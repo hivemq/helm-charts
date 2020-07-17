@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hivemq.fullname" . }}-operator
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "hivemq.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $.Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: "{{ $.Chart.Name }}"
+        operator: "{{ include "hivemq.fullname" . }}"
+    spec:
+      {{- with .Values.operator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - image: {{ .Values.operator.image }}
+          imagePullPolicy: {{ .Values.operator.imagePullPolicy }}
+          name: operator
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30"
+            - name: OPERATOR_LOG_LEVEL
+              value: {{ .Values.operator.logLevel }}
+            - name: CREATE_CRD
+              value: "false"
+            - name: MICRONAUT_SSL_ENABLED
+              value: "{{ .Values.operator.admissionHookEnabled }}"
+            - name: SSL_FQDN
+              value: "{{ include "hivemq.name" . }}-operator.{{ $.Release.Namespace }}.svc"
+          resources: {{ toYaml .Values.operator.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+          volumeMounts:
+            - mountPath: /templates
+              name: templates
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+      restartPolicy: Always
+      serviceAccountName: "{{ template "hivemq.fullname" . }}-operator"
+      volumes:
+        - name: templates
+          configMap:
+            {{- if .Values.operator.templateConfigMap }}
+            name: "{{ .Values.operator.templateConfigMap }}"
+            {{- else }}
+            name: "{{ include "hivemq.fullname" . }}-operator-templates"
+            {{- end }}

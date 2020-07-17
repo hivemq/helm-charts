@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    hivemq-cluster: {{ spec.name }}
+    {% if spec.metadata.labels.containsKey("app.kubernetes.io/instance") %}
+    release: {{ spec.metadata.labels.get("app.kubernetes.io/instance") }}
+    {% endif %}
+  name: {{ spec.name }}-monitoring-sm
+  ownerReferences:
+  - apiVersion: hivemq.com/v1
+    kind: HiveMQCluster
+    blockOwnerDeletion: true
+    name: "{{ spec.name }}"
+    uid: "{{ spec.metadata.uid }}"
+spec:
+  endpoints:
+    - port: metrics
+  selector:
+    matchLabels:
+      hivemq-cluster: {{ spec.name }}

@@ -1,0 +1,21 @@
+apiVersion: v2
+name: hivemq-operator
+description: Operator for the HiveMQ MQTT broker
+type: application
+keywords:
+  - MQTT
+  - IoT
+  - Java
+  - distributed
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.3.0
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: 4.3.3
+icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+dependencies:
+  - name: prometheus-operator
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    condition: monitoring.dedicated, monitoring.enabled
+    version: 8.15.*

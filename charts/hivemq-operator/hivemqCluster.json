@@ -1,0 +1,564 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "A HiveMQ cluster configuration",
+  "dependencies": null,
+  "definitions": {
+    "spec": {
+      "description": "A HiveMQ deployment's general parameters",
+      "extends": {
+        "type": "object",
+        "existingJavaType": "com.hivemq.EntityInfo"
+      },
+      "type": "object",
+      "javaType": "com.hivemq.openapi.HiveMQClusterSpec",
+      "properties": {
+        "nodeCount": {
+          "description": "Number of HiveMQ instances to spawn",
+          "type": "integer",
+          "default": "3",
+          "minimum": 1
+        },
+        "cpu": {
+          "type": "string",
+          "default": "4"
+        },
+        "memory": {
+          "description": "Memory to request in total for a single node",
+          "type": "string",
+          "default": "8Gi"
+        },
+        "ephemeralStorage": {
+          "description": "Total storage amount for a single node",
+          "type": "string",
+          "default": "15Gi"
+        },
+        "cpuLimitRatio": {
+          "description": "Ratio for the CPU upper limit (>=2)",
+          "type": "number",
+          "default": "2"
+        },
+        "memoryLimitRatio": {
+          "description": "Ratio for the memory upper limit (>=1)",
+          "type": "number",
+          "default": "1"
+        },
+        "ephemeralStorageLimitRatio": {
+          "description": "Ratio for the ephemeral storage upper limit (>=1)",
+          "type": "number",
+          "default": "1"
+        },
+        "image": {
+          "description": "Image to use for the broker. Note that you must specify the tag to the image separately in the hivemqVersion field.",
+          "type": "string",
+          "default": "hivemq/hivemq4"
+        },
+        "imagePullPolicy": {
+          "description": "When to pull the image",
+          "type": "string",
+          "default": "IfNotPresent"
+        },
+        "imagePullSecrets": {
+          "description": "Image pull secrets to be used in the deployment to pull the HiveMQ container",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hivemqVersion": {
+          "description": "Version of HiveMQ to deploy, when using the official image. When using a custom image, this corresponds to the image tag used.",
+          "type": "string",
+          "default": "4.3.3"
+        },
+        "javaOptions": {
+          "description": "JAVA_OPTS to pass to the HiveMQ JVM",
+          "type": "string",
+          "default": "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=40 -XX:MaxRAMPercentage=50 -XX:MinRAMPercentage=30"
+        },
+        "configOverride": {
+          "description": "Override the default template for the HiveMQ config.xml. Note that modifying this may lead to other fields in this schema not taking effect anymore.",
+          "type": "string",
+          "contentMediaType": "text/xml",
+          "default": "<?xml version=\"1.0\"?>\n<hivemq xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n        xsi:noNamespaceSchemaLocation=\"hivemq-config.xsd\">\n    <listeners>\n        --LISTENER-CONFIGURATION--\n    </listeners>\n    <control-center>\n        <listeners>\n            <http>\n                <port>${HIVEMQ_CONTROL_CENTER_PORT}</port>\n                <bind-address>0.0.0.0</bind-address>\n            </http>\n        </listeners>\n        <users>\n            <user>\n                <name>${HIVEMQ_CONTROL_CENTER_USER}</name>\n                <password>${HIVEMQ_CONTROL_CENTER_PASSWORD}</password>\n            </user>\n        </users>\n    </control-center>\n    <cluster>\n        <enabled>true</enabled>\n        <transport>\n            <udp>\n                <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>\n                <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>\n                <multicast-enabled>false</multicast-enabled>\n                <enabled>true</enabled>\n            </udp>\n        </transport>\n        <discovery>\n            <extension>\n                <reload-interval>${HIVEMQ_DNS_DISCOVERY_INTERVAL}</reload-interval>\n            </extension>\n        </discovery>\n\n        <replication>\n            <replica-count>${HIVEMQ_CLUSTER_REPLICA_COUNT}</replica-count>\n        </replication>\n\n        <overload-protection>\n            <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>\n        </overload-protection>\n\n        <failure-detection>\n            <tcp-health-check>\n                <enabled>true</enabled>\n                <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>\n                <bind-port>9000</bind-port>\n                <port-range>50</port-range>\n            </tcp-health-check>\n\n            <heartbeat>\n                <enabled>true</enabled>\n                <interval>4000</interval>\n                <timeout>30000</timeout>\n            </heartbeat>\n        </failure-detection>\n        \n    </cluster>\n    <restrictions>\n        <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>\n        <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>\n        <max-connections>-${HIVEMQ_MAX_CONNECTIONS}</max-connections>\n        <incoming-bandwidth-throttling>${HIVEMQ_INCOMING_BANDWIDTH_THROTTLING}</incoming-bandwidth-throttling>\n        <no-connect-idle-timeout>${HIVEMQ_NO_CONNECT_IDLE_TIMEOUT}</no-connect-idle-timeout>\n    </restrictions>\n    <mqtt>\n        <session-expiry>\n            <max-interval>${HIVEMQ_SESSION_EXPIRY_INTERVAL}</max-interval>\n        </session-expiry>\n\n        <packets>\n            <max-packet-size>${HIVEMQ_MAX_PACKET_SIZE}</max-packet-size>\n        </packets>\n\n        <receive-maximum>\n            <server-receive-maximum>${HIVEMQ_SERVER_RECEIVE_MAXIMUM}</server-receive-maximum>\n        </receive-maximum>\n\n        <keep-alive>\n            <max-keep-alive>${HIVEMQ_KEEPALIVE_MAX}</max-keep-alive>\n            <allow-unlimited>${HIVEMQ_KEEPALIVE_ALLOW_UNLIMITED}</allow-unlimited>\n        </keep-alive>\n\n        <topic-alias>\n            <enabled>${HIVEMQ_TOPIC_ALIAS_ENABLED}</enabled>\n            <max-per-client>${HIVEMQ_TOPIC_ALIAS_MAX_PER_CLIENT}</max-per-client>\n        </topic-alias>\n\n        <subscription-identifier>\n            <enabled>${HIVEMQ_SUBSCRIPTION_IDENTIFIER_ENABLED}</enabled>\n        </subscription-identifier>\n\n        <wildcard-subscriptions>\n            <enabled>${HIVEMQ_WILDCARD_SUBSCRIPTION_ENABLED}</enabled>\n        </wildcard-subscriptions>\n\n        <shared-subscriptions>\n            <enabled>${HIVEMQ_SHARED_SUBSCRIPTION_ENABLED}</enabled>\n        </shared-subscriptions>\n\n        <quality-of-service>\n            <max-qos>${HIVEMQ_MAX_QOS}</max-qos>\n        </quality-of-service>\n\n        <retained-messages>\n            <enabled>${HIVEMQ_RETAINED_MESSAGES_ENABLED}</enabled>\n        </retained-messages>\n\n        <queued-messages>\n            <max-queue-size>${HIVEMQ_QUEUED_MESSAGE_MAX_QUEUE_SIZE}</max-queue-size>\n            <strategy>${HIVEMQ_QUEUED_MESSAGE_STRATEGY}</strategy>\n        </queued-messages>\n    </mqtt>\n    <security>\n        <!-- Allows the use of empty client ids -->\n        <allow-empty-client-id>\n            <enabled>${HIVEMQ_ALLOW_EMPTY_CLIENT_ID}</enabled>\n        </allow-empty-client-id>\n\n        <!-- Configures validation for UTF-8 PUBLISH payloads -->\n        <payload-format-validation>\n            <enabled>${HIVEMQ_PAYLOAD_FORMAT_VALIDATION}</enabled>\n        </payload-format-validation>\n\n        <utf8-validation>\n            <enabled>${HIVEMQ_TOPIC_FORMAT_VALIDATION}</enabled>\n        </utf8-validation>\n\n        <!-- Allows clients to request problem information -->\n        <allow-request-problem-information>\n            <enabled>${HIVEMQ_ALLOW_REQUEST_PROBLEM_INFORMATION}</enabled>\n        </allow-request-problem-information>\n    </security>\n</hivemq>"
+        },
+        "listenerConfiguration": {
+          "description": "The listener configuration below the <listeners> tag. Add all your desired listeners here.",
+          "type": "string",
+          "contentMediaType": "text/xml",
+          "default": "<tcp-listener>\n                   <port>${HIVEMQ_MQTT_PORT}</port>\n                   <bind-address>0.0.0.0</bind-address>\n                </tcp-listener>"
+        },
+        "logLevel": {
+          "description": "HiveMQ root logger level. Only INFO and above is allowed for now.",
+          "type": "string",
+          "default": "INFO",
+          "enum": [
+            "INFO",
+            "DEBUG",
+            "TRACE"
+          ]
+        },
+        "labels": {
+          "description": "Labels for the cluster",
+          "type": "object",
+          "existingJavaType": "java.util.Map<String,String>"
+        },
+        "env": {
+          "description": "Additional environment variables for the cluster",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "javaType": "com.hivemq.openapi.spec.Env",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ]
+          }
+        },
+        "configMaps": {
+          "description": "Hot-reloadable config map or statically mapped configuration",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "javaType": "com.hivemq.openapi.spec.ConfigMapping",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "description": "Target path at which to mount/place this configuration",
+                "type": "string"
+              },
+              "static": {
+                "description": "Whether this configuration must lead to a restart of the broker (true) or can be re-loaded at run-time (false)",
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "name",
+              "path"
+            ]
+          }
+        },
+        "extensions": {
+          "description": "Description of all extensions and their (desired) states",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "javaType": "com.hivemq.openapi.spec.ExtensionConfiguration",
+            "properties": {
+              "name": {
+                "description": "Unique, descriptive name for the extension folder",
+                "type": "string"
+              },
+              "enabled": {
+                "description": "Whether this extension should be enabled",
+                "type": "boolean",
+                "default": true
+              },
+              "configMap": {
+                "type": "string",
+                "description": "ConfigMap that contains configuration files for this extension"
+              },
+              "static": {
+                "type": "boolean",
+                "description": "Whether configuration changes should lead to a rolling disable/enable instead of hot-reload",
+                "default": false
+              },
+              "extensionUri": {
+                "type": "string",
+                "description": "HTTP URI to download the extension from (as .zip distribution). Set to 'preinstalled' if the extension to be managed is statically built into the container."
+              },
+              "offline": {
+                "description": "Whether the individual HiveMQ nodes being updated with a new extension version should be taken offline (i.e. removed from load-balancers) during the update",
+                "type": "boolean",
+                "default": false
+              },
+              "initialization": {
+                "type": "string",
+                "description": "Initialization script to run when installing this extension. This will be executed with the working directory as the extension folder. Must be idempotent as it will be run on every update as well."
+              },
+              "updateStrategy": {
+                "description": "In what manner to perform extension updates",
+                "type": "string",
+                "enum": [
+                  "serial",
+                  "parallel"
+                ],
+                "default": "serial"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "initialization": {
+          "description": "Initialization routines to run before starting HiveMQ",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "javaType": "com.hivemq.openapi.spec.InitRoutine",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "image": {
+                "description": "Container to run the commands in, might be ignored on some platforms",
+                "type": "string",
+                "default": "busybox"
+              },
+              "command": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [
+                  "/bin/sh",
+                  "-c"
+                ]
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "affinity": {
+          "description": "Specify a PodAffinity object. Must be specified as a scalar string for now.",
+          "type": "string",
+          "default": "podAntiAffinity:\n  preferredDuringSchedulingIgnoredDuringExecution:\n    # Try not to co-locate with nodes from the same cluster\n    - weight: 60\n      podAffinityTerm:\n        labelSelector:\n          matchExpressions:\n            - key: hivemq-cluster\n              operator: In\n              values:\n                - {{ spec.name }}\n        topologyKey: \"kubernetes.io/hostname\"\n    # Try not to co-locate with other HiveMQ clusters\n    - weight: 30\n      podAffinityTerm:\n        labelSelector:\n          matchExpressions:\n            - key: app\n              operator: In\n              values:\n                - hivemq\n        topologyKey: \"kubernetes.io/hostname\""
+        },
+        "ports": {
+          "description": "List of ports to map for each cluster node. MQTT, control center and cluster port are required and set by default.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "javaType": "com.hivemq.openapi.spec.PortMapping",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the port, for use in templating"
+              },
+              "port": {
+                "description": "Port to map",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "expose": {
+                "description": "Create a Service for this port",
+                "type": "boolean",
+                "default": "false"
+              },
+              "patch": {
+                "description": "JSON patches to apply to service manifests before applying them, only applies if expose is true.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "name",
+              "port"
+            ]
+          }
+        },
+        "clusterReplicaCount": {
+          "description": "Number of replicas to store in total",
+          "type": "integer",
+          "default": "2",
+          "minimum": 1
+        },
+        "clusterOverloadProtection": {
+          "type": "boolean",
+          "default": "true"
+        },
+        "restrictions": {
+          "type": "object",
+          "properties": {
+            "maxClientIdLength": {
+              "type": "integer",
+              "default": "65535"
+            },
+            "maxTopicLength": {
+              "type": "integer",
+              "default": "65535"
+            },
+            "maxConnections": {
+              "type": "integer",
+              "default": "-1",
+              "minimum": -1
+            },
+            "incomingBandwidthThrottling": {
+              "type": "integer",
+              "default": "0",
+              "minimum": 0
+            },
+            "noConnectIdleTimeout": {
+              "type": "integer",
+              "default": "10000"
+            }
+          }
+        },
+        "mqtt": {
+          "type": "object",
+          "properties": {
+            "sessionExpiryInterval": {
+              "type": "integer",
+              "default": "4294967295",
+              "minimum": 0
+            },
+            "maxPacketSize": {
+              "type": "integer",
+              "default": "268435460"
+            },
+            "serverReceiveMaximum": {
+              "type": "integer",
+              "default": "10"
+            },
+            "keepaliveMax": {
+              "type": "integer",
+              "default": "65535"
+            },
+            "keepaliveAllowUnlimited": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "topicAliasEnabled": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "topicAliasMaxPerClient": {
+              "type": "integer",
+              "default": "5"
+            },
+            "subscriptionIdentifierEnabled": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "wildcardSubscriptionEnabled": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "sharedSubscriptionEnabled": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "retainedMessagesEnabled": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "maxQos": {
+              "type": "integer",
+              "default": "2",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "queuedMessagesMaxQueueSize": {
+              "type": "integer",
+              "default": "1000",
+              "minimum": 0
+            },
+            "queuedMessageStrategy": {
+              "type": "string",
+              "default": "discard",
+              "enum": [
+                "discard",
+                "discard-oldest"
+              ]
+            }
+          }
+        },
+        "monitoring": {
+          "type": "object",
+          "properties": {
+            "enablePrometheus": {
+              "type": "boolean",
+              "default": "true"
+            }
+          }
+        },
+        "security": {
+          "type": "object",
+          "properties": {
+            "allowEmptyClientId": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "payloadFormatValidation": {
+              "type": "boolean",
+              "default": "false"
+            },
+            "topicFormatValidation": {
+              "type": "boolean",
+              "default": "true"
+            },
+            "allowRequestProblemInformation": {
+              "type": "boolean",
+              "default": "true"
+            }
+          }
+        },
+        "controllerTemplate": {
+          "description": "Advanced: Template file to use for rendering the controller that will spawn the HiveMQ pods. The template files are stored on the operator container at /templates and can be overridden via configMap.",
+          "type": "string",
+          "default": "cluster-deployment.yaml"
+        },
+        "serviceAccountName": {
+          "description": "Service account to assign to the pods in the template",
+          "type": "string"
+        },
+        "secrets": {
+          "description": "Secrets to mount onto the HiveMQ container",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "javaType": "com.hivemq.openapi.spec.Secret",
+            "properties": {
+              "name": {
+                "description": "Name of the secret to be mounted",
+                "type": "string"
+              },
+              "path": {
+                "description": "Path to mount the files to",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "path"
+            ]
+          }
+        },
+        "customProperties": {
+          "description": "Additional arbitrary properties for this cluster, to be used in custom controller templates.",
+          "type": "object",
+          "existingJavaType": "java.util.Map<String,Object>"
+        }
+      }
+    }
+  },
+  "patternProperties": null,
+  "type": "object",
+  "properties": {
+    "spec": {
+      "$ref": "#/definitions/spec"
+    },
+    "status": {
+      "description": "A HiveMQ deployment's status description",
+      "javaType": "com.hivemq.openapi.HivemqClusterStatus",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "Running",
+            "Updating",
+            "Creating",
+            "Failed",
+            "Degraded",
+            "Deleting"
+          ]
+        },
+        "message": {
+          "description": "Human readable message describing the current state of the cluster or action being performed",
+          "type": "string"
+        },
+        "portStatus": {
+          "description": "The public addresses of generated LoadBalancer services",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "port": {
+                "description": "Exposed port on the given service",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "address": {
+                "type": "string"
+              },
+              "name": {
+                "description": "Name of the port in the original mapping",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "warnings": {
+          "description": "Warning messages regarding configuration errors",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "conditions": {
+          "description": "The conditions of the cluster at any given time, as implemented by all Kubernetes resources",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "AllNodesReady",
+                  "AllExtensionsLoaded",
+                  "AllServicesReady",
+                  "LogLevelApplied"
+                ],
+                "description": "Identifier for the condition, add new conditions for life cycles here"
+              },
+              "lastTransitionTime": {
+                "type": "string",
+                "pattern": "^([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\.[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))$",
+                "description": "Last state transition time in RFC3339, UTC time"
+              },
+              "status": {
+                "type": "string",
+                "description": "current status of the condition"
+              },
+              "reason": {
+                "type": "string",
+                "description": "Reason for the last state transition"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "state",
+        "message"
+      ],
+      "type": "object"
+    },
+    "apiVersion": {
+      "description": "APIVersion defines the versioned schema of this representation\n              of an object. Servers should convert recognized schemas to the latest\n              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind is a string value representing the REST resource this\n              object represents. Servers may infer this from the endpoint the client\n              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "spec"
+  ]
+}

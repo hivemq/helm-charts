@@ -1,0 +1,30 @@
+# This test will simply wait for the default service (deployed by the operator in accordance to the HiveMQCluster resource) to become available and publish a test message to the cluster.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-mqtt-test"
+  annotations:
+    "helm.sh/hook": test
+spec:
+  template:
+    spec:
+      containers:
+        - name: main
+          image: eclipse-mosquitto
+          env:
+            - name: MQTT_ADDRESS
+              value: hivemq-{{ .Release.Name }}-mqtt.{{ .Release.Namespace }}.svc.cluster.local
+          command: ["sh", "-c"]
+          args:
+            - |
+              while true; do
+                mosquitto_pub -m "test" -t "test" -q 1 -h ${MQTT_ADDRESS}
+                if [[ $? != 0 ]]; then
+                   echo "MQTT service not available yet at ${MQTT_ADDRESS}, waiting..."
+                   sleep 2
+                else
+                   echo "MQTT up"
+                   exit 0
+                fi
+              done
+      restartPolicy: Never

@@ -1,0 +1,9 @@
+# An example patch showing how to install a license using the operator.
+# See the config sub-folder on how to create a license file ConfigMap.
+
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+spec:
+  configMaps:
+    - name: hivemq-license
+      path: /opt/hivemq/license

@@ -1,0 +1,63 @@
+{{- if .Values.operator.deployCr  }}
+kind: HiveMQCluster
+apiVersion: hivemq.com/v1
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Chart.Name | quote }}
+    hivemq-cluster: {{ .Release.Name | quote }}
+    {{- include "hivemq.labels" . | nindent 4 }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  nodeCount: {{ .Values.hivemq.nodeCount }}
+  image: "{{- (splitn ":" 2 .Values.hivemq.image)._0 }}"
+  hivemqVersion: "{{- (splitn ":" 2 .Values.hivemq.image)._1 }}"
+  imagePullPolicy: {{ .Values.hivemq.imagePullPolicy }}
+  memory: {{ .Values.hivemq.memory }}
+  memoryLimitRatio: {{ .Values.hivemq.memoryLimitRatio }}
+  ephemeralStorage: {{ .Values.hivemq.ephemeralStorage }}
+  ephemeralStorageLimitRatio: {{ .Values.hivemq.ephemeralStorageLimitRatio }}
+  cpu: {{ .Values.hivemq.cpu | quote }}
+  cpuLimitRatio: {{ .Values.hivemq.cpuLimitRatio }}
+  restrictions: {{ toYaml .Values.hivemq.restrictions | nindent 4 }}
+  {{- if .Values.hivemq.extensions }}
+  extensions: {{ toYaml .Values.hivemq.extensions | nindent 4 }}
+  {{- end }}
+  security: {{ toYaml .Values.hivemq.security | nindent 4 }}
+  logLevel: {{ .Values.hivemq.logLevel }}
+  {{- if .Values.monitoring.enabled }}
+  monitoring:
+    enablePrometheus: true
+  {{- end }}
+  {{- if .Values.global.rbac.create }}
+  serviceAccountName: "{{ template "hivemq.fullname" . }}-hivemq"
+  {{- else }}
+  serviceAccountName: "{{ .Values.hivemq.serviceAccountName }}"
+  {{- end }}
+  {{- if .Values.hivemq.secrets }}
+  secrets: {{ toYaml .Values.hivemq.secrets | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "hivemq.labels" . | nindent 4 }}
+  env: {{ toYaml .Values.hivemq.env | nindent 4 }}
+  ports: {{ toYaml .Values.hivemq.ports | nindent 4 }}
+  {{- if .Values.hivemq.configMaps }}
+  configMaps: {{ toYaml .Values.hivemq.configMaps | nindent 4 }}
+  {{- if .Values.hivemq.license }}
+    - name: {{ include "hivemq.fullname" . }}-license
+      path: /opt/hivemq/license
+  {{- end }}
+  {{- else if .Values.hivemq.license }}
+  configMaps:
+    - name: {{ include "hivemq.fullname" . }}-license
+      path: /opt/hivemq/license
+  {{- end }}
+  mqtt: {{ toYaml .Values.hivemq.mqtt | nindent 4 }}
+  clusterOverloadProtection: {{ .Values.hivemq.clusterOverloadProtection }}
+  javaOptions: {{ .Values.hivemq.javaOptions }}
+  clusterReplicaCount: {{ .Values.hivemq.clusterReplicaCount }}
+  controllerTemplate: {{ .Values.hivemq.controllerTemplate }}
+  affinity: |{{ .Values.hivemq.affinity | nindent 4 }}
+  listenerConfiguration: |{{ .Values.hivemq.listenerConfiguration | nindent 4 }}
+  configOverride: |{{ .Values.hivemq.configOverride | nindent 4 }}
+{{- end }}

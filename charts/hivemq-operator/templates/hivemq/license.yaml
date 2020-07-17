@@ -1,0 +1,13 @@
+{{- if .Values.hivemq.license }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hivemq.fullname" . }}-license
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    hivemq-cluster: {{ .Release.Name }}
+    {{- include "hivemq.labels" . | nindent 4 }}
+data:
+  hivemq.lic: |-{{ b64dec .Values.hivemq.license | nindent 4}}
+{{- end }}

@@ -1,0 +1,283 @@
+global:
+  rbac:
+    create: true
+    # Create a PodSecurityPolicy, cluster role, role binding and service account for the HiveMQ pods and assign the service account to them.
+    pspEnabled: true
+    pspAnnotations: {}
+    allowedCapabilities: []
+
+operator:
+  # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
+  # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
+  deployCr: true
+  image: hivemq/hivemq-operator:0.2.0
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  logLevel: INFO
+  # Verify all HiveMQCluster objects before accepting them. Not using the validation hook can result in erroneous cluster configurations which are hard to debug.
+  admissionHookEnabled: true
+  # Set this string to a name of a externally managed ConfigMap containing the templates for the operator if you want to customize them.
+  templateConfigMap: ""
+  resources:
+    limits:
+      cpu: 800m
+      memory: 512M
+    requests:
+      cpu: 200m
+      memory: 512M
+
+monitoring:
+  # Deploy ServiceMonitor for Prometheus Operator and enable Prometheus
+  enabled: false
+  # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
+  dedicated: false
+
+hivemq:
+  # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
+  image: hivemq/hivemq4:k8s-4.3.3
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  nodeCount: "3"
+  cpu: "4"
+  memory: "4Gi"
+  ephemeralStorage: "15Gi"
+  # This is only used if global.rbac.create is set to false.
+  serviceAccountName: hivemq
+  # Base64 encoded license. (NOTE: use a ConfigMap when mounting multiple files)
+  license: ""
+  env: []
+  ## Add custom environment variables (e.g. for your extension) here.
+  # - name: MY_CUSTOM_ENV
+  #   value: some-value
+  extensions: []
+  ## Specify a list of extensions to use here, like such (kafka-config is your config XML for the extension)
+  #- name: hivemq-kafka-extension
+  #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-kafka-extension-1.1.0.zip
+  #  configMap: kafka-config
+  configMaps: {}
+  # ConfigMaps to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
+  #- name: hivemq-license
+  #  path: /opt/hivemq/license
+  secrets: {}
+  # Secrets to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
+  #- name: hivemq-license
+  #  path: /opt/hivemq/license
+  cpuLimitRatio: "2"
+  memoryLimitRatio: "1"
+  ephemeralStorageLimitRatio: "1"
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        # Try not to co-locate with nodes from the same cluster
+        - weight: 60
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: hivemq-cluster
+                  operator: In
+                  values:
+                    - {{ spec.name }}
+            topologyKey: "kubernetes.io/hostname"
+        # Try not to co-locate with other HiveMQ clusters
+        - weight: 30
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - hivemq
+            topologyKey: "kubernetes.io/hostname"
+  listenerConfiguration: |
+    <tcp-listener>
+      <port>${HIVEMQ_MQTT_PORT}</port>
+        <bind-address>0.0.0.0</bind-address>
+    </tcp-listener>
+  restrictions:
+    noConnectIdleTimeout: 10000
+    maxClientIdLength: 65535
+    maxTopicLength: 65535
+    incomingBandwidthThrottling: 0
+    maxConnections: -1
+  security:
+    topicFormatValidation: true
+    allowRequestProblemInformation: true
+    allowEmptyClientId: true
+    payloadFormatValidation: false
+  logLevel: "INFO"
+  # The ports can be edited or expanded upon, but the MQTT and cluster ports must remain the first and second ports respectively.
+  ports:
+    - name: "mqtt"
+      port: 1883
+      expose: true
+      patch:
+      - '[{"op":"add","path":"/spec/selector/hivemq.com~1node-offline","value":"false"},{"op":"add","path":"/metadata/annotations","value":{"service.spec.externalTrafficPolicy":"Local"}}]'
+      # If you want Kubernetes to expose the MQTT port
+      # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+    - name: "cc"
+      port: 8080
+      expose: true
+      patch:
+      - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+      # If you want Kubernetes to expose the HiveMQ control center via load balancer.
+      # Warning: You should consider configuring proper security and TLS beforehand. Ingress may be a better option here.
+      # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+  clusterOverloadProtection: "true"
+  mqtt:
+    sharedSubscriptionEnabled: true
+    queuedMessageStrategy: "discard"
+    subscriptionIdentifierEnabled: true
+    keepaliveAllowUnlimited: true
+    retainedMessagesEnabled: true
+    topicAliasMaxPerClient: 5
+    maxPacketSize: 268435460
+    topicAliasEnabled: true
+    serverReceiveMaximum: 10
+    keepaliveMax: 65535
+    wildcardSubscriptionEnabled: true
+    queuedMessagesMaxQueueSize: 1000
+    sessionExpiryInterval: 4294967295
+    maxQos: 2
+  javaOptions: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=40 -XX:MaxRAMPercentage=50 -XX:MinRAMPercentage=30"
+  clusterReplicaCount: "2"
+  controllerTemplate: cluster-deployment.yaml
+  configOverride: |
+    <?xml version="1.0"?>
+    <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="hivemq-config.xsd">
+    <listeners>
+    --LISTENER-CONFIGURATION--
+    </listeners>
+    <control-center>
+    <listeners>
+    <http>
+    <port>${HIVEMQ_CONTROL_CENTER_PORT}</port>
+    <bind-address>0.0.0.0</bind-address>
+    </http>
+    </listeners>
+    <users>
+    <user>
+    <name>${HIVEMQ_CONTROL_CENTER_USER}</name>
+    <password>${HIVEMQ_CONTROL_CENTER_PASSWORD}</password>
+    </user>
+    </users>
+    </control-center>
+    <cluster>
+    <enabled>true</enabled>
+    <transport>
+    <udp>
+    <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
+    <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
+    <multicast-enabled>false</multicast-enabled>
+    <enabled>true</enabled>
+    </udp>
+    </transport>
+    <discovery>
+    <extension>
+    <reload-interval>${HIVEMQ_DNS_DISCOVERY_INTERVAL}</reload-interval>
+    </extension>
+    </discovery>
+
+    <replication>
+    <replica-count>${HIVEMQ_CLUSTER_REPLICA_COUNT}</replica-count>
+    </replication>
+
+    <overload-protection>
+    <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
+    </overload-protection>
+
+    <failure-detection>
+    <tcp-health-check>
+    <enabled>true</enabled>
+    <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
+    <bind-port>9000</bind-port>
+    <port-range>50</port-range>
+    </tcp-health-check>
+
+    <heartbeat>
+    <enabled>true</enabled>
+    <interval>4000</interval>
+    <timeout>30000</timeout>
+    </heartbeat>
+    </failure-detection>
+
+    </cluster>
+    <restrictions>
+    <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>
+    <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>
+    <max-connections>-${HIVEMQ_MAX_CONNECTIONS}</max-connections>
+    <incoming-bandwidth-throttling>${HIVEMQ_INCOMING_BANDWIDTH_THROTTLING}</incoming-bandwidth-throttling>
+    <no-connect-idle-timeout>${HIVEMQ_NO_CONNECT_IDLE_TIMEOUT}</no-connect-idle-timeout>
+    </restrictions>
+    <mqtt>
+    <session-expiry>
+    <max-interval>${HIVEMQ_SESSION_EXPIRY_INTERVAL}</max-interval>
+    </session-expiry>
+
+    <packets>
+    <max-packet-size>${HIVEMQ_MAX_PACKET_SIZE}</max-packet-size>
+    </packets>
+
+    <receive-maximum>
+    <server-receive-maximum>${HIVEMQ_SERVER_RECEIVE_MAXIMUM}</server-receive-maximum>
+    </receive-maximum>
+
+    <keep-alive>
+    <max-keep-alive>${HIVEMQ_KEEPALIVE_MAX}</max-keep-alive>
+    <allow-unlimited>${HIVEMQ_KEEPALIVE_ALLOW_UNLIMITED}</allow-unlimited>
+    </keep-alive>
+
+    <topic-alias>
+    <enabled>${HIVEMQ_TOPIC_ALIAS_ENABLED}</enabled>
+    <max-per-client>${HIVEMQ_TOPIC_ALIAS_MAX_PER_CLIENT}</max-per-client>
+    </topic-alias>
+
+    <subscription-identifier>
+    <enabled>${HIVEMQ_SUBSCRIPTION_IDENTIFIER_ENABLED}</enabled>
+    </subscription-identifier>
+
+    <wildcard-subscriptions>
+    <enabled>${HIVEMQ_WILDCARD_SUBSCRIPTION_ENABLED}</enabled>
+    </wildcard-subscriptions>
+
+    <shared-subscriptions>
+    <enabled>${HIVEMQ_SHARED_SUBSCRIPTION_ENABLED}</enabled>
+    </shared-subscriptions>
+
+    <quality-of-service>
+    <max-qos>${HIVEMQ_MAX_QOS}</max-qos>
+    </quality-of-service>
+
+    <retained-messages>
+    <enabled>${HIVEMQ_RETAINED_MESSAGES_ENABLED}</enabled>
+    </retained-messages>
+
+    <queued-messages>
+    <max-queue-size>${HIVEMQ_QUEUED_MESSAGE_MAX_QUEUE_SIZE}</max-queue-size>
+    <strategy>${HIVEMQ_QUEUED_MESSAGE_STRATEGY}</strategy>
+    </queued-messages>
+    </mqtt>
+    <security>
+    <!-- Allows the use of empty client ids -->
+    <allow-empty-client-id>
+    <enabled>${HIVEMQ_ALLOW_EMPTY_CLIENT_ID}</enabled>
+    </allow-empty-client-id>
+
+    <!-- Configures validation for UTF-8 PUBLISH payloads -->
+    <payload-format-validation>
+    <enabled>${HIVEMQ_PAYLOAD_FORMAT_VALIDATION}</enabled>
+    </payload-format-validation>
+
+    <utf8-validation>
+    <enabled>${HIVEMQ_TOPIC_FORMAT_VALIDATION}</enabled>
+    </utf8-validation>
+
+    <!-- Allows clients to request problem information -->
+    <allow-request-problem-information>
+    <enabled>${HIVEMQ_ALLOW_REQUEST_PROBLEM_INFORMATION}</enabled>
+    </allow-request-problem-information>
+    </security>
+    </hivemq>
+
+nameOverride: ""
+fullnameOverride: ""

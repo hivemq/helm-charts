@@ -1,0 +1,119 @@
+# This sample patch shows how you can override the default config.xml template, in case you need to configure some detailed parameters not described in the JSON schema.
+# It will simply apply the default template already configured in the JSON schema by default, showcasing how block scalar strings in YAML should be used for this kind of structure.
+# Of course you can also use a JSON patch, which would eliminate the need for any special formatting.
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+spec:
+  configOverride: |-
+    <?xml version="1.0"?>
+    <hivemq>
+      <listeners>
+        --LISTENER-CONFIGURATION--
+      </listeners>
+      <control-center>
+        <listeners>
+          <http>
+            <port>${HIVEMQ_CONTROL_CENTER_PORT}</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+        </listeners>
+        <users>
+          <user>
+            <name>${HIVEMQ_CONTROL_CENTER_USER}</name>
+            <password>${HIVEMQ_CONTROL_CENTER_PASSWORD}</password>
+          </user>
+        </users>
+      </control-center>
+      <cluster>
+        <transport>
+          --TRANSPORT_TYPE--
+        </transport>
+        <enabled>true</enabled>
+        <discovery>
+          <extension>
+            <reload-interval>${HIVEMQ_DNS_DISCOVERY_INTERVAL}</reload-interval>
+          </extension>
+        </discovery>
+        <replication>
+          <replica-count>${HIVEMQ_CLUSTER_REPLICA_COUNT}</replica-count>
+        </replication>
+        <overload-protection>
+          <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
+        </overload-protection>
+      </cluster>
+      <restrictions>
+        <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>
+        <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>
+        <max-connections>-${HIVEMQ_MAX_CONNECTIONS}</max-connections>
+        <incoming-bandwidth-throttling>${HIVEMQ_INCOMING_BANDWIDTH_THROTTLING}</incoming-bandwidth-throttling>
+        <no-connect-idle-timeout>${HIVEMQ_NO_CONNECT_IDLE_TIMEOUT}</no-connect-idle-timeout>
+      </restrictions>
+      <mqtt>
+        <session-expiry>
+          <max-interval>${HIVEMQ_SESSION_EXPIRY_INTERVAL}</max-interval>
+        </session-expiry>
+
+        <packets>
+          <max-packet-size>${HIVEMQ_MAX_PACKET_SIZE}</max-packet-size>
+        </packets>
+
+        <receive-maximum>
+          <server-receive-maximum>${HIVEMQ_SERVER_RECEIVE_MAXIMUM}</server-receive-maximum>
+        </receive-maximum>
+
+        <keep-alive>
+          <max-keep-alive>${HIVEMQ_KEEPALIVE_MAX}</max-keep-alive>
+          <allow-unlimited>${HIVEMQ_KEEPALIVE_ALLOW_UNLIMITED}</allow-unlimited>
+        </keep-alive>
+
+        <topic-alias>
+          <enabled>${HIVEMQ_TOPIC_ALIAS_ENABLED}</enabled>
+          <max-per-client>${HIVEMQ_TOPIC_ALIAS_MAX_PER_CLIENT}</max-per-client>
+        </topic-alias>
+
+        <subscription-identifier>
+          <enabled>${HIVEMQ_SUBSCRIPTION_IDENTIFIER_ENABLED}</enabled>
+        </subscription-identifier>
+
+        <wildcard-subscriptions>
+          <enabled>${HIVEMQ_WILDCARD_SUBSCRIPTION_ENABLED}</enabled>
+        </wildcard-subscriptions>
+
+        <shared-subscriptions>
+          <enabled>${HIVEMQ_SHARED_SUBSCRIPTION_ENABLED}</enabled>
+        </shared-subscriptions>
+
+        <quality-of-service>
+          <max-qos>${HIVEMQ_MAX_QOS}</max-qos>
+        </quality-of-service>
+
+        <retained-messages>
+          <enabled>${HIVEMQ_RETAINED_MESSAGES_ENABLED}</enabled>
+        </retained-messages>
+
+        <queued-messages>
+          <max-queue-size>${HIVEMQ_QUEUED_MESSAGE_MAX_QUEUE_SIZE}</max-queue-size>
+          <strategy>${HIVEMQ_QUEUED_MESSAGE_STRATEGY}</strategy>
+        </queued-messages>
+      </mqtt>
+      <security>
+        <!-- Allows the use of empty client ids -->
+        <allow-empty-client-id>
+          <enabled>${HIVEMQ_ALLOW_EMPTY_CLIENT_ID}</enabled>
+        </allow-empty-client-id>
+
+        <!-- Configures validation for UTF-8 PUBLISH payloads -->
+        <payload-format-validation>
+          <enabled>${HIVEMQ_PAYLOAD_FORMAT_VALIDATION}</enabled>
+        </payload-format-validation>
+        <!-- test-->
+        <utf8-validation>
+          <enabled>${HIVEMQ_TOPIC_FORMAT_VALIDATION}</enabled>
+        </utf8-validation>
+
+        <!-- Allows clients to request problem information -->
+        <allow-request-problem-information>
+          <enabled>${HIVEMQ_ALLOW_REQUEST_PROBLEM_INFORMATION}</enabled>
+        </allow-request-problem-information>
+      </security>
+    </hivemq>

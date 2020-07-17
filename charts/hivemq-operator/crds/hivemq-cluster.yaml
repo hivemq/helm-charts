@@ -1,0 +1,446 @@
+---
+apiVersion: "apiextensions.k8s.io/v1beta1"
+kind: CustomResourceDefinition
+metadata:
+  name: "hivemq-clusters.hivemq.com"
+spec:
+  additionalPrinterColumns:
+    - JSONPath: ".spec.nodeCount"
+      description: "HiveMQ cluster size"
+      name: "size"
+      type: "integer"
+    - JSONPath: ".spec.image"
+      description: "Image"
+      name: "image"
+      type: "string"
+    - JSONPath: ".spec.hivemqVersion"
+      description: "Version/Tag"
+      name: "version"
+      type: "string"
+    - JSONPath: ".status.state"
+      description: "Current Status"
+      name: "status"
+      type: "string"
+    - JSONPath: ".status.portStatus[0].address"
+      description: "MQTT endpoint"
+      name: "endpoint"
+      type: "string"
+    - JSONPath: ".status.message"
+      description: "Latest (detailed) status message"
+      name: "message"
+      type: "string"
+  group: "hivemq.com"
+  names:
+    kind: "HiveMQCluster"
+    plural: "hivemq-clusters"
+    shortNames:
+      - "hmqc"
+    singular: "hivemq-cluster"
+  preserveUnknownFields: false
+  scope: "Namespaced"
+  subresources:
+    scale:
+      specReplicasPath: ".spec.nodeCount"
+      statusReplicasPath: ".status.scale"
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: "A HiveMQ cluster configuration"
+      properties:
+        spec:
+          description: "A HiveMQ deployment's general parameters"
+          properties:
+            nodeCount:
+              description: "Number of HiveMQ instances to spawn"
+              minimum: 1.0
+              type: "integer"
+            cpu:
+              type: "string"
+            memory:
+              description: "Memory to request in total for a single node"
+              type: "string"
+            ephemeralStorage:
+              description: "Total storage amount for a single node"
+              type: "string"
+            cpuLimitRatio:
+              description: "Ratio for the CPU upper limit (>=2)"
+              type: "number"
+            memoryLimitRatio:
+              description: "Ratio for the memory upper limit (>=1)"
+              type: "number"
+            ephemeralStorageLimitRatio:
+              description: "Ratio for the ephemeral storage upper limit (>=1)"
+              type: "number"
+            image:
+              description: "Image to use for the broker. Note that you must specify\
+                \ the tag to the image separately in the hivemqVersion field."
+              type: "string"
+            imagePullPolicy:
+              description: "When to pull the image"
+              type: "string"
+            imagePullSecrets:
+              description: "Image pull secrets to be used in the deployment to pull\
+                \ the HiveMQ container"
+              items:
+                JSONSchemas: []
+                type: "string"
+              type: "array"
+            hivemqVersion:
+              description: "Version of HiveMQ to deploy, when using the official image.\
+                \ When using a custom image, this corresponds to the image tag used."
+              type: "string"
+            javaOptions:
+              description: "JAVA_OPTS to pass to the HiveMQ JVM"
+              type: "string"
+            configOverride:
+              description: "Override the default template for the HiveMQ config.xml.\
+                \ Note that modifying this may lead to other fields in this schema\
+                \ not taking effect anymore."
+              type: "string"
+            listenerConfiguration:
+              description: "The listener configuration below the <listeners> tag.\
+                \ Add all your desired listeners here."
+              type: "string"
+            logLevel:
+              description: "HiveMQ root logger level. Only INFO and above is allowed\
+                \ for now."
+              enum:
+                - "INFO"
+                - "DEBUG"
+                - "TRACE"
+              type: "string"
+            labels:
+              description: "Labels for the cluster"
+              type: "object"
+            env:
+              description: "Additional environment variables for the cluster"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  name:
+                    type: "string"
+                  value:
+                    type: "string"
+                required:
+                  - "name"
+                  - "value"
+                javaType: "com.hivemq.openapi.spec.Env"
+              type: "array"
+            configMaps:
+              description: "Hot-reloadable config map or statically mapped configuration"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  name:
+                    type: "string"
+                  path:
+                    description: "Target path at which to mount/place this configuration"
+                    type: "string"
+                  static:
+                    description: "Whether this configuration must lead to a restart\
+                      \ of the broker (true) or can be re-loaded at run-time (false)"
+                    type: "boolean"
+                required:
+                  - "name"
+                  - "path"
+                javaType: "com.hivemq.openapi.spec.ConfigMapping"
+              type: "array"
+            extensions:
+              description: "Description of all extensions and their (desired) states"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  name:
+                    description: "Unique, descriptive name for the extension folder"
+                    type: "string"
+                  enabled:
+                    description: "Whether this extension should be enabled"
+                    type: "boolean"
+                  configMap:
+                    type: "string"
+                    description: "ConfigMap that contains configuration files for\
+                      \ this extension"
+                  static:
+                    type: "boolean"
+                    description: "Whether configuration changes should lead to a rolling\
+                      \ disable/enable instead of hot-reload"
+                  extensionUri:
+                    type: "string"
+                    description: "HTTP URI to download the extension from (as .zip\
+                      \ distribution). Set to 'preinstalled' if the extension to be\
+                      \ managed is statically built into the container."
+                  offline:
+                    description: "Whether the individual HiveMQ nodes being updated\
+                      \ with a new extension version should be taken offline (i.e.\
+                      \ removed from load-balancers) during the update"
+                    type: "boolean"
+                  initialization:
+                    type: "string"
+                    description: "Initialization script to run when installing this\
+                      \ extension. This will be executed with the working directory\
+                      \ as the extension folder. Must be idempotent as it will be\
+                      \ run on every update as well."
+                  updateStrategy:
+                    description: "In what manner to perform extension updates"
+                    type: "string"
+                    enum:
+                      - "serial"
+                      - "parallel"
+                required:
+                  - "name"
+                javaType: "com.hivemq.openapi.spec.ExtensionConfiguration"
+              type: "array"
+            initialization:
+              description: "Initialization routines to run before starting HiveMQ"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  name:
+                    type: "string"
+                  image:
+                    description: "Container to run the commands in, might be ignored\
+                      \ on some platforms"
+                    type: "string"
+                  command:
+                    type: "array"
+                    items:
+                      type: "string"
+                  args:
+                    type: "array"
+                    items:
+                      type: "string"
+                required:
+                  - "name"
+                javaType: "com.hivemq.openapi.spec.InitRoutine"
+              type: "array"
+            affinity:
+              description: "Specify a PodAffinity object. Must be specified as a scalar\
+                \ string for now."
+              type: "string"
+            ports:
+              description: "List of ports to map for each cluster node. MQTT, control\
+                \ center and cluster port are required and set by default."
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  name:
+                    type: "string"
+                    description: "Name of the port, for use in templating"
+                  port:
+                    description: "Port to map"
+                    type: "integer"
+                    minimum: 1
+                    maximum: 65535
+                  expose:
+                    description: "Create a Service for this port"
+                    type: "boolean"
+                  patch:
+                    description: "JSON patches to apply to service manifests before\
+                      \ applying them, only applies if expose is true."
+                    type: "array"
+                    items:
+                      type: "string"
+                required:
+                  - "name"
+                  - "port"
+                javaType: "com.hivemq.openapi.spec.PortMapping"
+              type: "array"
+            clusterReplicaCount:
+              description: "Number of replicas to store in total"
+              minimum: 1.0
+              type: "integer"
+            clusterOverloadProtection:
+              type: "boolean"
+            restrictions:
+              properties:
+                maxClientIdLength:
+                  type: "integer"
+                maxTopicLength:
+                  type: "integer"
+                maxConnections:
+                  minimum: -1.0
+                  type: "integer"
+                incomingBandwidthThrottling:
+                  minimum: 0.0
+                  type: "integer"
+                noConnectIdleTimeout:
+                  type: "integer"
+              type: "object"
+            mqtt:
+              properties:
+                sessionExpiryInterval:
+                  minimum: 0.0
+                  type: "integer"
+                maxPacketSize:
+                  type: "integer"
+                serverReceiveMaximum:
+                  type: "integer"
+                keepaliveMax:
+                  type: "integer"
+                keepaliveAllowUnlimited:
+                  type: "boolean"
+                topicAliasEnabled:
+                  type: "boolean"
+                topicAliasMaxPerClient:
+                  type: "integer"
+                subscriptionIdentifierEnabled:
+                  type: "boolean"
+                wildcardSubscriptionEnabled:
+                  type: "boolean"
+                sharedSubscriptionEnabled:
+                  type: "boolean"
+                retainedMessagesEnabled:
+                  type: "boolean"
+                maxQos:
+                  maximum: 2.0
+                  minimum: 0.0
+                  type: "integer"
+                queuedMessagesMaxQueueSize:
+                  minimum: 0.0
+                  type: "integer"
+                queuedMessageStrategy:
+                  enum:
+                    - "discard"
+                    - "discard-oldest"
+                  type: "string"
+              type: "object"
+            monitoring:
+              properties:
+                enablePrometheus:
+                  type: "boolean"
+              type: "object"
+            security:
+              properties:
+                allowEmptyClientId:
+                  type: "boolean"
+                payloadFormatValidation:
+                  type: "boolean"
+                topicFormatValidation:
+                  type: "boolean"
+                allowRequestProblemInformation:
+                  type: "boolean"
+              type: "object"
+            controllerTemplate:
+              description: "Advanced: Template file to use for rendering the controller\
+                \ that will spawn the HiveMQ pods. The template files are stored on\
+                \ the operator container at /templates and can be overridden via configMap."
+              type: "string"
+            serviceAccountName:
+              description: "Service account to assign to the pods in the template"
+              type: "string"
+            secrets:
+              description: "Secrets to mount onto the HiveMQ container"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  name:
+                    description: "Name of the secret to be mounted"
+                    type: "string"
+                  path:
+                    description: "Path to mount the files to"
+                    type: "string"
+                required:
+                  - "name"
+                  - "path"
+                javaType: "com.hivemq.openapi.spec.Secret"
+              type: "array"
+            customProperties:
+              description: "Additional arbitrary properties for this cluster, to be\
+                \ used in custom controller templates."
+              type: "object"
+          type: "object"
+        status:
+          description: "A HiveMQ deployment's status description"
+          properties:
+            state:
+              enum:
+                - "Running"
+                - "Updating"
+                - "Creating"
+                - "Failed"
+                - "Degraded"
+                - "Deleting"
+              type: "string"
+            message:
+              description: "Human readable message describing the current state of\
+                \ the cluster or action being performed"
+              type: "string"
+            portStatus:
+              description: "The public addresses of generated LoadBalancer services"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  port:
+                    description: "Exposed port on the given service"
+                    type: "integer"
+                    minimum: 1
+                    maximum: 65535
+                  address:
+                    type: "string"
+                  name:
+                    description: "Name of the port in the original mapping"
+                    type: "string"
+              type: "array"
+            warnings:
+              description: "Warning messages regarding configuration errors"
+              items:
+                JSONSchemas: []
+                type: "string"
+              type: "array"
+            conditions:
+              description: "The conditions of the cluster at any given time, as implemented\
+                \ by all Kubernetes resources"
+              items:
+                JSONSchemas: []
+                type: "object"
+                properties:
+                  type:
+                    type: "string"
+                    enum:
+                      - "AllNodesReady"
+                      - "AllExtensionsLoaded"
+                      - "AllServicesReady"
+                      - "LogLevelApplied"
+                    description: "Identifier for the condition, add new conditions\
+                      \ for life cycles here"
+                  lastTransitionTime:
+                    type: "string"
+                    pattern: "^([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\\
+                      .[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))$"
+                    description: "Last state transition time in RFC3339, UTC time"
+                  status:
+                    type: "string"
+                    description: "current status of the condition"
+                  reason:
+                    type: "string"
+                    description: "Reason for the last state transition"
+              type: "array"
+          required:
+            - "state"
+            - "message"
+          type: "object"
+        apiVersion:
+          description: "APIVersion defines the versioned schema of this representation\n\
+            \              of an object. Servers should convert recognized schemas\
+            \ to the latest\n              internal value, and may reject unrecognized\
+            \ values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
+          type: "string"
+        kind:
+          description: "Kind is a string value representing the REST resource this\n\
+            \              object represents. Servers may infer this from the endpoint\
+            \ the client\n              submits requests to. Cannot be updated. In\
+            \ CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+          type: "string"
+        metadata:
+          type: "object"
+      required:
+        - "spec"
+      type: "object"
+  version: "v1"

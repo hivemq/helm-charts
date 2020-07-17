@@ -1,0 +1,14 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ template "hivemq.fullname" . }}-operator-binding"
+  labels:
+    {{- include "hivemq.labels" . | nindent 4 }}
+roleRef:
+  name: "{{ template "hivemq.fullname" . }}-operator"
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+subjects:
+  - name: "{{ template "hivemq.fullname" . }}-operator"
+    namespace: {{ .Release.Namespace }}
+    kind: ServiceAccount

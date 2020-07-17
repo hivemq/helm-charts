@@ -1,0 +1,26 @@
+# An example patch showing how to configure additional ports
+# Applying this to a cluster in default configuration will simply add an additional API port and expose it as a Service
+
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+spec:
+  ports:
+    # These are the default ports that get exposed if you don't override this field.
+    - name: mqtt
+      port: 1883
+      patch:
+        - '[{"op":"add","path":"/metadata/annotations/service.spec.externalTrafficPolicy","value":"Local"}]'
+    - name: cluster
+      port: 7000
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/clusterIP","value":"None"}]'
+        - '[{"op":"add","path":"/metadata/annotations","value":{"service.alpha.kubernetes.io/tolerate-unready-endpoints":"true"}}]'
+    - name: cc
+      port: 8080
+    # Default ports end
+    # If your extension exposes a custom REST API, you can expose the port to a service like such:
+    # The service will be called "hivemq-<cluster-name>-<port-name>"
+    - name: my-api
+      port: 8082
+      expose: true

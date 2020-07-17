@@ -1,0 +1,37 @@
+{{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+{{- if .Values.operator.admissionHookEnabled }}
+kind: ValidatingWebhookConfiguration
+{{- if semverCompare ">= 1.16.0-0" $kubeTargetVersion }}
+apiVersion: admissionregistration.k8s.io/v1
+{{- else }}
+apiVersion: admissionregistration.k8s.io/v1beta1
+{{- end }}
+metadata:
+  name: "{{ include "hivemq.fullname" . }}-admission"
+  labels:
+    app: hivemq
+    {{- include "hivemq.labels" . | nindent 4 }}
+webhooks:
+  - name: "hivemq-cluster-policy.hivemq.com"
+    rules:
+      - apiGroups:
+          - "hivemq.com"
+        apiVersions:
+          - "v1"
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - "hivemq-clusters"
+        scope: "Namespaced"
+    clientConfig:
+      service:
+        namespace: "{{ .Release.Namespace }}"
+        name: {{ include "hivemq.name" . }}-operator
+        path: /api/v1/validate/hivemq-clusters
+    admissionReviewVersions:
+    - "v1"
+    - "v1beta1"
+    sideEffects: None
+    timeoutSeconds: 30
+{{- end }}

@@ -1,0 +1,12 @@
+# An example patch showing how to to manage extensions
+# See https://www.hivemq.com/docs/4.2/enterprise-extensions/kafka.html#configuration on how to create the extension configuration
+# Check the config sub-folder for an example ConfigMap.
+
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+spec:
+  extensions:
+    - name: hivemq-kafka-extension
+      extensionUri: https://www.hivemq.com/releases/extensions/hivemq-kafka-extension-1.1.0.zip
+      configMap: kafka-configuration
+      enabled: true

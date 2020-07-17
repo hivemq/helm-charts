@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hivemq-operator
+  namespace: hivemq
+  labels:
+    app: hivemq-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hivemq-operator
+  template:
+    metadata:
+      labels:
+        app: hivemq-operator
+        operator: hivemq-operator
+    spec:
+      containers:
+        - image: hivemq/hivemq-operator:0.2.0
+          imagePullPolicy: IfNotPresent
+          name: operator
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30"
+            - name: OPERATOR_LOG_LEVEL
+              value: INFO
+            - name: MICRONAUT_SSL_ENABLED
+              value: "true"
+            - name: SSL_FQDN
+              value: "hivemq-operator.hivemq.svc"
+          resources:
+            limits:
+              cpu: 800m
+              memory: 512M
+            requests:
+              cpu: 200m
+              memory: 512M
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+      restartPolicy: Always
+      serviceAccountName: hivemq-operator

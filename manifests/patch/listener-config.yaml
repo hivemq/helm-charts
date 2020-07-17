@@ -1,0 +1,19 @@
+# An example patch showing how to configure additional listeners.
+# You can also use service port environment variables (https://kubernetes.io/docs/concepts/services-networking/service/#environment-variables) in this definition
+# in order to directly reference a service on Kubernetes and use the correct port even if the LB port changes.
+# This example simply uses the default listener (and it's templated environment variable) as well as an additional hardcoded listener on port 1884.
+# Of course, you can also configure other types of listener as shown here: https://www.hivemq.com/docs/latest/hivemq/listeners.html
+# Note that for TLS listeners you will of course have to also provide key- and truststores using the configurations field.
+
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+spec:
+  listenerConfiguration: >
+    <tcp-listener>
+      <port>${HIVEMQ_MQTT_PORT}</port>
+      <bind-address>0.0.0.0</bind-address>
+    </tcp-listener>
+    <tcp-listener>
+      <port>1884</port>
+      <bind-address>0.0.0.0</bind-address>
+    </tcp-listener>

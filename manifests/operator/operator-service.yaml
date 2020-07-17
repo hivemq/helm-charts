@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hivemq-operator
+  namespace: hivemq
+  labels:
+    app: hivemq-operator
+spec:
+  selector:
+    operator: hivemq-operator
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https

@@ -1,0 +1,19 @@
+{{- if and .Values.global.rbac.create .Values.global.rbac.pspEnabled }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "hivemq.fullname" . }}-hivemq-psp
+  labels:
+    {{- include "hivemq.labels" . | nindent 4 }}
+rules:
+  {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+  {{- if semverCompare "> 1.15.0-0" $kubeTargetVersion }}
+  - apiGroups: ['policy']
+  {{- else }}
+  - apiGroups: ['extensions']
+    {{- end }}
+    resources: ['podsecuritypolicies']
+    verbs:     ['use']
+    resourceNames:
+      - {{ template "hivemq.fullname" . }}-hivemq
+  {{- end }}

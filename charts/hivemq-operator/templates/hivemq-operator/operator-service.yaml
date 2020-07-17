@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "hivemq.name" . }}-operator
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "hivemq.labels" . | nindent 4 }}
+spec:
+  selector:
+    operator: "{{ include "hivemq.fullname" . }}"
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https

@@ -1,0 +1,187 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "{{ template "hivemq.fullname" . }}-operator"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hivemq.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - extensions
+    resources:
+      - deployments
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - extensions
+    resources:
+      - daemonsets
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - extensions
+    resources:
+      - statefulsets
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - patch
+  - apiGroups:
+      - hivemq.com
+    resources:
+      - hivemq-clusters
+      - hivemq-clusters/status
+      - hivemq-clusters/scale
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods/attach
+      - pods/exec
+      - pods/portforward
+      - pods/proxy
+      - services/proxy
+    verbs:
+      - list
+      - get
+      - create
+      - update
+      - delete
+      - watch
+      - patch
