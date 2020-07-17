@@ -5,12 +5,11 @@ global:
     pspEnabled: true
     pspAnnotations: {}
     allowedCapabilities: []
-
 operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:0.2.0
+  image: hivemq/hivemq-operator:0.3.1
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   logLevel: INFO
@@ -25,16 +24,14 @@ operator:
     requests:
       cpu: 200m
       memory: 512M
-
 monitoring:
   # Deploy ServiceMonitor for Prometheus Operator and enable Prometheus
   enabled: false
   # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
   dedicated: false
-
 hivemq:
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
-  image: hivemq/hivemq4:k8s-4.3.3
+  image: hivemq/hivemq4:k8s-4.3.4
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   nodeCount: "3"
@@ -111,17 +108,17 @@ hivemq:
       port: 1883
       expose: true
       patch:
-      - '[{"op":"add","path":"/spec/selector/hivemq.com~1node-offline","value":"false"},{"op":"add","path":"/metadata/annotations","value":{"service.spec.externalTrafficPolicy":"Local"}}]'
-      # If you want Kubernetes to expose the MQTT port
-      # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+        - '[{"op":"add","path":"/spec/selector/hivemq.com~1node-offline","value":"false"},{"op":"add","path":"/metadata/annotations","value":{"service.spec.externalTrafficPolicy":"Local"}}]'
+        # If you want Kubernetes to expose the MQTT port
+        # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
     - name: "cc"
       port: 8080
       expose: true
       patch:
-      - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
-      # If you want Kubernetes to expose the HiveMQ control center via load balancer.
-      # Warning: You should consider configuring proper security and TLS beforehand. Ingress may be a better option here.
-      # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+        - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+        # If you want Kubernetes to expose the HiveMQ control center via load balancer.
+        # Warning: You should consider configuring proper security and TLS beforehand. Ingress may be a better option here.
+        # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
   clusterOverloadProtection: "true"
   mqtt:
     sharedSubscriptionEnabled: true
@@ -278,6 +275,5 @@ hivemq:
     </allow-request-problem-information>
     </security>
     </hivemq>
-
 nameOverride: ""
 fullnameOverride: ""
