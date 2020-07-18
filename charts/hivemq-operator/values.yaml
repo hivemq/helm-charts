@@ -31,7 +31,7 @@ monitoring:
   dedicated: false
 hivemq:
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
-  image: hivemq/hivemq4:k8s-4.3.4
+  image: hivemq/hivemq4:k8s-4.3.5
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   nodeCount: "3"
