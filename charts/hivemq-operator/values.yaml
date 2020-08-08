@@ -46,7 +46,23 @@ hivemq:
   ## Add custom environment variables (e.g. for your extension) here.
   # - name: MY_CUSTOM_ENV
   #   value: some-value
-  extensions: []
+  extensions:
+  # Default platform extensions. Add a configMap and enable them if you want to use either
+  - name: hivemq-kafka-extension
+    extensionUri: preinstalled
+    enabled: false
+  - name: hivemq-enterprise-security-extension
+    extensionUri: preinstalled
+    enabled: false
+    # Note that this is just an example initialization routine. Make sure this points to the current JDBC version you require for your configuration.
+    initialization: |
+      # A little hack because k8s configMaps can't handle sub-directories
+      [[ -e /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml ]] &&
+      rm -f $(pwd)/conf/enterprise-security-extension.xml &&
+      cp -s /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml $(pwd)/conf/enterprise-security-extension.xml
+
+      [[ ! -f drivers/postgres-jdbc.jar ]] &&
+      curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar --output drivers/jdbc/postgres.jar
   ## Specify a list of extensions to use here, like such (kafka-config is your config XML for the extension)
   #- name: hivemq-kafka-extension
   #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-kafka-extension-1.1.0.zip
