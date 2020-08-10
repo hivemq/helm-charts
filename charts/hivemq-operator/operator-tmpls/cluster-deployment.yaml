@@ -105,6 +105,10 @@ spec:
           value: {{ util:getPort(spec, "mqtt").port }}
         - name: HIVEMQ_CONTROL_CENTER_PORT
           value: {{ util:getPort(spec, "cc").port }}
+        - name: HIVEMQ_REST_API_PORT
+          value: {{ util:getPort(spec, "api").port }}
+        - name: HIVEMQ_REST_API_ENABLED
+          value: {{ util:getPort(spec, "api").port != null }}
         - name: HIVEMQ_CLUSTER_REPLICA_COUNT
           value: "{{ spec.clusterReplicaCount }}"
         - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
@@ -167,6 +171,9 @@ spec:
         - name: HIVEMQ_LISTENER_CONFIGURATION
           value: |
 {{ util:indent(12, spec.listenerConfiguration) }}
+        - name: HIVEMQ_REST_API_CONFIGURATION
+          value: |
+{{ util:indent(12, spec.restApiConfiguration) }}
         {% for env in spec.env %}
         - name: {{ env.name }}
           value: {{ env.value }}
