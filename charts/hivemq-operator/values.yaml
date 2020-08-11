@@ -47,8 +47,11 @@ hivemq:
   # - name: MY_CUSTOM_ENV
   #   value: some-value
   extensions:
-  # Default platform extensions. Add a configMap and enable them if you want to use either
+  # Default platform extensions starting from 4.4.0. Add a configMap and enable them if you want to use either
   - name: hivemq-kafka-extension
+    extensionUri: preinstalled
+    enabled: false
+  - name: hivemq-bridge-extension
     extensionUri: preinstalled
     enabled: false
   - name: hivemq-enterprise-security-extension
