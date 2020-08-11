@@ -1,6 +1,6 @@
 ---
 apiVersion: "apiextensions.k8s.io/v1beta1"
-kind: CustomResourceDefinition
+kind: "CustomResourceDefinition"
 metadata:
   name: "hivemq-clusters.hivemq.com"
 spec:
@@ -82,7 +82,6 @@ spec:
               description: "Image pull secrets to be used in the deployment to pull\
                 \ the HiveMQ container"
               items:
-                JSONSchemas: []
                 type: "string"
               type: "array"
             hivemqVersion:
@@ -98,8 +97,11 @@ spec:
                 \ not taking effect anymore."
               type: "string"
             listenerConfiguration:
-              description: "The listener configuration below the <listeners> tag.\
-                \ Add all your desired listeners here."
+              description: "The MQTT listener configuration below the <listeners>\
+                \ tag. Add all your desired listeners here."
+              type: "string"
+            restApiConfiguration:
+              description: "The REST API configuration. Ignored for versions <4.4.0"
               type: "string"
             logLevel:
               description: "HiveMQ root logger level. Only INFO and above is allowed\
@@ -115,8 +117,6 @@ spec:
             env:
               description: "Additional environment variables for the cluster"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   name:
                     type: "string"
@@ -125,13 +125,11 @@ spec:
                 required:
                   - "name"
                   - "value"
-                javaType: "com.hivemq.openapi.spec.Env"
+                type: "object"
               type: "array"
             configMaps:
               description: "Hot-reloadable config map or statically mapped configuration"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   name:
                     type: "string"
@@ -145,13 +143,11 @@ spec:
                 required:
                   - "name"
                   - "path"
-                javaType: "com.hivemq.openapi.spec.ConfigMapping"
+                type: "object"
               type: "array"
             extensions:
               description: "Description of all extensions and their (desired) states"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   name:
                     description: "Unique, descriptive name for the extension folder"
@@ -160,44 +156,42 @@ spec:
                     description: "Whether this extension should be enabled"
                     type: "boolean"
                   configMap:
-                    type: "string"
                     description: "ConfigMap that contains configuration files for\
                       \ this extension"
+                    type: "string"
                   static:
-                    type: "boolean"
                     description: "Whether configuration changes should lead to a rolling\
                       \ disable/enable instead of hot-reload"
+                    type: "boolean"
                   extensionUri:
-                    type: "string"
                     description: "HTTP URI to download the extension from (as .zip\
                       \ distribution). Set to 'preinstalled' if the extension to be\
                       \ managed is statically built into the container."
+                    type: "string"
                   offline:
                     description: "Whether the individual HiveMQ nodes being updated\
                       \ with a new extension version should be taken offline (i.e.\
                       \ removed from load-balancers) during the update"
                     type: "boolean"
                   initialization:
-                    type: "string"
                     description: "Initialization script to run when installing this\
                       \ extension. This will be executed with the working directory\
                       \ as the extension folder. Must be idempotent as it will be\
                       \ run on every update as well."
+                    type: "string"
                   updateStrategy:
                     description: "In what manner to perform extension updates"
-                    type: "string"
                     enum:
                       - "serial"
                       - "parallel"
+                    type: "string"
                 required:
                   - "name"
-                javaType: "com.hivemq.openapi.spec.ExtensionConfiguration"
+                type: "object"
               type: "array"
             initialization:
               description: "Initialization routines to run before starting HiveMQ"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   name:
                     type: "string"
@@ -206,16 +200,16 @@ spec:
                       \ on some platforms"
                     type: "string"
                   command:
-                    type: "array"
                     items:
                       type: "string"
+                    type: "array"
                   args:
-                    type: "array"
                     items:
                       type: "string"
+                    type: "array"
                 required:
                   - "name"
-                javaType: "com.hivemq.openapi.spec.InitRoutine"
+                type: "object"
               type: "array"
             affinity:
               description: "Specify a PodAffinity object. Must be specified as a scalar\
@@ -225,30 +219,28 @@ spec:
               description: "List of ports to map for each cluster node. MQTT, control\
                 \ center and cluster port are required and set by default."
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   name:
-                    type: "string"
                     description: "Name of the port, for use in templating"
+                    type: "string"
                   port:
                     description: "Port to map"
+                    maximum: 65535.0
+                    minimum: 1.0
                     type: "integer"
-                    minimum: 1
-                    maximum: 65535
                   expose:
                     description: "Create a Service for this port"
                     type: "boolean"
                   patch:
                     description: "JSON patches to apply to service manifests before\
                       \ applying them, only applies if expose is true."
-                    type: "array"
                     items:
                       type: "string"
+                    type: "array"
                 required:
                   - "name"
                   - "port"
-                javaType: "com.hivemq.openapi.spec.PortMapping"
+                type: "object"
               type: "array"
             clusterReplicaCount:
               description: "Number of replicas to store in total"
@@ -336,8 +328,6 @@ spec:
             secrets:
               description: "Secrets to mount onto the HiveMQ container"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   name:
                     description: "Name of the secret to be mounted"
@@ -348,7 +338,7 @@ spec:
                 required:
                   - "name"
                   - "path"
-                javaType: "com.hivemq.openapi.spec.Secret"
+                type: "object"
               type: "array"
             customProperties:
               description: "Additional arbitrary properties for this cluster, to be\
@@ -374,53 +364,50 @@ spec:
             portStatus:
               description: "The public addresses of generated LoadBalancer services"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   port:
                     description: "Exposed port on the given service"
+                    maximum: 65535.0
+                    minimum: 1.0
                     type: "integer"
-                    minimum: 1
-                    maximum: 65535
                   address:
                     type: "string"
                   name:
                     description: "Name of the port in the original mapping"
                     type: "string"
+                type: "object"
               type: "array"
             warnings:
               description: "Warning messages regarding configuration errors"
               items:
-                JSONSchemas: []
                 type: "string"
               type: "array"
             conditions:
               description: "The conditions of the cluster at any given time, as implemented\
                 \ by all Kubernetes resources"
               items:
-                JSONSchemas: []
-                type: "object"
                 properties:
                   type:
-                    type: "string"
+                    description: "Identifier for the condition, add new conditions\
+                      \ for life cycles here"
                     enum:
                       - "AllNodesReady"
                       - "AllExtensionsLoaded"
                       - "AllServicesReady"
                       - "LogLevelApplied"
-                    description: "Identifier for the condition, add new conditions\
-                      \ for life cycles here"
-                  lastTransitionTime:
                     type: "string"
+                  lastTransitionTime:
+                    description: "Last state transition time in RFC3339, UTC time"
                     pattern: "^([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\\
                       .[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))$"
-                    description: "Last state transition time in RFC3339, UTC time"
+                    type: "string"
                   status:
-                    type: "string"
                     description: "current status of the condition"
-                  reason:
                     type: "string"
+                  reason:
                     description: "Reason for the last state transition"
+                    type: "string"
+                type: "object"
               type: "array"
           required:
             - "state"

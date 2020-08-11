@@ -59,5 +59,6 @@ spec:
   controllerTemplate: {{ .Values.hivemq.controllerTemplate }}
   affinity: |{{ .Values.hivemq.affinity | nindent 4 }}
   listenerConfiguration: |{{ .Values.hivemq.listenerConfiguration | nindent 4 }}
+  restApiConfiguration: |{{ .Values.hivemq.restApiConfiguration | nindent 4 }}
   configOverride: |{{ .Values.hivemq.configOverride | nindent 4 }}
 {{- end }}
