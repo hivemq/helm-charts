@@ -9,7 +9,7 @@ operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:4.4.0
+  image: hivemq/hivemq-operator:4.4.1
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   logLevel: INFO
@@ -31,7 +31,7 @@ monitoring:
   dedicated: false
 hivemq:
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
-  image: hivemq/hivemq4:k8s-4.4.0
+  image: hivemq/hivemq4:k8s-4.4.1
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   nodeCount: "3"
@@ -47,25 +47,25 @@ hivemq:
   # - name: MY_CUSTOM_ENV
   #   value: some-value
   extensions:
-  # Default platform extensions starting from 4.4.0. Add a configMap and enable them if you want to use either
-  - name: hivemq-kafka-extension
-    extensionUri: preinstalled
-    enabled: false
-  - name: hivemq-bridge-extension
-    extensionUri: preinstalled
-    enabled: false
-  - name: hivemq-enterprise-security-extension
-    extensionUri: preinstalled
-    enabled: false
-    # Note that this is just an example initialization routine. Make sure this points to the current JDBC version you require for your configuration.
-    initialization: |
-      # A little hack because k8s configMaps can't handle sub-directories
-      [[ -e /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml ]] &&
-      rm -f $(pwd)/conf/enterprise-security-extension.xml &&
-      cp -s /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml $(pwd)/conf/enterprise-security-extension.xml
+    - # Default platform extensions starting from 4.4.0. Add a configMap and enable them if you want to use either
+      name: hivemq-kafka-extension
+      extensionUri: preinstalled
+      enabled: false
+    - name: hivemq-bridge-extension
+      extensionUri: preinstalled
+      enabled: false
+    - name: hivemq-enterprise-security-extension
+      extensionUri: preinstalled
+      enabled: false
+      # Note that this is just an example initialization routine. Make sure this points to the current JDBC version you require for your configuration.
+      initialization: |
+        # A little hack because k8s configMaps can't handle sub-directories
+        [[ -e /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml ]] &&
+        rm -f $(pwd)/conf/enterprise-security-extension.xml &&
+        cp -s /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml $(pwd)/conf/enterprise-security-extension.xml
 
-      [[ ! -f drivers/postgres-jdbc.jar ]] &&
-      curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar --output drivers/jdbc/postgres.jar
+        [[ ! -f drivers/postgres-jdbc.jar ]] &&
+        curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar --output drivers/jdbc/postgres.jar
   ## Feel free to add other extensions as well. You should keep the blocks above to maintain control over the platform extensions though.
   #- name: hivemq-mqtt-message-log-extension
   #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-mqtt-message-log-extension-1.1.0.zip
@@ -148,12 +148,13 @@ hivemq:
         # If you want Kubernetes to expose the HiveMQ control center via load balancer.
         # Warning: You should consider configuring proper security and TLS beforehand. Ingress may be a better option here.
         # - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
-    # To enable the HiveMQ REST API and expose it as a service. Be aware of the security risks of exposing the REST API
-    # - name: "api"
-    #   port: 8888
-    #   expose: true
-    #   patch:
-    #     - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+  # To enable the HiveMQ REST API and expose it as a service. Be aware of the security risks of exposing the REST API
+  # - name: "api"
+  #   port: 8888
+  #   expose: true
+  #   patch:
+  #     - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+
   clusterOverloadProtection: "true"
   mqtt:
     sharedSubscriptionEnabled: true
