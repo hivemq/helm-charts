@@ -3,6 +3,10 @@ global:
     create: true
     # Create a PodSecurityPolicy, cluster role, role binding and service account for the HiveMQ pods and assign the service account to them.
     pspEnabled: true
+    # Enable additional (unsafe) sysctls in the PSP to enhance performance for large deployments.
+    # Make sure to refer to https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/ to enable them first, or the HiveMQ Pods will fail to launch. See https://www.hivemq.com/docs/hivemq/latest/user-guide/system-requirements.html for the full list of sysctl parameters and their effects.
+    # Also make sure to adjust hivemq.controllerTemplate to use the cluster-deployment-unsafe-sysctls.yaml, which will set the sysctls for the deployments.
+    advancedSysctls: false
     pspAnnotations: {}
     allowedCapabilities: []
 operator:

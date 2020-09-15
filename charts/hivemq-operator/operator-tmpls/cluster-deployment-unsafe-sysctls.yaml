@@ -22,7 +22,7 @@ spec:
     matchLabels:
       app: "hivemq"
       hivemq-cluster: "{{ spec.name }}"
-  replicas: {{ spec.nodeCount }}
+  replicas: "{{ spec.nodeCount }}"
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -33,7 +33,7 @@ spec:
       labels:
         app: "hivemq"
         hivemq-cluster: "{{ spec.name }}"
-        hivemq.com/node-offline: "false"
+        hivemq.com/node-offline: false
     spec:
       initContainers:
       - name: "init-shared"
@@ -67,11 +67,6 @@ spec:
         - name: {{ extension.configMap }}
           mountPath: /conf-override/extensions/{{ extension.name }}
         {% endif %}{% endfor %}
-      - name: dns-wait
-        image: hivemq/init-dns-wait:1.0.0
-        volumeMounts:
-          - mountPath: /mnt/misc
-            name: dns-wait-config
       {% for initContainer in spec.initialization %}
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
@@ -107,21 +102,41 @@ spec:
               value: "32768"
             - name: net.ipv4.ip_local_port_range
               value: "1024 65535"
+            - name: net.ipv4.tcp_fin_timeout
+              value: "90"
+            - name: net.ipv4.tcp_tw_recycle
+              value: "1"
+            - name: net.ipv4.tcp_tw_reuse
+              value: "1"
+            - name: net.core.rmem_default
+              value: "524288"
+            - name: net.core.wmem_default
+              value: "524288"
+            - name: net.core.rmem_max
+              value: "67108864"
+            - name: net.core.wmem_max
+              value: "67108864"
+            - name: net.ipv4.tcp_rmem
+              value: "4096 87380 16777216"
+            - name: net.ipv4.tcp_wmem
+              value: "4096 65536 16777216"
+            - name: fs.file-max
+              value: "5097152"
         env:
         - name: HIVEMQ_DNS_DISCOVERY_ADDRESS
           value: "hivemq-{{ spec.name }}-cluster.{{ spec.namespace }}.svc.cluster.local."
         - name: JAVA_OPTS
           value: "{{ spec.javaOptions }}"
         - name: HIVEMQ_CLUSTER_PORT
-          value: "{{ util:getPort(spec, "cluster").port }}"
+          value: {{ util:getPort(spec, "cluster").port }}
         - name: HIVEMQ_MQTT_PORT
-          value: "{{ util:getPort(spec, "mqtt").port }}"
+          value: {{ util:getPort(spec, "mqtt").port }}
         - name: HIVEMQ_CONTROL_CENTER_PORT
-          value: "{{ util:getPort(spec, "cc").port }}"
+          value: {{ util:getPort(spec, "cc").port }}
         - name: HIVEMQ_REST_API_PORT
-          value: "{{ util:getPort(spec, "api").port }}"
+          value: {{ util:getPort(spec, "api").port }}
         - name: HIVEMQ_REST_API_ENABLED
-          value: "{{ util:getPort(spec, "api").port != null }}"
+          value: {{ util:getPort(spec, "api").port != null }}
         - name: HIVEMQ_CLUSTER_REPLICA_COUNT
           value: "{{ spec.clusterReplicaCount }}"
         - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
@@ -256,9 +271,6 @@ spec:
         - name: live-info
           configMap:
             name: hivemq-cluster-{{ spec.name }}-dynamic-state
-        - name: dns-wait-config
-          configMap:
-            name: hivemq-cluster-{{ spec.name }}-dns-wait-config
         {% for map in spec.configMaps %}
         - name: {{ map.name }}
           configMap:

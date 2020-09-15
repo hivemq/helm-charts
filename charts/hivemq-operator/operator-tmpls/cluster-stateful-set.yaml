@@ -96,6 +96,11 @@ spec:
           securityContext:
             privileged: false
             allowPrivilegeEscalation: false
+            sysctls:
+              - name: net.core.somaxconn
+                value: "32768"
+              - name: net.ipv4.ip_local_port_range
+                value: "1024 65535"
           env:
             - name: HIVEMQ_DNS_DISCOVERY_ADDRESS
               value: "hivemq-{{ spec.name }}-cluster.{{ spec.namespace }}.svc.cluster.local."
