@@ -20,6 +20,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.operator.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | indent 8 }}
+      {{- end }}
       containers:
         - image: {{ .Values.operator.image }}
           imagePullPolicy: {{ .Values.operator.imagePullPolicy }}

@@ -61,4 +61,6 @@ spec:
   listenerConfiguration: |{{ .Values.hivemq.listenerConfiguration | nindent 4 }}
   restApiConfiguration: |{{ .Values.hivemq.restApiConfiguration | nindent 4 }}
   configOverride: |{{ .Values.hivemq.configOverride | nindent 4 }}
+  initialization: {{ toYaml .Values.hivemq.initialization | nindent 4 }}
+  sidecars: {{ toYaml .Values.hivemq.sidecars | nindent 2 }}
 {{- end }}

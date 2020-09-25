@@ -58,9 +58,14 @@ spec:
         - name: backup
           mountPath: /opt/hivemq/backup
           readOnly: false
+        - name: log
+          mountPath: /opt/hivemq/log
+          readOnly: false
         {% for map in spec.configMaps %}
+        {% if map.path != "none" %}
         - name: {{ map.name }}
           mountPath: {{ util:stringReplace(map.path, "/opt/hivemq/", "/conf-override/") }}
+        {% endif %}
         {% endfor %}
         {% for extension in spec.extensions %}
         {% if extension.configMap != null %}
@@ -74,8 +79,10 @@ spec:
         args: {{ initContainer.args }}
         volumeMounts:
         {% for map in spec.configMaps %}
+        {% if map.path != "none" %}
         - name: {{ map.name }}
           mountPath: {{ util:stringReplace(map.path, "/opt/hivemq/", "/conf-override/") }}
+        {% endif %}
         {% endfor %}
         {% for extension in spec.extensions %}
         {% if extension.configMap != null %}
@@ -181,10 +188,10 @@ spec:
 {{ util:indent(12, spec.configOverride) }}
         - name: HIVEMQ_LISTENER_CONFIGURATION
           value: |
-{{ util:indent(12, spec.listenerConfiguration) }}
+            {{ util:indentCustom(12, 0, spec.listenerConfiguration) }}
         - name: HIVEMQ_REST_API_CONFIGURATION
           value: |
-{{ util:indent(12, spec.restApiConfiguration) }}
+            {{ util:indentCustom(12, 0, spec.restApiConfiguration) }}
         {% for env in spec.env %}
         - name: {{ env.name }}
           value: {{ env.value }}
@@ -214,7 +221,7 @@ spec:
             port: {{ util:getPort(spec, "mqtt").port }}
           initialDelaySeconds: 15
           periodSeconds: 30
-          failureThreshold: 90
+          failureThreshold: 240
         volumeMounts:
           - name: shared-data
             mountPath: /hivemq-data
@@ -227,18 +234,25 @@ spec:
             mountPath: /opt/hivemq/backup
             readOnly: false
           {% for map in spec.configMaps %}
+          {% if map.path != "none" %}
           - name: {{ map.name }}
             mountPath: {{ util:stringReplace(map.path, "/opt/hivemq/", "/conf-override/") }}
+          {% endif %}
           {% endfor %}
           {% for secret in spec.secrets %}
+          {% if secret.path != "none" %}
           - name: {{ secret.name }}
             mountPath: {{ util:stringReplace(secret.path, "/opt/hivemq/", "/conf-override/") }}
+          {% endif %}
           {% endfor %}
           {% for extension in spec.extensions %}
           {% if extension.configMap != null %}
           - name: {{ extension.configMap }}
             mountPath: /conf-override/extensions/{{ extension.name }}
           {% endif %}{% endfor %}
+        {% for sidecar in spec.sidecars %}
+      - {{ util:indentCustom(8, 0, sidecar) }}
+        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
       affinity:
@@ -250,6 +264,8 @@ spec:
         - name: conf-override
           emptyDir: {}
         - name: backup
+          emptyDir: {}
+        - name: log
           emptyDir: {}
         - name: live-info
           configMap:

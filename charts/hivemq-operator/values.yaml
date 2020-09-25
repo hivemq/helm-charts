@@ -16,6 +16,7 @@ operator:
   image: hivemq/hivemq-operator:4.4.3
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
+  nodeSelector: {}
   logLevel: INFO
   # Verify all HiveMQCluster objects before accepting them. Not using the validation hook can result in erroneous cluster configurations which are hard to debug.
   admissionHookEnabled: true
@@ -50,6 +51,30 @@ hivemq:
   ## Add custom environment variables (e.g. for your extension) here.
   # - name: MY_CUSTOM_ENV
   #   value: some-value
+  initialization: []
+  ## Add custom initContainers here. Busybox is the default image. and /bin/sh -c the default command
+  # - name: init-cfg
+  #   image: busybox
+  #   command:
+  #   - /bin/sh
+  #   - "-c"
+  #   args:
+  #   - |
+  #     echo "mycustomfile" >> /hivemq-data/conf/test.cfg
+  sidecars: []
+  ## Add custom sidecar containers here. Must be a Container object in the regular Kubernetes API.
+  #- |
+  #  name: fluent-logging-example
+  #  args: -i tail -p path=/mnt/log/*.log -o stdout
+  #  image: fluent/fluent-bit:1.5
+  #  resources:
+  #    limits:
+  #      cpu: 100m
+  #      memory: 200Mi
+  #  volumeMounts:
+  #    - name: log
+  #      readOnly: true
+  #      mountPath: /mnt/log
   extensions:
     - # Default platform extensions starting from 4.4.0. Add a configMap and enable them if you want to use either
       name: hivemq-kafka-extension

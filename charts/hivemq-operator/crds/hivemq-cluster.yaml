@@ -114,6 +114,14 @@ spec:
             labels:
               description: "Labels for the cluster"
               type: "object"
+            sidecars:
+              description: "Sidecar containers to run alongside the HiveMQ container"
+              items:
+                description: "A single container spec for a sidecar container, wrapped\
+                  \ in a multi-line scalar string. See Container v1 in the API spec\
+                  \ for format."
+                type: "string"
+              type: "array"
             env:
               description: "Additional environment variables for the cluster"
               items:
