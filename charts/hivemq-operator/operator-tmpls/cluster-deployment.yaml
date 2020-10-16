@@ -41,25 +41,30 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
+            mkdir -p /opt/hivemq/bin
             mkdir -p /opt/hivemq/backup
             mkdir -p /opt/hivemq/extensions
             mkdir -p /opt/hivemq/conf
             mkdir -p /opt/hivemq/license
-            cp -r /opt/hivemq/* /hivemq-data/
             cp -r /opt/hivemq/* /conf-override/
+            cp -r /opt/hivemq/* /hivemq-data/
         volumeMounts:
         - name: shared-data
           mountPath: /hivemq-data
+          readOnly: false
         - name: conf-override
           mountPath: /conf-override
           readOnly: false
         - name: live-info
           mountPath: /etc/podinfo
         - name: backup
-          mountPath: /opt/hivemq/backup
+          mountPath: /conf-override/backup
           readOnly: false
         - name: log
-          mountPath: /opt/hivemq/log
+          mountPath: /conf-override/log
+          readOnly: false
+        - name: audit
+          mountPath: /conf-override/audit
           readOnly: false
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
@@ -83,6 +88,21 @@ spec:
         command: {{ initContainer.command }}
         args: {{ initContainer.args }}
         volumeMounts:
+        - name: shared-data
+          mountPath: /hivemq-data
+          readOnly: false
+        - name: conf-override
+          mountPath: /conf-override
+          readOnly: false
+        - name: backup
+          mountPath: /conf-override/backup
+          readOnly: false
+        - name: log
+          mountPath: /conf-override/log
+          readOnly: false
+        - name: audit
+          mountPath: /conf-override/audit
+          readOnly: false
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
         - name: {{ map.name }}
@@ -226,6 +246,7 @@ spec:
         volumeMounts:
           - name: shared-data
             mountPath: /hivemq-data
+            readOnly: false
           - name: conf-override
             mountPath: /conf-override
             readOnly: false
@@ -233,6 +254,12 @@ spec:
             mountPath: /etc/podinfo
           - name: backup
             mountPath: /opt/hivemq/backup
+            readOnly: false
+          - name: log
+            mountPath: /opt/hivemq/log
+            readOnly: false
+          - name: audit
+            mountPath: /opt/hivemq/audit
             readOnly: false
           {% for map in spec.configMaps %}
           {% if map.path != "none" %}
@@ -265,6 +292,8 @@ spec:
         - name: conf-override
           emptyDir: {}
         - name: backup
+          emptyDir: {}
+        - name: audit
           emptyDir: {}
         - name: log
           emptyDir: {}
