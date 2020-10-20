@@ -16,6 +16,7 @@ metadata:
     name: "{{ spec.name }}"
     uid: "{{ spec.metadata.uid }}"
 spec:
+  minReadySeconds: 30
   progressDeadlineSeconds: 10800
   revisionHistoryLimit: 2
   selector:
