@@ -99,7 +99,7 @@ hivemq:
   #- name: hivemq-mqtt-message-log-extension
   #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-mqtt-message-log-extension-1.1.0.zip
   #  configMap: message-log-config
-  configMaps: {}
+  configMaps: []
   # ConfigMaps to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
   #- name: hivemq-license
   #  path: /opt/hivemq/license
