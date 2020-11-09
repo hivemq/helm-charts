@@ -1,6 +1,6 @@
 dependencies:
-- name: prometheus-operator
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 8.15.*
-digest: sha256:1c391dc9c1d96bcaee7fa582084799e0683f7d683bd1f50e67db7fda4824ed51
-generated: "2020-07-17T12:04:23.043220407+02:00"
+- name: kube-prometheus-stack
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 11.0.4
+digest: sha256:1fe4733f309e794b64a03ae68bf14b58e85ba6ba0dc922bcc583d1a4d1b0bd1e
+generated: "2020-11-09T10:41:11.038029+01:00"

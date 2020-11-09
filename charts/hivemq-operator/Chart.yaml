@@ -15,7 +15,7 @@ version: 0.6.2
 appVersion: 4.4.2
 icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
 dependencies:
-  - name: prometheus-operator
-    repository: https://kubernetes-charts.storage.googleapis.com/
+  - name: kube-prometheus-stack
+    repository: https://prometheus-community.github.io/helm-charts
     condition: monitoring.dedicated, monitoring.enabled
-    version: 8.15.*
+    version: 11.*
