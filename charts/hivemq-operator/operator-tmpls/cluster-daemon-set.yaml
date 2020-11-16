@@ -25,7 +25,7 @@ spec:
       labels:
         app: "hivemq"
         hivemq-cluster: "{{ spec.name }}"
-        hivemq.com/node-offline: false
+        hivemq.com/node-offline: "false"
     spec:
       initContainers:
       - name: "init-shared"
@@ -59,6 +59,11 @@ spec:
         - name: {{ extension.configMap }}
           mountPath: /conf-override/extensions/{{ extension.name }}
         {% endif %}{% endfor %}
+      - name: dns-wait
+        image: hivemq/init-dns-wait:1.0.0
+        volumeMounts:
+          - mountPath: /mnt/misc
+            name: dns-wait-config
       {% for initContainer in spec.initialization %}
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
@@ -95,15 +100,15 @@ spec:
             - name: JAVA_OPTS
               value: "{{ spec.javaOptions }}"
             - name: HIVEMQ_CLUSTER_PORT
-              value: {{ util:getPort(spec, "cluster").port }}
+              value: "{{ util:getPort(spec, "cluster").port }}"
             - name: HIVEMQ_MQTT_PORT
-              value: {{ util:getPort(spec, "mqtt").port }}
+              value: "{{ util:getPort(spec, "mqtt").port }}"
             - name: HIVEMQ_CONTROL_CENTER_PORT
-              value: {{ util:getPort(spec, "cc").port }}
+              value: "{{ util:getPort(spec, "cc").port }}"
             - name: HIVEMQ_REST_API_PORT
-              value: {{ util:getPort(spec, "api").port }}
+              value: "{{ util:getPort(spec, "api").port }}"
             - name: HIVEMQ_REST_API_ENABLED
-              value: {{ util:getPort(spec, "api").port != null }}
+              value: "{{ util:getPort(spec, "api").port != null }}"
             - name: HIVEMQ_CLUSTER_REPLICA_COUNT
               value: "{{ spec.clusterReplicaCount }}"
             - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
@@ -236,6 +241,9 @@ spec:
         - name: live-info
           configMap:
             name: hivemq-cluster-{{ spec.name }}-dynamic-state
+        - name: dns-wait-config
+          configMap:
+            name: hivemq-cluster-{{ spec.name }}-dns-wait-config
         {% for map in spec.configMaps %}
         - name: {{ map.name }}
           configMap:
