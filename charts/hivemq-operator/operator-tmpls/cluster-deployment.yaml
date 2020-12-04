@@ -67,6 +67,9 @@ spec:
         - name: audit
           mountPath: /conf-override/audit
           readOnly: false
+        - name: heap-dumps
+          mountPath: /opt/hivemq/dumps
+          readOnly: false
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
         - name: {{ map.name }}
@@ -214,9 +217,12 @@ spec:
         - name: HIVEMQ_REST_API_CONFIGURATION
           value: |
             {{ util:indentCustom(12, 0, spec.restApiConfiguration) }}
+        - name: HEAPDUMP_HOME
+          value: /opt/hivemq/dumps
         {% for env in spec.env %}
         - name: {{ env.name }}
-          value: {{ env.value }}
+          value: |
+{{ util:indent(12, env.value) }}
         {% endfor %}
         image: "{{ util:getTaggedImage(spec) }}"
         ports:{% for portInstance in spec.ports %}
@@ -262,6 +268,9 @@ spec:
           - name: audit
             mountPath: /opt/hivemq/audit
             readOnly: false
+          - name: heap-dumps
+            mountPath: /opt/hivemq/dumps
+            readOnly: false
           {% for map in spec.configMaps %}
           {% if map.path != "none" %}
           - name: {{ map.name }}
@@ -297,6 +306,8 @@ spec:
         - name: audit
           emptyDir: {}
         - name: log
+          emptyDir: {}
+        - name: heap-dumps
           emptyDir: {}
         - name: live-info
           configMap:

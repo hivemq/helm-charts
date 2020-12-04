@@ -13,6 +13,10 @@ spec:
   image: "{{- (splitn ":" 2 .Values.hivemq.image)._0 }}"
   hivemqVersion: "{{- (splitn ":" 2 .Values.hivemq.image)._1 }}"
   imagePullPolicy: {{ .Values.hivemq.imagePullPolicy }}
+  imagePullSecrets:
+  {{- range .Values.hivemq.imagePullSecrets }}
+  - {{ .name | quote }}
+  {{- end }}
   memory: {{ .Values.hivemq.memory }}
   memoryLimitRatio: {{ .Values.hivemq.memoryLimitRatio }}
   ephemeralStorage: {{ .Values.hivemq.ephemeralStorage }}

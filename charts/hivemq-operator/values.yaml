@@ -35,10 +35,14 @@ monitoring:
   # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
   dedicated: false
 hivemq:
+  # Annotations to apply to the service account
+  serviceAccountAnnotations: {}
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
   image: hivemq/hivemq4:k8s-4.4.3
   imagePullPolicy: IfNotPresent
+  # This also applies to the generated service account
   imagePullSecrets: []
+  # - name: hivemq-pull-secret
   nodeCount: "3"
   cpu: "4"
   memory: "4Gi"
