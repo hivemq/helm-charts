@@ -7,15 +7,17 @@ metadata:
     app: {{ .Chart.Name | quote }}
     hivemq-cluster: {{ .Release.Name | quote }}
     {{- include "hivemq.labels" . | nindent 4 }}
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ template "hivemq.namespace" . }}
 spec:
   nodeCount: {{ .Values.hivemq.nodeCount }}
   image: "{{- (splitn ":" 2 .Values.hivemq.image)._0 }}"
   hivemqVersion: "{{- (splitn ":" 2 .Values.hivemq.image)._1 }}"
   imagePullPolicy: {{ .Values.hivemq.imagePullPolicy }}
+  {{- with .Values.global.rbac.imagePullSecrets }}
   imagePullSecrets:
-  {{- range .Values.hivemq.imagePullSecrets }}
+  {{- range .Values.global.rbac.imagePullSecrets }}
   - {{ .name | quote }}
+  {{- end }}
   {{- end }}
   memory: {{ .Values.hivemq.memory }}
   memoryLimitRatio: {{ .Values.hivemq.memoryLimitRatio }}
@@ -66,5 +68,4 @@ spec:
   restApiConfiguration: |{{ .Values.hivemq.restApiConfiguration | nindent 4 }}
   configOverride: |{{ .Values.hivemq.configOverride | nindent 4 }}
   initialization: {{ toYaml .Values.hivemq.initialization | nindent 4 }}
-  sidecars: {{ toYaml .Values.hivemq.sidecars | nindent 4 }}
 {{- end }}

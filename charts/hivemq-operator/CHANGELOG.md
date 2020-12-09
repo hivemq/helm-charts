@@ -2,7 +2,6 @@
 
 - Added safe sysctl settings by default to the HiveMQ Pods' security context which will extend the local port range
 - Added a separate Deployment controller template that sets some unsafe sysctls (You will have to reconfigure kubelet to use this)
-- Add support for custom sidecar containers that run alongside your HiveMQ deployment
 - Add proper templating and default example for the initContainer field.
 - Add nodeSelector support to operator deployment template
 - Increased liveness `failureThreshold` to ensure joining HiveMQ nodes don't get shut down during a long-lasting join process

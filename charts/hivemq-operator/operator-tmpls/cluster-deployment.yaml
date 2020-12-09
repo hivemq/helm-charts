@@ -38,6 +38,15 @@ spec:
     spec:
       initContainers:
       - name: "init-shared"
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         image: "busybox:latest"
         command: ["/bin/sh", "-c"]
         args:
@@ -83,12 +92,30 @@ spec:
         {% endif %}{% endfor %}
       - name: dns-wait
         image: hivemq/init-dns-wait:1.0.0
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         volumeMounts:
           - mountPath: /mnt/misc
             name: dns-wait-config
       {% for initContainer in spec.initialization %}
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         command: {{ initContainer.command }}
         args: {{ initContainer.args }}
         volumeMounts:
@@ -217,12 +244,12 @@ spec:
         - name: HIVEMQ_REST_API_CONFIGURATION
           value: |
             {{ util:indentCustom(12, 0, spec.restApiConfiguration) }}
-        - name: HEAPDUMP_HOME
+        - name: HIVEMQ_HEAPDUMP_HOME
           value: /opt/hivemq/dumps
         {% for env in spec.env %}
         - name: {{ env.name }}
           value: |
-{{ util:indent(12, env.value) }}
+            {{ util:indentCustom(12, 0, env.value) }}
         {% endfor %}
         image: "{{ util:getTaggedImage(spec) }}"
         ports:{% for portInstance in spec.ports %}
@@ -288,9 +315,6 @@ spec:
           - name: {{ extension.configMap }}
             mountPath: /conf-override/extensions/{{ extension.name }}
           {% endif %}{% endfor %}
-        {% for sidecar in spec.sidecars %}
-      - {{ util:indentCustom(8, 0, sidecar) }}
-        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
       affinity:

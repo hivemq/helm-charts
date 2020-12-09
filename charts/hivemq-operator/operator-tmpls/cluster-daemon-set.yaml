@@ -25,7 +25,7 @@ spec:
       labels:
         app: "hivemq"
         hivemq-cluster: "{{ spec.name }}"
-        hivemq.com/node-offline: "false"
+        hivemq.com/node-offline: false
     spec:
       initContainers:
       - name: "init-shared"
@@ -33,6 +33,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
+            mkdir -p /opt/hivemq/bin
             mkdir -p /opt/hivemq/backup
             mkdir -p /opt/hivemq/extensions
             mkdir -p /opt/hivemq/conf
@@ -108,15 +109,15 @@ spec:
             - name: JAVA_OPTS
               value: "{{ spec.javaOptions }}"
             - name: HIVEMQ_CLUSTER_PORT
-              value: "{{ util:getPort(spec, "cluster").port }}"
+              value: {{ util:getPort(spec, "cluster").port }}
             - name: HIVEMQ_MQTT_PORT
-              value: "{{ util:getPort(spec, "mqtt").port }}"
+              value: {{ util:getPort(spec, "mqtt").port }}
             - name: HIVEMQ_CONTROL_CENTER_PORT
-              value: "{{ util:getPort(spec, "cc").port }}"
+              value: {{ util:getPort(spec, "cc").port }}
             - name: HIVEMQ_REST_API_PORT
-              value: "{{ util:getPort(spec, "api").port }}"
+              value: {{ util:getPort(spec, "api").port }}
             - name: HIVEMQ_REST_API_ENABLED
-              value: "{{ util:getPort(spec, "api").port != null }}"
+              value: {{ util:getPort(spec, "api").port != null }}
             - name: HIVEMQ_CLUSTER_REPLICA_COUNT
               value: "{{ spec.clusterReplicaCount }}"
             - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
@@ -182,10 +183,11 @@ spec:
             - name: HIVEMQ_REST_API_CONFIGURATION
               value: |
 {{ util:indent(15, spec.restApiConfiguration) }}
-              {% for env in spec.env %}
+          {% for env in spec.env %}
             - name: {{ env.name }}
-              value: {{ env.value }}
-              {% endfor %}
+              value: |
+                {{ util:indentCustom(15, 0, env.value) }}
+          {% endfor %}
           image: "{{ util:getTaggedImage(spec) }}"
           ports:{% for portInstance in spec.ports %}
             - containerPort: {{ portInstance.port }}
@@ -213,19 +215,23 @@ spec:
             periodSeconds: 30
             failureThreshold: 240
           volumeMounts:
-            - name: shared-data
-              mountPath: /hivemq-data
-            - name: conf-override
-              mountPath: /conf-override
-              readOnly: false
-            - name: live-info
-              mountPath: /etc/podinfo
-            - name: backup
-              mountPath: /opt/hivemq/backup
-              readOnly: false
-            - name: log
-              mountPath: /opt/hivemq/log
-              readOnly: false
+          - name: shared-data
+            mountPath: /hivemq-data
+            readOnly: false
+          - name: conf-override
+            mountPath: /conf-override
+            readOnly: false
+          - name: live-info
+            mountPath: /etc/podinfo
+          - name: backup
+            mountPath: /opt/hivemq/backup
+            readOnly: false
+          - name: log
+            mountPath: /opt/hivemq/log
+            readOnly: false
+          - name: audit
+            mountPath: /opt/hivemq/audit
+            readOnly: false
             {% for map in spec.configMaps %}
             - name: {{ map.name }}
               mountPath: {{ util:stringReplace(map.path, "/opt/hivemq/", "/conf-override/") }}
@@ -241,9 +247,6 @@ spec:
               mountPath: {{ util:stringReplace(secret.path, "/opt/hivemq/", "/conf-override/") }}
             {% endif %}
             {% endfor %}
-        {% for sidecar in spec.sidecars %}
-        - {{ util:indentCustom(8, 0, sidecar) }}
-        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
       volumes:
@@ -255,6 +258,8 @@ spec:
         - name: backup
           emptyDir: {}
         - name: log
+          emptyDir: {}
+        - name: audit
           emptyDir: {}
         - name: live-info
           configMap:

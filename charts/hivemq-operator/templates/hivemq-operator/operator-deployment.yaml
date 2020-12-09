@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "hivemq.fullname" . }}-operator
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ template "hivemq.namespace" . }}
   labels:
     {{- include "hivemq.labels" . | nindent 4 }}
 spec:
@@ -16,7 +16,7 @@ spec:
         app: "{{ $.Chart.Name }}"
         operator: "{{ include "hivemq.fullname" . }}"
     spec:
-      {{- with .Values.operator.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -36,9 +36,13 @@ spec:
             - name: CREATE_CRD
               value: "false"
             - name: MICRONAUT_SSL_ENABLED
-              value: "{{ .Values.operator.admissionHookEnabled }}"
+              value: "{{ .Values.operator.admissionWebhooks.enabled }}"
+            {{- if .Values.operator.admissionWebhooks.enabled }}
+            - name: OPERATOR_SSL_PATH
+              value: "/etc/ssl/admission"
+            {{- end }}
             - name: SSL_FQDN
-              value: "{{ include "hivemq.name" . }}-operator.{{ $.Release.Namespace }}.svc"
+              value: "{{ include "hivemq.name" . }}-operator.{{ template "hivemq.namespace" . }}.svc"
           resources: {{ toYaml .Values.operator.resources | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -46,6 +50,10 @@ spec:
           volumeMounts:
             - mountPath: /templates
               name: templates
+            {{- if .Values.operator.admissionWebhooks.enabled }}
+            - mountPath: /etc/ssl/admission
+              name: ssl-secrets
+            {{- end }}
           ports:
             - name: https
               containerPort: 443
@@ -60,3 +68,8 @@ spec:
             {{- else }}
             name: "{{ include "hivemq.fullname" . }}-operator-templates"
             {{- end }}
+        {{- if .Values.operator.admissionWebhooks.enabled }}
+        - name: ssl-secrets
+          secret:
+            secretName: {{ template "hivemq.fullname" . }}-admission
+        {{- end }}

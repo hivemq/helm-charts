@@ -1,8 +1,8 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ include "hivemq.name" . }}-operator
-  namespace: {{ $.Release.Namespace }}
+  name: {{ template "hivemq.fullname" . }}-operator
+  namespace: {{ template "hivemq.namespace" . }}
   labels:
     {{- include "hivemq.labels" . | nindent 4 }}
 spec:

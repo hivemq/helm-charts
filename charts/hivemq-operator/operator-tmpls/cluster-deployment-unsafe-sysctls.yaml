@@ -16,13 +16,14 @@ metadata:
     name: "{{ spec.name }}"
     uid: "{{ spec.metadata.uid }}"
 spec:
+  minReadySeconds: 30
   progressDeadlineSeconds: 10800
   revisionHistoryLimit: 2
   selector:
     matchLabels:
       app: "hivemq"
       hivemq-cluster: "{{ spec.name }}"
-  replicas: "{{ spec.nodeCount }}"
+  replicas: {{ spec.nodeCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -33,33 +34,50 @@ spec:
       labels:
         app: "hivemq"
         hivemq-cluster: "{{ spec.name }}"
-        hivemq.com/node-offline: false
+        hivemq.com/node-offline: "false"
     spec:
       initContainers:
       - name: "init-shared"
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         image: "busybox:latest"
         command: ["/bin/sh", "-c"]
         args:
           - |
+            mkdir -p /opt/hivemq/bin
             mkdir -p /opt/hivemq/backup
             mkdir -p /opt/hivemq/extensions
             mkdir -p /opt/hivemq/conf
             mkdir -p /opt/hivemq/license
-            cp -r /opt/hivemq/* /hivemq-data/
             cp -r /opt/hivemq/* /conf-override/
+            cp -r /opt/hivemq/* /hivemq-data/
         volumeMounts:
         - name: shared-data
           mountPath: /hivemq-data
+          readOnly: false
         - name: conf-override
           mountPath: /conf-override
           readOnly: false
         - name: live-info
           mountPath: /etc/podinfo
         - name: backup
-          mountPath: /opt/hivemq/backup
+          mountPath: /conf-override/backup
           readOnly: false
         - name: log
-          mountPath: /opt/hivemq/log
+          mountPath: /conf-override/log
+          readOnly: false
+        - name: audit
+          mountPath: /conf-override/audit
+          readOnly: false
+        - name: heap-dumps
+          mountPath: /opt/hivemq/dumps
           readOnly: false
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
@@ -72,12 +90,50 @@ spec:
         - name: {{ extension.configMap }}
           mountPath: /conf-override/extensions/{{ extension.name }}
         {% endif %}{% endfor %}
+      - name: dns-wait
+        image: hivemq/init-dns-wait:1.0.0
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
+        volumeMounts:
+          - mountPath: /mnt/misc
+            name: dns-wait-config
       {% for initContainer in spec.initialization %}
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         command: {{ initContainer.command }}
         args: {{ initContainer.args }}
         volumeMounts:
+        - name: shared-data
+          mountPath: /hivemq-data
+          readOnly: false
+        - name: conf-override
+          mountPath: /conf-override
+          readOnly: false
+        - name: backup
+          mountPath: /conf-override/backup
+          readOnly: false
+        - name: log
+          mountPath: /conf-override/log
+          readOnly: false
+        - name: audit
+          mountPath: /conf-override/audit
+          readOnly: false
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
         - name: {{ map.name }}
@@ -118,15 +174,15 @@ spec:
         - name: JAVA_OPTS
           value: "{{ spec.javaOptions }}"
         - name: HIVEMQ_CLUSTER_PORT
-          value: {{ util:getPort(spec, "cluster").port }}
+          value: "{{ util:getPort(spec, "cluster").port }}"
         - name: HIVEMQ_MQTT_PORT
-          value: {{ util:getPort(spec, "mqtt").port }}
+          value: "{{ util:getPort(spec, "mqtt").port }}"
         - name: HIVEMQ_CONTROL_CENTER_PORT
-          value: {{ util:getPort(spec, "cc").port }}
+          value: "{{ util:getPort(spec, "cc").port }}"
         - name: HIVEMQ_REST_API_PORT
-          value: {{ util:getPort(spec, "api").port }}
+          value: "{{ util:getPort(spec, "api").port }}"
         - name: HIVEMQ_REST_API_ENABLED
-          value: {{ util:getPort(spec, "api").port != null }}
+          value: "{{ util:getPort(spec, "api").port != null }}"
         - name: HIVEMQ_CLUSTER_REPLICA_COUNT
           value: "{{ spec.clusterReplicaCount }}"
         - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
@@ -192,9 +248,12 @@ spec:
         - name: HIVEMQ_REST_API_CONFIGURATION
           value: |
             {{ util:indentCustom(12, 0, spec.restApiConfiguration) }}
+        - name: HIVEMQ_HEAPDUMP_HOME
+          value: /opt/hivemq/dumps
         {% for env in spec.env %}
         - name: {{ env.name }}
-          value: {{ env.value }}
+          value: |
+            {{ util:indentCustom(12, 0, env.value) }}
         {% endfor %}
         image: "{{ util:getTaggedImage(spec) }}"
         ports:{% for portInstance in spec.ports %}
@@ -225,6 +284,7 @@ spec:
         volumeMounts:
           - name: shared-data
             mountPath: /hivemq-data
+            readOnly: false
           - name: conf-override
             mountPath: /conf-override
             readOnly: false
@@ -232,6 +292,15 @@ spec:
             mountPath: /etc/podinfo
           - name: backup
             mountPath: /opt/hivemq/backup
+            readOnly: false
+          - name: log
+            mountPath: /opt/hivemq/log
+            readOnly: false
+          - name: audit
+            mountPath: /opt/hivemq/audit
+            readOnly: false
+          - name: heap-dumps
+            mountPath: /opt/hivemq/dumps
             readOnly: false
           {% for map in spec.configMaps %}
           {% if map.path != "none" %}
@@ -250,9 +319,6 @@ spec:
           - name: {{ extension.configMap }}
             mountPath: /conf-override/extensions/{{ extension.name }}
           {% endif %}{% endfor %}
-        {% for sidecar in spec.sidecars %}
-      - {{ util:indentCustom(8, 0, sidecar) }}
-        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
       affinity:
@@ -265,11 +331,18 @@ spec:
           emptyDir: {}
         - name: backup
           emptyDir: {}
+        - name: audit
+          emptyDir: {}
         - name: log
+          emptyDir: {}
+        - name: heap-dumps
           emptyDir: {}
         - name: live-info
           configMap:
             name: hivemq-cluster-{{ spec.name }}-dynamic-state
+        - name: dns-wait-config
+          configMap:
+            name: hivemq-cluster-{{ spec.name }}-dns-wait-config
         {% for map in spec.configMaps %}
         - name: {{ map.name }}
           configMap:
