@@ -14,3 +14,4 @@
 - Move image pull secrets to global section
 - Introduce more detailed webhook configuration option
 - Add namespace override
+- Reduce `cpuLimitRatio` default value to 1 for a more predictable CPU count seen by HiveMQ.

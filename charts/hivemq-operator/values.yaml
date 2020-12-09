@@ -133,7 +133,7 @@ hivemq:
   # Secrets to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
   #- name: hivemq-license
   #  path: /opt/hivemq/license
-  cpuLimitRatio: "2"
+  cpuLimitRatio: "1"
   memoryLimitRatio: "1"
   ephemeralStorageLimitRatio: "1"
   affinity: |

@@ -109,15 +109,15 @@ spec:
             - name: JAVA_OPTS
               value: "{{ spec.javaOptions }}"
             - name: HIVEMQ_CLUSTER_PORT
-              value: {{ util:getPort(spec, "cluster").port }}
+              value: "{{ util:getPort(spec, "cluster").port }}"
             - name: HIVEMQ_MQTT_PORT
-              value: {{ util:getPort(spec, "mqtt").port }}
+              value: "{{ util:getPort(spec, "mqtt").port }}"
             - name: HIVEMQ_CONTROL_CENTER_PORT
-              value: {{ util:getPort(spec, "cc").port }}
+              value: "{{ util:getPort(spec, "cc").port }}"
             - name: HIVEMQ_REST_API_PORT
-              value: {{ util:getPort(spec, "api").port }}
+              value: "{{ util:getPort(spec, "api").port }}"
             - name: HIVEMQ_REST_API_ENABLED
-              value: {{ util:getPort(spec, "api").port != null }}
+              value: "{{ util:getPort(spec, "api").port != null }}"
             - name: HIVEMQ_CLUSTER_REPLICA_COUNT
               value: "{{ spec.clusterReplicaCount }}"
             - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
