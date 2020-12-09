@@ -25,7 +25,7 @@ spec:
       labels:
         app: "hivemq"
         hivemq-cluster: "{{ spec.name }}"
-        hivemq.com/node-offline: false
+        hivemq.com/node-offline: "false"
     spec:
       initContainers:
       - name: "init-shared"

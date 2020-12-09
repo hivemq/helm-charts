@@ -17,6 +17,7 @@ metadata:
     uid: "{{ spec.metadata.uid }}"
 spec:
   serviceName: hivemq-{{ spec.name }}-cluster
+  replicas: {{ spec.nodeCount }}
   selector:
     matchLabels:
       app: "hivemq"
@@ -26,7 +27,7 @@ spec:
       labels:
         app: "hivemq"
         hivemq-cluster: "{{ spec.name }}"
-        hivemq.com/node-offline: false
+        hivemq.com/node-offline: "false"
     spec:
       initContainers:
       - name: "init-shared"
