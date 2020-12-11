@@ -15,7 +15,7 @@ spec:
   imagePullPolicy: {{ .Values.hivemq.imagePullPolicy }}
   {{- with .Values.global.rbac.imagePullSecrets }}
   imagePullSecrets:
-  {{- range .Values.global.rbac.imagePullSecrets }}
+  {{- range . }}
   - {{ .name | quote }}
   {{- end }}
   {{- end }}
