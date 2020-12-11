@@ -240,12 +240,11 @@ hivemq:
         <cluster>
             <enabled>true</enabled>
             <transport>
-                <udp>
+                <tcp>
                     <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
                     <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
-                    <multicast-enabled>false</multicast-enabled>
                     <enabled>true</enabled>
-                </udp>
+                </tcp>
             </transport>
             <discovery>
                 <extension>

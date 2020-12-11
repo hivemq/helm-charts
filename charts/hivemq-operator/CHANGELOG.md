@@ -15,3 +15,4 @@
 - Introduce more detailed webhook configuration option
 - Add namespace override
 - Reduce `cpuLimitRatio` default value to 1 for a more predictable CPU count seen by HiveMQ.
+- Changed default transport type to TCP. Note that if you are upgrading, you must set the transport explicitly to UDP or re-create (backup, uninstall, install) your cluster to switch to TCP transport.
