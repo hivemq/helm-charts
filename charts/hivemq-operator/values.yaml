@@ -39,7 +39,6 @@ operator:
         pullPolicy: IfNotPresent
       resources: {}
       ## Provide a priority class name to the webhook patching job
-      ##
       priorityClassName: ""
       podAnnotations: {}
       nodeSelector: {}
@@ -63,7 +62,7 @@ hivemq:
   # Annotations to apply to the service account
   serviceAccountAnnotations: {}
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
-  image: hivemq/hivemq4:k8s-4.4.3
+  image: hivemq/hivemq4:k8s-4.5.0
   imagePullPolicy: IfNotPresent
   nodeCount: "3"
   cpu: "4"
@@ -243,7 +242,6 @@ hivemq:
                 <tcp>
                     <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
                     <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
-                    <enabled>true</enabled>
                 </tcp>
             </transport>
             <discovery>
