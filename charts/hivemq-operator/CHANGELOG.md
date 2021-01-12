@@ -9,6 +9,7 @@
 - Fix templating of multi-line environment variables
 - Add a default heap dump storage path and volume, to preserve heap dump files after container restarts (requires HiveMQ 4.4.3+)
 - Fix image pull secrets not being used in generated custom resource
+- Add field for adding annotations to the operator service account
 - Improve service monitor naming to exactly match the generated cluster name, for easier correlation when querying metrics
 - Migrate validation hook TLS provisioning to webhook cert generator to make validation hook configuration more reliable
 - Move image pull secrets to global section
