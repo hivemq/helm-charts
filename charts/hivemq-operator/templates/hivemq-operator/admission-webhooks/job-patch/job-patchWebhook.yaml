@@ -1,0 +1,67 @@
+{{- if and .Values.operator.admissionWebhooks.enabled .Values.operator.admissionWebhooks.patch.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  {{ template "hivemq.fullname" . }}-admission-patch
+  namespace: {{ template "hivemq.namespace" . }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app: {{ template "hivemq.name" $ }}-admission-patch
+{{ include "hivemq.labels" $ | indent 4 }}
+spec:
+  {{- if .Capabilities.APIVersions.Has "batch/v1alpha1" }}
+  # Alpha feature since k8s 1.12
+  ttlSecondsAfterFinished: 0
+  {{- end }}
+  template:
+    metadata:
+      name:  {{ template "hivemq.fullname" . }}-admission-patch
+{{- with .Values.operator.admissionWebhooks.patch.podAnnotations }}
+      annotations:
+{{ toYaml .  | indent 8 }}
+{{- end }}
+      labels:
+        app: {{ template "hivemq.name" $ }}-admission-patch
+{{ include "hivemq.labels" $ | indent 8 }}
+    spec:
+      {{- if .Values.operator.admissionWebhooks.patch.priorityClassName }}
+      priorityClassName: {{ .Values.operator.admissionWebhooks.patch.priorityClassName }}
+      {{- end }}
+      containers:
+        - name: patch
+          {{- if .Values.operator.admissionWebhooks.patch.image.sha }}
+          image: {{ .Values.operator.admissionWebhooks.patch.image.repository }}:{{ .Values.operator.admissionWebhooks.patch.image.tag }}@sha256:{{ .Values.operator.admissionWebhooks.patch.image.sha }}
+          {{- else }}
+          image: {{ .Values.operator.admissionWebhooks.patch.image.repository }}:{{ .Values.operator.admissionWebhooks.patch.image.tag }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.operator.admissionWebhooks.patch.image.pullPolicy }}
+          args:
+            - patch
+            - --webhook-name={{ template "hivemq.fullname" . }}-admission
+            - --namespace={{ template "hivemq.namespace" . }}
+            - --patch-mutating=false
+            - --secret-name={{ template "hivemq.fullname" . }}-admission
+            - --patch-failure-policy={{ .Values.operator.admissionWebhooks.failurePolicy }}
+          resources:
+{{ toYaml .Values.operator.admissionWebhooks.patch.resources | indent 12 }}
+      restartPolicy: OnFailure
+      serviceAccountName: {{ template "hivemq.fullname" . }}-admission
+      {{- with .Values.operator.admissionWebhooks.patch.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.operator.admissionWebhooks.patch.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.operator.admissionWebhooks.patch.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      securityContext:
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+{{- end }}

@@ -1,0 +1,20 @@
+{{- if and .Values.operator.admissionWebhooks.enabled .Values.operator.admissionWebhooks.patch.enabled .Values.global.rbac.create  }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name:  {{ template "hivemq.fullname" . }}-admission
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app: {{ include "hivemq.name" . }}-admission
+{{ include "hivemq.labels" $ | indent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "hivemq.fullname" . }}-admission
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "hivemq.fullname" . }}-admission
+    namespace: {{ template "hivemq.namespace" . }}
+{{- end }}

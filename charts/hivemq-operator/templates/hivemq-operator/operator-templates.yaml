@@ -4,4 +4,4 @@ data:
 kind: ConfigMap
 metadata:
   name: "{{ include "hivemq.fullname" . }}-operator-templates"
-  namespace: {{ $.Release.Namespace }}
+  namespace: {{ template "hivemq.namespace" . }}
