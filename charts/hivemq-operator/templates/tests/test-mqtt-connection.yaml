@@ -13,7 +13,7 @@ spec:
           image: eclipse-mosquitto
           env:
             - name: MQTT_ADDRESS
-              value: hivemq-{{ .Release.Name }}-mqtt.{{ .Release.Namespace }}.svc.cluster.local
+              value: hivemq-{{ .Release.Name }}-mqtt.{{ template "hivemq.namespace" . }}.svc.cluster.local
           command: ["sh", "-c"]
           args:
             - |

@@ -10,5 +10,5 @@ roleRef:
   kind: ClusterRole
 subjects:
   - name: "{{ template "hivemq.fullname" . }}-operator"
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ template "hivemq.namespace" . }}
     kind: ServiceAccount

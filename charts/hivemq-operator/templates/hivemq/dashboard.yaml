@@ -6,7 +6,7 @@ metadata:
     grafana_dashboard: "1"
     {{- include "hivemq.labels" . | nindent 4 }}
   name: {{ .Chart.Name }}-{{ .Release.Name }}-dashboard
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ template "hivemq.namespace" . }}
 data:
   hivemq.json: |-
     {

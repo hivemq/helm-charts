@@ -12,5 +12,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.hivemq.serviceAccountName }}
-    namespace: {{ $.Release.Namespace }}
+    namespace: {{ template "hivemq.namespace" . }}
 {{- end }}

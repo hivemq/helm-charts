@@ -6,7 +6,7 @@ metadata:
     {% if spec.metadata.labels.containsKey("app.kubernetes.io/instance") %}
     release: {{ spec.metadata.labels.get("app.kubernetes.io/instance") }}
     {% endif %}
-  name: {{ spec.name }}-monitoring-sm
+  name: {{ spec.name }}
   ownerReferences:
   - apiVersion: hivemq.com/v1
     kind: HiveMQCluster
@@ -16,6 +16,7 @@ metadata:
 spec:
   endpoints:
     - port: metrics
+  jobLabel: hivemq-cluster
   selector:
     matchLabels:
       hivemq-cluster: {{ spec.name }}
