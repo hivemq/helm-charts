@@ -4,7 +4,7 @@
 
 This repository contains HiveMQ Helm charts.
 
-== Usage
+## Usage
 
 **Quick start**
 
@@ -20,12 +20,12 @@ The result of this command is a running HiveMQ cluster on your Kubernetes cluste
 
 See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/4.5/kubernetes-operator/deploying.html#helm-chart) for more detailed instructions on how to use the helm chart.
 
-== Contributing
+## Contributing
 
 If you want to contribute to HiveMQ Maven Extension Archetype, see the link:CONTRIBUTING.md[contribution guidelines].
 
 **NOTE** Every PR to master must imply an increased minor version of the chart to indicate that the templating has changed.
 
-== License
+## License
 
 HiveMQ Maven Extension Archetype is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
