@@ -22,10 +22,10 @@ See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/latest/kuber
 
 ## Contributing
 
-If you want to contribute to HiveMQ Helm Charts, see the link:CONTRIBUTING.md[contribution guidelines].
+If you want to contribute to HiveMQ Helm Charts, see the [contribution guidelines](CONTRIBUTING.md).
 
 **NOTE** Every PR to master must imply an increased minor version of the chart to indicate that the templating has changed.
 
 ## License
 
-HiveMQ Helm Charts is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
+HiveMQ Helm Charts is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found [here](LICENSE).
