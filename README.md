@@ -18,14 +18,14 @@ Install the HiveMQ Helm Chart:
 
 The result of this command is a running HiveMQ cluster on your Kubernetes cluster that is maintained and managed by the HiveMQ Kubernetes Operator.
 
-See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/4.5/kubernetes-operator/deploying.html#helm-chart) for more detailed instructions on how to use the helm chart.
+See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/latest/kubernetes-operator/deploying.html#helm-chart) for more detailed instructions on how to use the helm chart.
 
 ## Contributing
 
-If you want to contribute to HiveMQ Maven Extension Archetype, see the link:CONTRIBUTING.md[contribution guidelines].
+If you want to contribute to HiveMQ Helm Charts, see the link:CONTRIBUTING.md[contribution guidelines].
 
 **NOTE** Every PR to master must imply an increased minor version of the chart to indicate that the templating has changed.
 
 ## License
 
-HiveMQ Maven Extension Archetype is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
+HiveMQ Helm Charts is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
