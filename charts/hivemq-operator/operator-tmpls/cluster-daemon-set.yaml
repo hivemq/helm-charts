@@ -256,7 +256,7 @@ spec:
             - name: HIVEMQ_RETAINED_MESSAGES_ENABLED
               value: "{{ spec.mqtt.retainedMessagesEnabled }}"
             - name: HIVEMQ_QUEUED_MESSAGE_MAX_QUEUE_SIZE
-              value: "{{ spec.mqtt.queuedMessageMaxQueueSize }}"
+              value: "{{ spec.mqtt.queuedMessagesMaxQueueSize }}"
             - name: HIVEMQ_QUEUED_MESSAGE_STRATEGY
               value: "{{ spec.mqtt.queuedMessageStrategy }}"
             - name: HIVEMQ_ALLOW_EMPTY_CLIENT_ID
