@@ -1,3 +1,5 @@
+---
+# Source: hivemq-operator/templates/hivemq-operator/operator-service.yaml
 kind: Service
 apiVersion: v1
 metadata:
@@ -7,7 +9,7 @@ metadata:
     app: hivemq-operator
 spec:
   selector:
-    operator: hivemq-operator
+    operator: "hivemq-operator"
   ports:
     - name: https
       port: 443

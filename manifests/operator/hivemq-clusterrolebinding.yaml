@@ -1,0 +1,16 @@
+---
+# Source: hivemq-operator/templates/global/hivemq-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "hivemq-operator-hivemq-psp"
+  labels:
+    app: hivemq-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hivemq-operator-hivemq-psp
+subjects:
+  - kind: ServiceAccount
+    name: hivemq
+    namespace: hivemq

@@ -1,3 +1,5 @@
+---
+# Source: hivemq-operator/templates/hivemq-operator/operator-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,11 +15,11 @@ spec:
   template:
     metadata:
       labels:
-        app: hivemq-operator
-        operator: hivemq-operator
+        app: "hivemq-operator"
+        operator: "hivemq-operator"
     spec:
       containers:
-        - image: hivemq/hivemq-operator:0.2.0
+        - image: hivemq/hivemq-operator:4.5.0
           imagePullPolicy: IfNotPresent
           name: operator
           env:
@@ -25,11 +27,13 @@ spec:
               value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30"
             - name: OPERATOR_LOG_LEVEL
               value: INFO
+            - name: CREATE_CRD
+              value: "false"
             - name: MICRONAUT_SSL_ENABLED
-              value: "true"
+              value: "false"
             - name: SSL_FQDN
               value: "hivemq-operator.hivemq.svc"
-          resources:
+          resources: 
             limits:
               cpu: 800m
               memory: 512M
@@ -39,9 +43,16 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
+          volumeMounts:
+            - mountPath: /templates
+              name: templates
           ports:
             - name: https
               containerPort: 443
               protocol: TCP
       restartPolicy: Always
-      serviceAccountName: hivemq-operator
+      serviceAccountName: "hivemq-operator"
+      volumes:
+        - name: templates
+          configMap:
+            name: "hivemq-operator-templates"
