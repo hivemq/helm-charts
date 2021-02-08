@@ -1,4 +1,8 @@
-# 4.5.0
+# chart 0.8.1
+
+- fix templating of the image pull secrets into the HiveMQ ServiceAccount
+
+# 4.5.0 (chart 0.8.0)
 
 - BREAKING: Changed default transport type to TCP. Note that if you are upgrading, you must set the transport explicitly to UDP or re-create (backup, uninstall, install) your cluster to switch to TCP transport.
 - Reduce `cpuLimitRatio` default value to 1 for a more predictable CPU count seen by HiveMQ.

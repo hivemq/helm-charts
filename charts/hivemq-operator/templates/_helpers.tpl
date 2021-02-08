@@ -45,12 +45,16 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "hivemq.labels" -}}
+{{- if .Values.generateLabels -}}
 helm.sh/chart: {{ include "hivemq.chart" . }}
 {{ include "hivemq.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- else -}}
+app: hivemq-operator
+{{- end -}}
 {{- end -}}
 
 {{/*

@@ -1,7 +1,9 @@
+---
+# Source: hivemq-operator/templates/hivemq-operator/operator-cluster-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: hivemq-operator
+  name: "hivemq-operator"
   namespace: hivemq
   labels:
     app: hivemq-operator
