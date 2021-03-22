@@ -24,4 +24,4 @@ This will install HiveMQ with one commander and three agents by default.
 helm upgrade --install swarm hivemq/hivemq-swarm
 ```
 
-For more information on configuring HiveMQ Swarm and advanced usage, visit [HiveMQ Swarm documentation](https://www.hivemq.com/docs/swarm/)
+For more information on configuring HiveMQ Swarm and advanced usage, visit [HiveMQ Swarm documentation](https://www.hivemq.com/docs/swarm/).
