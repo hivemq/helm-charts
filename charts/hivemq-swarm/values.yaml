@@ -39,28 +39,6 @@ commander:
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node
   ##
   affinity: {}
-    # podAntiAffinity:
-    #   preferredDuringSchedulingIgnoredDuringExecution:
-    #     # Try not to co-locate with other swarm instances
-    #     - weight: 50
-    #       podAffinityTerm:
-    #         labelSelector:
-    #           matchExpressions:
-    #             - key: app.kubernetes.io/instance
-    #               operator: In
-    #               values:
-    #                 - ${LABEL}
-    #         topologyKey: "kubernetes.io/hostname"
-    #     # Try not to co-locate with HiveMQ nodes
-    #     - weight: 60
-    #       podAffinityTerm:
-    #         labelSelector:
-    #           matchExpressions:
-    #             - key: app
-    #               operator: In
-    #               values:
-    #                 - hivemq
-    #         topologyKey: "kubernetes.io/hostname"
 
   ## Add environment variables to the commander
   ##
@@ -93,6 +71,16 @@ commander:
   ##
   volumeClaimTemplates: [ ]
 
+  ## Node labels for pod assignment. Evaluated as a template.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: { }
+
+  ## Pod annotations
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: { }
+
 ## HiveMQ Swarm Agents configuration
 ##
 agents:
@@ -123,29 +111,9 @@ agents:
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node
   ##
   affinity: {}
-    # podAntiAffinity:
-    #   preferredDuringSchedulingIgnoredDuringExecution:
-    #     # Try not to co-locate with other swarm instances
-    #     - weight: 50
-    #       podAffinityTerm:
-    #         labelSelector:
-    #           matchExpressions:
-    #             - key: swarm-task
-    #               operator: In
-    #               values:
-    #                 - ${LABEL}
-    #         topologyKey: "kubernetes.io/hostname"
-    #     # Try not to co-locate with HiveMQ nodes
-    #     - weight: 60
-    #       podAffinityTerm:
-    #         labelSelector:
-    #           matchExpressions:
-    #             - key: app
-    #               operator: In
-    #               values:
-    #                 - hivemq
-    #         topologyKey: "kubernetes.io/hostname"
-  # Add environment variables for all agents
+
+  ## Add environment variables to the commander
+  ##
   env: [ ]
 
   ## Additional volumes for the HiveMQ Swarm agent pod.
@@ -153,6 +121,16 @@ agents:
 
   ## Extra volume mounts that will be added to the swarm agent container
   extraVolumeMounts: [ ]
+
+  ## Node labels for pod assignment. Evaluated as a template.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: { }
+
+  ## Pod annotations
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: { }
 
 ## Monitoring configuration
 ##
@@ -175,11 +153,6 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
-## Pod annotations
-## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-##
-podAnnotations: {}
 
 ## Configure the service to access toe HiveMQ Swarm commander
 ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
@@ -213,10 +186,6 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-## Node labels for pod assignment. Evaluated as a template.
-## ref: https://kubernetes.io/docs/user-guide/node-selection/
-##
-nodeSelector: {}
 
 ## Tolerations for pod assignment. Evaluated as a template.
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
