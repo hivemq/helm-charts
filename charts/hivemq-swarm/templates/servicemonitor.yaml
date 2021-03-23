@@ -8,6 +8,8 @@ metadata:
   name: {{ include "hivemq-swarm.fullname" . }}
   {{- if .Values.monitoring.serviceMonitor.namespace }}
   namespace: {{ .Values.monitoring.serviceMonitor.namespace }}
+  { { - else } }
+  namespace: { { template "hivemq-swarm.namespace" . } }
   {{- end }}
 spec:
   endpoints:

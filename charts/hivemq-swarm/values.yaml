@@ -157,7 +157,7 @@ agents:
 ## Monitoring configuration
 ##
 monitoring:
-  # Deploy ServiceMonitor for Prometheus Operator and enable Prometheus
+  # Deploy ServiceMonitor for Prometheus Operator and Configmap for Grafana Dashboard
   enabled: false
   # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
   dedicated: false

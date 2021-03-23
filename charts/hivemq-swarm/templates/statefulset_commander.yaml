@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "hivemq-swarm.fullname" . }}-commander
+  namespace: {{ template "hivemq-swarm.namespace" . }}
   labels:
   {{- include "hivemq-swarm.labels" . | nindent 4 }}
 spec:
