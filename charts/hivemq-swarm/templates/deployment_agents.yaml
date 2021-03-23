@@ -50,7 +50,7 @@ spec:
             - name: LOG_LEVEL
               value: {{ .Values.agents.logLevel }}
             - name: JAVA_TOOL_OPTIONS
-              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
+              value: {{ .Values.agents.javaOpts }}
               {{- if .Values.agents.env }}
               {{ toYaml .Values.agents.env | nindent 12 }}
               {{- end }}

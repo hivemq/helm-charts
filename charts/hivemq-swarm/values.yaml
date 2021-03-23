@@ -81,6 +81,10 @@ commander:
   ##
   podAnnotations: { }
 
+  ## JVM options to start the commander with
+  ##
+  javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
+
 ## HiveMQ Swarm Agents configuration
 ##
 agents:
@@ -131,6 +135,10 @@ agents:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: { }
+
+  ## JVM options to start the agents with
+  ##
+  javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
 
 ## Monitoring configuration
 ##
