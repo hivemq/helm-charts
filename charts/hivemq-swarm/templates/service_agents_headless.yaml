@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hivemq-swarm.fullname" . }}-agents
+  labels:
+    hivemq-swarm.io/role: agent
+    {{- include "hivemq-swarm.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 3881
+      targetPort: agent-transport
+      protocol: TCP
+      name: agent-transport
+    - port: 8181
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  publishNotReadyAddresses: true
+  selector:
+    hivemq-swarm.io/role: agent
+    {{- include "hivemq-swarm.selectorLabels" . | nindent 4 }}
