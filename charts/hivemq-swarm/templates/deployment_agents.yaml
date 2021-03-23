@@ -9,7 +9,7 @@ spec:
   replicas: {{ .Values.agents.agentCount }}
   selector:
     matchLabels:
-      hivemq-swarm.io/role: agent
+      hivemq.com/swarm-role: agent
       {{- include "hivemq-swarm.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        hivemq-swarm.io/role: agent
+        hivemq.com/swarm-role: agent
         {{- include "hivemq-swarm.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -68,12 +68,12 @@ spec:
             requests:
               cpu: {{ .Values.agents.resources.cpu }}
               memory: {{ .Values.agents.resources.memory }}
-      {{- if .Values.agents.extraVolumeMounts }}
+          {{- if .Values.agents.extraVolumeMounts }}
           volumeMounts:
             {{ toYaml .Values.agents.extraVolumeMounts | nindent 12}}
-      {{- end }}
+          {{- end }}
 
-      {{- if .Values.agents.extraVolumeMounts }}
+      {{- if .Values.agents.extraVolumes }}
       volumes:
         {{ toYaml .Values.agents.extraVolumes | nindent 8}}
       {{- end }}

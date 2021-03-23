@@ -10,7 +10,7 @@ spec:
   serviceName: {{ include "hivemq-swarm.fullname" . }}-api
   selector:
     matchLabels:
-      hivemq-swarm.io/role: commander
+      hivemq.com/swarm-role: commander
   {{- include "hivemq-swarm.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -19,7 +19,7 @@ spec:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        hivemq-swarm.io/role: commander
+        hivemq.com/swarm-role: commander
         {{- include "hivemq-swarm.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}

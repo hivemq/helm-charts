@@ -4,7 +4,7 @@ metadata:
   name: {{ include "hivemq-swarm.fullname" . }}-agents
   namespace: {{ template "hivemq-swarm.namespace" . }}
   labels:
-    hivemq-swarm.io/role: agent
+    hivemq.com/swarm-role: agent
     {{- include "hivemq-swarm.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
@@ -20,5 +20,5 @@ spec:
       name: metrics
   publishNotReadyAddresses: true
   selector:
-    hivemq-swarm.io/role: agent
+    hivemq.com/swarm-role: agent
     {{- include "hivemq-swarm.selectorLabels" . | nindent 4 }}

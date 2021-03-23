@@ -4,7 +4,7 @@ metadata:
   name: {{ include "hivemq-swarm.fullname" . }}-api
   namespace: {{ template "hivemq-swarm.namespace" . }}
   labels:
-    hivemq-swarm.io/role: commander
+    hivemq.com/swarm-role: commander
     {{- include "hivemq-swarm.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
@@ -17,5 +17,5 @@ spec:
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}
   selector:
-    hivemq-swarm.io/role: commander
+    hivemq.com/swarm-role: commander
     {{- include "hivemq-swarm.selectorLabels" . | nindent 4 }}
