@@ -1,4 +1,3 @@
-
 # HiveMQ Swarm
 
 [HiveMQ Swarm](https://www.hivemq.com/docs/swarm/) is an advanced IoT testing and simulation tool that gives you the load and reliability testing ability you need to determine the resilience and capacity of your complete IoT system.
