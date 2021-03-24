@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hivemq-swarm.fullname" . }}-agent
+  namespace: {{ template "hivemq-swarm.namespace" . }}
+  labels:
+    {{- include "hivemq-swarm.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.agents.agentCount }}
+  selector:
+    matchLabels:
+      hivemq.com/swarm-role: agent
+      {{- include "hivemq-swarm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.commander.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        hivemq.com/swarm-role: agent
+        {{- include "hivemq-swarm.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hivemq-swarm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.agents.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-agent
+          securityContext:
+            {{- toYaml .Values.agents.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SWARM_AGENT_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: SWARM_AGENT_BIND_PORT
+              value: "3881"
+            - name: SWARM_REST_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ADDRESS
+              value: "0.0.0.0"
+            - name: SWARM_REST_LISTENER_0_HTTP_PORT
+              value: "8181"
+            - name: LOG_LEVEL
+              value: {{ .Values.agents.logLevel }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ .Values.agents.javaOpts }}
+              {{- if .Values.agents.env }}
+              {{ toYaml .Values.agents.env | nindent 12 }}
+              {{- end }}
+          ports:
+            - name: metrics
+              containerPort: 8181
+              protocol: TCP
+            - name: agent-transport
+              containerPort: 3881
+              protocol: TCP
+          resources:
+            limits:
+              cpu: {{ .Values.agents.resources.cpu }}
+              memory: {{ .Values.agents.resources.memory }}
+            requests:
+              cpu: {{ .Values.agents.resources.cpu }}
+              memory: {{ .Values.agents.resources.memory }}
+          {{- if .Values.agents.extraVolumeMounts }}
+          volumeMounts:
+            {{ toYaml .Values.agents.extraVolumeMounts | nindent 12}}
+          {{- end }}
+
+      {{- if .Values.agents.extraVolumes }}
+      volumes:
+        {{ toYaml .Values.agents.extraVolumes | nindent 8}}
+      {{- end }}
+      {{- with .Values.commander.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.agents.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

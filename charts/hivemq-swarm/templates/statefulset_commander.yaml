@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hivemq-swarm.fullname" . }}-commander
+  namespace: {{ template "hivemq-swarm.namespace" . }}
+  labels:
+  {{- include "hivemq-swarm.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ include "hivemq-swarm.fullname" . }}-api
+  selector:
+    matchLabels:
+      hivemq.com/swarm-role: commander
+  {{- include "hivemq-swarm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.agents.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        hivemq.com/swarm-role: commander
+        {{- include "hivemq-swarm.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hivemq-swarm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.commander.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-commander
+          securityContext:
+            {{- toYaml .Values.commander.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SWARM_COMMANDER_MODE
+              value: "rest"
+            - name: SWARM_REST_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ADDRESS
+              value: "0.0.0.0"
+            - name: SWARM_REST_LISTENER_0_HTTP_PORT
+              value: "8080"
+            - name: SWARM_DNS_DISCOVERY_ADDRESS
+              value: "{{ include "hivemq-swarm.fullname" . }}-agents.{{.Release.Namespace}}.svc.{{.Values.clusterDomain}}"
+            - name: SWARM_DNS_DISCOVERY_AGENT_COUNT
+              value: {{ .Values.agents.agentCount | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.commander.logLevel }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ .Values.commander.javaOpts }}
+              {{- if .Values.commander.env }}
+              {{ toYaml .Values.commander.env | nindent 12 }}
+              {{- end }}
+          ports:
+            - name: api
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /commander
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /commander
+              port: api
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            limits:
+              cpu: {{ .Values.commander.resources.cpu }}
+              memory: {{ .Values.commander.resources.memory }}
+            requests:
+              cpu: {{ .Values.commander.resources.cpu }}
+              memory: {{ .Values.commander.resources.memory }}
+      {{- if or .Values.license .Values.commander.extraVolumeMounts }}
+          volumeMounts:
+          {{- if .Values.license }}
+            - name: license
+              mountPath: /license
+              readOnly: true
+          {{- end }}
+          {{- if .Values.commander.extraVolumeMounts }}
+            {{ toYaml .Values.commander.extraVolumeMounts | nindent 12}}
+          {{- end }}
+      {{- end }}
+      {{- if or .Values.license .Values.commander.extraVolumeMounts }}
+      volumes:
+        {{- if .Values.license }}
+        - name: license
+          configMap:
+            name: {{ include "hivemq-swarm.fullname" . }}-license
+        {{- end }}
+        {{- if .Values.commander.extraVolumes }}
+          {{ toYaml .Values.commander.extraVolumes | nindent 8}}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.agents.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.commander.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+  {{- end }}
+  {{- if .Values.commander.volumeClaimTemplates }}
+  volumeClaimTemplates:
+  {{ toYaml .Values.commander.volumeClaimTemplates | nindent 4 }}
+  {{- end }}
