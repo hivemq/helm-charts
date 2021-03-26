@@ -1,3 +1,15 @@
+# chart 0.8.4
+
+- Fix custom env templating by using correct YAML block scalar string syntax
+
+# chart 0.8.3
+
+- Regular version bump through CI
+
+# chart 0.8.2
+
+- Regular version bump through CI
+
 # chart 0.8.1
 
 - fix templating of the image pull secrets into the HiveMQ ServiceAccount
