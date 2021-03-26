@@ -248,7 +248,7 @@ spec:
           value: /opt/hivemq/dumps
         {% for env in spec.env %}
         - name: {{ env.name }}
-          value: |
+          value: |-
             {{ util:indentCustom(12, 0, env.value) }}
         {% endfor %}
         image: "{{ util:getTaggedImage(spec) }}"
