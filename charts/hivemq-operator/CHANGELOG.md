@@ -1,3 +1,7 @@
+# chart 0.8.5
+
+- Fix heap dump path environment variable. Heap dumps are now properly saved to `/opt/hivemq/dumps`.
+
 # chart 0.8.4
 
 - Fix custom env templating by using correct YAML block scalar string syntax

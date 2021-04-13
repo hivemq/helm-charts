@@ -244,7 +244,7 @@ spec:
         - name: HIVEMQ_REST_API_CONFIGURATION
           value: |
             {{ util:indentCustom(12, 0, spec.restApiConfiguration) }}
-        - name: HIVEMQ_HEAPDUMP_HOME
+        - name: HIVEMQ_HEAPDUMP_FOLDER
           value: /opt/hivemq/dumps
         {% for env in spec.env %}
         - name: {{ env.name }}
