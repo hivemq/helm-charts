@@ -2,6 +2,28 @@ apiVersion: v1
 entries:
   hivemq-operator:
   - apiVersion: v2
+    appVersion: 4.5.3
+    created: "2021-04-13T12:26:39.522447624Z"
+    dependencies:
+    - condition: monitoring.dedicated, monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 11.*
+    description: Operator for the HiveMQ MQTT broker
+    digest: 743a0e59499168cfe2aeb865651ee0aca1cdc9085f6ae8da28e26ce3451b6cea
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    name: hivemq-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-0.86/hivemq-operator-0.86.tgz
+    version: "0.86"
+  - apiVersion: v2
     appVersion: 4.5.2
     created: "2021-04-13T09:15:01.757622751Z"
     dependencies:
