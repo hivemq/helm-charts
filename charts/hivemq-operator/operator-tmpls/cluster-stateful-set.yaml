@@ -242,23 +242,23 @@ spec:
             periodSeconds: 30
             failureThreshold: 240
           volumeMounts:
-          - name: shared-data
-            mountPath: /hivemq-data
-            readOnly: false
-          - name: conf-override
-            mountPath: /conf-override
-            readOnly: false
-          - name: live-info
-            mountPath: /etc/podinfo
-          - name: backup
-            mountPath: /opt/hivemq/backup
-            readOnly: false
-          - name: log
-            mountPath: /opt/hivemq/log
-            readOnly: false
-          - name: audit
-            mountPath: /opt/hivemq/audit
-            readOnly: false
+            - name: shared-data
+              mountPath: /hivemq-data
+              readOnly: false
+            - name: conf-override
+              mountPath: /conf-override
+              readOnly: false
+            - name: live-info
+              mountPath: /etc/podinfo
+            - name: backup
+              mountPath: /opt/hivemq/backup
+              readOnly: false
+            - name: log
+              mountPath: /opt/hivemq/log
+              readOnly: false
+            - name: audit
+              mountPath: /opt/hivemq/audit
+              readOnly: false
             {% for map in spec.configMaps %}
             - name: {{ map.name }}
               mountPath: {{ util:stringReplace(map.path, "/opt/hivemq/", "/conf-override/") }}
