@@ -1,3 +1,7 @@
+# chart 0.9.3
+
+- Fixed templating of the `queuedMessagesMaxQueueSize` field in the custom resource
+
 # chart 0.9.2
 
 - Fix an issue where the operator would not properly sync the `-dynamic-state` ConfigMap
