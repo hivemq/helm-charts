@@ -47,17 +47,21 @@ spec:
             cpu: "{{ spec.cpu }}"
             memory: "{{ spec.memory }}"
             ephemeral-storage: "{{ spec.ephemeralStorage }}"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          privileged: false
         image: "busybox:latest"
         command: ["/bin/sh", "-c"]
         args:
           - |
-            mkdir -p /opt/hivemq/bin
-            mkdir -p /opt/hivemq/backup
-            mkdir -p /opt/hivemq/extensions
-            mkdir -p /opt/hivemq/conf
-            mkdir -p /opt/hivemq/license
-            cp -r /opt/hivemq/* /conf-override/
-            cp -r /opt/hivemq/* /hivemq-data/
+            mkdir -p /conf-override/bin
+            mkdir -p /conf-override/backup
+            mkdir -p /conf-override/extensions
+            mkdir -p /conf-override/conf
+            mkdir -p /conf-override/license
+            cp -r /conf-override/* /hivemq-data/
         volumeMounts:
         - name: shared-data
           mountPath: /hivemq-data
@@ -107,6 +111,11 @@ spec:
       {% for initContainer in spec.initialization %}
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          privileged: false
         resources:
           limits:
             cpu: "{{ util:getCpuLimit(spec) }}"
@@ -156,14 +165,19 @@ spec:
       serviceAccountName: "{{ spec.serviceAccountName }}"
       {% endif %}
       securityContext:
+        fsGroup: 1001
+        runAsNonRoot: true
+        runAsUser: 1000
         sysctls:
           - name: net.ipv4.ip_local_port_range
             value: "1024 65535"
       containers:
       - name: "hivemq"
         securityContext:
-          privileged: false
+          runAsNonRoot: true
+          runAsUser: 1000
           allowPrivilegeEscalation: false
+          privileged: false
         env:
         - name: HIVEMQ_DNS_DISCOVERY_ADDRESS
           value: "hivemq-{{ spec.name }}-cluster.{{ spec.namespace }}.svc.cluster.local."
@@ -295,6 +309,9 @@ spec:
           - name: audit
             mountPath: /opt/hivemq/audit
             readOnly: false
+          - name: data
+            mountPath: /opt/hivemq/data
+            readOnly: false
           - name: heap-dumps
             mountPath: /opt/hivemq/dumps
             readOnly: false
@@ -321,6 +338,8 @@ spec:
 {{ util:indent(8, util:render(spec, spec.affinity)) }}
       volumes:
         - name: shared-data
+          emptyDir: {}
+        - name: data
           emptyDir: {}
         # For overriding configuration after init containers have finished without overwriting the directory
         - name: conf-override

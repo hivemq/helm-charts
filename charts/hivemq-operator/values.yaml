@@ -4,6 +4,9 @@ global:
     # Create a PodSecurityPolicy, cluster role, role binding and service account for the HiveMQ pods and assign the service account to them.
     pspEnabled: true
     pspAnnotations: {}
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
     allowedCapabilities: []
     # Image pull secrets for operator, hivemq or other images.
     imagePullSecrets: []
