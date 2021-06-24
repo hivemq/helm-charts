@@ -48,10 +48,7 @@ spec:
             memory: "{{ spec.memory }}"
             ephemeral-storage: "{{ spec.ephemeralStorage }}"
         securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         image: "busybox:latest"
         command: ["/bin/sh", "-c"]
         args:
@@ -112,10 +109,7 @@ spec:
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
         securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         resources:
           limits:
             cpu: "{{ util:getCpuLimit(spec) }}"
@@ -165,19 +159,11 @@ spec:
       serviceAccountName: "{{ spec.serviceAccountName }}"
       {% endif %}
       securityContext:
-        fsGroup: 1001
-        runAsNonRoot: true
-        runAsUser: 1000
-        sysctls:
-          - name: net.ipv4.ip_local_port_range
-            value: "1024 65535"
+        {{ util:nindent(8, util:toYaml(spec.podSecurityContext)) }}
       containers:
       - name: "hivemq"
         securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         env:
         - name: HIVEMQ_DNS_DISCOVERY_ADDRESS
           value: "hivemq-{{ spec.name }}-cluster.{{ spec.namespace }}.svc.cluster.local."
@@ -260,11 +246,7 @@ spec:
             {{ util:indentCustom(12, 0, spec.restApiConfiguration) }}
         - name: HIVEMQ_HEAPDUMP_FOLDER
           value: /opt/hivemq/dumps
-        {% for env in spec.env %}
-        - name: {{ env.name }}
-          value: |-
-            {{ util:indentCustom(12, 0, env.value) }}
-        {% endfor %}
+        {{ util:indentCustom(8, 0, util:toYaml(spec.env)) }}
         image: "{{ util:getTaggedImage(spec) }}"
         ports:{% for portInstance in spec.ports %}
         - containerPort: {{ portInstance.port }}
@@ -332,6 +314,9 @@ spec:
           - name: {{ extension.configMap }}
             mountPath: /conf-override/extensions/{{ extension.name }}
           {% endif %}{% endfor %}
+        {% for sidecar in spec.sidecars %}
+      - {{ util:indentCustom(8, 0, sidecar) }}
+        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
       affinity:

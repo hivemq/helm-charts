@@ -16,8 +16,14 @@ metadata:
     name: "{{ spec.name }}"
     uid: "{{ spec.metadata.uid }}"
 spec:
-  serviceName: hivemq-{{ spec.name }}-cluster
   replicas: {{ spec.nodeCount }}
+  serviceName: hivemq-{{ spec.name }}-cluster
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: OnDelete
+  # TODO get this from the CR
+  volumeClaimTemplates:
+    {{ util:nindent(4, util:toYaml(spec.volumeClaimTemplates)) }}
   selector:
     matchLabels:
       app: "hivemq"
@@ -31,17 +37,27 @@ spec:
     spec:
       initContainers:
       - name: "init-shared"
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         image: "busybox:latest"
         command: ["/bin/sh", "-c"]
         args:
           - |
-            mkdir -p /opt/hivemq/bin
-            mkdir -p /opt/hivemq/backup
-            mkdir -p /opt/hivemq/extensions
-            mkdir -p /opt/hivemq/conf
-            mkdir -p /opt/hivemq/license
-            cp -r /opt/hivemq/* /hivemq-data/
-            cp -r /opt/hivemq/* /conf-override/
+            mkdir -p /conf-override/bin
+            mkdir -p /conf-override/backup
+            mkdir -p /conf-override/extensions
+            mkdir -p /conf-override/conf
+            mkdir -p /conf-override/license
+            cp -r /conf-override/* /hivemq-data/
+        securityContext:
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         volumeMounts:
         - name: shared-data
           mountPath: /hivemq-data
@@ -60,6 +76,9 @@ spec:
         - name: audit
           mountPath: /conf-override/audit
           readOnly: false
+        - name: heap-dumps
+          mountPath: /opt/hivemq/dumps
+          readOnly: false
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
         - name: {{ map.name }}
@@ -71,17 +90,40 @@ spec:
         - name: {{ extension.configMap }}
           mountPath: /conf-override/extensions/{{ extension.name }}
         {% endif %}{% endfor %}
+      {{ util:nindent(6, util:toYaml(spec.initContainers)) }}
       - name: dns-wait
         image: hivemq/init-dns-wait:1.0.0
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         volumeMounts:
           - mountPath: /mnt/misc
             name: dns-wait-config
       {% for initContainer in spec.initialization %}
       - name: {{ initContainer.name }}
         image: {{ initContainer.image }}
+        securityContext:
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
+        resources:
+          limits:
+            cpu: "{{ util:getCpuLimit(spec) }}"
+            memory: "{{ util:getMemoryLimit(spec) }}"
+            ephemeral-storage: "{{ util:getStorageLimit(spec) }}"
+          requests:
+            cpu: "{{ spec.cpu }}"
+            memory: "{{ spec.memory }}"
+            ephemeral-storage: "{{ spec.ephemeralStorage }}"
         command: {{ initContainer.command }}
         args: {{ initContainer.args }}
         volumeMounts:
+        - name: data
+          mountPath: /opt/hivemq/data
         - name: shared-data
           mountPath: /hivemq-data
           readOnly: false
@@ -121,29 +163,26 @@ spec:
       serviceAccountName: "{{ spec.serviceAccountName }}"
       {% endif %}
       securityContext:
-        sysctls:
-          - name: net.ipv4.ip_local_port_range
-            value: "1024 65535"
+        {{ util:nindent(8, util:toYaml(spec.podSecurityContext)) }}
       containers:
         - name: "hivemq"
           securityContext:
-            privileged: false
-            allowPrivilegeEscalation: false
+            {{ util:nindent(12, util:toYaml(spec.containerSecurityContext)) }}
           env:
             - name: HIVEMQ_DNS_DISCOVERY_ADDRESS
               value: "hivemq-{{ spec.name }}-cluster.{{ spec.namespace }}.svc.cluster.local."
             - name: JAVA_OPTS
               value: "{{ spec.javaOptions }}"
             - name: HIVEMQ_CLUSTER_PORT
-              value: {{ util:getPort(spec, "cluster").port }}
+              value: "{{ util:getPort(spec, "cluster").port }}"
             - name: HIVEMQ_MQTT_PORT
-              value: {{ util:getPort(spec, "mqtt").port }}
+              value: "{{ util:getPort(spec, "mqtt").port }}"
             - name: HIVEMQ_CONTROL_CENTER_PORT
-              value: {{ util:getPort(spec, "cc").port }}
+              value: "{{ util:getPort(spec, "cc").port }}"
             - name: HIVEMQ_REST_API_PORT
-              value: {{ util:getPort(spec, "api").port }}
+              value: "{{ util:getPort(spec, "api").port }}"
             - name: HIVEMQ_REST_API_ENABLED
-              value: {{ util:getPort(spec, "api").port != null }}
+              value: "{{ util:getPort(spec, "api").port != null }}"
             - name: HIVEMQ_CLUSTER_REPLICA_COUNT
               value: "{{ spec.clusterReplicaCount }}"
             - name: HIVEMQ_CLUSTER_OVERLOAD_PROTECTION
@@ -200,25 +239,22 @@ spec:
               value: "{{ spec.security.allowRequestProblemInformation }}"
             - name: HIVEMQ_ENABLE_PROMETHEUS
               value: "{{ spec.monitoring.enablePrometheus }}"
-
             - name: HIVEMQ_CONFIG_OVERRIDE
               value: |
-{{ util:indent(15, spec.configOverride) }}
+                {{ util:nindent(16, spec.configOverride) }}
             - name: HIVEMQ_LISTENER_CONFIGURATION
               value: |
-{{ util:indent(15, spec.listenerConfiguration) }}
+                {{ util:nindent(16, spec.listenerConfiguration) }}
             - name: HIVEMQ_REST_API_CONFIGURATION
               value: |
-{{ util:indent(15, spec.restApiConfiguration) }}
-              {% for env in spec.env %}
-            - name: {{ env.name }}
-              value: |
-                {{ util:indentCustom(15, 0, env.value) }}
-              {% endfor %}
+                {{ util:nindent(16, spec.restApiConfiguration) }}
+            - name: HIVEMQ_HEAPDUMP_HOME
+              value: /opt/hivemq/dumps
+            {{ util:nindent(12, util:toYaml(spec.env)) }}
           image: "{{ util:getTaggedImage(spec) }}"
           ports:{% for portInstance in spec.ports %}
-            - containerPort: {{ portInstance.port }}
-              name: {{ portInstance.name }}{% endfor %}
+          - containerPort: {{ portInstance.port }}
+            name: {{ portInstance.name }}{% endfor %}
           imagePullPolicy: "{{ spec.imagePullPolicy }}"
           resources:
             limits:
@@ -242,26 +278,33 @@ spec:
             periodSeconds: 30
             failureThreshold: 240
           volumeMounts:
-          - name: shared-data
-            mountPath: /hivemq-data
-            readOnly: false
-          - name: conf-override
-            mountPath: /conf-override
-            readOnly: false
-          - name: live-info
-            mountPath: /etc/podinfo
-          - name: backup
-            mountPath: /opt/hivemq/backup
-            readOnly: false
-          - name: log
-            mountPath: /opt/hivemq/log
-            readOnly: false
-          - name: audit
-            mountPath: /opt/hivemq/audit
-            readOnly: false
+            - name: data
+              mountPath: /opt/hivemq/data
+            - name: shared-data
+              mountPath: /hivemq-data
+              readOnly: false
+            - name: conf-override
+              mountPath: /conf-override
+              readOnly: false
+            - name: live-info
+              mountPath: /etc/podinfo
+            - name: backup
+              mountPath: /opt/hivemq/backup
+              readOnly: false
+            - name: log
+              mountPath: /opt/hivemq/log
+              readOnly: false
+            - name: audit
+              mountPath: /opt/hivemq/audit
+              readOnly: false
+            - name: heap-dumps
+              mountPath: /opt/hivemq/dumps
+              readOnly: false
             {% for map in spec.configMaps %}
+            {% if map.path != "none" %}
             - name: {{ map.name }}
               mountPath: {{ util:stringReplace(map.path, "/opt/hivemq/", "/conf-override/") }}
+            {% endif %}
             {% endfor %}
             {% for extension in spec.extensions %}
             {% if extension.configMap != null %}
@@ -269,13 +312,18 @@ spec:
               mountPath: /conf-override/extensions/{{ extension.name }}
             {% endif %}{% endfor %}
             {% for secret in spec.secrets %}
-            {% if map.path != "none" %}
+            {% if secret.path != "none" %}
             - name: {{ secret.name }}
               mountPath: {{ util:stringReplace(secret.path, "/opt/hivemq/", "/conf-override/") }}
             {% endif %}
             {% endfor %}
+        {% for sidecar in spec.sidecars %}
+        - {{ util:nindent(8, sidecar) }}
+        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
+      affinity:
+        {{ util:nindent(8, util:render(spec, spec.affinity)) }}
       volumes:
         - name: shared-data
           emptyDir: {}
@@ -287,7 +335,9 @@ spec:
         - name: log
           emptyDir: {}
         - name: audit
-          emptyDir: { }
+          emptyDir: {}
+        - name: heap-dumps
+          emptyDir: {}
         - name: live-info
           configMap:
             name: hivemq-cluster-{{ spec.name }}-dynamic-state

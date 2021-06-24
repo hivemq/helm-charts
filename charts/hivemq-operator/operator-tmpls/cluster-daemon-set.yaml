@@ -31,6 +31,8 @@ spec:
       - name: "init-shared"
         image: "busybox:latest"
         command: ["/bin/sh", "-c"]
+        securityContext:
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         args:
           - |
             mkdir -p /opt/hivemq/bin
@@ -72,6 +74,8 @@ spec:
         image: {{ initContainer.image }}
         command: {{ initContainer.command }}
         args: {{ initContainer.args }}
+        securityContext:
+          {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         volumeMounts:
         {% for map in spec.configMaps %}
         {% if map.path != "none" %}
@@ -95,14 +99,11 @@ spec:
       serviceAccountName: "{{ spec.serviceAccountName }}"
       {% endif %}
       securityContext:
-        sysctls:
-          - name: net.ipv4.ip_local_port_range
-            value: "1024 65535"
+        {{ util:nindent(8, util:toYaml(spec.podSecurityContext)) }}
       containers:
         - name: "hivemq"
           securityContext:
-            privileged: false
-            allowPrivilegeEscalation: false
+            {{ util:nindent(12, util:toYaml(spec.containerSecurityContext)) }}
           env:
             - name: HIVEMQ_DNS_DISCOVERY_ADDRESS
               value: "hivemq-{{ spec.name }}-cluster.{{ spec.namespace }}.svc.cluster.local."
@@ -183,11 +184,7 @@ spec:
             - name: HIVEMQ_REST_API_CONFIGURATION
               value: |
 {{ util:indent(15, spec.restApiConfiguration) }}
-          {% for env in spec.env %}
-            - name: {{ env.name }}
-              value: |
-                {{ util:indentCustom(15, 0, env.value) }}
-          {% endfor %}
+            {{ util:indentCustom(12, 0, util:toYaml(spec.env)) }}
           image: "{{ util:getTaggedImage(spec) }}"
           ports:{% for portInstance in spec.ports %}
             - containerPort: {{ portInstance.port }}
@@ -247,6 +244,9 @@ spec:
               mountPath: {{ util:stringReplace(secret.path, "/opt/hivemq/", "/conf-override/") }}
             {% endif %}
             {% endfor %}
+        {% for sidecar in spec.sidecars %}
+        - {{ util:indentCustom(8, 0, sidecar) }}
+        {% endfor %}
       # Wait longer for replication tasks
       terminationGracePeriodSeconds: 3600
       volumes:
