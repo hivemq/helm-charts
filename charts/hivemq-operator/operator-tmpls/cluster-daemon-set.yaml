@@ -35,13 +35,16 @@ spec:
           {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         args:
           - |
-            mkdir -p /opt/hivemq/bin
-            mkdir -p /opt/hivemq/backup
-            mkdir -p /opt/hivemq/extensions
-            mkdir -p /opt/hivemq/conf
-            mkdir -p /opt/hivemq/license
-            cp -r /opt/hivemq/* /hivemq-data/
-            cp -r /opt/hivemq/* /conf-override/
+            mkdir -p /conf-override/bin
+            mkdir -p /conf-override/backup
+            mkdir -p /conf-override/extensions
+            mkdir -p /conf-override/conf
+            mkdir -p /conf-override/license
+            mkdir -p /hivemq-data/bin
+            mkdir -p /hivemq-data/backup
+            mkdir -p /hivemq-data/extensions
+            mkdir -p /hivemq-data/conf
+            mkdir -p /hivemq-data/license
         volumeMounts:
         - name: shared-data
           mountPath: /hivemq-data

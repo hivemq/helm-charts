@@ -55,7 +55,11 @@ spec:
             mkdir -p /conf-override/extensions
             mkdir -p /conf-override/conf
             mkdir -p /conf-override/license
-            cp -r /conf-override/* /hivemq-data/
+            mkdir -p /hivemq-data/bin
+            mkdir -p /hivemq-data/backup
+            mkdir -p /hivemq-data/extensions
+            mkdir -p /hivemq-data/conf
+            mkdir -p /hivemq-data/license
         securityContext:
           {{ util:nindent(10, util:toYaml(spec.containerSecurityContext)) }}
         volumeMounts:
