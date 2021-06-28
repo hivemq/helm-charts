@@ -63,7 +63,7 @@ spec:
               description: "Total storage amount for a single node"
               type: "string"
             cpuLimitRatio:
-              description: "Ratio for the CPU upper limit (>=2)"
+              description: "Ratio for the CPU upper limit (>=1)"
               type: "number"
             memoryLimitRatio:
               description: "Ratio for the memory upper limit (>=1)"
@@ -83,6 +83,678 @@ spec:
                 \ the HiveMQ container"
               items:
                 type: "string"
+              type: "array"
+            volumeClaimTemplates:
+              description: "Volume claim templates for the stateful set (if the controller\
+                \ is a STS)"
+              items:
+                description: "PersistentVolumeClaim is a user's request for and claim\
+                  \ to a persistent volume"
+                example:
+                  metadata:
+                    generation: 6
+                    finalizers:
+                      - "finalizers"
+                      - "finalizers"
+                    resourceVersion: "resourceVersion"
+                    annotations:
+                      key: "annotations"
+                    generateName: "generateName"
+                    deletionTimestamp: "2000-01-23T04:56:07.000+00:00"
+                    labels:
+                      key: "labels"
+                    ownerReferences:
+                      - uid: "uid"
+                        controller: true
+                        apiVersion: "apiVersion"
+                        kind: "kind"
+                        name: "name"
+                        blockOwnerDeletion: true
+                      - uid: "uid"
+                        controller: true
+                        apiVersion: "apiVersion"
+                        kind: "kind"
+                        name: "name"
+                        blockOwnerDeletion: true
+                    selfLink: "selfLink"
+                    deletionGracePeriodSeconds: 0
+                    uid: "uid"
+                    managedFields:
+                      - apiVersion: "apiVersion"
+                        fieldsV1: "{}"
+                        manager: "manager"
+                        time: "2000-01-23T04:56:07.000+00:00"
+                        operation: "operation"
+                        fieldsType: "fieldsType"
+                      - apiVersion: "apiVersion"
+                        fieldsV1: "{}"
+                        manager: "manager"
+                        time: "2000-01-23T04:56:07.000+00:00"
+                        operation: "operation"
+                        fieldsType: "fieldsType"
+                    clusterName: "clusterName"
+                    creationTimestamp: "2000-01-23T04:56:07.000+00:00"
+                    name: "name"
+                    namespace: "namespace"
+                  apiVersion: "apiVersion"
+                  kind: "kind"
+                  spec:
+                    storageClassName: "storageClassName"
+                    volumeName: "volumeName"
+                    resources:
+                      requests: {}
+                      limits: {}
+                    selector:
+                      matchExpressions:
+                        - values:
+                            - "values"
+                            - "values"
+                          key: "key"
+                          operator: "operator"
+                        - values:
+                            - "values"
+                            - "values"
+                          key: "key"
+                          operator: "operator"
+                      matchLabels:
+                        key: "matchLabels"
+                    accessModes:
+                      - "accessModes"
+                      - "accessModes"
+                    dataSource:
+                      apiGroup: "apiGroup"
+                      kind: "kind"
+                      name: "name"
+                    volumeMode: "volumeMode"
+                properties:
+                  apiVersion:
+                    description: "APIVersion defines the versioned schema of this\
+                      \ representation of an object. Servers should convert recognized\
+                      \ schemas to the latest internal value, and may reject unrecognized\
+                      \ values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
+                    type: "string"
+                  kind:
+                    description: "Kind is a string value representing the REST resource\
+                      \ this object represents. Servers may infer this from the endpoint\
+                      \ the client submits requests to. Cannot be updated. In CamelCase.\
+                      \ More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+                    type: "string"
+                  metadata:
+                    description: "ObjectMeta is metadata that all persisted resources\
+                      \ must have, which includes all objects users must create."
+                    example:
+                      generation: 6
+                      finalizers:
+                        - "finalizers"
+                        - "finalizers"
+                      resourceVersion: "resourceVersion"
+                      annotations:
+                        key: "annotations"
+                      generateName: "generateName"
+                      deletionTimestamp: "2000-01-23T04:56:07.000+00:00"
+                      labels:
+                        key: "labels"
+                      ownerReferences:
+                        - uid: "uid"
+                          controller: true
+                          apiVersion: "apiVersion"
+                          kind: "kind"
+                          name: "name"
+                          blockOwnerDeletion: true
+                        - uid: "uid"
+                          controller: true
+                          apiVersion: "apiVersion"
+                          kind: "kind"
+                          name: "name"
+                          blockOwnerDeletion: true
+                      selfLink: "selfLink"
+                      deletionGracePeriodSeconds: 0
+                      uid: "uid"
+                      managedFields:
+                        - apiVersion: "apiVersion"
+                          fieldsV1: "{}"
+                          manager: "manager"
+                          time: "2000-01-23T04:56:07.000+00:00"
+                          operation: "operation"
+                          fieldsType: "fieldsType"
+                        - apiVersion: "apiVersion"
+                          fieldsV1: "{}"
+                          manager: "manager"
+                          time: "2000-01-23T04:56:07.000+00:00"
+                          operation: "operation"
+                          fieldsType: "fieldsType"
+                      clusterName: "clusterName"
+                      creationTimestamp: "2000-01-23T04:56:07.000+00:00"
+                      name: "name"
+                      namespace: "namespace"
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: "string"
+                        description: "Annotations is an unstructured key value map\
+                          \ stored with a resource that may be set by external tools\
+                          \ to store and retrieve arbitrary metadata. They are not\
+                          \ queryable and should be preserved when modifying objects.\
+                          \ More info: http://kubernetes.io/docs/user-guide/annotations"
+                        type: "object"
+                      clusterName:
+                        description: "The name of the cluster which the object belongs\
+                          \ to. This is used to distinguish resources with same name\
+                          \ and namespace in different clusters. This field is not\
+                          \ set anywhere right now and apiserver is going to ignore\
+                          \ it if set in create or update request."
+                        type: "string"
+                      creationTimestamp:
+                        description: "CreationTimestamp is a timestamp representing\
+                          \ the server time when this object was created. It is not\
+                          \ guaranteed to be set in happens-before order across separate\
+                          \ operations. Clients may not set this value. It is represented\
+                          \ in RFC3339 form and is in UTC.\n\nPopulated by the system.\
+                          \ Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata"
+                        format: "date-time"
+                        type: "string"
+                      deletionGracePeriodSeconds:
+                        description: "Number of seconds allowed for this object to\
+                          \ gracefully terminate before it will be removed from the\
+                          \ system. Only set when deletionTimestamp is also set. May\
+                          \ only be shortened. Read-only."
+                        format: "int64"
+                        type: "integer"
+                      deletionTimestamp:
+                        description: "DeletionTimestamp is RFC 3339 date and time\
+                          \ at which this resource will be deleted. This field is\
+                          \ set by the server when a graceful deletion is requested\
+                          \ by the user, and is not directly settable by a client.\
+                          \ The resource is expected to be deleted (no longer visible\
+                          \ from resource lists, and not reachable by name) after\
+                          \ the time in this field, once the finalizers list is empty.\
+                          \ As long as the finalizers list contains items, deletion\
+                          \ is blocked. Once the deletionTimestamp is set, this value\
+                          \ may not be unset or be set further into the future, although\
+                          \ it may be shortened or the resource may be deleted prior\
+                          \ to this time. For example, a user may request that a pod\
+                          \ is deleted in 30 seconds. The Kubelet will react by sending\
+                          \ a graceful termination signal to the containers in the\
+                          \ pod. After that 30 seconds, the Kubelet will send a hard\
+                          \ termination signal (SIGKILL) to the container and after\
+                          \ cleanup, remove the pod from the API. In the presence\
+                          \ of network partitions, this object may still exist after\
+                          \ this timestamp, until an administrator or automated process\
+                          \ can determine the resource is fully terminated. If not\
+                          \ set, graceful deletion of the object has not been requested.\n\
+                          \nPopulated by the system when a graceful deletion is requested.\
+                          \ Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata"
+                        format: "date-time"
+                        type: "string"
+                      finalizers:
+                        description: "Must be empty before the object is deleted from\
+                          \ the registry. Each entry is an identifier for the responsible\
+                          \ component that will remove the entry from the list. If\
+                          \ the deletionTimestamp of the object is non-nil, entries\
+                          \ in this list can only be removed. Finalizers may be processed\
+                          \ and removed in any order.  Order is NOT enforced because\
+                          \ it introduces significant risk of stuck finalizers. finalizers\
+                          \ is a shared field, any actor with permission can reorder\
+                          \ it. If the finalizer list is processed in order, then\
+                          \ this can lead to a situation in which the component responsible\
+                          \ for the first finalizer in the list is waiting for a signal\
+                          \ (field value, external system, or other) produced by a\
+                          \ component responsible for a finalizer later in the list,\
+                          \ resulting in a deadlock. Without enforced ordering finalizers\
+                          \ are free to order amongst themselves and are not vulnerable\
+                          \ to ordering changes in the list."
+                        items:
+                          type: "string"
+                        type: "array"
+                      generateName:
+                        description: "GenerateName is an optional prefix, used by\
+                          \ the server, to generate a unique name ONLY IF the Name\
+                          \ field has not been provided. If this field is used, the\
+                          \ name returned to the client will be different than the\
+                          \ name passed. This value will also be combined with a unique\
+                          \ suffix. The provided value has the same validation rules\
+                          \ as the Name field, and may be truncated by the length\
+                          \ of the suffix required to make the value unique on the\
+                          \ server.\n\nIf this field is specified and the generated\
+                          \ name exists, the server will NOT return a 409 - instead,\
+                          \ it will either return 201 Created or 500 with Reason ServerTimeout\
+                          \ indicating a unique name could not be found in the time\
+                          \ allotted, and the client should retry (optionally after\
+                          \ the time indicated in the Retry-After header).\n\nApplied\
+                          \ only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency"
+                        type: "string"
+                      generation:
+                        description: "A sequence number representing a specific generation\
+                          \ of the desired state. Populated by the system. Read-only."
+                        format: "int64"
+                        type: "integer"
+                      labels:
+                        additionalProperties:
+                          type: "string"
+                        description: "Map of string keys and values that can be used\
+                          \ to organize and categorize (scope and select) objects.\
+                          \ May match selectors of replication controllers and services.\
+                          \ More info: http://kubernetes.io/docs/user-guide/labels"
+                        type: "object"
+                      managedFields:
+                        description: "ManagedFields maps workflow-id and version to\
+                          \ the set of fields that are managed by that workflow. This\
+                          \ is mostly for internal housekeeping, and users typically\
+                          \ shouldn't need to set or understand this field. A workflow\
+                          \ can be the user's name, a controller's name, or the name\
+                          \ of a specific apply path like \"ci-cd\". The set of fields\
+                          \ is always in the version that the workflow used when modifying\
+                          \ the object."
+                        items:
+                          description: "ManagedFieldsEntry is a workflow-id, a FieldSet\
+                            \ and the group version of the resource that the fieldset\
+                            \ applies to."
+                          example:
+                            apiVersion: "apiVersion"
+                            fieldsV1: "{}"
+                            manager: "manager"
+                            time: "2000-01-23T04:56:07.000+00:00"
+                            operation: "operation"
+                            fieldsType: "fieldsType"
+                          properties:
+                            apiVersion:
+                              description: "APIVersion defines the version of this\
+                                \ resource that this field set applies to. The format\
+                                \ is \"group/version\" just like the top-level APIVersion\
+                                \ field. It is necessary to track the version of a\
+                                \ field set because it cannot be automatically converted."
+                              type: "string"
+                            fieldsType:
+                              description: "FieldsType is the discriminator for the\
+                                \ different fields format and version. There is currently\
+                                \ only one possible value: \"FieldsV1\""
+                              type: "string"
+                            fieldsV1:
+                              description: "FieldsV1 holds the first JSON version\
+                                \ format as described in the \"FieldsV1\" type."
+                              properties: {}
+                              type: "object"
+                            manager:
+                              description: "Manager is an identifier of the workflow\
+                                \ managing these fields."
+                              type: "string"
+                            operation:
+                              description: "Operation is the type of operation which\
+                                \ lead to this ManagedFieldsEntry being created. The\
+                                \ only valid values for this field are 'Apply' and\
+                                \ 'Update'."
+                              type: "string"
+                            time:
+                              description: "Time is timestamp of when these fields\
+                                \ were set. It should always be empty if Operation\
+                                \ is 'Apply'"
+                              format: "date-time"
+                              type: "string"
+                          type: "object"
+                        type: "array"
+                      name:
+                        description: "Name must be unique within a namespace. Is required\
+                          \ when creating resources, although some resources may allow\
+                          \ a client to request the generation of an appropriate name\
+                          \ automatically. Name is primarily intended for creation\
+                          \ idempotence and configuration definition. Cannot be updated.\
+                          \ More info: http://kubernetes.io/docs/user-guide/identifiers#names"
+                        type: "string"
+                      namespace:
+                        description: "Namespace defines the space within which each\
+                          \ name must be unique. An empty namespace is equivalent\
+                          \ to the \"default\" namespace, but \"default\" is the canonical\
+                          \ representation. Not all objects are required to be scoped\
+                          \ to a namespace - the value of this field for those objects\
+                          \ will be empty.\n\nMust be a DNS_LABEL. Cannot be updated.\
+                          \ More info: http://kubernetes.io/docs/user-guide/namespaces"
+                        type: "string"
+                      ownerReferences:
+                        description: "List of objects depended by this object. If\
+                          \ ALL objects in the list have been deleted, this object\
+                          \ will be garbage collected. If this object is managed by\
+                          \ a controller, then an entry in this list will point to\
+                          \ this controller, with the controller field set to true.\
+                          \ There cannot be more than one managing controller."
+                        items:
+                          description: "OwnerReference contains enough information\
+                            \ to let you identify an owning object. An owning object\
+                            \ must be in the same namespace as the dependent, or be\
+                            \ cluster-scoped, so there is no namespace field."
+                          example:
+                            uid: "uid"
+                            controller: true
+                            apiVersion: "apiVersion"
+                            kind: "kind"
+                            name: "name"
+                            blockOwnerDeletion: true
+                          properties:
+                            apiVersion:
+                              description: "API version of the referent."
+                              type: "string"
+                            blockOwnerDeletion:
+                              description: "If true, AND if the owner has the \"foregroundDeletion\"\
+                                \ finalizer, then the owner cannot be deleted from\
+                                \ the key-value store until this reference is removed.\
+                                \ Defaults to false. To set this field, a user needs\
+                                \ \"delete\" permission of the owner, otherwise 422\
+                                \ (Unprocessable Entity) will be returned."
+                              type: "boolean"
+                            controller:
+                              description: "If true, this reference points to the\
+                                \ managing controller."
+                              type: "boolean"
+                            kind:
+                              description: "Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+                              type: "string"
+                            name:
+                              description: "Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names"
+                              type: "string"
+                            uid:
+                              description: "UID of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#uids"
+                              type: "string"
+                          required:
+                            - "apiVersion"
+                            - "kind"
+                            - "name"
+                            - "uid"
+                          type: "object"
+                        type: "array"
+                      resourceVersion:
+                        description: "An opaque value that represents the internal\
+                          \ version of this object that can be used by clients to\
+                          \ determine when objects have changed. May be used for optimistic\
+                          \ concurrency, change detection, and the watch operation\
+                          \ on a resource or set of resources. Clients must treat\
+                          \ these values as opaque and passed unmodified back to the\
+                          \ server. They may only be valid for a particular resource\
+                          \ or set of resources.\n\nPopulated by the system. Read-only.\
+                          \ Value must be treated as opaque by clients and . More\
+                          \ info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency"
+                        type: "string"
+                      selfLink:
+                        description: "SelfLink is a URL representing this object.\
+                          \ Populated by the system. Read-only.\n\nDEPRECATED Kubernetes\
+                          \ will stop propagating this field in 1.20 release and the\
+                          \ field is planned to be removed in 1.21 release."
+                        type: "string"
+                      uid:
+                        description: "UID is the unique in time and space value for\
+                          \ this object. It is typically generated by the server on\
+                          \ successful creation of a resource and is not allowed to\
+                          \ change on PUT operations.\n\nPopulated by the system.\
+                          \ Read-only. More info: http://kubernetes.io/docs/user-guide/identifiers#uids"
+                        type: "string"
+                    type: "object"
+                  spec:
+                    description: "PersistentVolumeClaimSpec describes the common attributes\
+                      \ of storage devices and allows a Source for provider-specific\
+                      \ attributes"
+                    example:
+                      storageClassName: "storageClassName"
+                      volumeName: "volumeName"
+                      resources:
+                        requests: {}
+                        limits: {}
+                      selector:
+                        matchExpressions:
+                          - values:
+                              - "values"
+                              - "values"
+                            key: "key"
+                            operator: "operator"
+                          - values:
+                              - "values"
+                              - "values"
+                            key: "key"
+                            operator: "operator"
+                        matchLabels:
+                          key: "matchLabels"
+                      accessModes:
+                        - "accessModes"
+                        - "accessModes"
+                      dataSource:
+                        apiGroup: "apiGroup"
+                        kind: "kind"
+                        name: "name"
+                      volumeMode: "volumeMode"
+                    properties:
+                      accessModes:
+                        description: "AccessModes contains the desired access modes\
+                          \ the volume should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
+                        items:
+                          type: "string"
+                        type: "array"
+                      dataSource:
+                        description: "TypedLocalObjectReference contains enough information\
+                          \ to let you locate the typed referenced object inside the\
+                          \ same namespace."
+                        example:
+                          apiGroup: "apiGroup"
+                          kind: "kind"
+                          name: "name"
+                        properties:
+                          apiGroup:
+                            description: "APIGroup is the group for the resource being\
+                              \ referenced. If APIGroup is not specified, the specified\
+                              \ Kind must be in the core API group. For any other\
+                              \ third-party types, APIGroup is required."
+                            type: "string"
+                          kind:
+                            description: "Kind is the type of resource being referenced"
+                            type: "string"
+                          name:
+                            description: "Name is the name of resource being referenced"
+                            type: "string"
+                        required:
+                          - "kind"
+                          - "name"
+                        type: "object"
+                      resources:
+                        description: "ResourceRequirements describes the compute resource\
+                          \ requirements."
+                        example:
+                          requests: {}
+                          limits: {}
+                        properties:
+                          limits:
+                            additionalProperties:
+                              description: "Quantity is a fixed-point representation\
+                                \ of a number. It provides convenient marshaling/unmarshaling\
+                                \ in JSON and YAML, in addition to String() and AsInt64()\
+                                \ accessors.\n\nThe serialization format is:\n\n<quantity>\
+                                \        ::= <signedNumber><suffix>\n  (Note that\
+                                \ <suffix> may be empty, from the \"\" case in <decimalSI>.)\n\
+                                <digit>           ::= 0 | 1 | ... | 9 <digits>   \
+                                \       ::= <digit> | <digit><digits> <number>   \
+                                \       ::= <digits> | <digits>.<digits> | <digits>.\
+                                \ | .<digits> <sign>            ::= \"+\" | \"-\"\
+                                \ <signedNumber>    ::= <number> | <sign><number>\
+                                \ <suffix>          ::= <binarySI> | <decimalExponent>\
+                                \ | <decimalSI> <binarySI>        ::= Ki | Mi | Gi\
+                                \ | Ti | Pi | Ei\n  (International System of units;\
+                                \ See: http://physics.nist.gov/cuu/Units/binary.html)\n\
+                                <decimalSI>       ::= m | \"\" | k | M | G | T | P\
+                                \ | E\n  (Note that 1024 = 1Ki but 1000 = 1k; I didn't\
+                                \ choose the capitalization.)\n<decimalExponent> ::=\
+                                \ \"e\" <signedNumber> | \"E\" <signedNumber>\n\n\
+                                No matter which of the three exponent forms is used,\
+                                \ no quantity may represent a number greater than\
+                                \ 2^63-1 in magnitude, nor may it have more than 3\
+                                \ decimal places. Numbers larger or more precise will\
+                                \ be capped or rounded up. (E.g.: 0.1m will rounded\
+                                \ up to 1m.) This may be extended in the future if\
+                                \ we require larger or smaller quantities.\n\nWhen\
+                                \ a Quantity is parsed from a string, it will remember\
+                                \ the type of suffix it had, and will use the same\
+                                \ type again when it is serialized.\n\nBefore serializing,\
+                                \ Quantity will be put in \"canonical form\". This\
+                                \ means that Exponent/suffix will be adjusted up or\
+                                \ down (with a corresponding increase or decrease\
+                                \ in Mantissa) such that:\n  a. No precision is lost\n\
+                                \  b. No fractional digits will be emitted\n  c. The\
+                                \ exponent (or suffix) is as large as possible.\n\
+                                The sign will be omitted unless the number is negative.\n\
+                                \nExamples:\n  1.5 will be serialized as \"1500m\"\
+                                \n  1.5Gi will be serialized as \"1536Mi\"\n\nNote\
+                                \ that the quantity will NEVER be internally represented\
+                                \ by a floating point number. That is the whole point\
+                                \ of this exercise.\n\nNon-canonical values will still\
+                                \ parse as long as they are well formed, but will\
+                                \ be re-emitted in their canonical form. (So always\
+                                \ use canonical form, or don't diff.)\n\nThis format\
+                                \ is intended to make it difficult to use these numbers\
+                                \ without writing some sort of special handling code\
+                                \ in the hopes that that will cause implementors to\
+                                \ also use a fixed point implementation."
+                              format: "quantity"
+                              type: "string"
+                            description: "Limits describes the maximum amount of compute\
+                              \ resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
+                            type: "object"
+                          requests:
+                            additionalProperties:
+                              description: "Quantity is a fixed-point representation\
+                                \ of a number. It provides convenient marshaling/unmarshaling\
+                                \ in JSON and YAML, in addition to String() and AsInt64()\
+                                \ accessors.\n\nThe serialization format is:\n\n<quantity>\
+                                \        ::= <signedNumber><suffix>\n  (Note that\
+                                \ <suffix> may be empty, from the \"\" case in <decimalSI>.)\n\
+                                <digit>           ::= 0 | 1 | ... | 9 <digits>   \
+                                \       ::= <digit> | <digit><digits> <number>   \
+                                \       ::= <digits> | <digits>.<digits> | <digits>.\
+                                \ | .<digits> <sign>            ::= \"+\" | \"-\"\
+                                \ <signedNumber>    ::= <number> | <sign><number>\
+                                \ <suffix>          ::= <binarySI> | <decimalExponent>\
+                                \ | <decimalSI> <binarySI>        ::= Ki | Mi | Gi\
+                                \ | Ti | Pi | Ei\n  (International System of units;\
+                                \ See: http://physics.nist.gov/cuu/Units/binary.html)\n\
+                                <decimalSI>       ::= m | \"\" | k | M | G | T | P\
+                                \ | E\n  (Note that 1024 = 1Ki but 1000 = 1k; I didn't\
+                                \ choose the capitalization.)\n<decimalExponent> ::=\
+                                \ \"e\" <signedNumber> | \"E\" <signedNumber>\n\n\
+                                No matter which of the three exponent forms is used,\
+                                \ no quantity may represent a number greater than\
+                                \ 2^63-1 in magnitude, nor may it have more than 3\
+                                \ decimal places. Numbers larger or more precise will\
+                                \ be capped or rounded up. (E.g.: 0.1m will rounded\
+                                \ up to 1m.) This may be extended in the future if\
+                                \ we require larger or smaller quantities.\n\nWhen\
+                                \ a Quantity is parsed from a string, it will remember\
+                                \ the type of suffix it had, and will use the same\
+                                \ type again when it is serialized.\n\nBefore serializing,\
+                                \ Quantity will be put in \"canonical form\". This\
+                                \ means that Exponent/suffix will be adjusted up or\
+                                \ down (with a corresponding increase or decrease\
+                                \ in Mantissa) such that:\n  a. No precision is lost\n\
+                                \  b. No fractional digits will be emitted\n  c. The\
+                                \ exponent (or suffix) is as large as possible.\n\
+                                The sign will be omitted unless the number is negative.\n\
+                                \nExamples:\n  1.5 will be serialized as \"1500m\"\
+                                \n  1.5Gi will be serialized as \"1536Mi\"\n\nNote\
+                                \ that the quantity will NEVER be internally represented\
+                                \ by a floating point number. That is the whole point\
+                                \ of this exercise.\n\nNon-canonical values will still\
+                                \ parse as long as they are well formed, but will\
+                                \ be re-emitted in their canonical form. (So always\
+                                \ use canonical form, or don't diff.)\n\nThis format\
+                                \ is intended to make it difficult to use these numbers\
+                                \ without writing some sort of special handling code\
+                                \ in the hopes that that will cause implementors to\
+                                \ also use a fixed point implementation."
+                              format: "quantity"
+                              type: "string"
+                            description: "Requests describes the minimum amount of\
+                              \ compute resources required. If Requests is omitted\
+                              \ for a container, it defaults to Limits if that is\
+                              \ explicitly specified, otherwise to an implementation-defined\
+                              \ value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
+                            type: "object"
+                        type: "object"
+                      selector:
+                        description: "A label selector is a label query over a set\
+                          \ of resources. The result of matchLabels and matchExpressions\
+                          \ are ANDed. An empty label selector matches all objects.\
+                          \ A null label selector matches no objects."
+                        example:
+                          matchExpressions:
+                            - values:
+                                - "values"
+                                - "values"
+                              key: "key"
+                              operator: "operator"
+                            - values:
+                                - "values"
+                                - "values"
+                              key: "key"
+                              operator: "operator"
+                          matchLabels:
+                            key: "matchLabels"
+                        properties:
+                          matchExpressions:
+                            description: "matchExpressions is a list of label selector\
+                              \ requirements. The requirements are ANDed."
+                            items:
+                              description: "A label selector requirement is a selector\
+                                \ that contains values, a key, and an operator that\
+                                \ relates the key and values."
+                              example:
+                                values:
+                                  - "values"
+                                  - "values"
+                                key: "key"
+                                operator: "operator"
+                              properties:
+                                key:
+                                  description: "key is the label key that the selector\
+                                    \ applies to."
+                                  type: "string"
+                                operator:
+                                  description: "operator represents a key's relationship\
+                                    \ to a set of values. Valid operators are In,\
+                                    \ NotIn, Exists and DoesNotExist."
+                                  type: "string"
+                                values:
+                                  description: "values is an array of string values.\
+                                    \ If the operator is In or NotIn, the values array\
+                                    \ must be non-empty. If the operator is Exists\
+                                    \ or DoesNotExist, the values array must be empty.\
+                                    \ This array is replaced during a strategic merge\
+                                    \ patch."
+                                  items:
+                                    type: "string"
+                                  type: "array"
+                              required:
+                                - "key"
+                                - "operator"
+                              type: "object"
+                            type: "array"
+                          matchLabels:
+                            additionalProperties:
+                              type: "string"
+                            description: "matchLabels is a map of {key,value} pairs.\
+                              \ A single {key,value} in the matchLabels map is equivalent\
+                              \ to an element of matchExpressions, whose key field\
+                              \ is \"key\", the operator is \"In\", and the values\
+                              \ array contains only \"value\". The requirements are\
+                              \ ANDed."
+                            type: "object"
+                        type: "object"
+                      storageClassName:
+                        description: "Name of the StorageClass required by the claim.\
+                          \ More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1"
+                        type: "string"
+                      volumeMode:
+                        description: "volumeMode defines what type of volume is required\
+                          \ by the claim. Value of Filesystem is implied when not\
+                          \ included in claim spec."
+                        type: "string"
+                      volumeName:
+                        description: "VolumeName is the binding reference to the PersistentVolume\
+                          \ backing this claim."
+                        type: "string"
+                    type: "object"
+                type: "object"
               type: "array"
             hivemqVersion:
               description: "Version of HiveMQ to deploy, when using the official image.\
@@ -112,19 +784,204 @@ spec:
                 - "TRACE"
               type: "string"
             labels:
+              additionalProperties:
+                type: "string"
               description: "Labels for the cluster"
               type: "object"
+            sidecars:
+              description: "Sidecar containers to run alongside the HiveMQ container"
+              items:
+                description: "A single container spec for a sidecar container, wrapped\
+                  \ in a multi-line scalar string. See Container v1 in the API spec\
+                  \ for format."
+                type: "string"
+              type: "array"
             env:
               description: "Additional environment variables for the cluster"
               items:
+                description: "EnvVar represents an environment variable present in\
+                  \ a Container."
+                example:
+                  name: "name"
+                  value: "value"
+                  valueFrom:
+                    secretKeyRef:
+                      name: "name"
+                      optional: true
+                      key: "key"
+                    resourceFieldRef:
+                      divisor: "divisor"
+                      resource: "resource"
+                      containerName: "containerName"
+                    configMapKeyRef:
+                      name: "name"
+                      optional: true
+                      key: "key"
+                    fieldRef:
+                      apiVersion: "apiVersion"
+                      fieldPath: "fieldPath"
                 properties:
                   name:
+                    description: "Name of the environment variable. Must be a C_IDENTIFIER."
                     type: "string"
                   value:
+                    description: "Variable references $(VAR_NAME) are expanded using\
+                      \ the previous defined environment variables in the container\
+                      \ and any service environment variables. If a variable cannot\
+                      \ be resolved, the reference in the input string will be unchanged.\
+                      \ The $(VAR_NAME) syntax can be escaped with a double $$, ie:\
+                      \ $$(VAR_NAME). Escaped references will never be expanded, regardless\
+                      \ of whether the variable exists or not. Defaults to \"\"."
                     type: "string"
+                  valueFrom:
+                    description: "EnvVarSource represents a source for the value of\
+                      \ an EnvVar."
+                    example:
+                      secretKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      configMapKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
+                    properties:
+                      configMapKeyRef:
+                        description: "Selects a key from a ConfigMap."
+                        example:
+                          name: "name"
+                          optional: true
+                          key: "key"
+                        properties:
+                          key:
+                            description: "The key to select."
+                            type: "string"
+                          name:
+                            description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                            type: "string"
+                          optional:
+                            description: "Specify whether the ConfigMap or its key\
+                              \ must be defined"
+                            type: "boolean"
+                        required:
+                          - "key"
+                        type: "object"
+                      fieldRef:
+                        description: "ObjectFieldSelector selects an APIVersioned\
+                          \ field of an object."
+                        example:
+                          apiVersion: "apiVersion"
+                          fieldPath: "fieldPath"
+                        properties:
+                          apiVersion:
+                            description: "Version of the schema the FieldPath is written\
+                              \ in terms of, defaults to \"v1\"."
+                            type: "string"
+                          fieldPath:
+                            description: "Path of the field to select in the specified\
+                              \ API version."
+                            type: "string"
+                        required:
+                          - "fieldPath"
+                        type: "object"
+                      resourceFieldRef:
+                        description: "ResourceFieldSelector represents container resources\
+                          \ (cpu, memory) and their output format"
+                        example:
+                          divisor: "divisor"
+                          resource: "resource"
+                          containerName: "containerName"
+                        properties:
+                          containerName:
+                            description: "Container name: required for volumes, optional\
+                              \ for env vars"
+                            type: "string"
+                          divisor:
+                            description: "Quantity is a fixed-point representation\
+                              \ of a number. It provides convenient marshaling/unmarshaling\
+                              \ in JSON and YAML, in addition to String() and AsInt64()\
+                              \ accessors.\n\nThe serialization format is:\n\n<quantity>\
+                              \        ::= <signedNumber><suffix>\n  (Note that <suffix>\
+                              \ may be empty, from the \"\" case in <decimalSI>.)\n\
+                              <digit>           ::= 0 | 1 | ... | 9 <digits>     \
+                              \     ::= <digit> | <digit><digits> <number>       \
+                              \   ::= <digits> | <digits>.<digits> | <digits>. | .<digits>\
+                              \ <sign>            ::= \"+\" | \"-\" <signedNumber>\
+                              \    ::= <number> | <sign><number> <suffix>        \
+                              \  ::= <binarySI> | <decimalExponent> | <decimalSI>\
+                              \ <binarySI>        ::= Ki | Mi | Gi | Ti | Pi | Ei\n\
+                              \  (International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\
+                              <decimalSI>       ::= m | \"\" | k | M | G | T | P |\
+                              \ E\n  (Note that 1024 = 1Ki but 1000 = 1k; I didn't\
+                              \ choose the capitalization.)\n<decimalExponent> ::=\
+                              \ \"e\" <signedNumber> | \"E\" <signedNumber>\n\nNo\
+                              \ matter which of the three exponent forms is used,\
+                              \ no quantity may represent a number greater than 2^63-1\
+                              \ in magnitude, nor may it have more than 3 decimal\
+                              \ places. Numbers larger or more precise will be capped\
+                              \ or rounded up. (E.g.: 0.1m will rounded up to 1m.)\
+                              \ This may be extended in the future if we require larger\
+                              \ or smaller quantities.\n\nWhen a Quantity is parsed\
+                              \ from a string, it will remember the type of suffix\
+                              \ it had, and will use the same type again when it is\
+                              \ serialized.\n\nBefore serializing, Quantity will be\
+                              \ put in \"canonical form\". This means that Exponent/suffix\
+                              \ will be adjusted up or down (with a corresponding\
+                              \ increase or decrease in Mantissa) such that:\n  a.\
+                              \ No precision is lost\n  b. No fractional digits will\
+                              \ be emitted\n  c. The exponent (or suffix) is as large\
+                              \ as possible.\nThe sign will be omitted unless the\
+                              \ number is negative.\n\nExamples:\n  1.5 will be serialized\
+                              \ as \"1500m\"\n  1.5Gi will be serialized as \"1536Mi\"\
+                              \n\nNote that the quantity will NEVER be internally\
+                              \ represented by a floating point number. That is the\
+                              \ whole point of this exercise.\n\nNon-canonical values\
+                              \ will still parse as long as they are well formed,\
+                              \ but will be re-emitted in their canonical form. (So\
+                              \ always use canonical form, or don't diff.)\n\nThis\
+                              \ format is intended to make it difficult to use these\
+                              \ numbers without writing some sort of special handling\
+                              \ code in the hopes that that will cause implementors\
+                              \ to also use a fixed point implementation."
+                            format: "quantity"
+                            type: "string"
+                          resource:
+                            description: "Required: resource to select"
+                            type: "string"
+                        required:
+                          - "resource"
+                        type: "object"
+                      secretKeyRef:
+                        description: "SecretKeySelector selects a key of a Secret."
+                        example:
+                          name: "name"
+                          optional: true
+                          key: "key"
+                        properties:
+                          key:
+                            description: "The key of the secret to select from.  Must\
+                              \ be a valid secret key."
+                            type: "string"
+                          name:
+                            description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                            type: "string"
+                          optional:
+                            description: "Specify whether the Secret or its key must\
+                              \ be defined"
+                            type: "boolean"
+                        required:
+                          - "key"
+                        type: "object"
+                    type: "object"
                 required:
                   - "name"
-                  - "value"
                 type: "object"
               type: "array"
             configMaps:
@@ -134,7 +991,9 @@ spec:
                   name:
                     type: "string"
                   path:
-                    description: "Target path at which to mount/place this configuration"
+                    description: "Target path at which to mount/place this configuration.\
+                      \ Can be 'none' to only define as volume, to use the ConfigMap\
+                      \ for sidecars."
                     type: "string"
                   static:
                     description: "Whether this configuration must lead to a restart\
@@ -184,6 +1043,2148 @@ spec:
                     enum:
                       - "serial"
                       - "parallel"
+                    type: "string"
+                required:
+                  - "name"
+                type: "object"
+              type: "array"
+            podSecurityContext:
+              description: "PodSecurityContext holds pod-level security attributes\
+                \ and common container settings. Some fields are also present in container.securityContext.\
+                \  Field values of container.securityContext take precedence over\
+                \ field values of PodSecurityContext."
+              example:
+                runAsUser: 6
+                seLinuxOptions:
+                  role: "role"
+                  level: "level"
+                  type: "type"
+                  user: "user"
+                fsGroup: 1
+                seccompProfile:
+                  localhostProfile: "localhostProfile"
+                  type: "type"
+                windowsOptions:
+                  gmsaCredentialSpec: "gmsaCredentialSpec"
+                  runAsUserName: "runAsUserName"
+                  gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                fsGroupChangePolicy: "fsGroupChangePolicy"
+                supplementalGroups:
+                  - 7
+                  - 7
+                runAsGroup: 1
+                runAsNonRoot: true
+                sysctls:
+                  - name: "name"
+                    value: "value"
+                  - name: "name"
+                    value: "value"
+              properties:
+                fsGroup:
+                  description: "A special supplemental group that applies to all containers\
+                    \ in a pod. Some volume types allow the Kubelet to change the\
+                    \ ownership of that volume to be owned by the pod:\n\n1. The owning\
+                    \ GID will be the FSGroup 2. The setgid bit is set (new files\
+                    \ created in the volume will be owned by FSGroup) 3. The permission\
+                    \ bits are OR'd with rw-rw----\n\nIf unset, the Kubelet will not\
+                    \ modify the ownership and permissions of any volume."
+                  format: "int64"
+                  type: "integer"
+                fsGroupChangePolicy:
+                  description: "fsGroupChangePolicy defines behavior of changing ownership\
+                    \ and permission of the volume before being exposed inside Pod.\
+                    \ This field will only apply to volume types which support fsGroup\
+                    \ based ownership(and permissions). It will have no effect on\
+                    \ ephemeral volume types such as: secret, configmaps and emptydir.\
+                    \ Valid values are \"OnRootMismatch\" and \"Always\". If not specified\
+                    \ defaults to \"Always\"."
+                  type: "string"
+                runAsGroup:
+                  description: "The GID to run the entrypoint of the container process.\
+                    \ Uses runtime default if unset. May also be set in SecurityContext.\
+                    \  If set in both SecurityContext and PodSecurityContext, the\
+                    \ value specified in SecurityContext takes precedence for that\
+                    \ container."
+                  format: "int64"
+                  type: "integer"
+                runAsNonRoot:
+                  description: "Indicates that the container must run as a non-root\
+                    \ user. If true, the Kubelet will validate the image at runtime\
+                    \ to ensure that it does not run as UID 0 (root) and fail to start\
+                    \ the container if it does. If unset or false, no such validation\
+                    \ will be performed. May also be set in SecurityContext.  If set\
+                    \ in both SecurityContext and PodSecurityContext, the value specified\
+                    \ in SecurityContext takes precedence."
+                  type: "boolean"
+                runAsUser:
+                  description: "The UID to run the entrypoint of the container process.\
+                    \ Defaults to user specified in image metadata if unspecified.\
+                    \ May also be set in SecurityContext.  If set in both SecurityContext\
+                    \ and PodSecurityContext, the value specified in SecurityContext\
+                    \ takes precedence for that container."
+                  format: "int64"
+                  type: "integer"
+                seLinuxOptions:
+                  description: "SELinuxOptions are the labels to be applied to the\
+                    \ container"
+                  example:
+                    role: "role"
+                    level: "level"
+                    type: "type"
+                    user: "user"
+                  properties:
+                    level:
+                      description: "Level is SELinux level label that applies to the\
+                        \ container."
+                      type: "string"
+                    role:
+                      description: "Role is a SELinux role label that applies to the\
+                        \ container."
+                      type: "string"
+                    type:
+                      description: "Type is a SELinux type label that applies to the\
+                        \ container."
+                      type: "string"
+                    user:
+                      description: "User is a SELinux user label that applies to the\
+                        \ container."
+                      type: "string"
+                  type: "object"
+                seccompProfile:
+                  description: "SeccompProfile defines a pod/container's seccomp profile\
+                    \ settings. Only one profile source may be set."
+                  example:
+                    localhostProfile: "localhostProfile"
+                    type: "type"
+                  properties:
+                    localhostProfile:
+                      description: "localhostProfile indicates a profile defined in\
+                        \ a file on the node should be used. The profile must be preconfigured\
+                        \ on the node to work. Must be a descending path, relative\
+                        \ to the kubelet's configured seccomp profile location. Must\
+                        \ only be set if type is \"Localhost\"."
+                      type: "string"
+                    type:
+                      description: "type indicates which kind of seccomp profile will\
+                        \ be applied. Valid options are:\n\nLocalhost - a profile\
+                        \ defined in a file on the node should be used. RuntimeDefault\
+                        \ - the container runtime default profile should be used.\
+                        \ Unconfined - no profile should be applied."
+                      type: "string"
+                  required:
+                    - "type"
+                  type: "object"
+                supplementalGroups:
+                  description: "A list of groups applied to the first process run\
+                    \ in each container, in addition to the container's primary GID.\
+                    \  If unspecified, no groups will be added to any container."
+                  items:
+                    format: "int64"
+                    type: "integer"
+                  type: "array"
+                sysctls:
+                  description: "Sysctls hold a list of namespaced sysctls used for\
+                    \ the pod. Pods with unsupported sysctls (by the container runtime)\
+                    \ might fail to launch."
+                  items:
+                    description: "Sysctl defines a kernel parameter to be set"
+                    example:
+                      name: "name"
+                      value: "value"
+                    properties:
+                      name:
+                        description: "Name of a property to set"
+                        type: "string"
+                      value:
+                        description: "Value of a property to set"
+                        type: "string"
+                    required:
+                      - "name"
+                      - "value"
+                    type: "object"
+                  type: "array"
+                windowsOptions:
+                  description: "WindowsSecurityContextOptions contain Windows-specific\
+                    \ options and credentials."
+                  example:
+                    gmsaCredentialSpec: "gmsaCredentialSpec"
+                    runAsUserName: "runAsUserName"
+                    gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                  properties:
+                    gmsaCredentialSpec:
+                      description: "GMSACredentialSpec is where the GMSA admission\
+                        \ webhook (https://github.com/kubernetes-sigs/windows-gmsa)\
+                        \ inlines the contents of the GMSA credential spec named by\
+                        \ the GMSACredentialSpecName field."
+                      type: "string"
+                    gmsaCredentialSpecName:
+                      description: "GMSACredentialSpecName is the name of the GMSA\
+                        \ credential spec to use."
+                      type: "string"
+                    runAsUserName:
+                      description: "The UserName in Windows to run the entrypoint\
+                        \ of the container process. Defaults to the user specified\
+                        \ in image metadata if unspecified. May also be set in PodSecurityContext.\
+                        \ If set in both SecurityContext and PodSecurityContext, the\
+                        \ value specified in SecurityContext takes precedence."
+                      type: "string"
+                  type: "object"
+              type: "object"
+            containerSecurityContext:
+              description: "The security context to apply to the hivemq container\
+                \ + static init containers used in the deployment template."
+              example:
+                privileged: true
+                runAsUser: 7
+                capabilities:
+                  add:
+                    - "add"
+                    - "add"
+                  drop:
+                    - "drop"
+                    - "drop"
+                seLinuxOptions:
+                  role: "role"
+                  level: "level"
+                  type: "type"
+                  user: "user"
+                seccompProfile:
+                  localhostProfile: "localhostProfile"
+                  type: "type"
+                windowsOptions:
+                  gmsaCredentialSpec: "gmsaCredentialSpec"
+                  runAsUserName: "runAsUserName"
+                  gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                procMount: "procMount"
+                allowPrivilegeEscalation: true
+                runAsGroup: 4
+                runAsNonRoot: true
+                readOnlyRootFilesystem: true
+              properties:
+                allowPrivilegeEscalation:
+                  description: "AllowPrivilegeEscalation controls whether a process\
+                    \ can gain more privileges than its parent process. This bool\
+                    \ directly controls if the no_new_privs flag will be set on the\
+                    \ container process. AllowPrivilegeEscalation is true always when\
+                    \ the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN"
+                  type: "boolean"
+                capabilities:
+                  description: "Adds and removes POSIX capabilities from running containers."
+                  example:
+                    add:
+                      - "add"
+                      - "add"
+                    drop:
+                      - "drop"
+                      - "drop"
+                  properties:
+                    add:
+                      description: "Added capabilities"
+                      items:
+                        type: "string"
+                      type: "array"
+                    drop:
+                      description: "Removed capabilities"
+                      items:
+                        type: "string"
+                      type: "array"
+                  type: "object"
+                privileged:
+                  description: "Run container in privileged mode. Processes in privileged\
+                    \ containers are essentially equivalent to root on the host. Defaults\
+                    \ to false."
+                  type: "boolean"
+                procMount:
+                  description: "procMount denotes the type of proc mount to use for\
+                    \ the containers. The default is DefaultProcMount which uses the\
+                    \ container runtime defaults for readonly paths and masked paths.\
+                    \ This requires the ProcMountType feature flag to be enabled."
+                  type: "string"
+                readOnlyRootFilesystem:
+                  description: "Whether this container has a read-only root filesystem.\
+                    \ Default is false."
+                  type: "boolean"
+                runAsGroup:
+                  description: "The GID to run the entrypoint of the container process.\
+                    \ Uses runtime default if unset. May also be set in PodSecurityContext.\
+                    \  If set in both SecurityContext and PodSecurityContext, the\
+                    \ value specified in SecurityContext takes precedence."
+                  format: "int64"
+                  type: "integer"
+                runAsNonRoot:
+                  description: "Indicates that the container must run as a non-root\
+                    \ user. If true, the Kubelet will validate the image at runtime\
+                    \ to ensure that it does not run as UID 0 (root) and fail to start\
+                    \ the container if it does. If unset or false, no such validation\
+                    \ will be performed. May also be set in PodSecurityContext.  If\
+                    \ set in both SecurityContext and PodSecurityContext, the value\
+                    \ specified in SecurityContext takes precedence."
+                  type: "boolean"
+                runAsUser:
+                  description: "The UID to run the entrypoint of the container process.\
+                    \ Defaults to user specified in image metadata if unspecified.\
+                    \ May also be set in PodSecurityContext.  If set in both SecurityContext\
+                    \ and PodSecurityContext, the value specified in SecurityContext\
+                    \ takes precedence."
+                  format: "int64"
+                  type: "integer"
+                seLinuxOptions:
+                  description: "SELinuxOptions are the labels to be applied to the\
+                    \ container"
+                  example:
+                    role: "role"
+                    level: "level"
+                    type: "type"
+                    user: "user"
+                  properties:
+                    level:
+                      description: "Level is SELinux level label that applies to the\
+                        \ container."
+                      type: "string"
+                    role:
+                      description: "Role is a SELinux role label that applies to the\
+                        \ container."
+                      type: "string"
+                    type:
+                      description: "Type is a SELinux type label that applies to the\
+                        \ container."
+                      type: "string"
+                    user:
+                      description: "User is a SELinux user label that applies to the\
+                        \ container."
+                      type: "string"
+                  type: "object"
+                seccompProfile:
+                  description: "SeccompProfile defines a pod/container's seccomp profile\
+                    \ settings. Only one profile source may be set."
+                  example:
+                    localhostProfile: "localhostProfile"
+                    type: "type"
+                  properties:
+                    localhostProfile:
+                      description: "localhostProfile indicates a profile defined in\
+                        \ a file on the node should be used. The profile must be preconfigured\
+                        \ on the node to work. Must be a descending path, relative\
+                        \ to the kubelet's configured seccomp profile location. Must\
+                        \ only be set if type is \"Localhost\"."
+                      type: "string"
+                    type:
+                      description: "type indicates which kind of seccomp profile will\
+                        \ be applied. Valid options are:\n\nLocalhost - a profile\
+                        \ defined in a file on the node should be used. RuntimeDefault\
+                        \ - the container runtime default profile should be used.\
+                        \ Unconfined - no profile should be applied."
+                      type: "string"
+                  required:
+                    - "type"
+                  type: "object"
+                windowsOptions:
+                  description: "WindowsSecurityContextOptions contain Windows-specific\
+                    \ options and credentials."
+                  example:
+                    gmsaCredentialSpec: "gmsaCredentialSpec"
+                    runAsUserName: "runAsUserName"
+                    gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                  properties:
+                    gmsaCredentialSpec:
+                      description: "GMSACredentialSpec is where the GMSA admission\
+                        \ webhook (https://github.com/kubernetes-sigs/windows-gmsa)\
+                        \ inlines the contents of the GMSA credential spec named by\
+                        \ the GMSACredentialSpecName field."
+                      type: "string"
+                    gmsaCredentialSpecName:
+                      description: "GMSACredentialSpecName is the name of the GMSA\
+                        \ credential spec to use."
+                      type: "string"
+                    runAsUserName:
+                      description: "The UserName in Windows to run the entrypoint\
+                        \ of the container process. Defaults to the user specified\
+                        \ in image metadata if unspecified. May also be set in PodSecurityContext.\
+                        \ If set in both SecurityContext and PodSecurityContext, the\
+                        \ value specified in SecurityContext takes precedence."
+                      type: "string"
+                  type: "object"
+              type: "object"
+            initContainers:
+              description: "Init containers to run before starting HiveMQ"
+              items:
+                description: "A single application container that you want to run\
+                  \ within a pod."
+                example:
+                  volumeDevices:
+                    - devicePath: "devicePath"
+                      name: "name"
+                    - devicePath: "devicePath"
+                      name: "name"
+                  image: "image"
+                  imagePullPolicy: "imagePullPolicy"
+                  livenessProbe:
+                    failureThreshold: 5
+                    periodSeconds: 2
+                    tcpSocket:
+                      port: "port"
+                      host: "host"
+                    timeoutSeconds: 9
+                    successThreshold: 7
+                    initialDelaySeconds: 5
+                    exec:
+                      command:
+                        - "command"
+                        - "command"
+                    httpGet:
+                      path: "path"
+                      scheme: "scheme"
+                      port: "port"
+                      host: "host"
+                      httpHeaders:
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
+                  stdin: true
+                  terminationMessagePolicy: "terminationMessagePolicy"
+                  terminationMessagePath: "terminationMessagePath"
+                  workingDir: "workingDir"
+                  resources:
+                    requests: {}
+                    limits: {}
+                  securityContext:
+                    privileged: true
+                    runAsUser: 7
+                    capabilities:
+                      add:
+                        - "add"
+                        - "add"
+                      drop:
+                        - "drop"
+                        - "drop"
+                    seLinuxOptions:
+                      role: "role"
+                      level: "level"
+                      type: "type"
+                      user: "user"
+                    seccompProfile:
+                      localhostProfile: "localhostProfile"
+                      type: "type"
+                    windowsOptions:
+                      gmsaCredentialSpec: "gmsaCredentialSpec"
+                      runAsUserName: "runAsUserName"
+                      gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                    procMount: "procMount"
+                    allowPrivilegeEscalation: true
+                    runAsGroup: 4
+                    runAsNonRoot: true
+                    readOnlyRootFilesystem: true
+                  startupProbe:
+                    failureThreshold: 5
+                    periodSeconds: 2
+                    tcpSocket:
+                      port: "port"
+                      host: "host"
+                    timeoutSeconds: 9
+                    successThreshold: 7
+                    initialDelaySeconds: 5
+                    exec:
+                      command:
+                        - "command"
+                        - "command"
+                    httpGet:
+                      path: "path"
+                      scheme: "scheme"
+                      port: "port"
+                      host: "host"
+                      httpHeaders:
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
+                  env:
+                    - name: "name"
+                      value: "value"
+                      valueFrom:
+                        secretKeyRef:
+                          name: "name"
+                          optional: true
+                          key: "key"
+                        resourceFieldRef:
+                          divisor: "divisor"
+                          resource: "resource"
+                          containerName: "containerName"
+                        configMapKeyRef:
+                          name: "name"
+                          optional: true
+                          key: "key"
+                        fieldRef:
+                          apiVersion: "apiVersion"
+                          fieldPath: "fieldPath"
+                    - name: "name"
+                      value: "value"
+                      valueFrom:
+                        secretKeyRef:
+                          name: "name"
+                          optional: true
+                          key: "key"
+                        resourceFieldRef:
+                          divisor: "divisor"
+                          resource: "resource"
+                          containerName: "containerName"
+                        configMapKeyRef:
+                          name: "name"
+                          optional: true
+                          key: "key"
+                        fieldRef:
+                          apiVersion: "apiVersion"
+                          fieldPath: "fieldPath"
+                  ports:
+                    - protocol: "protocol"
+                      hostIP: "hostIP"
+                      name: "name"
+                      containerPort: 3
+                      hostPort: 2
+                    - protocol: "protocol"
+                      hostIP: "hostIP"
+                      name: "name"
+                      containerPort: 3
+                      hostPort: 2
+                  command:
+                    - "command"
+                    - "command"
+                  volumeMounts:
+                    - mountPath: "mountPath"
+                      mountPropagation: "mountPropagation"
+                      name: "name"
+                      readOnly: true
+                      subPath: "subPath"
+                      subPathExpr: "subPathExpr"
+                    - mountPath: "mountPath"
+                      mountPropagation: "mountPropagation"
+                      name: "name"
+                      readOnly: true
+                      subPath: "subPath"
+                      subPathExpr: "subPathExpr"
+                  args:
+                    - "args"
+                    - "args"
+                  lifecycle:
+                    postStart:
+                      tcpSocket:
+                        port: "port"
+                        host: "host"
+                      exec:
+                        command:
+                          - "command"
+                          - "command"
+                      httpGet:
+                        path: "path"
+                        scheme: "scheme"
+                        port: "port"
+                        host: "host"
+                        httpHeaders:
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
+                    preStop:
+                      tcpSocket:
+                        port: "port"
+                        host: "host"
+                      exec:
+                        command:
+                          - "command"
+                          - "command"
+                      httpGet:
+                        path: "path"
+                        scheme: "scheme"
+                        port: "port"
+                        host: "host"
+                        httpHeaders:
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
+                  name: "name"
+                  tty: true
+                  readinessProbe:
+                    failureThreshold: 5
+                    periodSeconds: 2
+                    tcpSocket:
+                      port: "port"
+                      host: "host"
+                    timeoutSeconds: 9
+                    successThreshold: 7
+                    initialDelaySeconds: 5
+                    exec:
+                      command:
+                        - "command"
+                        - "command"
+                    httpGet:
+                      path: "path"
+                      scheme: "scheme"
+                      port: "port"
+                      host: "host"
+                      httpHeaders:
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
+                  stdinOnce: true
+                  envFrom:
+                    - configMapRef:
+                        name: "name"
+                        optional: true
+                      prefix: "prefix"
+                      secretRef:
+                        name: "name"
+                        optional: true
+                    - configMapRef:
+                        name: "name"
+                        optional: true
+                      prefix: "prefix"
+                      secretRef:
+                        name: "name"
+                        optional: true
+                properties:
+                  args:
+                    description: "Arguments to the entrypoint. The docker image's\
+                      \ CMD is used if this is not provided. Variable references $(VAR_NAME)\
+                      \ are expanded using the container's environment. If a variable\
+                      \ cannot be resolved, the reference in the input string will\
+                      \ be unchanged. The $(VAR_NAME) syntax can be escaped with a\
+                      \ double $$, ie: $$(VAR_NAME). Escaped references will never\
+                      \ be expanded, regardless of whether the variable exists or\
+                      \ not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell"
+                    items:
+                      type: "string"
+                    type: "array"
+                  command:
+                    description: "Entrypoint array. Not executed within a shell. The\
+                      \ docker image's ENTRYPOINT is used if this is not provided.\
+                      \ Variable references $(VAR_NAME) are expanded using the container's\
+                      \ environment. If a variable cannot be resolved, the reference\
+                      \ in the input string will be unchanged. The $(VAR_NAME) syntax\
+                      \ can be escaped with a double $$, ie: $$(VAR_NAME). Escaped\
+                      \ references will never be expanded, regardless of whether the\
+                      \ variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell"
+                    items:
+                      type: "string"
+                    type: "array"
+                  env:
+                    description: "List of environment variables to set in the container.\
+                      \ Cannot be updated."
+                    items:
+                      description: "EnvVar represents an environment variable present\
+                        \ in a Container."
+                      example:
+                        name: "name"
+                        value: "value"
+                        valueFrom:
+                          secretKeyRef:
+                            name: "name"
+                            optional: true
+                            key: "key"
+                          resourceFieldRef:
+                            divisor: "divisor"
+                            resource: "resource"
+                            containerName: "containerName"
+                          configMapKeyRef:
+                            name: "name"
+                            optional: true
+                            key: "key"
+                          fieldRef:
+                            apiVersion: "apiVersion"
+                            fieldPath: "fieldPath"
+                      properties:
+                        name:
+                          description: "Name of the environment variable. Must be\
+                            \ a C_IDENTIFIER."
+                          type: "string"
+                        value:
+                          description: "Variable references $(VAR_NAME) are expanded\
+                            \ using the previous defined environment variables in\
+                            \ the container and any service environment variables.\
+                            \ If a variable cannot be resolved, the reference in the\
+                            \ input string will be unchanged. The $(VAR_NAME) syntax\
+                            \ can be escaped with a double $$, ie: $$(VAR_NAME). Escaped\
+                            \ references will never be expanded, regardless of whether\
+                            \ the variable exists or not. Defaults to \"\"."
+                          type: "string"
+                        valueFrom:
+                          description: "EnvVarSource represents a source for the value\
+                            \ of an EnvVar."
+                          example:
+                            secretKeyRef:
+                              name: "name"
+                              optional: true
+                              key: "key"
+                            resourceFieldRef:
+                              divisor: "divisor"
+                              resource: "resource"
+                              containerName: "containerName"
+                            configMapKeyRef:
+                              name: "name"
+                              optional: true
+                              key: "key"
+                            fieldRef:
+                              apiVersion: "apiVersion"
+                              fieldPath: "fieldPath"
+                          properties:
+                            configMapKeyRef:
+                              description: "Selects a key from a ConfigMap."
+                              example:
+                                name: "name"
+                                optional: true
+                                key: "key"
+                              properties:
+                                key:
+                                  description: "The key to select."
+                                  type: "string"
+                                name:
+                                  description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                                  type: "string"
+                                optional:
+                                  description: "Specify whether the ConfigMap or its\
+                                    \ key must be defined"
+                                  type: "boolean"
+                              required:
+                                - "key"
+                              type: "object"
+                            fieldRef:
+                              description: "ObjectFieldSelector selects an APIVersioned\
+                                \ field of an object."
+                              example:
+                                apiVersion: "apiVersion"
+                                fieldPath: "fieldPath"
+                              properties:
+                                apiVersion:
+                                  description: "Version of the schema the FieldPath\
+                                    \ is written in terms of, defaults to \"v1\"."
+                                  type: "string"
+                                fieldPath:
+                                  description: "Path of the field to select in the\
+                                    \ specified API version."
+                                  type: "string"
+                              required:
+                                - "fieldPath"
+                              type: "object"
+                            resourceFieldRef:
+                              description: "ResourceFieldSelector represents container\
+                                \ resources (cpu, memory) and their output format"
+                              example:
+                                divisor: "divisor"
+                                resource: "resource"
+                                containerName: "containerName"
+                              properties:
+                                containerName:
+                                  description: "Container name: required for volumes,\
+                                    \ optional for env vars"
+                                  type: "string"
+                                divisor:
+                                  description: "Quantity is a fixed-point representation\
+                                    \ of a number. It provides convenient marshaling/unmarshaling\
+                                    \ in JSON and YAML, in addition to String() and\
+                                    \ AsInt64() accessors.\n\nThe serialization format\
+                                    \ is:\n\n<quantity>        ::= <signedNumber><suffix>\n\
+                                    \  (Note that <suffix> may be empty, from the\
+                                    \ \"\" case in <decimalSI>.)\n<digit>        \
+                                    \   ::= 0 | 1 | ... | 9 <digits>          ::=\
+                                    \ <digit> | <digit><digits> <number>         \
+                                    \ ::= <digits> | <digits>.<digits> | <digits>.\
+                                    \ | .<digits> <sign>            ::= \"+\" | \"\
+                                    -\" <signedNumber>    ::= <number> | <sign><number>\
+                                    \ <suffix>          ::= <binarySI> | <decimalExponent>\
+                                    \ | <decimalSI> <binarySI>        ::= Ki | Mi\
+                                    \ | Gi | Ti | Pi | Ei\n  (International System\
+                                    \ of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\
+                                    <decimalSI>       ::= m | \"\" | k | M | G | T\
+                                    \ | P | E\n  (Note that 1024 = 1Ki but 1000 =\
+                                    \ 1k; I didn't choose the capitalization.)\n<decimalExponent>\
+                                    \ ::= \"e\" <signedNumber> | \"E\" <signedNumber>\n\
+                                    \nNo matter which of the three exponent forms\
+                                    \ is used, no quantity may represent a number\
+                                    \ greater than 2^63-1 in magnitude, nor may it\
+                                    \ have more than 3 decimal places. Numbers larger\
+                                    \ or more precise will be capped or rounded up.\
+                                    \ (E.g.: 0.1m will rounded up to 1m.) This may\
+                                    \ be extended in the future if we require larger\
+                                    \ or smaller quantities.\n\nWhen a Quantity is\
+                                    \ parsed from a string, it will remember the type\
+                                    \ of suffix it had, and will use the same type\
+                                    \ again when it is serialized.\n\nBefore serializing,\
+                                    \ Quantity will be put in \"canonical form\".\
+                                    \ This means that Exponent/suffix will be adjusted\
+                                    \ up or down (with a corresponding increase or\
+                                    \ decrease in Mantissa) such that:\n  a. No precision\
+                                    \ is lost\n  b. No fractional digits will be emitted\n\
+                                    \  c. The exponent (or suffix) is as large as\
+                                    \ possible.\nThe sign will be omitted unless the\
+                                    \ number is negative.\n\nExamples:\n  1.5 will\
+                                    \ be serialized as \"1500m\"\n  1.5Gi will be\
+                                    \ serialized as \"1536Mi\"\n\nNote that the quantity\
+                                    \ will NEVER be internally represented by a floating\
+                                    \ point number. That is the whole point of this\
+                                    \ exercise.\n\nNon-canonical values will still\
+                                    \ parse as long as they are well formed, but will\
+                                    \ be re-emitted in their canonical form. (So always\
+                                    \ use canonical form, or don't diff.)\n\nThis\
+                                    \ format is intended to make it difficult to use\
+                                    \ these numbers without writing some sort of special\
+                                    \ handling code in the hopes that that will cause\
+                                    \ implementors to also use a fixed point implementation."
+                                  format: "quantity"
+                                  type: "string"
+                                resource:
+                                  description: "Required: resource to select"
+                                  type: "string"
+                              required:
+                                - "resource"
+                              type: "object"
+                            secretKeyRef:
+                              description: "SecretKeySelector selects a key of a Secret."
+                              example:
+                                name: "name"
+                                optional: true
+                                key: "key"
+                              properties:
+                                key:
+                                  description: "The key of the secret to select from.\
+                                    \  Must be a valid secret key."
+                                  type: "string"
+                                name:
+                                  description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                                  type: "string"
+                                optional:
+                                  description: "Specify whether the Secret or its\
+                                    \ key must be defined"
+                                  type: "boolean"
+                              required:
+                                - "key"
+                              type: "object"
+                          type: "object"
+                      required:
+                        - "name"
+                      type: "object"
+                    type: "array"
+                  envFrom:
+                    description: "List of sources to populate environment variables\
+                      \ in the container. The keys defined within a source must be\
+                      \ a C_IDENTIFIER. All invalid keys will be reported as an event\
+                      \ when the container is starting. When a key exists in multiple\
+                      \ sources, the value associated with the last source will take\
+                      \ precedence. Values defined by an Env with a duplicate key\
+                      \ will take precedence. Cannot be updated."
+                    items:
+                      description: "EnvFromSource represents the source of a set of\
+                        \ ConfigMaps"
+                      example:
+                        configMapRef:
+                          name: "name"
+                          optional: true
+                        prefix: "prefix"
+                        secretRef:
+                          name: "name"
+                          optional: true
+                      properties:
+                        configMapRef:
+                          description: "ConfigMapEnvSource selects a ConfigMap to\
+                            \ populate the environment variables with.\n\nThe contents\
+                            \ of the target ConfigMap's Data field will represent\
+                            \ the key-value pairs as environment variables."
+                          example:
+                            name: "name"
+                            optional: true
+                          properties:
+                            name:
+                              description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                              type: "string"
+                            optional:
+                              description: "Specify whether the ConfigMap must be\
+                                \ defined"
+                              type: "boolean"
+                          type: "object"
+                        prefix:
+                          description: "An optional identifier to prepend to each\
+                            \ key in the ConfigMap. Must be a C_IDENTIFIER."
+                          type: "string"
+                        secretRef:
+                          description: "SecretEnvSource selects a Secret to populate\
+                            \ the environment variables with.\n\nThe contents of the\
+                            \ target Secret's Data field will represent the key-value\
+                            \ pairs as environment variables."
+                          example:
+                            name: "name"
+                            optional: true
+                          properties:
+                            name:
+                              description: "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                              type: "string"
+                            optional:
+                              description: "Specify whether the Secret must be defined"
+                              type: "boolean"
+                          type: "object"
+                      type: "object"
+                    type: "array"
+                  image:
+                    description: "Docker image name. More info: https://kubernetes.io/docs/concepts/containers/images\
+                      \ This field is optional to allow higher level config management\
+                      \ to default or override container images in workload controllers\
+                      \ like Deployments and StatefulSets."
+                    type: "string"
+                  imagePullPolicy:
+                    description: "Image pull policy. One of Always, Never, IfNotPresent.\
+                      \ Defaults to Always if :latest tag is specified, or IfNotPresent\
+                      \ otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images"
+                    type: "string"
+                  lifecycle:
+                    description: "Lifecycle describes actions that the management\
+                      \ system should take in response to container lifecycle events.\
+                      \ For the PostStart and PreStop lifecycle handlers, management\
+                      \ of the container blocks until the action is complete, unless\
+                      \ the container process fails, in which case the handler is\
+                      \ aborted."
+                    example:
+                      postStart:
+                        tcpSocket:
+                          port: "port"
+                          host: "host"
+                        exec:
+                          command:
+                            - "command"
+                            - "command"
+                        httpGet:
+                          path: "path"
+                          scheme: "scheme"
+                          port: "port"
+                          host: "host"
+                          httpHeaders:
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
+                      preStop:
+                        tcpSocket:
+                          port: "port"
+                          host: "host"
+                        exec:
+                          command:
+                            - "command"
+                            - "command"
+                        httpGet:
+                          path: "path"
+                          scheme: "scheme"
+                          port: "port"
+                          host: "host"
+                          httpHeaders:
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
+                    properties:
+                      postStart:
+                        description: "Handler defines a specific action that should\
+                          \ be taken"
+                        example:
+                          tcpSocket:
+                            port: "port"
+                            host: "host"
+                          exec:
+                            command:
+                              - "command"
+                              - "command"
+                          httpGet:
+                            path: "path"
+                            scheme: "scheme"
+                            port: "port"
+                            host: "host"
+                            httpHeaders:
+                              - name: "name"
+                                value: "value"
+                              - name: "name"
+                                value: "value"
+                        properties:
+                          exec:
+                            description: "ExecAction describes a \"run in container\"\
+                              \ action."
+                            example:
+                              command:
+                                - "command"
+                                - "command"
+                            properties:
+                              command:
+                                description: "Command is the command line to execute\
+                                  \ inside the container, the working directory for\
+                                  \ the command  is root ('/') in the container's\
+                                  \ filesystem. The command is simply exec'd, it is\
+                                  \ not run inside a shell, so traditional shell instructions\
+                                  \ ('|', etc) won't work. To use a shell, you need\
+                                  \ to explicitly call out to that shell. Exit status\
+                                  \ of 0 is treated as live/healthy and non-zero is\
+                                  \ unhealthy."
+                                items:
+                                  type: "string"
+                                type: "array"
+                            type: "object"
+                          httpGet:
+                            description: "HTTPGetAction describes an action based\
+                              \ on HTTP Get requests."
+                            example:
+                              path: "path"
+                              scheme: "scheme"
+                              port: "port"
+                              host: "host"
+                              httpHeaders:
+                                - name: "name"
+                                  value: "value"
+                                - name: "name"
+                                  value: "value"
+                            properties:
+                              host:
+                                description: "Host name to connect to, defaults to\
+                                  \ the pod IP. You probably want to set \"Host\"\
+                                  \ in httpHeaders instead."
+                                type: "string"
+                              httpHeaders:
+                                description: "Custom headers to set in the request.\
+                                  \ HTTP allows repeated headers."
+                                items:
+                                  description: "HTTPHeader describes a custom header\
+                                    \ to be used in HTTP probes"
+                                  example:
+                                    name: "name"
+                                    value: "value"
+                                  properties:
+                                    name:
+                                      description: "The header field name"
+                                      type: "string"
+                                    value:
+                                      description: "The header field value"
+                                      type: "string"
+                                  required:
+                                    - "name"
+                                    - "value"
+                                  type: "object"
+                                type: "array"
+                              path:
+                                description: "Path to access on the HTTP server."
+                                type: "string"
+                              port:
+                                description: "IntOrString is a type that can hold\
+                                  \ an int32 or a string.  When used in JSON or YAML\
+                                  \ marshalling and unmarshalling, it produces or\
+                                  \ consumes the inner type.  This allows you to have,\
+                                  \ for example, a JSON field that can accept a name\
+                                  \ or number."
+                                format: "int-or-string"
+                                type: "string"
+                              scheme:
+                                description: "Scheme to use for connecting to the\
+                                  \ host. Defaults to HTTP."
+                                type: "string"
+                            required:
+                              - "port"
+                            type: "object"
+                          tcpSocket:
+                            description: "TCPSocketAction describes an action based\
+                              \ on opening a socket"
+                            example:
+                              port: "port"
+                              host: "host"
+                            properties:
+                              host:
+                                description: "Optional: Host name to connect to, defaults\
+                                  \ to the pod IP."
+                                type: "string"
+                              port:
+                                description: "IntOrString is a type that can hold\
+                                  \ an int32 or a string.  When used in JSON or YAML\
+                                  \ marshalling and unmarshalling, it produces or\
+                                  \ consumes the inner type.  This allows you to have,\
+                                  \ for example, a JSON field that can accept a name\
+                                  \ or number."
+                                format: "int-or-string"
+                                type: "string"
+                            required:
+                              - "port"
+                            type: "object"
+                        type: "object"
+                      preStop:
+                        description: "Handler defines a specific action that should\
+                          \ be taken"
+                        example:
+                          tcpSocket:
+                            port: "port"
+                            host: "host"
+                          exec:
+                            command:
+                              - "command"
+                              - "command"
+                          httpGet:
+                            path: "path"
+                            scheme: "scheme"
+                            port: "port"
+                            host: "host"
+                            httpHeaders:
+                              - name: "name"
+                                value: "value"
+                              - name: "name"
+                                value: "value"
+                        properties:
+                          exec:
+                            description: "ExecAction describes a \"run in container\"\
+                              \ action."
+                            example:
+                              command:
+                                - "command"
+                                - "command"
+                            properties:
+                              command:
+                                description: "Command is the command line to execute\
+                                  \ inside the container, the working directory for\
+                                  \ the command  is root ('/') in the container's\
+                                  \ filesystem. The command is simply exec'd, it is\
+                                  \ not run inside a shell, so traditional shell instructions\
+                                  \ ('|', etc) won't work. To use a shell, you need\
+                                  \ to explicitly call out to that shell. Exit status\
+                                  \ of 0 is treated as live/healthy and non-zero is\
+                                  \ unhealthy."
+                                items:
+                                  type: "string"
+                                type: "array"
+                            type: "object"
+                          httpGet:
+                            description: "HTTPGetAction describes an action based\
+                              \ on HTTP Get requests."
+                            example:
+                              path: "path"
+                              scheme: "scheme"
+                              port: "port"
+                              host: "host"
+                              httpHeaders:
+                                - name: "name"
+                                  value: "value"
+                                - name: "name"
+                                  value: "value"
+                            properties:
+                              host:
+                                description: "Host name to connect to, defaults to\
+                                  \ the pod IP. You probably want to set \"Host\"\
+                                  \ in httpHeaders instead."
+                                type: "string"
+                              httpHeaders:
+                                description: "Custom headers to set in the request.\
+                                  \ HTTP allows repeated headers."
+                                items:
+                                  description: "HTTPHeader describes a custom header\
+                                    \ to be used in HTTP probes"
+                                  example:
+                                    name: "name"
+                                    value: "value"
+                                  properties:
+                                    name:
+                                      description: "The header field name"
+                                      type: "string"
+                                    value:
+                                      description: "The header field value"
+                                      type: "string"
+                                  required:
+                                    - "name"
+                                    - "value"
+                                  type: "object"
+                                type: "array"
+                              path:
+                                description: "Path to access on the HTTP server."
+                                type: "string"
+                              port:
+                                description: "IntOrString is a type that can hold\
+                                  \ an int32 or a string.  When used in JSON or YAML\
+                                  \ marshalling and unmarshalling, it produces or\
+                                  \ consumes the inner type.  This allows you to have,\
+                                  \ for example, a JSON field that can accept a name\
+                                  \ or number."
+                                format: "int-or-string"
+                                type: "string"
+                              scheme:
+                                description: "Scheme to use for connecting to the\
+                                  \ host. Defaults to HTTP."
+                                type: "string"
+                            required:
+                              - "port"
+                            type: "object"
+                          tcpSocket:
+                            description: "TCPSocketAction describes an action based\
+                              \ on opening a socket"
+                            example:
+                              port: "port"
+                              host: "host"
+                            properties:
+                              host:
+                                description: "Optional: Host name to connect to, defaults\
+                                  \ to the pod IP."
+                                type: "string"
+                              port:
+                                description: "IntOrString is a type that can hold\
+                                  \ an int32 or a string.  When used in JSON or YAML\
+                                  \ marshalling and unmarshalling, it produces or\
+                                  \ consumes the inner type.  This allows you to have,\
+                                  \ for example, a JSON field that can accept a name\
+                                  \ or number."
+                                format: "int-or-string"
+                                type: "string"
+                            required:
+                              - "port"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                  livenessProbe:
+                    description: "Probe describes a health check to be performed against\
+                      \ a container to determine whether it is alive or ready to receive\
+                      \ traffic."
+                    example:
+                      failureThreshold: 5
+                      periodSeconds: 2
+                      tcpSocket:
+                        port: "port"
+                        host: "host"
+                      timeoutSeconds: 9
+                      successThreshold: 7
+                      initialDelaySeconds: 5
+                      exec:
+                        command:
+                          - "command"
+                          - "command"
+                      httpGet:
+                        path: "path"
+                        scheme: "scheme"
+                        port: "port"
+                        host: "host"
+                        httpHeaders:
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
+                    properties:
+                      exec:
+                        description: "ExecAction describes a \"run in container\"\
+                          \ action."
+                        example:
+                          command:
+                            - "command"
+                            - "command"
+                        properties:
+                          command:
+                            description: "Command is the command line to execute inside\
+                              \ the container, the working directory for the command\
+                              \  is root ('/') in the container's filesystem. The\
+                              \ command is simply exec'd, it is not run inside a shell,\
+                              \ so traditional shell instructions ('|', etc) won't\
+                              \ work. To use a shell, you need to explicitly call\
+                              \ out to that shell. Exit status of 0 is treated as\
+                              \ live/healthy and non-zero is unhealthy."
+                            items:
+                              type: "string"
+                            type: "array"
+                        type: "object"
+                      failureThreshold:
+                        description: "Minimum consecutive failures for the probe to\
+                          \ be considered failed after having succeeded. Defaults\
+                          \ to 3. Minimum value is 1."
+                        format: "int32"
+                        type: "integer"
+                      httpGet:
+                        description: "HTTPGetAction describes an action based on HTTP\
+                          \ Get requests."
+                        example:
+                          path: "path"
+                          scheme: "scheme"
+                          port: "port"
+                          host: "host"
+                          httpHeaders:
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
+                        properties:
+                          host:
+                            description: "Host name to connect to, defaults to the\
+                              \ pod IP. You probably want to set \"Host\" in httpHeaders\
+                              \ instead."
+                            type: "string"
+                          httpHeaders:
+                            description: "Custom headers to set in the request. HTTP\
+                              \ allows repeated headers."
+                            items:
+                              description: "HTTPHeader describes a custom header to\
+                                \ be used in HTTP probes"
+                              example:
+                                name: "name"
+                                value: "value"
+                              properties:
+                                name:
+                                  description: "The header field name"
+                                  type: "string"
+                                value:
+                                  description: "The header field value"
+                                  type: "string"
+                              required:
+                                - "name"
+                                - "value"
+                              type: "object"
+                            type: "array"
+                          path:
+                            description: "Path to access on the HTTP server."
+                            type: "string"
+                          port:
+                            description: "IntOrString is a type that can hold an int32\
+                              \ or a string.  When used in JSON or YAML marshalling\
+                              \ and unmarshalling, it produces or consumes the inner\
+                              \ type.  This allows you to have, for example, a JSON\
+                              \ field that can accept a name or number."
+                            format: "int-or-string"
+                            type: "string"
+                          scheme:
+                            description: "Scheme to use for connecting to the host.\
+                              \ Defaults to HTTP."
+                            type: "string"
+                        required:
+                          - "port"
+                        type: "object"
+                      initialDelaySeconds:
+                        description: "Number of seconds after the container has started\
+                          \ before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+                        format: "int32"
+                        type: "integer"
+                      periodSeconds:
+                        description: "How often (in seconds) to perform the probe.\
+                          \ Default to 10 seconds. Minimum value is 1."
+                        format: "int32"
+                        type: "integer"
+                      successThreshold:
+                        description: "Minimum consecutive successes for the probe\
+                          \ to be considered successful after having failed. Defaults\
+                          \ to 1. Must be 1 for liveness and startup. Minimum value\
+                          \ is 1."
+                        format: "int32"
+                        type: "integer"
+                      tcpSocket:
+                        description: "TCPSocketAction describes an action based on\
+                          \ opening a socket"
+                        example:
+                          port: "port"
+                          host: "host"
+                        properties:
+                          host:
+                            description: "Optional: Host name to connect to, defaults\
+                              \ to the pod IP."
+                            type: "string"
+                          port:
+                            description: "IntOrString is a type that can hold an int32\
+                              \ or a string.  When used in JSON or YAML marshalling\
+                              \ and unmarshalling, it produces or consumes the inner\
+                              \ type.  This allows you to have, for example, a JSON\
+                              \ field that can accept a name or number."
+                            format: "int-or-string"
+                            type: "string"
+                        required:
+                          - "port"
+                        type: "object"
+                      timeoutSeconds:
+                        description: "Number of seconds after which the probe times\
+                          \ out. Defaults to 1 second. Minimum value is 1. More info:\
+                          \ https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+                        format: "int32"
+                        type: "integer"
+                    type: "object"
+                  name:
+                    description: "Name of the container specified as a DNS_LABEL.\
+                      \ Each container in a pod must have a unique name (DNS_LABEL).\
+                      \ Cannot be updated."
+                    type: "string"
+                  ports:
+                    description: "List of ports to expose from the container. Exposing\
+                      \ a port here gives the system additional information about\
+                      \ the network connections a container uses, but is primarily\
+                      \ informational. Not specifying a port here DOES NOT prevent\
+                      \ that port from being exposed. Any port which is listening\
+                      \ on the default \"0.0.0.0\" address inside a container will\
+                      \ be accessible from the network. Cannot be updated."
+                    items:
+                      description: "ContainerPort represents a network port in a single\
+                        \ container."
+                      example:
+                        protocol: "protocol"
+                        hostIP: "hostIP"
+                        name: "name"
+                        containerPort: 3
+                        hostPort: 2
+                      properties:
+                        containerPort:
+                          description: "Number of port to expose on the pod's IP address.\
+                            \ This must be a valid port number, 0 < x < 65536."
+                          format: "int32"
+                          type: "integer"
+                        hostIP:
+                          description: "What host IP to bind the external port to."
+                          type: "string"
+                        hostPort:
+                          description: "Number of port to expose on the host. If specified,\
+                            \ this must be a valid port number, 0 < x < 65536. If\
+                            \ HostNetwork is specified, this must match ContainerPort.\
+                            \ Most containers do not need this."
+                          format: "int32"
+                          type: "integer"
+                        name:
+                          description: "If specified, this must be an IANA_SVC_NAME\
+                            \ and unique within the pod. Each named port in a pod\
+                            \ must have a unique name. Name for the port that can\
+                            \ be referred to by services."
+                          type: "string"
+                        protocol:
+                          description: "Protocol for port. Must be UDP, TCP, or SCTP.\
+                            \ Defaults to \"TCP\"."
+                          type: "string"
+                      required:
+                        - "containerPort"
+                        - "protocol"
+                      type: "object"
+                    type: "array"
+                    x-kubernetes-list-map-keys:
+                      - "containerPort"
+                      - "protocol"
+                    x-kubernetes-list-type: "map"
+                  readinessProbe:
+                    description: "Probe describes a health check to be performed against\
+                      \ a container to determine whether it is alive or ready to receive\
+                      \ traffic."
+                    example:
+                      failureThreshold: 5
+                      periodSeconds: 2
+                      tcpSocket:
+                        port: "port"
+                        host: "host"
+                      timeoutSeconds: 9
+                      successThreshold: 7
+                      initialDelaySeconds: 5
+                      exec:
+                        command:
+                          - "command"
+                          - "command"
+                      httpGet:
+                        path: "path"
+                        scheme: "scheme"
+                        port: "port"
+                        host: "host"
+                        httpHeaders:
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
+                    properties:
+                      exec:
+                        description: "ExecAction describes a \"run in container\"\
+                          \ action."
+                        example:
+                          command:
+                            - "command"
+                            - "command"
+                        properties:
+                          command:
+                            description: "Command is the command line to execute inside\
+                              \ the container, the working directory for the command\
+                              \  is root ('/') in the container's filesystem. The\
+                              \ command is simply exec'd, it is not run inside a shell,\
+                              \ so traditional shell instructions ('|', etc) won't\
+                              \ work. To use a shell, you need to explicitly call\
+                              \ out to that shell. Exit status of 0 is treated as\
+                              \ live/healthy and non-zero is unhealthy."
+                            items:
+                              type: "string"
+                            type: "array"
+                        type: "object"
+                      failureThreshold:
+                        description: "Minimum consecutive failures for the probe to\
+                          \ be considered failed after having succeeded. Defaults\
+                          \ to 3. Minimum value is 1."
+                        format: "int32"
+                        type: "integer"
+                      httpGet:
+                        description: "HTTPGetAction describes an action based on HTTP\
+                          \ Get requests."
+                        example:
+                          path: "path"
+                          scheme: "scheme"
+                          port: "port"
+                          host: "host"
+                          httpHeaders:
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
+                        properties:
+                          host:
+                            description: "Host name to connect to, defaults to the\
+                              \ pod IP. You probably want to set \"Host\" in httpHeaders\
+                              \ instead."
+                            type: "string"
+                          httpHeaders:
+                            description: "Custom headers to set in the request. HTTP\
+                              \ allows repeated headers."
+                            items:
+                              description: "HTTPHeader describes a custom header to\
+                                \ be used in HTTP probes"
+                              example:
+                                name: "name"
+                                value: "value"
+                              properties:
+                                name:
+                                  description: "The header field name"
+                                  type: "string"
+                                value:
+                                  description: "The header field value"
+                                  type: "string"
+                              required:
+                                - "name"
+                                - "value"
+                              type: "object"
+                            type: "array"
+                          path:
+                            description: "Path to access on the HTTP server."
+                            type: "string"
+                          port:
+                            description: "IntOrString is a type that can hold an int32\
+                              \ or a string.  When used in JSON or YAML marshalling\
+                              \ and unmarshalling, it produces or consumes the inner\
+                              \ type.  This allows you to have, for example, a JSON\
+                              \ field that can accept a name or number."
+                            format: "int-or-string"
+                            type: "string"
+                          scheme:
+                            description: "Scheme to use for connecting to the host.\
+                              \ Defaults to HTTP."
+                            type: "string"
+                        required:
+                          - "port"
+                        type: "object"
+                      initialDelaySeconds:
+                        description: "Number of seconds after the container has started\
+                          \ before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+                        format: "int32"
+                        type: "integer"
+                      periodSeconds:
+                        description: "How often (in seconds) to perform the probe.\
+                          \ Default to 10 seconds. Minimum value is 1."
+                        format: "int32"
+                        type: "integer"
+                      successThreshold:
+                        description: "Minimum consecutive successes for the probe\
+                          \ to be considered successful after having failed. Defaults\
+                          \ to 1. Must be 1 for liveness and startup. Minimum value\
+                          \ is 1."
+                        format: "int32"
+                        type: "integer"
+                      tcpSocket:
+                        description: "TCPSocketAction describes an action based on\
+                          \ opening a socket"
+                        example:
+                          port: "port"
+                          host: "host"
+                        properties:
+                          host:
+                            description: "Optional: Host name to connect to, defaults\
+                              \ to the pod IP."
+                            type: "string"
+                          port:
+                            description: "IntOrString is a type that can hold an int32\
+                              \ or a string.  When used in JSON or YAML marshalling\
+                              \ and unmarshalling, it produces or consumes the inner\
+                              \ type.  This allows you to have, for example, a JSON\
+                              \ field that can accept a name or number."
+                            format: "int-or-string"
+                            type: "string"
+                        required:
+                          - "port"
+                        type: "object"
+                      timeoutSeconds:
+                        description: "Number of seconds after which the probe times\
+                          \ out. Defaults to 1 second. Minimum value is 1. More info:\
+                          \ https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+                        format: "int32"
+                        type: "integer"
+                    type: "object"
+                  resources:
+                    description: "ResourceRequirements describes the compute resource\
+                      \ requirements."
+                    example:
+                      requests: {}
+                      limits: {}
+                    properties:
+                      limits:
+                        additionalProperties:
+                          description: "Quantity is a fixed-point representation of\
+                            \ a number. It provides convenient marshaling/unmarshaling\
+                            \ in JSON and YAML, in addition to String() and AsInt64()\
+                            \ accessors.\n\nThe serialization format is:\n\n<quantity>\
+                            \        ::= <signedNumber><suffix>\n  (Note that <suffix>\
+                            \ may be empty, from the \"\" case in <decimalSI>.)\n\
+                            <digit>           ::= 0 | 1 | ... | 9 <digits>       \
+                            \   ::= <digit> | <digit><digits> <number>          ::=\
+                            \ <digits> | <digits>.<digits> | <digits>. | .<digits>\
+                            \ <sign>            ::= \"+\" | \"-\" <signedNumber> \
+                            \   ::= <number> | <sign><number> <suffix>          ::=\
+                            \ <binarySI> | <decimalExponent> | <decimalSI> <binarySI>\
+                            \        ::= Ki | Mi | Gi | Ti | Pi | Ei\n  (International\
+                            \ System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\
+                            <decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n\
+                            \  (Note that 1024 = 1Ki but 1000 = 1k; I didn't choose\
+                            \ the capitalization.)\n<decimalExponent> ::= \"e\" <signedNumber>\
+                            \ | \"E\" <signedNumber>\n\nNo matter which of the three\
+                            \ exponent forms is used, no quantity may represent a\
+                            \ number greater than 2^63-1 in magnitude, nor may it\
+                            \ have more than 3 decimal places. Numbers larger or more\
+                            \ precise will be capped or rounded up. (E.g.: 0.1m will\
+                            \ rounded up to 1m.) This may be extended in the future\
+                            \ if we require larger or smaller quantities.\n\nWhen\
+                            \ a Quantity is parsed from a string, it will remember\
+                            \ the type of suffix it had, and will use the same type\
+                            \ again when it is serialized.\n\nBefore serializing,\
+                            \ Quantity will be put in \"canonical form\". This means\
+                            \ that Exponent/suffix will be adjusted up or down (with\
+                            \ a corresponding increase or decrease in Mantissa) such\
+                            \ that:\n  a. No precision is lost\n  b. No fractional\
+                            \ digits will be emitted\n  c. The exponent (or suffix)\
+                            \ is as large as possible.\nThe sign will be omitted unless\
+                            \ the number is negative.\n\nExamples:\n  1.5 will be\
+                            \ serialized as \"1500m\"\n  1.5Gi will be serialized\
+                            \ as \"1536Mi\"\n\nNote that the quantity will NEVER be\
+                            \ internally represented by a floating point number. That\
+                            \ is the whole point of this exercise.\n\nNon-canonical\
+                            \ values will still parse as long as they are well formed,\
+                            \ but will be re-emitted in their canonical form. (So\
+                            \ always use canonical form, or don't diff.)\n\nThis format\
+                            \ is intended to make it difficult to use these numbers\
+                            \ without writing some sort of special handling code in\
+                            \ the hopes that that will cause implementors to also\
+                            \ use a fixed point implementation."
+                          format: "quantity"
+                          type: "string"
+                        description: "Limits describes the maximum amount of compute\
+                          \ resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
+                        type: "object"
+                      requests:
+                        additionalProperties:
+                          description: "Quantity is a fixed-point representation of\
+                            \ a number. It provides convenient marshaling/unmarshaling\
+                            \ in JSON and YAML, in addition to String() and AsInt64()\
+                            \ accessors.\n\nThe serialization format is:\n\n<quantity>\
+                            \        ::= <signedNumber><suffix>\n  (Note that <suffix>\
+                            \ may be empty, from the \"\" case in <decimalSI>.)\n\
+                            <digit>           ::= 0 | 1 | ... | 9 <digits>       \
+                            \   ::= <digit> | <digit><digits> <number>          ::=\
+                            \ <digits> | <digits>.<digits> | <digits>. | .<digits>\
+                            \ <sign>            ::= \"+\" | \"-\" <signedNumber> \
+                            \   ::= <number> | <sign><number> <suffix>          ::=\
+                            \ <binarySI> | <decimalExponent> | <decimalSI> <binarySI>\
+                            \        ::= Ki | Mi | Gi | Ti | Pi | Ei\n  (International\
+                            \ System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\
+                            <decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n\
+                            \  (Note that 1024 = 1Ki but 1000 = 1k; I didn't choose\
+                            \ the capitalization.)\n<decimalExponent> ::= \"e\" <signedNumber>\
+                            \ | \"E\" <signedNumber>\n\nNo matter which of the three\
+                            \ exponent forms is used, no quantity may represent a\
+                            \ number greater than 2^63-1 in magnitude, nor may it\
+                            \ have more than 3 decimal places. Numbers larger or more\
+                            \ precise will be capped or rounded up. (E.g.: 0.1m will\
+                            \ rounded up to 1m.) This may be extended in the future\
+                            \ if we require larger or smaller quantities.\n\nWhen\
+                            \ a Quantity is parsed from a string, it will remember\
+                            \ the type of suffix it had, and will use the same type\
+                            \ again when it is serialized.\n\nBefore serializing,\
+                            \ Quantity will be put in \"canonical form\". This means\
+                            \ that Exponent/suffix will be adjusted up or down (with\
+                            \ a corresponding increase or decrease in Mantissa) such\
+                            \ that:\n  a. No precision is lost\n  b. No fractional\
+                            \ digits will be emitted\n  c. The exponent (or suffix)\
+                            \ is as large as possible.\nThe sign will be omitted unless\
+                            \ the number is negative.\n\nExamples:\n  1.5 will be\
+                            \ serialized as \"1500m\"\n  1.5Gi will be serialized\
+                            \ as \"1536Mi\"\n\nNote that the quantity will NEVER be\
+                            \ internally represented by a floating point number. That\
+                            \ is the whole point of this exercise.\n\nNon-canonical\
+                            \ values will still parse as long as they are well formed,\
+                            \ but will be re-emitted in their canonical form. (So\
+                            \ always use canonical form, or don't diff.)\n\nThis format\
+                            \ is intended to make it difficult to use these numbers\
+                            \ without writing some sort of special handling code in\
+                            \ the hopes that that will cause implementors to also\
+                            \ use a fixed point implementation."
+                          format: "quantity"
+                          type: "string"
+                        description: "Requests describes the minimum amount of compute\
+                          \ resources required. If Requests is omitted for a container,\
+                          \ it defaults to Limits if that is explicitly specified,\
+                          \ otherwise to an implementation-defined value. More info:\
+                          \ https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
+                        type: "object"
+                    type: "object"
+                  securityContext:
+                    description: "SecurityContext holds security configuration that\
+                      \ will be applied to a container. Some fields are present in\
+                      \ both SecurityContext and PodSecurityContext.  When both are\
+                      \ set, the values in SecurityContext take precedence."
+                    example:
+                      privileged: true
+                      runAsUser: 7
+                      capabilities:
+                        add:
+                          - "add"
+                          - "add"
+                        drop:
+                          - "drop"
+                          - "drop"
+                      seLinuxOptions:
+                        role: "role"
+                        level: "level"
+                        type: "type"
+                        user: "user"
+                      seccompProfile:
+                        localhostProfile: "localhostProfile"
+                        type: "type"
+                      windowsOptions:
+                        gmsaCredentialSpec: "gmsaCredentialSpec"
+                        runAsUserName: "runAsUserName"
+                        gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                      procMount: "procMount"
+                      allowPrivilegeEscalation: true
+                      runAsGroup: 4
+                      runAsNonRoot: true
+                      readOnlyRootFilesystem: true
+                    properties:
+                      allowPrivilegeEscalation:
+                        description: "AllowPrivilegeEscalation controls whether a\
+                          \ process can gain more privileges than its parent process.\
+                          \ This bool directly controls if the no_new_privs flag will\
+                          \ be set on the container process. AllowPrivilegeEscalation\
+                          \ is true always when the container is: 1) run as Privileged\
+                          \ 2) has CAP_SYS_ADMIN"
+                        type: "boolean"
+                      capabilities:
+                        description: "Adds and removes POSIX capabilities from running\
+                          \ containers."
+                        example:
+                          add:
+                            - "add"
+                            - "add"
+                          drop:
+                            - "drop"
+                            - "drop"
+                        properties:
+                          add:
+                            description: "Added capabilities"
+                            items:
+                              type: "string"
+                            type: "array"
+                          drop:
+                            description: "Removed capabilities"
+                            items:
+                              type: "string"
+                            type: "array"
+                        type: "object"
+                      privileged:
+                        description: "Run container in privileged mode. Processes\
+                          \ in privileged containers are essentially equivalent to\
+                          \ root on the host. Defaults to false."
+                        type: "boolean"
+                      procMount:
+                        description: "procMount denotes the type of proc mount to\
+                          \ use for the containers. The default is DefaultProcMount\
+                          \ which uses the container runtime defaults for readonly\
+                          \ paths and masked paths. This requires the ProcMountType\
+                          \ feature flag to be enabled."
+                        type: "string"
+                      readOnlyRootFilesystem:
+                        description: "Whether this container has a read-only root\
+                          \ filesystem. Default is false."
+                        type: "boolean"
+                      runAsGroup:
+                        description: "The GID to run the entrypoint of the container\
+                          \ process. Uses runtime default if unset. May also be set\
+                          \ in PodSecurityContext.  If set in both SecurityContext\
+                          \ and PodSecurityContext, the value specified in SecurityContext\
+                          \ takes precedence."
+                        format: "int64"
+                        type: "integer"
+                      runAsNonRoot:
+                        description: "Indicates that the container must run as a non-root\
+                          \ user. If true, the Kubelet will validate the image at\
+                          \ runtime to ensure that it does not run as UID 0 (root)\
+                          \ and fail to start the container if it does. If unset or\
+                          \ false, no such validation will be performed. May also\
+                          \ be set in PodSecurityContext.  If set in both SecurityContext\
+                          \ and PodSecurityContext, the value specified in SecurityContext\
+                          \ takes precedence."
+                        type: "boolean"
+                      runAsUser:
+                        description: "The UID to run the entrypoint of the container\
+                          \ process. Defaults to user specified in image metadata\
+                          \ if unspecified. May also be set in PodSecurityContext.\
+                          \  If set in both SecurityContext and PodSecurityContext,\
+                          \ the value specified in SecurityContext takes precedence."
+                        format: "int64"
+                        type: "integer"
+                      seLinuxOptions:
+                        description: "SELinuxOptions are the labels to be applied\
+                          \ to the container"
+                        example:
+                          role: "role"
+                          level: "level"
+                          type: "type"
+                          user: "user"
+                        properties:
+                          level:
+                            description: "Level is SELinux level label that applies\
+                              \ to the container."
+                            type: "string"
+                          role:
+                            description: "Role is a SELinux role label that applies\
+                              \ to the container."
+                            type: "string"
+                          type:
+                            description: "Type is a SELinux type label that applies\
+                              \ to the container."
+                            type: "string"
+                          user:
+                            description: "User is a SELinux user label that applies\
+                              \ to the container."
+                            type: "string"
+                        type: "object"
+                      seccompProfile:
+                        description: "SeccompProfile defines a pod/container's seccomp\
+                          \ profile settings. Only one profile source may be set."
+                        example:
+                          localhostProfile: "localhostProfile"
+                          type: "type"
+                        properties:
+                          localhostProfile:
+                            description: "localhostProfile indicates a profile defined\
+                              \ in a file on the node should be used. The profile\
+                              \ must be preconfigured on the node to work. Must be\
+                              \ a descending path, relative to the kubelet's configured\
+                              \ seccomp profile location. Must only be set if type\
+                              \ is \"Localhost\"."
+                            type: "string"
+                          type:
+                            description: "type indicates which kind of seccomp profile\
+                              \ will be applied. Valid options are:\n\nLocalhost -\
+                              \ a profile defined in a file on the node should be\
+                              \ used. RuntimeDefault - the container runtime default\
+                              \ profile should be used. Unconfined - no profile should\
+                              \ be applied."
+                            type: "string"
+                        required:
+                          - "type"
+                        type: "object"
+                      windowsOptions:
+                        description: "WindowsSecurityContextOptions contain Windows-specific\
+                          \ options and credentials."
+                        example:
+                          gmsaCredentialSpec: "gmsaCredentialSpec"
+                          runAsUserName: "runAsUserName"
+                          gmsaCredentialSpecName: "gmsaCredentialSpecName"
+                        properties:
+                          gmsaCredentialSpec:
+                            description: "GMSACredentialSpec is where the GMSA admission\
+                              \ webhook (https://github.com/kubernetes-sigs/windows-gmsa)\
+                              \ inlines the contents of the GMSA credential spec named\
+                              \ by the GMSACredentialSpecName field."
+                            type: "string"
+                          gmsaCredentialSpecName:
+                            description: "GMSACredentialSpecName is the name of the\
+                              \ GMSA credential spec to use."
+                            type: "string"
+                          runAsUserName:
+                            description: "The UserName in Windows to run the entrypoint\
+                              \ of the container process. Defaults to the user specified\
+                              \ in image metadata if unspecified. May also be set\
+                              \ in PodSecurityContext. If set in both SecurityContext\
+                              \ and PodSecurityContext, the value specified in SecurityContext\
+                              \ takes precedence."
+                            type: "string"
+                        type: "object"
+                    type: "object"
+                  startupProbe:
+                    description: "Probe describes a health check to be performed against\
+                      \ a container to determine whether it is alive or ready to receive\
+                      \ traffic."
+                    example:
+                      failureThreshold: 5
+                      periodSeconds: 2
+                      tcpSocket:
+                        port: "port"
+                        host: "host"
+                      timeoutSeconds: 9
+                      successThreshold: 7
+                      initialDelaySeconds: 5
+                      exec:
+                        command:
+                          - "command"
+                          - "command"
+                      httpGet:
+                        path: "path"
+                        scheme: "scheme"
+                        port: "port"
+                        host: "host"
+                        httpHeaders:
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
+                    properties:
+                      exec:
+                        description: "ExecAction describes a \"run in container\"\
+                          \ action."
+                        example:
+                          command:
+                            - "command"
+                            - "command"
+                        properties:
+                          command:
+                            description: "Command is the command line to execute inside\
+                              \ the container, the working directory for the command\
+                              \  is root ('/') in the container's filesystem. The\
+                              \ command is simply exec'd, it is not run inside a shell,\
+                              \ so traditional shell instructions ('|', etc) won't\
+                              \ work. To use a shell, you need to explicitly call\
+                              \ out to that shell. Exit status of 0 is treated as\
+                              \ live/healthy and non-zero is unhealthy."
+                            items:
+                              type: "string"
+                            type: "array"
+                        type: "object"
+                      failureThreshold:
+                        description: "Minimum consecutive failures for the probe to\
+                          \ be considered failed after having succeeded. Defaults\
+                          \ to 3. Minimum value is 1."
+                        format: "int32"
+                        type: "integer"
+                      httpGet:
+                        description: "HTTPGetAction describes an action based on HTTP\
+                          \ Get requests."
+                        example:
+                          path: "path"
+                          scheme: "scheme"
+                          port: "port"
+                          host: "host"
+                          httpHeaders:
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
+                        properties:
+                          host:
+                            description: "Host name to connect to, defaults to the\
+                              \ pod IP. You probably want to set \"Host\" in httpHeaders\
+                              \ instead."
+                            type: "string"
+                          httpHeaders:
+                            description: "Custom headers to set in the request. HTTP\
+                              \ allows repeated headers."
+                            items:
+                              description: "HTTPHeader describes a custom header to\
+                                \ be used in HTTP probes"
+                              example:
+                                name: "name"
+                                value: "value"
+                              properties:
+                                name:
+                                  description: "The header field name"
+                                  type: "string"
+                                value:
+                                  description: "The header field value"
+                                  type: "string"
+                              required:
+                                - "name"
+                                - "value"
+                              type: "object"
+                            type: "array"
+                          path:
+                            description: "Path to access on the HTTP server."
+                            type: "string"
+                          port:
+                            description: "IntOrString is a type that can hold an int32\
+                              \ or a string.  When used in JSON or YAML marshalling\
+                              \ and unmarshalling, it produces or consumes the inner\
+                              \ type.  This allows you to have, for example, a JSON\
+                              \ field that can accept a name or number."
+                            format: "int-or-string"
+                            type: "string"
+                          scheme:
+                            description: "Scheme to use for connecting to the host.\
+                              \ Defaults to HTTP."
+                            type: "string"
+                        required:
+                          - "port"
+                        type: "object"
+                      initialDelaySeconds:
+                        description: "Number of seconds after the container has started\
+                          \ before liveness probes are initiated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+                        format: "int32"
+                        type: "integer"
+                      periodSeconds:
+                        description: "How often (in seconds) to perform the probe.\
+                          \ Default to 10 seconds. Minimum value is 1."
+                        format: "int32"
+                        type: "integer"
+                      successThreshold:
+                        description: "Minimum consecutive successes for the probe\
+                          \ to be considered successful after having failed. Defaults\
+                          \ to 1. Must be 1 for liveness and startup. Minimum value\
+                          \ is 1."
+                        format: "int32"
+                        type: "integer"
+                      tcpSocket:
+                        description: "TCPSocketAction describes an action based on\
+                          \ opening a socket"
+                        example:
+                          port: "port"
+                          host: "host"
+                        properties:
+                          host:
+                            description: "Optional: Host name to connect to, defaults\
+                              \ to the pod IP."
+                            type: "string"
+                          port:
+                            description: "IntOrString is a type that can hold an int32\
+                              \ or a string.  When used in JSON or YAML marshalling\
+                              \ and unmarshalling, it produces or consumes the inner\
+                              \ type.  This allows you to have, for example, a JSON\
+                              \ field that can accept a name or number."
+                            format: "int-or-string"
+                            type: "string"
+                        required:
+                          - "port"
+                        type: "object"
+                      timeoutSeconds:
+                        description: "Number of seconds after which the probe times\
+                          \ out. Defaults to 1 second. Minimum value is 1. More info:\
+                          \ https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+                        format: "int32"
+                        type: "integer"
+                    type: "object"
+                  stdin:
+                    description: "Whether this container should allocate a buffer\
+                      \ for stdin in the container runtime. If this is not set, reads\
+                      \ from stdin in the container will always result in EOF. Default\
+                      \ is false."
+                    type: "boolean"
+                  stdinOnce:
+                    description: "Whether the container runtime should close the stdin\
+                      \ channel after it has been opened by a single attach. When\
+                      \ stdin is true the stdin stream will remain open across multiple\
+                      \ attach sessions. If stdinOnce is set to true, stdin is opened\
+                      \ on container start, is empty until the first client attaches\
+                      \ to stdin, and then remains open and accepts data until the\
+                      \ client disconnects, at which time stdin is closed and remains\
+                      \ closed until the container is restarted. If this flag is false,\
+                      \ a container processes that reads from stdin will never receive\
+                      \ an EOF. Default is false"
+                    type: "boolean"
+                  terminationMessagePath:
+                    description: "Optional: Path at which the file to which the container's\
+                      \ termination message will be written is mounted into the container's\
+                      \ filesystem. Message written is intended to be brief final\
+                      \ status, such as an assertion failure message. Will be truncated\
+                      \ by the node if greater than 4096 bytes. The total message\
+                      \ length across all containers will be limited to 12kb. Defaults\
+                      \ to /dev/termination-log. Cannot be updated."
+                    type: "string"
+                  terminationMessagePolicy:
+                    description: "Indicate how the termination message should be populated.\
+                      \ File will use the contents of terminationMessagePath to populate\
+                      \ the container status message on both success and failure.\
+                      \ FallbackToLogsOnError will use the last chunk of container\
+                      \ log output if the termination message file is empty and the\
+                      \ container exited with an error. The log output is limited\
+                      \ to 2048 bytes or 80 lines, whichever is smaller. Defaults\
+                      \ to File. Cannot be updated."
+                    type: "string"
+                  tty:
+                    description: "Whether this container should allocate a TTY for\
+                      \ itself, also requires 'stdin' to be true. Default is false."
+                    type: "boolean"
+                  volumeDevices:
+                    description: "volumeDevices is the list of block devices to be\
+                      \ used by the container."
+                    items:
+                      description: "volumeDevice describes a mapping of a raw block\
+                        \ device within a container."
+                      example:
+                        devicePath: "devicePath"
+                        name: "name"
+                      properties:
+                        devicePath:
+                          description: "devicePath is the path inside of the container\
+                            \ that the device will be mapped to."
+                          type: "string"
+                        name:
+                          description: "name must match the name of a persistentVolumeClaim\
+                            \ in the pod"
+                          type: "string"
+                      required:
+                        - "devicePath"
+                        - "name"
+                      type: "object"
+                    type: "array"
+                  volumeMounts:
+                    description: "Pod volumes to mount into the container's filesystem.\
+                      \ Cannot be updated."
+                    items:
+                      description: "VolumeMount describes a mounting of a Volume within\
+                        \ a container."
+                      example:
+                        mountPath: "mountPath"
+                        mountPropagation: "mountPropagation"
+                        name: "name"
+                        readOnly: true
+                        subPath: "subPath"
+                        subPathExpr: "subPathExpr"
+                      properties:
+                        mountPath:
+                          description: "Path within the container at which the volume\
+                            \ should be mounted.  Must not contain ':'."
+                          type: "string"
+                        mountPropagation:
+                          description: "mountPropagation determines how mounts are\
+                            \ propagated from the host to container and the other\
+                            \ way around. When not set, MountPropagationNone is used.\
+                            \ This field is beta in 1.10."
+                          type: "string"
+                        name:
+                          description: "This must match the Name of a Volume."
+                          type: "string"
+                        readOnly:
+                          description: "Mounted read-only if true, read-write otherwise\
+                            \ (false or unspecified). Defaults to false."
+                          type: "boolean"
+                        subPath:
+                          description: "Path within the volume from which the container's\
+                            \ volume should be mounted. Defaults to \"\" (volume's\
+                            \ root)."
+                          type: "string"
+                        subPathExpr:
+                          description: "Expanded path within the volume from which\
+                            \ the container's volume should be mounted. Behaves similarly\
+                            \ to SubPath but environment variable references $(VAR_NAME)\
+                            \ are expanded using the container's environment. Defaults\
+                            \ to \"\" (volume's root). SubPathExpr and SubPath are\
+                            \ mutually exclusive."
+                          type: "string"
+                      required:
+                        - "mountPath"
+                        - "name"
+                      type: "object"
+                    type: "array"
+                  workingDir:
+                    description: "Container's working directory. If not specified,\
+                      \ the container runtime's default will be used, which might\
+                      \ be configured in the container image. Cannot be updated."
                     type: "string"
                 required:
                   - "name"
@@ -349,10 +3350,12 @@ spec:
           description: "A HiveMQ deployment's status description"
           properties:
             state:
+              description: "The current state of the deployment, indicating if updates\
+                \ are in progress, have failed, or the state was degraded"
               enum:
                 - "Running"
                 - "Updating"
-                - "Creating"
+                - "Pending"
                 - "Failed"
                 - "Degraded"
                 - "Deleting"
@@ -409,25 +3412,72 @@ spec:
                     type: "string"
                 type: "object"
               type: "array"
+            previousState:
+              description: "The previous state of this cluster, for building diffs\
+                \ and determining the current cluster state"
+              type: "string"
+            extensionState:
+              description: "Description of all extensions and their (desired) states"
+              items:
+                properties:
+                  name:
+                    description: "Unique, descriptive name for the extension folder"
+                    type: "string"
+                  enabled:
+                    description: "Whether this extension should be enabled"
+                    type: "boolean"
+                  configMap:
+                    description: "ConfigMap that contains configuration files for\
+                      \ this extension"
+                    type: "string"
+                  static:
+                    description: "Whether configuration changes should lead to a rolling\
+                      \ disable/enable instead of hot-reload"
+                    type: "boolean"
+                  extensionUri:
+                    description: "HTTP URI to download the extension from (as .zip\
+                      \ distribution). Set to 'preinstalled' if the extension to be\
+                      \ managed is statically built into the container."
+                    type: "string"
+                  offline:
+                    description: "Whether the individual HiveMQ nodes being updated\
+                      \ with a new extension version should be taken offline (i.e.\
+                      \ removed from load-balancers) during the update"
+                    type: "boolean"
+                  initialization:
+                    description: "Initialization script to run when installing this\
+                      \ extension. This will be executed with the working directory\
+                      \ as the extension folder. Must be idempotent as it will be\
+                      \ run on every update as well."
+                    type: "string"
+                  updateStrategy:
+                    description: "In what manner to perform extension updates"
+                    enum:
+                      - "serial"
+                      - "parallel"
+                    type: "string"
+                required:
+                  - "name"
+                type: "object"
+              type: "array"
+            surgeStatus:
+              description: "Only used if the underlying controller type is StatefulSet:\
+                \ indicates whether a surge update is in progress, and what state\
+                \ it is in."
+              enum:
+                - "SURGE_IN_PROGRESS"
+                - "READY"
+              type: "string"
           required:
             - "state"
             - "message"
           type: "object"
-        apiVersion:
-          description: "APIVersion defines the versioned schema of this representation\n\
-            \              of an object. Servers should convert recognized schemas\
-            \ to the latest\n              internal value, and may reject unrecognized\
-            \ values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
-          type: "string"
-        kind:
-          description: "Kind is a string value representing the REST resource this\n\
-            \              object represents. Servers may infer this from the endpoint\
-            \ the client\n              submits requests to. Cannot be updated. In\
-            \ CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
-          type: "string"
         metadata:
           type: "object"
       required:
         - "spec"
       type: "object"
-  version: "v1"
+  versions:
+    - name: "v1"
+      served: true
+      storage: true
