@@ -3,12 +3,13 @@
 The most significant changes in this release are:
 - The CRD update (You must update your CustomResourceDefinition. Can be done without any downtime, simply apply the new CRD.)
 - The operator now supports the stable v1 api version of CustomResourceDefinition.
+- HiveMQ now runs with a more restricted Pod & container security context by default. Additionally, security context configurations are now customizable.
 
 Full list of changes:
-- Fix the customProperties field in the CustomResourceDefinition. It was previously not working properly due to field-pruning. Note that customProperties must be string-types now.
+- Fix the `customProperties` field in the CustomResourceDefinition. It was previously not working properly due to field-pruning. Note that customProperties must be string-types now.
 - The CustomResourceDefinition of this version contains some changes. While the changes are non-breaking, be aware that you must update the CRD on your cluster.
 - Added various fields to the CustomResourceDefinition and added them to the templates, to ensure most fields of the underlying pod & controller specs can be utilized.
-  - `sidecars`: Add arbitrary containers to the HiveMQ Pod.
+  - `sidecars`: Add arbitrary containers to the HiveMQ Pod
   - `initContainers`: Add arbitrary initContainers to the HiveMQ Pod (Similar to `initialization` but with more flexibility)
   - `podLabels`: Add arbitrary labels to the HiveMQ Pod
   - `podAnnotations`: Add arbitrary annotations to the HiveMQ Pod
@@ -19,8 +20,10 @@ Full list of changes:
   - `additionalVolumes`: Add arbitrary volumes to the HiveMQ Pod
   - `additionalVolumeMounts`: Add arbitrary volume mounts to the HiveMQ container
   - `topologySpreadConstraints`: Configure topologySpreadConstraints in the underlying controller
-  - `dnsSuffix` For configuring a custom `svc.cluster.local` suffix for DNS discovery
-  - `operatorHints` section for configuring operations logic such as surge node orchestration & PVC clean-up
+  - `dnsSuffix`: Field for configuring a custom `svc.cluster.local` suffix for DNS discovery
+  - `operatorHints`: Section for configuring operations logic such as surge node orchestration & PVC clean-up
+  - `podSecurityContext`: For providing a custom securityContext for the HiveMQ Pod
+  - `containerSecurityContext`: For providing a custom securityContext for the HiveMQ container
   - mqtt section:
     - Added missing `messageExpiryMaxInterval` field
   - security section:
