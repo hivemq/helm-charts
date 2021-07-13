@@ -843,7 +843,6 @@ data:
       podManagementPolicy: Parallel
       updateStrategy:
         type: OnDelete
-      # TODO get this from the CR
       volumeClaimTemplates:
         {{ util:nindent(4, util:toYaml(spec.volumeClaimTemplates)) }}
       selector:

@@ -29,7 +29,7 @@ spec:
     rule: 'MustRunAsNonRoot'
   seLinux:
     # This policy assumes the nodes are using AppArmor rather than SELinux.
-    rule: 'RunAsAny'
+    rule: 'MustRunAs'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:

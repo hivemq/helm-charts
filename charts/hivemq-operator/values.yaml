@@ -263,6 +263,7 @@ hivemq:
   javaOptions: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=40 -XX:MaxRAMPercentage=50 -XX:MinRAMPercentage=30"
   clusterReplicaCount: "2"
   controllerTemplate: cluster-deployment.yaml
+  # language=XML
   configOverride: |
     <?xml version="1.0"?>
     <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -284,13 +285,15 @@ hivemq:
                 </user>
             </users>
         </control-center>
-        <!--REST-API-CONFIGURATION-->
+
+        --REST-API-CONFIGURATION--
         <cluster>
             <enabled>true</enabled>
             <transport>
                 <tcp>
                     <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
                     <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
+                    <enabled>true</enabled>
                 </tcp>
             </transport>
             <discovery>
@@ -334,6 +337,10 @@ hivemq:
             <session-expiry>
                 <max-interval>${HIVEMQ_SESSION_EXPIRY_INTERVAL}</max-interval>
             </session-expiry>
+
+            <message-expiry>
+                <max-interval>${HIVEMQ_MESSAGE_EXPIRY_MAX_INTERVAL}</max-interval>
+            </message-expiry>
 
             <packets>
                 <max-packet-size>${HIVEMQ_MAX_PACKET_SIZE}</max-packet-size>
@@ -397,6 +404,10 @@ hivemq:
             <allow-request-problem-information>
                 <enabled>${HIVEMQ_ALLOW_REQUEST_PROBLEM_INFORMATION}</enabled>
             </allow-request-problem-information>
+
+            <control-center-audit-log>
+                <enabled>${HIVEMQ_CONTROL_CENTER_AUDIT_LOG_ENABLED}</enabled>
+            </control-center-audit-log>
         </security>
     </hivemq>
 nameOverride: ""
