@@ -1,7 +1,7 @@
 # 4.7.0 (chart 0.9.0)
 
 The most significant changes in this release are:
-- The CRD update (You must update your CustomResourceDefinition. Can be done without any downtime, simply apply the new CRD.)
+- The CRD update (You must update your CustomResourceDefinition. Can be done without any downtime, simply apply the new CRD using `kubectl apply -f https://raw.githubusercontent.com/hivemq/helm-charts/master/charts/hivemq-operator/crds/hivemq-cluster.yaml`)
 - The Helm Chart now uses v1 CustomResourceDefinition by default. This is only supported in Kubernetes 1.16+. If you are running Kubernetes <1.16, Please apply the CRD directly using `kubectl apply -f https://raw.githubusercontent.com/hivemq/helm-charts/master/manifests/legacy/v1beta1-hivemq-cluster.yaml`. 
 - The operator now supports the stable v1 api version of CustomResourceDefinition.
 - HiveMQ now runs with a more restricted Pod & container security context by default. Additionally, security context configurations are now customizable.
