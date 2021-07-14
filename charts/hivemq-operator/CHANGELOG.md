@@ -2,6 +2,7 @@
 
 The most significant changes in this release are:
 - The CRD update (You must update your CustomResourceDefinition. Can be done without any downtime, simply apply the new CRD.)
+- The Helm Chart now uses v1 CustomResourceDefinition by default. This is only supported in Kubernetes 1.16+. If you are running Kubernetes <1.16, Please apply the CRD directly using `kubectl apply -f https://raw.githubusercontent.com/hivemq/helm-charts/master/manifests/legacy/v1beta1-hivemq-cluster.yaml`. 
 - The operator now supports the stable v1 api version of CustomResourceDefinition.
 - HiveMQ now runs with a more restricted Pod & container security context by default. Additionally, security context configurations are now customizable.
 
@@ -23,6 +24,7 @@ Full list of changes:
   - `dnsSuffix`: Field for configuring a custom `svc.cluster.local` suffix for DNS discovery
   - `operatorHints`: Section for configuring operations logic such as surge node orchestration & PVC clean-up
   - `podSecurityContext`: For providing a custom securityContext for the HiveMQ Pod
+  - `volumeClaimTemplates`: (StatefulSet only) for providing volume claim templates to the StatefulSet.
   - `containerSecurityContext`: For providing a custom securityContext for the HiveMQ container
   - mqtt section:
     - Added missing `messageExpiryMaxInterval` field
