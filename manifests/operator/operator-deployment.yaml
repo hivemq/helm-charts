@@ -19,7 +19,7 @@ spec:
         operator: "hivemq-operator"
     spec:
       containers:
-        - image: hivemq/hivemq-operator:4.7.0,pre-1
+        - image: hivemq/hivemq-operator:4.7.0-pre-1
           imagePullPolicy: IfNotPresent
           name: operator
           env:
