@@ -16,6 +16,9 @@ metadata:
 spec:
   endpoints:
     - port: metrics
+      {% if spec.monitoring.scrapeInterval != null %}
+      interval: {{ spec.monitoring.scrapeInterval }}
+      {% endif %}
   jobLabel: hivemq-cluster
   selector:
     matchLabels:

@@ -79,6 +79,26 @@ rules:
       - watch
       - patch
   - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+  - apiGroups:
       - extensions
     resources:
       - statefulsets
