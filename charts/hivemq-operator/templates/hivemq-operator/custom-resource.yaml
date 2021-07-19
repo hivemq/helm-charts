@@ -82,4 +82,5 @@ spec:
   dnsSuffix: {{ toYaml .Values.hivemq.dnsSuffix | nindent 4 }}
   podAnnotations: {{ toYaml .Values.hivemq.podAnnotations | nindent 4 }}
   customProperties: {{ toYaml .Values.hivemq.customProperties | nindent 4 }}
+  podLabels: {{ toYaml .Values.hivemq.podLabels | nindent 4 }}
 {{- end }}
