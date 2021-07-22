@@ -1,4 +1,4 @@
-{{- if .Values.operator.deployCr  }}
+{{- if .Values.operator.deployCr }}
 kind: HiveMQCluster
 apiVersion: hivemq.com/v1
 metadata:
@@ -70,8 +70,12 @@ spec:
   initialization: {{ toYaml .Values.hivemq.initialization | nindent 4 }}
   sidecars: {{ toYaml .Values.hivemq.sidecars | nindent 4 }}
   initContainers: {{ toYaml .Values.hivemq.initContainers | nindent 4 }}
+  {{- if .Values.hivemq.podSecurityContext }}
   podSecurityContext: {{ toYaml .Values.hivemq.podSecurityContext | nindent 4 }}
+  {{- end }}
+  {{- if .Values.hivemq.containerSecurityContext }}
   containerSecurityContext: {{ toYaml .Values.hivemq.containerSecurityContext | nindent 4 }}
+  {{- end }}
   topologySpreadConstraints: {{ toYaml .Values.hivemq.topologySpreadConstraints | nindent 4 }}
   tolerations: {{ toYaml .Values.hivemq.tolerations | nindent 4 }}
   nodeSelector: {{ toYaml .Values.hivemq.nodeSelector | nindent 4 }}
@@ -82,4 +86,7 @@ spec:
   dnsSuffix: {{ toYaml .Values.hivemq.dnsSuffix | nindent 4 }}
   podAnnotations: {{ toYaml .Values.hivemq.podAnnotations | nindent 4 }}
   customProperties: {{ toYaml .Values.hivemq.customProperties | nindent 4 }}
+  {{- if .Values.hivemq.operatorHints }}
+  operatorHints: {{ toYaml .Values.hivemq.operatorHints | nindent 4 }}
+  {{- end }}
 {{- end }}

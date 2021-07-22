@@ -64,20 +64,20 @@ hivemq:
   # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison this field does not have any defaults but allows for more granular configuration using the full K8s Container API
   initContainers: []
   # HiveMQ Pod security context
-  podSecurityContext:
-    fsGroup: 1001
-    runAsNonRoot: true
-    runAsUser: 1000
-    sysctls:
+  podSecurityContext: {}
+    # fsGroup: 1001
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # sysctls:
       # To ensure we don't run into port exhaustion
-      - name: net.ipv4.ip_local_port_range
-        value: "1024 65535"
+      # - name: net.ipv4.ip_local_port_range
+      #   value: "1024 65535"
   # HiveMQ container security context within the Pod
   containerSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    allowPrivilegeEscalation: false
-    privileged: false
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # allowPrivilegeEscalation: false
+    # privileged: false
   # TopologySpreadConstraints to apply in the underlying Pod spec
   topologySpreadConstraints: []
   # Tolerations to apply in the underlying Pod spec
@@ -103,6 +103,9 @@ hivemq:
   podAnnotations: {}
   # Labels to add to the HiveMQ Pods
   podLabels: {}
+
+  # Optional operator-internal configuration (See kubectl explain hmqc.spec.operatorHints for more info)
+  operatorHints: {}
 
   # Custom properties to set in the custom resource, to be used in conjunction with custom operator templates.
   customProperties: {}
