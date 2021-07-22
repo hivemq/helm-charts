@@ -5,36 +5,36 @@ metadata:
   name: "hivemq-clusters.hivemq.com"
 spec:
   additionalPrinterColumns:
-    - JSONPath: ".spec.nodeCount"
-      description: "HiveMQ cluster size"
-      name: "size"
-      type: "integer"
-    - JSONPath: ".spec.image"
-      description: "Image"
-      name: "image"
-      type: "string"
-    - JSONPath: ".spec.hivemqVersion"
-      description: "Version/Tag"
-      name: "version"
-      type: "string"
-    - JSONPath: ".status.state"
-      description: "Current Status"
-      name: "status"
-      type: "string"
-    - JSONPath: ".status.portStatus[0].address"
-      description: "MQTT endpoint"
-      name: "endpoint"
-      type: "string"
-    - JSONPath: ".status.message"
-      description: "Latest (detailed) status message"
-      name: "message"
-      type: "string"
+  - JSONPath: ".spec.nodeCount"
+    description: "HiveMQ cluster size"
+    name: "size"
+    type: "integer"
+  - JSONPath: ".spec.image"
+    description: "Image"
+    name: "image"
+    type: "string"
+  - JSONPath: ".spec.hivemqVersion"
+    description: "Version/Tag"
+    name: "version"
+    type: "string"
+  - JSONPath: ".status.state"
+    description: "Current Status"
+    name: "status"
+    type: "string"
+  - JSONPath: ".status.portStatus[0].address"
+    description: "MQTT endpoint"
+    name: "endpoint"
+    type: "string"
+  - JSONPath: ".status.message"
+    description: "Latest (detailed) status message"
+    name: "message"
+    type: "string"
   group: "hivemq.com"
   names:
     kind: "HiveMQCluster"
     plural: "hivemq-clusters"
     shortNames:
-      - "hmqc"
+    - "hmqc"
     singular: "hivemq-cluster"
   preserveUnknownFields: false
   scope: "Namespaced"
@@ -216,8 +216,8 @@ spec:
                       metadata:
                         generation: 6
                         finalizers:
-                          - "finalizers"
-                          - "finalizers"
+                        - "finalizers"
+                        - "finalizers"
                         resourceVersion: "resourceVersion"
                         annotations:
                           key: "annotations"
@@ -226,34 +226,34 @@ spec:
                         labels:
                           key: "labels"
                         ownerReferences:
-                          - uid: "uid"
-                            controller: true
-                            apiVersion: "apiVersion"
-                            kind: "kind"
-                            name: "name"
-                            blockOwnerDeletion: true
-                          - uid: "uid"
-                            controller: true
-                            apiVersion: "apiVersion"
-                            kind: "kind"
-                            name: "name"
-                            blockOwnerDeletion: true
+                        - uid: "uid"
+                          controller: true
+                          apiVersion: "apiVersion"
+                          kind: "kind"
+                          name: "name"
+                          blockOwnerDeletion: true
+                        - uid: "uid"
+                          controller: true
+                          apiVersion: "apiVersion"
+                          kind: "kind"
+                          name: "name"
+                          blockOwnerDeletion: true
                         selfLink: "selfLink"
                         deletionGracePeriodSeconds: 0
                         uid: "uid"
                         managedFields:
-                          - apiVersion: "apiVersion"
-                            fieldsV1: "{}"
-                            manager: "manager"
-                            time: "2000-01-23T04:56:07.000+00:00"
-                            operation: "operation"
-                            fieldsType: "fieldsType"
-                          - apiVersion: "apiVersion"
-                            fieldsV1: "{}"
-                            manager: "manager"
-                            time: "2000-01-23T04:56:07.000+00:00"
-                            operation: "operation"
-                            fieldsType: "fieldsType"
+                        - apiVersion: "apiVersion"
+                          fieldsV1: "{}"
+                          manager: "manager"
+                          time: "2000-01-23T04:56:07.000+00:00"
+                          operation: "operation"
+                          fieldsType: "fieldsType"
+                        - apiVersion: "apiVersion"
+                          fieldsV1: "{}"
+                          manager: "manager"
+                          time: "2000-01-23T04:56:07.000+00:00"
+                          operation: "operation"
+                          fieldsType: "fieldsType"
                         clusterName: "clusterName"
                         creationTimestamp: "2000-01-23T04:56:07.000+00:00"
                         name: "name"
@@ -266,21 +266,21 @@ spec:
                           limits: {}
                         selector:
                           matchExpressions:
-                            - values:
-                                - "values"
-                                - "values"
-                              key: "key"
-                              operator: "operator"
-                            - values:
-                                - "values"
-                                - "values"
-                              key: "key"
-                              operator: "operator"
+                          - values:
+                            - "values"
+                            - "values"
+                            key: "key"
+                            operator: "operator"
+                          - values:
+                            - "values"
+                            - "values"
+                            key: "key"
+                            operator: "operator"
                           matchLabels:
                             key: "matchLabels"
                         accessModes:
-                          - "accessModes"
-                          - "accessModes"
+                        - "accessModes"
+                        - "accessModes"
                         dataSource:
                           apiGroup: "apiGroup"
                           kind: "kind"
@@ -291,102 +291,102 @@ spec:
                     defaultMode: 6
                     optional: true
                     items:
-                      - mode: 6
-                        path: "path"
-                        key: "key"
-                      - mode: 6
-                        path: "path"
-                        key: "key"
+                    - mode: 6
+                      path: "path"
+                      key: "key"
+                    - mode: 6
+                      path: "path"
+                      key: "key"
                   projected:
                     sources:
-                      - downwardAPI:
-                          items:
-                            - mode: 9
-                              path: "path"
-                              resourceFieldRef:
-                                divisor: "divisor"
-                                resource: "resource"
-                                containerName: "containerName"
-                              fieldRef:
-                                apiVersion: "apiVersion"
-                                fieldPath: "fieldPath"
-                            - mode: 9
-                              path: "path"
-                              resourceFieldRef:
-                                divisor: "divisor"
-                                resource: "resource"
-                                containerName: "containerName"
-                              fieldRef:
-                                apiVersion: "apiVersion"
-                                fieldPath: "fieldPath"
-                        configMap:
-                          name: "name"
-                          optional: true
-                          items:
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                        secret:
-                          name: "name"
-                          optional: true
-                          items:
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                        serviceAccountToken:
+                    - downwardAPI:
+                        items:
+                        - mode: 9
                           path: "path"
-                          audience: "audience"
-                          expirationSeconds: 2
-                      - downwardAPI:
-                          items:
-                            - mode: 9
-                              path: "path"
-                              resourceFieldRef:
-                                divisor: "divisor"
-                                resource: "resource"
-                                containerName: "containerName"
-                              fieldRef:
-                                apiVersion: "apiVersion"
-                                fieldPath: "fieldPath"
-                            - mode: 9
-                              path: "path"
-                              resourceFieldRef:
-                                divisor: "divisor"
-                                resource: "resource"
-                                containerName: "containerName"
-                              fieldRef:
-                                apiVersion: "apiVersion"
-                                fieldPath: "fieldPath"
-                        configMap:
-                          name: "name"
-                          optional: true
-                          items:
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                        secret:
-                          name: "name"
-                          optional: true
-                          items:
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                            - mode: 6
-                              path: "path"
-                              key: "key"
-                        serviceAccountToken:
+                          resourceFieldRef:
+                            divisor: "divisor"
+                            resource: "resource"
+                            containerName: "containerName"
+                          fieldRef:
+                            apiVersion: "apiVersion"
+                            fieldPath: "fieldPath"
+                        - mode: 9
                           path: "path"
-                          audience: "audience"
-                          expirationSeconds: 2
+                          resourceFieldRef:
+                            divisor: "divisor"
+                            resource: "resource"
+                            containerName: "containerName"
+                          fieldRef:
+                            apiVersion: "apiVersion"
+                            fieldPath: "fieldPath"
+                      configMap:
+                        name: "name"
+                        optional: true
+                        items:
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                      secret:
+                        name: "name"
+                        optional: true
+                        items:
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                      serviceAccountToken:
+                        path: "path"
+                        audience: "audience"
+                        expirationSeconds: 2
+                    - downwardAPI:
+                        items:
+                        - mode: 9
+                          path: "path"
+                          resourceFieldRef:
+                            divisor: "divisor"
+                            resource: "resource"
+                            containerName: "containerName"
+                          fieldRef:
+                            apiVersion: "apiVersion"
+                            fieldPath: "fieldPath"
+                        - mode: 9
+                          path: "path"
+                          resourceFieldRef:
+                            divisor: "divisor"
+                            resource: "resource"
+                            containerName: "containerName"
+                          fieldRef:
+                            apiVersion: "apiVersion"
+                            fieldPath: "fieldPath"
+                      configMap:
+                        name: "name"
+                        optional: true
+                        items:
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                      secret:
+                        name: "name"
+                        optional: true
+                        items:
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                        - mode: 6
+                          path: "path"
+                          key: "key"
+                      serviceAccountToken:
+                        path: "path"
+                        audience: "audience"
+                        expirationSeconds: 2
                     defaultMode: 1
                   cephfs:
                     path: "path"
@@ -396,8 +396,8 @@ spec:
                     readOnly: true
                     user: "user"
                     monitors:
-                      - "monitors"
-                      - "monitors"
+                    - "monitors"
+                    - "monitors"
                   scaleIO:
                     system: "system"
                     protectionDomain: "protectionDomain"
@@ -441,24 +441,24 @@ spec:
                   downwardAPI:
                     defaultMode: 8
                     items:
-                      - mode: 9
-                        path: "path"
-                        resourceFieldRef:
-                          divisor: "divisor"
-                          resource: "resource"
-                          containerName: "containerName"
-                        fieldRef:
-                          apiVersion: "apiVersion"
-                          fieldPath: "fieldPath"
-                      - mode: 9
-                        path: "path"
-                        resourceFieldRef:
-                          divisor: "divisor"
-                          resource: "resource"
-                          containerName: "containerName"
-                        fieldRef:
-                          apiVersion: "apiVersion"
-                          fieldPath: "fieldPath"
+                    - mode: 9
+                      path: "path"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
+                    - mode: 9
+                      path: "path"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
                   awsElasticBlockStore:
                     partition: 9
                     volumeID: "volumeID"
@@ -474,8 +474,8 @@ spec:
                     chapAuthDiscovery: true
                     iqn: "iqn"
                     portals:
-                      - "portals"
-                      - "portals"
+                    - "portals"
+                    - "portals"
                     secretRef:
                       name: "name"
                     initiatorName: "initiatorName"
@@ -492,19 +492,19 @@ spec:
                     keyring: "keyring"
                     user: "user"
                     monitors:
-                      - "monitors"
-                      - "monitors"
+                    - "monitors"
+                    - "monitors"
                   configMap:
                     defaultMode: 9
                     name: "name"
                     optional: true
                     items:
-                      - mode: 6
-                        path: "path"
-                        key: "key"
-                      - mode: 6
-                        path: "path"
-                        key: "key"
+                    - mode: 6
+                      path: "path"
+                      key: "key"
+                    - mode: 6
+                      path: "path"
+                      key: "key"
                   storageos:
                     volumeNamespace: "volumeNamespace"
                     volumeName: "volumeName"
@@ -544,12 +544,12 @@ spec:
                   fc:
                     lun: 6
                     targetWWNs:
-                      - "targetWWNs"
-                      - "targetWWNs"
+                    - "targetWWNs"
+                    - "targetWWNs"
                     readOnly: true
                     wwids:
-                      - "wwids"
-                      - "wwids"
+                    - "wwids"
+                    - "wwids"
                     fsType: "fsType"
                   hostPath:
                     path: "path"
@@ -592,7 +592,7 @@ spec:
                           \ AWS (Amazon EBS volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore"
                         type: "string"
                     required:
-                      - "volumeID"
+                    - "volumeID"
                     type: "object"
                   azureDisk:
                     description: "AzureDisk represents an Azure Data Disk mount on\
@@ -631,8 +631,8 @@ spec:
                           \ will force the ReadOnly setting in VolumeMounts."
                         type: "boolean"
                     required:
-                      - "diskName"
-                      - "diskURI"
+                    - "diskName"
+                    - "diskURI"
                     type: "object"
                   azureFile:
                     description: "AzureFile represents an Azure File Service mount\
@@ -654,8 +654,8 @@ spec:
                         description: "Share Name"
                         type: "string"
                     required:
-                      - "secretName"
-                      - "shareName"
+                    - "secretName"
+                    - "shareName"
                     type: "object"
                   cephfs:
                     description: "Represents a Ceph Filesystem mount that lasts the\
@@ -669,8 +669,8 @@ spec:
                       readOnly: true
                       user: "user"
                       monitors:
-                        - "monitors"
-                        - "monitors"
+                      - "monitors"
+                      - "monitors"
                     properties:
                       monitors:
                         description: "Required: Monitors is a collection of Ceph monitors\
@@ -708,7 +708,7 @@ spec:
                           \ is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it"
                         type: "string"
                     required:
-                      - "monitors"
+                    - "monitors"
                     type: "object"
                   cinder:
                     description: "Represents a cinder volume resource in Openstack.\
@@ -749,7 +749,7 @@ spec:
                           \ More info: https://examples.k8s.io/mysql-cinder-pd/README.md"
                         type: "string"
                     required:
-                      - "volumeID"
+                    - "volumeID"
                     type: "object"
                   configMap:
                     description: "Adapts a ConfigMap into a volume.\n\nThe contents\
@@ -763,12 +763,12 @@ spec:
                       name: "name"
                       optional: true
                       items:
-                        - mode: 6
-                          path: "path"
-                          key: "key"
-                        - mode: 6
-                          path: "path"
-                          key: "key"
+                      - mode: 6
+                        path: "path"
+                        key: "key"
+                      - mode: 6
+                        path: "path"
+                        key: "key"
                     properties:
                       defaultMode:
                         description: "Optional: mode bits used to set permissions\
@@ -821,8 +821,8 @@ spec:
                                 \ '..'."
                               type: "string"
                           required:
-                            - "key"
-                            - "path"
+                          - "key"
+                          - "path"
                           type: "object"
                         type: "array"
                       name:
@@ -879,7 +879,7 @@ spec:
                           \ documentation for supported values."
                         type: "object"
                     required:
-                      - "driver"
+                    - "driver"
                     type: "object"
                   downwardAPI:
                     description: "DownwardAPIVolumeSource represents a volume containing\
@@ -888,24 +888,24 @@ spec:
                     example:
                       defaultMode: 8
                       items:
-                        - mode: 9
-                          path: "path"
-                          resourceFieldRef:
-                            divisor: "divisor"
-                            resource: "resource"
-                            containerName: "containerName"
-                          fieldRef:
-                            apiVersion: "apiVersion"
-                            fieldPath: "fieldPath"
-                        - mode: 9
-                          path: "path"
-                          resourceFieldRef:
-                            divisor: "divisor"
-                            resource: "resource"
-                            containerName: "containerName"
-                          fieldRef:
-                            apiVersion: "apiVersion"
-                            fieldPath: "fieldPath"
+                      - mode: 9
+                        path: "path"
+                        resourceFieldRef:
+                          divisor: "divisor"
+                          resource: "resource"
+                          containerName: "containerName"
+                        fieldRef:
+                          apiVersion: "apiVersion"
+                          fieldPath: "fieldPath"
+                      - mode: 9
+                        path: "path"
+                        resourceFieldRef:
+                          divisor: "divisor"
+                          resource: "resource"
+                          containerName: "containerName"
+                        fieldRef:
+                          apiVersion: "apiVersion"
+                          fieldPath: "fieldPath"
                     properties:
                       defaultMode:
                         description: "Optional: mode bits to use on created files\
@@ -952,7 +952,7 @@ spec:
                                     \ specified API version."
                                   type: "string"
                               required:
-                                - "fieldPath"
+                              - "fieldPath"
                               type: "object"
                             mode:
                               description: "Optional: mode bits used to set permissions\
@@ -1043,10 +1043,10 @@ spec:
                                   description: "Required: resource to select"
                                   type: "string"
                               required:
-                                - "resource"
+                              - "resource"
                               type: "object"
                           required:
-                            - "path"
+                          - "path"
                           type: "object"
                         type: "array"
                     type: "object"
@@ -1119,8 +1119,8 @@ spec:
                         metadata:
                           generation: 6
                           finalizers:
-                            - "finalizers"
-                            - "finalizers"
+                          - "finalizers"
+                          - "finalizers"
                           resourceVersion: "resourceVersion"
                           annotations:
                             key: "annotations"
@@ -1129,34 +1129,34 @@ spec:
                           labels:
                             key: "labels"
                           ownerReferences:
-                            - uid: "uid"
-                              controller: true
-                              apiVersion: "apiVersion"
-                              kind: "kind"
-                              name: "name"
-                              blockOwnerDeletion: true
-                            - uid: "uid"
-                              controller: true
-                              apiVersion: "apiVersion"
-                              kind: "kind"
-                              name: "name"
-                              blockOwnerDeletion: true
+                          - uid: "uid"
+                            controller: true
+                            apiVersion: "apiVersion"
+                            kind: "kind"
+                            name: "name"
+                            blockOwnerDeletion: true
+                          - uid: "uid"
+                            controller: true
+                            apiVersion: "apiVersion"
+                            kind: "kind"
+                            name: "name"
+                            blockOwnerDeletion: true
                           selfLink: "selfLink"
                           deletionGracePeriodSeconds: 0
                           uid: "uid"
                           managedFields:
-                            - apiVersion: "apiVersion"
-                              fieldsV1: "{}"
-                              manager: "manager"
-                              time: "2000-01-23T04:56:07.000+00:00"
-                              operation: "operation"
-                              fieldsType: "fieldsType"
-                            - apiVersion: "apiVersion"
-                              fieldsV1: "{}"
-                              manager: "manager"
-                              time: "2000-01-23T04:56:07.000+00:00"
-                              operation: "operation"
-                              fieldsType: "fieldsType"
+                          - apiVersion: "apiVersion"
+                            fieldsV1: "{}"
+                            manager: "manager"
+                            time: "2000-01-23T04:56:07.000+00:00"
+                            operation: "operation"
+                            fieldsType: "fieldsType"
+                          - apiVersion: "apiVersion"
+                            fieldsV1: "{}"
+                            manager: "manager"
+                            time: "2000-01-23T04:56:07.000+00:00"
+                            operation: "operation"
+                            fieldsType: "fieldsType"
                           clusterName: "clusterName"
                           creationTimestamp: "2000-01-23T04:56:07.000+00:00"
                           name: "name"
@@ -1169,21 +1169,21 @@ spec:
                             limits: {}
                           selector:
                             matchExpressions:
-                              - values:
-                                  - "values"
-                                  - "values"
-                                key: "key"
-                                operator: "operator"
-                              - values:
-                                  - "values"
-                                  - "values"
-                                key: "key"
-                                operator: "operator"
+                            - values:
+                              - "values"
+                              - "values"
+                              key: "key"
+                              operator: "operator"
+                            - values:
+                              - "values"
+                              - "values"
+                              key: "key"
+                              operator: "operator"
                             matchLabels:
                               key: "matchLabels"
                           accessModes:
-                            - "accessModes"
-                            - "accessModes"
+                          - "accessModes"
+                          - "accessModes"
                           dataSource:
                             apiGroup: "apiGroup"
                             kind: "kind"
@@ -1201,8 +1201,8 @@ spec:
                           metadata:
                             generation: 6
                             finalizers:
-                              - "finalizers"
-                              - "finalizers"
+                            - "finalizers"
+                            - "finalizers"
                             resourceVersion: "resourceVersion"
                             annotations:
                               key: "annotations"
@@ -1211,34 +1211,34 @@ spec:
                             labels:
                               key: "labels"
                             ownerReferences:
-                              - uid: "uid"
-                                controller: true
-                                apiVersion: "apiVersion"
-                                kind: "kind"
-                                name: "name"
-                                blockOwnerDeletion: true
-                              - uid: "uid"
-                                controller: true
-                                apiVersion: "apiVersion"
-                                kind: "kind"
-                                name: "name"
-                                blockOwnerDeletion: true
+                            - uid: "uid"
+                              controller: true
+                              apiVersion: "apiVersion"
+                              kind: "kind"
+                              name: "name"
+                              blockOwnerDeletion: true
+                            - uid: "uid"
+                              controller: true
+                              apiVersion: "apiVersion"
+                              kind: "kind"
+                              name: "name"
+                              blockOwnerDeletion: true
                             selfLink: "selfLink"
                             deletionGracePeriodSeconds: 0
                             uid: "uid"
                             managedFields:
-                              - apiVersion: "apiVersion"
-                                fieldsV1: "{}"
-                                manager: "manager"
-                                time: "2000-01-23T04:56:07.000+00:00"
-                                operation: "operation"
-                                fieldsType: "fieldsType"
-                              - apiVersion: "apiVersion"
-                                fieldsV1: "{}"
-                                manager: "manager"
-                                time: "2000-01-23T04:56:07.000+00:00"
-                                operation: "operation"
-                                fieldsType: "fieldsType"
+                            - apiVersion: "apiVersion"
+                              fieldsV1: "{}"
+                              manager: "manager"
+                              time: "2000-01-23T04:56:07.000+00:00"
+                              operation: "operation"
+                              fieldsType: "fieldsType"
+                            - apiVersion: "apiVersion"
+                              fieldsV1: "{}"
+                              manager: "manager"
+                              time: "2000-01-23T04:56:07.000+00:00"
+                              operation: "operation"
+                              fieldsType: "fieldsType"
                             clusterName: "clusterName"
                             creationTimestamp: "2000-01-23T04:56:07.000+00:00"
                             name: "name"
@@ -1251,21 +1251,21 @@ spec:
                               limits: {}
                             selector:
                               matchExpressions:
-                                - values:
-                                    - "values"
-                                    - "values"
-                                  key: "key"
-                                  operator: "operator"
-                                - values:
-                                    - "values"
-                                    - "values"
-                                  key: "key"
-                                  operator: "operator"
+                              - values:
+                                - "values"
+                                - "values"
+                                key: "key"
+                                operator: "operator"
+                              - values:
+                                - "values"
+                                - "values"
+                                key: "key"
+                                operator: "operator"
                               matchLabels:
                                 key: "matchLabels"
                             accessModes:
-                              - "accessModes"
-                              - "accessModes"
+                            - "accessModes"
+                            - "accessModes"
                             dataSource:
                               apiGroup: "apiGroup"
                               kind: "kind"
@@ -1279,8 +1279,8 @@ spec:
                             example:
                               generation: 6
                               finalizers:
-                                - "finalizers"
-                                - "finalizers"
+                              - "finalizers"
+                              - "finalizers"
                               resourceVersion: "resourceVersion"
                               annotations:
                                 key: "annotations"
@@ -1289,34 +1289,34 @@ spec:
                               labels:
                                 key: "labels"
                               ownerReferences:
-                                - uid: "uid"
-                                  controller: true
-                                  apiVersion: "apiVersion"
-                                  kind: "kind"
-                                  name: "name"
-                                  blockOwnerDeletion: true
-                                - uid: "uid"
-                                  controller: true
-                                  apiVersion: "apiVersion"
-                                  kind: "kind"
-                                  name: "name"
-                                  blockOwnerDeletion: true
+                              - uid: "uid"
+                                controller: true
+                                apiVersion: "apiVersion"
+                                kind: "kind"
+                                name: "name"
+                                blockOwnerDeletion: true
+                              - uid: "uid"
+                                controller: true
+                                apiVersion: "apiVersion"
+                                kind: "kind"
+                                name: "name"
+                                blockOwnerDeletion: true
                               selfLink: "selfLink"
                               deletionGracePeriodSeconds: 0
                               uid: "uid"
                               managedFields:
-                                - apiVersion: "apiVersion"
-                                  fieldsV1: "{}"
-                                  manager: "manager"
-                                  time: "2000-01-23T04:56:07.000+00:00"
-                                  operation: "operation"
-                                  fieldsType: "fieldsType"
-                                - apiVersion: "apiVersion"
-                                  fieldsV1: "{}"
-                                  manager: "manager"
-                                  time: "2000-01-23T04:56:07.000+00:00"
-                                  operation: "operation"
-                                  fieldsType: "fieldsType"
+                              - apiVersion: "apiVersion"
+                                fieldsV1: "{}"
+                                manager: "manager"
+                                time: "2000-01-23T04:56:07.000+00:00"
+                                operation: "operation"
+                                fieldsType: "fieldsType"
+                              - apiVersion: "apiVersion"
+                                fieldsV1: "{}"
+                                manager: "manager"
+                                time: "2000-01-23T04:56:07.000+00:00"
+                                operation: "operation"
+                                fieldsType: "fieldsType"
                               clusterName: "clusterName"
                               creationTimestamp: "2000-01-23T04:56:07.000+00:00"
                               name: "name"
@@ -1573,10 +1573,10 @@ spec:
                                         \ http://kubernetes.io/docs/user-guide/identifiers#uids"
                                       type: "string"
                                   required:
-                                    - "apiVersion"
-                                    - "kind"
-                                    - "name"
-                                    - "uid"
+                                  - "apiVersion"
+                                  - "kind"
+                                  - "name"
+                                  - "uid"
                                   type: "object"
                                 type: "array"
                               resourceVersion:
@@ -1620,21 +1620,21 @@ spec:
                                 limits: {}
                               selector:
                                 matchExpressions:
-                                  - values:
-                                      - "values"
-                                      - "values"
-                                    key: "key"
-                                    operator: "operator"
-                                  - values:
-                                      - "values"
-                                      - "values"
-                                    key: "key"
-                                    operator: "operator"
+                                - values:
+                                  - "values"
+                                  - "values"
+                                  key: "key"
+                                  operator: "operator"
+                                - values:
+                                  - "values"
+                                  - "values"
+                                  key: "key"
+                                  operator: "operator"
                                 matchLabels:
                                   key: "matchLabels"
                               accessModes:
-                                - "accessModes"
-                                - "accessModes"
+                              - "accessModes"
+                              - "accessModes"
                               dataSource:
                                 apiGroup: "apiGroup"
                                 kind: "kind"
@@ -1672,8 +1672,8 @@ spec:
                                       \ referenced"
                                     type: "string"
                                 required:
-                                  - "kind"
-                                  - "name"
+                                - "kind"
+                                - "name"
                                 type: "object"
                               resources:
                                 description: "ResourceRequirements describes the compute\
@@ -1823,16 +1823,16 @@ spec:
                                   \ matches no objects."
                                 example:
                                   matchExpressions:
-                                    - values:
-                                        - "values"
-                                        - "values"
-                                      key: "key"
-                                      operator: "operator"
-                                    - values:
-                                        - "values"
-                                        - "values"
-                                      key: "key"
-                                      operator: "operator"
+                                  - values:
+                                    - "values"
+                                    - "values"
+                                    key: "key"
+                                    operator: "operator"
+                                  - values:
+                                    - "values"
+                                    - "values"
+                                    key: "key"
+                                    operator: "operator"
                                   matchLabels:
                                     key: "matchLabels"
                                 properties:
@@ -1847,8 +1847,8 @@ spec:
                                         \ values."
                                       example:
                                         values:
-                                          - "values"
-                                          - "values"
+                                        - "values"
+                                        - "values"
                                         key: "key"
                                         operator: "operator"
                                       properties:
@@ -1874,8 +1874,8 @@ spec:
                                             type: "string"
                                           type: "array"
                                       required:
-                                        - "key"
-                                        - "operator"
+                                      - "key"
+                                      - "operator"
                                       type: "object"
                                     type: "array"
                                   matchLabels:
@@ -1904,7 +1904,7 @@ spec:
                                 type: "string"
                             type: "object"
                         required:
-                          - "spec"
+                        - "spec"
                         type: "object"
                     type: "object"
                   fc:
@@ -1914,12 +1914,12 @@ spec:
                     example:
                       lun: 6
                       targetWWNs:
-                        - "targetWWNs"
-                        - "targetWWNs"
+                      - "targetWWNs"
+                      - "targetWWNs"
                       readOnly: true
                       wwids:
-                        - "wwids"
-                        - "wwids"
+                      - "wwids"
+                      - "wwids"
                       fsType: "fsType"
                     properties:
                       fsType:
@@ -1992,7 +1992,7 @@ spec:
                             type: "string"
                         type: "object"
                     required:
-                      - "driver"
+                    - "driver"
                     type: "object"
                   flocker:
                     description: "Represents a Flocker volume mounted by the Flocker\
@@ -2050,7 +2050,7 @@ spec:
                           \ in VolumeMounts. Defaults to false. More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
                         type: "boolean"
                     required:
-                      - "pdName"
+                    - "pdName"
                     type: "object"
                   gitRepo:
                     description: "Represents a volume that is populated with the contents\
@@ -2079,7 +2079,7 @@ spec:
                         description: "Commit hash for the specified revision."
                         type: "string"
                     required:
-                      - "repository"
+                    - "repository"
                     type: "object"
                   glusterfs:
                     description: "Represents a Glusterfs mount that lasts the lifetime\
@@ -2104,8 +2104,8 @@ spec:
                           \ false. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod"
                         type: "boolean"
                     required:
-                      - "endpoints"
-                      - "path"
+                    - "endpoints"
+                    - "path"
                     type: "object"
                   hostPath:
                     description: "Represents a host path mapped into a pod. Host path\
@@ -2124,7 +2124,7 @@ spec:
                           \ info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath"
                         type: "string"
                     required:
-                      - "path"
+                    - "path"
                     type: "object"
                   iscsi:
                     description: "Represents an ISCSI disk. ISCSI volumes can only\
@@ -2137,8 +2137,8 @@ spec:
                       chapAuthDiscovery: true
                       iqn: "iqn"
                       portals:
-                        - "portals"
-                        - "portals"
+                      - "portals"
+                      - "portals"
                       secretRef:
                         name: "name"
                       initiatorName: "initiatorName"
@@ -2204,9 +2204,9 @@ spec:
                           \ TCP ports 860 and 3260)."
                         type: "string"
                     required:
-                      - "iqn"
-                      - "lun"
-                      - "targetPortal"
+                    - "iqn"
+                    - "lun"
+                    - "targetPortal"
                     type: "object"
                   name:
                     description: "Volume's name. Must be a DNS_LABEL and unique within\
@@ -2235,8 +2235,8 @@ spec:
                           \ NFS server. More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs"
                         type: "string"
                     required:
-                      - "path"
-                      - "server"
+                    - "path"
+                    - "server"
                     type: "object"
                   persistentVolumeClaim:
                     description: "PersistentVolumeClaimVolumeSource references the\
@@ -2258,7 +2258,7 @@ spec:
                           \ Default false."
                         type: "boolean"
                     required:
-                      - "claimName"
+                    - "claimName"
                     type: "object"
                   photonPersistentDisk:
                     description: "Represents a Photon Controller persistent disk resource."
@@ -2277,7 +2277,7 @@ spec:
                           \ disk"
                         type: "string"
                     required:
-                      - "pdID"
+                    - "pdID"
                     type: "object"
                   portworxVolume:
                     description: "PortworxVolumeSource represents a Portworx volume\
@@ -2301,100 +2301,100 @@ spec:
                         description: "VolumeID uniquely identifies a Portworx volume"
                         type: "string"
                     required:
-                      - "volumeID"
+                    - "volumeID"
                     type: "object"
                   projected:
                     description: "Represents a projected volume source"
                     example:
                       sources:
-                        - downwardAPI:
-                            items:
-                              - mode: 9
-                                path: "path"
-                                resourceFieldRef:
-                                  divisor: "divisor"
-                                  resource: "resource"
-                                  containerName: "containerName"
-                                fieldRef:
-                                  apiVersion: "apiVersion"
-                                  fieldPath: "fieldPath"
-                              - mode: 9
-                                path: "path"
-                                resourceFieldRef:
-                                  divisor: "divisor"
-                                  resource: "resource"
-                                  containerName: "containerName"
-                                fieldRef:
-                                  apiVersion: "apiVersion"
-                                  fieldPath: "fieldPath"
-                          configMap:
-                            name: "name"
-                            optional: true
-                            items:
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                          secret:
-                            name: "name"
-                            optional: true
-                            items:
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                          serviceAccountToken:
+                      - downwardAPI:
+                          items:
+                          - mode: 9
                             path: "path"
-                            audience: "audience"
-                            expirationSeconds: 2
-                        - downwardAPI:
-                            items:
-                              - mode: 9
-                                path: "path"
-                                resourceFieldRef:
-                                  divisor: "divisor"
-                                  resource: "resource"
-                                  containerName: "containerName"
-                                fieldRef:
-                                  apiVersion: "apiVersion"
-                                  fieldPath: "fieldPath"
-                              - mode: 9
-                                path: "path"
-                                resourceFieldRef:
-                                  divisor: "divisor"
-                                  resource: "resource"
-                                  containerName: "containerName"
-                                fieldRef:
-                                  apiVersion: "apiVersion"
-                                  fieldPath: "fieldPath"
-                          configMap:
-                            name: "name"
-                            optional: true
-                            items:
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                          secret:
-                            name: "name"
-                            optional: true
-                            items:
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                              - mode: 6
-                                path: "path"
-                                key: "key"
-                          serviceAccountToken:
+                            resourceFieldRef:
+                              divisor: "divisor"
+                              resource: "resource"
+                              containerName: "containerName"
+                            fieldRef:
+                              apiVersion: "apiVersion"
+                              fieldPath: "fieldPath"
+                          - mode: 9
                             path: "path"
-                            audience: "audience"
-                            expirationSeconds: 2
+                            resourceFieldRef:
+                              divisor: "divisor"
+                              resource: "resource"
+                              containerName: "containerName"
+                            fieldRef:
+                              apiVersion: "apiVersion"
+                              fieldPath: "fieldPath"
+                        configMap:
+                          name: "name"
+                          optional: true
+                          items:
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                        secret:
+                          name: "name"
+                          optional: true
+                          items:
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                        serviceAccountToken:
+                          path: "path"
+                          audience: "audience"
+                          expirationSeconds: 2
+                      - downwardAPI:
+                          items:
+                          - mode: 9
+                            path: "path"
+                            resourceFieldRef:
+                              divisor: "divisor"
+                              resource: "resource"
+                              containerName: "containerName"
+                            fieldRef:
+                              apiVersion: "apiVersion"
+                              fieldPath: "fieldPath"
+                          - mode: 9
+                            path: "path"
+                            resourceFieldRef:
+                              divisor: "divisor"
+                              resource: "resource"
+                              containerName: "containerName"
+                            fieldRef:
+                              apiVersion: "apiVersion"
+                              fieldPath: "fieldPath"
+                        configMap:
+                          name: "name"
+                          optional: true
+                          items:
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                        secret:
+                          name: "name"
+                          optional: true
+                          items:
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                          - mode: 6
+                            path: "path"
+                            key: "key"
+                        serviceAccountToken:
+                          path: "path"
+                          audience: "audience"
+                          expirationSeconds: 2
                       defaultMode: 1
                     properties:
                       defaultMode:
@@ -2416,44 +2416,44 @@ spec:
                           example:
                             downwardAPI:
                               items:
-                                - mode: 9
-                                  path: "path"
-                                  resourceFieldRef:
-                                    divisor: "divisor"
-                                    resource: "resource"
-                                    containerName: "containerName"
-                                  fieldRef:
-                                    apiVersion: "apiVersion"
-                                    fieldPath: "fieldPath"
-                                - mode: 9
-                                  path: "path"
-                                  resourceFieldRef:
-                                    divisor: "divisor"
-                                    resource: "resource"
-                                    containerName: "containerName"
-                                  fieldRef:
-                                    apiVersion: "apiVersion"
-                                    fieldPath: "fieldPath"
+                              - mode: 9
+                                path: "path"
+                                resourceFieldRef:
+                                  divisor: "divisor"
+                                  resource: "resource"
+                                  containerName: "containerName"
+                                fieldRef:
+                                  apiVersion: "apiVersion"
+                                  fieldPath: "fieldPath"
+                              - mode: 9
+                                path: "path"
+                                resourceFieldRef:
+                                  divisor: "divisor"
+                                  resource: "resource"
+                                  containerName: "containerName"
+                                fieldRef:
+                                  apiVersion: "apiVersion"
+                                  fieldPath: "fieldPath"
                             configMap:
                               name: "name"
                               optional: true
                               items:
-                                - mode: 6
-                                  path: "path"
-                                  key: "key"
-                                - mode: 6
-                                  path: "path"
-                                  key: "key"
+                              - mode: 6
+                                path: "path"
+                                key: "key"
+                              - mode: 6
+                                path: "path"
+                                key: "key"
                             secret:
                               name: "name"
                               optional: true
                               items:
-                                - mode: 6
-                                  path: "path"
-                                  key: "key"
-                                - mode: 6
-                                  path: "path"
-                                  key: "key"
+                              - mode: 6
+                                path: "path"
+                                key: "key"
+                              - mode: 6
+                                path: "path"
+                                key: "key"
                             serviceAccountToken:
                               path: "path"
                               audience: "audience"
@@ -2472,12 +2472,12 @@ spec:
                                 name: "name"
                                 optional: true
                                 items:
-                                  - mode: 6
-                                    path: "path"
-                                    key: "key"
-                                  - mode: 6
-                                    path: "path"
-                                    key: "key"
+                                - mode: 6
+                                  path: "path"
+                                  key: "key"
+                                - mode: 6
+                                  path: "path"
+                                  key: "key"
                               properties:
                                 items:
                                   description: "If unspecified, each key-value pair\
@@ -2523,8 +2523,8 @@ spec:
                                           \ '..'. May not start with the string '..'."
                                         type: "string"
                                     required:
-                                      - "key"
-                                      - "path"
+                                    - "key"
+                                    - "path"
                                     type: "object"
                                   type: "array"
                                 name:
@@ -2542,24 +2542,24 @@ spec:
                                 \ mode."
                               example:
                                 items:
-                                  - mode: 9
-                                    path: "path"
-                                    resourceFieldRef:
-                                      divisor: "divisor"
-                                      resource: "resource"
-                                      containerName: "containerName"
-                                    fieldRef:
-                                      apiVersion: "apiVersion"
-                                      fieldPath: "fieldPath"
-                                  - mode: 9
-                                    path: "path"
-                                    resourceFieldRef:
-                                      divisor: "divisor"
-                                      resource: "resource"
-                                      containerName: "containerName"
-                                    fieldRef:
-                                      apiVersion: "apiVersion"
-                                      fieldPath: "fieldPath"
+                                - mode: 9
+                                  path: "path"
+                                  resourceFieldRef:
+                                    divisor: "divisor"
+                                    resource: "resource"
+                                    containerName: "containerName"
+                                  fieldRef:
+                                    apiVersion: "apiVersion"
+                                    fieldPath: "fieldPath"
+                                - mode: 9
+                                  path: "path"
+                                  resourceFieldRef:
+                                    divisor: "divisor"
+                                    resource: "resource"
+                                    containerName: "containerName"
+                                  fieldRef:
+                                    apiVersion: "apiVersion"
+                                    fieldPath: "fieldPath"
                               properties:
                                 items:
                                   description: "Items is a list of DownwardAPIVolume\
@@ -2596,7 +2596,7 @@ spec:
                                               \ in the specified API version."
                                             type: "string"
                                         required:
-                                          - "fieldPath"
+                                        - "fieldPath"
                                         type: "object"
                                       mode:
                                         description: "Optional: mode bits used to\
@@ -2703,10 +2703,10 @@ spec:
                                             description: "Required: resource to select"
                                             type: "string"
                                         required:
-                                          - "resource"
+                                        - "resource"
                                         type: "object"
                                     required:
-                                      - "path"
+                                    - "path"
                                     type: "object"
                                   type: "array"
                               type: "object"
@@ -2721,12 +2721,12 @@ spec:
                                 name: "name"
                                 optional: true
                                 items:
-                                  - mode: 6
-                                    path: "path"
-                                    key: "key"
-                                  - mode: 6
-                                    path: "path"
-                                    key: "key"
+                                - mode: 6
+                                  path: "path"
+                                  key: "key"
+                                - mode: 6
+                                  path: "path"
+                                  key: "key"
                               properties:
                                 items:
                                   description: "If unspecified, each key-value pair\
@@ -2772,8 +2772,8 @@ spec:
                                           \ '..'. May not start with the string '..'."
                                         type: "string"
                                     required:
-                                      - "key"
-                                      - "path"
+                                    - "key"
+                                    - "path"
                                     type: "object"
                                   type: "array"
                                 name:
@@ -2820,12 +2820,12 @@ spec:
                                     \ point of the file to project the token into."
                                   type: "string"
                               required:
-                                - "path"
+                              - "path"
                               type: "object"
                           type: "object"
                         type: "array"
                     required:
-                      - "sources"
+                    - "sources"
                     type: "object"
                   quobyte:
                     description: "Represents a Quobyte mount that lasts the lifetime\
@@ -2868,8 +2868,8 @@ spec:
                           \ created Quobyte volume by name."
                         type: "string"
                     required:
-                      - "registry"
-                      - "volume"
+                    - "registry"
+                    - "volume"
                     type: "object"
                   rbd:
                     description: "Represents a Rados Block Device mount that lasts\
@@ -2885,8 +2885,8 @@ spec:
                       keyring: "keyring"
                       user: "user"
                       monitors:
-                        - "monitors"
-                        - "monitors"
+                      - "monitors"
+                      - "monitors"
                     properties:
                       fsType:
                         description: "Filesystem type of the volume that you want\
@@ -2931,8 +2931,8 @@ spec:
                           \ info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
                         type: "string"
                     required:
-                      - "image"
-                      - "monitors"
+                    - "image"
+                    - "monitors"
                     type: "object"
                   scaleIO:
                     description: "ScaleIOVolumeSource represents a persistent ScaleIO\
@@ -2998,9 +2998,9 @@ spec:
                           \ ScaleIO system that is associated with this volume source."
                         type: "string"
                     required:
-                      - "gateway"
-                      - "secretRef"
-                      - "system"
+                    - "gateway"
+                    - "secretRef"
+                    - "system"
                     type: "object"
                   secret:
                     description: "Adapts a Secret into a volume.\n\nThe contents of\
@@ -3012,12 +3012,12 @@ spec:
                       defaultMode: 6
                       optional: true
                       items:
-                        - mode: 6
-                          path: "path"
-                          key: "key"
-                        - mode: 6
-                          path: "path"
-                          key: "key"
+                      - mode: 6
+                        path: "path"
+                        key: "key"
+                      - mode: 6
+                        path: "path"
+                        key: "key"
                     properties:
                       defaultMode:
                         description: "Optional: mode bits used to set permissions\
@@ -3070,8 +3070,8 @@ spec:
                                 \ '..'."
                               type: "string"
                           required:
-                            - "key"
-                            - "path"
+                          - "key"
+                          - "path"
                           type: "object"
                         type: "array"
                       optional:
@@ -3156,10 +3156,10 @@ spec:
                         description: "Path that identifies vSphere volume vmdk"
                         type: "string"
                     required:
-                      - "volumePath"
+                    - "volumePath"
                     type: "object"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             additionalVolumeMounts:
@@ -3204,8 +3204,8 @@ spec:
                       \ SubPathExpr and SubPath are mutually exclusive."
                     type: "string"
                 required:
-                  - "mountPath"
-                  - "name"
+                - "mountPath"
+                - "name"
                 type: "object"
               type: "array"
             topologySpreadConstraints:
@@ -3221,16 +3221,16 @@ spec:
                   maxSkew: 5
                   labelSelector:
                     matchExpressions:
-                      - values:
-                          - "values"
-                          - "values"
-                        key: "key"
-                        operator: "operator"
-                      - values:
-                          - "values"
-                          - "values"
-                        key: "key"
-                        operator: "operator"
+                    - values:
+                      - "values"
+                      - "values"
+                      key: "key"
+                      operator: "operator"
+                    - values:
+                      - "values"
+                      - "values"
+                      key: "key"
+                      operator: "operator"
                     matchLabels:
                       key: "matchLabels"
                   topologyKey: "topologyKey"
@@ -3242,16 +3242,16 @@ spec:
                       \ null label selector matches no objects."
                     example:
                       matchExpressions:
-                        - values:
-                            - "values"
-                            - "values"
-                          key: "key"
-                          operator: "operator"
-                        - values:
-                            - "values"
-                            - "values"
-                          key: "key"
-                          operator: "operator"
+                      - values:
+                        - "values"
+                        - "values"
+                        key: "key"
+                        operator: "operator"
+                      - values:
+                        - "values"
+                        - "values"
+                        key: "key"
+                        operator: "operator"
                       matchLabels:
                         key: "matchLabels"
                     properties:
@@ -3264,8 +3264,8 @@ spec:
                             \ the key and values."
                           example:
                             values:
-                              - "values"
-                              - "values"
+                            - "values"
+                            - "values"
                             key: "key"
                             operator: "operator"
                           properties:
@@ -3288,8 +3288,8 @@ spec:
                                 type: "string"
                               type: "array"
                           required:
-                            - "key"
-                            - "operator"
+                          - "key"
+                          - "operator"
                           type: "object"
                         type: "array"
                       matchLabels:
@@ -3345,9 +3345,9 @@ spec:
                       \ imbalanced. It's a required field."
                     type: "string"
                 required:
-                  - "maxSkew"
-                  - "topologyKey"
-                  - "whenUnsatisfiable"
+                - "maxSkew"
+                - "topologyKey"
+                - "whenUnsatisfiable"
                 type: "object"
               type: "array"
             volumeClaimTemplates:
@@ -3360,8 +3360,8 @@ spec:
                   metadata:
                     generation: 6
                     finalizers:
-                      - "finalizers"
-                      - "finalizers"
+                    - "finalizers"
+                    - "finalizers"
                     resourceVersion: "resourceVersion"
                     annotations:
                       key: "annotations"
@@ -3370,34 +3370,34 @@ spec:
                     labels:
                       key: "labels"
                     ownerReferences:
-                      - uid: "uid"
-                        controller: true
-                        apiVersion: "apiVersion"
-                        kind: "kind"
-                        name: "name"
-                        blockOwnerDeletion: true
-                      - uid: "uid"
-                        controller: true
-                        apiVersion: "apiVersion"
-                        kind: "kind"
-                        name: "name"
-                        blockOwnerDeletion: true
+                    - uid: "uid"
+                      controller: true
+                      apiVersion: "apiVersion"
+                      kind: "kind"
+                      name: "name"
+                      blockOwnerDeletion: true
+                    - uid: "uid"
+                      controller: true
+                      apiVersion: "apiVersion"
+                      kind: "kind"
+                      name: "name"
+                      blockOwnerDeletion: true
                     selfLink: "selfLink"
                     deletionGracePeriodSeconds: 0
                     uid: "uid"
                     managedFields:
-                      - apiVersion: "apiVersion"
-                        fieldsV1: "{}"
-                        manager: "manager"
-                        time: "2000-01-23T04:56:07.000+00:00"
-                        operation: "operation"
-                        fieldsType: "fieldsType"
-                      - apiVersion: "apiVersion"
-                        fieldsV1: "{}"
-                        manager: "manager"
-                        time: "2000-01-23T04:56:07.000+00:00"
-                        operation: "operation"
-                        fieldsType: "fieldsType"
+                    - apiVersion: "apiVersion"
+                      fieldsV1: "{}"
+                      manager: "manager"
+                      time: "2000-01-23T04:56:07.000+00:00"
+                      operation: "operation"
+                      fieldsType: "fieldsType"
+                    - apiVersion: "apiVersion"
+                      fieldsV1: "{}"
+                      manager: "manager"
+                      time: "2000-01-23T04:56:07.000+00:00"
+                      operation: "operation"
+                      fieldsType: "fieldsType"
                     clusterName: "clusterName"
                     creationTimestamp: "2000-01-23T04:56:07.000+00:00"
                     name: "name"
@@ -3412,21 +3412,21 @@ spec:
                       limits: {}
                     selector:
                       matchExpressions:
-                        - values:
-                            - "values"
-                            - "values"
-                          key: "key"
-                          operator: "operator"
-                        - values:
-                            - "values"
-                            - "values"
-                          key: "key"
-                          operator: "operator"
+                      - values:
+                        - "values"
+                        - "values"
+                        key: "key"
+                        operator: "operator"
+                      - values:
+                        - "values"
+                        - "values"
+                        key: "key"
+                        operator: "operator"
                       matchLabels:
                         key: "matchLabels"
                     accessModes:
-                      - "accessModes"
-                      - "accessModes"
+                    - "accessModes"
+                    - "accessModes"
                     dataSource:
                       apiGroup: "apiGroup"
                       kind: "kind"
@@ -3451,8 +3451,8 @@ spec:
                     example:
                       generation: 6
                       finalizers:
-                        - "finalizers"
-                        - "finalizers"
+                      - "finalizers"
+                      - "finalizers"
                       resourceVersion: "resourceVersion"
                       annotations:
                         key: "annotations"
@@ -3461,34 +3461,34 @@ spec:
                       labels:
                         key: "labels"
                       ownerReferences:
-                        - uid: "uid"
-                          controller: true
-                          apiVersion: "apiVersion"
-                          kind: "kind"
-                          name: "name"
-                          blockOwnerDeletion: true
-                        - uid: "uid"
-                          controller: true
-                          apiVersion: "apiVersion"
-                          kind: "kind"
-                          name: "name"
-                          blockOwnerDeletion: true
+                      - uid: "uid"
+                        controller: true
+                        apiVersion: "apiVersion"
+                        kind: "kind"
+                        name: "name"
+                        blockOwnerDeletion: true
+                      - uid: "uid"
+                        controller: true
+                        apiVersion: "apiVersion"
+                        kind: "kind"
+                        name: "name"
+                        blockOwnerDeletion: true
                       selfLink: "selfLink"
                       deletionGracePeriodSeconds: 0
                       uid: "uid"
                       managedFields:
-                        - apiVersion: "apiVersion"
-                          fieldsV1: "{}"
-                          manager: "manager"
-                          time: "2000-01-23T04:56:07.000+00:00"
-                          operation: "operation"
-                          fieldsType: "fieldsType"
-                        - apiVersion: "apiVersion"
-                          fieldsV1: "{}"
-                          manager: "manager"
-                          time: "2000-01-23T04:56:07.000+00:00"
-                          operation: "operation"
-                          fieldsType: "fieldsType"
+                      - apiVersion: "apiVersion"
+                        fieldsV1: "{}"
+                        manager: "manager"
+                        time: "2000-01-23T04:56:07.000+00:00"
+                        operation: "operation"
+                        fieldsType: "fieldsType"
+                      - apiVersion: "apiVersion"
+                        fieldsV1: "{}"
+                        manager: "manager"
+                        time: "2000-01-23T04:56:07.000+00:00"
+                        operation: "operation"
+                        fieldsType: "fieldsType"
                       clusterName: "clusterName"
                       creationTimestamp: "2000-01-23T04:56:07.000+00:00"
                       name: "name"
@@ -3720,10 +3720,10 @@ spec:
                               description: "UID of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#uids"
                               type: "string"
                           required:
-                            - "apiVersion"
-                            - "kind"
-                            - "name"
-                            - "uid"
+                          - "apiVersion"
+                          - "kind"
+                          - "name"
+                          - "uid"
                           type: "object"
                         type: "array"
                       resourceVersion:
@@ -3764,21 +3764,21 @@ spec:
                         limits: {}
                       selector:
                         matchExpressions:
-                          - values:
-                              - "values"
-                              - "values"
-                            key: "key"
-                            operator: "operator"
-                          - values:
-                              - "values"
-                              - "values"
-                            key: "key"
-                            operator: "operator"
+                        - values:
+                          - "values"
+                          - "values"
+                          key: "key"
+                          operator: "operator"
+                        - values:
+                          - "values"
+                          - "values"
+                          key: "key"
+                          operator: "operator"
                         matchLabels:
                           key: "matchLabels"
                       accessModes:
-                        - "accessModes"
-                        - "accessModes"
+                      - "accessModes"
+                      - "accessModes"
                       dataSource:
                         apiGroup: "apiGroup"
                         kind: "kind"
@@ -3813,8 +3813,8 @@ spec:
                             description: "Name is the name of resource being referenced"
                             type: "string"
                         required:
-                          - "kind"
-                          - "name"
+                        - "kind"
+                        - "name"
                         type: "object"
                       resources:
                         description: "ResourceRequirements describes the compute resource\
@@ -3944,16 +3944,16 @@ spec:
                           \ A null label selector matches no objects."
                         example:
                           matchExpressions:
-                            - values:
-                                - "values"
-                                - "values"
-                              key: "key"
-                              operator: "operator"
-                            - values:
-                                - "values"
-                                - "values"
-                              key: "key"
-                              operator: "operator"
+                          - values:
+                            - "values"
+                            - "values"
+                            key: "key"
+                            operator: "operator"
+                          - values:
+                            - "values"
+                            - "values"
+                            key: "key"
+                            operator: "operator"
                           matchLabels:
                             key: "matchLabels"
                         properties:
@@ -3966,8 +3966,8 @@ spec:
                                 \ relates the key and values."
                               example:
                                 values:
-                                  - "values"
-                                  - "values"
+                                - "values"
+                                - "values"
                                 key: "key"
                                 operator: "operator"
                               properties:
@@ -3991,8 +3991,8 @@ spec:
                                     type: "string"
                                   type: "array"
                               required:
-                                - "key"
-                                - "operator"
+                              - "key"
+                              - "operator"
                               type: "object"
                             type: "array"
                           matchLabels:
@@ -4045,9 +4045,9 @@ spec:
               description: "HiveMQ root logger level. Only INFO and above is allowed\
                 \ for now."
               enum:
-                - "INFO"
-                - "DEBUG"
-                - "TRACE"
+              - "INFO"
+              - "DEBUG"
+              - "TRACE"
               type: "string"
             labels:
               additionalProperties:
@@ -4061,10 +4061,10 @@ spec:
                   \ within a pod."
                 example:
                   volumeDevices:
-                    - devicePath: "devicePath"
-                      name: "name"
-                    - devicePath: "devicePath"
-                      name: "name"
+                  - devicePath: "devicePath"
+                    name: "name"
+                  - devicePath: "devicePath"
+                    name: "name"
                   image: "image"
                   imagePullPolicy: "imagePullPolicy"
                   livenessProbe:
@@ -4078,18 +4078,18 @@ spec:
                     initialDelaySeconds: 5
                     exec:
                       command:
-                        - "command"
-                        - "command"
+                      - "command"
+                      - "command"
                     httpGet:
                       path: "path"
                       scheme: "scheme"
                       port: "port"
                       host: "host"
                       httpHeaders:
-                        - name: "name"
-                          value: "value"
-                        - name: "name"
-                          value: "value"
+                      - name: "name"
+                        value: "value"
+                      - name: "name"
+                        value: "value"
                   stdin: true
                   terminationMessagePolicy: "terminationMessagePolicy"
                   terminationMessagePath: "terminationMessagePath"
@@ -4102,11 +4102,11 @@ spec:
                     runAsUser: 7
                     capabilities:
                       add:
-                        - "add"
-                        - "add"
+                      - "add"
+                      - "add"
                       drop:
-                        - "drop"
-                        - "drop"
+                      - "drop"
+                      - "drop"
                     seLinuxOptions:
                       role: "role"
                       level: "level"
@@ -4135,85 +4135,85 @@ spec:
                     initialDelaySeconds: 5
                     exec:
                       command:
-                        - "command"
-                        - "command"
+                      - "command"
+                      - "command"
                     httpGet:
                       path: "path"
                       scheme: "scheme"
                       port: "port"
                       host: "host"
                       httpHeaders:
-                        - name: "name"
-                          value: "value"
-                        - name: "name"
-                          value: "value"
+                      - name: "name"
+                        value: "value"
+                      - name: "name"
+                        value: "value"
                   env:
-                    - name: "name"
-                      value: "value"
-                      valueFrom:
-                        secretKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        resourceFieldRef:
-                          divisor: "divisor"
-                          resource: "resource"
-                          containerName: "containerName"
-                        configMapKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        fieldRef:
-                          apiVersion: "apiVersion"
-                          fieldPath: "fieldPath"
-                    - name: "name"
-                      value: "value"
-                      valueFrom:
-                        secretKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        resourceFieldRef:
-                          divisor: "divisor"
-                          resource: "resource"
-                          containerName: "containerName"
-                        configMapKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        fieldRef:
-                          apiVersion: "apiVersion"
-                          fieldPath: "fieldPath"
+                  - name: "name"
+                    value: "value"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      configMapKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
+                  - name: "name"
+                    value: "value"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      configMapKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
                   ports:
-                    - protocol: "protocol"
-                      hostIP: "hostIP"
-                      name: "name"
-                      containerPort: 3
-                      hostPort: 2
-                    - protocol: "protocol"
-                      hostIP: "hostIP"
-                      name: "name"
-                      containerPort: 3
-                      hostPort: 2
+                  - protocol: "protocol"
+                    hostIP: "hostIP"
+                    name: "name"
+                    containerPort: 3
+                    hostPort: 2
+                  - protocol: "protocol"
+                    hostIP: "hostIP"
+                    name: "name"
+                    containerPort: 3
+                    hostPort: 2
                   command:
-                    - "command"
-                    - "command"
+                  - "command"
+                  - "command"
                   volumeMounts:
-                    - mountPath: "mountPath"
-                      mountPropagation: "mountPropagation"
-                      name: "name"
-                      readOnly: true
-                      subPath: "subPath"
-                      subPathExpr: "subPathExpr"
-                    - mountPath: "mountPath"
-                      mountPropagation: "mountPropagation"
-                      name: "name"
-                      readOnly: true
-                      subPath: "subPath"
-                      subPathExpr: "subPathExpr"
+                  - mountPath: "mountPath"
+                    mountPropagation: "mountPropagation"
+                    name: "name"
+                    readOnly: true
+                    subPath: "subPath"
+                    subPathExpr: "subPathExpr"
+                  - mountPath: "mountPath"
+                    mountPropagation: "mountPropagation"
+                    name: "name"
+                    readOnly: true
+                    subPath: "subPath"
+                    subPathExpr: "subPathExpr"
                   args:
-                    - "args"
-                    - "args"
+                  - "args"
+                  - "args"
                   lifecycle:
                     postStart:
                       tcpSocket:
@@ -4221,36 +4221,36 @@ spec:
                         host: "host"
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     preStop:
                       tcpSocket:
                         port: "port"
                         host: "host"
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                   name: "name"
                   tty: true
                   readinessProbe:
@@ -4264,34 +4264,34 @@ spec:
                     initialDelaySeconds: 5
                     exec:
                       command:
-                        - "command"
-                        - "command"
+                      - "command"
+                      - "command"
                     httpGet:
                       path: "path"
                       scheme: "scheme"
                       port: "port"
                       host: "host"
                       httpHeaders:
-                        - name: "name"
-                          value: "value"
-                        - name: "name"
-                          value: "value"
+                      - name: "name"
+                        value: "value"
+                      - name: "name"
+                        value: "value"
                   stdinOnce: true
                   envFrom:
-                    - configMapRef:
-                        name: "name"
-                        optional: true
-                      prefix: "prefix"
-                      secretRef:
-                        name: "name"
-                        optional: true
-                    - configMapRef:
-                        name: "name"
-                        optional: true
-                      prefix: "prefix"
-                      secretRef:
-                        name: "name"
-                        optional: true
+                  - configMapRef:
+                      name: "name"
+                      optional: true
+                    prefix: "prefix"
+                    secretRef:
+                      name: "name"
+                      optional: true
+                  - configMapRef:
+                      name: "name"
+                      optional: true
+                    prefix: "prefix"
+                    secretRef:
+                      name: "name"
+                      optional: true
                 properties:
                   args:
                     description: "Arguments to the entrypoint. The docker image's\
@@ -4395,7 +4395,7 @@ spec:
                                     \ key must be defined"
                                   type: "boolean"
                               required:
-                                - "key"
+                              - "key"
                               type: "object"
                             fieldRef:
                               description: "ObjectFieldSelector selects an APIVersioned\
@@ -4413,7 +4413,7 @@ spec:
                                     \ specified API version."
                                   type: "string"
                               required:
-                                - "fieldPath"
+                              - "fieldPath"
                               type: "object"
                             resourceFieldRef:
                               description: "ResourceFieldSelector represents container\
@@ -4485,7 +4485,7 @@ spec:
                                   description: "Required: resource to select"
                                   type: "string"
                               required:
-                                - "resource"
+                              - "resource"
                               type: "object"
                             secretKeyRef:
                               description: "SecretKeySelector selects a key of a Secret."
@@ -4506,11 +4506,11 @@ spec:
                                     \ key must be defined"
                                   type: "boolean"
                               required:
-                                - "key"
+                              - "key"
                               type: "object"
                           type: "object"
                       required:
-                        - "name"
+                      - "name"
                       type: "object"
                     type: "array"
                   envFrom:
@@ -4597,36 +4597,36 @@ spec:
                           host: "host"
                         exec:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         httpGet:
                           path: "path"
                           scheme: "scheme"
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                       preStop:
                         tcpSocket:
                           port: "port"
                           host: "host"
                         exec:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         httpGet:
                           path: "path"
                           scheme: "scheme"
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                     properties:
                       postStart:
                         description: "Handler defines a specific action that should\
@@ -4637,26 +4637,26 @@ spec:
                             host: "host"
                           exec:
                             command:
-                              - "command"
-                              - "command"
+                            - "command"
+                            - "command"
                           httpGet:
                             path: "path"
                             scheme: "scheme"
                             port: "port"
                             host: "host"
                             httpHeaders:
-                              - name: "name"
-                                value: "value"
-                              - name: "name"
-                                value: "value"
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
                         properties:
                           exec:
                             description: "ExecAction describes a \"run in container\"\
                               \ action."
                             example:
                               command:
-                                - "command"
-                                - "command"
+                              - "command"
+                              - "command"
                             properties:
                               command:
                                 description: "Command is the command line to execute\
@@ -4681,10 +4681,10 @@ spec:
                               port: "port"
                               host: "host"
                               httpHeaders:
-                                - name: "name"
-                                  value: "value"
-                                - name: "name"
-                                  value: "value"
+                              - name: "name"
+                                value: "value"
+                              - name: "name"
+                                value: "value"
                             properties:
                               host:
                                 description: "Host name to connect to, defaults to\
@@ -4708,8 +4708,8 @@ spec:
                                       description: "The header field value"
                                       type: "string"
                                   required:
-                                    - "name"
-                                    - "value"
+                                  - "name"
+                                  - "value"
                                   type: "object"
                                 type: "array"
                               path:
@@ -4729,7 +4729,7 @@ spec:
                                   \ host. Defaults to HTTP."
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                           tcpSocket:
                             description: "TCPSocketAction describes an action based\
@@ -4752,7 +4752,7 @@ spec:
                                 format: "int-or-string"
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                         type: "object"
                       preStop:
@@ -4764,26 +4764,26 @@ spec:
                             host: "host"
                           exec:
                             command:
-                              - "command"
-                              - "command"
+                            - "command"
+                            - "command"
                           httpGet:
                             path: "path"
                             scheme: "scheme"
                             port: "port"
                             host: "host"
                             httpHeaders:
-                              - name: "name"
-                                value: "value"
-                              - name: "name"
-                                value: "value"
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
                         properties:
                           exec:
                             description: "ExecAction describes a \"run in container\"\
                               \ action."
                             example:
                               command:
-                                - "command"
-                                - "command"
+                              - "command"
+                              - "command"
                             properties:
                               command:
                                 description: "Command is the command line to execute\
@@ -4808,10 +4808,10 @@ spec:
                               port: "port"
                               host: "host"
                               httpHeaders:
-                                - name: "name"
-                                  value: "value"
-                                - name: "name"
-                                  value: "value"
+                              - name: "name"
+                                value: "value"
+                              - name: "name"
+                                value: "value"
                             properties:
                               host:
                                 description: "Host name to connect to, defaults to\
@@ -4835,8 +4835,8 @@ spec:
                                       description: "The header field value"
                                       type: "string"
                                   required:
-                                    - "name"
-                                    - "value"
+                                  - "name"
+                                  - "value"
                                   type: "object"
                                 type: "array"
                               path:
@@ -4856,7 +4856,7 @@ spec:
                                   \ host. Defaults to HTTP."
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                           tcpSocket:
                             description: "TCPSocketAction describes an action based\
@@ -4879,7 +4879,7 @@ spec:
                                 format: "int-or-string"
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                         type: "object"
                     type: "object"
@@ -4898,26 +4898,26 @@ spec:
                       initialDelaySeconds: 5
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     properties:
                       exec:
                         description: "ExecAction describes a \"run in container\"\
                           \ action."
                         example:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         properties:
                           command:
                             description: "Command is the command line to execute inside\
@@ -4947,10 +4947,10 @@ spec:
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                         properties:
                           host:
                             description: "Host name to connect to, defaults to the\
@@ -4974,8 +4974,8 @@ spec:
                                   description: "The header field value"
                                   type: "string"
                               required:
-                                - "name"
-                                - "value"
+                              - "name"
+                              - "value"
                               type: "object"
                             type: "array"
                           path:
@@ -4994,7 +4994,7 @@ spec:
                               \ Defaults to HTTP."
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       initialDelaySeconds:
                         description: "Number of seconds after the container has started\
@@ -5033,7 +5033,7 @@ spec:
                             format: "int-or-string"
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       timeoutSeconds:
                         description: "Number of seconds after which the probe times\
@@ -5091,13 +5091,13 @@ spec:
                             \ Defaults to \"TCP\"."
                           type: "string"
                       required:
-                        - "containerPort"
-                        - "protocol"
+                      - "containerPort"
+                      - "protocol"
                       type: "object"
                     type: "array"
                     x-kubernetes-list-map-keys:
-                      - "containerPort"
-                      - "protocol"
+                    - "containerPort"
+                    - "protocol"
                     x-kubernetes-list-type: "map"
                   readinessProbe:
                     description: "Probe describes a health check to be performed against\
@@ -5114,26 +5114,26 @@ spec:
                       initialDelaySeconds: 5
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     properties:
                       exec:
                         description: "ExecAction describes a \"run in container\"\
                           \ action."
                         example:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         properties:
                           command:
                             description: "Command is the command line to execute inside\
@@ -5163,10 +5163,10 @@ spec:
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                         properties:
                           host:
                             description: "Host name to connect to, defaults to the\
@@ -5190,8 +5190,8 @@ spec:
                                   description: "The header field value"
                                   type: "string"
                               required:
-                                - "name"
-                                - "value"
+                              - "name"
+                              - "value"
                               type: "object"
                             type: "array"
                           path:
@@ -5210,7 +5210,7 @@ spec:
                               \ Defaults to HTTP."
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       initialDelaySeconds:
                         description: "Number of seconds after the container has started\
@@ -5249,7 +5249,7 @@ spec:
                             format: "int-or-string"
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       timeoutSeconds:
                         description: "Number of seconds after which the probe times\
@@ -5383,11 +5383,11 @@ spec:
                       runAsUser: 7
                       capabilities:
                         add:
-                          - "add"
-                          - "add"
+                        - "add"
+                        - "add"
                         drop:
-                          - "drop"
-                          - "drop"
+                        - "drop"
+                        - "drop"
                       seLinuxOptions:
                         role: "role"
                         level: "level"
@@ -5419,11 +5419,11 @@ spec:
                           \ containers."
                         example:
                           add:
-                            - "add"
-                            - "add"
+                          - "add"
+                          - "add"
                           drop:
-                            - "drop"
-                            - "drop"
+                          - "drop"
+                          - "drop"
                         properties:
                           add:
                             description: "Added capabilities"
@@ -5528,7 +5528,7 @@ spec:
                               \ be applied."
                             type: "string"
                         required:
-                          - "type"
+                        - "type"
                         type: "object"
                       windowsOptions:
                         description: "WindowsSecurityContextOptions contain Windows-specific\
@@ -5573,26 +5573,26 @@ spec:
                       initialDelaySeconds: 5
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     properties:
                       exec:
                         description: "ExecAction describes a \"run in container\"\
                           \ action."
                         example:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         properties:
                           command:
                             description: "Command is the command line to execute inside\
@@ -5622,10 +5622,10 @@ spec:
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                         properties:
                           host:
                             description: "Host name to connect to, defaults to the\
@@ -5649,8 +5649,8 @@ spec:
                                   description: "The header field value"
                                   type: "string"
                               required:
-                                - "name"
-                                - "value"
+                              - "name"
+                              - "value"
                               type: "object"
                             type: "array"
                           path:
@@ -5669,7 +5669,7 @@ spec:
                               \ Defaults to HTTP."
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       initialDelaySeconds:
                         description: "Number of seconds after the container has started\
@@ -5708,7 +5708,7 @@ spec:
                             format: "int-or-string"
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       timeoutSeconds:
                         description: "Number of seconds after which the probe times\
@@ -5777,8 +5777,8 @@ spec:
                             \ in the pod"
                           type: "string"
                       required:
-                        - "devicePath"
-                        - "name"
+                      - "devicePath"
+                      - "name"
                       type: "object"
                     type: "array"
                   volumeMounts:
@@ -5826,8 +5826,8 @@ spec:
                             \ mutually exclusive."
                           type: "string"
                       required:
-                        - "mountPath"
-                        - "name"
+                      - "mountPath"
+                      - "name"
                       type: "object"
                     type: "array"
                   workingDir:
@@ -5836,7 +5836,7 @@ spec:
                       \ be configured in the container image. Cannot be updated."
                     type: "string"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             env:
@@ -5914,7 +5914,7 @@ spec:
                               \ must be defined"
                             type: "boolean"
                         required:
-                          - "key"
+                        - "key"
                         type: "object"
                       fieldRef:
                         description: "ObjectFieldSelector selects an APIVersioned\
@@ -5932,7 +5932,7 @@ spec:
                               \ API version."
                             type: "string"
                         required:
-                          - "fieldPath"
+                        - "fieldPath"
                         type: "object"
                       resourceFieldRef:
                         description: "ResourceFieldSelector represents container resources\
@@ -5999,7 +5999,7 @@ spec:
                             description: "Required: resource to select"
                             type: "string"
                         required:
-                          - "resource"
+                        - "resource"
                         type: "object"
                       secretKeyRef:
                         description: "SecretKeySelector selects a key of a Secret."
@@ -6020,11 +6020,11 @@ spec:
                               \ be defined"
                             type: "boolean"
                         required:
-                          - "key"
+                        - "key"
                         type: "object"
                     type: "object"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             configMaps:
@@ -6043,8 +6043,8 @@ spec:
                       \ of the broker (true) or can be re-loaded at run-time (false)"
                     type: "boolean"
                 required:
-                  - "name"
-                  - "path"
+                - "name"
+                - "path"
                 type: "object"
               type: "array"
             extensions:
@@ -6084,11 +6084,11 @@ spec:
                   updateStrategy:
                     description: "In what manner to perform extension updates"
                     enum:
-                      - "serial"
-                      - "parallel"
+                    - "serial"
+                    - "parallel"
                     type: "string"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             podSecurityContext:
@@ -6113,15 +6113,15 @@ spec:
                   gmsaCredentialSpecName: "gmsaCredentialSpecName"
                 fsGroupChangePolicy: "fsGroupChangePolicy"
                 supplementalGroups:
-                  - 7
-                  - 7
+                - 7
+                - 7
                 runAsGroup: 1
                 runAsNonRoot: true
                 sysctls:
-                  - name: "name"
-                    value: "value"
-                  - name: "name"
-                    value: "value"
+                - name: "name"
+                  value: "value"
+                - name: "name"
+                  value: "value"
               properties:
                 fsGroup:
                   description: "A special supplemental group that applies to all containers\
@@ -6215,7 +6215,7 @@ spec:
                         \ Unconfined - no profile should be applied."
                       type: "string"
                   required:
-                    - "type"
+                  - "type"
                   type: "object"
                 supplementalGroups:
                   description: "A list of groups applied to the first process run\
@@ -6242,8 +6242,8 @@ spec:
                         description: "Value of a property to set"
                         type: "string"
                     required:
-                      - "name"
-                      - "value"
+                    - "name"
+                    - "value"
                     type: "object"
                   type: "array"
                 windowsOptions:
@@ -6281,11 +6281,11 @@ spec:
                 runAsUser: 7
                 capabilities:
                   add:
-                    - "add"
-                    - "add"
+                  - "add"
+                  - "add"
                   drop:
-                    - "drop"
-                    - "drop"
+                  - "drop"
+                  - "drop"
                 seLinuxOptions:
                   role: "role"
                   level: "level"
@@ -6315,11 +6315,11 @@ spec:
                   description: "Adds and removes POSIX capabilities from running containers."
                   example:
                     add:
-                      - "add"
-                      - "add"
+                    - "add"
+                    - "add"
                     drop:
-                      - "drop"
-                      - "drop"
+                    - "drop"
+                    - "drop"
                   properties:
                     add:
                       description: "Added capabilities"
@@ -6419,7 +6419,7 @@ spec:
                         \ Unconfined - no profile should be applied."
                       type: "string"
                   required:
-                    - "type"
+                  - "type"
                   type: "object"
                 windowsOptions:
                   description: "WindowsSecurityContextOptions contain Windows-specific\
@@ -6455,10 +6455,10 @@ spec:
                   \ within a pod."
                 example:
                   volumeDevices:
-                    - devicePath: "devicePath"
-                      name: "name"
-                    - devicePath: "devicePath"
-                      name: "name"
+                  - devicePath: "devicePath"
+                    name: "name"
+                  - devicePath: "devicePath"
+                    name: "name"
                   image: "image"
                   imagePullPolicy: "imagePullPolicy"
                   livenessProbe:
@@ -6472,18 +6472,18 @@ spec:
                     initialDelaySeconds: 5
                     exec:
                       command:
-                        - "command"
-                        - "command"
+                      - "command"
+                      - "command"
                     httpGet:
                       path: "path"
                       scheme: "scheme"
                       port: "port"
                       host: "host"
                       httpHeaders:
-                        - name: "name"
-                          value: "value"
-                        - name: "name"
-                          value: "value"
+                      - name: "name"
+                        value: "value"
+                      - name: "name"
+                        value: "value"
                   stdin: true
                   terminationMessagePolicy: "terminationMessagePolicy"
                   terminationMessagePath: "terminationMessagePath"
@@ -6496,11 +6496,11 @@ spec:
                     runAsUser: 7
                     capabilities:
                       add:
-                        - "add"
-                        - "add"
+                      - "add"
+                      - "add"
                       drop:
-                        - "drop"
-                        - "drop"
+                      - "drop"
+                      - "drop"
                     seLinuxOptions:
                       role: "role"
                       level: "level"
@@ -6529,85 +6529,85 @@ spec:
                     initialDelaySeconds: 5
                     exec:
                       command:
-                        - "command"
-                        - "command"
+                      - "command"
+                      - "command"
                     httpGet:
                       path: "path"
                       scheme: "scheme"
                       port: "port"
                       host: "host"
                       httpHeaders:
-                        - name: "name"
-                          value: "value"
-                        - name: "name"
-                          value: "value"
+                      - name: "name"
+                        value: "value"
+                      - name: "name"
+                        value: "value"
                   env:
-                    - name: "name"
-                      value: "value"
-                      valueFrom:
-                        secretKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        resourceFieldRef:
-                          divisor: "divisor"
-                          resource: "resource"
-                          containerName: "containerName"
-                        configMapKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        fieldRef:
-                          apiVersion: "apiVersion"
-                          fieldPath: "fieldPath"
-                    - name: "name"
-                      value: "value"
-                      valueFrom:
-                        secretKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        resourceFieldRef:
-                          divisor: "divisor"
-                          resource: "resource"
-                          containerName: "containerName"
-                        configMapKeyRef:
-                          name: "name"
-                          optional: true
-                          key: "key"
-                        fieldRef:
-                          apiVersion: "apiVersion"
-                          fieldPath: "fieldPath"
+                  - name: "name"
+                    value: "value"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      configMapKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
+                  - name: "name"
+                    value: "value"
+                    valueFrom:
+                      secretKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      resourceFieldRef:
+                        divisor: "divisor"
+                        resource: "resource"
+                        containerName: "containerName"
+                      configMapKeyRef:
+                        name: "name"
+                        optional: true
+                        key: "key"
+                      fieldRef:
+                        apiVersion: "apiVersion"
+                        fieldPath: "fieldPath"
                   ports:
-                    - protocol: "protocol"
-                      hostIP: "hostIP"
-                      name: "name"
-                      containerPort: 3
-                      hostPort: 2
-                    - protocol: "protocol"
-                      hostIP: "hostIP"
-                      name: "name"
-                      containerPort: 3
-                      hostPort: 2
+                  - protocol: "protocol"
+                    hostIP: "hostIP"
+                    name: "name"
+                    containerPort: 3
+                    hostPort: 2
+                  - protocol: "protocol"
+                    hostIP: "hostIP"
+                    name: "name"
+                    containerPort: 3
+                    hostPort: 2
                   command:
-                    - "command"
-                    - "command"
+                  - "command"
+                  - "command"
                   volumeMounts:
-                    - mountPath: "mountPath"
-                      mountPropagation: "mountPropagation"
-                      name: "name"
-                      readOnly: true
-                      subPath: "subPath"
-                      subPathExpr: "subPathExpr"
-                    - mountPath: "mountPath"
-                      mountPropagation: "mountPropagation"
-                      name: "name"
-                      readOnly: true
-                      subPath: "subPath"
-                      subPathExpr: "subPathExpr"
+                  - mountPath: "mountPath"
+                    mountPropagation: "mountPropagation"
+                    name: "name"
+                    readOnly: true
+                    subPath: "subPath"
+                    subPathExpr: "subPathExpr"
+                  - mountPath: "mountPath"
+                    mountPropagation: "mountPropagation"
+                    name: "name"
+                    readOnly: true
+                    subPath: "subPath"
+                    subPathExpr: "subPathExpr"
                   args:
-                    - "args"
-                    - "args"
+                  - "args"
+                  - "args"
                   lifecycle:
                     postStart:
                       tcpSocket:
@@ -6615,36 +6615,36 @@ spec:
                         host: "host"
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     preStop:
                       tcpSocket:
                         port: "port"
                         host: "host"
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                   name: "name"
                   tty: true
                   readinessProbe:
@@ -6658,34 +6658,34 @@ spec:
                     initialDelaySeconds: 5
                     exec:
                       command:
-                        - "command"
-                        - "command"
+                      - "command"
+                      - "command"
                     httpGet:
                       path: "path"
                       scheme: "scheme"
                       port: "port"
                       host: "host"
                       httpHeaders:
-                        - name: "name"
-                          value: "value"
-                        - name: "name"
-                          value: "value"
+                      - name: "name"
+                        value: "value"
+                      - name: "name"
+                        value: "value"
                   stdinOnce: true
                   envFrom:
-                    - configMapRef:
-                        name: "name"
-                        optional: true
-                      prefix: "prefix"
-                      secretRef:
-                        name: "name"
-                        optional: true
-                    - configMapRef:
-                        name: "name"
-                        optional: true
-                      prefix: "prefix"
-                      secretRef:
-                        name: "name"
-                        optional: true
+                  - configMapRef:
+                      name: "name"
+                      optional: true
+                    prefix: "prefix"
+                    secretRef:
+                      name: "name"
+                      optional: true
+                  - configMapRef:
+                      name: "name"
+                      optional: true
+                    prefix: "prefix"
+                    secretRef:
+                      name: "name"
+                      optional: true
                 properties:
                   args:
                     description: "Arguments to the entrypoint. The docker image's\
@@ -6789,7 +6789,7 @@ spec:
                                     \ key must be defined"
                                   type: "boolean"
                               required:
-                                - "key"
+                              - "key"
                               type: "object"
                             fieldRef:
                               description: "ObjectFieldSelector selects an APIVersioned\
@@ -6807,7 +6807,7 @@ spec:
                                     \ specified API version."
                                   type: "string"
                               required:
-                                - "fieldPath"
+                              - "fieldPath"
                               type: "object"
                             resourceFieldRef:
                               description: "ResourceFieldSelector represents container\
@@ -6879,7 +6879,7 @@ spec:
                                   description: "Required: resource to select"
                                   type: "string"
                               required:
-                                - "resource"
+                              - "resource"
                               type: "object"
                             secretKeyRef:
                               description: "SecretKeySelector selects a key of a Secret."
@@ -6900,11 +6900,11 @@ spec:
                                     \ key must be defined"
                                   type: "boolean"
                               required:
-                                - "key"
+                              - "key"
                               type: "object"
                           type: "object"
                       required:
-                        - "name"
+                      - "name"
                       type: "object"
                     type: "array"
                   envFrom:
@@ -6991,36 +6991,36 @@ spec:
                           host: "host"
                         exec:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         httpGet:
                           path: "path"
                           scheme: "scheme"
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                       preStop:
                         tcpSocket:
                           port: "port"
                           host: "host"
                         exec:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         httpGet:
                           path: "path"
                           scheme: "scheme"
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                     properties:
                       postStart:
                         description: "Handler defines a specific action that should\
@@ -7031,26 +7031,26 @@ spec:
                             host: "host"
                           exec:
                             command:
-                              - "command"
-                              - "command"
+                            - "command"
+                            - "command"
                           httpGet:
                             path: "path"
                             scheme: "scheme"
                             port: "port"
                             host: "host"
                             httpHeaders:
-                              - name: "name"
-                                value: "value"
-                              - name: "name"
-                                value: "value"
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
                         properties:
                           exec:
                             description: "ExecAction describes a \"run in container\"\
                               \ action."
                             example:
                               command:
-                                - "command"
-                                - "command"
+                              - "command"
+                              - "command"
                             properties:
                               command:
                                 description: "Command is the command line to execute\
@@ -7075,10 +7075,10 @@ spec:
                               port: "port"
                               host: "host"
                               httpHeaders:
-                                - name: "name"
-                                  value: "value"
-                                - name: "name"
-                                  value: "value"
+                              - name: "name"
+                                value: "value"
+                              - name: "name"
+                                value: "value"
                             properties:
                               host:
                                 description: "Host name to connect to, defaults to\
@@ -7102,8 +7102,8 @@ spec:
                                       description: "The header field value"
                                       type: "string"
                                   required:
-                                    - "name"
-                                    - "value"
+                                  - "name"
+                                  - "value"
                                   type: "object"
                                 type: "array"
                               path:
@@ -7123,7 +7123,7 @@ spec:
                                   \ host. Defaults to HTTP."
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                           tcpSocket:
                             description: "TCPSocketAction describes an action based\
@@ -7146,7 +7146,7 @@ spec:
                                 format: "int-or-string"
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                         type: "object"
                       preStop:
@@ -7158,26 +7158,26 @@ spec:
                             host: "host"
                           exec:
                             command:
-                              - "command"
-                              - "command"
+                            - "command"
+                            - "command"
                           httpGet:
                             path: "path"
                             scheme: "scheme"
                             port: "port"
                             host: "host"
                             httpHeaders:
-                              - name: "name"
-                                value: "value"
-                              - name: "name"
-                                value: "value"
+                            - name: "name"
+                              value: "value"
+                            - name: "name"
+                              value: "value"
                         properties:
                           exec:
                             description: "ExecAction describes a \"run in container\"\
                               \ action."
                             example:
                               command:
-                                - "command"
-                                - "command"
+                              - "command"
+                              - "command"
                             properties:
                               command:
                                 description: "Command is the command line to execute\
@@ -7202,10 +7202,10 @@ spec:
                               port: "port"
                               host: "host"
                               httpHeaders:
-                                - name: "name"
-                                  value: "value"
-                                - name: "name"
-                                  value: "value"
+                              - name: "name"
+                                value: "value"
+                              - name: "name"
+                                value: "value"
                             properties:
                               host:
                                 description: "Host name to connect to, defaults to\
@@ -7229,8 +7229,8 @@ spec:
                                       description: "The header field value"
                                       type: "string"
                                   required:
-                                    - "name"
-                                    - "value"
+                                  - "name"
+                                  - "value"
                                   type: "object"
                                 type: "array"
                               path:
@@ -7250,7 +7250,7 @@ spec:
                                   \ host. Defaults to HTTP."
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                           tcpSocket:
                             description: "TCPSocketAction describes an action based\
@@ -7273,7 +7273,7 @@ spec:
                                 format: "int-or-string"
                                 type: "string"
                             required:
-                              - "port"
+                            - "port"
                             type: "object"
                         type: "object"
                     type: "object"
@@ -7292,26 +7292,26 @@ spec:
                       initialDelaySeconds: 5
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     properties:
                       exec:
                         description: "ExecAction describes a \"run in container\"\
                           \ action."
                         example:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         properties:
                           command:
                             description: "Command is the command line to execute inside\
@@ -7341,10 +7341,10 @@ spec:
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                         properties:
                           host:
                             description: "Host name to connect to, defaults to the\
@@ -7368,8 +7368,8 @@ spec:
                                   description: "The header field value"
                                   type: "string"
                               required:
-                                - "name"
-                                - "value"
+                              - "name"
+                              - "value"
                               type: "object"
                             type: "array"
                           path:
@@ -7388,7 +7388,7 @@ spec:
                               \ Defaults to HTTP."
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       initialDelaySeconds:
                         description: "Number of seconds after the container has started\
@@ -7427,7 +7427,7 @@ spec:
                             format: "int-or-string"
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       timeoutSeconds:
                         description: "Number of seconds after which the probe times\
@@ -7485,13 +7485,13 @@ spec:
                             \ Defaults to \"TCP\"."
                           type: "string"
                       required:
-                        - "containerPort"
-                        - "protocol"
+                      - "containerPort"
+                      - "protocol"
                       type: "object"
                     type: "array"
                     x-kubernetes-list-map-keys:
-                      - "containerPort"
-                      - "protocol"
+                    - "containerPort"
+                    - "protocol"
                     x-kubernetes-list-type: "map"
                   readinessProbe:
                     description: "Probe describes a health check to be performed against\
@@ -7508,26 +7508,26 @@ spec:
                       initialDelaySeconds: 5
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     properties:
                       exec:
                         description: "ExecAction describes a \"run in container\"\
                           \ action."
                         example:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         properties:
                           command:
                             description: "Command is the command line to execute inside\
@@ -7557,10 +7557,10 @@ spec:
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                         properties:
                           host:
                             description: "Host name to connect to, defaults to the\
@@ -7584,8 +7584,8 @@ spec:
                                   description: "The header field value"
                                   type: "string"
                               required:
-                                - "name"
-                                - "value"
+                              - "name"
+                              - "value"
                               type: "object"
                             type: "array"
                           path:
@@ -7604,7 +7604,7 @@ spec:
                               \ Defaults to HTTP."
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       initialDelaySeconds:
                         description: "Number of seconds after the container has started\
@@ -7643,7 +7643,7 @@ spec:
                             format: "int-or-string"
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       timeoutSeconds:
                         description: "Number of seconds after which the probe times\
@@ -7777,11 +7777,11 @@ spec:
                       runAsUser: 7
                       capabilities:
                         add:
-                          - "add"
-                          - "add"
+                        - "add"
+                        - "add"
                         drop:
-                          - "drop"
-                          - "drop"
+                        - "drop"
+                        - "drop"
                       seLinuxOptions:
                         role: "role"
                         level: "level"
@@ -7813,11 +7813,11 @@ spec:
                           \ containers."
                         example:
                           add:
-                            - "add"
-                            - "add"
+                          - "add"
+                          - "add"
                           drop:
-                            - "drop"
-                            - "drop"
+                          - "drop"
+                          - "drop"
                         properties:
                           add:
                             description: "Added capabilities"
@@ -7922,7 +7922,7 @@ spec:
                               \ be applied."
                             type: "string"
                         required:
-                          - "type"
+                        - "type"
                         type: "object"
                       windowsOptions:
                         description: "WindowsSecurityContextOptions contain Windows-specific\
@@ -7967,26 +7967,26 @@ spec:
                       initialDelaySeconds: 5
                       exec:
                         command:
-                          - "command"
-                          - "command"
+                        - "command"
+                        - "command"
                       httpGet:
                         path: "path"
                         scheme: "scheme"
                         port: "port"
                         host: "host"
                         httpHeaders:
-                          - name: "name"
-                            value: "value"
-                          - name: "name"
-                            value: "value"
+                        - name: "name"
+                          value: "value"
+                        - name: "name"
+                          value: "value"
                     properties:
                       exec:
                         description: "ExecAction describes a \"run in container\"\
                           \ action."
                         example:
                           command:
-                            - "command"
-                            - "command"
+                          - "command"
+                          - "command"
                         properties:
                           command:
                             description: "Command is the command line to execute inside\
@@ -8016,10 +8016,10 @@ spec:
                           port: "port"
                           host: "host"
                           httpHeaders:
-                            - name: "name"
-                              value: "value"
-                            - name: "name"
-                              value: "value"
+                          - name: "name"
+                            value: "value"
+                          - name: "name"
+                            value: "value"
                         properties:
                           host:
                             description: "Host name to connect to, defaults to the\
@@ -8043,8 +8043,8 @@ spec:
                                   description: "The header field value"
                                   type: "string"
                               required:
-                                - "name"
-                                - "value"
+                              - "name"
+                              - "value"
                               type: "object"
                             type: "array"
                           path:
@@ -8063,7 +8063,7 @@ spec:
                               \ Defaults to HTTP."
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       initialDelaySeconds:
                         description: "Number of seconds after the container has started\
@@ -8102,7 +8102,7 @@ spec:
                             format: "int-or-string"
                             type: "string"
                         required:
-                          - "port"
+                        - "port"
                         type: "object"
                       timeoutSeconds:
                         description: "Number of seconds after which the probe times\
@@ -8171,8 +8171,8 @@ spec:
                             \ in the pod"
                           type: "string"
                       required:
-                        - "devicePath"
-                        - "name"
+                      - "devicePath"
+                      - "name"
                       type: "object"
                     type: "array"
                   volumeMounts:
@@ -8220,8 +8220,8 @@ spec:
                             \ mutually exclusive."
                           type: "string"
                       required:
-                        - "mountPath"
-                        - "name"
+                      - "mountPath"
+                      - "name"
                       type: "object"
                     type: "array"
                   workingDir:
@@ -8230,7 +8230,7 @@ spec:
                       \ be configured in the container image. Cannot be updated."
                     type: "string"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             initialization:
@@ -8252,7 +8252,7 @@ spec:
                       type: "string"
                     type: "array"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             initDnsWaitImage:
@@ -8290,8 +8290,8 @@ spec:
                       type: "string"
                     type: "array"
                 required:
-                  - "name"
-                  - "port"
+                - "name"
+                - "port"
                 type: "object"
               type: "array"
             clusterReplicaCount:
@@ -8352,8 +8352,8 @@ spec:
                   type: "integer"
                 queuedMessageStrategy:
                   enum:
-                    - "discard"
-                    - "discard-oldest"
+                  - "discard"
+                  - "discard-oldest"
                   type: "string"
               type: "object"
             monitoring:
@@ -8403,8 +8403,8 @@ spec:
                     description: "Path to mount the files to"
                     type: "string"
                 required:
-                  - "name"
-                  - "path"
+                - "name"
+                - "path"
                 type: "object"
               type: "array"
             customProperties:
@@ -8421,12 +8421,13 @@ spec:
               description: "The current state of the deployment, indicating if updates\
                 \ are in progress, have failed, or the state was degraded"
               enum:
-                - "Running"
-                - "Updating"
-                - "Pending"
-                - "Failed"
-                - "Degraded"
-                - "Deleting"
+              - "Running"
+              - "Updating"
+              - "Creating"
+              - "Pending"
+              - "Failed"
+              - "Degraded"
+              - "Deleting"
               type: "string"
             message:
               description: "Human readable message describing the current state of\
@@ -8462,10 +8463,10 @@ spec:
                     description: "Identifier for the condition, add new conditions\
                       \ for life cycles here"
                     enum:
-                      - "AllNodesReady"
-                      - "AllExtensionsLoaded"
-                      - "AllServicesReady"
-                      - "LogLevelApplied"
+                    - "AllNodesReady"
+                    - "AllExtensionsLoaded"
+                    - "AllServicesReady"
+                    - "LogLevelApplied"
                     type: "string"
                   lastTransitionTime:
                     description: "Last state transition time in RFC3339, UTC time"
@@ -8521,11 +8522,11 @@ spec:
                   updateStrategy:
                     description: "In what manner to perform extension updates"
                     enum:
-                      - "serial"
-                      - "parallel"
+                    - "serial"
+                    - "parallel"
                     type: "string"
                 required:
-                  - "name"
+                - "name"
                 type: "object"
               type: "array"
             surgeStatus:
@@ -8533,19 +8534,19 @@ spec:
                 \ indicates whether a surge update is in progress, and what state\
                 \ it is in."
               enum:
-                - "SURGE_IN_PROGRESS"
-                - "READY"
+              - "SURGE_IN_PROGRESS"
+              - "READY"
               type: "string"
           required:
-            - "state"
-            - "message"
+          - "state"
+          - "message"
           type: "object"
         metadata:
           type: "object"
       required:
-        - "spec"
+      - "spec"
       type: "object"
   versions:
-    - name: "v1"
-      served: true
-      storage: true
+  - name: "v1"
+    served: true
+    storage: true
