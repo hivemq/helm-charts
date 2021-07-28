@@ -35,7 +35,7 @@ Full list of changes:
   - The operator now encodes operations logic for properly orchestrating HiveMQ on a StatefulSet.
     The operator will ensure an additional (surge) HiveMQ node with the updated configuration will get spawned prior to rolling-updating the cluster.
     An OnDelete strategy is required in the StatefulSet template to facilitate this, as the operator will also ensure a proper cool-down period between individual nodes being restarted.
-- The Helm Chart (and operator) will now automatically use the V1 CustomResourceDefinition api version if it is available on the cluster.
+- The Helm Chart (and operator) now use the V1 CustomResourceDefinition api version. v1beta1 is still supported. See above.
 - Fixed a bug where specifically formatted extensionUris would lead to broken extension state management
 
 # chart 0.8.5
