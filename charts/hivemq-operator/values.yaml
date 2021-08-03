@@ -4,15 +4,19 @@ global:
     # Create a PodSecurityPolicy, cluster role, role binding and service account for the HiveMQ pods and assign the service account to them.
     pspEnabled: true
     pspAnnotations: {}
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
     allowedCapabilities: []
     # Image pull secrets for operator, hivemq or other images.
     imagePullSecrets: []
     # - name: hivemq-pull-secret
+
 operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:4.6.0
+  image: hivemq/hivemq-operator:4.6.4
   imagePullPolicy: IfNotPresent
   nodeSelector: {}
   logLevel: INFO
@@ -55,16 +59,66 @@ monitoring:
   # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
   dedicated: false
 hivemq:
+  # Custom container spec to add to the HiveMQ Pod
+  sidecars: []
+  # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison this field does not have any defaults but allows for more granular configuration using the full K8s Container API
+  initContainers: []
+  # HiveMQ Pod security context
+  podSecurityContext: {}
+    # fsGroup: 1001
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # sysctls:
+      # To ensure we don't run into port exhaustion
+      # - name: net.ipv4.ip_local_port_range
+      #   value: "1024 65535"
+  # HiveMQ container security context within the Pod
+  containerSecurityContext:
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # allowPrivilegeEscalation: false
+    # privileged: false
+  # TopologySpreadConstraints to apply in the underlying Pod spec
+  topologySpreadConstraints: []
+  # Tolerations to apply in the underlying Pod spec
+  tolerations: []
+
+  # Node selectors for the Pod spec
+  nodeSelector: {}
+  # StatefulSet only: Volume claim templates to use
+  volumeClaimTemplates: []
+  # RuntimeClass for the Pod spec
+  runtimeClassName: ""
+  # PriorityClass for the Pod spec
+  priorityClassName: ""
+
+  # Additional volumes to add to the HiveMQ Pod
+  additionalVolumes: []
+  # Additional volume mounts for the HiveMQ container
+  additionalVolumeMounts: []
+  # DNS suffix to use for DNS discovery
+  dnsSuffix: "svc.cluster.local."
+
+  # Annotations to add to the HiveMQ Pods
+  podAnnotations: {}
+  # Labels to add to the HiveMQ Pods
+  podLabels: {}
+
+  # Optional operator-internal configuration (See kubectl explain hmqc.spec.operatorHints for more info)
+  operatorHints: {}
+
+  # Custom properties to set in the custom resource, to be used in conjunction with custom operator templates.
+  customProperties: {}
   # Annotations to apply to the service account
   serviceAccountAnnotations: {}
-  # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused.
-  image: hivemq/hivemq4:k8s-4.6.0
+  # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused
+  image: hivemq/hivemq4:k8s-4.6.4
   imagePullPolicy: IfNotPresent
   nodeCount: "3"
   cpu: "4"
   memory: "4Gi"
   ephemeralStorage: "15Gi"
-  # This is only used if global.rbac.create is set to false.
+  # This is only used if global.rbac.create is set to false
   serviceAccountName: hivemq
   # Base64 encoded license. (NOTE: use a ConfigMap when mounting multiple files)
   license: ""
@@ -110,7 +164,7 @@ hivemq:
   # ConfigMaps to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
   #- name: hivemq-license
   #  path: /opt/hivemq/license
-  secrets: {}
+  secrets: []
   # Secrets to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
   #- name: hivemq-license
   #  path: /opt/hivemq/license
@@ -162,6 +216,7 @@ hivemq:
     incomingBandwidthThrottling: 0
     maxConnections: -1
   security:
+    controlCenterAuditLogEnabled: true
     topicFormatValidation: true
     allowRequestProblemInformation: true
     allowEmptyClientId: true
@@ -195,6 +250,7 @@ hivemq:
   mqtt:
     sharedSubscriptionEnabled: true
     queuedMessageStrategy: "discard"
+    messageExpiryMaxInterval: 4294967296
     subscriptionIdentifierEnabled: true
     keepaliveAllowUnlimited: true
     retainedMessagesEnabled: true
@@ -210,6 +266,7 @@ hivemq:
   javaOptions: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=40 -XX:MaxRAMPercentage=50 -XX:MinRAMPercentage=30"
   clusterReplicaCount: "2"
   controllerTemplate: cluster-deployment.yaml
+  # language=XML
   configOverride: |
     <?xml version="1.0"?>
     <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -231,6 +288,7 @@ hivemq:
                 </user>
             </users>
         </control-center>
+
         <!--REST-API-CONFIGURATION-->
         <cluster>
             <enabled>true</enabled>
@@ -238,6 +296,7 @@ hivemq:
                 <tcp>
                     <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
                     <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
+                    <enabled>true</enabled>
                 </tcp>
             </transport>
             <discovery>
@@ -281,6 +340,10 @@ hivemq:
             <session-expiry>
                 <max-interval>${HIVEMQ_SESSION_EXPIRY_INTERVAL}</max-interval>
             </session-expiry>
+
+            <message-expiry>
+                <max-interval>${HIVEMQ_MESSAGE_EXPIRY_MAX_INTERVAL}</max-interval>
+            </message-expiry>
 
             <packets>
                 <max-packet-size>${HIVEMQ_MAX_PACKET_SIZE}</max-packet-size>
@@ -344,6 +407,10 @@ hivemq:
             <allow-request-problem-information>
                 <enabled>${HIVEMQ_ALLOW_REQUEST_PROBLEM_INFORMATION}</enabled>
             </allow-request-problem-information>
+
+            <control-center-audit-log>
+                <enabled>${HIVEMQ_CONTROL_CENTER_AUDIT_LOG_ENABLED}</enabled>
+            </control-center-audit-log>
         </security>
     </hivemq>
 nameOverride: ""
@@ -351,5 +418,3 @@ namespaceOverride: ""
 fullnameOverride: ""
 # Whether to add the generic, common Helm metadata labels (mainly intended for use as a utility for generating the non-Helm install manifests)
 generateLabels: true
-image:
-  tag: 4.6.0
