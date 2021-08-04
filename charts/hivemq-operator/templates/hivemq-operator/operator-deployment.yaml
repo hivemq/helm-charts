@@ -35,21 +35,18 @@ spec:
               value: {{ .Values.operator.logLevel }}
             - name: CREATE_CRD
               value: "false"
-            - name: MICRONAUT_SERVER_PORT
-              value: "8443"
             - name: MICRONAUT_SSL_ENABLED
               value: "{{ .Values.operator.admissionWebhooks.enabled }}"
             {{- if .Values.operator.admissionWebhooks.enabled }}
             - name: OPERATOR_SSL_PATH
               value: "/etc/ssl/admission"
-            - name: MICRONAUT_CONFIG_FILES
-              value: "/tmp/application.yml"
             {{- end }}
             - name: SSL_FQDN
               value: "{{ include "hivemq.name" . }}-operator.{{ template "hivemq.namespace" . }}.svc"
           resources: {{ toYaml .Values.operator.resources | nindent 12 }}
           securityContext:
-            {{- toYaml .Values.global.rbac.securityContext | nindent 12 }}
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
           volumeMounts:
             - mountPath: /templates
               name: templates
@@ -59,7 +56,7 @@ spec:
             {{- end }}
           ports:
             - name: https
-              containerPort: 8443
+              containerPort: 443
               protocol: TCP
       restartPolicy: Always
       serviceAccountName: "{{ template "hivemq.fullname" . }}-operator"
