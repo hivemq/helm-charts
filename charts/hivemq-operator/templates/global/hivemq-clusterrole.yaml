@@ -15,5 +15,5 @@ rules:
     resources: ['podsecuritypolicies']
     verbs:     ['use']
     resourceNames:
-      - {{ template "hivemq.fullname" . }}
+      - {{ template "hivemq.fullname" . }}-hivemq
   {{- end }}

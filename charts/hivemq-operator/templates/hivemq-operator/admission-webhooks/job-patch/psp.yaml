@@ -34,21 +34,21 @@ spec:
   hostPID: false
   runAsUser:
     # Permits the container to run with root privileges as well.
-    rule: 'MustRunAsNonRoot'
+    rule: 'RunAsAny'
   seLinux:
     # This policy assumes the nodes are using AppArmor rather than SELinux.
-    rule: 'MustRunAs'
+    rule: 'RunAsAny'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
       # Forbid adding the root group.
-      - min: 1
+      - min: 0
         max: 65535
   fsGroup:
     rule: 'MustRunAs'
     ranges:
       # Forbid adding the root group.
-      - min: 1
+      - min: 0
         max: 65535
   readOnlyRootFilesystem: false
 {{- end }}
