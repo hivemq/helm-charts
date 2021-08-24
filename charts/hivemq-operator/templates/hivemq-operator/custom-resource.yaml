@@ -90,4 +90,6 @@ spec:
   {{- if .Values.hivemq.operatorHints }}
   operatorHints: {{ toYaml .Values.hivemq.operatorHints | nindent 4 }}
   {{- end }}
+  initBusyboxImage: {{ .Values.hivemq.initBusyboxImage }}
+  initDnsWaitImage: {{ .Values.hivemq.initDnsWaitImage }}
 {{- end }}
