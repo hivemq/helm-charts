@@ -1,4 +1,4 @@
-{{- if .Values.operator.deployCr  }}
+{{- if .Values.operator.deployCr }}
 kind: HiveMQCluster
 apiVersion: hivemq.com/v1
 metadata:
@@ -68,4 +68,26 @@ spec:
   restApiConfiguration: |{{ .Values.hivemq.restApiConfiguration | nindent 4 }}
   configOverride: |{{ .Values.hivemq.configOverride | nindent 4 }}
   initialization: {{ toYaml .Values.hivemq.initialization | nindent 4 }}
+  sidecars: {{ toYaml .Values.hivemq.sidecars | nindent 4 }}
+  initContainers: {{ toYaml .Values.hivemq.initContainers | nindent 4 }}
+  {{- if .Values.hivemq.podSecurityContext }}
+  podSecurityContext: {{ toYaml .Values.hivemq.podSecurityContext | nindent 4 }}
+  {{- end }}
+  {{- if .Values.hivemq.containerSecurityContext }}
+  containerSecurityContext: {{ toYaml .Values.hivemq.containerSecurityContext | nindent 4 }}
+  {{- end }}
+  topologySpreadConstraints: {{ toYaml .Values.hivemq.topologySpreadConstraints | nindent 4 }}
+  tolerations: {{ toYaml .Values.hivemq.tolerations | nindent 4 }}
+  nodeSelector: {{ toYaml .Values.hivemq.nodeSelector | nindent 4 }}
+  runtimeClassName: {{ toYaml .Values.hivemq.runtimeClassName | nindent 4 }}
+  priorityClassName: {{ toYaml .Values.hivemq.priorityClassName | nindent 4 }}
+  additionalVolumes: {{ toYaml .Values.hivemq.additionalVolumes | nindent 4 }}
+  additionalVolumeMounts: {{ toYaml .Values.hivemq.additionalVolumeMounts | nindent 4 }}
+  dnsSuffix: {{ toYaml .Values.hivemq.dnsSuffix | nindent 4 }}
+  podAnnotations: {{ toYaml .Values.hivemq.podAnnotations | nindent 4 }}
+  customProperties: {{ toYaml .Values.hivemq.customProperties | nindent 4 }}
+  podLabels: {{ toYaml .Values.hivemq.podLabels | nindent 4 }}
+  {{- if .Values.hivemq.operatorHints }}
+  operatorHints: {{ toYaml .Values.hivemq.operatorHints | nindent 4 }}
+  {{- end }}
 {{- end }}
