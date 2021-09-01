@@ -136,6 +136,8 @@ hivemq:
   #   args:
   #   - |
   #     echo "mycustomfile" >> /hivemq-data/conf/test.cfg
+  initBusyboxImage: busybox:latest
+  initDnsWaitImage: hivemq/init-dns-wait:1.0.0
   extensions:
     - # Default platform extensions starting from 4.4.0. Add a configMap and enable them if you want to use either
       name: hivemq-kafka-extension
