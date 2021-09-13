@@ -19,7 +19,7 @@ spec:
         operator: "hivemq-operator"
     spec:
       containers:
-        - image: hivemq/hivemq-operator:4.5.0
+        - image: hivemq/hivemq-operator:4.7.0
           imagePullPolicy: IfNotPresent
           name: operator
           env:
@@ -29,6 +29,8 @@ spec:
               value: INFO
             - name: CREATE_CRD
               value: "false"
+            - name: MICRONAUT_SERVER_PORT
+              value: "8443"
             - name: MICRONAUT_SSL_ENABLED
               value: "false"
             - name: SSL_FQDN
@@ -41,14 +43,14 @@ spec:
               cpu: 200m
               memory: 512M
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
           volumeMounts:
             - mountPath: /templates
               name: templates
           ports:
             - name: https
-              containerPort: 443
+              containerPort: 8443
               protocol: TCP
       restartPolicy: Always
       serviceAccountName: "hivemq-operator"
