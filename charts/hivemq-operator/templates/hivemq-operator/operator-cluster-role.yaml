@@ -114,6 +114,7 @@ rules:
       - apiextensions.k8s.io
     resources:
       - customresourcedefinitions
+      - customresourcedefinitions/finalizers
     verbs:
       - list
       - get
@@ -127,6 +128,7 @@ rules:
       - hivemq-clusters
       - hivemq-clusters/status
       - hivemq-clusters/scale
+      - hivemq-clusters/finalizers
     verbs:
       - list
       - get

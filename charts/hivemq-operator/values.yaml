@@ -136,6 +136,8 @@ hivemq:
   #   args:
   #   - |
   #     echo "mycustomfile" >> /hivemq-data/conf/test.cfg
+  initBusyboxImage: busybox:latest
+  initDnsWaitImage: hivemq/init-dns-wait:1.0.0
   extensions:
     - # Default platform extensions starting from 4.4.0. Add a configMap and enable them if you want to use either
       name: hivemq-kafka-extension
@@ -309,10 +311,6 @@ hivemq:
                 <replica-count>${HIVEMQ_CLUSTER_REPLICA_COUNT}</replica-count>
             </replication>
 
-            <overload-protection>
-                <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
-            </overload-protection>
-
             <failure-detection>
                 <tcp-health-check>
                     <enabled>true</enabled>
@@ -329,6 +327,9 @@ hivemq:
             </failure-detection>
 
         </cluster>
+        <overload-protection>
+            <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
+        </overload-protection>
         <restrictions>
             <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>
             <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>
