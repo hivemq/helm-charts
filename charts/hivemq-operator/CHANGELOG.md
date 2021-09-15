@@ -1,3 +1,10 @@
+# chart 0.9.1
+
+- Fix overload protection configuration
+- Add some missing RBAC configurations
+- Allow customization of init images in values.yaml
+- Allow security context configuration for webhook job
+
 # 4.7.0 (chart 0.9.0)
 
 The most significant changes in this release are:
