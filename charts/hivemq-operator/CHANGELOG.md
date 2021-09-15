@@ -1,7 +1,7 @@
 # chart 0.9.1
 
 - Fix overload protection configuration
-- Add some missing RBAC configurations
+- Add missing RBAC configuration, so that the chart is compatible with Openshift
 - Allow customization of init images in values.yaml
 - Allow security context configuration for webhook job
 
