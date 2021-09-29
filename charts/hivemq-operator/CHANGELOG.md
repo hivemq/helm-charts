@@ -1,3 +1,7 @@
+# chart 0.9.2
+
+- Fix an issue where the operator would not properly sync the `-dynamic-state` ConfigMap
+
 # chart 0.9.1
 
 - Fix overload protection configuration
