@@ -92,6 +92,8 @@ spec:
   {{- end }}
   initBusyboxImage: {{ .Values.hivemq.initBusyboxImage }}
   initDnsWaitImage: {{ .Values.hivemq.initDnsWaitImage }}
-  volumeClaimTemplates:
-  {{ .Values.hivemq.volumeClaimTemplates }}
+  {{- if .Values.hivemq.volumeClaimTemplates }}
+  volumeClaimTemplates: {{ toYaml .Values.hivemq.volumeClaimTemplates | nindent 4 }}
+  {{- end }}
+
 {{- end }}
