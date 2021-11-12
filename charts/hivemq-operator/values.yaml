@@ -86,7 +86,18 @@ hivemq:
   # Node selectors for the Pod spec
   nodeSelector: {}
   # StatefulSet only: Volume claim templates to use
-  volumeClaimTemplates: []
+  volumeClaimTemplates:
+    # - kind: PersistentVolumeClaim
+    #   apiVersion: v1
+    #   metadata:
+    #     name: data
+    #   spec:
+    #     accessModes:
+    #       - ReadWriteOnce
+    #     resources:
+    #       requests:
+    #         storage: 100Gi
+    #     volumeMode: Filesystem
   # RuntimeClass for the Pod spec
   runtimeClassName: ""
   # PriorityClass for the Pod spec
