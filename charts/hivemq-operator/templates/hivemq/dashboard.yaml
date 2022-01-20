@@ -4567,7 +4567,7 @@ data:
                 }
               ],
               "intervalFactor": 2,
-              "legendFormat": "{{`{{pod}}`}} GC M&S",
+              "legendFormat": "{{`{{pod}}`}} GC Y&O",
               "measurement": "com.hivemq.jvm.garbage-collector.G1-Young-Generation.count",
               "metric": "com_hivemq_jvm_garbage_collector_G1_Young_Generation_count",
               "policy": "default",
@@ -4736,7 +4736,7 @@ data:
             {
               "alias": "GC Old Time - $tag_host",
               "dsType": "influxdb",
-              "expr": "delta(com_hivemq_jvm_garbage_collector_PS_MarkSweep_time{job = \"$job\"}[1m])",
+              "expr": "delta(com_hivemq_jvm_garbage_collector_G1_Old_Generation_time{job = \"$job\"}[1m])",
               "format": "time_series",
               "groupBy": [
                 {
