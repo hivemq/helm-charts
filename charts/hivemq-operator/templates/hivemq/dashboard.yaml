@@ -4683,7 +4683,7 @@ data:
             {
               "alias": "GC Young Time - $tag_host",
               "dsType": "influxdb",
-              "expr": "delta(com_hivemq_jvm_garbage_collector_G1_Old_Generation_time{job = \"$job\"}[1m])",
+              "expr": "delta(com_hivemq_jvm_garbage_collector_G1_Young_Generation_time{job = \"$job\"}[1m])",
               "format": "time_series",
               "groupBy": [
                 {
