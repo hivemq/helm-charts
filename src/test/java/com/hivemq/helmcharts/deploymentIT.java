@@ -1,31 +1,37 @@
 package com.hivemq.helmcharts;
 
-import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.apis.CoreV1Api;
-import io.kubernetes.client.openapi.models.V1NodeList;
-import io.kubernetes.client.util.Config;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.testcontainers.containers.BindMode.READ_ONLY;
 
 public class deploymentIT {
+
+    private final @NotNull Logger log = LoggerFactory.getLogger(deploymentIT.class);
+
+
     @Test
-    public void deployCluster() throws IOException, ApiException {
-        K3sContainer k3s = new K3sContainer(DockerImageName.parse("rancher/k3s:v1.21.3-k3s1"));
-        String kubeConfigYaml = k3s.getKubeConfigYaml();
-
-        System.out.println(kubeConfigYaml);
-
-        ApiClient client = Config.fromConfig(new StringReader(kubeConfigYaml));
-        CoreV1Api api = new CoreV1Api(client);
-
-        // interact with the running K3s server, e.g.:
-        V1NodeList nodes = api.listNode(null, null, null, null, null, null, null, null, null, null);
-
+    public void deployCluster() throws IOException, ApiException, InterruptedException {
+        var k3sContainer = new K3sContainer(DockerImageName.parse("kube:latest").asCompatibleSubstituteFor("rancher/k3s"));
+        k3sContainer.addFileSystemBind(new File(".").getCanonicalPath(), "/test", READ_ONLY);
+        k3sContainer.start();
+        var config = k3sContainer.getKubeConfigYaml();
+        var out = k3sContainer.execInContainer("/bin/kubectl", "get", "nodes");
+        System.out.println(out.getStdout());
+        System.err.println(out.getStderr());
+        k3sContainer.getLogs();
+        boolean isCreated = k3sContainer.isCreated();
+        assertTrue(isCreated);
+        k3sContainer.close();
     }
+
 }
