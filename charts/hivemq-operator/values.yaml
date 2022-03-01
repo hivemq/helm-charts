@@ -33,8 +33,8 @@ operator:
     patch:
       enabled: true
       image:
-        repository: jettech/kube-webhook-certgen
-        tag: v1.5.1
+        repository: k8s.gcr.io/ingress-nginx/kube-webhook-certgen
+        tag: v1.1.1
         sha: ""
         pullPolicy: IfNotPresent
       resources: {}
