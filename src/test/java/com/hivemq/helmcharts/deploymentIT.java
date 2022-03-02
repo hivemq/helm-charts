@@ -4,7 +4,6 @@ import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.helmcharts.util.HelmK3sContainer;
-import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1Pod;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.shaded.com.google.common.io.ByteStreams;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +95,7 @@ public class deploymentIT {
             if (defaultPods.size() == 1) {
                 // As soon as the pod is created we can expose the service
                 if (!serviceReady) {
+                    assert container != null;
                     var outExpose = container.execInContainer("/bin/kubectl",
                             "expose",
                             "deployment",
