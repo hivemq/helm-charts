@@ -5,6 +5,8 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5DisconnectException;
+import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
+import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode;
 import com.hivemq.helmcharts.util.HelmK3sContainer;
 import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiException;
@@ -14,8 +16,7 @@ import io.kubernetes.client.util.Config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +39,11 @@ public class deploymentIT {
     public @Nullable
     HelmK3sContainer container;
 
-    @ParameterizedTest
-    @ValueSource(strings = {"v1.21.10-k3s1"})
-    public void testCustomContainer(final @NotNull String version) throws Exception {
+    @Test
+    public void testCustomContainer() throws Exception {
+
         container = HelmK3sContainer.builder()
-                .k3sVersion(version)
+                .k3sVersion("v1.21.10-k3s1")
                 .tempDir(new File("./src/test/resources"))
                 .build();
         container.addFileSystemBind(new File(".").getCanonicalPath(), "/test", READ_WRITE);
@@ -103,7 +104,8 @@ public class deploymentIT {
         assertNotNull(foundPods);
         //When the pod is running the cluster needs time to be ready
         var podLog = new PodLogs(client);
-        try (var is = podLog.streamNamespacedPodLog(foundPods)) {
+        var is = podLog.streamNamespacedPodLog(foundPods);
+        try {
             var scanner = new Scanner(is).useDelimiter("\n");
             while (scanner.hasNext()) {
                 var s = scanner.next();
@@ -112,7 +114,10 @@ public class deploymentIT {
                     return;
                 }
             }
+        } finally {
+            is.close();
         }
+        //ByteStreams.copy(is,System.out);
     }
 
     private @Nullable V1Pod waitForHiveMQCluster(@NotNull CoreV1Api api) throws ApiException, InterruptedException, IOException {
