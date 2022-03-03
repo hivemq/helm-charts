@@ -2,8 +2,11 @@ package com.hivemq.helmcharts;
 
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
+import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5DisconnectException;
 import com.hivemq.helmcharts.util.HelmK3sContainer;
+import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1Pod;
@@ -11,7 +14,8 @@ import io.kubernetes.client.util.Config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +24,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,11 +38,11 @@ public class deploymentIT {
     public @Nullable
     HelmK3sContainer container;
 
-    @Test
-    public void testCustomContainer() throws IOException, InterruptedException, ApiException {
-
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.21.10-k3s1"})
+    public void testCustomContainer(final @NotNull String version) throws Exception {
         container = HelmK3sContainer.builder()
-                .k3sVersion("v1.21.10-k3s1")
+                .k3sVersion(version)
                 .tempDir(new File("./src/test/resources"))
                 .build();
         container.addFileSystemBind(new File(".").getCanonicalPath(), "/test", READ_WRITE);
@@ -52,9 +57,10 @@ public class deploymentIT {
     }
 
     private void testMqttClient(int mappedPort) throws InterruptedException {
-        var client = Mqtt5Client.builder().
-                serverPort(mappedPort).buildBlocking();
-        client.connect();
+        System.out.println("Test mqtt client");
+        int retries = 5;
+        Mqtt5BlockingClient client = getMqtt5BlockingClient(mappedPort, retries);
+        System.out.println("Connected to mqtt client");
         var publishes = client.publishes(MqttGlobalPublishFilter.ALL);
         client.subscribeWith().topicFilter("test").send();
         client.publishWith()
@@ -67,10 +73,28 @@ public class deploymentIT {
         assertTrue(publishes.receive(200, TimeUnit.MILLISECONDS).isEmpty());
     }
 
+    @NotNull
+    private Mqtt5BlockingClient getMqtt5BlockingClient(final int mappedPort, int retries) throws RuntimeException {
+        Mqtt5BlockingClient client = Mqtt5Client.builder().
+                serverPort(mappedPort).buildBlocking();
+        try {
+            client.connect();
+        } catch (Mqtt5DisconnectException e) {
+            if (retries > 0) {
+                retries--;
+                return getMqtt5BlockingClient(mappedPort, retries);
+            } else {
+                throw new RuntimeException("retries exceeded", e);
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return client;
+    }
+
     private void exposeService() throws IOException, ApiException, InterruptedException {
         assert container != null;
         String kubeConfigYaml = container.getKubeConfigYaml();
-
         var client = Config.fromConfig(new StringReader(kubeConfigYaml));
         var api = new CoreV1Api(client);
         var nodes = api.listNode(null, null, null, null, null, null, null, null, null, null);
@@ -78,9 +102,17 @@ public class deploymentIT {
         V1Pod foundPods = waitForHiveMQCluster(api);
         assertNotNull(foundPods);
         //When the pod is running the cluster needs time to be ready
-        //var podLog = new PodLogs();
-        //var is =podLog.streamNamespacedPodLog(foundPods);
-        //ByteStreams.copy(is,System.out);
+        var podLog = new PodLogs(client);
+        try (var is = podLog.streamNamespacedPodLog(foundPods)) {
+            var scanner = new Scanner(is).useDelimiter("\n");
+            while (scanner.hasNext()) {
+                var s = scanner.next();
+                if (s.contains("Started HiveMQ in")) {
+                    System.out.println("Broker Ready");
+                    return;
+                }
+            }
+        }
     }
 
     private @Nullable V1Pod waitForHiveMQCluster(@NotNull CoreV1Api api) throws ApiException, InterruptedException, IOException {
@@ -112,7 +144,7 @@ public class deploymentIT {
                 }
             }
             retries--;
-            Thread.sleep(6000);
+            Thread.sleep(3000);
         }
         return null;
     }
