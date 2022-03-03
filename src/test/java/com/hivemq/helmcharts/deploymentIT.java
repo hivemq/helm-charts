@@ -74,6 +74,8 @@ public class deploymentIT {
         var receivedMessage = publishes.receive();
         assertNotNull(receivedMessage);
         assertTrue(publishes.receive(200, TimeUnit.MILLISECONDS).isEmpty());
+        System.out.println("Test finished" + StandardCharsets.UTF_8.decode(receivedMessage.getPayload()
+                .get().asReadOnlyBuffer()));
     }
 
     @NotNull
@@ -83,6 +85,7 @@ public class deploymentIT {
         try {
             client.connect();
             assertEquals(client.getState(), MqttClientState.CONNECTED);
+            System.out.println("Mqtt Client Connected");
         } catch (Mqtt5DisconnectException | ConnectionClosedException e) {
             System.err.println("Can not connect to server:" + e.getClass().getName()
                     + " with message: " + e.getMessage()
