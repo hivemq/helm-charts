@@ -1,12 +1,12 @@
 package com.hivemq.helmcharts;
 
+import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.exceptions.ConnectionClosedException;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5DisconnectException;
-import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
-import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAckReasonCode;
 import com.hivemq.helmcharts.util.HelmK3sContainer;
 import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiException;
@@ -16,9 +16,12 @@ import io.kubernetes.client.util.Config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testng.TestException;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +31,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.containers.BindMode.READ_WRITE;
 
 public class deploymentIT {
@@ -38,30 +40,31 @@ public class deploymentIT {
     Logger log = LoggerFactory.getLogger(deploymentIT.class);
     public @Nullable
     HelmK3sContainer container;
+    private final int mqttPort = 1883;
 
-    @Test
-    public void testCustomContainer() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.18.20-k3s1", "v1.19.16-k3s1", "v1.20.15-k3s1", "v1.21.10-k3s1"})
+    public void testCustomContainer(final @NotNull String version) throws Exception {
 
         container = HelmK3sContainer.builder()
-                .k3sVersion("v1.21.10-k3s1")
+                .k3sVersion(version)
                 .tempDir(new File("./src/test/resources"))
                 .build();
         container.addFileSystemBind(new File(".").getCanonicalPath(), "/test", READ_WRITE);
-
-        int mqttPort = 1883;
         container.addExposedPort(mqttPort);
         container.start();
         deployChart();
         exposeService();
-        int mappedPort = container.getMappedPort(mqttPort);
-        testMqttClient(mappedPort);
+        testMqttClient();
     }
 
-    private void testMqttClient(int mappedPort) throws InterruptedException {
-        System.out.println("Test mqtt client");
-        int retries = 5;
+    private void testMqttClient() throws InterruptedException {
+        int retries = 10;
+        assert container != null;
+        int mappedPort = container.getMappedPort(mqttPort);
+        container.withExposedPorts(mqttPort).waitingFor(Wait.forListeningPort());
+        System.out.println("Port is ready");
         Mqtt5BlockingClient client = getMqtt5BlockingClient(mappedPort, retries);
-        System.out.println("Connected to mqtt client");
         var publishes = client.publishes(MqttGlobalPublishFilter.ALL);
         client.subscribeWith().topicFilter("test").send();
         client.publishWith()
@@ -80,15 +83,17 @@ public class deploymentIT {
                 serverPort(mappedPort).buildBlocking();
         try {
             client.connect();
-        } catch (Mqtt5DisconnectException e) {
+            assertEquals(client.getState(), MqttClientState.CONNECTED);
+        } catch (Mqtt5DisconnectException | ConnectionClosedException e) {
+            System.err.println("Can not connect to server:" + e.getClass().getName()
+                    + " with message: " + e.getMessage()
+                    + " retries:"+retries);
             if (retries > 0) {
-                retries--;
-                return getMqtt5BlockingClient(mappedPort, retries);
+                return getMqtt5BlockingClient(mappedPort, --retries);
             } else {
-                throw new RuntimeException("retries exceeded", e);
+                System.err.println("Retries exceeded");
+                assert false;
             }
-        }catch (Exception ex){
-            ex.printStackTrace();
         }
         return client;
     }
@@ -104,8 +109,7 @@ public class deploymentIT {
         assertNotNull(foundPods);
         //When the pod is running the cluster needs time to be ready
         var podLog = new PodLogs(client);
-        var is = podLog.streamNamespacedPodLog(foundPods);
-        try {
+        try (var is = podLog.streamNamespacedPodLog(foundPods)) {
             var scanner = new Scanner(is).useDelimiter("\n");
             while (scanner.hasNext()) {
                 var s = scanner.next();
@@ -114,8 +118,6 @@ public class deploymentIT {
                     return;
                 }
             }
-        } finally {
-            is.close();
         }
         //ByteStreams.copy(is,System.out);
     }
@@ -149,9 +151,9 @@ public class deploymentIT {
                 }
             }
             retries--;
-            Thread.sleep(3000);
+            Thread.sleep(6000);
         }
-        return null;
+        throw new TestException("HiveMQ pod not found");
     }
 
     public void deployChart() throws IOException, InterruptedException {
