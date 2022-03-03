@@ -43,9 +43,8 @@ public class deploymentIT {
     private final int mqttPort = 1883;
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.18.20-k3s1", "v1.19.16-k3s1", "v1.20.15-k3s1", "v1.21.10-k3s1"})
-    public void testCustomContainer(final @NotNull String version) throws Exception {
-
+    @ValueSource(strings = {"v1.18.20-k3s1", "v1.19.16-k3s1", "v1.20.15-k3s1", "v1.21.10-k3s1", "v1.22.7-k3s1", "v1.23.4-k3s1"})
+    public void withHelmVersionDeployment_mqttMessagePublishedReceived(final @NotNull String version) throws Exception {
         container = HelmK3sContainer.builder()
                 .k3sVersion(version)
                 .tempDir(new File("./src/test/resources"))
@@ -173,7 +172,9 @@ public class deploymentIT {
                 "-f",
                 "/test/src/test/resources/testValues.yaml");
         System.out.println(outDeploy.getStdout());
-        log.warn(outDeploy.getStderr());
+        if (!outDeploy.getStderr().isEmpty()) {
+            log.warn(outDeploy.getStderr());
+        }
         assertTrue(outDeploy.getStdout().contains("STATUS: deployed"));
     }
 
