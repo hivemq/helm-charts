@@ -1,0 +1,70 @@
+package com.hivemq.helmcharts.util;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.k3s.K3sContainer;
+import org.testcontainers.utility.DockerImageName;
+
+import java.io.File;
+import java.io.IOException;
+
+public class OperatorHelmChartContainer extends K3sContainer {
+    public final static int mqttPort = 1883;
+
+    private OperatorHelmChartContainer(final @NotNull String k3sVersion,
+                                       final @NotNull File dockerfile,
+                                       final @NotNull File mountPath) throws IOException {
+        super(getAdHocImageName(k3sVersion, dockerfile));
+        super.addFileSystemBind(mountPath.getCanonicalPath(),"src", BindMode.READ_WRITE);
+        super.addExposedPort(mqttPort);
+    }
+
+    public static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
+                                                             final @NotNull File dockerfile) {
+        final String s = new ImageFromDockerfile().withDockerfile(
+                        dockerfile.toPath())
+                .withBuildArg("K3S_VERSION", k3sVersion)
+                .get();
+        return DockerImageName.parse(s).asCompatibleSubstituteFor("rancher/k3s");
+    }
+
+    public static @NotNull Builder builder() {
+        return new Builder();
+    }
+    public int getMappedPort(){
+        return super.getMappedPort(mqttPort);
+    }
+    public void waitForMqttService(){
+        super.withExposedPorts(mqttPort).waitingFor(Wait.forListeningPort());
+    }
+    public static class Builder {
+
+        private @Nullable File dockerfile;
+        private @Nullable File mountPath;
+        private @Nullable String k3sVersion;
+
+        public @NotNull Builder dockerfile(final @NotNull File dockerfile) {
+            this.dockerfile = dockerfile;
+            return this;
+        }
+        public @NotNull Builder mountPath(final @NotNull File mountPath){
+            this.mountPath = mountPath;
+            return this;
+        }
+
+        public @NotNull Builder k3sVersion(final @NotNull String k3sVersion) {
+            this.k3sVersion = k3sVersion;
+            return this;
+        }
+
+        public @NotNull OperatorHelmChartContainer build() throws IOException {
+            assert dockerfile != null;
+            assert k3sVersion != null;
+            assert mountPath != null;
+            return new OperatorHelmChartContainer(k3sVersion, dockerfile,mountPath);
+        }
+    }
+}
