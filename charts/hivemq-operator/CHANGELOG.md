@@ -1,3 +1,7 @@
+# chart 0.9.4
+
+- Fixed blocking deployment on version 1.22 using a newer cert-gen webhook from nginx
+
 # chart 0.9.3
 
 - Fixed templating of the `queuedMessagesMaxQueueSize` field in the custom resource
