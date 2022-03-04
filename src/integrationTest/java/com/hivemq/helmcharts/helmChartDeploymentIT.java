@@ -31,13 +31,17 @@ public class helmChartDeploymentIT {
     public void withHelmVersionDeployment_mqttMessagePublishedReceived(final @NotNull String version) throws IOException, InterruptedException, ApiException {
         container = OperatorHelmChartContainer.builder()
                 .k3sVersion(version)
-                .dockerfile(new File("./src/test/resources"))
+                .dockerfile(new File("./src/integrationTest/resources/Dockerfile"))
                 .mountPath(new File("."))
+                .containerPath("/test")
                 .build();
+
         container.start();
         var utils = new OperatorHelmChartUtils(container);
 
-        Container.ExecResult execDeploy = utils.deployChart();
+        Container.ExecResult execDeploy = utils.deployChart(
+                new File("/test/src/integrationTest/resources/testValues.yaml"),
+                new File("/test/charts/hivemq-operator"));
         if (!execDeploy.getStderr().isEmpty()) {
             System.err.println(execDeploy.getStderr());
         }

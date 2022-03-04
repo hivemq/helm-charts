@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testng.TestException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OperatorHelmChartUtils {
+
     private final @NotNull OperatorHelmChartContainer container;
 
     public OperatorHelmChartUtils(@NotNull OperatorHelmChartContainer container) {
@@ -36,10 +38,9 @@ public class OperatorHelmChartUtils {
     }
 
     public @NotNull Mqtt5Publish testMqttClient(String message) throws InterruptedException {
-        int retries = 10;
         container.waitForMqttService();
         System.out.println("Port is ready");
-        Mqtt5BlockingClient client = getMqtt5BlockingClient(container.getMappedPort(), retries);
+        Mqtt5BlockingClient client = getMqtt5BlockingClient(container.getMappedPort(), 20);
         var publishes = client.publishes(MqttGlobalPublishFilter.ALL);
         client.subscribeWith().topicFilter("test").send();
         client.publishWith()
@@ -68,28 +69,27 @@ public class OperatorHelmChartUtils {
             if (retries > 0) {
                 return getMqtt5BlockingClient(mappedPort, --retries);
             } else {
-                System.err.println("Retries exceeded");
-                assert false;
+                fail("Retries exceeded");
             }
         }
         return client;
     }
 
-    public @NotNull ExecResult deployChart() throws IOException, InterruptedException {
+    public @NotNull ExecResult deployChart(File valuesPath,File operatorPath) throws IOException, InterruptedException {
         //helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /test/charts/hivemq-operator -f /test/src/test/resources/testValues.yaml
         var outUpdate = container.execInContainer("/bin/helm",
                 "dependency",
                 "update",
-                "/test/charts/hivemq-operator/");
+                operatorPath.getAbsolutePath()+"/");
         assertTrue(outUpdate.getStderr().isEmpty());
         return container.execInContainer("/bin/helm",
                 "--kubeconfig",
                 "/etc/rancher/k3s/k3s.yaml",
                 "install",
                 "hivemq",
-                "/test/charts/hivemq-operator",
+                operatorPath.getAbsolutePath(),
                 "-f",
-                "/test/src/test/resources/testValues.yaml");
+                valuesPath.getAbsolutePath());
     }
 
     public @NotNull String exposeService() throws IOException, ApiException, InterruptedException {
@@ -102,18 +102,21 @@ public class OperatorHelmChartUtils {
         assertNotNull(foundPods);
         //When the pod is running the cluster needs time to be ready
         var podLog = new PodLogs(client);
+        StringBuilder stringBuilder = new StringBuilder();
         try (var is = podLog.streamNamespacedPodLog(foundPods)) {
             var scanner = new Scanner(is).useDelimiter("\n");
             while (scanner.hasNext()) {
                 var s = scanner.next();
+                stringBuilder.append(s);
+                stringBuilder.append("\n");
                 if (s.contains("Started HiveMQ in")) {
                     System.out.println("Broker Ready");
-                    return is.toString();
+                    break;
                 }
             }
         }
         //ByteStreams.copy(is,System.out);
-        return "";
+        return stringBuilder.toString();
     }
 
     private @Nullable V1Pod waitForHiveMQCluster(@NotNull CoreV1Api api) throws ApiException, InterruptedException, IOException {
