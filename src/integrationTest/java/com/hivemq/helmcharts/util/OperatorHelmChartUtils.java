@@ -3,10 +3,8 @@ package com.hivemq.helmcharts.util;
 import com.hivemq.client.mqtt.MqttClientState;
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.exceptions.ConnectionClosedException;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.exceptions.Mqtt5DisconnectException;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiException;
@@ -40,7 +38,7 @@ public class OperatorHelmChartUtils {
     public @NotNull Mqtt5Publish testMqttClient(String message) throws InterruptedException {
         container.waitForMqttService();
         System.out.println("Port is ready");
-        Mqtt5BlockingClient client = getMqtt5BlockingClient(container.getMappedPort(), 20);
+        Mqtt5BlockingClient client = getMqtt5BlockingClient(container.getMappedPort());
         var publishes = client.publishes(MqttGlobalPublishFilter.ALL);
         client.subscribeWith().topicFilter("test").send();
         client.publishWith()
@@ -55,23 +53,14 @@ public class OperatorHelmChartUtils {
     }
 
     @NotNull
-    private Mqtt5BlockingClient getMqtt5BlockingClient(final int mappedPort, int retries) throws RuntimeException {
-        Mqtt5BlockingClient client = Mqtt5Client.builder().
-                serverPort(mappedPort).buildBlocking();
-        try {
-            client.connect();
-            assertEquals(client.getState(), MqttClientState.CONNECTED);
-            System.out.println("Mqtt Client Connected");
-        } catch (Mqtt5DisconnectException | ConnectionClosedException e) {
-            System.err.println("Can not connect to server:" + e.getClass().getName()
-                    + " with message: " + e.getMessage()
-                    + " retries:" + retries);
-            if (retries > 0) {
-                return getMqtt5BlockingClient(mappedPort, --retries);
-            } else {
-                fail("Retries exceeded");
-            }
-        }
+    private Mqtt5BlockingClient getMqtt5BlockingClient(final int mappedPort) throws RuntimeException {
+        Mqtt5BlockingClient client = Mqtt5Client.builder()
+                .automaticReconnectWithDefaultConfig()
+                .serverPort(mappedPort)
+                .buildBlocking();
+        client.connect();
+        assertEquals(client.getState(), MqttClientState.CONNECTED);
+        System.out.println("Mqtt Client Connected");
         return client;
     }
 
