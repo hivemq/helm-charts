@@ -16,10 +16,10 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
     private OperatorHelmChartContainer(final @NotNull String k3sVersion,
                                        final @NotNull File dockerfile,
-                                       final @NotNull File mountPath,
+                                       final @NotNull File helmChartMountPath,
                                        final @NotNull String containerPath) throws IOException {
         super(getAdHocImageName(k3sVersion, dockerfile));
-        super.addFileSystemBind(mountPath.getCanonicalPath(),containerPath, BindMode.READ_WRITE);
+        super.addFileSystemBind(helmChartMountPath.getCanonicalPath(), containerPath, BindMode.READ_WRITE);
         super.addExposedPort(mqttPort);
     }
 
@@ -35,16 +35,19 @@ public class OperatorHelmChartContainer extends K3sContainer {
     public static @NotNull Builder builder() {
         return new Builder();
     }
-    public int getMappedPort(){
+
+    public int getMappedPort() {
         return super.getMappedPort(mqttPort);
     }
-    public void waitForMqttService(){
+
+    public void waitForMqttService() {
         super.withExposedPorts(mqttPort).waitingFor(Wait.forListeningPort());
     }
+
     public static class Builder {
 
         private @Nullable File dockerfile;
-        private @Nullable File mountPath;
+        private @Nullable File helmChartMountPath;
         private @Nullable String k3sVersion;
         private @Nullable String containerPath;
 
@@ -52,8 +55,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
             this.dockerfile = dockerfile;
             return this;
         }
-        public @NotNull Builder mountPath(final @NotNull File mountPath){
-            this.mountPath = mountPath;
+
+        public @NotNull Builder helmChartMountPath(final @NotNull File mountPath) {
+            this.helmChartMountPath = mountPath;
             return this;
         }
 
@@ -61,7 +65,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
             this.k3sVersion = k3sVersion;
             return this;
         }
-        public @NotNull Builder containerPath(final @NotNull String containerPath){
+
+        public @NotNull Builder containerPath(final @NotNull String containerPath) {
             this.containerPath = containerPath;
             return this;
         }
@@ -69,9 +74,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
         public @NotNull OperatorHelmChartContainer build() throws IOException {
             assert dockerfile != null;
             assert k3sVersion != null;
-            assert mountPath != null;
+            assert helmChartMountPath != null;
             assert containerPath != null;
-            return new OperatorHelmChartContainer(k3sVersion, dockerfile,mountPath,containerPath);
+            return new OperatorHelmChartContainer(k3sVersion, dockerfile, helmChartMountPath, containerPath);
         }
     }
 }

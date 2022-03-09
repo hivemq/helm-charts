@@ -14,7 +14,6 @@ import io.kubernetes.client.util.Config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.testcontainers.containers.Container.ExecResult;
-import org.testng.TestException;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +36,7 @@ public class OperatorHelmChartUtils {
 
     public @NotNull Mqtt5Publish testMqttClient(String message) throws InterruptedException {
         container.waitForMqttService();
+
         System.out.println("Port is ready");
         Mqtt5BlockingClient client = getMqtt5BlockingClient(container.getMappedPort());
         var publishes = client.publishes(MqttGlobalPublishFilter.ALL);
@@ -104,7 +104,6 @@ public class OperatorHelmChartUtils {
                 }
             }
         }
-        //ByteStreams.copy(is,System.out);
         return stringBuilder.toString();
     }
 
@@ -116,20 +115,7 @@ public class OperatorHelmChartUtils {
                     null, null, null, null,
                     "app=hivemq", null, null, null,
                     null, null).getItems();
-
             if (defaultPods.size() == 1) {
-                // As soon as the pod is created we can expose the service
-                if (!serviceReady) {
-                    var outExpose = container.execInContainer("/bin/kubectl",
-                            "expose",
-                            "deployment",
-                            "hivemq",
-                            "--type=LoadBalancer",
-                            "--name=hivemq-external");
-                    System.out.println(outExpose.getStdout());
-                    assertTrue(outExpose.getStderr().isEmpty());
-                    serviceReady = true;
-                }
                 if (Objects.requireNonNull(Objects.requireNonNull(defaultPods.get(0).getStatus()).getPhase()).equalsIgnoreCase("running")) {
                     //We wait for the pod to be on the running phase, hivemq cluster is not ready yet in either case
                     return defaultPods.get(0);
@@ -138,6 +124,7 @@ public class OperatorHelmChartUtils {
             retries--;
             Thread.sleep(6000);
         }
-        throw new TestException("HiveMQ pod not found");
+        fail("HiveMQ pod not found");
+        return null;
     }
 }
