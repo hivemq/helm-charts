@@ -2,14 +2,13 @@ package com.hivemq.helmcharts.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
-import java.io.IOException;
 
 public class OperatorHelmChartContainer extends K3sContainer {
     public final static int mqttPort = 1883;
@@ -17,9 +16,10 @@ public class OperatorHelmChartContainer extends K3sContainer {
     private OperatorHelmChartContainer(final @NotNull String k3sVersion,
                                        final @NotNull File dockerfile,
                                        final @NotNull File helmChartMountPath,
-                                       final @NotNull String containerPath) throws IOException {
+                                       final @NotNull String containerPath) {
         super(getAdHocImageName(k3sVersion, dockerfile));
-        super.addFileSystemBind(helmChartMountPath.getCanonicalPath(), containerPath, BindMode.READ_WRITE);
+        final MountableFile helmChartMountable = MountableFile.forHostPath(helmChartMountPath.getPath());
+        super.withCopyFileToContainer(helmChartMountable, containerPath);
         super.addExposedPort(mqttPort);
     }
 
@@ -71,7 +71,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
             return this;
         }
 
-        public @NotNull OperatorHelmChartContainer build() throws IOException {
+        public @NotNull OperatorHelmChartContainer build() {
             assert dockerfile != null;
             assert k3sVersion != null;
             assert helmChartMountPath != null;
