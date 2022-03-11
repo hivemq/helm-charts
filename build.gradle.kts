@@ -6,6 +6,11 @@ group = "com.hivemq.helmcharts"
 
 repositories {
     mavenCentral()
+    maven {
+        name = "operator"
+        url = uri("https://maven.pkg.github.com/hivemq/hivemq-operator")
+        credentials(PasswordCredentials::class)
+    }
 }
 
 dependencies {
@@ -17,8 +22,12 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:${property("testcontainers.version")}")
     testImplementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
     testImplementation("org.slf4j:slf4j-simple:${property("slf4j.version")}")
-    testImplementation("io.kubernetes:client-java:${property("kubernetes.client.version")}")
     testImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq.client.version")}")
+    testImplementation("com.hivemq.operator:operator:${property("hivemq.operator.version")}")
+    testImplementation("io.fabric8:kubernetes-client:${property("fabric8.version")}")
+    testImplementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
+    testImplementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
+
 }
 
 tasks.getByName<Test>("test") {
