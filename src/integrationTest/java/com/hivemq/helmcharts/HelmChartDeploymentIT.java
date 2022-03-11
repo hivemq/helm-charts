@@ -56,8 +56,8 @@ public class HelmChartDeploymentIT {
                             "hivemq", operatorPath.getAbsolutePath(), "-f", valuesPath.getAbsolutePath());
 
             if (!execDeploy.getStderr().isEmpty()) {
+                // Shows also warnings
                 System.err.println(execDeploy.getStderr());
-                fail("Can not deploy using helm:" + execDeploy.getStderr());
             }
 
             assertTrue(execDeploy.getStdout().contains("STATUS: deployed"));
