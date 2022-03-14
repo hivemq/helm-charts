@@ -88,6 +88,11 @@ public class HelmChartDeploymentIT {
 
     }
 
+    /**
+     * Wait for HiveMQ cluster, the helm chart makes sure it is installed, and the operator makes sure the state is
+     * update to running
+     * @param container k3s container that is running and waiting for the Kubernetes artifacts to be ready
+     */
     private void waitForClusterToBeReady(final @NotNull OperatorHelmChartContainer container) {
         String kubeConfigYaml = container.getKubeConfigYaml();
         Config config = Config.fromKubeconfig(kubeConfigYaml);
