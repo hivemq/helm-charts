@@ -27,7 +27,7 @@ dependencies {
     testImplementation("io.fabric8:kubernetes-client:${property("fabric8.version")}")
     testImplementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
     testImplementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
-
+    testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
 }
 
 tasks.getByName<Test>("test") {

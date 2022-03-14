@@ -23,7 +23,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test that the chart is deployed successfully on specific kubernetes cluster versions
@@ -86,23 +88,18 @@ public class HelmChartDeploymentIT {
 
     }
 
-    private void waitForClusterToBeReady(final @NotNull OperatorHelmChartContainer container) throws Exception {
+    private void waitForClusterToBeReady(final @NotNull OperatorHelmChartContainer container) {
         String kubeConfigYaml = container.getKubeConfigYaml();
         Config config = Config.fromKubeconfig(kubeConfigYaml);
         DefaultKubernetesClient client = new DefaultKubernetesClient(config);
-
-        var completableFutureResource = new CompletableFuture<Boolean>();
+        var completableFutureResource = new CompletableFuture<Void>();
         client.customResources(HiveMQInfo.class).watch(new Watcher<>() {
             @Override
             public void eventReceived(@NotNull Action action, @NotNull HiveMQInfo resource) {
-                try {
-                    if (resource.getStatus() != null
-                            && resource.getStatus().getState() != null
-                            && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
-                        completableFutureResource.complete(true);
-                    }
-                } catch (Exception e) {
-                    completableFutureResource.complete(false);
+                if (resource.getStatus() != null
+                        && resource.getStatus().getState() != null
+                        && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
+                    completableFutureResource.complete(null);
                 }
             }
 
@@ -111,6 +108,6 @@ public class HelmChartDeploymentIT {
                 System.out.println("onClose");
             }
         });
-        assertTrue(completableFutureResource.get());
+        await().atMost(2, TimeUnit.MINUTES).until(completableFutureResource::isDone);
     }
 }
