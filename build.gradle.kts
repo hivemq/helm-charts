@@ -11,6 +11,9 @@ repositories {
         url = uri("https://maven.pkg.github.com/hivemq/hivemq-operator")
         credentials(PasswordCredentials::class)
     }
+    maven{
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
