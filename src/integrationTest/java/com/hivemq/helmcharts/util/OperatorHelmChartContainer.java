@@ -10,6 +10,9 @@ import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
 
+/**
+ * Container that includes the helm binary to be able to install the HiveMQ helm charts
+ */
 public class OperatorHelmChartContainer extends K3sContainer {
     public final static int mqttPort = 1883;
 

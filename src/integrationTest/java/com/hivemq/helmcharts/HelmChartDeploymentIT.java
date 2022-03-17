@@ -20,7 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +63,7 @@ public class HelmChartDeploymentIT {
 
             assertTrue(execDeploy.getStdout().contains("STATUS: deployed"));
 
-            waitForClusterToBeReady(container).join();
+            assertTrue(waitForClusterToBeReady(container.getKubeConfigYaml()).await(3, TimeUnit.MINUTES));
 
             Mqtt5BlockingClient client = Mqtt5Client.builder()
                     .automaticReconnectWithDefaultConfig()
@@ -89,22 +89,21 @@ public class HelmChartDeploymentIT {
 
     /**
      * Wait for HiveMQ cluster, the helm chart makes sure it is installed, and the operator makes sure the state is
-     * update to running
+     * update to running, we listen for this status change
      *
-     * @param container k3s container that is running and waiting for the Kubernetes artifacts to be ready
+     * @param kubeConfigYaml k3s yaml configuration for the container that is running and waiting for the Kubernetes artifacts to be ready
      */
-    private CompletableFuture<Void> waitForClusterToBeReady(final @NotNull OperatorHelmChartContainer container) {
-        String kubeConfigYaml = container.getKubeConfigYaml();
+    private CountDownLatch waitForClusterToBeReady(final @NotNull String kubeConfigYaml) {
         Config config = Config.fromKubeconfig(kubeConfigYaml);
         DefaultKubernetesClient client = new DefaultKubernetesClient(config);
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        final CountDownLatch closeLatch = new CountDownLatch(1);
         client.customResources(HiveMQInfo.class).watch(new Watcher<>() {
             @Override
             public void eventReceived(@NotNull Action action, @NotNull HiveMQInfo resource) {
                 if (resource.getStatus() != null
                         && resource.getStatus().getState() != null
                         && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
-                    completableFuture.complete(null);
+                    closeLatch.countDown();
                 }
             }
 
@@ -113,6 +112,6 @@ public class HelmChartDeploymentIT {
                 System.out.println("onClose");
             }
         });
-        return completableFuture;
+        return closeLatch;
     }
 }
