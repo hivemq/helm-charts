@@ -63,7 +63,7 @@ public class HelmChartDeploymentIT {
 
             assertTrue(execDeploy.getStdout().contains("STATUS: deployed"));
 
-            assertTrue(waitForClusterToBeReady(container.getKubeConfigYaml()).await(3, TimeUnit.MINUTES));
+            assertTrue(getWaitForClusterToBeReadyLatch(container.getKubeConfigYaml()).await(3, TimeUnit.MINUTES));
 
             Mqtt5BlockingClient client = Mqtt5Client.builder()
                     .automaticReconnectWithDefaultConfig()
@@ -88,12 +88,13 @@ public class HelmChartDeploymentIT {
     }
 
     /**
-     * Wait for HiveMQ cluster, the helm chart makes sure it is installed, and the operator makes sure the state is
-     * update to running, we listen for this status change
+     * Return a count-down latch that will be decreased when the hivemq cluster is running.
+     * The helm chart makes sure it is installed, and the operator makes sure the state is
+     * update to running, we listen for this status change.
      *
      * @param kubeConfigYaml k3s yaml configuration for the container that is running and waiting for the Kubernetes artifacts to be ready
      */
-    private CountDownLatch waitForClusterToBeReady(final @NotNull String kubeConfigYaml) {
+    private CountDownLatch getWaitForClusterToBeReadyLatch(final @NotNull String kubeConfigYaml) {
         Config config = Config.fromKubeconfig(kubeConfigYaml);
         DefaultKubernetesClient client = new DefaultKubernetesClient(config);
         final CountDownLatch closeLatch = new CountDownLatch(1);
