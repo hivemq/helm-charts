@@ -58,6 +58,10 @@ operator:
       tolerations: []
   # Set this string to a name of a externally managed ConfigMap containing the templates for the operator if you want to customize them.
   templateConfigMap: ""
+  ## Extra environment variables that will be pass to the operator in the form of
+  ## env:
+  ## MY_CUSTOM_ENV: MY_VALUE
+  env: {}
   resources:
     limits:
       cpu: 800m
