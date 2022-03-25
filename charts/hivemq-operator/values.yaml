@@ -18,7 +18,19 @@ operator:
   deployCr: true
   image: hivemq/hivemq-operator:4.7.1
   imagePullPolicy: IfNotPresent
+
+
+
+  ## Nodeselector for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ##
   nodeSelector: {}
+
+  ## Affinity for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}
+
   logLevel: INFO
   # Let the operator verify all HiveMQCluster objects before accepting them.
   # Not using the validation hook can result in erroneous cluster configurations which are hard to debug.
