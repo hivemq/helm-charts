@@ -26,7 +26,7 @@ spec:
       {{- end }}
       {{- with .Values.operator.affinity }}
       affinity:
-      {{ toYaml . | indent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - image: {{ .Values.operator.image }}
