@@ -1,3 +1,7 @@
+# chart 0.10.4
+
+- Added ability to specify `affinity` for the operator 
+
 # chart 0.10.3
 
 - Fixed blocking deployment on version 1.22 using a newer cert-gen webhook from nginx
