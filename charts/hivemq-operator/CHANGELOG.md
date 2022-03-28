@@ -1,5 +1,6 @@
-# chart 0.10.4
+# chart 0.10.5
 
+- Added ability to pass arbitrary environment variables to the operator pod
 - Added ability to specify `affinity` for the operator 
 
 # chart 0.10.3
