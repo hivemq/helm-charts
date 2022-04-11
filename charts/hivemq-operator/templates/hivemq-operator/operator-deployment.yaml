@@ -49,6 +49,10 @@ spec:
             - name: MICRONAUT_CONFIG_FILES
               value: "/tmp/application.yml"
             {{- end }}
+            {{- if .Values.operator.crossNamespaceMode }}
+            - name: OPERATOR_ALL_NAMESPACES
+              value: "true"
+            {{- end }}
             - name: SSL_FQDN
               value: "{{ include "hivemq.name" . }}-operator.{{ template "hivemq.namespace" . }}.svc"
             {{- range $key, $value := .Values.operator.env }}
