@@ -1,0 +1,16 @@
+operator:
+  admissionWebhooks:
+    enabled: true
+    failurePolicy: Ignore
+hivemq:
+  image: hivemq/hivemq4-test:k8s-4.8.0-SNAPSHOT
+  logLevel: INFO
+  nodeCount: 1
+  cpu: 1
+  memory: 1Gi
+  ports:
+    - name: "mqtt"
+      port: 1883
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
