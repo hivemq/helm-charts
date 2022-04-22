@@ -1,0 +1,63 @@
+/docker-entrypoint.d/15_k8s_entrypoint.sh: line 22: /opt/hivemq/conf/config.xml: Permission denied
+sed: can't read /opt/hivemq/conf/config.xml: Permission denied
+sed: can't read /opt/hivemq/conf/config.xml: Permission denied
+Creating initial lastUpdate files...
+Disabling Prometheus
+mkdir: cannot create directory '/opt/hivemq/extensions': Permission denied
+touch: cannot touch '/opt/hivemq/extensions/hivemq-prometheus-extension/DISABLED': Permission denied
+cp: cannot create symbolic link '/opt/hivemq/initial_node_count' to '/etc/podinfo/replica-count': Permission denied
+Pod info:
+extension-names=hivemq-kafka-extension hivemq-bridge-extension hivemq-enterprise-security-extension
+extension-uris=preinstalled preinstalled preinstalled
+extension-states=false false false
+extensions-static=false false false
+Installing extension #0 with name: hivemq-kafka-extension, URI: preinstalled, enabled state: false
++ [[ 3 != 3 ]]
++ EXTENSION_URI=preinstalled
++ EXTENSION_NAME=hivemq-kafka-extension
++ TARGET_STATE=false
++ TARGET_DIR=/opt/hivemq/extensions/hivemq-kafka-extension
+++ mktemp -d
++ install_dir=/tmp/tmp.O6yh0HPvia
++ set +e
++ [[ -f /opt/hivemq/extensions/hivemq-kafka-extension/DISABLED ]]
++ was_enabled=1
++ set -e
++ [[ preinstalled != \p\r\e\i\n\s\t\a\l\l\e\d ]]
++ [[ false == \f\a\l\s\e ]]
++ touch /opt/hivemq/extensions/hivemq-kafka-extension/DISABLED
+touch: cannot touch '/opt/hivemq/extensions/hivemq-kafka-extension/DISABLED': Permission denied
+Installing extension #1 with name: hivemq-bridge-extension, URI: preinstalled, enabled state: false
++ [[ 3 != 3 ]]
++ EXTENSION_URI=preinstalled
++ EXTENSION_NAME=hivemq-bridge-extension
++ TARGET_STATE=false
++ TARGET_DIR=/opt/hivemq/extensions/hivemq-bridge-extension
+++ mktemp -d
++ install_dir=/tmp/tmp.q0EpTL1m20
++ set +e
++ [[ -f /opt/hivemq/extensions/hivemq-bridge-extension/DISABLED ]]
++ was_enabled=1
++ set -e
++ [[ preinstalled != \p\r\e\i\n\s\t\a\l\l\e\d ]]
++ [[ false == \f\a\l\s\e ]]
++ touch /opt/hivemq/extensions/hivemq-bridge-extension/DISABLED
+touch: cannot touch '/opt/hivemq/extensions/hivemq-bridge-extension/DISABLED': Permission denied
+Installing extension #2 with name: hivemq-enterprise-security-extension, URI: preinstalled, enabled state: false
++ [[ 3 != 3 ]]
++ EXTENSION_URI=preinstalled
++ EXTENSION_NAME=hivemq-enterprise-security-extension
++ TARGET_STATE=false
++ TARGET_DIR=/opt/hivemq/extensions/hivemq-enterprise-security-extension
+++ mktemp -d
++ install_dir=/tmp/tmp.vyO0gIF8gG
++ set +e
++ [[ -f /opt/hivemq/extensions/hivemq-enterprise-security-extension/DISABLED ]]
++ was_enabled=1
++ set -e
++ [[ preinstalled != \p\r\e\i\n\s\t\a\l\l\e\d ]]
++ [[ false == \f\a\l\s\e ]]
++ touch /opt/hivemq/extensions/hivemq-enterprise-security-extension/DISABLED
+touch: cannot touch '/opt/hivemq/extensions/hivemq-enterprise-security-extension/DISABLED': Permission denied
+sed: can't read /opt/hivemq/conf/logback.xml: Permission denied
+cp: failed to access '/opt/hivemq/extensions/hivemq-k8s-sync-extension/mapping.properties': Permission denied
