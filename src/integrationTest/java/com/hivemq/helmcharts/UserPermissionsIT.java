@@ -1,9 +1,10 @@
 package com.hivemq.helmcharts;
 
-import com.hivemq.helmcharts.util.TestUtils;
 import com.hivemq.helmcharts.util.OperatorHelmChartContainer;
+import com.hivemq.helmcharts.util.TestUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
@@ -13,27 +14,28 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.javaparser.utils.Utils.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class CustomImageDeploymentIT {
+public class UserPermissionsIT {
     @Container
     private static final @NotNull OperatorHelmChartContainer container = OperatorHelmChartContainer.builder()
             .k3sVersion("v1.20.15-k3s1")
-                .dockerfile(new File("./src/integrationTest/resources/context/Dockerfile"))
+            .dockerfile(new File("./src/integrationTest/resources/Dockerfile"))
             .helmChartMountPath(new File(".")).containerPath("/test").build();
 
     @Test
     public void withCustomImage_mqttMessagePublishedReceived() throws IOException, InterruptedException {
+        System.out.println(Runtime.getRuntime().maxMemory());
+        var image=MountableFile.forClasspathResource("hivemq-image.tgz");
+        container.addFileSystemBind(image.getFilesystemPath(),"/opt/hivemq-image.tgz", BindMode.READ_ONLY);
         container.start();
         System.out.println(container.getKubeConfigYaml());
-        container.copyFileToContainer(MountableFile.forClasspathResource("hivemq-k8s_snapshot.tar"),"/opt/hivemq-image.tar");
-        var outLoadImage = container.execInContainer("/bin/ctr",
-                "images",
-                "import",
-                "/opt/hivemq-image.tar");
-        assertNotNull(outLoadImage.getStdout());
-        var valuesPath = new File("/test/src/integrationTest/resources/customImageDeployment.yaml");
+        container.copyFileToContainer(MountableFile.forClasspathResource("decompress.sh"),"/opt/");
+        var outLoadImage = container.execInContainer("/bin/sh","/opt/decompress.sh");
+        assertFalse(outLoadImage.getStdout().isEmpty());
+        var valuesPath = new File("/test/src/integrationTest/resources/permissionsDeployment.yaml");
         var operatorPath = new File("/test/charts/hivemq-operator");
 
 

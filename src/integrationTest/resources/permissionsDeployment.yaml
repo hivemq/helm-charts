@@ -1,0 +1,29 @@
+operator:
+  logLevel: TRACE
+  admissionWebhooks:
+    enabled: true
+    failurePolicy: Ignore
+hivemq:
+  image: hivemq/hivemq-k8s-test:0.1
+  logLevel: DEBUG
+  nodeCount: 1
+  cpu: 1
+  memory: 1Gi
+  podSecurityContext:
+    fsGroup: 10000
+    runAsNonRoot: true
+    runAsGroup: 10000
+    runAsUser: 10000
+  containerSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 10000
+    runAsGroup: 10000
+    allowPrivilegeEscalation: false
+    privileged: false
+  ports:
+    - name: "mqtt"
+      port: 1883
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+
