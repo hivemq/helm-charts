@@ -16,8 +16,8 @@ hivemq:
     runAsUser: 10001
   containerSecurityContext:
     runAsNonRoot: true
-    runAsUser: 10001
     runAsGroup: 10000
+    runAsUser: 10001
     allowPrivilegeEscalation: false
     privileged: false
   ports:
