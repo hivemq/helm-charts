@@ -57,7 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl gnupg-agen
     fi \
     && ln -s /opt/hivemq-${HIVEMQ_VERSION} /opt/hivemq \
     && ln -s /opt/pre-entry.sh /docker-entrypoint.d/40_dns_entrypoint.sh \
-    && chmod g+w /opt/hivemq-${HIVEMQ_VERSION} \
+    && chmod g+w /opt/hivemq-${HIVEMQ_VERSION} /opt/hivemq/extensions /opt/hivemq/conf /opt/hivemq/extensions/hivemq-prometheus-extension /opt/hivemq/extensions/hivemq-bridge-extension  /opt/hivemq/extensions/hivemq-dns-cluster-discovery  /opt/hivemq/extensions/hivemq-enterprise-security-extension  /opt/hivemq/extensions/hivemq-k8s-sync-extension  /opt/hivemq/extensions/hivemq-kafka-extension /opt/hivemq/extensions/hivemq-kafka-extension/DISABLED /opt/hivemq/extensions/hivemq-bridge-extension/DISABLED /opt/hivemq/extensions/hivemq-enterprise-security-extension/DISABLED  \
     && chown hivemq:hivemq /opt/docker-entrypoint.sh \
     && chmod +rx /opt/hivemq/bin/*.sh \
     && chmod +rx /opt/pre-entry.sh /opt/hivemq/bin/pre-entry_1.sh /opt/docker-entrypoint.sh \

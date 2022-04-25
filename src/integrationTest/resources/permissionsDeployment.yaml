@@ -13,10 +13,10 @@ hivemq:
     fsGroup: 10000
     runAsNonRoot: true
     runAsGroup: 10000
-    runAsUser: 10000
+    runAsUser: 10001
   containerSecurityContext:
     runAsNonRoot: true
-    runAsUser: 10000
+    runAsUser: 10001
     runAsGroup: 10000
     allowPrivilegeEscalation: false
     privileged: false
