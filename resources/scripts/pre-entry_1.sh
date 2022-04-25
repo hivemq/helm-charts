@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-echo Set write permissions to extensions
-
-chmod g+w -R /opt/hivemq/extensions
-
 if [[ "${HIVEMQ_VERBOSE_ENTRYPOINT}" == "true" ]]; then
   set -o xtrace
 fi
