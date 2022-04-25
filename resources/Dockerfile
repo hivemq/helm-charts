@@ -45,19 +45,22 @@ RUN groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq
 
 COPY --from=unpack --chown=hivemq:hivemq /opt /opt
+COPY --from=unpack --chown=hivemq:hivemq /docker-entrypoint.d /docker-entrypoint.d/
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl gnupg-agent gnupg dirmngr unzip libnss-wrapper\
-    && chmod +rx /opt/hivemq/bin/*.sh && \
-    if [ -d /docker-entrypoint.d ]; then \
+    && if [ -d /docker-entrypoint.d ]; then \
       mv /opt/hivemq/bin/pre-entry_1.sh /docker-entrypoint.d/15_k8s_entrypoint.sh && \
       ln -s /opt/docker-entrypoint.sh /opt/hivemq/bin/pre-entry_1.sh; \
     else \
-      echo '# Pass on to DNS entrypoint' >> /opt/hivemq/bin/pre-entry_1.sh; \
-      #echo 'exec /opt/pre-entry.sh "$@"' >> /opt/hivemq/bin/pre-entry_1.sh; \
+      echo '# Pass on to DNS entrypoint' >> /opt/hivemq/bin/pre-entry_1.sh && \
+      echo 'exec /opt/pre-entry.sh "$@"' >> /opt/hivemq/bin/pre-entry_1.sh; \
     fi \
     && ln -s /opt/hivemq-${HIVEMQ_VERSION} /opt/hivemq \
-    && chmod +x /opt/pre-entry.sh \
+    && ln -s /opt/pre-entry.sh /docker-entrypoint.d/40_dns_entrypoint.sh \
     && chmod g+w /opt/hivemq-${HIVEMQ_VERSION} \
+    && chown hivemq:hivemq /opt/docker-entrypoint.sh \
+    && chmod +rx /opt/hivemq/bin/*.sh \
+    && chmod +rx /opt/pre-entry.sh /opt/hivemq/bin/pre-entry_1.sh /opt/docker-entrypoint.sh \
     && apt-get purge -y gpg dirmngr && apt-get clean && rm -rf /var/lib/apt/lists/* 
 
 

@@ -72,23 +72,9 @@ if [[ ${#EXTENSION_NAMES[@]} -ge 1 ]]; then
 fi
 
 /opt/hivemq/bin/set_log_level.sh
-
 mkdir -p /opt/hivemq/log
 
 # Link to the mapping properties file for auto file syncing
 cat /etc/podinfo/config-state
 cp -s /etc/podinfo/config-state /opt/hivemq/extensions/hivemq-k8s-sync-extension/mapping.properties
 echo Done pre_entry_1_s
-
-if [[ "${HIVEMQ_CLUSTER_TRANSPORT_TYPE}" == "UDP" ]]; then
-    # shellcheck disable=SC2016
-    sed -i -e 's|<\!--TRANSPORT_TYPE-->|<udp><bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address><bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port><!-- disable multicast to avoid accidental cluster forming --><multicast-enabled>false</multicast-enabled></udp>|' /opt/hivemq/conf/config.xml
-elif [[ "${HIVEMQ_CLUSTER_TRANSPORT_TYPE}" == "TCP" ]]; then
-    # shellcheck disable=SC2016
-    sed -i -e 's|<\!--TRANSPORT_TYPE-->|<tcp><bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address><bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port></tcp>|' /opt/hivemq/conf/config.xml
-fi
-echo executed pre-entry_s
-
-ls -l /opt/hivemq/bin
-
-/opt/hivemq/bin/run.sh
