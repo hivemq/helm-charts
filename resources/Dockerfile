@@ -107,5 +107,7 @@ EXPOSE 1883 8000 8080
 
 WORKDIR /opt/hivemq
 
+USER hivemq
+
 ENTRYPOINT ["/opt/hivemq/bin/pre-entry_1.sh"]
 CMD ["/opt/hivemq/bin/run.sh"]
