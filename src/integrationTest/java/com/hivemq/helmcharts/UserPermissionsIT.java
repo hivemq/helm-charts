@@ -19,42 +19,39 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class UserPermissionsIT {
+
+    private static final @NotNull String resourcesPath = "/test";
+    private static final @NotNull String customValuesPath = resourcesPath+"/src/integrationTest/resources/permissionsDeployment.yaml";
+
     @Container
     private static final @NotNull OperatorHelmChartContainer container = OperatorHelmChartContainer.builder()
             .k3sVersion("v1.20.15-k3s1")
             .dockerfile(new File("./src/integrationTest/resources/Dockerfile"))
-            .helmChartMountPath(new File(".")).containerPath("/test").build();
+            .helmChartMountPath(new File(".")).containerPath(resourcesPath).build();
 
     @Test
-    public void withCustomImage_mqttMessagePublishedReceived() throws IOException, InterruptedException {
+    public void withCustomImage_mqttMessagePublishedReceived() throws Exception {
+        // We need at least 6GB of RAM for this test
         System.out.println(Runtime.getRuntime().maxMemory());
+
+        var customValues = new File(customValuesPath).getAbsolutePath();
+
         var image=MountableFile.forClasspathResource("hivemq-image.tgz");
         container.addFileSystemBind(image.getFilesystemPath(),"/opt/hivemq-image.tgz", BindMode.READ_ONLY);
+
         container.start();
-        System.out.println(container.getKubeConfigYaml());
+
         container.copyFileToContainer(MountableFile.forClasspathResource("decompress.sh"),"/opt/");
+
         var outLoadImage = container.execInContainer("/bin/sh","/opt/decompress.sh");
         assertFalse(outLoadImage.getStdout().isEmpty());
-        var valuesPath = new File("/test/src/integrationTest/resources/permissionsDeployment.yaml");
-        var operatorPath = new File("/test/charts/hivemq-operator");
 
+        var deploy = TestUtils.deployLocalOperator(container,resourcesPath,customValues);
 
-        final var outUpdate = container
-                .execInContainer("/bin/helm", "dependency", "update", operatorPath.getAbsolutePath() + "/");
+        assertTrue(deploy.contains("STATUS: deployed"));
 
-        assertTrue(outUpdate.getStderr().isEmpty());
-
-        var execDeploy = container
-                .execInContainer("/bin/helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", "install",
-                        "hivemq", operatorPath.getAbsolutePath(), "-f", valuesPath.getAbsolutePath());
-
-        if (!execDeploy.getStderr().isEmpty()) {
-            // Shows also warnings
-            System.err.println(execDeploy.getStderr());
-        }
-
-        assertTrue(execDeploy.getStdout().contains("STATUS: deployed"));
         assertTrue(TestUtils.getWaitForClusterToBeReadyLatch(container.getKubeConfigYaml()).await(3, TimeUnit.MINUTES));
+
         TestUtils.sendTestMessage(container.getMappedPort(1883));
         container.stop();
     }

@@ -48,3 +48,32 @@ val integrationTestImplementation: Configuration by configurations.getting {
 val integrationTestRuntimeOnly: Configuration by configurations.getting {
     extendsFrom(configurations.testRuntimeOnly.get())
 }
+
+
+val containerName = findProperty("containerName") ?: "hivemq4-k8s-test"
+val containerTag = findProperty("containerTag") ?: "snapshot"
+
+val createImageContext by tasks.registering(Sync::class) {
+    group = "container"
+    description = "Prepare container base image context"
+    into(layout.buildDirectory.dir("container/context"))
+    from("container")
+}
+
+val buildImage by tasks.registering(Exec::class){
+    group = "container"
+    description = "Build docker image"
+    inputs.property("dockerImageName", containerName)
+    inputs.dir(createImageContext.map { it.destinationDir })
+    workingDir(createImageContext.map { it.destinationDir })
+    println("${containerName}:${containerTag}")
+    commandLine("docker","build","-f","broker.dockerfile","-t","${containerName}:${containerTag}",".")
+
+}
+val saveImage by tasks.registering(Exec::class){
+    group = "container"
+    description = "Save docker image"
+    dependsOn(buildImage)
+    workingDir(createImageContext.map { it.destinationDir })
+    commandLine("docker","save","-o","${containerName}.tar","${containerName}:${containerTag}")
+}

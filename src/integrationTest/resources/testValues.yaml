@@ -1,3 +1,14 @@
+global:
+  rbac:
+    create: true
+    pspEnabled: true
+    pspAnnotations: { }
+    allowedCapabilities: [ ]
+    imagePullSecrets:
+      - name: hmq-secret
+  imagePullSecrets:
+    - name: hmq-secret
+
 hivemq:
   logLevel: INFO
   nodeCount: 1
