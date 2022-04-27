@@ -3,7 +3,7 @@ operator:
     enabled: true
     failurePolicy: Ignore
 hivemq:
-  image: hivemq-k8s:snapshot
+  image: hivemq4-k8s-test:snapshot
   logLevel: INFO
   nodeCount: 1
   cpu: 1
