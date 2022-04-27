@@ -34,24 +34,25 @@ public class TestUtils {
         final CountDownLatch closeLatch = new CountDownLatch(1);
         Config config = Config.fromKubeconfig(kubeConfigYaml);
 
-        try (DefaultKubernetesClient client = new DefaultKubernetesClient(config)) {
+        DefaultKubernetesClient client = new DefaultKubernetesClient(config);
 
-            client.customResources(HiveMQInfo.class).watch(new Watcher<>() {
-                @Override
-                public void eventReceived(@NotNull Action action, @NotNull HiveMQInfo resource) {
-                    if (resource.getStatus() != null
-                            && resource.getStatus().getState() != null
-                            && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
-                        closeLatch.countDown();
-                    }
-                }
+        client.customResources(HiveMQInfo.class).watch(new Watcher<>() {
+            @Override
+            public void eventReceived(@NotNull Action action, @NotNull HiveMQInfo resource) {
 
-                @Override
-                public void onClose(@NotNull WatcherException cause) {
-                    System.out.println("onClose");
+                if (resource.getStatus() != null
+                        && resource.getStatus().getState() != null
+                        && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
+                    closeLatch.countDown();
                 }
-            });
-        }
+            }
+
+            @Override
+            public void onClose(@NotNull WatcherException cause) {
+                System.out.println("onClose");
+            }
+        });
+
         return closeLatch;
     }
 
@@ -77,8 +78,8 @@ public class TestUtils {
     /**
      * Deploys an operator from local resources
      *
-     * @param container container to execute the command
-     * @param resourcesPath where the resources are mounted on the image
+     * @param container        container to execute the command
+     * @param resourcesPath    where the resources are mounted on the image
      * @param customValuesPath where are the custom values located for the helm chart
      * @return String from the execute command
      */
@@ -87,7 +88,7 @@ public class TestUtils {
                                              @NotNull String resourcesPath,
                                              @NotNull String customValuesPath) throws Exception {
 
-        var operatorPath = new File(resourcesPath+"/charts/hivemq-operator").getAbsolutePath();
+        var operatorPath = new File(resourcesPath + "/charts/hivemq-operator").getAbsolutePath();
 
 
         final var outUpdate = container
