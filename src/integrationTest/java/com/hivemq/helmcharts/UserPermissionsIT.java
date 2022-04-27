@@ -4,16 +4,12 @@ import com.hivemq.helmcharts.util.OperatorHelmChartContainer;
 import com.hivemq.helmcharts.util.TestUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.javaparser.utils.Utils.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +22,7 @@ public class UserPermissionsIT {
     @Container
     private static final @NotNull OperatorHelmChartContainer container = OperatorHelmChartContainer.builder()
             .k3sVersion("v1.20.15-k3s1")
-            .dockerfile(new File("./src/integrationTest/resources/Dockerfile"))
+            .dockerfile("k3s.dockerfile")
             .helmChartMountPath(new File(".")).containerPath(resourcesPath).build();
 
     @Test
@@ -36,14 +32,17 @@ public class UserPermissionsIT {
 
         var customValues = new File(customValuesPath).getAbsolutePath();
 
-        var image=MountableFile.forClasspathResource("hivemq-image.tgz");
-        container.addFileSystemBind(image.getFilesystemPath(),"/opt/hivemq-image.tgz", BindMode.READ_ONLY);
-
         container.start();
 
-        container.copyFileToContainer(MountableFile.forClasspathResource("decompress.sh"),"/opt/");
+        var containerPath = "/build/container/context/hivemq4-k8s-test.tar";
 
-        var outLoadImage = container.execInContainer("/bin/sh","/opt/decompress.sh");
+        assertTrue(new File("."+containerPath).exists());
+
+        var outLoadImage = container.execInContainer("/bin/ctr",
+                "images",
+                "import",
+                resourcesPath+containerPath);
+
         assertFalse(outLoadImage.getStdout().isEmpty());
 
         var deploy = TestUtils.deployLocalOperator(container,resourcesPath,customValues);
@@ -53,6 +52,7 @@ public class UserPermissionsIT {
         assertTrue(TestUtils.getWaitForClusterToBeReadyLatch(container.getKubeConfigYaml()).await(3, TimeUnit.MINUTES));
 
         TestUtils.sendTestMessage(container.getMappedPort(1883));
+
         container.stop();
     }
 }

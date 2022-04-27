@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +33,9 @@ public class HelmChartDeploymentIT {
         var customValues = new File(customValuesPath).getAbsolutePath();
         try (var container = OperatorHelmChartContainer.builder()
                 .k3sVersion(version)
-                .dockerfile(new File("./src/integrationTest/resources/Dockerfile"))
-                .helmChartMountPath(new File(".")).containerPath("/test").build()) {
+                .withTmpFs(true)
+                .dockerfile("k3s.dockerfile")
+                .helmChartMountPath(new File(".")).containerPath(resourcesPath).build()) {
 
             container.start();
 
