@@ -9,6 +9,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Container that includes the helm binary to be able to install the HiveMQ helm charts
@@ -17,19 +18,26 @@ public class OperatorHelmChartContainer extends K3sContainer {
     public final static int mqttPort = 1883;
 
     private OperatorHelmChartContainer(final @NotNull String k3sVersion,
-                                       final @NotNull File dockerfile,
+                                       final @NotNull String dockerfileName,
                                        final @NotNull File helmChartMountPath,
-                                       final @NotNull String containerPath) {
-        super(getAdHocImageName(k3sVersion, dockerfile));
+                                       final @NotNull String containerPath,
+                                       final boolean withTmpFs) {
+        super(getAdHocImageName(k3sVersion, dockerfileName));
         final MountableFile helmChartMountable = MountableFile.forHostPath(helmChartMountPath.getPath());
         super.withCopyFileToContainer(helmChartMountable, containerPath);
         super.addExposedPort(mqttPort);
+        if(withTmpFs){
+            super.withTmpFs(Map.of("/hivemq-data","rw",
+                    "/conf-override","rw",
+                    "/opt/hivemq/dumps","rw"
+                    ));
+        }
     }
 
     public static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
-                                                             final @NotNull File dockerfile) {
-        final String s = new ImageFromDockerfile().withDockerfile(
-                        dockerfile.toPath())
+                                                             final @NotNull String dockerfileName) {
+        var dockerfile = new File(MountableFile.forClasspathResource(dockerfileName).getFilesystemPath());
+        final String s = new ImageFromDockerfile().withDockerfile(dockerfile.toPath())
                 .withBuildArg("K3S_VERSION", k3sVersion)
                 .get();
         return DockerImageName.parse(s).asCompatibleSubstituteFor("rancher/k3s");
@@ -49,12 +57,14 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
     public static class Builder {
 
-        private @Nullable File dockerfile;
+        private @Nullable String dockerfile;
         private @Nullable File helmChartMountPath;
         private @Nullable String k3sVersion;
         private @Nullable String containerPath;
 
-        public @NotNull Builder dockerfile(final @NotNull File dockerfile) {
+        private boolean withTmpFs=false;
+
+        public @NotNull Builder dockerfile(final @NotNull String dockerfile) {
             this.dockerfile = dockerfile;
             return this;
         }
@@ -73,13 +83,18 @@ public class OperatorHelmChartContainer extends K3sContainer {
             this.containerPath = containerPath;
             return this;
         }
+        public @NotNull Builder withTmpFs(final boolean withTmpFs){
+            this.withTmpFs= withTmpFs;
+            return this;
+        }
+
 
         public @NotNull OperatorHelmChartContainer build() {
             assert dockerfile != null;
             assert k3sVersion != null;
             assert helmChartMountPath != null;
             assert containerPath != null;
-            return new OperatorHelmChartContainer(k3sVersion, dockerfile, helmChartMountPath, containerPath);
+            return new OperatorHelmChartContainer(k3sVersion, dockerfile, helmChartMountPath, containerPath,withTmpFs);
         }
     }
 }
