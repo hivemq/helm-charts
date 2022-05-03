@@ -33,8 +33,17 @@ dependencies {
     testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
 }
 
-tasks.getByName<Test>("test") {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    maxHeapSize="6g"
+    println(allJvmArgs)
+}
+
+val integrationTest by tasks.registering(Test::class) {
+    group = "verification"
+    description = "Runs integration tests"
+    testClassesDirs = sourceSets[name].output.classesDirs
+    classpath = sourceSets[name].runtimeClasspath
 }
 
 sourceSets.create("integrationTest") {
@@ -66,14 +75,20 @@ val buildImage by tasks.registering(Exec::class){
     inputs.property("dockerImageName", containerName)
     inputs.dir(createImageContext.map { it.destinationDir })
     workingDir(createImageContext.map { it.destinationDir })
-    println("${containerName}:${containerTag}")
     commandLine("docker","build","-f","broker.dockerfile","-t","${containerName}:${containerTag}",".")
+    println("${containerName}:${containerTag}")
 
 }
 val saveImage by tasks.registering(Exec::class){
+    dependsOn(buildImage)
     group = "container"
     description = "Save docker image"
-    dependsOn(buildImage)
     workingDir(createImageContext.map { it.destinationDir })
     commandLine("docker","save","-o","${containerName}.tar","${containerName}:${containerTag}")
+    println("Image Saved")
+}
+
+tasks.named("integrationTest"){
+    println("Run integration tests")
+    //dependsOn(saveImage)
 }
