@@ -1,0 +1,17 @@
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+metadata:
+  name: hivemq-cluster
+spec:
+  hivemqVersion: snapshot
+  image: hivemq-k8s
+  imagePullPolicy: Never
+  nodeCount: 1
+  cpu: '1000m'
+  memory: '1024M'
+  javaOptions: '-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=60 -XX:MinRAMPercentage=40'
+  logLevel: DEBUG
+  mqtt:
+    maxQos: 2
+  monitoring:
+    enablePrometheus: false
