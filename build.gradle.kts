@@ -15,8 +15,10 @@ repositories {
         url = uri("https://jitpack.io")
     }
 }
+val hivemq: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = false }
 
 dependencies {
+    hivemq("com.hivemq:hivemq")
     implementation("org.codehaus.groovy:groovy-all:${property("groovy.version")}")
     implementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit.version")}")
@@ -57,8 +59,6 @@ val integrationTestImplementation: Configuration by configurations.getting {
 val integrationTestRuntimeOnly: Configuration by configurations.getting {
     extendsFrom(configurations.testRuntimeOnly.get())
 }
-
-
 val containerName = findProperty("containerName") ?: "hivemq4-k8s-test"
 val containerTag = findProperty("containerTag") ?: "snapshot"
 
@@ -79,6 +79,7 @@ val buildImage by tasks.registering(Exec::class){
     println("${containerName}:${containerTag}")
 
 }
+
 val saveImage by tasks.registering(Exec::class){
     dependsOn(buildImage)
     group = "container"
@@ -87,8 +88,35 @@ val saveImage by tasks.registering(Exec::class){
     commandLine("docker","save","-o","${containerName}.tar","${containerName}:${containerTag}")
     println("Image Saved")
 }
+val pullBaseImages by tasks.registering(Exec::class){
+    group = "container"
+    description = "Download support images"
+    commandLine("docker","pull","busybox:1.35.0")
+}
 
 tasks.named("integrationTest"){
     println("Run integration tests")
     //dependsOn(saveImage)
+}
+
+val producerDockerImage: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("k8s-docker-image"))
+    }
+}
+
+tasks.register<Task>("buildContainers"){
+    group = "container"
+    /*dependsOn(gradle.includedBuild("hivemq").task(":buildK8sImage"))
+    dependsOn(gradle.includedBuild("hivemq-operator").task(":buildDnsInitWaitImage"))
+    dependsOn(gradle.includedBuild("hivemq-operator").task(":jibDockerBuild"))*/
+    doLast{
+        println("containers")
+        println(producerDockerImage.resolvedConfiguration.hasError())
+        println(producerDockerImage.state)
+        println(producerDockerImage.files.size)
+        println(producerDockerImage.hierarchy)
+    }
 }

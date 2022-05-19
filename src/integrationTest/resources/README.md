@@ -1,4 +1,4 @@
-# Scripts
+# Integration Tests
 ## Containers
 ### To copy into the Testcontainer:
 
@@ -9,6 +9,6 @@
 
 ### Using custom images:
 
-When using custom images for the M1, all the images should be arm64 unless the k3s is running for an intel machine, .
+When using custom images for the M1, all the images should be arm64 unless the k3s is running for an intel machine.
 
 
