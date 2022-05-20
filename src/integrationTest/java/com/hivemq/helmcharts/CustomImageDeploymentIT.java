@@ -17,7 +17,7 @@ public class CustomImageDeploymentIT {
     @Container
     private static final @NotNull K3sContainer container = new K3sContainer(DockerImageName
             .parse("rancher/k3s:v1.21.3-k3s1"))
-            .withFileSystemBind("./build/container/context", "/build", BindMode.READ_ONLY)
+            .withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY)
             .withFileSystemBind("./charts/hivemq-operator", "/chart");
 
     @Test
@@ -25,17 +25,17 @@ public class CustomImageDeploymentIT {
 
         System.out.println(Runtime.getRuntime().maxMemory());
 
-        var containerName = "hivemq4-k8s-test";
+        var containerName = "hivemq-k8s-image.tar";
 
         var outLoadImage = container.execInContainer("/bin/ctr",
                 "images",
                 "import",
-                "/build/" + containerName + ".tar");
+                "/build/" + containerName);
 
         assertFalse(outLoadImage.getStdout().isEmpty());
 
         var outListImages = container.execInContainer("/bin/ctr", "images", "ls");
-        assertTrue(outListImages.getStdout().contains(containerName));
+        assertTrue(outListImages.getStdout().contains("hivemq/hivemq4-test"));
     }
 
 }
