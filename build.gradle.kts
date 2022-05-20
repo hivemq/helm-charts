@@ -17,8 +17,11 @@ repositories {
 }
 val hivemq: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = false }
 
+val operator: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = false }
+
 dependencies {
     hivemq("com.hivemq:hivemq")
+    operator("com.hivemq:hivemq-operator")
     implementation("org.codehaus.groovy:groovy-all:${property("groovy.version")}")
     implementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit.version")}")
@@ -62,61 +65,40 @@ val integrationTestRuntimeOnly: Configuration by configurations.getting {
 val containerName = findProperty("containerName") ?: "hivemq4-k8s-test"
 val containerTag = findProperty("containerTag") ?: "snapshot"
 
-val createImageContext by tasks.registering(Sync::class) {
-    group = "container"
-    description = "Prepare container base image context"
-    into(layout.buildDirectory.dir("container/context"))
-    from("container")
-}
-
-val buildImage by tasks.registering(Exec::class){
-    group = "container"
-    description = "Build docker image"
-    inputs.property("dockerImageName", containerName)
-    inputs.dir(createImageContext.map { it.destinationDir })
-    workingDir(createImageContext.map { it.destinationDir })
-    commandLine("docker","build","-f","broker.dockerfile","-t","${containerName}:${containerTag}",".")
-    println("${containerName}:${containerTag}")
-
-}
-
-val saveImage by tasks.registering(Exec::class){
-    dependsOn(buildImage)
-    group = "container"
-    description = "Save docker image"
-    workingDir(createImageContext.map { it.destinationDir })
-    commandLine("docker","save","-o","${containerName}.tar","${containerName}:${containerTag}")
-    println("Image Saved")
-}
-val pullBaseImages by tasks.registering(Exec::class){
-    group = "container"
-    description = "Download support images"
-    commandLine("docker","pull","busybox:1.35.0")
-}
-
-tasks.named("integrationTest"){
-    println("Run integration tests")
-    //dependsOn(saveImage)
-}
-
-val producerDockerImage: Configuration by configurations.creating {
+val producerK8sDockerImage: Configuration by configurations.creating {
     isCanBeConsumed = false
     isCanBeResolved = true
     attributes {
         attribute(Category.CATEGORY_ATTRIBUTE, objects.named("k8s-docker-image"))
     }
+    extendsFrom(hivemq)
+}
+val producerDnsInitWaitDockerImage: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("dns-init-wait-docker-image"))
+    }
+    extendsFrom(operator)
+}
+val producerOperatorDockerImage: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    attributes {
+        attribute(Category.CATEGORY_ATTRIBUTE, objects.named("operator-docker-image"))
+    }
+    extendsFrom(operator)
+}
+val setupFileContainers by tasks.registering(Copy::class){
+    group = "container"
+    dependsOn(gradle.includedBuild("hivemq").task(":buildK8sImage"))
+    dependsOn(gradle.includedBuild("hivemq-operator").task(":saveDnsInitWaitImage"))
+    dependsOn(gradle.includedBuild("hivemq-operator").task(":jibBuildTar"))
+    from(producerK8sDockerImage.singleFile,producerDnsInitWaitDockerImage.singleFile,producerOperatorDockerImage.singleFile)
+    into(layout.buildDirectory.dir("containers"))
 }
 
-tasks.register<Task>("buildContainers"){
-    group = "container"
-    /*dependsOn(gradle.includedBuild("hivemq").task(":buildK8sImage"))
-    dependsOn(gradle.includedBuild("hivemq-operator").task(":buildDnsInitWaitImage"))
-    dependsOn(gradle.includedBuild("hivemq-operator").task(":jibDockerBuild"))*/
-    doLast{
-        println("containers")
-        println(producerDockerImage.resolvedConfiguration.hasError())
-        println(producerDockerImage.state)
-        println(producerDockerImage.files.size)
-        println(producerDockerImage.hierarchy)
-    }
+tasks.named("integrationTest"){
+    println("Run integration tests")
+    //dependsOn(saveImage)
 }
