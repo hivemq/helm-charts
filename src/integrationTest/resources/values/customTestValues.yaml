@@ -1,15 +1,14 @@
 # Custom images Single node cluster with external mqtt port
 operator:
-  image: hivemq-operator:snapshot
+  image: hivemq/hivemq-operator:snapshot
   imagePullPolicy: Never
   logLevel: DEBUG
   admissionWebhooks:
     enabled: false
 
 hivemq:
-  image: hivemq-k8s:snapshot
+  image: hivemq/hivemq4-test:k8s-snapshot
   imagePullPolicy: Never
-  initBusyboxImage: busybox:snapshot
   initDnsWaitImage: hivemq/init-dns-wait:snapshot
   logLevel: DEBUG
   nodeCount: 1
