@@ -9,7 +9,6 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.k3s.K3sContainer;
@@ -19,6 +18,7 @@ import org.testcontainers.utility.MountableFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,12 +34,13 @@ public class OperatorHelmChartContainer extends K3sContainer {
                                       final @NotNull String dockerfileName,
                                       final @NotNull String customValuesFile) {
         super(getAdHocImageName(k3sVersion, dockerfileName));
-            //withStartupCheckStrategy(new OneShotStartupCheckStrategy());
             //assertNotNull(k3sContainer);
             super.addExposedPort(mqttPort);
-            super.withFileSystemBind("./build/container/context", "/build", BindMode.READ_ONLY);
+            super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
             super.withFileSystemBind("./charts/hivemq-operator", "/chart");
             super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
+            super.withCopyFileToContainer(MountableFile.forClasspathResource("scripts/"), "/scripts");
+            super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
     }
 
     public static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
@@ -77,13 +78,34 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 // we need this to have the yaml read from the container
                 container.containerIsStarted(container.getContainerInfo());
                 var yaml = container.getKubeConfigYaml();
+                System.out.println("1");
                 assertNotNull(yaml);
+                System.out.println("2");
+                loadImages();
+                System.out.println("3");
                 deployLocalOperator();
+                System.out.println("4");
                 waitForClusterToBeReady(yaml);
-            } catch (IOException | InterruptedException e) {
+                System.out.println("5");
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             return StartupStatus.SUCCESSFUL;
+        }
+        public void loadImages(){
+            var imagesNames  = Arrays.asList("hivemq-init-dns-image.tar","hivemq-k8s-image.tar","hivemq-operator.tar");
+            imagesNames.forEach(a->{
+                try {
+                    var outLoadImage = container.execInContainer("/bin/ctr",
+                            "images",
+                            "import",
+                            "/build/" + a);
+                    assertFalse(outLoadImage.getStdout().isEmpty());
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
         }
         public void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
             final CountDownLatch closeLatch = new CountDownLatch(1);

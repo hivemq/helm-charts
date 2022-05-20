@@ -4,7 +4,7 @@ metadata:
   name: hivemq-cluster
 spec:
   hivemqVersion: snapshot
-  image: hivemq-k8s
+  image: hivemq/hivemq4-test
   imagePullPolicy: Never
   nodeCount: 1
   cpu: '1000m'
