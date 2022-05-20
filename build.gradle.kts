@@ -100,5 +100,5 @@ val setupFileContainers by tasks.registering(Copy::class){
 
 tasks.named("integrationTest"){
     println("Run integration tests")
-    //dependsOn(saveImage)
+    dependsOn(setupFileContainers)
 }
