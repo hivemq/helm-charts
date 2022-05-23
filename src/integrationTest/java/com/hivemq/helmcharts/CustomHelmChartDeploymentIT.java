@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.MountableFile;
 
 import java.nio.charset.StandardCharsets;
 
@@ -28,7 +27,6 @@ public class CustomHelmChartDeploymentIT {
             container = new OperatorHelmChartContainer("v1.23.4-k3s1",
             "k3s.dockerfile",
             "values/customTestValues.yaml")
-            .withCopyFileToContainer(MountableFile.forClasspathResource("manifest/cluster.yml"),"/files/cluster.yml")
             .withCustomImages();
 
 
@@ -55,7 +53,5 @@ public class CustomHelmChartDeploymentIT {
         assertTrue(receivedMessage.getPayload().isPresent());
         assertEquals("Sending Message", StandardCharsets.UTF_8.decode(receivedMessage
                 .getPayload().get().asReadOnlyBuffer()).toString());
-
-        container.stop();
     }
 }

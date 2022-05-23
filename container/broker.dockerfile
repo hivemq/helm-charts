@@ -9,9 +9,9 @@ WORKDIR /opt/hivemq
 RUN groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq
 
-COPY --from=hivemq/hivemq4:k8s-4.7.6 --chown=hivemq:hivemq /opt/hivemq /opt/hivemq
-COPY --from=hivemq/hivemq4:k8s-4.7.6 --chown=hivemq:hivemq /opt/*.sh /opt/
-COPY --from=hivemq/hivemq4:k8s-4.7.6 --chown=hivemq:hivemq /docker-entrypoint.d /docker-entrypoint.d/
+COPY --from=hivemq/hivemq4-test:k8s-snapshot --chown=hivemq:hivemq /opt/hivemq /opt/hivemq
+COPY --from=hivemq/hivemq4-test:k8s-snapshot --chown=hivemq:hivemq /opt/*.sh /opt/
+COPY --from=hivemq/hivemq4-test:k8s-snapshot --chown=hivemq:hivemq /docker-entrypoint.d /docker-entrypoint.d/
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl gnupg-agent gnupg unzip libnss-wrapper \
   && apt-get purge -y gpg && apt-get clean && rm -rf /var/lib/apt/lists/* 

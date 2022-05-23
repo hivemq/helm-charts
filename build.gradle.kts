@@ -62,7 +62,7 @@ val integrationTestImplementation: Configuration by configurations.getting {
 val integrationTestRuntimeOnly: Configuration by configurations.getting {
     extendsFrom(configurations.testRuntimeOnly.get())
 }
-val containerName = findProperty("containerName") ?: "hivemq4-k8s-test"
+val containerName = findProperty("containerName") ?: "hivemq-k8s-test"
 val containerTag = findProperty("containerTag") ?: "snapshot"
 
 val producerK8sDockerImage: Configuration by configurations.creating {
@@ -96,6 +96,31 @@ val setupFileContainers by tasks.registering(Copy::class){
     dependsOn(gradle.includedBuild("hivemq-operator").task(":jibBuildTar"))
     from(producerK8sDockerImage.singleFile,producerDnsInitWaitDockerImage.singleFile,producerOperatorDockerImage.singleFile)
     into(layout.buildDirectory.dir("containers"))
+}
+
+val createRootlessK8sImageContext by tasks.registering(Sync::class) {
+    group = "container"
+    description = "Prepare container base image context"
+    into(layout.buildDirectory.dir("container/context"))
+    from("container")
+}
+
+val buildRootlessK8sImage by tasks.registering(Exec::class){
+    group = "container"
+    description = "Build docker image"
+    inputs.property("dockerImageName", containerName)
+    inputs.dir(createRootlessK8sImageContext.map { it.destinationDir })
+    workingDir(createRootlessK8sImageContext.map { it.destinationDir })
+    println("${containerName}:${containerTag}")
+    commandLine("docker","build","-f","broker.dockerfile","-t","${containerName}-rootless:${containerTag}",".")
+
+}
+val saveRootlessK8sImage by tasks.registering(Exec::class){
+    group = "container"
+    description = "Save docker image"
+    dependsOn(buildRootlessK8sImage)
+    workingDir(layout.buildDirectory.dir("containers"))
+    commandLine("docker","save","-o","${containerName}-rootless.tar","${containerName}-rootless:${containerTag}")
 }
 
 tasks.named("integrationTest"){
