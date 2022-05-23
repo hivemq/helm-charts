@@ -94,6 +94,7 @@ val setupFileContainers by tasks.registering(Copy::class){
     dependsOn(gradle.includedBuild("hivemq").task(":buildK8sImage"))
     dependsOn(gradle.includedBuild("hivemq-operator").task(":saveDnsInitWaitImage"))
     dependsOn(gradle.includedBuild("hivemq-operator").task(":jibBuildTar"))
+    dependsOn(saveRootlessK8sImage)
     from(producerK8sDockerImage.singleFile,producerDnsInitWaitDockerImage.singleFile,producerOperatorDockerImage.singleFile)
     into(layout.buildDirectory.dir("containers"))
 }
