@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -18,7 +19,9 @@ import org.testcontainers.utility.MountableFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +33,7 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
 public class OperatorHelmChartContainer extends K3sContainer {
     public final static int mqttPort = 1883;
     private boolean withCustomImages = false;
+    private final @NotNull List<String> imagesNames;
 
     public OperatorHelmChartContainer(final @NotNull String k3sVersion,
                                       final @NotNull String dockerfileName,
@@ -41,15 +45,22 @@ public class OperatorHelmChartContainer extends K3sContainer {
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
         super.withCopyFileToContainer(MountableFile.forClasspathResource("scripts/"), "/scripts");
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
+        imagesNames = new ArrayList<>();
     }
 
     /**
-     * Uses custom images instead of docker hub images
+     * Uses custom images instead of docker hub images, additional images can be added
      */
-    public @NotNull OperatorHelmChartContainer withCustomImages() {
+    public @NotNull OperatorHelmChartContainer withCustomImages(@Nullable String...fileNames) {
         withCustomImages = true;
         super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
+        imagesNames.addAll(Arrays.asList("hivemq-init-dns-image.tar", "hivemq-k8s-image.tar", "hivemq-operator.tar"));
+        imagesNames.addAll(Arrays.asList(fileNames));
         return this;
+    }
+
+    protected @NotNull List<String> getImagesNames() {
+        return imagesNames;
     }
 
     public static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
@@ -74,7 +85,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         public DeploymentStatusStartupCheckStrategy(@NotNull OperatorHelmChartContainer container) {
             this.container = container;
-            this.withTimeout(Duration.ofSeconds(120));
+            this.withTimeout(Duration.ofSeconds(240));
         }
 
         @Override
@@ -92,6 +103,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                     loadImages();
                 }
                 deployLocalOperator();
+                waitForClusterToBeReady(yaml);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -99,8 +111,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
         }
 
         public void loadImages() {
-            var imagesNames = Arrays.asList("hivemq-init-dns-image.tar", "hivemq-k8s-image.tar", "hivemq-operator.tar");
-            imagesNames.forEach(a -> {
+            container.getImagesNames().forEach(a -> {
                 try {
                     var outLoadImage = container.execInContainer("/bin/ctr",
                             "images",
@@ -114,7 +125,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         }
 
-        public void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
+        private void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
             final CountDownLatch closeLatch = new CountDownLatch(1);
             Config config = Config.fromKubeconfig(kubeConfigYaml);
             DefaultKubernetesClient client = new DefaultKubernetesClient(config);
