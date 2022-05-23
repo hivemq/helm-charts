@@ -29,18 +29,27 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
  */
 public class OperatorHelmChartContainer extends K3sContainer {
     public final static int mqttPort = 1883;
+    private boolean withCustomImages = false;
 
     public OperatorHelmChartContainer(final @NotNull String k3sVersion,
                                       final @NotNull String dockerfileName,
                                       final @NotNull String customValuesFile) {
         super(getAdHocImageName(k3sVersion, dockerfileName));
-            //assertNotNull(k3sContainer);
-            super.addExposedPort(mqttPort);
-            super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
-            super.withFileSystemBind("./charts/hivemq-operator", "/chart");
-            super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
-            super.withCopyFileToContainer(MountableFile.forClasspathResource("scripts/"), "/scripts");
-            super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
+        //assertNotNull(k3sContainer);
+        super.addExposedPort(mqttPort);
+        super.withFileSystemBind("./charts/hivemq-operator", "/chart");
+        super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
+        super.withCopyFileToContainer(MountableFile.forClasspathResource("scripts/"), "/scripts");
+        super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
+    }
+
+    /**
+     * Uses custom images instead of docker hub images
+     */
+    public @NotNull OperatorHelmChartContainer withCustomImages() {
+        withCustomImages = true;
+        super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
+        return this;
     }
 
     public static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
@@ -56,7 +65,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
     @Override
     public @NotNull OperatorHelmChartContainer withCopyFileToContainer(@NotNull MountableFile mountableFile, @NotNull String containerPath) {
-        super.withCopyFileToContainer(mountableFile,containerPath);
+        super.withCopyFileToContainer(mountableFile, containerPath);
         return this;
     }
 
@@ -71,30 +80,27 @@ public class OperatorHelmChartContainer extends K3sContainer {
         @Override
         public @NotNull StartupStatus checkStartupState(@NotNull DockerClient dockerClient, @NotNull String containerId) {
             var s = container.getLogs(STDERR);
-            while (!s.matches("(?s).*Node controller sync successful.*")){
+            while (!s.matches("(?s).*Node controller sync successful.*")) {
                 s = container.getLogs(STDERR);
             }
             try {
                 // we need this to have the yaml read from the container
                 container.containerIsStarted(container.getContainerInfo());
                 var yaml = container.getKubeConfigYaml();
-                System.out.println("1");
                 assertNotNull(yaml);
-                System.out.println("2");
-                loadImages();
-                System.out.println("3");
+                if (container.withCustomImages) {
+                    loadImages();
+                }
                 deployLocalOperator();
-                System.out.println("4");
-                waitForClusterToBeReady(yaml);
-                System.out.println("5");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
             return StartupStatus.SUCCESSFUL;
         }
-        public void loadImages(){
-            var imagesNames  = Arrays.asList("hivemq-init-dns-image.tar","hivemq-k8s-image.tar","hivemq-operator.tar");
-            imagesNames.forEach(a->{
+
+        public void loadImages() {
+            var imagesNames = Arrays.asList("hivemq-init-dns-image.tar", "hivemq-k8s-image.tar", "hivemq-operator.tar");
+            imagesNames.forEach(a -> {
                 try {
                     var outLoadImage = container.execInContainer("/bin/ctr",
                             "images",
@@ -107,6 +113,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
             });
 
         }
+
         public void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
             final CountDownLatch closeLatch = new CountDownLatch(1);
             Config config = Config.fromKubeconfig(kubeConfigYaml);
@@ -129,10 +136,11 @@ public class OperatorHelmChartContainer extends K3sContainer {
             });
             closeLatch.await();
         }
+
         private void deployLocalOperator() throws IOException, InterruptedException {
             //helm dependency update /chart
             final var outUpdate = container
-                    .execInContainer("/bin/helm", "dependency", "update",  "/chart/");
+                    .execInContainer("/bin/helm", "dependency", "update", "/chart/");
 
             assertTrue(outUpdate.getStderr().isEmpty());
             // helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /chart -f /files/values.yml
