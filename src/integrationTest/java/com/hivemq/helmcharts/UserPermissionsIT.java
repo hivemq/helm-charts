@@ -1,14 +1,8 @@
 package com.hivemq.helmcharts;
 
-import com.hivemq.helmcharts.util.OperatorHelmChartContainer;
-import com.hivemq.helmcharts.util.TestUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.io.File;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
