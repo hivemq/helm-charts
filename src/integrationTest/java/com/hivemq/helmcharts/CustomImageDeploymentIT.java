@@ -2,11 +2,14 @@ package com.hivemq.helmcharts;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.DockerImageName;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,6 +23,7 @@ public class CustomImageDeploymentIT {
             .withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY)
             .withFileSystemBind("./charts/hivemq-operator", "/chart");
 
+    @Timeout(value = 2, unit = TimeUnit.MINUTES)
     @Test
     public void withCustomImage_mqttMessagePublishedReceived() throws Exception {
 

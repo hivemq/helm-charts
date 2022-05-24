@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.MountableFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test that the chart is deployed successfully on specific kubernetes cluster versions
@@ -28,7 +28,8 @@ public class CompatibilityHelmChartDeploymentIT {
     @ParameterizedTest
     @ValueSource(strings = {"v1.20.15-k3s1", "v1.21.10-k3s1", "v1.22.7-k3s1", "v1.23.4-k3s1"})
     public void withHelmVersionDeployment_mqttMessagePublishedReceived(final @NotNull String version) throws Exception {
-        try (var container = new OperatorHelmChartContainer(version, "k3s.dockerfile", "values/customTestValues.yaml")) {
+        try (var container = new OperatorHelmChartContainer(version, "k3s.dockerfile",
+                "values/customTestValues.yaml")) {
             container.withCustomImages();
             container.start();
             Mqtt5BlockingClient client = Mqtt5Client.builder()

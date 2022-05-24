@@ -32,38 +32,21 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
  */
 public class OperatorHelmChartContainer extends K3sContainer {
     public final static int mqttPort = 1883;
-    private boolean withCustomImages = false;
     private final @NotNull List<String> imagesNames;
+    private boolean withCustomImages = false;
 
     public OperatorHelmChartContainer(final @NotNull String k3sVersion,
                                       final @NotNull String dockerfileName,
                                       final @NotNull String customValuesFile) {
         super(getAdHocImageName(k3sVersion, dockerfileName));
-        //assertNotNull(k3sContainer);
         super.addExposedPort(mqttPort);
         super.withFileSystemBind("./charts/hivemq-operator", "/chart");
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
-        super.withCopyFileToContainer(MountableFile.forClasspathResource("scripts/"), "/scripts");
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
         imagesNames = new ArrayList<>();
     }
 
-    /**
-     * Uses custom images instead of docker hub images, additional images can be added
-     */
-    public @NotNull OperatorHelmChartContainer withCustomImages(@Nullable String...fileNames) {
-        withCustomImages = true;
-        super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
-        imagesNames.addAll(Arrays.asList("hivemq-init-dns-image.tar", "hivemq-k8s-image.tar", "hivemq-operator.tar"));
-        imagesNames.addAll(Arrays.asList(fileNames));
-        return this;
-    }
-
-    protected @NotNull List<String> getImagesNames() {
-        return imagesNames;
-    }
-
-    public static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
+    private static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
                                                              final @NotNull String dockerfileName) {
         var dockerfile = new File(MountableFile.forClasspathResource(dockerfileName).getFilesystemPath());
 
@@ -74,10 +57,19 @@ public class OperatorHelmChartContainer extends K3sContainer {
         return DockerImageName.parse(s).asCompatibleSubstituteFor("rancher/k3s");
     }
 
-    @Override
-    public @NotNull OperatorHelmChartContainer withCopyFileToContainer(@NotNull MountableFile mountableFile, @NotNull String containerPath) {
-        super.withCopyFileToContainer(mountableFile, containerPath);
+    /**
+     * Uses custom images instead of docker hub images, additional images can be added
+     */
+    public @NotNull OperatorHelmChartContainer withCustomImages(@Nullable String... fileNames) {
+        withCustomImages = true;
+        super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
+        imagesNames.addAll(Arrays.asList("hivemq-init-dns-image.tar", "hivemq-k8s-image.tar", "hivemq-operator.tar"));
+        imagesNames.addAll(Arrays.asList(fileNames));
         return this;
+    }
+
+    protected @NotNull List<String> getImagesNames() {
+        return imagesNames;
     }
 
     private static class DeploymentStatusStartupCheckStrategy extends StartupCheckStrategy {
@@ -125,6 +117,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         }
 
+        @SuppressWarnings("resource")
         private void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
             final CountDownLatch closeLatch = new CountDownLatch(1);
             Config config = Config.fromKubeconfig(kubeConfigYaml);

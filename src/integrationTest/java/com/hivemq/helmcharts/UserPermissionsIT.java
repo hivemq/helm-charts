@@ -8,13 +8,15 @@ import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import com.hivemq.helmcharts.util.OperatorHelmChartContainer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class UserPermissionsIT {
@@ -26,6 +28,7 @@ public class UserPermissionsIT {
             "values/permissionsDeployment.yaml")
             .withCustomImages("hivemq-k8s-test-rootless.tar");
 
+    @Timeout(value = 4, unit = TimeUnit.MINUTES)
     @Test
     public void withCustomImage_mqttMessagePublishedReceived() throws Exception {
         assertTrue(container.isRunning());
