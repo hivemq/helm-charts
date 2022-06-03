@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
@@ -31,7 +32,7 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
  * Container that includes the helm binary to be able to install the HiveMQ helm charts
  */
 public class OperatorHelmChartContainer extends K3sContainer {
-    public final static int mqttPort = 1883;
+    public final static int MQTT_PORT = 1883;
     private final @NotNull List<String> imagesNames;
     private boolean withCustomImages = false;
 
@@ -39,18 +40,18 @@ public class OperatorHelmChartContainer extends K3sContainer {
                                       final @NotNull String dockerfileName,
                                       final @NotNull String customValuesFile) {
         super(getAdHocImageName(k3sVersion, dockerfileName));
-        super.addExposedPort(mqttPort);
-        super.withFileSystemBind("./charts/hivemq-operator", "/chart");
+        super.addExposedPort(MQTT_PORT);
+        super.withCopyFileToContainer(MountableFile.forHostPath("./charts/hivemq-operator"), "/chart");
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
         imagesNames = new ArrayList<>();
     }
 
     private static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
-                                                             final @NotNull String dockerfileName) {
-        var dockerfile = new File(MountableFile.forClasspathResource(dockerfileName).getFilesystemPath());
+                                                              final @NotNull String dockerfileName) {
+        final var dockerfile = new File(MountableFile.forClasspathResource(dockerfileName).getFilesystemPath());
 
-        final String s = new ImageFromDockerfile().withDockerfile(dockerfile.toPath())
+        final var s = new ImageFromDockerfile().withDockerfile(dockerfile.toPath())
                 .withBuildArg("K3S_VERSION", k3sVersion)
                 .get();
 
@@ -58,13 +59,13 @@ public class OperatorHelmChartContainer extends K3sContainer {
     }
 
     /**
-     * Uses custom images instead of docker hub images, additional images can be added
+     * Uses custom images instead of docker hub images, additional images can be appended
      */
-    public @NotNull OperatorHelmChartContainer withCustomImages(@Nullable String... fileNames) {
+    public @NotNull OperatorHelmChartContainer withLocalImages(final @Nullable String... fileNames) {
         withCustomImages = true;
-        super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
         imagesNames.addAll(Arrays.asList("hivemq-init-dns-image.tar", "hivemq-k8s-image.tar", "hivemq-operator.tar"));
         imagesNames.addAll(Arrays.asList(fileNames));
+        super.withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
         return this;
     }
 
@@ -81,22 +82,19 @@ public class OperatorHelmChartContainer extends K3sContainer {
         }
 
         @Override
-        public @NotNull StartupStatus checkStartupState(@NotNull DockerClient dockerClient, @NotNull String containerId) {
-            var s = container.getLogs(STDERR);
-            while (!s.matches("(?s).*Node controller sync successful.*")) {
-                s = container.getLogs(STDERR);
-            }
+        public @NotNull StartupStatus checkStartupState(final @NotNull DockerClient dockerClient, final @NotNull String containerId) {
             try {
+                await().until(() -> container.getLogs(STDERR).matches("(?s).*Node controller sync successful.*"));
                 // we need this to have the yaml read from the container
                 container.containerIsStarted(container.getContainerInfo());
-                var yaml = container.getKubeConfigYaml();
+                final var yaml = container.getKubeConfigYaml();
                 assertNotNull(yaml);
                 if (container.withCustomImages) {
                     loadImages();
                 }
                 deployLocalOperator();
                 waitForClusterToBeReady(yaml);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
             return StartupStatus.SUCCESSFUL;
@@ -105,12 +103,12 @@ public class OperatorHelmChartContainer extends K3sContainer {
         public void loadImages() {
             container.getImagesNames().forEach(a -> {
                 try {
-                    var outLoadImage = container.execInContainer("/bin/ctr",
+                    final var outLoadImage = container.execInContainer("/bin/ctr",
                             "images",
                             "import",
                             "/build/" + a);
                     assertFalse(outLoadImage.getStdout().isEmpty());
-                } catch (IOException | InterruptedException e) {
+                } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }
             });
@@ -119,12 +117,13 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         @SuppressWarnings("resource")
         private void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
-            final CountDownLatch closeLatch = new CountDownLatch(1);
-            Config config = Config.fromKubeconfig(kubeConfigYaml);
-            DefaultKubernetesClient client = new DefaultKubernetesClient(config);
+            final var closeLatch = new CountDownLatch(1);
+            final var config = Config.fromKubeconfig(kubeConfigYaml);
+            final var client = new DefaultKubernetesClient(config);
             client.customResources(HiveMQInfo.class).watch(new Watcher<>() {
                 @Override
-                public void eventReceived(@NotNull Action action, @NotNull HiveMQInfo resource) {
+                public void eventReceived(final @NotNull Action action,
+                                          final @NotNull HiveMQInfo resource) {
 
                     if (resource.getStatus() != null
                             && resource.getStatus().getState() != null
@@ -134,7 +133,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 }
 
                 @Override
-                public void onClose(@NotNull WatcherException cause) {
+                public void onClose(final @NotNull WatcherException cause) {
                     System.out.println("onClose");
                 }
             });
@@ -148,7 +147,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
             assertTrue(outUpdate.getStderr().isEmpty());
             // helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /chart -f /files/values.yml
-            var execDeploy = container
+            final var execDeploy = container
                     .execInContainer("/bin/helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", "install",
                             "hivemq", "/chart", "-f", "/files/values.yml");
 
