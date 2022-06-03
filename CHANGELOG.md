@@ -1,6 +1,6 @@
 # Changelog
-## hivemq-operator-0.10.9
-### Add integration tests
-- Custom images tests
+## 0.10.09 - 2022-06-03
+### Added
+- Local images tests
 - Matrix tests
 - Security rootless images tests
