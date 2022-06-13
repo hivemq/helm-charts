@@ -115,6 +115,7 @@ val saveRootlessK8sImage by tasks.registering(Exec::class) {
 }
 val buildContainersFiles by tasks.registering(Copy::class) {
     group = "container"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(producerK8sDockerImage){
         rename {"hivemq-k8s-image.tar"}
     }
