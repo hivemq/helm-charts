@@ -115,9 +115,15 @@ val saveRootlessK8sImage by tasks.registering(Exec::class) {
 }
 val buildContainersFiles by tasks.registering(Copy::class) {
     group = "container"
-    from(producerK8sDockerImage)
-    from(producerDnsInitWaitDockerImage)
-    dependsOn(gradle.includedBuild("hivemq-operator").task(":jibBuildTar"))
+    from(producerK8sDockerImage){
+        rename {"hivemq-k8s-image.tar"}
+    }
+    from(producerDnsInitWaitDockerImage){
+        rename {"hivemq-init-dns-image.tar"}
+    }
+    from(producerOperatorDockerImage) {
+        rename { "hivemq-operator.tar" }
+    }
     from(
         producerK8sDockerImage.singleFile,
         producerDnsInitWaitDockerImage.singleFile,

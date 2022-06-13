@@ -9,10 +9,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.DockerImageName;
 
-
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 public class LocalImageDeploymentIT {
@@ -30,7 +30,7 @@ public class LocalImageDeploymentIT {
                 "import",
                 "/build/" + "hivemq-k8s-image.tar");
 
-        assertEquals(0,outLoadImage.getExitCode());
+        assertEquals(0, outLoadImage.getExitCode());
 
         final var outListImages = container.execInContainer("/bin/ctr", "images", "ls");
         assertTrue(outListImages.getStdout().contains("hivemq/hivemq4-test"));
