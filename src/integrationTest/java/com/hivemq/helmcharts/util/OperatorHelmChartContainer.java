@@ -129,6 +129,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                             && resource.getStatus().getState() != null
                             && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
                         closeLatch.countDown();
+                        client.close();
                     }
                 }
 
