@@ -104,6 +104,7 @@ val buildRootlessK8sImage by tasks.registering(Exec::class) {
     inputs.dir(createRootlessK8sImageContext.map { it.destinationDir })
     workingDir(createRootlessK8sImageContext.map { it.destinationDir })
     commandLine("docker", "build", "-f", "broker.dockerfile", "-t", "${containerName}-rootless:${containerTag}", ".")
+    dependsOn(producerK8sDockerImage)
 }
 
 val saveRootlessK8sImage by tasks.registering(Exec::class) {
