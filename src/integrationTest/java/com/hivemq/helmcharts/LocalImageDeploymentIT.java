@@ -14,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Test capability that allow us to import images properly
+ */
 @Testcontainers
 public class LocalImageDeploymentIT {
 

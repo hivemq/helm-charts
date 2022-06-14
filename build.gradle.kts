@@ -100,11 +100,11 @@ val createRootlessK8sImageContext by tasks.registering(Sync::class) {
 val buildRootlessK8sImage by tasks.registering(Exec::class) {
     group = "container"
     description = "Build hivemq rootless k8s image"
+    dependsOn(producerK8sDockerImage)
     inputs.property("dockerImageName", containerName)
     inputs.dir(createRootlessK8sImageContext.map { it.destinationDir })
     workingDir(createRootlessK8sImageContext.map { it.destinationDir })
     commandLine("docker", "build", "-f", "broker.dockerfile", "-t", "${containerName}-rootless:${containerTag}", ".")
-    dependsOn(producerK8sDockerImage)
 }
 
 val saveRootlessK8sImage by tasks.registering(Exec::class) {
