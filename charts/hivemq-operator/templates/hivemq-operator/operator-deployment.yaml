@@ -24,6 +24,10 @@ spec:
       nodeSelector:
       {{ toYaml . | indent 8 }}
       {{- end }}
+      {{- with .Values.operator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - image: {{ .Values.operator.image }}
           imagePullPolicy: {{ .Values.operator.imagePullPolicy }}
@@ -35,18 +39,25 @@ spec:
               value: {{ .Values.operator.logLevel }}
             - name: CREATE_CRD
               value: "false"
+            - name: MICRONAUT_SERVER_PORT
+              value: "8443"
             - name: MICRONAUT_SSL_ENABLED
               value: "{{ .Values.operator.admissionWebhooks.enabled }}"
             {{- if .Values.operator.admissionWebhooks.enabled }}
             - name: OPERATOR_SSL_PATH
               value: "/etc/ssl/admission"
+            - name: MICRONAUT_CONFIG_FILES
+              value: "/tmp/application.yml"
             {{- end }}
             - name: SSL_FQDN
               value: "{{ include "hivemq.name" . }}-operator.{{ template "hivemq.namespace" . }}.svc"
+            {{- range $key, $value := .Values.operator.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+            {{- end }}
           resources: {{ toYaml .Values.operator.resources | nindent 12 }}
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            {{- toYaml .Values.global.rbac.securityContext | nindent 12 }}
           volumeMounts:
             - mountPath: /templates
               name: templates
@@ -56,7 +67,7 @@ spec:
             {{- end }}
           ports:
             - name: https
-              containerPort: 443
+              containerPort: 8443
               protocol: TCP
       restartPolicy: Always
       serviceAccountName: "{{ template "hivemq.fullname" . }}-operator"

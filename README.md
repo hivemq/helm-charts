@@ -20,6 +20,9 @@ The result of this command is a running HiveMQ cluster on your Kubernetes cluste
 
 See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/latest/kubernetes-operator/deploying.html#helm-chart) for more detailed instructions on how to use the helm chart.
 
+## Relase
+To release a new helm chart the Chart.yaml versions should be updated. 
+
 ## Contributing
 
 If you want to contribute to HiveMQ Helm Charts, see the [contribution guidelines](CONTRIBUTING.md).
