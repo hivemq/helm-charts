@@ -1,3 +1,13 @@
+# chart 0.10.5
+
+- Added ability to pass arbitrary environment variables to the operator pod
+- Added ability to specify `affinity` for the operator 
+
+# chart 0.10.3
+
+- Fixed blocking deployment on version 1.22 using a newer cert-gen webhook from nginx
+- Match versions of the chart.yaml and changelog
+- 
 # chart 0.9.3
 
 - Fixed templating of the `queuedMessagesMaxQueueSize` field in the custom resource

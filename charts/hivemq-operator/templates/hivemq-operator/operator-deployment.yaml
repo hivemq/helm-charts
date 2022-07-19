@@ -24,6 +24,10 @@ spec:
       nodeSelector:
       {{ toYaml . | indent 8 }}
       {{- end }}
+      {{- with .Values.operator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - image: {{ .Values.operator.image }}
           imagePullPolicy: {{ .Values.operator.imagePullPolicy }}
@@ -47,6 +51,10 @@ spec:
             {{- end }}
             - name: SSL_FQDN
               value: "{{ include "hivemq.name" . }}-operator.{{ template "hivemq.namespace" . }}.svc"
+            {{- range $key, $value := .Values.operator.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+            {{- end }}
           resources: {{ toYaml .Values.operator.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.global.rbac.securityContext | nindent 12 }}

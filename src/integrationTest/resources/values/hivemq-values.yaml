@@ -3,13 +3,13 @@ global:
     create: true
     # Create a PodSecurityPolicy, cluster role, role binding and service account for the HiveMQ pods and assign the service account to them.
     pspEnabled: true
-    pspAnnotations: {}
+    pspAnnotations: { }
     securityContext:
       runAsNonRoot: true
       runAsUser: 1000
-    allowedCapabilities: []
+    allowedCapabilities: [ ]
     # Image pull secrets for operator, hivemq or other images.
-    imagePullSecrets: []
+    imagePullSecrets: [ ]
     # - name: hivemq-pull-secret
 
 operator:
@@ -18,19 +18,7 @@ operator:
   deployCr: true
   image: hivemq/hivemq-operator:4.7.1
   imagePullPolicy: IfNotPresent
-
-
-
-  ## Nodeselector for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
-  ##
-  nodeSelector: {}
-
-  ## Affinity for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
-  affinity: {}
-
+  nodeSelector: { }
   logLevel: INFO
   # Let the operator verify all HiveMQCluster objects before accepting them.
   # Not using the validation hook can result in erroneous cluster configurations which are hard to debug.
@@ -49,19 +37,15 @@ operator:
         tag: v1.1.1
         sha: ""
         pullPolicy: IfNotPresent
-      resources: {}
+      resources: { }
       ## Provide a priority class name to the webhook patching job
       priorityClassName: ""
-      podAnnotations: {}
-      nodeSelector: {}
-      affinity: {}
-      tolerations: []
+      podAnnotations: { }
+      nodeSelector: { }
+      affinity: { }
+      tolerations: [ ]
   # Set this string to a name of a externally managed ConfigMap containing the templates for the operator if you want to customize them.
   templateConfigMap: ""
-  ## Extra environment variables that will be pass to the operator in the form of
-  ## env:
-  ## MY_CUSTOM_ENV: MY_VALUE
-  env: {}
   resources:
     limits:
       cpu: 800m
@@ -76,70 +60,70 @@ monitoring:
   dedicated: false
 hivemq:
   # Custom container spec to add to the HiveMQ Pod
-  sidecars: []
+  sidecars: [ ]
   # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison this field does not have any defaults but allows for more granular configuration using the full K8s Container API
-  initContainers: []
+  initContainers: [ ]
   # HiveMQ Pod security context
-  podSecurityContext: {}
+  podSecurityContext: { }
     # fsGroup: 1001
     # runAsNonRoot: true
     # runAsUser: 1000
     # sysctls:
-      # To ensure we don't run into port exhaustion
-      # - name: net.ipv4.ip_local_port_range
-      #   value: "1024 65535"
+    # To ensure we don't run into port exhaustion
+    # - name: net.ipv4.ip_local_port_range
+  #   value: "1024 65535"
   # HiveMQ container security context within the Pod
   containerSecurityContext:
-    # runAsNonRoot: true
-    # runAsUser: 1000
-    # allowPrivilegeEscalation: false
-    # privileged: false
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  # allowPrivilegeEscalation: false
+  # privileged: false
   # TopologySpreadConstraints to apply in the underlying Pod spec
-  topologySpreadConstraints: []
+  topologySpreadConstraints: [ ]
   # Tolerations to apply in the underlying Pod spec
-  tolerations: []
+  tolerations: [ ]
 
   # Node selectors for the Pod spec
-  nodeSelector: {}
+  nodeSelector: { }
   # StatefulSet only: Volume claim templates to use
   volumeClaimTemplates:
-    # - kind: PersistentVolumeClaim
-    #   apiVersion: v1
-    #   metadata:
-    #     name: data
-    #   spec:
-    #     accessModes:
-    #       - ReadWriteOnce
-    #     resources:
-    #       requests:
-    #         storage: 100Gi
-    #     volumeMode: Filesystem
+  # - kind: PersistentVolumeClaim
+  #   apiVersion: v1
+  #   metadata:
+  #     name: data
+  #   spec:
+  #     accessModes:
+  #       - ReadWriteOnce
+  #     resources:
+  #       requests:
+  #         storage: 100Gi
+  #     volumeMode: Filesystem
   # RuntimeClass for the Pod spec
   runtimeClassName: ""
   # PriorityClass for the Pod spec
   priorityClassName: ""
 
   # Additional volumes to add to the HiveMQ Pod
-  additionalVolumes: []
+  additionalVolumes: [ ]
   # Additional volume mounts for the HiveMQ container
-  additionalVolumeMounts: []
+  additionalVolumeMounts: [ ]
   # DNS suffix to use for DNS discovery
   dnsSuffix: "svc.cluster.local."
 
   # Annotations to add to the HiveMQ Pods
-  podAnnotations: {}
+  podAnnotations: { }
   # Labels to add to the HiveMQ Pods
-  podLabels: {}
+  podLabels: { }
 
   # Optional operator-internal configuration (See kubectl explain hmqc.spec.operatorHints for more info)
-  operatorHints: {}
+  operatorHints: { }
 
   # Custom properties to set in the custom resource, to be used in conjunction with custom operator templates.
-  customProperties: {}
+  customProperties: { }
   # Annotations to apply to the service account
-  serviceAccountAnnotations: {}
+  serviceAccountAnnotations: { }
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused
-  image: hivemq/hivemq4:k8s-4.8.2
+  image: hivemq/hivemq4:k8s-4.7.5
   imagePullPolicy: IfNotPresent
   nodeCount: "3"
   cpu: "4"
@@ -149,11 +133,11 @@ hivemq:
   serviceAccountName: hivemq
   # Base64 encoded license. (NOTE: use a ConfigMap when mounting multiple files)
   license: ""
-  env: []
+  env: [ ]
   ## Add custom environment variables (e.g. for your extension) here.
   # - name: MY_CUSTOM_ENV
   #   value: some-value
-  initialization: []
+  initialization: [ ]
   ## Add custom initContainers here. Busybox is the default image. and /bin/sh -c the default command
   # - name: init-cfg
   #   image: busybox
@@ -189,11 +173,11 @@ hivemq:
   #- name: hivemq-mqtt-message-log-extension
   #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-mqtt-message-log-extension-1.1.0.zip
   #  configMap: message-log-config
-  configMaps: []
+  configMaps: [ ]
   # ConfigMaps to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
   #- name: hivemq-license
   #  path: /opt/hivemq/license
-  secrets: []
+  secrets: [ ]
   # Secrets to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
   #- name: hivemq-license
   #  path: /opt/hivemq/license
@@ -360,7 +344,7 @@ hivemq:
         <restrictions>
             <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>
             <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>
-            <max-connections>${HIVEMQ_MAX_CONNECTIONS}</max-connections>
+            <max-connections>-${HIVEMQ_MAX_CONNECTIONS}</max-connections>
             <incoming-bandwidth-throttling>${HIVEMQ_INCOMING_BANDWIDTH_THROTTLING}</incoming-bandwidth-throttling>
             <no-connect-idle-timeout>${HIVEMQ_NO_CONNECT_IDLE_TIMEOUT}</no-connect-idle-timeout>
         </restrictions>
@@ -446,3 +430,4 @@ namespaceOverride: ""
 fullnameOverride: ""
 # Whether to add the generic, common Helm metadata labels (mainly intended for use as a utility for generating the non-Helm install manifests)
 generateLabels: true
+
