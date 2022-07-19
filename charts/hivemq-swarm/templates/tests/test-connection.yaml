@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "hivemq-swarm.fullname" . }}-test-connection"
+  namespace: {{ template "hivemq-swarm.namespace" . }}
+  labels:
+    {{- include "hivemq-swarm.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "hivemq-swarm.fullname" . }}-api:{{ .Values.service.port }}/commander']
+  restartPolicy: Never

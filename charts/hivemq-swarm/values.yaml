@@ -1,0 +1,180 @@
+image:
+  repository: hivemq/hivemq-swarm
+  pullPolicy: IfNotPresent
+  tag: 4.8.2
+imagePullSecrets: []
+## Cluster domain
+##
+clusterDomain: cluster.local
+## HiveMQ Swarm license as base64 encoded string.
+## NOTE: it's also possible to mount a license via a secret/configmap, please see the commander extraVolumes and extraVolumeMounts section
+##
+license: ""
+## HiveMQ Swarm commander configuration
+##
+commander:
+  logLevel: info
+  ## Configure resources for HiveMQ Swarm Commander Pod (Note: request = limits for HiveMQ Swarm)
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    cpu: 500m
+    memory: 1G
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ##
+  podSecurityContext: {}
+  ## Configure HiveMQ Swarm Commander Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ##
+  securityContext: {}
+  ## Configure affinity preset for HiveMQ Swarm Commander Pod
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node
+  ##
+  affinity: {}
+  ## Add environment variables to the commander
+  ##
+  env: []
+  ## Additional volumes to the Swarm pod.
+  ## By default: ephemeral volume for scenarios + previous run persistence
+  ##
+  extraVolumes:
+    - emptyDir: {}
+      name: scenario-persistence
+  # Adding a HiveMQ swarm license (requires also the VolumeMount for the HiveMQ Swarm pod)
+  #  - name: license
+  #    secret:
+  #      secretName: swarm-license
+
+  ## Extra volume mounts that will be added to the Swarm container
+  ##
+  extraVolumeMounts:
+    - mountPath: /scenario
+      name: scenario-persistence
+  # Mounting a HiveMQ swarm license (requires also the extraVolume for the HiveMQ Swarm pod)
+  #    - name: license
+  #      readOnly: true
+  #      mountPath: /license
+
+  ## Additional persistent volumes to create/mount for the commander StatefulSet
+  ##
+  volumeClaimTemplates: []
+  ## Node labels for pod assignment. Evaluated as a template.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+  ## Pod annotations
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## JVM options to start the commander with
+  ##
+  javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
+## HiveMQ Swarm Agents configuration
+##
+agents:
+  logLevel: info
+  agentCount: 3
+  ## Configure resources for HiveMQ Swarm Agent Pods (Note: request = limits for HiveMQ Swarm)
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    cpu: 500m
+    memory: 1G
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ##
+  podSecurityContext:
+    sysctls:
+      - name: net.ipv4.ip_local_port_range
+        value: "1024 65535"
+  ## Configure HiveMQ Swarm Agent Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ##
+  securityContext: {}
+  ## Configure affinity preset for HiveMQ Swarm Agent Pods
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node
+  ##
+  affinity: {}
+  ## Add environment variables to the commander
+  ##
+  env: []
+  ## Additional volumes for the HiveMQ Swarm agent pod.
+  extraVolumes: []
+  ## Extra volume mounts that will be added to the swarm agent container
+  extraVolumeMounts: []
+  ## Node labels for pod assignment. Evaluated as a template.
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+  ## Pod annotations
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## JVM options to start the agents with
+  ##
+  javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
+## Monitoring configuration
+##
+monitoring:
+  # Deploy ServiceMonitor for Prometheus Operator and Configmap for Grafana Dashboard
+  enabled: false
+  # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
+  dedicated: false
+  # dashboardNamespace: monitoring (defaults to use the namespace this chart is deployed to)
+  serviceMonitor:
+    interval: 15s
+    #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
+    scrapeTimeout: 10s
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+## Configure the service to access toe HiveMQ Swarm commander
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+##
+service:
+  type: ClusterIP
+  port: 80
+  nodePort: ""
+## Configure the ingress resource that allows you to access the HiveMQ Swarm commander
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## Set to true to enable ingress record generation
+  ##
+  enabled: false
+  ## Ingress annotations done as key:value pairs
+  ##
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+
+  ## The list of hostnames to be covered with this ingress record.
+  ##
+  hosts:
+    - host: chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+## Tolerations for pod assignment. Evaluated as a template.
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+## String to override the name  in the fullname template
+##
+nameOverride: ""
+## String to override the deployment namespace
+##
+namespaceOverride: ""
+## String to fully override fullname template
+##
+fullnameOverride: ""
+## Whether to add the generic, common Helm metadata labels (mainly intended for use as a utility for generating the non-Helm install manifests)
+##
+generateLabels: true

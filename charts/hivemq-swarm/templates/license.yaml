@@ -1,0 +1,11 @@
+{{- if .Values.license }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hivemq-swarm.fullname" . }}-license
+  namespace: {{ template "hivemq-swarm.namespace" . }}
+  labels:
+    {{ include "hivemq-swarm.labels" . | nindent 4 }}
+data:
+  swarm.slic: |-{{ b64dec .Values.license | nindent 4 }}
+{{- end }}

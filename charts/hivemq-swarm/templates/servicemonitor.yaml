@@ -1,0 +1,33 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    release: {{ .Release.Name }}
+    {{- include "hivemq-swarm.labels" . | nindent 4 }}
+  name: {{ include "hivemq-swarm.fullname" . }}
+  {{- if .Values.monitoring.serviceMonitor.namespace }}
+  namespace: {{ .Values.monitoring.serviceMonitor.namespace }}
+  {{- else }}
+  namespace: {{ template "hivemq-swarm.namespace" . }}
+  {{- end }}
+spec:
+  endpoints:
+    - interval: {{ .Values.monitoring.serviceMonitor.interval }}
+      {{- if .Values.monitoring.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+      port: api
+    - interval: {{ .Values.monitoring.serviceMonitor.interval }}
+      {{- if .Values.monitoring.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+      port: metrics
+  jobLabel: {{ include "hivemq-swarm.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "hivemq-swarm.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

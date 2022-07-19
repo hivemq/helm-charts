@@ -1,0 +1,21 @@
+apiVersion: v2
+name: hivemq-swarm
+description: A Helm chart for HiveMQ Swarm
+type: application
+keywords:
+  - MQTT
+  - IoT
+  - Java
+  - distributed
+  - messaging
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: 0.2.8
+# This is the version number of HiveMQ Swarm. 
+appVersion: 4.8.2
+icon: https://www.hivemq.com/img/svg/icon-hivemq-swarm.svg
+dependencies:
+  - name: kube-prometheus-stack
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: monitoring.dedicated, monitoring.enabled
+    version: 14.*
