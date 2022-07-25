@@ -65,10 +65,10 @@ operator:
   resources:
     limits:
       cpu: 800m
-      memory: 512M
+      memory: 1024M
     requests:
       cpu: 200m
-      memory: 512M
+      memory: 1024M
 monitoring:
   # Deploy ServiceMonitor for Prometheus Operator and enable Prometheus
   enabled: false
