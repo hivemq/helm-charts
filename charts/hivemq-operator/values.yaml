@@ -80,7 +80,6 @@ hivemq:
   # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison, this field does not have any defaults but allows for more granular configuration using the full K8s Container API
   initContainers: []
   # HiveMQ Pod security context
-  # To configure see example https://github.com/hivemq/helm-charts/tree/master/container/README.md
   podSecurityContext: {}
     # fsGroup: 10000
     # runAsNonRoot: true
@@ -92,8 +91,6 @@ hivemq:
   # HiveMQ container security context within the Pod
   containerSecurityContext:
     # runAsNonRoot: true
-    # runAsGroup: 10000
-    # runAsUser: 10001
     # allowPrivilegeEscalation: false
     # privileged: false
   # TopologySpreadConstraints to apply in the underlying Pod spec

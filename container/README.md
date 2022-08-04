@@ -4,22 +4,21 @@ For this reason we provide the documentation on how to modify the HiveMQ image w
 
 ## Build the image
 
-- Get the latest version from the docker registry https://hub.docker.com/r/hivemq/hivemq4/tags?page=1&name=k8s
- at the time of writing was `hivemq/hivemq4:k8s-4.8.3`.
+- Get the latest version from the docker registry https://hub.docker.com/r/hivemq/hivemq4/tags?page=1&name=k8s, for instance `hivemq/hivemq4:k8s-<version>`.
 - Build the custom image using the command:
 ```bash
 docker build \
-  --build-arg HIVEMQ_IMAGE=hivemq/hivemq4:k8s-4.8.3 \
+  --build-arg HIVEMQ_IMAGE=hivemq/hivemq4:k8s-<version> \
   --build-arg JAVA_IMAGE=openjdk:11-jre-slim \
-  -t hivemq:k8s -f example-k8s.dockerfile .
+  -t <custom-org>:<custom-tag> -f example-k8s.dockerfile .
 ```
 ## Configure the Helm-Chart
 - Configure the image name on the helm-chart `values.yml`
   ```
   hivemq:
-    image: hivemq:k8s
+    image: <custom-org>:<custom-tag>
   ```
-- Set up the [pod and container security context ](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) on the helm-chart values
+- Set up the [pod and container security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) on the helm-chart values
   ```yaml
   podSecurityContext:
     fsGroup: 10000

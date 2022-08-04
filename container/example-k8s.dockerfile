@@ -13,6 +13,7 @@ ENV HIVEMQ_UID=10000
 ENV HIVEMQ_LOG_LEVEL INFO
 
 WORKDIR /opt/hivemq
+
 RUN groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq
 
@@ -24,19 +25,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl gnupg-agen
   && apt-get purge -y gpg && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Setup permisions to the same group to the configuration and extensions, we are explicit to don't oversize the image
-RUN chmod g+w /opt/hivemq /opt/hivemq/extensions /opt/hivemq/conf /opt/hivemq/extensions/hivemq-prometheus-extension \
+RUN chmod g+w /opt/hivemq/extensions /opt/hivemq/conf /opt/hivemq/extensions/hivemq-prometheus-extension \
      /opt/hivemq/extensions/hivemq-bridge-extension \
      /opt/hivemq/extensions/hivemq-dns-cluster-discovery \
      /opt/hivemq/extensions/hivemq-enterprise-security-extension \
      /opt/hivemq/extensions/hivemq-k8s-sync-extension \
      /opt/hivemq/extensions/hivemq-kafka-extension \
-     /opt/hivemq/extensions/hivemq-kafka-extension/DISABLED /opt/hivemq/extensions/hivemq-bridge-extension/DISABLED \
+     /opt/hivemq/extensions/hivemq-kafka-extension/DISABLED \
+     /opt/hivemq/extensions/hivemq-bridge-extension/DISABLED \
      /opt/hivemq/extensions/hivemq-enterprise-security-extension/DISABLED
+
 # User and group ownership
 RUN chown hivemq:hivemq /opt/docker-entrypoint.sh /opt/hivemq \
     && chmod +rx /opt/hivemq/bin/*.sh \
     && chmod 775 /opt/hivemq/ \
-    && chmod +rx /opt/pre-entry.sh /opt/hivemq/bin/pre-entry_1.sh /opt/docker-entrypoint.sh
+    && chmod +rx /opt/pre-entry.sh /opt/hivemq/bin/pre-entry_1.sh /opt/docker-entrypoint.sh \
+
 # Set locale
 ENV LANG=en_US.UTF-8
 # Additional JVM options, may be overwritten by user
