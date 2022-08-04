@@ -1,3 +1,4 @@
+#This is an example and not part of the official release of HiveMQ
 ARG HIVEMQ_IMAGE=hivemq/hivemq4:k8s-4.8.3
 ARG JAVA_IMAGE=openjdk:11-jre-slim
 
