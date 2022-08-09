@@ -7,7 +7,7 @@ increasing the size of the image.
 
 ### Build your custom image
 
-- Get the latest version from the docker registry https://hub.docker.com/r/hivemq/hivemq4/tags?page=1&name=k8s `hivemq/hivemq4:k8s-<version>`.
+- Check which is the latest version of the HiveMQ k8s image provided on the docker registry https://hub.docker.com/r/hivemq/hivemq4/tags?page=1&name=k8s `hivemq/hivemq4:k8s-<version>`.
 - Build the custom image using the command:
   ```bash
   docker build \
@@ -21,6 +21,7 @@ increasing the size of the image.
   ```
   
 ### Configure the Helm-Chart
+Override the default docker image name of the HiveMQ operator helm chart, by creating a custom 'values.yml' file and configure the podSecurityContext according to your image.
 Use the custom values file as described on the [HiveMQ Operator documentation [3]](https://www.hivemq.com/docs/operator/4.8/kubernetes-operator/deploying.html#deploy-operator)
 
 - Configure the image name on the helm-chart `values.yml`
