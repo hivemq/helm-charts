@@ -23,6 +23,8 @@ See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/latest/kuber
 ## Release
 To release a new helm chart the Chart.yaml versions should be updated. 
 
+When the operator is updated, the `values.yaml` should be also modified, for the image version.
+
 ## Examples
 
 Configuration examples can be found in the folder [examples](/examples)
