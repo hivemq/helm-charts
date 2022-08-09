@@ -24,7 +24,7 @@ increasing the size of the image.
 Override the default docker image name of the HiveMQ operator helm chart, by creating a custom 'values.yml' file and configure the podSecurityContext according to your image.
 Use the custom values file as described on the [HiveMQ Operator documentation [3]](https://www.hivemq.com/docs/operator/4.8/kubernetes-operator/deploying.html#deploy-operator)
 
-- Configure the image name on the helm-chart `values.yml`
+- Configure the image name on the helm-chart `values.yml` for the HiveMQ operator helm-chart
   ```
   hivemq:
     image: <custom-org>:<custom-tag>

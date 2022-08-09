@@ -25,7 +25,7 @@ To release a new helm chart the Chart.yaml versions should be updated.
 
 ## Examples
 
-Configuration examples can be found on the examples folder [Readme](examples/README.md)
+Configuration examples can be found in the folder [examples](/examples)
 
 ## Contributing
 
