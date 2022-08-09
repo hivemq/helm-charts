@@ -8,8 +8,8 @@ FROM ${JAVA_IMAGE}
 
 ARG HIVEMQ_IMAGE
 
-ENV HIVEMQ_GID=10000
-ENV HIVEMQ_UID=10000
+ENV HIVEMQ_GID=10000 \
+    HIVEMQ_UID=10000
 
 ENV HIVEMQ_LOG_LEVEL INFO
 
@@ -40,7 +40,7 @@ RUN chmod g+w /opt/hivemq/extensions /opt/hivemq/conf /opt/hivemq/extensions/hiv
 RUN chown hivemq:hivemq /opt/docker-entrypoint.sh /opt/hivemq \
     && chmod +rx /opt/hivemq/bin/*.sh \
     && chmod 775 /opt/hivemq/ \
-    && chmod +rx /opt/pre-entry.sh /opt/hivemq/bin/pre-entry_1.sh /opt/docker-entrypoint.sh \
+    && chmod +rx /opt/pre-entry.sh /opt/hivemq/bin/pre-entry_1.sh /opt/docker-entrypoint.sh
 
 # Set locale
 ENV LANG=en_US.UTF-8
@@ -60,14 +60,16 @@ ENV HIVEMQ_VERBOSE_ENTRYPOINT "true"
 ENV HIVEMQ_USE_NSS_WRAPPER "true"
 
 # Use default DNS resolution timeout as default discovery interval
-ENV HIVEMQ_DNS_DISCOVERY_INTERVAL 31
-ENV HIVEMQ_DNS_DISCOVERY_TIMEOUT 30
+ENV HIVEMQ_DNS_DISCOVERY_INTERVAL=31 \
+    HIVEMQ_DNS_DISCOVERY_TIMEOUT=30
 
 # The default cluster transport bind port to use (UDP port)
-ENV HIVEMQ_CLUSTER_PORT 8000
-ENV HIVEMQ_CLUSTER_TRANSPORT_TYPE TCP
+ENV HIVEMQ_CLUSTER_PORT=8000 \
+    HIVEMQ_CLUSTER_TRANSPORT_TYPE=TCP
 
-# Make broker data persistent throughout stop/start cycles
+ENV HIVEMQ_CONTROL_CENTER_USER=admin \
+ HIVEMQ_CONTROL_CENTER_PASSWORD=a68fc32fc49fc4d04c63724a1f6d0c90442209c46dba6975774cde5e5149caf8
+
 VOLUME /opt/hivemq/data
 
 # Persist log data
