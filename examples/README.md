@@ -1,5 +1,5 @@
-# Modifying the default HiveMQ K8s Image
-## Non-Root Image
+# Examples
+## Modifying the default HiveMQ K8s Image Non-Root Image
 Security is important [[1](https://snyk.io/blog/10-kubernetes-security-context-settings-you-should-understand)] when running containers in Kubernetes. 
 For this reason we provide the documentation on how to modify the HiveMQ image without increasing its size.
 ### Build the image
