@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.util;
 import com.github.dockerjava.api.DockerClient;
 import com.hivemq.crd.hivemq.HiveMQInfo;
 import com.hivemq.openapi.HivemqClusterStatus;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
@@ -76,7 +77,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
     private static class DeploymentStatusStartupCheckStrategy extends StartupCheckStrategy {
         private final @NotNull OperatorHelmChartContainer container;
 
-        public DeploymentStatusStartupCheckStrategy(@NotNull OperatorHelmChartContainer container) {
+        public DeploymentStatusStartupCheckStrategy(@NotNull final OperatorHelmChartContainer container) {
             this.container = container;
             this.withTimeout(Duration.ofSeconds(240));
         }
@@ -92,8 +93,18 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 if (container.withCustomImages) {
                     loadImages();
                 }
-                deployLocalOperator();
-                waitForClusterToBeReady(yaml);
+
+                final var config = Config.fromKubeconfig(yaml);
+                try (final DefaultKubernetesClient client = new DefaultKubernetesClient(config)) {
+
+                    deployLocalOperator();
+                    waitForClusterToBeReady(client);
+                    // get the HiveMQ container logs inside the pod
+                    final Pod pod = client.pods().inAnyNamespace().withLabel("app", "hivemq").list().getItems().get(0);
+                    final var containerResource = client.pods().inNamespace("default").withName(pod.getMetadata().getName()).inContainer("hivemq");
+                    assertFalse(containerResource.getLog().contains("Could not read the configuration file /opt/hivemq/conf/config.xml. Using default config"),
+                            "When using the default config a cluster could not be created");
+                }
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
@@ -116,10 +127,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
         }
 
         @SuppressWarnings("resource")
-        private void waitForClusterToBeReady(final @NotNull String kubeConfigYaml) throws InterruptedException {
+        private void waitForClusterToBeReady(final DefaultKubernetesClient client) throws InterruptedException {
             final var closeLatch = new CountDownLatch(1);
-            final var config = Config.fromKubeconfig(kubeConfigYaml);
-            final var client = new DefaultKubernetesClient(config);
             client.customResources(HiveMQInfo.class).watch(new Watcher<>() {
                 @Override
                 public void eventReceived(final @NotNull Action action,
@@ -129,7 +138,6 @@ public class OperatorHelmChartContainer extends K3sContainer {
                             && resource.getStatus().getState() != null
                             && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
                         closeLatch.countDown();
-                        client.close();
                     }
                 }
 
@@ -156,7 +164,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 // Shows also warnings
                 System.err.println(execDeploy.getStderr());
             }
-            assertFalse(execDeploy.getStdout().isEmpty());
+            assertFalse(execDeploy.getStdout().isEmpty(), execDeploy.getStderr());
         }
     }
 

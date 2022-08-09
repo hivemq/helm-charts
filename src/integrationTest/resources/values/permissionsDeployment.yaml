@@ -7,7 +7,7 @@ operator:
 hivemq:
   image: hivemq-k8s-test-rootless:snapshot
   initDnsWaitImage: hivemq/init-dns-wait:snapshot
-  logLevel: DEBUG
+  logLevel: INFO
   nodeCount: 1
   cpu: 1
   memory: 1Gi

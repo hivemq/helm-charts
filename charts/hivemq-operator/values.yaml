@@ -16,7 +16,7 @@ operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:4.7.1
+  image: hivemq/hivemq-operator:4.7.3
   imagePullPolicy: IfNotPresent
 
 
@@ -77,13 +77,13 @@ monitoring:
 hivemq:
   # Custom container spec to add to the HiveMQ Pod
   sidecars: []
-  # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison this field does not have any defaults but allows for more granular configuration using the full K8s Container API
+  # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison, this field does not have any defaults but allows for more granular configuration using the full K8s Container API
   initContainers: []
   # HiveMQ Pod security context
   podSecurityContext: {}
-    # fsGroup: 1001
+    # fsGroup: 10000
     # runAsNonRoot: true
-    # runAsUser: 1000
+    # runAsUser: 10001
     # sysctls:
       # To ensure we don't run into port exhaustion
       # - name: net.ipv4.ip_local_port_range
@@ -91,7 +91,6 @@ hivemq:
   # HiveMQ container security context within the Pod
   containerSecurityContext:
     # runAsNonRoot: true
-    # runAsUser: 1000
     # allowPrivilegeEscalation: false
     # privileged: false
   # TopologySpreadConstraints to apply in the underlying Pod spec
