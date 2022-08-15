@@ -19,7 +19,8 @@ operator:
   image: hivemq/hivemq-operator:4.7.3
   imagePullPolicy: IfNotPresent
 
-
+  # Whether the operator should handle HiveMQCluster resources across all namespaces
+  crossNamespaceMode: false
 
   ## Nodeselector for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector

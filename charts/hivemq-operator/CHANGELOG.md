@@ -1,3 +1,7 @@
+# chart 0.11.0 - HiveMQ platform 4.8.0
+
+- Added ability for the operator to orchestrate HiveMQCluster resources across all namespaces. (`operator.crossNamespaceMode`)
+
 # chart 0.10.5
 
 - Added ability to pass arbitrary environment variables to the operator pod
