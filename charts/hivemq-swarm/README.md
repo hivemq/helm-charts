@@ -9,14 +9,14 @@ $ helm repo add hivemq https://hivemq.github.io/helm-charts
 $ helm upgrade --install swarm hivemq/hivemq-swarm
 ```
 
-See [here](https://www.hivemq.com/docs/swarm/clustering#deploy-on-k8s) for a more detailed getting started and configuration guidance on this Helm Chart.
+See [here](https://www.hivemq.com/docs/swarm/latest/swarm/clustering.html#deploy-on-k8s) for a more detailed getting started and configuration guidance on this Helm Chart.
 
 ## Introduction
 
 This chart bootstraps a [HiveMQ Swarm](https://github.com/hivemq/hivemq-swarm) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 Therefore, this chart provision:
-- A HiveMQ Swarm commander with an enabled [REST-API](https://www.hivemq.com/docs/swarm/rest-service) to start scenarios 
+- A HiveMQ Swarm commander with an enabled [REST-API](https://www.hivemq.com/docs/swarm/latest/swarm/rest-service.html) to start scenarios 
 - A set of HiveMQ Swarm agents
 - (Optional) Prometheus-operator integration for monitoring
   - A Prometheus Operator sub-chart if you want to deploy a dedicated Prometheus instance
