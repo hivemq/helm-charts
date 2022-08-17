@@ -1,3 +1,8 @@
+# chart 0.11.3
+
+- Updates operator to 4.7.5
+- Clean up the CRD, removing some unnecessary generated fields that get always pruned by kube-api
+
 # chart 0.11.0 - HiveMQ platform 4.8.0
 
 - Added ability for the operator to orchestrate HiveMQCluster resources across all namespaces. (`operator.crossNamespaceMode`)
