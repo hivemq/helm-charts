@@ -34,7 +34,7 @@ spec:
           name: operator
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30"
+              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
             - name: OPERATOR_LOG_LEVEL
               value: {{ .Values.operator.logLevel }}
             - name: CREATE_CRD
