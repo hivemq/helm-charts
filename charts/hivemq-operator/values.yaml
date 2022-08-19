@@ -57,8 +57,10 @@ operator:
       nodeSelector: {}
       affinity: {}
       tolerations: []
-  # Set this string to a name of a externally managed ConfigMap containing the templates for the operator if you want to customize them.
+  # Set this string to a name of an externally managed ConfigMap containing the templates for the operator if you want to customize them.
   templateConfigMap: ""
+  # Allow to customize the java environmental variables
+  javaEnvironment: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
   ## Extra environment variables that will be pass to the operator in the form of
   ## env:
   ## MY_CUSTOM_ENV: MY_VALUE
