@@ -1,4 +1,4 @@
-## chart 0.11.4
+# chart 0.11.4
 - Increase container limit and request size to 640MB
 - Allow to customize the java environment and set the default memory usage to 75%
 
@@ -7,12 +7,26 @@
 - Updates operator to 4.7.5
 - Clean up the CRD, removing some unnecessary generated fields that get always pruned by kube-api
 
-## chart 0.11.1
+# chart 0.11.1
 - Update to latest operator version 4.7.3
 
 # chart 0.11.0 - HiveMQ platform 4.8.0
 
 - Added ability for the operator to orchestrate HiveMQCluster resources across all namespaces. (`operator.crossNamespaceMode`)
+
+# chart 0.10.12
+- Document how to create and use non-root security context
+
+# chart 0.10.11
+- Upgrade to latest HiveMQ release 4.8.3
+
+# chart 0.10.10
+- Upgrade to latest HiveMQ release 4.8.2
+
+# chart 0.10.09
+- Local images tests
+- Matrix tests
+- Security rootless images tests
 
 # chart 0.10.5
 
@@ -23,7 +37,7 @@
 
 - Fixed blocking deployment on version 1.22 using a newer cert-gen webhook from nginx
 - Match versions of the chart.yaml and changelog
-- 
+
 # chart 0.9.3
 
 - Fixed templating of the `queuedMessagesMaxQueueSize` field in the custom resource
