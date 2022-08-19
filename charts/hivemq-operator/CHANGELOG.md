@@ -1,7 +1,14 @@
+## chart 0.11.4
+- Increase container limit and request size to 640MB
+- Allow to customize the java environment and set the default memory usage to 75%
+
 # chart 0.11.3
 
 - Updates operator to 4.7.5
 - Clean up the CRD, removing some unnecessary generated fields that get always pruned by kube-api
+
+## chart 0.11.1
+- Update to latest operator version 4.7.3
 
 # chart 0.11.0 - HiveMQ platform 4.8.0
 
