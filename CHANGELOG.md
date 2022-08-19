@@ -1,4 +1,8 @@
 # Changelog
+## 0.11.4
+### Added
+- Increase container limit and request size to 640MB
+- Allow to customize the java environment and set the default memory usage to 75%
 ## 0.11.1
 ### Added
 - Update to latest operator version 4.7.3
