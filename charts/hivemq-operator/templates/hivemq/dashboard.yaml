@@ -4544,7 +4544,7 @@ data:
             {
               "alias": "GC M&S - $tag_host",
               "dsType": "influxdb",
-              "expr": "delta(com_hivemq_jvm_garbage_collector_G1_Young_Generation_count{job = \"$job\"}[1m]) + delta(com_hivemq_jvm_garbage_collector_G1_Old_Generation_count{job = \"$job\"}[1m])"
+              "expr": "delta(com_hivemq_jvm_garbage_collector_G1_Young_Generation_count{job = \"$job\"}[1m]) + delta(com_hivemq_jvm_garbage_collector_G1_Old_Generation_count{job = \"$job\"}[1m])",
               "format": "time_series",
               "groupBy": [
                 {
