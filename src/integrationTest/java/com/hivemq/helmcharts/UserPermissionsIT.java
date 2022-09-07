@@ -38,17 +38,18 @@ public class UserPermissionsIT {
 
         client.connect();
 
-        final var publishes = client.publishes(MqttGlobalPublishFilter.ALL);
+        try (final var publishes = client.publishes(MqttGlobalPublishFilter.ALL)) {
 
-        client.subscribeWith().topicFilter("test").send();
-        client.publishWith()
-                .topic("test")
-                .payload("Sending Message".getBytes(StandardCharsets.UTF_8))
-                .qos(MqttQos.AT_LEAST_ONCE).send();
+            client.subscribeWith().topicFilter("test").send();
+            client.publishWith()
+                    .topic("test")
+                    .payload("Sending Message".getBytes(StandardCharsets.UTF_8))
+                    .qos(MqttQos.AT_LEAST_ONCE).send();
 
-        final var receivedMessage = publishes.receive();
-        assertTrue(receivedMessage.getPayload().isPresent());
-        assertEquals("Sending Message",
-                StandardCharsets.UTF_8.decode(receivedMessage.getPayload().get()).toString());
+            final var receivedMessage = publishes.receive();
+            assertTrue(receivedMessage.getPayload().isPresent());
+            assertEquals("Sending Message",
+                    StandardCharsets.UTF_8.decode(receivedMessage.getPayload().get()).toString());
+        }
     }
 }

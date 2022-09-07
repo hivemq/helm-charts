@@ -1,3 +1,12 @@
+# chart 0.11.6
+- Update to Prometheus 14 
+- Multi-namespace prometheus
+- Using G1 Garbage collector for prometheus
+- Test using K3s v1.24.3
+
+# chart 0.11.5
+- Use 4.8.4 HiveMQ Release
+
 # chart 0.11.4
 - Increase container limit and request size to 640MB
 - Allow to customize the java environment and set the default memory usage to 75%
