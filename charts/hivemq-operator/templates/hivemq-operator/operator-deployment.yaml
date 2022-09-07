@@ -34,7 +34,7 @@ spec:
           name: operator
           env:
             - name: JAVA_TOOL_OPTIONS
-              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30"
+              value: "{{ .Values.operator.javaEnvironment }}"
             - name: OPERATOR_LOG_LEVEL
               value: {{ .Values.operator.logLevel }}
             - name: CREATE_CRD
@@ -48,6 +48,10 @@ spec:
               value: "/etc/ssl/admission"
             - name: MICRONAUT_CONFIG_FILES
               value: "/tmp/application.yml"
+            {{- end }}
+            {{- if .Values.operator.crossNamespaceMode }}
+            - name: OPERATOR_ALL_NAMESPACES
+              value: "true"
             {{- end }}
             - name: SSL_FQDN
               value: "{{ include "hivemq.name" . }}-operator.{{ template "hivemq.namespace" . }}.svc"

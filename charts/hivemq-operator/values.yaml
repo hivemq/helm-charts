@@ -16,10 +16,11 @@ operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:4.7.1
+  image: hivemq/hivemq-operator:4.7.5
   imagePullPolicy: IfNotPresent
 
-
+  # Whether the operator should handle HiveMQCluster resources across all namespaces
+  crossNamespaceMode: false
 
   ## Nodeselector for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
@@ -56,8 +57,10 @@ operator:
       nodeSelector: {}
       affinity: {}
       tolerations: []
-  # Set this string to a name of a externally managed ConfigMap containing the templates for the operator if you want to customize them.
+  # Set this string to a name of an externally managed ConfigMap containing the templates for the operator if you want to customize them.
   templateConfigMap: ""
+  # Allow to customize the java environmental variables
+  javaEnvironment: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
   ## Extra environment variables that will be pass to the operator in the form of
   ## env:
   ## MY_CUSTOM_ENV: MY_VALUE
@@ -65,10 +68,10 @@ operator:
   resources:
     limits:
       cpu: 800m
-      memory: 512M
+      memory: 640M
     requests:
       cpu: 200m
-      memory: 512M
+      memory: 640M
 monitoring:
   # Deploy ServiceMonitor for Prometheus Operator and enable Prometheus
   enabled: false
@@ -77,13 +80,13 @@ monitoring:
 hivemq:
   # Custom container spec to add to the HiveMQ Pod
   sidecars: []
-  # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison this field does not have any defaults but allows for more granular configuration using the full K8s Container API
+  # Custom init container specs to add to the HiveMQ Pod. This is an extension of the initialization field. In comparison, this field does not have any defaults but allows for more granular configuration using the full K8s Container API
   initContainers: []
   # HiveMQ Pod security context
   podSecurityContext: {}
-    # fsGroup: 1001
+    # fsGroup: 10000
     # runAsNonRoot: true
-    # runAsUser: 1000
+    # runAsUser: 10001
     # sysctls:
       # To ensure we don't run into port exhaustion
       # - name: net.ipv4.ip_local_port_range
@@ -91,7 +94,6 @@ hivemq:
   # HiveMQ container security context within the Pod
   containerSecurityContext:
     # runAsNonRoot: true
-    # runAsUser: 1000
     # allowPrivilegeEscalation: false
     # privileged: false
   # TopologySpreadConstraints to apply in the underlying Pod spec
@@ -139,7 +141,7 @@ hivemq:
   # Annotations to apply to the service account
   serviceAccountAnnotations: {}
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused
-  image: hivemq/hivemq4:k8s-4.8.2
+  image: hivemq/hivemq4:k8s-4.8.3
   imagePullPolicy: IfNotPresent
   nodeCount: "3"
   cpu: "4"
