@@ -16,7 +16,7 @@ operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:4.7.5
+  image: hivemq/hivemq-operator:4.7.6
   imagePullPolicy: IfNotPresent
 
   # Whether the operator should handle HiveMQCluster resources across all namespaces
@@ -187,6 +187,12 @@ hivemq:
 
         [[ ! -f drivers/postgres-jdbc.jar ]] &&
         curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar --output drivers/jdbc/postgres.jar
+    - name: hivemq-google-cloud-pubsub-extension
+      extensionUri: preinstalled
+      enabled: false
+    - name: hivemq-distributed-tracing-extension
+      extensionUri: preinstalled
+      enabled: false
   ## Feel free to add other extensions as well. You should keep the blocks above to maintain control over the platform extensions though.
   #- name: hivemq-mqtt-message-log-extension
   #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-mqtt-message-log-extension-1.1.0.zip
