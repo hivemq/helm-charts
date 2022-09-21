@@ -172,6 +172,9 @@ hivemq:
       name: hivemq-kafka-extension
       extensionUri: preinstalled
       enabled: false
+    - name: hivemq-google-cloud-pubsub-extension
+      extensionUri: preinstalled
+      enabled: false
     - name: hivemq-bridge-extension
       extensionUri: preinstalled
       enabled: false
@@ -187,9 +190,6 @@ hivemq:
 
         [[ ! -f drivers/postgres-jdbc.jar ]] &&
         curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar --output drivers/jdbc/postgres.jar
-    - name: hivemq-google-cloud-pubsub-extension
-      extensionUri: preinstalled
-      enabled: false
     - name: hivemq-distributed-tracing-extension
       extensionUri: preinstalled
       enabled: false
