@@ -307,7 +307,7 @@ hivemq:
   configOverride: |
     <?xml version="1.0"?>
     <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:noNamespaceSchemaLocation="hivemq-config.xsd">
+            xsi:noNamespaceSchemaLocation="config.xsd">
         <listeners>
             --LISTENER-CONFIGURATION--
         </listeners>
@@ -333,13 +333,10 @@ hivemq:
                 <tcp>
                     <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
                     <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
-                    <enabled>true</enabled>
                 </tcp>
             </transport>
             <discovery>
-                <extension>
-                    <reload-interval>${HIVEMQ_DNS_DISCOVERY_INTERVAL}</reload-interval>
-                </extension>
+                <extension/>
             </discovery>
 
             <replication>
