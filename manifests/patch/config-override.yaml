@@ -24,27 +24,25 @@ spec:
           </user>
         </users>
       </control-center>
+      <overload-protection>
+            <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
+      </overload-protection>
       <cluster>
         <transport>
           --TRANSPORT_TYPE--
         </transport>
         <enabled>true</enabled>
         <discovery>
-          <extension>
-            <reload-interval>${HIVEMQ_DNS_DISCOVERY_INTERVAL}</reload-interval>
-          </extension>
+          <extension/>
         </discovery>
         <replication>
           <replica-count>${HIVEMQ_CLUSTER_REPLICA_COUNT}</replica-count>
         </replication>
-        <overload-protection>
-          <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
-        </overload-protection>
       </cluster>
       <restrictions>
         <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>
         <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>
-        <max-connections>-${HIVEMQ_MAX_CONNECTIONS}</max-connections>
+        <max-connections>${HIVEMQ_MAX_CONNECTIONS}</max-connections>
         <incoming-bandwidth-throttling>${HIVEMQ_INCOMING_BANDWIDTH_THROTTLING}</incoming-bandwidth-throttling>
         <no-connect-idle-timeout>${HIVEMQ_NO_CONNECT_IDLE_TIMEOUT}</no-connect-idle-timeout>
       </restrictions>
