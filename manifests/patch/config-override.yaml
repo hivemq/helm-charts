@@ -25,7 +25,7 @@ spec:
         </users>
       </control-center>
       <overload-protection>
-            <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
+        <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
       </overload-protection>
       <cluster>
         <transport>
