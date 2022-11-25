@@ -62,8 +62,7 @@ ENV HIVEMQ_VERBOSE_ENTRYPOINT "true"
 ENV HIVEMQ_USE_NSS_WRAPPER "true"
 
 # Use default DNS resolution timeout as default discovery interval
-ENV HIVEMQ_DNS_DISCOVERY_INTERVAL=31 \
-    HIVEMQ_DNS_DISCOVERY_TIMEOUT=30
+ENV HIVEMQ_DNS_DISCOVERY_TIMEOUT=30
 
 # The default cluster transport bind port to use (UDP port)
 ENV HIVEMQ_CLUSTER_PORT=8000 \

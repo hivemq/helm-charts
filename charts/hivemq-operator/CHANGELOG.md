@@ -1,3 +1,7 @@
+# chart 0.11.10
+- Bump operator to 4.7.9
+- Prepare for HiveMQ release 4.10
+
 # chart 0.11.6
 - Update to Prometheus 14 
 - Multi-namespace prometheus
