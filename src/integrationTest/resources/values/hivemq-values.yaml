@@ -212,16 +212,7 @@ hivemq:
         <port>${HIVEMQ_MQTT_PORT}</port>
         <bind-address>0.0.0.0</bind-address>
     </tcp-listener>
-  restApiConfiguration: |
-    <rest-api>
-        <enabled>${HIVEMQ_REST_API_ENABLED}</enabled>
-        <listeners>
-            <http>
-                <port>${HIVEMQ_REST_API_PORT}</port>
-                <bind-address>0.0.0.0</bind-address>
-            </http>
-        </listeners>
-    </rest-api>
+  restApiConfiguration: <rest-api/>
   restrictions:
     noConnectIdleTimeout: 10000
     maxClientIdLength: 65535
