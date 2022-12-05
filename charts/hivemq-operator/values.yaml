@@ -152,6 +152,9 @@ hivemq:
   # Base64 encoded license. (NOTE: use a ConfigMap when mounting multiple files)
   license: ""
   env: []
+  ## Skip config validation
+  #     - name: "HIVEMQ_SKIP_CONFIG_VALIDATION"
+  #      value: "true"
   ## Add custom environment variables (e.g. for your extension) here.
   # - name: MY_CUSTOM_ENV
   #   value: some-value
