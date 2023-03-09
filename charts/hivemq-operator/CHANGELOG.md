@@ -1,3 +1,7 @@
+# chart 0.11.14
+- Bump operator to 4.7.10
+- Created a Prometheus service monitor Custom Resource when monitoring.enabled and monitoring.dedicated set to true
+
 # chart 0.11.10
 - Bump operator to 4.7.9
 - Prepare for HiveMQ release 4.10

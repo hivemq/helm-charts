@@ -16,7 +16,7 @@ operator:
   # Deploy a custom resource based on the hivemq section below. Set to false if you want to create a HiveMQCluster object yourself.
   # By setting this to false, the operator will not start a HiveMQ cluster when deployed.
   deployCr: true
-  image: hivemq/hivemq-operator:4.7.9
+  image: hivemq/hivemq-operator:4.7.10
   imagePullPolicy: IfNotPresent
 
   # Whether the operator should handle HiveMQCluster resources across all namespaces
