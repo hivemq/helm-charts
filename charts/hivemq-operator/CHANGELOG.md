@@ -1,3 +1,7 @@
+# chart 0.11.16
+- Update to latest K8s container registry
+- Add support to test k8s > 1.24
+
 # chart 0.11.14
 - Bump operator to 4.7.10
 - Created a Prometheus service monitor Custom Resource when monitoring.enabled and monitoring.dedicated set to true
