@@ -22,7 +22,7 @@ public class LocalImageDeploymentIT {
 
     @Container
     private final @NotNull K3sContainer container = new K3sContainer(DockerImageName
-            .parse("rancher/k3s:v1.21.3-k3s1"))
+            .parse("rancher/k3s:v1.26.3-k3s1"))
             .withFileSystemBind("./build/containers", "/build", BindMode.READ_ONLY);
 
     @Timeout(value = 2, unit = TimeUnit.MINUTES)
