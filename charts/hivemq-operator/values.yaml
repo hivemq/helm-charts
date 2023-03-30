@@ -46,7 +46,7 @@ operator:
     patch:
       enabled: true
       image:
-        repository: k8s.gcr.io/ingress-nginx/kube-webhook-certgen
+        repository: registry.k8s.io/ingress-nginx/kube-webhook-certgen
         tag: v1.1.1
         sha: ""
         pullPolicy: IfNotPresent
