@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import static com.hivemq.helmcharts.testcontainer.DockerImageNames.K3s.V1_24;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
@@ -45,7 +46,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
         super.withCopyFileToContainer(MountableFile.forHostPath("./charts/hivemq-operator"), "/chart");
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
-        if(k3s.getOrdinal()>4){
+        if (k3s.ordinal() > V1_24.ordinal()) {
             super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
         }
         imagesNames = new ArrayList<>();
