@@ -26,7 +26,7 @@ public class LocalHelmChartDeploymentIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer
-            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_24,
+            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_26,
             "k3s.dockerfile",
             "values/customTestValues.yaml")
             .withLocalImages();

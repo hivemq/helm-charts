@@ -45,6 +45,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
         super.withCopyFileToContainer(MountableFile.forHostPath("./charts/hivemq-operator"), "/chart");
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
+        if(k3s.getOrdinal()>4){
+            super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
+        }
         imagesNames = new ArrayList<>();
     }
 
