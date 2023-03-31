@@ -25,7 +25,7 @@ public class CompatibilityHelmChartDeploymentIT {
 
     @Timeout(value = 20, unit = TimeUnit.MINUTES)
     @ParameterizedTest
-    @ValueSource(strings = {"v1.20.15-k3s1", "v1.21.10-k3s1", "v1.22.7-k3s1", "v1.23.4-k3s1","v1.24.3-k3s1","v1.25.8-k3s1","v1.26.3-k3s1"})
+    @ValueSource(strings = {"v1.20.15-k3s1", "v1.21.14-k3s1", "v1.22.17-k3s1", "v1.23.17-k3s1", "v1.24.11-k3s1", "v1.25.8-k3s1", "v1.26.3-k3s1"})
     public void withHelmLocalVersionDeployment_mqttMessagePublishedReceived(final @NotNull String version) throws Exception {
         try (final var container = new OperatorHelmChartContainer(version, "k3s.dockerfile",
                 "values/customTestValues.yaml")) {
