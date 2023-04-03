@@ -1,5 +1,5 @@
 # chart 0.11.16
-- Update to latest K8s container registry
+- Update usage of the legacy k8s.gcr.io container image registry to registry.k8s.io. See: https://kubernetes.io/blog/2023/03/10/image-registry-redirect/
 - Add support to test k8s > 1.24
 
 # chart 0.11.14
