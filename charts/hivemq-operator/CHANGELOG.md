@@ -1,3 +1,7 @@
+# chart 0.11.16
+- Update usage of the legacy k8s.gcr.io container image registry to registry.k8s.io. See: https://kubernetes.io/blog/2023/03/10/image-registry-redirect/
+- Add support to test k8s > 1.24
+
 # chart 0.11.14
 - Bump operator to 4.7.10
 - Created a Prometheus service monitor Custom Resource when monitoring.enabled and monitoring.dedicated set to true

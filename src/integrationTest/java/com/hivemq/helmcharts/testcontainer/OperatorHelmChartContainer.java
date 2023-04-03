@@ -1,4 +1,4 @@
-package com.hivemq.helmcharts.util;
+package com.hivemq.helmcharts.testcontainer;
 
 import com.github.dockerjava.api.DockerClient;
 import com.hivemq.crd.hivemq.HiveMQInfo;
@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import static com.hivemq.helmcharts.testcontainer.DockerImageNames.K3s.V1_24;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
@@ -37,23 +38,26 @@ public class OperatorHelmChartContainer extends K3sContainer {
     private final @NotNull List<String> imagesNames;
     private boolean withCustomImages = false;
 
-    public OperatorHelmChartContainer(final @NotNull String k3sVersion,
+    public OperatorHelmChartContainer(final @NotNull DockerImageNames.K3s k3s,
                                       final @NotNull String dockerfileName,
                                       final @NotNull String customValuesFile) {
-        super(getAdHocImageName(k3sVersion, dockerfileName));
+        super(getAdHocImageName(k3s, dockerfileName));
         super.addExposedPort(MQTT_PORT);
         super.withCopyFileToContainer(MountableFile.forHostPath("./charts/hivemq-operator"), "/chart");
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
+        if (k3s.ordinal() > V1_24.ordinal()) {
+            super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
+        }
         imagesNames = new ArrayList<>();
     }
 
-    private static @NotNull DockerImageName getAdHocImageName(final @NotNull String k3sVersion,
+    private static @NotNull DockerImageName getAdHocImageName(final @NotNull DockerImageNames.K3s k3s,
                                                               final @NotNull String dockerfileName) {
         final var dockerfile = new File(MountableFile.forClasspathResource(dockerfileName).getFilesystemPath());
 
         final var s = new ImageFromDockerfile().withDockerfile(dockerfile.toPath())
-                .withBuildArg("K3S_VERSION", k3sVersion)
+                .withBuildArg("K3S_VERSION", k3s.getVersion())
                 .get();
 
         return DockerImageName.parse(s).asCompatibleSubstituteFor("rancher/k3s");

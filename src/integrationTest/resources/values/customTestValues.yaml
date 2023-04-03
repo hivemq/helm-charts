@@ -1,4 +1,8 @@
 # Custom images Single node cluster with external mqtt port
+global:
+  rbac:
+    pspEnabled: false
+
 operator:
   image: hivemq/hivemq-operator:snapshot
   imagePullPolicy: Never
