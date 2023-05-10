@@ -22,6 +22,9 @@ operator:
   # Whether the operator should handle HiveMQCluster resources across all namespaces
   crossNamespaceMode: false
 
+  # Tolerations to apply in the underlying Pod spec
+  tolerations: []
+
   ## Nodeselector for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
