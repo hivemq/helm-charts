@@ -196,6 +196,9 @@ hivemq:
     - name: hivemq-distributed-tracing-extension
       extensionUri: preinstalled
       enabled: false
+    - name: hivemq-amazon-kinesis-extension
+      extensionUri: preinstalled
+      enabled: false
   ## Feel free to add other extensions as well. You should keep the blocks above to maintain control over the platform extensions though.
   #- name: hivemq-mqtt-message-log-extension
   #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-mqtt-message-log-extension-1.1.0.zip
