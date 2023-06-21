@@ -23,7 +23,7 @@ public class UserPermissionsIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer
-            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_23,
+            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
             "k3s.dockerfile",
             "values/permissionsDeployment.yaml")
             .withLocalImages("hivemq-k8s-test-rootless.tar");

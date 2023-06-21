@@ -27,7 +27,9 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.K3s.V1_24;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
 /**
