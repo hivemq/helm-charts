@@ -13,7 +13,8 @@ public class DockerImageNames {
         V1_23("v1.23.17-k3s1"),
         V1_24("v1.24.11-k3s1"),
         V1_25("v1.25.8-k3s1"),
-        V1_26("v1.26.3-k3s1");
+        V1_26("v1.26.3-k3s1"),
+        V1_27("v1.27.2-k3s1");
         private final @NotNull String version;
 
         K3s(final @NotNull String version) {

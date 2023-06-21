@@ -2,7 +2,8 @@ global:
   rbac:
     create: true
     # Create a PodSecurityPolicy, cluster role, role binding and service account for the HiveMQ pods and assign the service account to them.
-    pspEnabled: true
+    # Disabled by default. PodSecurityPolicy has been removed from Kubernetes versions starting with v1.25 https://kubernetes.io/docs/concepts/security/pod-security-policy/
+    pspEnabled: false
     pspAnnotations: {}
     securityContext:
       runAsNonRoot: true
