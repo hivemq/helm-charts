@@ -28,7 +28,7 @@ public class LocalHelmChartDeploymentIT {
     private final @NotNull OperatorHelmChartContainer
             container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
             "k3s.dockerfile",
-            "values/customTestValues.yaml",
+            "values/test-values.yaml",
             "local-hivemq")
             .withLocalImages();
 

@@ -1,9 +1,14 @@
+global:
+  rbac:
+    pspEnabled: false
+
 operator:
   logLevel: TRACE
   image: hivemq/hivemq-operator:snapshot
   admissionWebhooks:
     enabled: true
     failurePolicy: Ignore
+
 hivemq:
   image: hivemq-k8s-test-rootless:snapshot
   initDnsWaitImage: hivemq/init-dns-wait:snapshot

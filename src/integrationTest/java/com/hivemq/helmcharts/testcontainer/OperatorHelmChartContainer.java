@@ -11,6 +11,8 @@ import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -19,7 +21,6 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,10 +39,10 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
  */
 public class OperatorHelmChartContainer extends K3sContainer {
     public final static int MQTT_PORT = 1883;
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(OperatorHelmChartContainer.class);
     private final @NotNull List<String> imagesNames;
-    private boolean withCustomImages = false;
     private final @NotNull String chartName;
-
+    private boolean withCustomImages = false;
     private @Nullable KubernetesClient kubernetesClient;
 
     public OperatorHelmChartContainer(final @NotNull DockerImageNames.K3s k3s, final @NotNull String dockerfileName, final @NotNull String customValuesFile, final @NotNull String chartName) {
@@ -92,6 +93,48 @@ public class OperatorHelmChartContainer extends K3sContainer {
         return kubernetesClient;
     }
 
+    public void waitForClusterState(final @NotNull HivemqClusterStatus.State state) throws InterruptedException {
+        var client = getKubernetesClient();
+        final var closeLatch = new CountDownLatch(1);
+        //noinspection resource
+        client.resources(HiveMQInfo.class).watch(new Watcher<>() {
+            @Override
+            public void eventReceived(final @NotNull Action action, final @NotNull HiveMQInfo resource) {
+
+                if (resource.getStatus() != null && resource.getStatus().getState() != null && resource.getStatus().getState() == state) {
+                    closeLatch.countDown();
+                }
+            }
+
+            @Override
+            public void onClose(final @NotNull WatcherException cause) {
+                System.out.println("onClose");
+            }
+        });
+        closeLatch.await();
+    }
+
+    private void upgradeLocalChart(final @NotNull String chartName) throws Exception {
+
+        this.upgradeLocalChart(chartName, "/files/values.yml");
+    }
+
+    public void upgradeLocalChart(final @NotNull String chartName, final @NotNull String valuesFilePath) throws Exception {
+        //helm dependency update /chart
+        final var outUpdate = this.execInContainer("/bin/helm", "dependency", "update", "/chart/");
+
+        assertTrue(outUpdate.getStderr().isEmpty());
+        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /chart -f /files/values.yml
+        final var execDeploy = this.execInContainer("/bin/helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", "upgrade", "--install", chartName, "/chart", "-f", valuesFilePath);
+
+        if (!execDeploy.getStderr().isEmpty()) {
+            // Shows also warnings
+            System.err.println(execDeploy.getStderr());
+        }
+        assertFalse(execDeploy.getStdout().isEmpty(), execDeploy.getStderr());
+        LOG.debug("Chart '{}' installed or upgraded", chartName);
+    }
+
     private class DeploymentStatusStartupCheckStrategy extends StartupCheckStrategy {
         private final @NotNull OperatorHelmChartContainer container;
 
@@ -113,8 +156,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 }
                 final var client = container.getKubernetesClient();
 
-                deployLocalOperator(chartName);
-                waitForClusterToBeReady(client);
+                upgradeLocalChart(chartName);
+                waitForClusterState(HivemqClusterStatus.State.RUNNING);
                 // get the HiveMQ container logs inside the pod
                 final Pod pod = client.pods().inAnyNamespace().withLabel("app", "hivemq").list().getItems().get(0);
                 final var containerResource = client.pods().inNamespace("default").withName(pod.getMetadata().getName()).inContainer("hivemq");
@@ -137,42 +180,6 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         }
 
-        @SuppressWarnings("resource")
-        private void waitForClusterToBeReady(final KubernetesClient client) throws InterruptedException {
-            final var closeLatch = new CountDownLatch(1);
-            client.resources(HiveMQInfo.class).watch(new Watcher<>() {
-                @Override
-                public void eventReceived(final @NotNull Action action, final @NotNull HiveMQInfo resource) {
-
-                    if (resource.getStatus() != null && resource.getStatus().getState() != null && resource.getStatus().getState() == HivemqClusterStatus.State.RUNNING) {
-                        closeLatch.countDown();
-                    }
-                }
-
-                @Override
-                public void onClose(final @NotNull WatcherException cause) {
-                    System.out.println("onClose");
-                }
-            });
-            closeLatch.await();
-        }
-
-
-    }
-
-    private void deployLocalOperator(final @NotNull String chartName) throws IOException, InterruptedException {
-        //helm dependency update /chart
-        final var outUpdate = this.execInContainer("/bin/helm", "dependency", "update", "/chart/");
-
-        assertTrue(outUpdate.getStderr().isEmpty());
-        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /chart -f /files/values.yml
-        final var execDeploy = this.execInContainer("/bin/helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", "install", chartName, "/chart", "-f", "/files/values.yml");
-
-        if (!execDeploy.getStderr().isEmpty()) {
-            // Shows also warnings
-            System.err.println(execDeploy.getStderr());
-        }
-        assertFalse(execDeploy.getStdout().isEmpty(), execDeploy.getStderr());
     }
 
 
