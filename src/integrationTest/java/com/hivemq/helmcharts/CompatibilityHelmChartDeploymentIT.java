@@ -28,7 +28,7 @@ public class CompatibilityHelmChartDeploymentIT {
     @ParameterizedTest
     @EnumSource(value = DockerImageNames.K3s.class)
     public void withHelmLocalVersionDeployment_mqttMessagePublishedReceived(final @NotNull DockerImageNames.K3s k3s) throws Exception {
-        try (final var container = new OperatorHelmChartContainer(k3s, "k3s.dockerfile", "values/customTestValues.yaml","test-hivemq")) {
+        try (final var container = new OperatorHelmChartContainer(k3s, "k3s.dockerfile", "values/test-values.yaml", "test-hivemq")) {
             container.withLocalImages();
             container.start();
             final var client = Mqtt5Client.builder().automaticReconnectWithDefaultConfig().serverPort(container.getMappedPort(1883)).serverHost(container.getHost()).buildBlocking();

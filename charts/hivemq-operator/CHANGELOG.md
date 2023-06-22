@@ -1,4 +1,4 @@
-# chart 0.11.21
+# chart 0.11.22
 
 - Disable pod security policy by default because it is removed starting with K8s = v1.25
 

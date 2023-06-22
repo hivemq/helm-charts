@@ -22,8 +22,8 @@ val operator: Configuration by configurations.creating { isCanBeConsumed = false
 dependencies {
     hivemq("com.hivemq:hivemq")
     operator("com.hivemq:hivemq-operator")
-    implementation("org.codehaus.groovy:groovy-all:${property("groovy.version")}")
-    implementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
+    testImplementation("org.codehaus.groovy:groovy-all:${property("groovy.version")}")
+    testImplementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit.version")}")
     testImplementation("org.testcontainers:testcontainers:${property("testcontainers.version")}")
     testImplementation("org.testcontainers:k3s:${property("testcontainers.version")}")
@@ -36,6 +36,10 @@ dependencies {
     testImplementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
     testImplementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
     testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
+    testImplementation("ch.qos.logback:logback-classic:${property("logback.version")}")
+    testImplementation("ch.qos.logback:logback-core:${property("logback.version")}")
+    testImplementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
+    testImplementation("org.testcontainers:hivemq:${property("testcontainers.version")}")
 }
 
 tasks.withType<Test>().configureEach {
@@ -117,19 +121,19 @@ val saveRootlessK8sImage by tasks.registering(Exec::class) {
 val buildContainersFiles by tasks.registering(Copy::class) {
     group = "container"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(producerK8sDockerImage){
-        rename {"hivemq-k8s-image.tar"}
+    from(producerK8sDockerImage) {
+        rename { "hivemq-k8s-image.tar" }
     }
-    from(producerDnsInitWaitDockerImage){
-        rename {"hivemq-init-dns-image.tar"}
+    from(producerDnsInitWaitDockerImage) {
+        rename { "hivemq-init-dns-image.tar" }
     }
     from(producerOperatorDockerImage) {
         rename { "hivemq-operator.tar" }
     }
     from(
-        producerK8sDockerImage.singleFile,
-        producerDnsInitWaitDockerImage.singleFile,
-        producerOperatorDockerImage.singleFile
+            producerK8sDockerImage.singleFile,
+            producerDnsInitWaitDockerImage.singleFile,
+            producerOperatorDockerImage.singleFile
     )
     into(layout.buildDirectory.dir("containers"))
 }
@@ -139,5 +143,5 @@ buildContainersFiles {
 }
 
 tasks.named("integrationTest") {
-    dependsOn(buildContainersFiles)
+   dependsOn(buildContainersFiles)
 }
