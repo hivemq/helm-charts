@@ -28,7 +28,8 @@ public class LocalHelmChartDeploymentIT {
     private final @NotNull OperatorHelmChartContainer
             container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
             "k3s.dockerfile",
-            "values/customTestValues.yaml")
+            "values/customTestValues.yaml",
+            "local-hivemq")
             .withLocalImages();
 
     @Timeout(value = 3, unit = TimeUnit.MINUTES)
