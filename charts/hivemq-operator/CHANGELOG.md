@@ -1,3 +1,7 @@
+# chart 0.11.23
+
+- Remove extension configmap override on the initialization script, as this is already done by the operator
+
 # chart 0.11.22
 
 - Disable pod security policy by default because it is removed starting with K8s = v1.25

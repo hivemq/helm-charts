@@ -187,11 +187,7 @@ hivemq:
       enabled: false
       # Note that this is just an example initialization routine. Make sure this points to the current JDBC version you require for your configuration.
       initialization: |
-        # A little hack because k8s configMaps can't handle sub-directories
-        [[ -e /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml ]] &&
-        rm -f $(pwd)/conf/enterprise-security-extension.xml &&
-        cp -s /conf-override/extensions/hivemq-enterprise-security-extension/enterprise-security-extension.xml $(pwd)/conf/enterprise-security-extension.xml
-
+        # Download JDBC driver for PostgreSQL
         [[ ! -f drivers/postgres-jdbc.jar ]] &&
         curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar --output drivers/jdbc/postgres.jar
     - name: hivemq-distributed-tracing-extension

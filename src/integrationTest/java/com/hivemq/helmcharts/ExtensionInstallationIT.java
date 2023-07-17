@@ -23,9 +23,9 @@ public class ExtensionInstallationIT {
             .withLocalImages();
 
     @Test
-    @Timeout(value = 5,unit = TimeUnit.MINUTES)
-    void withExtensionConfiguration_hivemqRunning() throws Exception {
-        container.upgradeLocalChart(CHART_NAME, "/values/extension-values.yaml");
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void withLogExtensionConfiguration_hivemqRunning() throws Exception {
+        container.upgradeLocalChart(CHART_NAME, "/values/log-extension-values.yaml");
         container.waitForClusterState(HivemqClusterStatus.State.UPDATING);
         container.waitForClusterState(HivemqClusterStatus.State.RUNNING);
     }
