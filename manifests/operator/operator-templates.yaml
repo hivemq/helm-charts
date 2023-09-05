@@ -840,7 +840,7 @@ data:
     spec:
       replicas: {{ spec.nodeCount }}
       serviceName: hivemq-{{ spec.name }}-cluster
-      podManagementPolicy: Parallel
+      podManagementPolicy: OrderedReady
       updateStrategy:
         type: OnDelete
       volumeClaimTemplates:

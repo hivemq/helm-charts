@@ -1,6 +1,4 @@
 operator:
-  image: hivemq/hivemq-operator:snapshot
-  imagePullPolicy: Never
   logLevel: DEBUG
   admissionWebhooks:
     enabled: false
@@ -9,7 +7,7 @@ hivemq:
   imagePullPolicy: Never
   initDnsWaitImage: hivemq/init-dns-wait:snapshot
   logLevel: DEBUG
-  nodeCount: 2
+  nodeCount: 1
   cpu: 1
   memory: 1Gi
   controllerTemplate: cluster-stateful-set.yaml
