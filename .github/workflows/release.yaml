@@ -2,22 +2,88 @@ name: Release Charts
 
 on:
   push:
-    branches:
-      - master
-
+    branches: ["*"]
+  workflow_dispatch:
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Configure Git
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Checkout hivemq-platform-helm-charts
+        uses: actions/checkout@v3
+        with:
+          repository: hivemq/hivemq-platform-helm-charts
+          path: platform-charts/
+          token: ${{ secrets.JENKINS_TOKEN }}
+      - name: Prepare Chart Structure
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          cp -r platform-charts/hivemq-platform* ./charts
+          tree ./charts -L 3
+      - name: Install chart releaser
+        run: |
+          set -e
+          arch="$(dpkg --print-architecture)"
+          curl -s https://api.github.com/repos/helm/chart-releaser/releases/latest \
+          | yq --indent 0 --no-colors --input-format json --unwrapScalar \
+            ".assets[] | select(.name | test("\""^chart-releaser_.+_linux_${arch}\.tar\.gz$"\"")) | .browser_download_url" \
+          | xargs curl -SsL \
+          | tar zxf - -C /usr/local/bin
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: List charts
+        id: charts
+        run: |
+          set -e
+          find -L charts -mindepth 2 -maxdepth 2 -type f \( -name 'Chart.yaml' -o -name 'Chart.yml' \) -exec dirname "{}" \; \
+          | sort -u \
+          | sed -E 's/^/- /' \
+          | yq --no-colors --indent 0 --output-format json '.' \
+          | sed -E 's/^/charts=/' >> $GITHUB_OUTPUT
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.0.0-rc.1
-        env:
-          CR_TOKEN: "${{ secrets.CR_TOKEN }}"
+      - name: Update Charts Helm Dependencies
+        run: |
+          set -ex
+          echo '${{ steps.charts.outputs.charts }}' \
+          | yq --indent 0 --no-colors --input-format json --unwrapScalar '.[]' \
+          | while read -r dir; do
+              helm dependency update $dir;
+              if [ -f "$dir/Chart.lock" ]; then
+                yq --indent 0 \
+                  '.dependencies | map(["helm", "repo", "add", .name, .repository] | join(" ")) | .[]' \
+                  "$dir/Chart.lock" \
+                | sh --;
+              fi
+            done
+      - name: Package Charts
+        id: package
+        run: |
+          set -ex
+          packages=.cr-release-packages
+          find . -type f -name "Chart.yaml" -exec dirname {} \; | sort -u | while read -r dir; do
+            echo "$dir"
+            cr package "$dir" --package-path "$packages"
+          done
+          echo "dir=${packages}" >> $GITHUB_OUTPUT
+      - name: Upload Releases
+        run: |
+          owner=$(cut -d '/' -f 1 <<< '${{ github.repository }}')
+          repo=$(cut -d '/' -f 2 <<< '${{ github.repository }}')
+          cr upload --commit '${{ github.sha }}' --owner "$owner" --git-repo "$repo" --token '${{ github.token }}' \
+            --package-path '${{ steps.package.outputs.dir }}' --skip-existing
+      - name: Update Index
+        # The task has to run on a git repo
+        run: |
+          set -e
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          mkdir -p .cr-index
+          owner=$(cut -d '/' -f 1 <<< '${{ github.repository }}')
+          repo=$(cut -d '/' -f 2 <<< '${{ github.repository }}')
+          cr index --git-repo "$repo" --owner "$owner" --index-path . --push 
+          if [ ! -f .cr-index/index.yaml  ]; then
+            echo "The charts.yaml have to be increased to release new packages" && exit 1
+          fi
