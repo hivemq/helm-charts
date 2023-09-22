@@ -2,7 +2,7 @@ name: Release Charts
 
 on:
   push:
-    branches: ["*"]
+    branches: [master]
   workflow_dispatch:
 jobs:
   release:
@@ -83,7 +83,7 @@ jobs:
           mkdir -p .cr-index
           owner=$(cut -d '/' -f 1 <<< '${{ github.repository }}')
           repo=$(cut -d '/' -f 2 <<< '${{ github.repository }}')
-          cr index --git-repo "$repo" --owner "$owner" --index-path . --push 
+          cr index --git-repo "$repo" --owner "$owner" .cr-index --push 
           if [ ! -f .cr-index/index.yaml  ]; then
             echo "The charts.yaml have to be increased to release new packages" && exit 1
           fi
