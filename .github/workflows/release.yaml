@@ -60,3 +60,34 @@ jobs:
                 | sh --;
               fi
             done
+      - name: Package Charts
+        id: package
+        run: |
+          set -ex
+          tree
+          packages=.cr-release-packages
+          find . -type f -name "Chart.yaml" -exec dirname {} \; | sort -u | while read -r dir; do
+            echo "$dir"
+            cr package "$dir" --package-path "$packages"
+          done
+          echo "dir=${packages}" >> $GITHUB_OUTPUT
+      - name: Upload Releases
+        run: |
+          owner=$(cut -d '/' -f 1 <<< '${{ github.repository }}')
+          repo=$(cut -d '/' -f 2 <<< '${{ github.repository }}')
+          cr upload --commit '${{ github.sha }}' --owner "$owner" --git-repo "$repo" --token '${{ github.token }}' \
+            --package-path '${{ steps.package.outputs.dir }}' --skip-existing
+      - name: Update Index
+        # The task has to run on a git repo
+        run: |
+          set -e
+          cd operator-charts
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          mkdir -p .cr-index
+          owner=$(cut -d '/' -f 1 <<< '${{ github.repository }}')
+          repo=$(cut -d '/' -f 2 <<< '${{ github.repository }}') 
+          cr index --git-repo "$repo" --owner "$owner" .cr-index --push 
+          if [ ! -f .cr-index/index.yaml  ]; then
+            echo "The charts.yaml have to be increased to release new packages" && exit 1
+          fi
