@@ -21,16 +21,14 @@ helm upgrade --install hivemq-platform-operator hivemq/hivemq-platform-operator
 ```
 
 For more information on configuring a cluster and advanced usage, visit
-the [HiveMQ Operator documentation]
-(https://docs.hivemq.com/operator/4.19/kubernetes-operator/platform-operator-for-k8s)
+the [HiveMQ Operator documentation](https://docs.hivemq.com/operator/4.19/kubernetes-operator/platform-operator-for-k8s)
 
 ## Install the HiveMQ Platform
 
 This will install a Hivemq Platform with two nodes for evaluation.
 
 For more information on configuring a cluster and advanced usage, visit
-the [HiveMQ Operator documentation]
-(https://docs.hivemq.com/operator/4.19/kubernetes-operator/platform-operator-for-k8s)
+the [HiveMQ Operator documentation](https://docs.hivemq.com/operator/4.19/kubernetes-operator/platform-operator-for-k8s)
 
 ```
 helm upgrade --install hivemq-platform hivemq/hivemq-platform
