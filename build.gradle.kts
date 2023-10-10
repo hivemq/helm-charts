@@ -4,6 +4,12 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
 repositories {
     mavenCentral()
     maven {
@@ -15,8 +21,8 @@ repositories {
         url = uri("https://jitpack.io")
     }
 }
-val hivemq: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = false }
 
+val hivemq: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = false }
 val operator: Configuration by configurations.creating { isCanBeConsumed = false; isCanBeResolved = false }
 
 dependencies {
