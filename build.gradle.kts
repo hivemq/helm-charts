@@ -145,3 +145,44 @@ buildContainersFiles {
 tasks.named("integrationTest") {
    dependsOn(buildContainersFiles)
 }
+
+val updateOperatorChartVersion by tasks.registering {
+    group = "version"
+    project.ext.set("versionFilesToUpdate", arrayOf("charts/hivemq-operator/Chart.yaml", "charts/hivemq-operator/values.yaml"))
+    project.ext.set("valuesRegex", """(image:\s+[^:]+:\w+-)(\S+)""")
+    dependsOn(updateChartAndValueFilesWithVersion)
+}
+
+val updateSwarmChartVersion by tasks.registering {
+    group = "version"
+    project.ext.set("versionFilesToUpdate", arrayOf("charts/hivemq-swarm/Chart.yaml", "charts/hivemq-swarm/values.yaml"))
+    project.ext.set("valuesRegex", """(tag:\s*)(\S+)""")
+    dependsOn(updateChartAndValueFilesWithVersion)
+}
+
+val updateChartAndValueFilesWithVersion by tasks.registering {
+    group = "version"
+    val filesToUpdate = files(project.properties["versionFilesToUpdate"])
+    val chartVersion = project.properties["chartVersion"]
+    val appVersion = project.version
+    val valuesRegex = project.properties["valuesRegex"] as String
+
+    if (chartVersion == null || appVersion == null) {
+        error("Either chartVersion or version properties are missing")
+    }
+    doLast {
+        filesToUpdate.filter { file -> file.name == "Chart.yaml" }.forEach {
+            val text = it.readText()
+            val replacedTextAppVersion = text.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion")
+            val replacedChartVersion = replacedTextAppVersion.replace("""(?m)^version:\s*\S+$""".toRegex(), "version: $chartVersion")
+            it.writeText(replacedChartVersion)
+        }
+        filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach {
+            val text = it.readText()
+            val replacedText = text.replace(valuesRegex.toRegex()) { matchResult ->
+                "${matchResult.groupValues[1]}${appVersion}"
+            }
+            it.writeText(replacedText)
+        }
+    }
+}
