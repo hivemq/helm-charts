@@ -162,15 +162,15 @@ val updateSwarmChartVersion by tasks.registering {
 
 val updateChartAndValueFilesWithVersion by tasks.registering {
     group = "version"
-    val filesToUpdate = files(project.properties["versionFilesToUpdate"])
-    val chartVersion = project.properties["chartVersion"]
-    val appVersion = project.version
-    val valuesRegex = project.properties["valuesRegex"] as String
-
-    if (chartVersion == null || appVersion == null) {
-        error("Either chartVersion or version properties are missing")
-    }
     doLast {
+        val filesToUpdate = files(project.properties["versionFilesToUpdate"])
+        val chartVersion = project.properties["chartVersion"]
+        val appVersion = project.version
+        val valuesRegex = project.properties["valuesRegex"] as String
+
+        if (chartVersion == null || appVersion == null) {
+            error("Either chartVersion or version properties are missing")
+        }
         filesToUpdate.filter { file -> file.name == "Chart.yaml" }.forEach {
             val text = it.readText()
             val replacedTextAppVersion = text.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion")
