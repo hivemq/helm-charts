@@ -1,5 +1,7 @@
 # HiveMQ Helm Repository
 
+HiveMQ is a world-class, enterprise-ready MQTT platform that provides fast, efficient, and reliable movement of data to and from connected IoT devices. For more information, visit [HiveMQ](https://www.hivemq.com)
+
 ## Add the HiveMQ Helm repository
 
 ```
@@ -12,47 +14,46 @@ helm repo add hivemq https://hivemq.github.io/helm-charts
 helm repo update hivemq
 ```
 
-## Install the HiveMQ Platform Operator
+## Install the HiveMQ Platform Operator for Kubernetes
 
-This will install a Hivemq Platform Operator for a Kubernetes cluster.
+This will install the Hivemq Platform Operator for Kubernetes with support for HiveMQ versions 4.19 and above.
 
 ```
 helm upgrade --install hivemq-platform-operator hivemq/hivemq-platform-operator
 ```
 
 For more information on configuring a cluster and advanced usage, visit
-the [HiveMQ Operator documentation](https://docs.hivemq.com/operator/4.19/kubernetes-operator/platform-operator-for-k8s)
+the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/operator/latest/kubernetes-operator/platform-operator-for-k8s)
 
 ## Install the HiveMQ Platform
 
-This will install a Hivemq Platform with two nodes for evaluation.
+This will install the Hivemq Platform with support for HiveMQ version 4.19 and above. This Helm chart requires the installation of the HiveMQ Platform Operator.
 
-For more information on configuring a cluster and advanced usage, visit
-the [HiveMQ Operator documentation](https://docs.hivemq.com/operator/4.19/kubernetes-operator/platform-operator-for-k8s)
+For more information on configuring a HiveMQ Platform and advanced usage, visit
+the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/operator/latest/kubernetes-operator/platform-operator-for-k8s)
 
 ```
 helm upgrade --install hivemq-platform hivemq/hivemq-platform
 ```
 
-## Install the HiveMQ operator
+## Install the HiveMQ Operator
 
-This will install the HiveMQ operator as well as a custom resource that deploys a small 3-node evaluation cluster by
-default.
+This will install the (legacy) HiveMQ Operator and an example of a HiveMQ cluster with support for HiveMQ LTS version 4.9 and above.
 
 ```
 helm upgrade --install hivemq hivemq/hivemq-operator
 ```
 
 For more information on configuring a cluster and advanced usage, visit
-the [HiveMQ Operator documentation](https://www.hivemq.com/docs/operator/).
+the [HiveMQ Operator documentation](https://docs.hivemq.com/operator/latest/kubernetes-operator/hivemq-kubernetes-operator). 
 
 ## Install HiveMQ Swarm
 
-This will install HiveMQ with one commander and three agents by default.
+This will install HiveMQ Swarm with one commander and three agents by default.
 
 ```
 helm upgrade --install swarm hivemq/hivemq-swarm
 ```
 
 For more information on configuring HiveMQ Swarm and advanced usage,
-visit [HiveMQ Swarm documentation](https://www.hivemq.com/docs/swarm/).
+visit [HiveMQ Swarm documentation](https://docs.hivemq.com/swarm/).
