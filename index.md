@@ -16,7 +16,7 @@ helm repo update hivemq
 
 ## Install the HiveMQ Platform Operator for Kubernetes
 
-This will install the Hivemq Platform Operator for Kubernetes with support for HiveMQ versions 4.19 and up.
+This will install the Hivemq Platform Operator for Kubernetes with support for HiveMQ versions 4.19 and above.
 
 ```
 helm upgrade --install hivemq-platform-operator hivemq/hivemq-platform-operator
