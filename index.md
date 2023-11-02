@@ -27,7 +27,7 @@ the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/operator/la
 
 ## Install the HiveMQ Platform
 
-This will install the Hivemq Platform with support for HiveMQ version 4.19 and up. This Helm chart requires the installation of the HiveMQ Platform Operator.
+This will install the Hivemq Platform with support for HiveMQ version 4.19 and above. This Helm chart requires the installation of the HiveMQ Platform Operator.
 
 For more information on configuring a HiveMQ platform and advanced usage, visit
 the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/operator/latest/kubernetes-operator/platform-operator-for-k8s)
