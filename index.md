@@ -36,7 +36,7 @@ the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/operator/la
 helm upgrade --install hivemq-platform hivemq/hivemq-platform
 ```
 
-## Install the HiveMQ operator
+## Install the HiveMQ Operator
 
 This will install the (legacy) HiveMQ operator and an example HiveMQ cluster with support for HiveMQ LTS version 4.9 and up.
 
