@@ -38,7 +38,7 @@ helm upgrade --install hivemq-platform hivemq/hivemq-platform
 
 ## Install the HiveMQ Operator
 
-This will install the (legacy) HiveMQ operator and an example HiveMQ cluster with support for HiveMQ LTS version 4.9 and up.
+This will install the (legacy) HiveMQ Operator and an example of a HiveMQ cluster with support for HiveMQ LTS version 4.9 and above.
 
 ```
 helm upgrade --install hivemq hivemq/hivemq-operator
