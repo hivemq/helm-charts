@@ -2,6 +2,28 @@ apiVersion: v1
 entries:
   hivemq-operator:
   - apiVersion: v2
+    appVersion: 4.23.0
+    created: "2023-12-06T15:27:32.958113936Z"
+    dependencies:
+    - condition: monitoring.dedicated, monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 30.*
+    description: HiveMQ Operator (legacy)
+    digest: cab804e21d977f2c43b477915a919c547a8381dce6416305e0b9f4a2c2b9e6c1
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    name: hivemq-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-0.11.30/hivemq-operator-0.11.30.tgz
+    version: 0.11.30
+  - apiVersion: v2
     appVersion: 4.22.0
     created: "2023-11-07T12:09:15.46594178Z"
     dependencies:
@@ -1514,6 +1536,28 @@ entries:
     version: 0.2.0
   hivemq-swarm:
   - apiVersion: v2
+    appVersion: 4.23.0
+    created: "2023-12-06T15:27:33.190557348Z"
+    dependencies:
+    - condition: monitoring.dedicated, monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 14.*
+    description: A Helm chart for HiveMQ Swarm
+    digest: 554a443641429fa1cfca28decb0bd42c5c7f6792f6fc9e7a07739d010a9399a0
+    icon: https://www.hivemq.com/img/svg/icon-hivemq-swarm.svg
+    keywords:
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    name: hivemq-swarm
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.2.27/hivemq-swarm-0.2.27.tgz
+    version: 0.2.27
+  - apiVersion: v2
     appVersion: 4.22.0
     created: "2023-11-07T12:09:15.835139838Z"
     dependencies:
@@ -2129,4 +2173,4 @@ entries:
     urls:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.1.0/hivemq-swarm-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-29T17:58:24.498308371Z"
+generated: "2023-12-06T15:27:33.190945344Z"
