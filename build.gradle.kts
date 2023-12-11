@@ -171,24 +171,27 @@ val updateChartAndValueFilesWithVersion by tasks.registering {
     doLast {
         val filesToUpdate = files(project.properties["versionFilesToUpdate"])
         val chartVersion = project.properties["chartVersion"]
-        val appVersion = project.version
+        val appVersion = project.properties["appVersion"]
         val valuesRegex = project.properties["valuesRegex"] as String
-
-        if (chartVersion == null || appVersion == null) {
-            error("Either chartVersion or version properties are missing")
+        if (chartVersion == null) {
+            error("`chartVersion` must be set")
         }
         filesToUpdate.filter { file -> file.name == "Chart.yaml" }.forEach {
-            val text = it.readText()
-            val replacedTextAppVersion = text.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion")
+            var replacedTextAppVersion = it.readText()
+            if (appVersion != null) {
+                replacedTextAppVersion = replacedTextAppVersion.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion")
+            }
             val replacedChartVersion = replacedTextAppVersion.replace("""(?m)^version:\s*\S+$""".toRegex(), "version: $chartVersion")
             it.writeText(replacedChartVersion)
         }
-        filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach {
-            val text = it.readText()
-            val replacedText = text.replace(valuesRegex.toRegex()) { matchResult ->
-                "${matchResult.groupValues[1]}${appVersion}"
+        if (appVersion != null) {
+            filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach {
+                val text = it.readText()
+                val replacedText = text.replace(valuesRegex.toRegex()) { matchResult ->
+                    "${matchResult.groupValues[1]}${appVersion}"
+                }
+                it.writeText(replacedText)
             }
-            it.writeText(replacedText)
         }
     }
 }
