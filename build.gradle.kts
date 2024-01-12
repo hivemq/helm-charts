@@ -6,7 +6,7 @@ group = "com.hivemq.helmcharts"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
