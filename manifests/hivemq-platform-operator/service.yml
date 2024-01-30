@@ -1,0 +1,24 @@
+---
+# Source: hivemq-platform-operator/templates/service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: "hivemq-platform-operator"
+    app.kubernetes.io/instance: "my-operator"
+    app.kubernetes.io/version: "1.1.0"
+  name: "hivemq-platform-operator-my-operator"
+spec:
+  ports:
+    - name: http-my-operator
+      port: 8080
+      protocol: TCP
+      targetPort: http-my-operato
+    - name: https-my-operator
+      port: 8443
+      protocol: TCP
+      targetPort: https-my-operat
+  selector:
+    app.kubernetes.io/name: "hivemq-platform-operator"
+    app.kubernetes.io/instance: "my-operator"
+  type: ClusterIP

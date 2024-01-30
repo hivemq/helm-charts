@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
+  name: {{include "hivemq-platform-operator.name" . }}
+spec:
+  # The Operator cannot have more than one replica
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hivemq-platform-operator.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: {{ .Values.http.port | quote }}
+        prometheus.io/scheme: http
+      labels:
+        {{- include "hivemq-platform-operator.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        runAsGroup: {{ .Values.podSecurityContext.runAsUser }}
+        fsGroup: {{ .Values.podSecurityContext.runAsUser }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        fsGroupChangePolicy: "OnRootMismatch"
+      {{- end }}
+      {{- if typeIsLike "map[string]interface {}" .Values.podScheduling.affinity }}
+      affinity:
+        {{- .Values.podScheduling.affinity | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if typeIsLike "[]interface {}" .Values.podScheduling.tolerations }}
+      tolerations:
+        {{- .Values.podScheduling.tolerations | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: {{.Values.javaOpts | quote }}
+            {{- if and (ne .Values.selector "nil") (.Values.selector) }}
+            - name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+              value: operator={{ .Values.selector }}
+            {{- end }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: hivemq.platform.operator.release.name
+              value: "{{ .Release.Name }}"
+            - name: hivemq.platform.operator.init.image
+              value: "{{ .Values.image.repository}}/{{ .Values.image.initImageName}}:{{.Values.image.tag}}"
+            - name: hivemq.platform.operator.image.pull.secret
+              value: "{{ .Values.image.pullSecretName }}"
+            - name: hivemq.platform.operator.log.level
+              value: "{{ .Values.logLevel }}"
+            # additional option to show the configuration details in the log
+            - name: hivemq.platform.operator.log.configuration
+              value: "{{ .Values.logConfiguration | default "false"}}"
+            # additional options for fine-grained logging
+            - name: hivemq.platform.operator.quarkus.log.level
+              value: "{{ .Values.quarkusLogLevel | default "INFO" }}"
+            - name: hivemq.platform.operator.sdk.log.level
+              value: "{{ .Values.sdkLogLevel | default "INFO" }}"
+            - name: hivemq.platform.operator.network.log.level
+              value: "{{ .Values.networkLogLevel | default "WARN" }}"
+            - name: quarkus.http.port
+              value: "{{ .Values.http.port }}"
+            - name: quarkus.http.ssl-port
+              value: "{{ .Values.https.port }}"
+            {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
+            - name: quarkus.http.ssl.certificate.key-store-file-type
+              value: "JKS"
+            - name: quarkus.http.ssl.certificate.key-store-file
+              value: "/mnt/tls/keystore.jks"
+            - name: quarkus.http.ssl.certificate.trust-store-file
+              value: "/mnt/tls/truststore.jks"
+            - name: quarkus.http.ssl.certificate.key-store-password
+              {{- if and (ne .Values.tls.keystorePassword "nil") (.Values.tls.keystorePassword) }}
+              value: "{{ .Values.tls.keystorePassword }}"
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tls.secretName }}
+                  key: keystore.password
+              {{- end }}
+            - name: quarkus.http.ssl.certificate.trust-store-password
+              {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
+              value: "{{ .Values.tls.truststorePassword }}"
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tls.secretName }}
+                  key: truststore.password
+              {{- end }}
+            {{- end }}
+          image: "{{ .Values.image.repository}}/{{ .Values.image.name }}:{{.Values.image.tag}}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: {{ .Values.http.port }}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: hivemq-platform-operator
+          ports:
+            - name: {{ printf "http-%s" .Release.Name | lower | trunc 15 | trimSuffix "-"  }}
+              containerPort: {{ .Values.http.port }}
+              protocol: TCP
+            - name: {{ printf "https-%s" .Release.Name | lower | trunc 15 | trimSuffix "-" }}
+              containerPort: {{ .Values.https.port }}
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: {{ .Values.http.port }}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: {{.Values.resources.cpu | quote}}
+              memory: {{.Values.resources.memory | quote}}
+            requests:
+              cpu: {{.Values.resources.cpu | quote}}
+              memory: {{.Values.resources.memory | quote}}
+          {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
+          volumeMounts:
+            - name: tls
+              mountPath: /mnt/tls
+              readOnly: true
+          {{- end}}
+      {{- if .Values.image.pullSecretName }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecretName }}
+      {{- end }}
+      serviceAccountName: {{ include "hivemq-platform-operator.serviceAccountName" . }}
+      {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
+      volumes:
+        - name: tls
+          secret:
+            secretName: "{{ .Values.tls.secretName }}"
+      {{- end}}

@@ -1,0 +1,156 @@
+suite: test HiveMQ Platform Operator deployments
+templates:
+  - deployment.yml
+tests:
+
+  - it: with image override
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: test-tag
+      image.initImageName: test-init-image
+      logLevel: WARN
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+      - isKind:
+          of: Deployment
+      - isNotEmpty:
+          path: spec.template.spec.containers[0]
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.log.level
+            value: "WARN"
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image:test-tag"
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].livenessProbe
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].readinessProbe
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].resources
+
+  - it: with environment variables override for init container
+    set:
+      image.repository: test-repo
+      image.tag: test-tag
+      image.initImageName: test-init-image
+      image.pullSecretName: test-pull-secret-name
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.containers[0]
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.init.image
+            value: "test-repo/test-init-image:test-tag"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.image.pull.secret
+            value: "test-pull-secret-name"
+
+  - it: with default security context disabled
+    asserts:
+      - notExists:
+          path: spec.template.spec.securityContext
+
+  - it: with default security context values enabled
+    set:
+      podSecurityContext.enabled: true
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.securityContext
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 185
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 185
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.fsGroup
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 185
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
+
+  - it: with security context values enabled
+    set:
+      podSecurityContext.enabled: true
+      podSecurityContext.runAsUser: 5000
+      podSecurityContext.runAsNonRoot: true
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.securityContext
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 5000
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 5000
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.fsGroup
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 5000
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
+
+  - it: with pod scheduling values set
+    values:
+      - pod-scheduling-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.affinity
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - my-app
+                  topologyKey: "kubernetes.io/hostname"
+      - isNotEmpty:
+          path: spec.template.spec.tolerations
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: my-key
+            operator: Exists

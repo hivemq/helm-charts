@@ -1,0 +1,77 @@
+# HiveMQ Platform Operator Helm Chart default values
+
+# Container image configuration
+image:
+  repository: docker.io/hivemq
+  name: hivemq-platform-operator
+  tag: 1.1.0
+  initImageName: hivemq-platform-operator-init
+  pullPolicy: IfNotPresent
+  pullSecretName: ""
+
+# Resources, limits and requests are set to equal values
+# Note: Increase resources depending on how many HiveMQ Platforms this operator manages.
+resources:
+  cpu: 512m
+  memory: 512M
+
+# Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
+logLevel: INFO
+
+# Configures the Operator ports for http/s. These ports provide access to metrics and other services.
+http:
+  port: 8080
+https:
+  port: 8443
+
+# Configures the Java JVM runtime options for the process.
+javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+
+# Selector name that is used to watch HiveMQ Platforms with a matching selector.
+selector: nil
+
+# Configures whether Kubernetes RBAC permissions should be created.
+rbac:
+  create: true
+
+# Configures the service account for Kubernetes RBAC permissions.
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+  # The service account name to be used, or "hivemq-<release name>" if not set.
+  name: ""
+
+# Configures how the operator pod should be scheduled on the Kubernetes cluster nodes.
+podScheduling:
+  # Configures the affinity for the Operator pod
+  affinity:
+  # podAffinity:
+  #    requiredDuringSchedulingIgnoredDuringExecution:
+  #      - labelSelector:
+  #          matchExpressions:
+  #            - key: app
+  #              operator: In
+  #              values:
+  #                - my-app
+  #        topologyKey: "kubernetes.io/hostname"
+
+  # Configures the tolerations for the Operator pod
+  tolerations:
+  #  - key: "example-key"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+
+# TLS configuration for the operator to access the Kubernetes API.
+tls:
+  # Name of the secret that contains keystore and truststore
+  secretName: nil
+  # The keystore password. Can also be set as "keystore.password" in the secret.
+  keystorePassword: nil
+  # The truststore password. Can also be set as "truststore.password" in the secret.
+  truststorePassword: nil
+
+# Operator security context, requires that the image supports the configured user.
+podSecurityContext:
+  enabled: false
+  runAsNonRoot: true
+  runAsUser: 185

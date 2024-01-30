@@ -1,0 +1,17 @@
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: hivemq
+          image: docker.io/hivemq/hivemq4:4.24.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mqtt-1883
+              containerPort: 1883
+            - name: mqtt-1884
+              containerPort: 1884
+            - name: cc-8080
+              containerPort: 8080
+            - name: metrics-9399
+              containerPort: 9399

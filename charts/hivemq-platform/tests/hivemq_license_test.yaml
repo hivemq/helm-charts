@@ -1,0 +1,45 @@
+suite: test HiveMQ platform secrets
+templates:
+  - hivemq-custom-resource.yml
+  - hivemq-license.yml
+tests:
+  - it: with secret file
+    set:
+      license.overrideLicense: test-content
+    asserts:
+      - isKind:
+          of: Secret
+        template: hivemq-license.yml
+      - isNotEmpty:
+          path: data
+        template: hivemq-license.yml
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+        template: hivemq-custom-resource.yml
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts[0]
+        template: hivemq-custom-resource.yml
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts[0].name
+          value: licenses
+        template: hivemq-custom-resource.yml
+  - it: with secret data
+    set:
+      license.data: test-content
+    asserts:
+      - isKind:
+          of: Secret
+        template: hivemq-license.yml
+      - isNotEmpty:
+          path: data
+        template: hivemq-license.yml
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+        template: hivemq-custom-resource.yml
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts[0]
+        template: hivemq-custom-resource.yml
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts[0].name
+          value: licenses
+        template: hivemq-custom-resource.yml

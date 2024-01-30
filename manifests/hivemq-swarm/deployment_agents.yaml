@@ -1,0 +1,67 @@
+---
+# Source: hivemq-swarm/templates/deployment_agents.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-swarm-hivemq-swarm-agent
+  namespace: default
+  labels:
+    app.kubernetes.io/name: hivemq-swarm
+    app.kubernetes.io/instance: my-swarm
+    app.kubernetes.io/version: "4.24.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      hivemq.com/swarm-role: agent
+      app.kubernetes.io/name: hivemq-swarm
+      app.kubernetes.io/instance: my-swarm
+  template:
+    metadata:
+      labels:
+        hivemq.com/swarm-role: agent
+        app.kubernetes.io/name: hivemq-swarm
+        app.kubernetes.io/instance: my-swarm
+    spec:
+      serviceAccountName: my-swarm-hivemq-swarm
+      securityContext:
+        sysctls:
+        - name: net.ipv4.ip_local_port_range
+          value: 1024 65535
+      containers:
+        - name: hivemq-swarm-agent
+          securityContext:
+            {}
+          image: "hivemq/hivemq-swarm:4.24.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SWARM_AGENT_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: SWARM_AGENT_BIND_PORT
+              value: "3881"
+            - name: SWARM_REST_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ADDRESS
+              value: "0.0.0.0"
+            - name: SWARM_REST_LISTENER_0_HTTP_PORT
+              value: "8181"
+            - name: LOG_LEVEL
+              value: info
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M
+          ports:
+            - name: metrics
+              containerPort: 8181
+              protocol: TCP
+            - name: agent-transport
+              containerPort: 3881
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1G
+            requests:
+              cpu: 500m
+              memory: 1G

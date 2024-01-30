@@ -1,0 +1,211 @@
+{{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
+{{- $hasLicense:= ( include "hivemq-platform.has-license" . ) -}}
+{{- $hasAdditionalVolumes:= ( include "hivemq-platform.has-additional-volumes" . ) -}}
+apiVersion: hivemq.com/v1
+kind: HiveMQPlatform
+metadata:
+  name: "{{ .Release.Name }}"
+  labels:
+    {{- include "hivemq-platform.labels" . | nindent 4 }}
+    {{- if and (ne .Values.operator.selector "nil") (.Values.operator.selector) }}
+    operator: {{.Values.operator.selector}}
+    {{- end }}
+spec:
+  configMapName: {{ include "hivemq-platform.configuration-name" . }}
+  logLevel: {{ .Values.nodes.logLevel }}
+  operatorRestApiPort: 7979
+  healthApiPort: 8889
+  metricsPort: 9399
+  metricsPath: /
+  statefulSet:
+    {{- if not .Values.config.overrideStatefulSet }}
+    spec:
+      replicas: {{.Values.nodes.replicaCount}}
+      template:
+        {{- if and (typeIsLike "map[string]interface {}" .Values.nodes.annotations) (.Values.nodes.annotations) }}
+        metadata:
+          annotations:
+          {{- .Values.nodes.annotations | toYaml | nindent 12 }}
+        {{- end }}
+        spec:
+          {{- if .Values.image.pullSecretName }}
+          imagePullSecrets:
+            - name: {{ .Values.image.pullSecretName }}
+          {{- end }}
+          {{- if .Values.nodes.podSecurityContext.enabled }}
+          securityContext:
+            runAsUser: {{ .Values.nodes.podSecurityContext.runAsUser }}
+            runAsGroup: {{ .Values.nodes.podSecurityContext.runAsGroup }}
+            fsGroup: {{ .Values.nodes.podSecurityContext.runAsGroup }}
+            runAsNonRoot: {{ .Values.nodes.podSecurityContext.runAsNonRoot }}
+            fsGroupChangePolicy: "OnRootMismatch"
+          {{- end }}
+          containers:
+            - name: hivemq
+              env:
+                - name: JAVA_OPTS
+                  value: {{ .Values.nodes.javaOpts | quote }}
+                {{- if $hasKeystore }}
+                {{- $envNamesKeyStoreList := list }}
+                {{- $envNamesTrustStoreList := list }}
+                {{- range $key, $val := .Values.services }}
+                {{- if and $val.exposed (or $val.keystorePassword $val.keystorePasswordSecretName) }}
+                {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass") }}
+                {{- if not (has $envName $envNamesKeyStoreList) }}
+                - name: {{ $envName }}
+                  {{- if $val.keystorePassword }}
+                  value: {{ $val.keystorePassword | b64dec }}
+                  {{- else if $val.keystorePasswordSecretName }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ $val.keystorePasswordSecretName }}
+                      key: keystore.password
+                  {{- end }}
+                {{- $envNamesKeyStoreList = $envName | append $envNamesKeyStoreList}}
+                {{- end }}
+                {{- if $val.truststoreSecretName }}
+                {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass") }}
+                {{- if not (has $envName $envNamesTrustStoreList) }}
+                - name: {{ $envName }}
+                  {{- if $val.truststorePassword }}
+                  value: {{ $val.truststorePassword | b64dec }}
+                  {{- else if $val.truststorePasswordSecretName }}
+                  # Use truststore password from secret {{ $val.truststorePasswordSecretName }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ $val.truststorePasswordSecretName }}
+                      key: truststore.password
+                  {{- end }}
+                  {{- $envNamesTrustStoreList = $envName | append $envNamesTrustStoreList}}
+                {{- end }}
+                {{- end }}
+                {{- end }}
+                {{- end }}
+                {{- end }}
+              image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              ports:
+                {{- range $key, $val := .Values.services }}
+                {{- if $val.exposed}}
+                - name: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 15 | trimSuffix "-" |  trim }}
+                  containerPort: {{$val.containerPort}}
+                {{- end }}
+                {{- end }}
+                  # Metric container ports are not configurable right now
+                - name: metrics-9399
+                  containerPort: 9399
+              resources:
+                limits:
+                  cpu: {{ .Values.nodes.resources.cpu | quote }}
+                  memory: {{ .Values.nodes.resources.memory | quote }}
+                requests:
+                  cpu: {{ .Values.nodes.resources.cpu | quote }}
+                  memory: {{ .Values.nodes.resources.memory | quote }}
+              {{- if or $hasAdditionalVolumes (or $hasLicense $hasKeystore) }}
+              volumeMounts:
+                {{- if $hasLicense }}
+                - name: licenses
+                  mountPath: /opt/hivemq/license
+                {{- end}}
+                {{- if $hasKeystore }}
+                {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
+                {{- end}}
+                {{- if $hasAdditionalVolumes }}
+                {{- include "hivemq-platform.get-additional-volume-mounts" . | indent 16 }}
+                {{- end -}}
+              {{- end }}
+          {{- if or $hasAdditionalVolumes (or $hasLicense $hasKeystore) }}
+          volumes:
+            {{- if $hasLicense }}
+            - name: licenses
+              secret:
+                {{- if eq .Values.license.name "" }}
+                secretName: hivemq-license-{{ .Release.Name }}
+                {{- else}}
+                secretName: {{ .Values.license.name }}
+                {{- end }}
+            {{- end }}
+            {{- if $hasKeystore }}
+              {{- (include "hivemq-platform.get-tls-secret-volumes" .) | indent 12 -}}
+            {{- end }}
+            {{- if $hasAdditionalVolumes }}
+              {{- include "hivemq-platform.get-additional-volumes" . | indent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if and (typeIsLike "map[string]interface {}" .Values.podScheduling.affinity) (.Values.podScheduling.affinity) }}
+          affinity:
+            {{- .Values.podScheduling.affinity | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if and (typeIsLike "[]interface {}" .Values.podScheduling.tolerations) (.Values.podScheduling.tolerations) }}
+          tolerations:
+            {{- .Values.podScheduling.tolerations | toYaml | nindent 12 }}
+          {{- end }}
+      {{- else -}}
+      {{.Values.config.overrideStatefulSet | nindent 3}}
+      {{- end }}
+  services:
+    {{- range $key, $val := .Values.services }}
+    {{- if and $val.exposed }}
+    - metadata:
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        {{- if and (typeIsLike "map[string]interface {}" $val.annotations) ($val.annotations) }}
+        annotations:
+          {{- $val.annotations | toYaml | nindent 10 }}
+        {{- end }}
+      spec:
+        {{- if and $val.serviceType (or (eq $val.serviceType "NodePort") (eq $val.serviceType "LoadBalancer")) }}
+        type: {{ $val.serviceType }}
+        {{- end }}
+        {{- if eq $val.type "control-center" }}
+        sessionAffinity: ClientIP
+        {{- end }}
+        ports:
+          - name: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+            targetPort: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
+          {{- if $val.port}}
+            port: {{ $val.port }}
+          {{- else}}
+            port: {{ $val.containerPort }}
+          {{- end }}
+    {{- end }}
+    {{- end }}
+    # Metric service ports are not configurable right now
+    - metadata:
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" "9399" "containerPort" "9399")) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+      spec:
+        ports:
+          - name: metrics-9399
+            targetPort: metrics-9399
+            port: 9399
+  {{- if hasKey .Values "extensions" }}
+  extensions:
+    {{- range $key, $val := .Values.extensions }}
+    - id: {{$val.name}}
+      {{- if hasKey $val "enabled" }}
+      enabled: {{ printf "%t" $val.enabled | default false }}
+      {{- else}}
+      enabled: false
+      {{- end}}
+      {{- if hasKey $val "supportsHotReload" }}
+      supportsHotReload: {{ printf "%t" $val.supportsHotReload | default false }}
+      {{- else}}
+      supportsHotReload: false
+      {{- end}}
+      {{- if hasKey $val "configMapName" }}
+      configMapName: {{ $val.configMapName | quote }}
+      {{- end}}
+      {{- if hasKey $val "requestHeaderSecretName" }}
+      requestHeaderSecretName: {{$val.requestHeaderSecretName | quote }}
+      {{- end}}
+      extensionUri: {{ $val.extensionUri | default "preinstalled" | quote }}
+      {{- if hasKey $val "customizationUri" }}
+      customizationUri: {{ $val.customizationUri | quote }}
+      {{- end}}
+      {{- if hasKey $val "priority" }}
+      extensionPriority: {{ $val.priority | default -1 }}
+      {{- end}}
+      {{- if hasKey $val "startPriority" }}
+      extensionStartPriority: {{ $val.startPriority | default -1 }}
+      {{- end}}
+    {{- end}}
+  {{- end}}

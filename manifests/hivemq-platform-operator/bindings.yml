@@ -1,0 +1,41 @@
+---
+# Source: hivemq-platform-operator/templates/bindings.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "hivemq-platform-operator-role-binding-my-operator"
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: "hivemq-platform-operator-role-my-operator"
+subjects:
+  - kind: ServiceAccount
+    name: hivemq-platform-operator-my-operator
+    namespace: default
+---
+# Source: hivemq-platform-operator/templates/bindings.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hivemq-controller-crd-validating-role-binding-my-operator
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: "hivemq-platform-operator-validating-role-my-operator"
+subjects:
+  - kind: ServiceAccount
+    name: hivemq-platform-operator-my-operator
+    namespace: default
+---
+# Source: hivemq-platform-operator/templates/bindings.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "hivemq-platform-operator-view-my-operator"
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: hivemq-platform-operator-my-operator

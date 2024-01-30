@@ -1,0 +1,17 @@
+{{- if (include "hivemq-platform.has-license" .) -}}
+apiVersion: v1
+data:
+  {{- if .Values.license.data}}
+  license.lic: {{ .Values.license.data }}
+  {{- else}}
+  {{- if .Values.license.overrideLicense}}
+  license.lic: |-
+    {{ range (.Values.license.overrideLicense | b64enc) | toStrings }}
+    {{ . | nindent 4 }}
+    {{ end }}
+  {{- end}}
+  {{- end }}
+kind: Secret
+metadata:
+  name: hivemq-license-{{.Release.Name}}
+{{- end}}

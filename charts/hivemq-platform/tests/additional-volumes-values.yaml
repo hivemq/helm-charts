@@ -1,0 +1,16 @@
+additionalVolumes:
+  - type: configMap
+    name: test-volume
+    mountName: test-mount-volume
+    path: /additional-configmap-volume
+    subPath: subpath-configmap
+  - type: secret
+    name: test-secret-volume
+    path: /additional-secret-volume
+  - type: emptyDir
+    name: test-empty-dir-volume
+    path: /additional-empty-dir-volume
+  - type: persistentVolumeClaim
+    name: test-persistent-volume-claim-volume
+    path: /additional-persistent-volume-claim-volume
+

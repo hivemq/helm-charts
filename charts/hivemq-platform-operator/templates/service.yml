@@ -1,0 +1,23 @@
+{{- if .Values.serviceAccount.create -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
+  name: "hivemq-platform-operator-{{.Release.Name}}"
+spec:
+  ports:
+    - name: {{ printf "http-%s" .Release.Name }}
+      port: {{ .Values.http.port }}
+      protocol: TCP
+      targetPort: {{ printf "http-%s" .Release.Name | lower | trunc 15 | trimSuffix "-" }}
+    - name: {{ printf "https-%s" .Release.Name }}
+      port: {{ .Values.https.port }}
+      protocol: TCP
+      targetPort: {{ printf "https-%s" .Release.Name | lower | trunc 15 | trimSuffix "-" }}
+  selector:
+    {{- include "hivemq-platform-operator.selectorLabels" . | nindent 4 }}
+  type: ClusterIP
+---
+{{- end }}

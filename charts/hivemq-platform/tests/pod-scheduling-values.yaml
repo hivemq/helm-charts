@@ -1,0 +1,15 @@
+podScheduling:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - my-app
+          topologyKey: "kubernetes.io/hostname"
+  tolerations:
+    - key: "my-key"
+      operator: "Exists"
+      effect: "NoSchedule"

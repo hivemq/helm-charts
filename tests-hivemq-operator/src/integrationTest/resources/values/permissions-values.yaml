@@ -1,0 +1,36 @@
+global:
+  rbac:
+    pspEnabled: false
+
+operator:
+  logLevel: INFO
+  image: hivemq/hivemq-operator:snapshot
+  admissionWebhooks:
+    enabled: true
+    failurePolicy: Ignore
+
+hivemq:
+  image: hivemq-k8s-test-rootless:snapshot
+  initDnsWaitImage: hivemq/init-dns-wait:snapshot
+  logLevel: INFO
+  nodeCount: 1
+  cpu: 512m
+  memory: 1Gi
+  podSecurityContext:
+    fsGroup: 10000
+    runAsNonRoot: true
+    runAsGroup: 10000
+    runAsUser: 10001
+  containerSecurityContext:
+    runAsNonRoot: true
+    runAsGroup: 10000
+    runAsUser: 10001
+    allowPrivilegeEscalation: false
+    privileged: false
+  ports:
+    - name: "mqtt"
+      port: 1883
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+

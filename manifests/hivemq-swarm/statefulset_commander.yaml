@@ -1,0 +1,85 @@
+---
+# Source: hivemq-swarm/templates/statefulset_commander.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-swarm-hivemq-swarm-commander
+  namespace: default
+  labels:
+    app.kubernetes.io/name: hivemq-swarm
+    app.kubernetes.io/instance: my-swarm
+    app.kubernetes.io/version: "4.24.0"
+spec:
+  replicas: 1
+  serviceName: my-swarm-hivemq-swarm-api
+  selector:
+    matchLabels:
+      hivemq.com/swarm-role: commander
+      app.kubernetes.io/name: hivemq-swarm
+      app.kubernetes.io/instance: my-swarm
+  template:
+    metadata:
+      labels:
+        hivemq.com/swarm-role: commander
+        app.kubernetes.io/name: hivemq-swarm
+        app.kubernetes.io/instance: my-swarm
+    spec:
+      serviceAccountName: my-swarm-hivemq-swarm
+      securityContext:
+        {}
+      containers:
+        - name: hivemq-swarm-commander
+          securityContext:
+            {}
+          image: "hivemq/hivemq-swarm:4.24.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SWARM_COMMANDER_MODE
+              value: "rest"
+            - name: SWARM_REST_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ENABLED
+              value: "true"
+            - name: SWARM_REST_LISTENER_0_HTTP_ADDRESS
+              value: "0.0.0.0"
+            - name: SWARM_REST_LISTENER_0_HTTP_PORT
+              value: "8080"
+            - name: SWARM_DNS_DISCOVERY_ADDRESS
+              value: "my-swarm-hivemq-swarm-agents.default.svc.cluster.local"
+            - name: SWARM_DNS_DISCOVERY_AGENT_COUNT
+              value: "3"
+            - name: LOG_LEVEL
+              value: info
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M
+          ports:
+            - name: api
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /commander
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /commander
+              port: api
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1G
+            requests:
+              cpu: 500m
+              memory: 1G
+          volumeMounts:
+            
+            - mountPath: /scenario
+              name: scenario-persistence
+      volumes:
+          
+        - emptyDir: {}
+          name: scenario-persistence

@@ -1,0 +1,31 @@
+# Custom images Single node cluster with external mqtt port
+global:
+  rbac:
+    pspEnabled: false
+
+operator:
+  image: hivemq/hivemq-operator:snapshot
+  imagePullPolicy: Never
+  logLevel: INFO
+  admissionWebhooks:
+    enabled: false
+
+hivemq:
+  image: hivemq/hivemq4:k8s-4.24.0
+  imagePullPolicy: Never
+  initDnsWaitImage: hivemq/init-dns-wait:snapshot
+  logLevel: DEBUG
+  nodeCount: 1
+  cpu: 512m
+  memory: 1Gi
+  ports:
+    - name: "mqtt"
+      port: 1883
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
+    - name: "cc"
+      port: 8080
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'

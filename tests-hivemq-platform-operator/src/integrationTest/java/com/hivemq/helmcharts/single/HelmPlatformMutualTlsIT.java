@@ -1,0 +1,153 @@
+package com.hivemq.helmcharts.single;
+
+import com.hivemq.client.mqtt.MqttClientSslConfig;
+import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.util.CertificatesUtil;
+import com.hivemq.helmcharts.util.MqttUtil;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import static com.hivemq.client.util.KeyStoreUtil.keyManagerFromKeystore;
+import static com.hivemq.client.util.KeyStoreUtil.trustManagerFromKeystore;
+import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
+import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
+import static com.hivemq.helmcharts.util.MqttUtil.withDefaultPublishSubscribeRunnable;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Tag("Platform")
+@Tag("Tls")
+@SuppressWarnings("DuplicatedCode")
+class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
+
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmPlatformMutualTlsIT.class);
+
+    private static final int MQTT_SERVICE_PORT_1883 = 1883;
+    private static final @NotNull String MQTT_SERVICE_NAME_1883 = "hivemq-test-hivemq-platform-mqtt-1883";
+    private static final int MQTT_SERVICE_PORT_1884 = 1884;
+    private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
+    private static final int MQTT_SERVICE_PORT_1885 = 1885;
+    private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
+    private static final @NotNull String BROKER_KEYSTORE_PASSWORD = "key-changeme";
+    private static final @NotNull String BROKER_KEYSTORE_PRIVATE_PASSWORD = "key-changeme";
+    private static final @NotNull String CLIENT_KEYSTORE_PASSWORD = "trust-changeme";
+
+    private @NotNull Path brokerCertificateStore;
+    private @NotNull Path clientCertificateStore;
+
+    @BeforeEach
+    void setup(@TempDir final @NotNull Path tempDir) throws Exception {
+        CertificatesUtil.generateCertificates(tempDir.toFile());
+        final var encoder = Base64.getEncoder();
+
+        brokerCertificateStore = tempDir.resolve("keystore.jks");
+        final var keystoreContent = Files.readAllBytes(brokerCertificateStore);
+        createSecret(client, namespace, "mqtts-keystore-1884", "keystore", encoder.encodeToString(keystoreContent));
+        createSecret(client, namespace, "mqtts-keystore-1885", "keystore", encoder.encodeToString(keystoreContent));
+        createSecret(client,
+                namespace,
+                "mqtts-keystore-password-1885",
+                "keystore.password",
+                encoder.encodeToString(BROKER_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+
+        clientCertificateStore = tempDir.resolve("truststore.jks");
+        final var truststoreContent = Files.readAllBytes(clientCertificateStore);
+        final var base64TruststoreContent = encoder.encodeToString(truststoreContent);
+        createSecret(client, namespace, "mqtts-truststore-1884", "truststore.jks", base64TruststoreContent);
+        createSecret(client, namespace, "mqtts-truststore-1885", "truststore", base64TruststoreContent);
+        createSecret(client,
+                namespace,
+                "mqtts-truststore-password-1885",
+                "truststore.password",
+                encoder.encodeToString(CLIENT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void withMutualTls_hivemqRunning() throws Exception {
+        installChartsAndWaitForPlatformRunning("/files/mtls-test-values.yaml");
+
+        final var statefulSet =
+                client.apps().statefulSets().inNamespace(namespace).withName("test-hivemq-platform").get();
+        assertThat(statefulSet).isNotNull();
+
+        LOG.info("Connecting to MQTT listener with no mTLS/SSL on port {}", MQTT_SERVICE_PORT_1883);
+        assertMqttListener(MQTT_SERVICE_NAME_1883, MQTT_SERVICE_PORT_1883);
+
+        final var sslConfig = MqttClientSslConfig.builder()
+                .keyManagerFactory(keyManagerFromKeystore(brokerCertificateStore.toFile(),
+                        BROKER_KEYSTORE_PASSWORD,
+                        BROKER_KEYSTORE_PRIVATE_PASSWORD))
+                .trustManagerFactory(trustManagerFromKeystore(clientCertificateStore.toFile(),
+                        CLIENT_KEYSTORE_PASSWORD))
+                .hostnameVerifier((hostname, session) -> true)
+                .build();
+
+        LOG.info("Connecting to MQTT listener mTLS/SSL on port {}", MQTT_SERVICE_PORT_1884);
+        assertSecretMounted(statefulSet, "mqtts-keystore-1884");
+        assertSecretMounted(statefulSet, "mqtts-truststore-1884");
+        assertMqttListener(MQTT_SERVICE_NAME_1884, MQTT_SERVICE_PORT_1884, sslConfig);
+
+        LOG.info("Connecting to MQTT listener mTLS/SSL on port {}", MQTT_SERVICE_PORT_1885);
+        assertSecretMounted(statefulSet, "mqtts-keystore-1885");
+        assertSecretMounted(statefulSet, "mqtts-truststore-1885");
+        assertMqttListener(MQTT_SERVICE_NAME_1885, MQTT_SERVICE_PORT_1885, sslConfig);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void assertMqttListener(final @NotNull String serviceName, final int servicePort) {
+        assertMqttListener(serviceName, servicePort, null);
+    }
+
+    private void assertMqttListener(
+            final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
+        MqttUtil.execute(client,
+                namespace,
+                serviceName,
+                servicePort,
+                portForward -> getBlockingClient(portForward,
+                        "PublishClient",
+                        clientBuilder -> clientBuilder.sslConfig(sslConfig)),
+                portForward -> getBlockingClient(portForward,
+                        "SubscribeClient",
+                        clientBuilder -> clientBuilder.sslConfig(sslConfig)),
+                withDefaultPublishSubscribeRunnable());
+    }
+
+    private static void assertSecretMounted(StatefulSet statefulSet, @NotNull final String name) {
+        final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
+        assertThat(volumes).isNotEmpty();
+
+        final var tlsVolume = statefulSet.getSpec()
+                .getTemplate()
+                .getSpec()
+                .getVolumes()
+                .stream()
+                .filter(v -> Objects.equals(v.getName(), name))
+                .findFirst();
+        assertThat(tlsVolume).isPresent();
+
+        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().get(0);
+        assertThat(container).isNotNull();
+
+        final var volumeMount = container.getVolumeMounts()
+                .stream()
+                .filter(vm -> Objects.equals(vm.getName(), name) && Objects.equals(vm.getMountPath(), "/tls-" + name))
+                .findFirst();
+        assertThat(volumeMount).isPresent();
+    }
+}

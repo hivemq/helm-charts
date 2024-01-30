@@ -1,0 +1,24 @@
+global:
+  rbac:
+    pspEnabled: false
+
+operator:
+  image: hivemq/hivemq-operator:snapshot
+  imagePullPolicy: Never
+  logLevel: INFO
+  admissionWebhooks:
+    enabled: false
+
+hivemq:
+  image: hivemq/hivemq4:k8s-4.24.0
+  imagePullPolicy: Never
+  initDnsWaitImage: hivemq/init-dns-wait:snapshot
+  logLevel: DEBUG
+  nodeCount: 1
+  cpu: 512m
+  memory: 1Gi
+  extensions:
+    - name: hivemq-mqtt-message-log-extension
+      extensionUri: https://github.com/hivemq/hivemq-mqtt-message-log-extension/releases/download/1.1.3/hivemq-mqtt-message-log-extension-1.1.3.zip
+      enabled: true
+      static: true

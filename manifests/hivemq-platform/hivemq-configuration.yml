@@ -1,0 +1,70 @@
+---
+# Source: hivemq-platform/templates/hivemq-configuration.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "hivemq-configuration-my-platform"
+  labels:
+    app.kubernetes.io/name: "hivemq-platform"
+    app.kubernetes.io/instance: "my-platform"
+    app.kubernetes.io/version: "4.24.0"
+data:
+  # noinspection XmlPathReference
+  config.xml: |-
+    <?xml version="1.0"?>
+    <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+      <listeners>
+        <tcp-listener>
+          <port>1883</port>
+          <bind-address>0.0.0.0</bind-address>
+        </tcp-listener>
+      </listeners>
+      <cluster>
+        <transport>
+          <tcp>
+            <bind-address>0.0.0.0</bind-address>
+            <bind-port>7000</bind-port>
+          </tcp>
+        </transport>
+        <enabled>true</enabled>
+        <discovery>
+          <extension/>
+        </discovery>
+      </cluster>
+      <!-- required and should not be configured different -->
+      <health-api>
+        <enabled>true</enabled>
+        <listeners>
+          <http>
+            <port>8889</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+        </listeners>
+      </health-api>
+      <!-- -->
+      <control-center>
+        <listeners>
+          <http>
+            <port>8080</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+        </listeners>
+      </control-center>
+      <anonymous-usage-statistics>
+        <enabled>false</enabled>
+      </anonymous-usage-statistics>
+    </hivemq>
+  tracing.xml: |-
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <tracing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tracing.xsd">
+      <context-propagation>
+        <outbound-context-propagation>
+          <enabled>false</enabled>
+        </outbound-context-propagation>
+      </context-propagation>
+      <sampling>
+        <publish-sampling>
+          <enabled>true</enabled>
+        </publish-sampling>
+      </sampling>
+    </tracing>

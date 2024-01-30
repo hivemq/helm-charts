@@ -1,0 +1,74 @@
+suite: test HiveMQ Platform extensions
+templates:
+  - hivemq-custom-resource.yml
+tests:
+  - it: with extension enabled for custom resource
+    values:
+      - extensions-values.yaml
+    asserts:
+      - equal:
+          path: spec.extensions[0].id
+          value: hivemq-custom-test-extension
+      - equal:
+          path: spec.extensions[0].enabled
+          value: true
+      - equal:
+          path: spec.extensions[0].supportsHotReload
+          value: false
+      - equal:
+          path: spec.extensions[0].configMapName
+          value: custom-extension-configuration
+      - equal:
+          path: spec.extensions[0].requestHeaderSecretName
+          value: custom-extension-auth-secret
+      - equal:
+          path: spec.extensions[0].extensionUri
+          value: http://nginx-service/hivemq-custom-test-extension-1.0.0.zip
+      - equal:
+          path: spec.extensions[0].customizationUri
+          value: http://nginx-service/hivemq-customization.zip
+      - equal:
+          path: spec.extensions[0].extensionPriority
+          value: 1500
+      - equal:
+          path: spec.extensions[0].extensionStartPriority
+          value: 2000
+
+      - equal:
+          path: spec.extensions[1].id
+          value: hivemq-kafka-extension
+      - equal:
+          path: spec.extensions[1].enabled
+          value: true
+      - equal:
+          path: spec.extensions[1].supportsHotReload
+          value: true
+      - equal:
+          path: spec.extensions[1].configMapName
+          value: hivemq-kafka-extension-test-configuration
+      - equal:
+          path: spec.extensions[1].extensionUri
+          value: preinstalled
+      - notExists:
+          path: spec.extensions[1].extensionPriority
+      - notExists:
+          path: spec.extensions[1].extensionStartPriority
+
+      - equal:
+          path: spec.extensions[2].id
+          value: hivemq-google-cloud-pubsub-extension
+      - equal:
+          path: spec.extensions[2].enabled
+          value: true
+      - equal:
+          path: spec.extensions[2].supportsHotReload
+          value: true
+      - notExists:
+          path: spec.extensions[2].configMapName
+      - equal:
+          path: spec.extensions[2].extensionUri
+          value: preinstalled
+      - notExists:
+          path: spec.extensions[2].extensionPriority
+      - notExists:
+          path: spec.extensions[2].extensionStartPriority

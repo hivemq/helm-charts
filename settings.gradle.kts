@@ -1,8 +1,4 @@
 rootProject.name = "helm-charts"
 
-if (file("../hivemq/").exists()) {
-    includeBuild("../hivemq/")
-}
-if (file("../hivemq-operator/").exists()) {
-    includeBuild("../hivemq-operator/")
-}
+includeBuild("tests-hivemq-operator")
+includeBuild("tests-hivemq-platform-operator")

@@ -1,0 +1,17 @@
+image:
+  repository: docker.io/hivemq
+  name: hivemq4
+  pullPolicy: IfNotPresent
+  dataHub:
+    dataValidationEnabled: true
+    behaviorValidationEnabled: true
+services:
+  - type: mqtt
+    exposed: true
+    containerPort: 1883
+  - type: control-center
+    exposed: true
+    containerPort: 8080
+  - type: rest-api
+    exposed: true
+    containerPort: 8888
