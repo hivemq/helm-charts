@@ -7,13 +7,13 @@
 This repository contains the HiveMQ Helm charts.
 
 - The [HiveMQ Platform Operator Helm chart](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-platform-operator) (new)
-  - This chart deploys the HiveMQ Platform Operator, that will install and manage your HiveMQ Platform clusters in Kubernetes.
+  - This chart deploys the latest HiveMQ Platform Operator that installs and manages your HiveMQ Platform clusters in Kubernetes.
   
 - The [HiveMQ Platform Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-platform) (new)
-  - This chart requests the deployment of one HiveMQ Platform cluster (new) via the HiveMQ Platform Operator.  
+  - This chart specifies the HiveMQ Platform deployment that the HiveMQ Platform Operator then installs.  
       
 - The [HiveMQ Operator Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-operator) (legacy)
-  - This chart deploys the legacy HiveMQ Operator and one HiveMQ Platform cluster.
+  - This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
   
 - The [HiveMQ Swarm Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-swarm)
   - This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulation tool.
@@ -22,24 +22,25 @@ This repository contains the HiveMQ Helm charts.
 See the [HiveMQ Kubernetes documentation](https://docs.hivemq.com/hivemq-platform-operator/introduction.html) for more detailed information.
 
 
-## Install the HiveMQ Helm chart repository
+## Register the HiveMQ Helm chart repository
 
 Add the HiveMQ Helm Chart repository to your local Helm setup:
 
-`helm repo add hivemq https://hivemq.github.io/helm-charts`
+`helm repo add hivemq https://hivemq.github.io/helm-charts`  
+`helm repo update`
 
 Refer to the individual Helm chart instructions for usage.
 
 ## Manifests
 
-The manifest folder contains the rendered yaml files of the charts with default values. The manifests can be modified and configured and used for manual deployment without using helm. 
+The manifest folder contains the rendered yaml files of the Helm charts with default values. The manifests can be modified, configured, and used for manual deployment with kubectl. 
 
 ## Examples
 
-The examples folder contains configuration examples for each of the charts. It also contains yaml files helpful for specific environments such as Openshift. 
+The examples folder contains configuration examples for each of the Helm charts. This folder also contains yaml files that are helpful for specific environments such as Openshift. 
 
 ## Tests
-Integration tests are split into two different Gradle submodules, one for the HiveMQ Platform Operator (new) called [`tests-hivemq-platform-operator`](./tests-hivemq-platform-operator) and another one called [`tests-hivemq-operator`](./tests-hivemq-operator) for the HiveMQ Operator (legacy).
+Integration tests are split into two Gradle submodules. One submodule for the HiveMQ Platform Operator (new): [`tests-hivemq-platform-operator`](./tests-hivemq-platform-operator) and another submodule for the HiveMQ Operator (legacy): [`tests-hivemq-operator`](./tests-hivemq-operator).
 
 ## Contributing
 

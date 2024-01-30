@@ -1,8 +1,6 @@
 # Examples
 
-This folder contains examples for the different charts.
-
-## Available Charts
+This folder contains examples for the Helm charts.
 
 ### [hivemq-platform](./hivemq-platform)
 

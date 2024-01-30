@@ -2,7 +2,7 @@
 
 See the [documentation](https://docs.hivemq.com/hivemq-operator/) for detailed getting started and configuration guidance.
 
-NOTE: `The HiveMQ Kubernetes Operator (legacy) will be sunsetted and cease to receive updates or further support 6 months after the next LTS release of the HiveMQ Platform. The HiveMQ Platform Operator (new) offers usability, stability, and performance enhancements, and will be the supported version for all future LTS releases.`
+NOTE: `The HiveMQ Operator (legacy) will be sunsetted and cease to receive updates or further support 6 months after the next LTS release of the HiveMQ Platform. The HiveMQ Platform Operator (new) offers usability, stability, and performance enhancements, and will be the supported version for all future LTS releases.`
 
 This chart provisions the
 

@@ -1,6 +1,6 @@
 # HiveMQ Platform (new)
 
-This Helm chart bootstraps the HiveMQ Platform deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. With default settings, this chart deploys the HiveMQ Platform custom resource and configuration. The HiveMQ Platform Operator then installs a 2 node HiveMQ Platform cluster based on the default custom resource. 
+This Helm chart bootstraps the HiveMQ Platform deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. With the default settings, the HiveMQ Platform Operator then installs a 2 node HiveMQ Platform cluster that is suitable for testing. 
 
 This chart can be used multiple times to deploy several HiveMQ Platform clusters. One HiveMQ Platform Operator can manage many HiveMQ deployments.
 

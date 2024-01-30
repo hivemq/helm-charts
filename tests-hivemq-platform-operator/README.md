@@ -1,6 +1,6 @@
 # HiveMQ Platform Operator (new) Integration Tests
 
-This submodule contains integration tests for validating the functionality and behavior of the HiveMQ Platform Operator (new) via Helm Charts in a Kubernetes environment. This Kubernetes environment is mimic by extending the [K3S module](https://java.testcontainers.org/modules/k3s/) available within the Testcontainer framework.
+This submodule contains integration tests for validating the functionality and behavior of the HiveMQ Platform Operator (new) Helm Charts. The Kubernetes environment used extends the [K3S module](https://java.testcontainers.org/modules/k3s/) available within the Testcontainer framework.
 
 ## Overview
 
