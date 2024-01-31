@@ -53,6 +53,7 @@ dependencies {
     testImplementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
     testImplementation("io.rest-assured:rest-assured:${property("rest-assured.version")}")
     testImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-client.version")}")
+    testImplementation("io.netty:netty-codec-http:${property("netty-codec-http.version")}")
 }
 
 fun Test.configureJUnitPlatform() {
