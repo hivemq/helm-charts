@@ -2,7 +2,7 @@
 
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hivemq)](https://artifacthub.io/packages/search?repo=hivemq)
 
-[![Correct Templates](https://github.com/hivemq/helm-charts/actions/workflows/verify.yml/badge.svg)](https://github.com/hivemq/helm-charts/actions/workflows/verify.yml) [![Smoke Test](https://github.com/hivemq/helm-charts/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/hivemq/helm-charts/actions/workflows/smoke-test.yml) [![Integration Test](https://github.com/hivemq/helm-charts/actions/workflows/integration-test.yml/badge.svg?branch=master)](https://github.com/hivemq/helm-charts/actions/workflows/integration-test.yml)
+[![Correct Templates](https://github.com/hivemq/helm-charts/actions/workflows/verify.yml/badge.svg)](https://github.com/hivemq/helm-charts/actions/workflows/verify.yml) [![Smoke Test](https://github.com/hivemq/helm-charts/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/hivemq/helm-charts/actions/workflows/smoke-test.yml) [![HiveMQ Operator (legacy) Integration Test](https://github.com/hivemq/helm-charts/actions/workflows/hivemq-operator-integration-test.yml/badge.svg?branch=master)](https://github.com/hivemq/helm-charts/actions/workflows/hivemq-operator-integration-test.yml) [![HiveMQ Platform Operator (new) Integration Test](https://github.com/hivemq/helm-charts/actions/workflows/hivemq-platform-operator-integration-test.yml/badge.svg?branch=master)](https://github.com/hivemq/helm-charts/actions/workflows/hivemq-platform-operator-integration-test.yml)
 
 This repository contains the HiveMQ Helm charts.
 
