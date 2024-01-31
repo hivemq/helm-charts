@@ -1,49 +1,57 @@
 # HiveMQ Swarm
 
-[HiveMQ Swarm](https://www.hivemq.com/docs/swarm/) is an advanced IoT testing and simulation tool that gives you the load and reliability testing ability you need to determine the resilience and capacity of your complete IoT system.
+This Helm chart bootstraps a [HiveMQ Swarm](https://docs.hivemq.com/hivemq-swarm/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. 
 
-## TL;DR
+[HiveMQ Swarm](https://docs.hivemq.com/hivemq-swarm/) is an advanced IoT testing and simulation tool that provides load and reliability testing for your IoT architectures.
 
-```console
-$ helm repo add hivemq https://hivemq.github.io/helm-charts
-$ helm upgrade --install swarm hivemq/hivemq-swarm
-```
+This chart deploys:
+- a HiveMQ Swarm commander with the [REST-API](https://docs.hivemq.com/hivemq-swarm/latest/rest-service.html) enabled to start scenarios
+- a number of HiveMQ Swarm agents
+- an optional Prometheus for monitoring
+    - with an optional Prometheus Operator as a dedicated Prometheus instance
+    - with a pre-defined Grafana dashboard, called `HiveMQ Swarm`
 
-See [here](https://www.hivemq.com/docs/swarm/latest/swarm/clustering.html#deploy-on-k8s) for a more detailed getting started and configuration guidance on this Helm Chart.
 
-## Introduction
-
-This chart bootstraps a [HiveMQ Swarm](https://github.com/hivemq/hivemq-swarm) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
-
-Therefore, this chart provision:
-- A HiveMQ Swarm commander with an enabled [REST-API](https://www.hivemq.com/docs/swarm/latest/swarm/rest-service.html) to start scenarios 
-- A set of HiveMQ Swarm agents
-- (Optional) Prometheus-operator integration for monitoring
-  - A Prometheus Operator sub-chart if you want to deploy a dedicated Prometheus instance
-  - A pre-defined Grafana dashboard, called `HiveMQ Swarm`, deployed along with the sub-chart
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-swarm/) for
+more details.
 
 ## Prerequisites
 
-- Running Kubernetes cluster version 1.13.0 or higher on the cloud provider of your choice
-- Helm version 3 or higher
+- Kubernetes 1.23+
+- Helm 3
 
-## Installing the Chart
-
-To install the chart with the release name `swarm`:
+## Repository Info
 
 ```console
-$ helm repo add hivemq https://hivemq.github.io/helm-charts
-$ helm upgrade --install swarm hivemq/hivemq-swarm
+helm repo add hivemq https://hivemq.github.io/helm-charts
+helm repo update
 ```
 
-These commands deploy HiveMQ Swarm on the Kubernetes cluster in the default configuration.
+_See the Helm [`documentation`](https://helm.sh/docs/helm/helm_repo/) for more details._
 
-> **Tip**: List all releases using `helm list`
-
-## Uninstalling the Chart
-
-To uninstall/delete the `swarm` deployment:
+## Install the Chart
 
 ```console
-$ helm delete swarm
+helm install [RELEASE_NAME] hivemq/hivemq-swarm -n <namespace>
 ```
+
+_See the [documentation](https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#deploy-on-k8s) for more detailed information on getting started with this Helm Chart._
+
+## Uninstall the Chart
+
+```console
+helm uninstall [RELEASE_NAME] -n <namespace>
+```
+
+This removes all Kubernetes components associated with the chart and deletes the release.
+
+## Configuration
+
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#deploy-on-k8s) on configuration options. To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/blog/master/charts/hivemq-swarm/values.yaml), or run this command:
+
+```console
+helm show values hivemq/hivemq-swarm
+```
+
+
+

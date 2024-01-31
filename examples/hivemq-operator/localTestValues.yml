@@ -1,0 +1,19 @@
+# Custom images Single node cluster with external mqtt port
+operator:
+  image: hivemq/hivemq-operator:snapshot
+  imagePullPolicy: Never
+  logLevel: DEBUG
+  admissionWebhooks:
+    enabled: false
+monitoring:
+  # Deploy ServiceMonitor for Prometheus Operator and enable Prometheus
+  enabled: true
+
+hivemq:
+  image: hivemq/hivemq4:k8s-4.24.0
+  imagePullPolicy: Never
+  initDnsWaitImage: hivemq/init-dns-wait:snapshot
+  logLevel: DEBUG
+  nodeCount: 1
+  cpu: 512m
+  memory: 1Gi

@@ -1,0 +1,13 @@
+services:
+  - type: mqtt
+    exposed: true
+    containerPort: 1883
+  - type: mqtt
+    exposed: true
+    containerPort: 1884
+  - type: websocket
+    exposed: true
+    containerPort: 8000
+  - type: websocket
+    exposed: true
+    containerPort: 8001

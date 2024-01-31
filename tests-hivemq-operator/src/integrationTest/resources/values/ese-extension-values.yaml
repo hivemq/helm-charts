@@ -1,0 +1,24 @@
+global:
+  rbac:
+    pspEnabled: false
+
+operator:
+  image: hivemq/hivemq-operator:snapshot
+  imagePullPolicy: Never
+  logLevel: INFO
+  admissionWebhooks:
+    enabled: false
+
+hivemq:
+  image: hivemq/hivemq4:k8s-4.24.0
+  imagePullPolicy: Never
+  initDnsWaitImage: hivemq/init-dns-wait:snapshot
+  logLevel: DEBUG
+  nodeCount: 1
+  cpu: 1
+  memory: 1Gi
+  extensions:
+    - configMap: ese-extension-config
+      enabled: true
+      extensionUri: preinstalled
+      name: hivemq-enterprise-security-extension

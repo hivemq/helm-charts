@@ -1,0 +1,33 @@
+name: Verify
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: azure/setup-helm@v3
+        with:
+          # only needed if the version is 'latest'
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lint
+        run: |
+          helm lint ./charts/hivemq-platform
+          helm lint ./charts/hivemq-platform-operator
+          helm lint ./charts/hivemq-operator
+          helm lint ./charts/hivemq-swarm
+      - name: Unit Test
+        uses: d3adb5/helm-unittest-action@v2.3
+        with:
+          helm-version: v3.10.1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check manifests are up-to-date
+        run: |
+          ./manifests/hivemq-operator/manifests.sh
+          ./manifests/hivemq-platform-operator/manifests.sh
+          ./manifests/hivemq-platform/manifests.sh
+          ./manifests/hivemq-swarm/manifests.sh
+          git diff HEAD --exit-code

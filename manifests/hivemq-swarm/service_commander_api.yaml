@@ -1,0 +1,23 @@
+---
+# Source: hivemq-swarm/templates/service_commander_api.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-swarm-hivemq-swarm-api
+  namespace: default
+  labels:
+    hivemq.com/swarm-role: commander
+    app.kubernetes.io/name: hivemq-swarm
+    app.kubernetes.io/instance: my-swarm
+    app.kubernetes.io/version: "4.24.0"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: api
+      protocol: TCP
+      name: api
+  selector:
+    hivemq.com/swarm-role: commander
+    app.kubernetes.io/name: hivemq-swarm
+    app.kubernetes.io/instance: my-swarm

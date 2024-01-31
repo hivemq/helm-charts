@@ -1,0 +1,98 @@
+---
+# Source: hivemq-platform-operator/templates/deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: "hivemq-platform-operator"
+    app.kubernetes.io/instance: "my-operator"
+    app.kubernetes.io/version: "1.1.0"
+  name: hivemq-my-operator
+spec:
+  # The Operator cannot have more than one replica
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "hivemq-platform-operator"
+      app.kubernetes.io/instance: "my-operator"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: http
+      labels:
+        app.kubernetes.io/name: "hivemq-platform-operator"
+        app.kubernetes.io/instance: "my-operator"
+    spec:
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: hivemq.platform.operator.release.name
+              value: "my-operator"
+            - name: hivemq.platform.operator.init.image
+              value: "docker.io/hivemq/hivemq-platform-operator-init:1.1.0"
+            - name: hivemq.platform.operator.image.pull.secret
+              value: ""
+            - name: hivemq.platform.operator.log.level
+              value: "INFO"
+            # additional option to show the configuration details in the log
+            - name: hivemq.platform.operator.log.configuration
+              value: "false"
+            # additional options for fine-grained logging
+            - name: hivemq.platform.operator.quarkus.log.level
+              value: "INFO"
+            - name: hivemq.platform.operator.sdk.log.level
+              value: "INFO"
+            - name: hivemq.platform.operator.network.log.level
+              value: "WARN"
+            - name: quarkus.http.port
+              value: "8080"
+            - name: quarkus.http.ssl-port
+              value: "8443"
+          image: "docker.io/hivemq/hivemq-platform-operator:1.1.0"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: hivemq-platform-operator
+          ports:
+            - name: http-my-operato
+              containerPort: 8080
+              protocol: TCP
+            - name: https-my-operat
+              containerPort: 8443
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: "512m"
+              memory: "512M"
+            requests:
+              cpu: "512m"
+              memory: "512M"
+      serviceAccountName: hivemq-platform-operator-my-operator

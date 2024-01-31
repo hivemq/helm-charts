@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hivemq-configuration-test-hivemq-platform
+data:
+  config.xml: |
+    <?xml version="1.0"?>
+    <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="../../../../hivemq-enterprise/src/main/resources/config.xsd">
+      <listeners>
+        <tcp-listener>
+          <port>1884</port>
+          <bind-address>0.0.0.0</bind-address>
+        </tcp-listener>
+      </listeners>
+      <cluster>
+        <transport>
+          <tcp>
+            <bind-address>0.0.0.0</bind-address>
+            <bind-port>8000</bind-port>
+          </tcp>
+        </transport>
+        <enabled>true
+        </enabled>
+      </cluster>
+      <health-api>
+        <enabled>true</enabled>
+        <listeners>
+          <http>
+            <port>8889</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+        </listeners>
+      </health-api>
+      <anonymous-usage-statistics>
+        <enabled>false</enabled>
+      </anonymous-usage-statistics>
+    </hivemq>

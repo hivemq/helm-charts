@@ -1,0 +1,18 @@
+extensions:
+  - name: hivemq-custom-test-extension
+    enabled: true
+    supportsHotReload: false
+    configMapName: "custom-extension-configuration"
+    requestHeaderSecretName: custom-extension-auth-secret
+    extensionUri: http://nginx-service/hivemq-custom-test-extension-1.0.0.zip
+    customizationUri: http://nginx-service/hivemq-customization.zip
+    priority: 1500
+    startPriority: 2000
+  - name: hivemq-kafka-extension
+    enabled: true
+    supportsHotReload: true
+    configMapName: "hivemq-kafka-extension-test-configuration"
+  - name: hivemq-google-cloud-pubsub-extension
+    enabled: true
+    supportsHotReload: true
+    extensionUri: preinstalled

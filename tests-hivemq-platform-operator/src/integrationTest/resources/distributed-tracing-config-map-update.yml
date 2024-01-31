@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: distributed-tracing-configuration
+data:
+  config.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <hivemq-distributed-tracing-extension xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                          xsi:noNamespaceSchemaLocation="../../../../hivemq-distributed-tracing-extension/src/main/resources/config.xsd">
+      <service-name>HiveMQ Broker</service-name>
+      <propagators>
+        <propagator>tracecontext</propagator>
+      </propagators>
+      <exporters>
+        <otlp-exporter>
+          <id>my-otlp-grpc-exporter</id>
+          <endpoint>http://localhost:4318</endpoint>
+          <protocol>http/protobuf</protocol>
+        </otlp-exporter>
+      </exporters>
+    </hivemq-distributed-tracing-extension>

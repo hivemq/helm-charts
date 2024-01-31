@@ -1,0 +1,29 @@
+---
+# Source: hivemq-swarm/templates/service_agents_headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-swarm-hivemq-swarm-agents
+  namespace: default
+  labels:
+    hivemq.com/swarm-role: agent
+    app.kubernetes.io/name: hivemq-swarm
+    app.kubernetes.io/instance: my-swarm
+    app.kubernetes.io/version: "4.24.0"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 3881
+      targetPort: agent-transport
+      protocol: TCP
+      name: agent-transport
+    - port: 8181
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  publishNotReadyAddresses: true
+  selector:
+    hivemq.com/swarm-role: agent
+    app.kubernetes.io/name: hivemq-swarm
+    app.kubernetes.io/instance: my-swarm

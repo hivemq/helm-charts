@@ -1,0 +1,205 @@
+suite: test HiveMQ Platform custom resource
+templates:
+  - hivemq-custom-resource.yml
+tests:
+
+  - it: with operator selector
+    set:
+      operator.selector: north
+    asserts:
+      - isKind:
+          of: HiveMQPlatform
+      - equal:
+          path: metadata.labels.operator
+          value: north
+
+  - it: with image definition
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: snapshot
+      image.pullPolicy: IfNotPresent
+      image.pullSecretName: test-secret
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.imagePullSecrets[0]
+      - equal:
+          path: spec.statefulSet.spec.template.spec.imagePullSecrets[0].name
+          value: test-secret
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0]
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].image
+          value: test-repo/test-image:snapshot
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: with containers
+    set:
+      nodes.replicaCount: 10
+      nodes.logLevel: ERROR
+    asserts:
+      - isKind:
+          of: HiveMQPlatform
+      - equal:
+          path: spec.logLevel
+          value: ERROR
+      - equal:
+          path: spec.statefulSet.spec.replicas
+          value: 10
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0]
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].name
+          value: hivemq
+
+  - it: with resource limits
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0]
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: 1m
+
+  - it: with enabled security context
+    set:
+      nodes.podSecurityContext.enabled: true
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+          value: 10000
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+          value: 0
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+          value: 0
+
+  - it: with default disabled security context
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.securityContext
+
+  - it: with default values, no volumes are defined
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+
+  - it: with additional volumes
+    values:
+      - additional-volumes-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-mount-volume
+            configMap:
+              name: test-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-secret-volume
+            secret:
+              secretName: test-secret-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-empty-dir-volume
+            emptyDir: {}
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-persistent-volume-claim-volume
+            persistentVolumeClaim:
+              claimName: test-persistent-volume-claim-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-mount-volume
+            mountPath: /additional-configmap-volume/subpath-configmap
+            subPath: subpath-configmap
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-secret-volume
+            mountPath: /additional-secret-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-empty-dir-volume
+            mountPath: /additional-empty-dir-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-persistent-volume-claim-volume
+            mountPath: /additional-persistent-volume-claim-volume
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+
+  - it: with pod scheduling values set
+    values:
+      - pod-scheduling-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.affinity
+      - isSubset:
+          path: spec.statefulSet.spec.template.spec.affinity
+          content:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - my-app
+                  topologyKey: "kubernetes.io/hostname"
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.tolerations
+      - contains:
+          path: spec.statefulSet.spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: my-key
+            operator: Exists
+
+  - it: with custom pod annotations
+    set:
+      nodes:
+        annotations:
+          ad.datadoghq.com/hivemq.check_names: '["hivemq"]'
+          ad.datadoghq.com/hivemq.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
+          ad.datadoghq.com/hivemq.instances: '[{"host": "%%host%%", "port": "9010"}]'
+          ad.datadoghq.com/hivemq.logs: '[{"source": "hivemq", "service": "hivemq-platform-mqtt-1883"}]'
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.metadata.annotations
+      - isSubset:
+          path: spec.statefulSet.spec.template.metadata.annotations
+          content:
+            ad.datadoghq.com/hivemq.check_names: '["hivemq"]'
+            ad.datadoghq.com/hivemq.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
+            ad.datadoghq.com/hivemq.instances: '[{"host": "%%host%%", "port": "9010"}]'
+            ad.datadoghq.com/hivemq.logs: '[{"source": "hivemq", "service": "hivemq-platform-mqtt-1883"}]'

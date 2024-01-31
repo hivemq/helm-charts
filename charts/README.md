@@ -1,19 +1,28 @@
 # HiveMQ Helm Charts
 
-## Development
+The HiveMQ Helm Charts contain the necessary resources to deploy the respective HiveMQ application on Kubernetes. 
 
-### Updating the `hivemq` structure
+## Available Charts
 
-The `hivemq` substructure within values.yaml and its default values are generated from the operator CRD's OpenAPI specification. (Can be found in [hivemqCluster.json](https://github.com/hivemq/hivemq-operator/tree/master/operator/src/main/resources/schema/hivemqCluster.json))
+### [hivemq-platform-operator](./hivemq-platform-operator)
 
-To update the values, run `./gradlew generateSchemaDefaults` from the operator project and then copy the contents of the generated `defaults.yaml` to the values.yaml file.
+This chart deploys the HiveMQ Platform Operator that will install and manage your HiveMQ Platform clusters in Kubernetes.
 
-### Updating the `crds` folder
+### [hivemq-platform](./hivemq-platform)
 
-The CustomResourceDefinition YAML is also generated from the operator project.
-Run `./gradlew generateCustomResource` in the operator directory to directly update the `crds/` folder.
+This chart specifies the HiveMQ Platform deployment that the HiveMQ Platform Operator then installs.
 
-### Other co-dependent files
+### [hivemq-operator](./hivemq-operator)
 
-- operator-tmpls must be exactly the same as the operator repo's `src/main/templates`
-- hivemqCluster.json must be equal to operator repo's
+This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
+
+### [hivemq-swarm](./hivemq-swarm)
+
+This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulation tool.
+
+## Usage
+
+To deploy a chart, navigate to the respective chart directory and follow the instructions in the corresponding `README.md` file.
+
+## Documentation
+See the [HiveMQ Kubernetes documentation](https://docs.hivemq.com/hivemq-platform-operator/introduction.html) for more detailed information.

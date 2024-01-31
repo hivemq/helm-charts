@@ -1,0 +1,169 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "http" : {
+      "type" : "object",
+      "properties" : {
+        "port" : {
+          "type" : "integer",
+          "minimum" : 1000
+        }
+      }
+    },
+    "https" : {
+      "type" : "object",
+      "properties" : {
+        "port" : {
+          "type" : "integer",
+          "minimum" : 1000
+        }
+      }
+    },
+    "image" : {
+      "type" : "object",
+      "properties" : {
+        "initImageName" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "pullPolicy" : {
+          "type" : "string",
+          "enum" : [
+            "IfNotPresent",
+            "Never",
+            "Always"
+          ]
+        },
+        "pullSecretName" : {
+          "type" : "string"
+        },
+        "repository" : {
+          "type" : "string"
+        },
+        "tag" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "repository",
+        "name",
+        "tag",
+        "initImageName"
+      ]
+    },
+    "javaOpts" : {
+      "type" : "string"
+    },
+    "logConfiguration" : {
+      "type" : "boolean"
+    },
+    "logLevel" : {
+      "type" : "string",
+      "enum" : [
+        "FATAL",
+        "ERROR",
+        "WARN",
+        "INFO",
+        "DEBUG",
+        "TRACE"
+      ]
+    },
+    "networkLogLevel" : {
+      "type" : "string",
+      "enum" : [
+        "FATAL",
+        "ERROR",
+        "WARN",
+        "INFO",
+        "DEBUG",
+        "TRACE"
+      ]
+    },
+    "quarkusLogLevel" : {
+      "type" : "string",
+      "enum" : [
+        "FATAL",
+        "ERROR",
+        "WARN",
+        "INFO",
+        "DEBUG",
+        "TRACE"
+      ]
+    },
+    "skdLogLevel" : {
+      "type" : "string",
+      "enum" : [
+        "FATAL",
+        "ERROR",
+        "WARN",
+        "INFO",
+        "DEBUG",
+        "TRACE"
+      ]
+    },
+    "selector" : {
+      "type" : "string"
+    },
+    "resources" : {
+      "type" : "object",
+      "properties" : {
+        "cpu" : {
+          "type" : "string"
+        },
+        "memory" : {
+          "type" : "string"
+        }
+      }
+    },
+    "podSecurityContext" : {
+      "type" : "object",
+      "properties" : {
+        "runAsNonRoot" : {
+          "type" : "boolean"
+        },
+        "runAsUser" : {
+          "type" : "integer"
+        },
+        "enabled" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "serviceAccount" : {
+      "type" : "object",
+      "properties" : {
+        "create" : {
+          "type" : "boolean"
+        },
+        "name" : {
+          "type" : "string"
+        }
+      }
+    },
+    "rbac" : {
+      "type" : "object",
+      "properties" : {
+        "create" : {
+          "type" : "boolean"
+        }
+      },
+      "tls" : {
+        "type" : "object",
+        "properties" : {
+          "keystorePassword" : {
+            "type" : "string"
+          },
+          "secretName" : {
+            "type" : "string"
+          },
+          "truststorePassword" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}

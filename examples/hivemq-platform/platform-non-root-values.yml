@@ -1,0 +1,10 @@
+nodes:
+  replicaCount: 1
+  resources:
+    cpu: 1024m
+    memory: 1024M
+  podSecurityContext:
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 10000
+    runAsGroup: 0

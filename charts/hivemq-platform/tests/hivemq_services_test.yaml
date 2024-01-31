@@ -1,0 +1,546 @@
+suite: test HiveMQ Platform services
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+tests:
+
+  - it: with default values
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8080
+            containerPort: 8080
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8080
+            spec:
+              ports:
+                - name: cc-8080
+                  targetPort: cc-8080
+                  port: 8080
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
+
+  - it: with NodePort
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          serviceType: NodePort
+    asserts:
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              type: NodePort
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with additional annotations
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          annotations:
+            test-annotation-key: test-annotation-value
+    asserts:
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+              annotations:
+                test-annotation-key: test-annotation-value
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with a mqtt service enabled
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1884
+            containerPort: 1884
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with a control-center service enabled
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8081
+            containerPort: 8081
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with a rest-api service enabled
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a websocket service enabled
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8000
+            containerPort: 8000
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8000
+            spec:
+              ports:
+                - name: ws-8000
+                  targetPort: ws-8000
+                  port: 8000
+
+  - it: with tls secret defined and port
+    values:
+      # Using the values yaml to generate a template as well
+      - tls-service-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret"
+            secret:
+              secretName: "mqtt-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret1"
+            secret:
+              secretName: "mqtt-secret1"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "control-center-secret"
+            secret:
+              secretName: "control-center-secret"
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_mqtt-secret_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "control-center_test-hivemq-platform_control-center-secret_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "keystore.password"
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1883
+            name: mqtts-1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1884
+            name: mqtts-1884
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1885
+            name: mqtts-1885
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 8080
+            name: cc-8080
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 9399
+            name: metrics-9399
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret"
+            mountPath: "/tls-mqtt-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret1"
+            mountPath: "/tls-mqtt-secret1"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "control-center-secret"
+            mountPath: "/tls-control-center-secret"
+            readOnly: true
+
+  - it: with tls secret not defined, volume and secrets not defined
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+
+  - it: with mutual tls secret defined and port
+    values:
+      - mtls-service-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret"
+            secret:
+              secretName: "mqtt-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "truststore-secret"
+            secret:
+              secretName: "truststore-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret1"
+            secret:
+              secretName: "mqtt-secret1"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "truststore-secret1"
+            secret:
+              secretName: "truststore-secret1"
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_mqtt-secret_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_truststore-secret_truststore_pass"
+            value: "truststore-password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_truststore-secret1_truststore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "truststore.password"
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1883
+            name: mqtts-1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1884
+            name: mqtts-1884
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1885
+            name: mqtts-1885
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 9399
+            name: metrics-9399
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret"
+            mountPath: "/tls-mqtt-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret"
+            mountPath: "/tls-truststore-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret1"
+            mountPath: "/tls-mqtt-secret1"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret1"
+            mountPath: "/tls-truststore-secret1"
+            readOnly: true
+
+  - it: with multiple service listeners defined
+    values:
+      - multiple-service-listeners.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1884
+            containerPort: 1884
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8000
+            containerPort: 8000
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - isNotEmpty:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8000
+            spec:
+              ports:
+                - name: ws-8000
+                  targetPort: ws-8000
+                  port: 8000
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399

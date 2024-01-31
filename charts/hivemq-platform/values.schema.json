@@ -1,0 +1,289 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "config" : {
+      "type" : "object",
+      "properties" : {
+        "create" : {
+          "type" : "boolean"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "overrideContent" : {
+          "type" : "string"
+        },
+        "statefulSet" : {
+          "type" : "string"
+        }
+      }
+    },
+    "controlCenter" : {
+      "type" : "object",
+      "properties" : {
+        "username" : {
+          "type" : "string"
+        },
+        "password" : {
+          "type" : "string"
+        }
+      }
+    },
+    "additionalVolumes" : {
+      "type" : "array",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "mountName" : {
+          "type" : "string"
+        },
+        "path" : {
+          "type" : "string"
+        },
+        "subPath": {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : [
+            "configMap",
+            "secret",
+            "emptyDir",
+            "persistentVolumeClaim"
+          ]
+        }
+      }
+    },
+    "services" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [
+              "control-center",
+              "rest-api",
+              "metrics",
+              "mqtt",
+              "websocket"
+            ]
+          },
+          "annotations": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "serviceType": {
+            "type" : "string",
+            "enum" : [
+              "ClusterIP",
+              "NodePort",
+              "LoadBalancer"
+            ]
+          },
+          "exposed" : {
+            "type" : "boolean"
+          },
+          "port" : {
+            "type" : "integer",
+            "minimum" : 0
+          },
+          "containerPort" : {
+            "type" : "integer",
+            "minimum" : 0
+          },
+          "keystoreSecretName" : {
+            "type" : "string"
+          },
+          "keystoreSecretKey" : {
+            "type" : "string"
+          },
+          "keystorePassword" : {
+            "type" : "string"
+          },
+          "keystorePasswordSecretName" : {
+            "type" : "string"
+          },
+          "truststoreSecretName" : {
+            "type" : "string"
+          },
+          "truststoreSecretKey" : {
+            "type" : "string"
+          },
+          "truststorePassword" : {
+            "type" : "string"
+          },
+          "truststorePasswordSecretName" : {
+            "type" : "string"
+          },
+          "tlsClientAuthenticationMode": {
+            "type" : "string",
+            "enum" : [
+              "NONE",
+              "OPTIONAL",
+              "REQUIRED"
+            ]
+          }
+        },
+        "required" : [
+          "type",
+          "containerPort",
+          "exposed"
+        ]
+      }
+    },
+    "extensions" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "supportsHotReload" : {
+            "type" : "boolean"
+          },
+          "configMapName" : {
+            "type" : "string"
+          },
+          "requestHeaderSecretName" : {
+            "type" : "string"
+          },
+          "extensionUri" : {
+            "type" : "string"
+          },
+          "customizationUri" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "type" : "integer"
+          },
+          "startPriority" : {
+            "type" : "integer"
+          }
+        }
+      }
+    },
+    "image" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "pullPolicy" : {
+          "type" : "string",
+          "enum" : [
+            "IfNotPresent",
+            "Never",
+            "Always"
+          ]
+        },
+        "pullSecretName" : {
+          "type" : "string"
+        },
+        "repository" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "repository",
+        "name"
+      ]
+    },
+    "license" : {
+      "type" : "object",
+      "properties" : {
+        "data" : {
+          "type" : "string"
+        },
+        "fileContent" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        }
+      }
+    },
+    "nodes" : {
+      "type" : "object",
+      "properties" : {
+        "javaOpts" : {
+          "type" : "string"
+        },
+        "logLevel" : {
+          "type" : "string",
+          "enum" : [
+            "FATAL",
+            "ERROR",
+            "WARN",
+            "INFO",
+            "DEBUG",
+            "TRACE"
+          ]
+        },
+        "replicaCount" : {
+          "type" : "integer",
+          "minimum" : 1
+        },
+        "resources" : {
+          "type" : "object",
+          "properties" : {
+            "cpu" : {
+              "type" : "string"
+            },
+            "memory" : {
+              "type" : "string"
+            }
+          }
+        },
+        "annotations" : {
+          "type" : "object",
+          "additionalProperties": true
+        },
+        "podSecurityContext" : {
+          "type" : "object",
+          "properties" : {
+            "runAsNonRoot" : {
+              "type" : "boolean"
+            },
+            "runAsUser" : {
+              "type" : "integer"
+            },
+            "enabled" : {
+              "type" : "boolean"
+            }
+          }
+        }
+      }
+    },
+    "podScheduling": {
+      "type": "object",
+      "properties" : {
+        "affinity" : {
+          "type" : "object",
+          "additionalProperties": true
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "operator" : {
+      "type" : "object",
+      "properties" : {
+        "selector" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

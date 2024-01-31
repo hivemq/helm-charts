@@ -1,0 +1,290 @@
+# HiveMQ Platform Helm Chart default values
+
+# HiveMQ Platform container image configuration
+image:
+  repository: docker.io/hivemq
+  name: hivemq4
+  tag: 4.24.0
+  pullPolicy: IfNotPresent
+  pullSecretName: ""
+
+# Provides the HiveMQ Platform configuration (config.xml) as a Kubernetes ConfigMap.
+config:
+  # Creates a new ConfigMap with a standard config.xml.
+  create: true
+  # Provides the name of the ConfigMap that contains a custom "config.xml" (set create=false).
+  name: ""
+  # Inlines the config.xml and overrides the default ConfigMap configuration.
+  overrideHiveMQConfig: ""
+  # Inlines the StatefulSet configuration and overrides the default StatefulSet.
+  overrideStatefulSet: ""
+  # Enables HiveMQ Data Hub
+  dataHub:
+    dataValidationEnabled: false
+    behaviorValidationEnabled: false
+
+# Selector name that is used to match the selector of the managing operator.
+# This selector assigns the HiveMQ Platform to a specific operator.
+operator:
+  selector: nil
+
+# Settings for the HiveMQ Platform nodes
+nodes:
+  # The number of HiveMQ nodes in the cluster
+  replicaCount: 2
+  logLevel: DEBUG
+  javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+  # Annotations to add to the HiveMQ Pods
+  annotations: {}
+
+  # Resources, limits and requests are set to equal values.
+  # Note: For production use-cases HiveMQ requires a minimum of 4 CPUs and 4G of memory.
+  #       See: https://docs.hivemq.com/hivemq/latest/user-guide/system-requirements.html#minimum
+  resources:
+    cpu: 1024m
+    memory: 2048M
+
+  # Requires that the image provides support for the configured user.
+  # Note: The standard official HiveMQ image hivemq/hivemq4 supports a pre-installed user "10000" and group "0".
+  #       Therefore, it is possible to run this image with user "root" or "10000" and the group "0".
+  #       Other settings require a custom image that supports the changes.
+  podSecurityContext:
+    enabled: false
+    runAsNonRoot: true
+    runAsUser: 10000
+    runAsGroup: 0
+
+# Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
+podScheduling:
+  # Configures the affinity for the Platform pods
+  affinity: {}
+  # podAffinity:
+  #    requiredDuringSchedulingIgnoredDuringExecution:
+  #      - labelSelector:
+  #          matchExpressions:
+  #            - key: app
+  #              operator: In
+  #              values:
+  #                - my-app
+  #        topologyKey: "kubernetes.io/hostname"
+
+  # Configures the tolerations for the Platform pods
+  tolerations: []
+  #  - key: "example-key"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+
+# Configure exposed Services and ports
+# Possible service types are: "control-center", "rest-api", "mqtt", "websocket"
+services:
+  # MQTT service configuration
+  - type: mqtt
+    exposed: true
+    containerPort: 1883
+    # Set if service port is different from container port
+    port: 1883
+    # Set if different from ClusterIP. Possible values are `ClusterIP`, `NodePort` and `LoadBalancer`
+    # serviceType: NodePort
+    # Annotations to add to the service
+    annotations: {}
+  # Secure MQTT service configuration
+  - type: mqtt
+    exposed: false
+    containerPort: 8883
+    # The name of the Kubernetes secret that contains the keystore file.
+    keystoreSecretName: ""
+    # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
+    keystoreSecretKey: ""
+    # The inlined password for the keystore, Base 64 encoded.
+    keystorePassword: ""
+    # Alternatively, the name of the secret with the password, using the key: `keystore.password`.
+    keystorePasswordSecretName: ""
+    # The name of the Kubernetes secret that contains the truststore file.
+    truststoreSecretName: ""
+    # The key of the Kubernetes secret that contains the truststore file. Defaults to `truststore`
+    truststoreSecretKey: ""
+    # The inlined password for the truststore, Base 64 encoded.
+    truststorePassword: ""
+    # Alternatively, the name of the secret with the password, using the key: `truststore.password`.
+    truststorePasswordSecretName: ""
+    # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
+    tlsClientAuthenticationMode: "NONE"
+  # Control Center service configuration
+  - type: control-center
+    exposed: true
+    containerPort: 8080
+  # RestAPI service configuration
+  - type: rest-api
+    exposed: false
+    containerPort: 8888
+  # WebSocket service configuration
+  - type: websocket
+    exposed: false
+    containerPort: 8001
+  # Secure WebSocket service configuration
+  - type: websocket
+    exposed: false
+    containerPort: 8000
+    # The name of the Kubernetes secret that contains the keystore file.
+    keystoreSecretName: ""
+    # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
+    keystoreSecretKey: ""
+    # The inlined password for the keystore, Base 64 encoded.
+    keystorePassword: ""
+    # Alternatively, the name of the secret with the password, using the key: "keystore.password".
+    keystorePasswordSecretName: ""
+    # The name of the Kubernetes secret that contains the truststore file.
+    truststoreSecretName: ""
+    # The key of the Kubernetes secret that contains the truststore file. Defaults to `truststore`
+    truststoreSecretKey: ""
+    # The inlined password for the truststore, Base 64 encoded.
+    truststorePassword: ""
+    # Alternatively, the name of the secret with the password, using the key: "truststore.password".
+    truststorePasswordSecretName: ""
+    # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
+    tlsClientAuthenticationMode: "NONE"
+
+# Configures the HiveMQ License information.
+license:
+  # The name of a secret with the License information. Add all required licenses into the secret.
+  name: ""
+  # Inlines the License information as an encoded 64-bytes string.
+  data: ""
+  # Overrides the License information via file using --set-file license.lic.
+  overrideLicense: ""
+
+# Overrides the default ControlCenter username and password.
+# Set both values to override the default configuration.
+controlCenter:
+  username: ""
+  # Password as SHA256 HASH. See password generation here:
+  # https://docs.hivemq.com/hivemq/latest/control-center/configuration.html#generate-password
+  password: ""
+
+# HiveMQ Platform extension configuration
+extensions:
+
+# HiveMQ Allow All Extension
+# By default, the HiveMQ Platform is installed with this extension to permit all MQTT connections for testing.
+# For production, add a security extension and disable this extension.
+  - name: hivemq-allow-all-extension
+    enabled: true
+
+# HiveMQ Enterprise Extension for Kafka
+#  - name: hivemq-kafka-extension
+#    enabled: true
+#    # The Kafka extension supports hot-reload of the configuration.
+#    supportsHotReload: true
+#    # The ConfigMap name that contains the Kafka extension configuration.
+#    configMapName: ""
+#    # The Secret name that contains request headers for the customization download.
+#    requestHeaderSecretName: ""
+#    # The URI to download a customization for the Kafka extension.
+#    customizationUri: ""
+
+# HiveMQ Enterprise Extension for Google Pub/Sub
+#  - name: hivemq-google-cloud-pubsub-extension
+#    enabled: true
+#    # The Google Pub/Sub extension supports hot-reload of the configuration.
+#    supportsHotReload: true
+#    # The ConfigMap name that contains the Google Pub/Sub extension configuration.
+#    configMapName: ""
+#    # The Secret name that contains request headers for the customization download.
+#    requestHeaderSecretName: ""
+#    # The URI to download a customization for the Google Pub/Sub extension.
+#    customizationUri: ""
+
+# HiveMQ Enterprise Extension for Amazon Kinesis
+#  - name: hivemq-amazon-kinesis-extension
+#    enabled: true
+#    # The Amazon Kinesis extension supports hot-reload of the configuration.
+#    supportsHotReload: true
+#    # The ConfigMap name that contains the Amazon Kinesis extension configuration.
+#    configMapName: ""
+#    # The Secret name that contains request headers for the customization download.
+#    requestHeaderSecretName: ""
+#    # The URI to download a customization for the Amazon Kinesis extension.
+#    customizationUri: ""
+
+# HiveMQ Enterprise Security Extension
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-enterprise-security-extension
+#    enabled: true
+#    # The ConfigMap name that contains the Security extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Distributed Tracing Extension
+#  - name: hivemq-distributed-tracing-extension
+#    enabled: true
+#    # The Tracing extension supports hot-reload of the configuration.
+#    supportsHotReload: true
+#    # The ConfigMap name that contains the Tracing extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Extension for MongoDB
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-mongodb-extension
+#    enabled: true
+#    # The ConfigMap name that contains the MongoDB extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Extension for PostgreSQL
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-mysql-extension
+#    enabled: true
+#    # The ConfigMap name that contains the PostgreSQL extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Extension for MySQL
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-postgresql-extension
+#    enabled: true
+#    # The ConfigMap name that contains the MySQL extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Extension for Snowflake
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-snowflake-extension
+#    enabled: true
+#    # The ConfigMap name that contains the Snowflake extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Bridge Extension
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-bridge-extension
+#    enabled: true
+#    # The ConfigMap name that contains the Bridge extension configuration.
+#    configMapName: ""
+
+# Custom extension
+#  - name: custom-extension-id
+#    enabled: true
+#    # Defines if your custom extension supports hot-reload of its configuration, or if it needs to be restarted on configuration changes.
+#    supportsHotReload: false
+#    # The ConfigMap name that contains the extension configuration (will be mounted into the subfolder "conf" of the extension folder).
+#    configMapName: ""
+#    # The Secret name that contains request headers for the custom extension download.
+#    requestHeaderSecretName: ""
+#    # The URI to download the custom extension (as .zip distribution).
+#    extensionUri: ""
+#    # Dynamically configures the extension priority value in the "hivemq-extension.xml" file.
+#    priority: 1000
+#    # Dynamically configures the extension start-priority value in the "hivemq-extension.xml" file.
+#    startPriority: 1000
+
+# Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim".
+additionalVolumes: []
+#  - type: configMap
+#    name: configmap-name
+#    mountName: mount-name
+#    path: /file/mount/path
+#    subPath: ""
+
+# type: Choose a type of volume that you want to mount.
+# name: Optional name for the secret or the configmap to be mounted
+# mountName: The mountName to be used for the StatefulSet Spec.
+# path: The path configures the directory to which the volume is mounted in the container
+#       If the directory already exists then the contents are overwritten!
+# subPath: Optional name for the subPath. If a volume is mounted with subPath than the contents
+#          of the directory are not overwritten. However, note that changes to a configmap for example
+#          mounted via subPath will not be propagated to the container. Therefore pods have to be restarted.

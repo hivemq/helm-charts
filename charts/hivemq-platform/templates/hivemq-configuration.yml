@@ -1,0 +1,182 @@
+{{- if .Values.config.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hivemq-platform.configuration-name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hivemq-platform.labels" . | nindent 4 }}
+data:
+  # noinspection XmlPathReference
+  config.xml: |-
+    {{- if .Values.config.overrideHiveMQConfig -}}
+    {{ .Values.config.overrideHiveMQConfig | nindent 3}}
+    {{- else }}
+    <?xml version="1.0"?>
+    <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+      {{- $hastMqtt := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "mqtt") }}
+      {{- $hasWebsocket := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "websocket") }}
+      {{- if or $hastMqtt $hasWebsocket }}
+      <listeners>
+      {{- range $key, $val := .Values.services }}
+        {{- if and (eq $val.type "mqtt") $val.exposed }}
+        {{- if $val.keystoreSecretName }}
+        <tls-tcp-listener>
+          <port>{{ $val.containerPort }}</port>
+          <bind-address>0.0.0.0</bind-address>
+          <tls>
+            <keystore>
+              <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
+              <private-key-password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</private-key-password>
+            </keystore>
+            {{- if $val.truststoreSecretName }}
+            <truststore>
+              <path>/tls-{{ $val.truststoreSecretName }}/{{ $val.truststoreSecretKey | default "truststore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass" }}</password>
+            </truststore>
+            {{- end}}
+            {{- if $val.tlsClientAuthenticationMode}}
+            <client-authentication-mode>{{ $val.tlsClientAuthenticationMode }}</client-authentication-mode>
+            {{- end}}
+          </tls>
+        </tls-tcp-listener>
+        {{- else }}
+        <tcp-listener>
+          <port>{{ $val.containerPort }}</port>
+          <bind-address>0.0.0.0</bind-address>
+        </tcp-listener>
+        {{- end }}
+        {{- else if and (eq $val.type "websocket") $val.exposed }}
+        {{- if $val.keystoreSecretName }}
+        <tls-websocket-listener>
+          <port>{{ $val.containerPort }}</port>
+          <bind-address>0.0.0.0</bind-address>
+          <path>/mqtt</path>
+          <tls>
+            <keystore>
+              <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
+              <private-key-password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</private-key-password>
+            </keystore>
+            {{- if $val.truststoreSecretName }}
+            <truststore>
+              <path>/tls-{{ $val.truststoreSecretName }}/{{ $val.truststoreSecretKey | default "truststore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass" }}</password>
+            </truststore>
+            {{- end}}
+            {{- if $val.tlsClientAuthenticationMode}}
+            <client-authentication-mode>{{ $val.tlsClientAuthenticationMode }}</client-authentication-mode>
+            {{- end}}
+          </tls>
+        </tls-websocket-listener>
+        {{- else }}
+        <websocket-listener>
+          <port>{{ $val.containerPort }}</port>
+          <bind-address>0.0.0.0</bind-address>
+          <path>/mqtt</path>
+        </websocket-listener>
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      </listeners>
+      {{- end }}
+      <cluster>
+        <transport>
+          <tcp>
+            <bind-address>0.0.0.0</bind-address>
+            <bind-port>7000</bind-port>
+          </tcp>
+        </transport>
+        <enabled>true</enabled>
+        <discovery>
+          <extension/>
+        </discovery>
+      </cluster>
+      <!-- required and should not be configured different -->
+      <health-api>
+        <enabled>true</enabled>
+        <listeners>
+          <http>
+            <port>8889</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+        </listeners>
+      </health-api>
+      <!-- -->
+      {{- $hasControlCenter := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "control-center") }}
+      {{- if $hasControlCenter }}
+      <control-center>
+        <listeners>
+        {{- range $key, $val := .Values.services }}
+          {{- if eq $val.type "control-center" }}
+          <http>
+            <port>{{ $val.containerPort }}</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+          {{- end }}
+        {{- end }}
+        </listeners>
+        {{- if and .Values.controlCenter.username .Values.controlCenter.password }}
+        <users>
+          <user>
+            <name>{{ .Values.controlCenter.username | trim }}</name>
+            <password>{{ .Values.controlCenter.password | trim }}</password>
+          </user>
+        </users>
+        {{- end }}
+      </control-center>
+      {{- end }}
+      {{- $hasRestApi := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "rest-api") }}
+      {{- if $hasRestApi }}
+      <rest-api>
+        <enabled>true</enabled>
+        <auth>
+          <enabled>false</enabled>
+        </auth>
+        {{- range $key, $val := .Values.services }}
+        {{- if eq $val.type "rest-api" }}
+        <listeners>
+          <http>
+            <port>{{ $val.containerPort }}</port>
+            <bind-address>0.0.0.0</bind-address>
+          </http>
+        </listeners>
+        {{- end }}
+        {{- end }}
+      </rest-api>
+      {{- end }}
+      <anonymous-usage-statistics>
+        <enabled>false</enabled>
+      </anonymous-usage-statistics>
+      {{- if and .Values.config.dataHub (or .Values.config.dataHub.behaviorValidationEnabled .Values.config.dataHub.dataValidationEnabled) }}
+      <data-hub>
+        {{- if .Values.config.dataHub.dataValidationEnabled }}
+        <data-validation>
+          <enabled>true</enabled>
+        </data-validation>
+        {{- end }}
+        {{- if .Values.config.dataHub.behaviorValidationEnabled }}
+        <behavior-validation>
+          <enabled>true</enabled>
+        </behavior-validation>
+        {{- end }}
+      </data-hub>
+      {{- end }}
+    </hivemq>
+  tracing.xml: |-
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <tracing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tracing.xsd">
+      <context-propagation>
+        <outbound-context-propagation>
+          <enabled>false</enabled>
+        </outbound-context-propagation>
+      </context-propagation>
+      <sampling>
+        <publish-sampling>
+          <enabled>true</enabled>
+        </publish-sampling>
+      </sampling>
+    </tracing>
+    {{- end -}}
+{{- end }}

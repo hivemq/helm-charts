@@ -2,32 +2,45 @@
 
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hivemq)](https://artifacthub.io/packages/search?repo=hivemq)
 
-This repository contains HiveMQ Helm charts.
+[![Correct Templates](https://github.com/hivemq/helm-charts/actions/workflows/verify.yml/badge.svg)](https://github.com/hivemq/helm-charts/actions/workflows/verify.yml) [![Smoke Test](https://github.com/hivemq/helm-charts/actions/workflows/smoke-test.yml/badge.svg)](https://github.com/hivemq/helm-charts/actions/workflows/smoke-test.yml) [![Integration Test](https://github.com/hivemq/helm-charts/actions/workflows/integration-test.yml/badge.svg?branch=master)](https://github.com/hivemq/helm-charts/actions/workflows/integration-test.yml)
 
-## Usage
+This repository contains the HiveMQ Helm charts.
 
-**Quick start**
+- The [HiveMQ Platform Operator Helm chart](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-platform-operator) (new)
+  - This chart deploys the latest HiveMQ Platform Operator that installs and manages your HiveMQ Platform clusters in Kubernetes.
+  
+- The [HiveMQ Platform Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-platform) (new)
+  - This chart specifies the HiveMQ Platform deployment that the HiveMQ Platform Operator then installs.  
+      
+- The [HiveMQ Operator Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-operator) (legacy)
+  - This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
+  
+- The [HiveMQ Swarm Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-swarm)
+  - This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulation tool.
 
-Add the HiveMQ Helm Chart repository to your Helm installations:
+## Documentation
+See the [HiveMQ Kubernetes documentation](https://docs.hivemq.com/hivemq-platform-operator/introduction.html) for more detailed information.
 
-`helm repo add hivemq https://hivemq.github.io/helm-charts`
 
-Install the HiveMQ Helm Chart:
+## Register the HiveMQ Helm chart repository
 
-`helm upgrade --install hivemq hivemq/hivemq-operator`
+Add the HiveMQ Helm Chart repository to your local Helm setup:
 
-The result of this command is a running HiveMQ cluster on your Kubernetes cluster that is maintained and managed by the HiveMQ Kubernetes Operator.
+`helm repo add hivemq https://hivemq.github.io/helm-charts`  
+`helm repo update`
 
-See the [HiveMQ documentation](https://www.hivemq.com/docs/operator/latest/kubernetes-operator/deploying.html#helm-chart) for more detailed instructions on how to use the helm chart.
+Refer to the individual Helm chart instructions for usage.
 
-## Release
-To release a new helm chart the Chart.yaml versions should be updated. 
+## Manifests
 
-When the operator is updated, the `values.yaml` should be also modified, for the image version.
+The manifest folder contains the rendered yaml files of the Helm charts with default values. The manifests can be modified, configured, and used for manual deployment with kubectl. 
 
 ## Examples
 
-Configuration examples can be found in the folder [examples](/examples)
+The examples folder contains configuration examples for each of the Helm charts. This folder also contains yaml files that are helpful for specific environments such as Openshift. 
+
+## Tests
+Integration tests are split into two Gradle submodules. One submodule for the HiveMQ Platform Operator (new): [`tests-hivemq-platform-operator`](./tests-hivemq-platform-operator) and another submodule for the HiveMQ Operator (legacy): [`tests-hivemq-operator`](./tests-hivemq-operator).
 
 ## Contributing
 
