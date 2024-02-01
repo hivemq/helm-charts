@@ -52,7 +52,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Run HiveMQ Platform Operator integration tests
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2
         env:
           TEST_PLAN: ${{ matrix.test-plan }}
         with:
@@ -118,7 +118,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Run HiveMQ Platform Operator integration tests
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2
         env:
           TEST_PLAN: ${{ matrix.test-plan }}
         with:
