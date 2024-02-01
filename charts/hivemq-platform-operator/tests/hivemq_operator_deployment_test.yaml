@@ -57,6 +57,38 @@ tests:
             name: hivemq.platform.operator.image.pull.secret
             value: "test-pull-secret-name"
 
+  - it: with custom environment variables for the operator container
+    values:
+      - custom-env-vars-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.containers[0]
+      - isNotEmpty:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MY_CUSTOM_ENV_VAR1
+            value: "mycustomvalue1"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MY_CUSTOM_ENV_VAR2
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: mysecretkey
+                optional: false
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: MY_CUSTOM_ENV_VAR3
+            valueFrom:
+              configMapKeyRef:
+                name: myconfigmap
+                key: myconfigmapkey
+                optional: true
+
   - it: with default security context disabled
     asserts:
       - notExists:

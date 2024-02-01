@@ -53,6 +53,24 @@ nodes:
     runAsNonRoot: true
     runAsUser: 10000
     runAsGroup: 0
+  # Specifies environment variables to be added to the HiveMQ Platform container.
+  # Environment variables can be defined as a list of either key-value pairs or
+  # using valueFrom to reference a secret or config map.
+  env: []
+  # - name: <ENV_VAR_NAME1>
+  #   value: <value>
+  # - name: <ENV_VAR_NAME2>
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: mysecretkey
+  #       optional: false
+  #  - name: <ENV_VAR_NAME3>
+  #    valueFrom:
+  #      configMapKeyRef:
+  #        name: myconfigmap
+  #        key: myconfigmapkey
+  #        optional: true
 
 # Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
 podScheduling:

@@ -82,6 +82,9 @@ spec:
                 {{- end }}
                 {{- end }}
                 {{- end }}
+                {{- with .Values.nodes.env }}
+                  {{- toYaml . | nindent 16 }}
+                {{- end }}
               image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               ports:

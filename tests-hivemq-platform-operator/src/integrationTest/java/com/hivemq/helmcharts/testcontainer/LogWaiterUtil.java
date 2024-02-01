@@ -17,7 +17,7 @@ public class LogWaiterUtil implements BiConsumer<String, String> {
 
     @Override
     public void accept(final @NotNull String prefix, final @NotNull String line) {
-        final Map<String, CompletableFuture<String>> prefixPatterns = patterns.getOrDefault(prefix, Map.of());
+        final Map<String, CompletableFuture<String>> prefixPatterns = getOrDefault(prefix);
         prefixPatterns.forEach((pattern, future) -> {
             if (line.matches(pattern)) {
                 LOG.info("TEST Found log pattern on '{}': {}", prefix, pattern);
@@ -31,5 +31,14 @@ public class LogWaiterUtil implements BiConsumer<String, String> {
         LOG.info("TEST Waiting for log pattern on '{}': {}", prefix, pattern);
         return patterns.computeIfAbsent(prefix, s -> new ConcurrentHashMap<>())
                 .computeIfAbsent(pattern, s -> new CompletableFuture<>());
+    }
+
+    private @NotNull Map<String, CompletableFuture<String>> getOrDefault(final @NotNull String prefix) {
+        for (final String key : patterns.keySet()) {
+            if (prefix.matches(key)) {
+                return patterns.get(key);
+            }
+        }
+        return patterns.getOrDefault(prefix, Map.of());
     }
 }

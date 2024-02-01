@@ -132,6 +132,13 @@
         }
       }
     },
+    "env": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
     "serviceAccount" : {
       "type" : "object",
       "properties" : {

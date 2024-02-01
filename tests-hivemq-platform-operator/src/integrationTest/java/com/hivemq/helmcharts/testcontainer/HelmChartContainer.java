@@ -224,8 +224,11 @@ public class HelmChartContainer extends K3sContainer {
     }
 
     public @NotNull KubernetesClient getKubernetesClient() {
-        final var config = Config.fromKubeconfig(getKubeConfigYaml());
-        return new KubernetesClientBuilder().withConfig(config).build();
+        if (client == null) {
+            final var config = Config.fromKubeconfig(getKubeConfigYaml());
+            return new KubernetesClientBuilder().withConfig(config).build();
+        }
+        return client;
     }
 
     public void installOperatorChart(
@@ -577,7 +580,8 @@ public class HelmChartContainer extends K3sContainer {
                                             printLine);
                                     logWaiter.accept(podName, line);
                                 });
-                            } catch (final Exception ignored) {
+                            } catch (final Exception exception) {
+                                LOG.error("Error while reading and processing log output for [{}] [{}]", logPodName, containerName, exception);
                             }
                             removeAndCloseLogWatcher(containerName, podName, podUid);
                         });

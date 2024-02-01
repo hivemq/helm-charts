@@ -19,7 +19,8 @@ import static org.awaitility.Awaitility.await;
 @Tag("CustomConfig")
 class HelmCustomConfigIT {
 
-    private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
+    private static final @NotNull String PLATFORM_RELEASE_NAME = "hivemq-platform";
+    private static final @NotNull String OPERATOR_RELEASE_NAME = "platform-operator";
     private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER = new HelmChartContainer();
 
     @SuppressWarnings("NotNullFieldNotInitialized")
@@ -27,22 +28,23 @@ class HelmCustomConfigIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    public static void setup() throws Exception {
+    static void setup() {
         HELM_CHART_CONTAINER.start();
-        HELM_CHART_CONTAINER.installOperatorChart("test-hivemq-platform-operator");
         client = HELM_CHART_CONTAINER.getKubernetesClient();
     }
 
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    public static void shutdown() {
+    static void shutdown() {
         HELM_CHART_CONTAINER.stop();
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCustomYml_hivemqRunning() throws Exception {
-        final var customResourceName = "test-hivemq-platform";
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
+
+        final var customResourceName = "hivemq-platform";
         final var namespace = "config-custom-yml";
         HELM_CHART_CONTAINER.createNamespace(namespace);
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
@@ -77,13 +79,20 @@ class HelmCustomConfigIT {
                 "--namespace",
                 namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
+                "--cascade",
+                "foreground",
+                "--namespace",
+                "default");
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCustomXml_hivemqRunning() throws Exception {
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
+
         final var namespace = "config-custom-xml";
-        final var customResourceName = "test-hivemq-platform";
+        final var customResourceName = "hivemq-platform";
         HELM_CHART_CONTAINER.createNamespace(namespace);
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "--namespace",
@@ -95,7 +104,7 @@ class HelmCustomConfigIT {
         await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
             final var configmap = client.configMaps()
                     .inNamespace(namespace)
-                    .withName("hivemq-configuration-test-hivemq-platform")
+                    .withName("hivemq-configuration-hivemq-platform")
                     .get();
             assertThat(configmap).isNotNull();
             final var xmlConfig = configmap.getData().get("config.xml");
@@ -108,12 +117,19 @@ class HelmCustomConfigIT {
                 "--namespace",
                 namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
+                "--cascade",
+                "foreground",
+                "--namespace",
+                "default");
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withExistingConfigMap_customResourceCreated() throws Exception {
-        final var customResourceName = "test-hivemq-platform";
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
+
+        final var customResourceName = "hivemq-platform";
         final var namespace = "existing-configmap";
         HELM_CHART_CONTAINER.createNamespace(namespace);
 
@@ -141,5 +157,58 @@ class HelmCustomConfigIT {
                 "--namespace",
                 namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
+                "--cascade",
+                "foreground",
+                "--namespace",
+                "default");
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void withCustomEnvVars_hivemqRunning() throws Exception {
+        final var operatorNamespace = "operator-custom-env-vars";
+        HELM_CHART_CONTAINER.createNamespace(operatorNamespace);
+        final var configMap =
+                K8sUtil.createConfigMap(client, operatorNamespace, "operator-custom-env-var-config-map.yml");
+        assertThat(configMap).isNotNull();
+        final var platformNamespace = "platform-custom-env-vars-namespace";
+        final var operatorStartedFuture = HELM_CHART_CONTAINER.getLogWaiter()
+                .waitFor("hivemq-platform-operator-.*",
+                        ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[platform-custom-env-vars-namespace\\]");
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME,
+                "--namespace",
+                operatorNamespace,
+                "-f",
+                "/files/custom-operator-env-vars-test-values.yaml");
+        await().atMost(1, TimeUnit.MINUTES).until(operatorStartedFuture::isDone);
+
+        final var customResourceName = "hivemq-platform";
+        HELM_CHART_CONTAINER.createNamespace(platformNamespace);
+
+        HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
+                "--namespace",
+                platformNamespace,
+                "-f",
+                "/files/custom-platform-env-vars-test-values.yaml");
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, customResourceName);
+
+        final var statefulSet = K8sUtil.getStatefulSet(client, platformNamespace, customResourceName);
+        assertThat(K8sUtil.getHiveMQContainer(statefulSet.getSpec())
+                .getEnv()).anyMatch(envVar -> "MY_CUSTOM_ENV_VAR".equals(envVar.getName()) &&
+                "mycustomvalue".equals(envVar.getValue()));
+
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
+                "--cascade",
+                "foreground",
+                "--namespace",
+                platformNamespace);
+        HELM_CHART_CONTAINER.deleteNamespace(platformNamespace);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
+                "--cascade",
+                "foreground",
+                "--namespace",
+                operatorNamespace);
+        HELM_CHART_CONTAINER.deleteNamespace(operatorNamespace);
     }
 }
