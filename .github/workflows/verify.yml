@@ -20,7 +20,7 @@ jobs:
           helm lint ./charts/hivemq-operator
           helm lint ./charts/hivemq-swarm
       - name: Unit Test
-        uses: d3adb5/helm-unittest-action@v2.3
+        uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
         with:
           helm-version: v3.10.1
           github-token: ${{ secrets.GITHUB_TOKEN }}
