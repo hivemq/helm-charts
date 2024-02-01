@@ -1,11 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>hivemq/renovate-config:default.json5"
+    "local>hivemq/renovate-config:default.json5",
+    "helpers:pinGitHubActionDigests"
   ],
   baseBranches: [
     "master",
     "renovate-playground"
+  ],
+  enabledManagers: [
+        "github-actions"
   ],
   "useBaseBranchConfig": "merge",
   "branchPrefix": "renovate/helm-charts/"
