@@ -98,6 +98,9 @@ spec:
                   key: truststore.password
               {{- end }}
             {{- end }}
+            {{- with .Values.env }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           image: "{{ .Values.image.repository}}/{{ .Values.image.name }}:{{.Values.image.tag}}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           livenessProbe:

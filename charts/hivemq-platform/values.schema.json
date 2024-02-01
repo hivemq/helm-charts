@@ -258,6 +258,13 @@
               "type" : "boolean"
             }
           }
+        },
+        "env": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       }
     },

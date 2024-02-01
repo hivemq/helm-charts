@@ -75,3 +75,22 @@ podSecurityContext:
   enabled: false
   runAsNonRoot: true
   runAsUser: 185
+
+# Specifies environment variables to be added to the operator container.
+# Environment variables can be defined as a list of either key-value pairs or
+# using valueFrom to reference a secret or config map.
+env: []
+  # - name: <ENV_VAR_NAME1>
+  #   value: <value>
+  # - name: <ENV_VAR_NAME2>
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: mysecretkey
+  #       optional: false
+  #  - name: <ENV_VAR_NAME3>
+  #    valueFrom:
+  #      configMapKeyRef:
+  #        name: myconfigmap
+  #        key: myconfigmapkey
+  #        optional: true

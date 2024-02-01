@@ -1,10 +1,13 @@
 package com.hivemq.helmcharts.util;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.LocalPortForward;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -120,6 +123,20 @@ public class K8sUtil {
         }
     }
 
+    /**
+     * Returns the HiveMQ container from the given {@link StatefulSetSpec}
+     * instance.
+     * <p>
+     * This is safe to use and cannot return {@code null} after the custom resource validation (that asserts the
+     * existence of the HiveMQ container).
+     *
+     * @param statefulSetSpec the {@link StatefulSetSpec} to retrieve the HiveMQ container from
+     * @return the HiveMQ container
+     */
+    public static @NotNull Container getHiveMQContainer(final @NotNull StatefulSetSpec statefulSetSpec) {
+        return statefulSetSpec.getTemplate().getSpec().getContainers().get(0);
+    }
+
     public static @NotNull Resource<GenericKubernetesResource> getHiveMQPlatform(
             final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
         final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
@@ -166,16 +183,17 @@ public class K8sUtil {
     }
 
     /**
-     * Waits for the given platform to be in a RUNNING status.
+     * Returns the {@link Container} container from the given {@link StatefulSetSpec}
+     * instance.
+     * @param client            the Kubernetes client to use
+     * @param namespace         the namespace to use to fetch the statefulSet from
+     * @param statefulSetName   the name of the statefulSet to fetch
      */
-    public static void waitForHiveMQPlatformStateRunning(
+    public static @NotNull StatefulSet getStatefulSet(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
-            final @NotNull String customResourceName) {
-        final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
-        hivemqCustomResource.waitUntilCondition(getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
-        assertThat(hivemqCustomResource.get().get("status").toString()).contains("RUNNING");
+            final @NotNull String statefulSetName) {
+        return client.apps().statefulSets().inNamespace(namespace).withName(statefulSetName).get();
     }
 
     /**
@@ -190,5 +208,18 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName) {
         loadResource(client, namespace, resourceName, ConfigMap.class).update();
+    }
+
+    /**
+     * Waits for the given platform to be in a RUNNING status.
+     */
+    public static void waitForHiveMQPlatformStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName) {
+        final Resource<GenericKubernetesResource> hivemqCustomResource =
+                K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
+        hivemqCustomResource.waitUntilCondition(getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
+        assertThat(hivemqCustomResource.get().get("status").toString()).contains("RUNNING");
     }
 }

@@ -1,0 +1,16 @@
+nodes:
+  env:
+    - name: MY_CUSTOM_ENV_VAR1
+      value: mycustomvalue1
+    - name: MY_CUSTOM_ENV_VAR2
+      valueFrom:
+        secretKeyRef:
+          name: mysecret
+          key: mysecretkey
+          optional: false
+    - name: MY_CUSTOM_ENV_VAR3
+      valueFrom:
+        configMapKeyRef:
+          name: myconfigmap
+          key: myconfigmapkey
+          optional: true

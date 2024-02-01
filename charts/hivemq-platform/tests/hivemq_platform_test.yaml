@@ -54,6 +54,38 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].name
           value: hivemq
 
+  - it: with custom environment variables for the HiveMQ container
+    values:
+      - custom-env-vars-values.yaml
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0]
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: MY_CUSTOM_ENV_VAR1
+            value: "mycustomvalue1"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: MY_CUSTOM_ENV_VAR2
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: mysecretkey
+                optional: false
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: MY_CUSTOM_ENV_VAR3
+            valueFrom:
+              configMapKeyRef:
+                name: myconfigmap
+                key: myconfigmapkey
+                optional: true
+
   - it: with resource limits
     set:
       nodes.resources.cpu: 1c
