@@ -8,8 +8,8 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: azure/setup-helm@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3
         with:
           # only needed if the version is 'latest'
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -20,7 +20,7 @@ jobs:
           helm lint ./charts/hivemq-operator
           helm lint ./charts/hivemq-swarm
       - name: Unit Test
-        uses: d3adb5/helm-unittest-action@v2.3
+        uses: d3adb5/helm-unittest-action@82e7919c19e872d2b73811bf00c31126d3f9d256 # v2.3
         with:
           helm-version: v3.10.1
           github-token: ${{ secrets.GITHUB_TOKEN }}
