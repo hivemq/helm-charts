@@ -11,7 +11,7 @@ operator:
     enabled: false
 
 hivemq:
-  image: hivemq/hivemq4:k8s-4.24.0
+  image: hivemq/hivemq4:k8s-4.25.0
   imagePullPolicy: Never
   initDnsWaitImage: hivemq/init-dns-wait:snapshot
   logLevel: DEBUG
