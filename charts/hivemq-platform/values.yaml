@@ -32,7 +32,7 @@ operator:
 nodes:
   # The number of HiveMQ nodes in the cluster
   replicaCount: 2
-  logLevel: DEBUG
+  logLevel: INFO
   javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
   # Annotations to add to the HiveMQ Pods
   annotations: {}
