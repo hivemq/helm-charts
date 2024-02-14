@@ -48,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -215,8 +216,13 @@ public class HelmChartContainer extends K3sContainer {
 
     public void deleteNamespace(final @NotNull String name) {
         final var namespace = new NamespaceBuilder().withNewMetadata().withName(name).endMetadata().build();
-        final var response = getKubernetesClient().namespaces().resource(namespace).delete();
+        final var client = getKubernetesClient();
+        final var response = client.namespaces().resource(namespace).delete();
         assertThat(response).isNotNull();
+        await().atMost(1, TimeUnit.MINUTES)
+                .untilAsserted(() -> assertThat(client.namespaces()
+                        .list()
+                        .getItems()).noneMatch(n -> name.equals(n.getMetadata().getName())));
     }
 
     public @NotNull LogWaiterUtil getLogWaiter() {

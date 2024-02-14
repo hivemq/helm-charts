@@ -132,7 +132,7 @@ data:
       <rest-api>
         <enabled>true</enabled>
         <auth>
-          <enabled>false</enabled>
+          <enabled>{{ printf "%t" .Values.restApi.authEnabled | default false }}</enabled>
         </auth>
         {{- range $key, $val := .Values.services }}
         {{- if eq $val.type "rest-api" }}
