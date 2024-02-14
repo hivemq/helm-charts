@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class K8sUtil {
 
@@ -168,10 +169,11 @@ public class K8sUtil {
 
     /**
      * Returns the {@link LocalPortForward} object the service and target port passed as parameters.
-     * @param client        the Kubernetes client to use
-     * @param namespace     the namespace to look up for the service to expose
-     * @param serviceName   the service name to port forward
-     * @param targetPort    the service port to forward
+     *
+     * @param client      the Kubernetes client to use
+     * @param namespace   the namespace to look up for the service to expose
+     * @param serviceName the service name to port forward
+     * @param targetPort  the service port to forward
      * @return {@link LocalPortForward}
      */
     public static @NotNull LocalPortForward getPortForward(
@@ -185,9 +187,10 @@ public class K8sUtil {
     /**
      * Returns the {@link Container} container from the given {@link StatefulSetSpec}
      * instance.
-     * @param client            the Kubernetes client to use
-     * @param namespace         the namespace to use to fetch the statefulSet from
-     * @param statefulSetName   the name of the statefulSet to fetch
+     *
+     * @param client          the Kubernetes client to use
+     * @param namespace       the namespace to use to fetch the statefulSet from
+     * @param statefulSetName the name of the statefulSet to fetch
      */
     public static @NotNull StatefulSet getStatefulSet(
             final @NotNull KubernetesClient client,
@@ -221,5 +224,16 @@ public class K8sUtil {
                 K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
         hivemqCustomResource.waitUntilCondition(getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
         assertThat(hivemqCustomResource.get().get("status").toString()).contains("RUNNING");
+    }
+
+    /**
+     * Waits for all the pods to be deleted in the given namespace
+     * @param client    the Kubernetes client to use
+     * @param namespace the namespace to wait to check for all the pods to be removed
+     */
+    public static void waitForNoPodsDeletedInNamespace(
+            final @NotNull KubernetesClient client, final @NotNull String namespace) {
+        await().atMost(1, TimeUnit.MINUTES)
+                .untilAsserted(() -> assertThat(client.pods().inNamespace(namespace).list().getItems()).isEmpty());
     }
 }
