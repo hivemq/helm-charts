@@ -30,6 +30,14 @@
         }
       }
     },
+    "restApi" : {
+      "type" : "object",
+      "properties" : {
+        "authEnabled" : {
+          "type" : "boolean"
+        }
+      }
+    },
     "additionalVolumes" : {
       "type" : "array",
       "properties" : {

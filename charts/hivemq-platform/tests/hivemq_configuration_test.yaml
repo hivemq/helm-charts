@@ -249,9 +249,12 @@ tests:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<rest-api>.*?<port>8890</port>.*?</rest-api>"
 
-  - it: with a Rest API service not exposed
+  - it: with a Rest API service not being exposed
     template: hivemq-configuration.yml
     set:
       services:
@@ -263,7 +266,48 @@ tests:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<rest-api>.*?<port>8890</port>.*?</rest-api>"
+
+  - it: with REST API authentication enabled
+    template: hivemq-configuration.yml
+    set:
+      restApi.authEnabled: true
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - isNotNull:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<auth>.*?<enabled>true</enabled>.*?</auth>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<port>8890</port>.*?</rest-api>"
+
+  - it: with default REST API authentication
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - isNotNull:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<auth>.*?<enabled>false</enabled>.*?</auth>.*?</rest-api>"
 
   - it: with a WebSocket service exposed
     template: hivemq-configuration.yml
@@ -309,7 +353,7 @@ tests:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265</password>.*?/user>"
+          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265</password>.*?</user>"
 
   - it: with default Control Center username and password
     template: hivemq-configuration.yml
@@ -318,7 +362,7 @@ tests:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>test-password</password>.*?/user>"
+          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>test-password</password>.*?</user>"
 
   - it: with Data Hub enabled
     template: hivemq-configuration.yml
