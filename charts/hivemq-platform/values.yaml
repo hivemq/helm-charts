@@ -23,6 +23,20 @@ config:
     dataValidationEnabled: false
     behaviorValidationEnabled: false
 
+# Control Center configuration
+controlCenter:
+  # The name of the user.
+  # Set both values (username and password) to override the default configuration.
+  username: ""
+  # The password of the user as a SHA256 hash. See password generation here:
+  # https://docs.hivemq.com/hivemq/latest/control-center/configuration.html#generate-password
+  password: ""
+
+# REST API configuration
+restApi:
+    # Enables or disables authentication and authorization.
+    authEnabled: false
+
 # Selector name that is used to match the selector of the managing operator.
 # This selector assigns the HiveMQ Platform to a specific operator.
 operator:
@@ -131,7 +145,7 @@ services:
   - type: control-center
     exposed: true
     containerPort: 8080
-  # RestAPI service configuration
+  # REST API service configuration
   - type: rest-api
     exposed: false
     containerPort: 8888
@@ -170,14 +184,6 @@ license:
   data: ""
   # Overrides the License information via file using --set-file license.lic.
   overrideLicense: ""
-
-# Overrides the default ControlCenter username and password.
-# Set both values to override the default configuration.
-controlCenter:
-  username: ""
-  # Password as SHA256 HASH. See password generation here:
-  # https://docs.hivemq.com/hivemq/latest/control-center/configuration.html#generate-password
-  password: ""
 
 # HiveMQ Platform extension configuration
 extensions:
@@ -300,7 +306,7 @@ additionalVolumes: []
 
 # type: Choose a type of volume that you want to mount.
 # name: Optional name for the secret or the configmap to be mounted
-# mountName: The mountName to be used for the StatefulSet Spec.
+# mountName: The volume mount name to be used for the StatefulSet Spec.
 # path: The path configures the directory to which the volume is mounted in the container
 #       If the directory already exists then the contents are overwritten!
 # subPath: Optional name for the subPath. If a volume is mounted with subPath than the contents
