@@ -40,6 +40,9 @@ spec:
             runAsNonRoot: {{ .Values.nodes.podSecurityContext.runAsNonRoot }}
             fsGroupChangePolicy: "OnRootMismatch"
           {{- end }}
+          {{- if .Values.nodes.serviceAccountName }}
+          serviceAccountName: {{ .Values.nodes.serviceAccountName }}
+          {{- end }}
           containers:
             - name: hivemq
               env:

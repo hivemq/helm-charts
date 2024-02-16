@@ -6,6 +6,7 @@ import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -97,6 +98,23 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName) {
         return loadResource(client, namespace, resourceName, Secret.class).create();
+    }
+
+    /**
+     * Creates a Service Account in the given namespace.
+     *
+     * @param client             the Kubernetes client to use
+     * @param namespace          the namespace to create the service account in
+     * @param serviceAccountName the name of the service account to create
+     */
+    public static void createServiceAccount(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String serviceAccountName) {
+        final var serviceAccount = client.resource(new ServiceAccountBuilder() //
+                        .withNewMetadata().withNamespace(namespace).withName(serviceAccountName).endMetadata().build())
+                .create();
+        assertThat(serviceAccount).isNotNull();
     }
 
     /**
@@ -216,14 +234,25 @@ public class K8sUtil {
     /**
      * Waits for the given platform to be in a RUNNING status.
      */
-    public static void waitForHiveMQPlatformStateRunning(
+    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunning(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String customResourceName) {
-        final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
-        hivemqCustomResource.waitUntilCondition(getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
-        assertThat(hivemqCustomResource.get().get("status").toString()).contains("RUNNING");
+        return waitForHiveMQPlatformState(client, namespace, customResourceName, "RUNNING");
+    }
+
+    /**
+     * Waits for the given platform to be in a specific status.
+     */
+    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformState(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName,
+            final @NotNull String state) {
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
+        hivemqCustomResource.waitUntilCondition(getHiveMQPlatformStatus(state), 5, TimeUnit.MINUTES);
+        assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
+        return hivemqCustomResource.get();
     }
 
     /**

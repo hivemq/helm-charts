@@ -48,6 +48,7 @@ nodes:
   replicaCount: 2
   logLevel: INFO
   javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+
   # Annotations to add to the HiveMQ Pods
   annotations: {}
 
@@ -67,6 +68,7 @@ nodes:
     runAsNonRoot: true
     runAsUser: 10000
     runAsGroup: 0
+
   # Specifies environment variables to be added to the HiveMQ Platform container.
   # Environment variables can be defined as a list of either key-value pairs or
   # using valueFrom to reference a secret or config map.
@@ -85,6 +87,9 @@ nodes:
   #        name: myconfigmap
   #        key: myconfigmapkey
   #        optional: true
+
+  # The name of the custom service account to use by the Platform pods. If not set or empty, a default service account will be created.
+  serviceAccountName: ""
 
 # Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
 podScheduling:
