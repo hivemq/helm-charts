@@ -18,6 +18,8 @@ config:
   overrideHiveMQConfig: ""
   # Inlines the StatefulSet configuration and overrides the default StatefulSet.
   overrideStatefulSet: ""
+  # Inlines an init container configuration
+  overrideInitContainers: ""
   # Enables HiveMQ Data Hub
   dataHub:
     dataValidationEnabled: false
