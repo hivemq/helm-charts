@@ -35,6 +35,21 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
+  - it: with default service account
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.serviceAccountName
+
+  - it: with custom service account
+    set:
+      nodes.serviceAccountName: my-custom-sa
+    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.serviceAccountName
+      - equal:
+          path: spec.statefulSet.spec.template.spec.serviceAccountName
+          value: my-custom-sa
+
   - it: with containers
     set:
       nodes.replicaCount: 10
