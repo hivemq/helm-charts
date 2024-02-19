@@ -7,6 +7,7 @@ echo "Create manifests directory"
 mkdir -p manifests && cd manifests || exit 1
 
 echo "Create HiveMQ Operator Templates"
+helm dependency build ../charts/hivemq-operator
 helm template hivemq-operator ../charts/hivemq-operator -n hivemq -f ./hivemq-operator/manifest.yaml --skip-tests --output-dir . > /dev/null
 
 echo "Flatten directory structure"
