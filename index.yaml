@@ -2,6 +2,28 @@ apiVersion: v1
 entries:
   hivemq-operator:
   - apiVersion: v2
+    appVersion: 4.25.1
+    created: "2024-02-19T11:24:29.400554686Z"
+    dependencies:
+    - condition: monitoring.dedicated, monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 30.*
+    description: HiveMQ Operator (legacy)
+    digest: 64db8b86cdfa9e2d7905605498904755c9dedeb89a871e70674acb33b5ddd696
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    name: hivemq-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-0.11.33/hivemq-operator-0.11.33.tgz
+    version: 0.11.33
+  - apiVersion: v2
     appVersion: 4.25.0
     created: "2024-02-06T16:09:19.842348078Z"
     dependencies:
@@ -1406,6 +1428,29 @@ entries:
     version: 0.5.0
   hivemq-platform:
   - apiVersion: v2
+    appVersion: 4.25.1
+    created: "2024-02-19T11:24:29.544445102Z"
+    description: HiveMQ Platform Helm Chart (new)
+    digest: 256d93b431d0d5aaaa54ad3021b01a0ac1255f74eeffe8a331e57364a845dd6d
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform
+    - Broker
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-0.2.8/hivemq-platform-0.2.8.tgz
+    version: 0.2.8
+  - apiVersion: v2
     appVersion: 4.25.0
     created: "2024-02-06T16:09:20.03684267Z"
     description: HiveMQ Platform Helm Chart (new)
@@ -1648,6 +1693,28 @@ entries:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-operator-0.2.0/hivemq-platform-operator-0.2.0.tgz
     version: 0.2.0
   hivemq-swarm:
+  - apiVersion: v2
+    appVersion: 4.25.1
+    created: "2024-02-19T11:24:29.727319868Z"
+    dependencies:
+    - condition: monitoring.dedicated, monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 14.*
+    description: A Helm chart for HiveMQ Swarm
+    digest: 3630f87608504028b79d5699afb91d748fa60799b68c0f515eb0a9f5213f6f95
+    icon: https://www.hivemq.com/img/svg/icon-hivemq-swarm.svg
+    keywords:
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    name: hivemq-swarm
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.2.30/hivemq-swarm-0.2.30.tgz
+    version: 0.2.30
   - apiVersion: v2
     appVersion: 4.25.0
     created: "2024-02-06T16:09:20.409789339Z"
@@ -2330,4 +2397,4 @@ entries:
     urls:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.1.0/hivemq-swarm-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-06T16:09:20.410149798Z"
+generated: "2024-02-19T11:24:29.727664181Z"
