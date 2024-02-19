@@ -191,7 +191,9 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.md")
                 include("**/*.properties")
                 include("**/*.java")
-            }
+            // Include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform chart.
+            }.plus(file("../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml"))
+
             filesToUpdate.filter{ file -> "gradle.properties" == file.name }.forEach {
                 val text = it.readText()
                 val replacedText = text.replace("""^version=.+""".toRegex(), "version=${appVersion}")
@@ -208,7 +210,10 @@ val updatePlatformVersion by tasks.registering {
                 val replacedText3 = replacedText2.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                     "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
                 }
-                it.writeText(replacedText3)
+                val replacedText4 = replacedText3.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                    "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
+                }
+                it.writeText(replacedText4)
             }
         }
     }
