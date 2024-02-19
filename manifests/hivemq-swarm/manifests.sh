@@ -6,6 +6,9 @@ cd "$(dirname "$0")"/../.. || exit 1
 echo "Create manifests directory"
 mkdir -p manifests && cd manifests || exit 1
 
+echo "Update HiveMQ Swarm dependencies"
+helm dependency build ../charts/hivemq-swarm
+
 echo "Create HiveMQ Swarm Templates"
 helm template my-swarm ../charts/hivemq-swarm --skip-tests --output-dir . > /dev/null
 
