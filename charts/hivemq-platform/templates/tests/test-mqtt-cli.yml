@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
     - name: hivemq-mqtt-cli
-      image: "hivemq/mqtt-cli:{{.Chart.AppVersion}}"
+      image: hivemq/mqtt-cli:4.25.0
       command: [ "java" ]
       args: [ "-cp",
               "/app/resources:/app/classes:/app/libs/*",
