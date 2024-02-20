@@ -8,7 +8,7 @@ val k8sVersion = "k8s-${project.properties["hivemq.version"]}"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
