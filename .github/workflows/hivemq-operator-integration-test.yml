@@ -19,7 +19,7 @@ jobs:
       matrix:
         test-plan: [ K8sVersionCompatibility, Extensions, RollingUpgrades, Other ]
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           path: helm-charts
       - name: Set up Docker QEMU
@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Checkout HiveMQ Operator (legacy) on the default branch
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_TOKEN }}
