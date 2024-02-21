@@ -11,11 +11,25 @@
         "name" : {
           "type" : "string"
         },
-        "overrideContent" : {
+        "overrideHiveMQConfig" : {
           "type" : "string"
         },
-        "statefulSet" : {
+        "overrideStatefulSet" : {
           "type" : "string"
+        },
+        "overrideInitContainers" : {
+          "type" : "string"
+        },
+        "dataHub" : {
+          "type" : "object",
+          "properties" : {
+            "dataValidationEnabled" : {
+              "type" : "boolean"
+            },
+            "behaviorValidationEnabled" : {
+              "type" : "boolean"
+            }
+          }
         }
       }
     },
@@ -196,6 +210,9 @@
         },
         "repository" : {
           "type" : "string"
+        },
+        "tag" : {
+          "type" : "string"
         }
       },
       "required" : [
@@ -209,7 +226,7 @@
         "data" : {
           "type" : "string"
         },
-        "fileContent" : {
+        "overrideLicense" : {
           "type" : "string"
         },
         "name" : {
@@ -260,6 +277,9 @@
               "type" : "boolean"
             },
             "runAsUser" : {
+              "type" : "integer"
+            },
+            "runAsGroup" : {
               "type" : "integer"
             },
             "enabled" : {

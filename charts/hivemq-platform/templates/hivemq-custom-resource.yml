@@ -40,6 +40,10 @@ spec:
             runAsNonRoot: {{ .Values.nodes.podSecurityContext.runAsNonRoot }}
             fsGroupChangePolicy: "OnRootMismatch"
           {{- end }}
+          {{- if .Values.config.overrideInitContainers }}
+          initContainers:
+            {{.Values.config.overrideInitContainers | nindent 12}}
+          {{- end }}
           {{- if .Values.nodes.serviceAccountName }}
           serviceAccountName: {{ .Values.nodes.serviceAccountName }}
           {{- end }}
