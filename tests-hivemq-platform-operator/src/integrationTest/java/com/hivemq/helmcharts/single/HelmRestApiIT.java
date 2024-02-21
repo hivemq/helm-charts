@@ -145,7 +145,7 @@ class HelmRestApiIT {
     @SuppressWarnings("SameParameterValue")
     private static @NotNull String createBasicAuthHeader(
             final @NotNull String username, final @NotNull String password) {
-        final String s = username + ":" + password;
-        return "Basic " + Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
+        final var credentials = username + ":" + password;
+        return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
     }
 }
