@@ -81,12 +81,23 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected void installChartsAndWaitForPlatformRunning(final @NotNull String valuesResourceFile) throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName);
-        helmChartContainer.installPlatformChart(platformReleaseName,
+        installChartsAndWaitForPlatformRunning("-f", valuesResourceFile, "--namespace", namespace);
+    }
+
+    protected void installChartsAndWaitForPlatformRunning(
+            final @NotNull String valuesResourceFile, final @NotNull String setFileOverride) throws Exception {
+        installChartsAndWaitForPlatformRunning("--set-file",
+                setFileOverride,
                 "-f",
                 valuesResourceFile,
                 "--namespace",
                 namespace);
+    }
+
+    protected void installChartsAndWaitForPlatformRunning(
+            final @NotNull String... commands) throws Exception {
+        helmChartContainer.installOperatorChart(operatorReleaseName);
+        helmChartContainer.installPlatformChart(platformReleaseName, commands);
 
         K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, platformReleaseName);
     }

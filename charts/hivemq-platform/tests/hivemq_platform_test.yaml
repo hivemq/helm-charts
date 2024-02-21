@@ -35,6 +35,31 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
+  - it: with init containers
+    set:
+      config.overrideInitContainers: |-
+        - name: test-init-container
+          image: busybox
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.initContainers
+          count: 1
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.initContainers[0]
+      - equal:
+          path: spec.statefulSet.spec.template.spec.initContainers[0].name
+          value: test-init-container
+      - equal:
+          path: spec.statefulSet.spec.template.spec.initContainers[0].image
+          value: busybox
+
+  - it: without init containers
+    set:
+      config.overrideInitContainers:
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.initContainers
+
   - it: with default service account
     asserts:
       - notExists:
