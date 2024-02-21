@@ -44,6 +44,9 @@ spec:
           initContainers:
             {{.Values.config.overrideInitContainers | nindent 12}}
           {{- end }}
+          {{- if .Values.nodes.serviceAccountName }}
+          serviceAccountName: {{ .Values.nodes.serviceAccountName }}
+          {{- end }}
           containers:
             - name: hivemq
               env:

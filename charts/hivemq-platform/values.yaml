@@ -14,6 +14,7 @@ nodes:
   replicaCount: 2
   logLevel: INFO
   javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+
   # Annotations to add to the HiveMQ Pods
   annotations: {}
 
@@ -52,6 +53,10 @@ nodes:
   #        name: my-config-map
   #        key: my-configmap-key
   #        optional: true
+
+  # The name of the custom service account to use by the Platform pods.
+  # If not set or empty, a default service account is created.
+  serviceAccountName: ""
 
 # Configuration options for the default provided HiveMQ configuration (config.xml)
 #
