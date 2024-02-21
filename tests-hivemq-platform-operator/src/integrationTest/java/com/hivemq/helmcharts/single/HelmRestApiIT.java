@@ -62,7 +62,7 @@ class HelmRestApiIT {
                 "foreground",
                 "--namespace",
                 NAMESPACE);
-        K8sUtil.waitForNoPodsDeletedInNamespace(client, NAMESPACE);
+        K8sUtil.waitForAllPodsDeletedInNamespace(client, NAMESPACE);
         HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
 
         HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
@@ -70,7 +70,7 @@ class HelmRestApiIT {
                 "foreground",
                 "--namespace",
                 "default");
-        K8sUtil.waitForNoPodsDeletedInNamespace(client, "default");
+        K8sUtil.waitForAllPodsDeletedInNamespace(client, "default");
     }
 
     @Test
