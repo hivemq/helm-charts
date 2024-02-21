@@ -231,7 +231,7 @@ public class K8sUtil {
      * @param client    the Kubernetes client to use
      * @param namespace the namespace to wait to check for all the pods to be removed
      */
-    public static void waitForNoPodsDeletedInNamespace(
+    public static void waitForAllPodsDeletedInNamespace(
             final @NotNull KubernetesClient client, final @NotNull String namespace) {
         await().atMost(1, TimeUnit.MINUTES)
                 .untilAsserted(() -> assertThat(client.pods().inNamespace(namespace).list().getItems()).isEmpty());
