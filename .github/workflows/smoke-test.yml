@@ -51,7 +51,7 @@ jobs:
             git checkout origin/${GITHUB_REF_NAME}
           fi
       - name: Build HiveMQ Platform Operator and HiveMQ Platform Operator Init images
-        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2
+        uses: gradle/gradle-build-action@29c0906b64b8fc82467890bfb7a0a7ef34bda89e # v3
         with:
           cache-disabled: true
           gradle-home-cache-includes: |
@@ -143,7 +143,7 @@ jobs:
             git checkout origin/${GITHUB_REF_NAME}
           fi
       - name: Build HiveMQ Operator (legacy) images
-        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2
+        uses: gradle/gradle-build-action@29c0906b64b8fc82467890bfb7a0a7ef34bda89e # v3
         with:
           cache-disabled: true
           gradle-home-cache-includes: |

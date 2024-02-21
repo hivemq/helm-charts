@@ -51,7 +51,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - name: Run HiveMQ Operator (legacy) integration tests
-        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2
+        uses: gradle/gradle-build-action@29c0906b64b8fc82467890bfb7a0a7ef34bda89e # v3
         env:
           TEST_PLAN: ${{ matrix.test-plan }}
         with:
