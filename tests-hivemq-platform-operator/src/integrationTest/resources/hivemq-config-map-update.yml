@@ -4,7 +4,7 @@ metadata:
   name: hivemq-configuration-test-hivemq-platform
 data:
   config.xml: |
-    <?xml version="1.0"?>
+    <?xml version="1.0" encoding="UTF-8"?>
     <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:noNamespaceSchemaLocation="../../../../hivemq-enterprise/src/main/resources/config.xsd">
       <listeners>

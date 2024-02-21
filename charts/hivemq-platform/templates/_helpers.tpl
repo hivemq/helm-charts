@@ -110,12 +110,12 @@ Usage: {{ include "hivemq-platform.range-service-name" (dict "releaseName" $.Rel
 {{- end -}}
 
 {{/*
-Checks if a particular service type exists within the services values.
+Checks if a particular service type exists and is exposed within the services values.
 Params:
 - services: The array of services to check.
 - expectedType: The expected type to check for.
 Returns:
-- bool: True if the desired type is found, False otherwise.
+- `true` if the desired type is found and the service is marked as `exposed`, empty string otherwise.
 */}}
 {{- define "hivemq-platform.has-service-type" -}}
 {{- $services := .services }}
