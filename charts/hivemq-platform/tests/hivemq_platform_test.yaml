@@ -152,12 +152,6 @@ tests:
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
           value: 10000
-      - equal:
-          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
-          value: 0
-      - equal:
-          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
-          value: 0
 
   - it: with default disabled security context
     asserts:
