@@ -35,8 +35,6 @@ spec:
           {{- if .Values.nodes.podSecurityContext.enabled }}
           securityContext:
             runAsUser: {{ .Values.nodes.podSecurityContext.runAsUser }}
-            runAsGroup: {{ .Values.nodes.podSecurityContext.runAsGroup }}
-            fsGroup: {{ .Values.nodes.podSecurityContext.runAsGroup }}
             runAsNonRoot: {{ .Values.nodes.podSecurityContext.runAsNonRoot }}
             fsGroupChangePolicy: "OnRootMismatch"
           {{- end }}
