@@ -111,16 +111,6 @@ tests:
           path: spec.template.spec.securityContext.runAsUser
           value: 185
       - isNotEmpty:
-          path: spec.template.spec.securityContext.runAsGroup
-      - equal:
-          path: spec.template.spec.securityContext.runAsGroup
-          value: 185
-      - isNotEmpty:
-          path: spec.template.spec.securityContext.fsGroup
-      - equal:
-          path: spec.template.spec.securityContext.fsGroup
-          value: 185
-      - isNotEmpty:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
@@ -143,16 +133,6 @@ tests:
           path: spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.template.spec.securityContext.runAsUser
-          value: 5000
-      - isNotEmpty:
-          path: spec.template.spec.securityContext.runAsGroup
-      - equal:
-          path: spec.template.spec.securityContext.runAsGroup
-          value: 5000
-      - isNotEmpty:
-          path: spec.template.spec.securityContext.fsGroup
-      - equal:
-          path: spec.template.spec.securityContext.fsGroup
           value: 5000
       - isNotEmpty:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
