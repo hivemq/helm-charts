@@ -70,7 +70,9 @@ tls:
   # The truststore password. Can also be set as "truststore.password" in the secret.
   truststorePassword: nil
 
-# Operator security context, requires that the image supports the configured user.
+# Holds pod-level security attributes and common container settings.
+# This defaults to non-root user with UID "185" and GID "0". However, if required, this user can be overwritten
+# by any other UID.
 podSecurityContext:
   enabled: false
   runAsNonRoot: true
