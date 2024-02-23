@@ -88,6 +88,57 @@ license:
   # Overrides the License information via file using --set-file license.lic.
   overrideLicense: ""
 
+# Configures HiveMQ restriction options,
+# see https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html
+hivemqRestrictions:
+  maxConnections: -1
+  incomingBandwidthThrottling: 0
+  noConnectIdleTimeout: 10000
+  maxClientIdLength: 65535
+
+# Configures HiveMQ MQTT options:
+# see https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config
+hivemqMqtt:
+  sessionExpiryMaxInterval: 4294967296
+  messageExpiryMaxInterval: 4294967296
+  maxPacketSize: 268435460
+  serverReceiveMaximum: 10
+  keepAliveMax: 65535
+  keepAliveAllowUnlimited: true
+  topicAliasEnabled: true
+  topicAliasMaxPerClient: 5
+  subscriptionIdentifier: true
+  wildcardSubscriptions: true
+  sharedSubscriptions: true
+  maxQualityOfService: 2
+  retainedMessages: true
+  queuedMessagesMaxSize: 1000
+  queuedMessagesStrategy: discard
+
+# Configures HiveMQ MQTT Add-on options:
+# see https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html
+hivemqMqttAddons:
+  expiredMessagesTopic: false
+  droppedMessagesTopic: false
+  deadMessagesTopic: false
+
+# Configures HiveMQ MQTT security options:
+# see https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#security
+hivemqMqttSecurity:
+  allowEmptyClientId: true
+  payloadFormatValidation: false
+  utf8Validation: true
+  allowRequestProblemInformation: true
+  controlCenterAuditLog: true
+
+# Configures HiveMQ Overload protection:
+# see https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
+hivemqOverloadProtection: true
+
+# Configures HiveMQ replication factor:
+# see https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
+hivemqReplicationCount: 2
+
 # Selector name that is used to match the selector of the managing operator.
 # This selector assigns the HiveMQ Platform to a specific operator.
 operator:

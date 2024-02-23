@@ -92,6 +92,11 @@ data:
         <discovery>
           <extension/>
         </discovery>
+        {{- if .Values.hivemqReplicationCount }}
+        <replication>
+          <replica-count>{{ .Values.hivemqReplicationCount }}</replica-count>
+        </replication>
+        {{- end }}
       </cluster>
       <!-- required and should not be configured different -->
       <health-api>
@@ -163,6 +168,147 @@ data:
         {{- end }}
       </data-hub>
       {{- end }}
+      {{- if .Values.hivemqRestrictions }}
+      <restrictions>
+        <max-connections>
+            {{ printf "%t" .Values.hivemqRestrictions.maxConnections | default -1 }}
+        </max-connections>
+        <incoming-bandwidth-throttling>
+            {{ printf "%t" .Values.hivemqRestrictions.incomingBandwidthThrottling | default 0 }}
+        </incoming-bandwidth-throttling>
+        <no-connect-idle-timeout>
+            {{ printf "%t" .Values.hivemqRestrictions.noConnectIdleTimeout | default 1000 }}
+        </no-connect-idle-timeout>
+        <max-client-id-length>
+            {{ printf "%t" .Values.hivemqRestrictions.maxClientIdLength | default 65535 }}
+        </max-client-id-length>
+      </restrictions>
+      {{- end }}
+
+      {{- if .Values.hivemqMqtt }}
+      <mqtt>
+        <session-expiry>
+          <max-interval>
+            {{ printf "%t" .Values.hivemqMqtt.sessionExpiryMaxInterval | default 4294967296 }}
+          </max-interval>
+        </session-expiry>
+        <message-expiry>
+          <max-interval>
+            {{ printf "%t" .Values.hivemqMqtt.messageExpiryMaxInterval | default 4294967296 }}
+          </max-interval>
+        </message-expiry>
+        <packets>
+          <max-packet-size>
+            {{ printf "%t" .Values.hivemqMqtt.maxPacketSize | default 268435460 }}
+          </max-packet-size>
+        </packets>
+        <receive-maximum>
+          <server-receive-maximum>
+            {{ printf "%t" .Values.hivemqMqtt.serverReceiveMaximum | default 10 }}
+          </server-receive-maximum>
+        </receive-maximum>
+        <keep-alive>
+          <max-keep-alive>
+            {{ printf "%t" .Values.hivemqMqtt.keepAliveMax | default 65535 }}
+          </max-keep-alive>
+          <allow-unlimited>
+            {{ printf "%t" .Values.hivemqMqtt.keepAliveAllowUnlimited | default true }}
+          </allow-unlimited>
+        </keep-alive>
+        <topic-alias>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqtt.topicAliasEnabled | default true }}
+          </enabled>
+          <max-per-client>
+            {{ printf "%t" .Values.hivemqMqtt.topicAliasMaxPerClient | default 5 }}
+          </max-per-client>
+        </topic-alias>
+        <subscription-identifier>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqtt.subscriptionIdentifier | default true }}
+          </enabled>
+        </subscription-identifier>
+        <wildcard-subscriptions>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqtt.wildcardSubscriptions | default true }}
+          </enabled>
+        </wildcard-subscriptions>
+        <shared-subscriptions>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqtt.sharedSubscriptions | default true }}
+          </enabled>
+        </shared-subscriptions>
+        <quality-of-service>
+          <max-qos>
+            {{ printf "%t" .Values.hivemqMqtt.maxQualityOfService | default 2 }}
+          </max-qos>
+        </quality-of-service>
+        <retained-messages>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqtt.retainedMessages | default true }}
+          </enabled>
+        </retained-messages>
+        <queued-messages>
+          <max-queue-size>
+            {{ printf "%t" .Values.hivemqMqtt.queuedMessagesMaxSize | default 1000 }}
+          </max-queue-size>
+          <strategy>
+            {{ printf "%t" .Values.hivemqMqtt.queuedMessagesStrategy | default "discard" }}
+          </strategy>
+        </queued-messages>
+      </mqtt>
+      {{- end }}
+      {{- if .Values.hivemqMqttAddons }}
+      <mqtt-addons>
+        <expired-messages-topic>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttAddons.expiredMessagesTopic | default false }}
+          </enabled>
+        </expired-messages-topic>
+        <dropped-messages-topic>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttAddons.droppedMessagesTopic | default false }}
+          </enabled>
+        </dropped-messages-topic>
+        <dead-messages-topic>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttAddons.deadMessagesTopic | default false }}
+          </enabled>
+        </dead-messages-topic>
+      </mqtt-addons>
+      {{- end }}
+      {{- if .Values.hivemqMqttSecurity }}
+      <security>
+        <allow-empty-client-id>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttSecurity.allowEmptyClientId | default true }}
+          </enabled>
+        </allow-empty-client-id>
+        <payload-format-validation>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttSecurity.payloadFormatValidation | default false }}
+          </enabled>
+        </payload-format-validation>
+        <utf8-validation>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttSecurity.utf8Validation | default true }}
+          </enabled>
+        </utf8-validation>
+        <allow-request-problem-information>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttSecurity.allowRequestProblemInformation | default true }}
+          </enabled>
+        </allow-request-problem-information>
+        <control-center-audit-log>
+          <enabled>
+            {{ printf "%t" .Values.hivemqMqttSecurity.controlCenterAuditLog | default true }}
+          </enabled>
+        </control-center-audit-log>
+      </security>
+      {{- end }}
+      <overload-protection>
+        <enabled>{{ printf "%t" .Values.hivemqOverloadProtection | default true }}</enabled>
+      </overload-protection>
     </hivemq>
   tracing.xml: |-
     <?xml version="1.0" encoding="UTF-8" ?>
