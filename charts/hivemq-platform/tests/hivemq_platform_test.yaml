@@ -140,23 +140,75 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
           value: 1m
 
-  - it: with enabled security context
+  - it: with default security context disabled
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.securityContext
+
+  - it: with default security context values enabled
     set:
       nodes.podSecurityContext.enabled: true
     asserts:
       - isNotEmpty:
           path: spec.statefulSet.spec.template.spec.securityContext
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
           value: true
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
           value: 10000
-
-  - it: with default disabled security context
-    asserts:
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+          value: 0
       - notExists:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
+
+  - it: with custom security context values enabled
+    set:
+      nodes.podSecurityContext.enabled: true
+      nodes.podSecurityContext.runAsUser: 10001
+      nodes.podSecurityContext.runAsGroup: 10002
+      nodes.podSecurityContext.fsGroup: 10003
+      nodes.podSecurityContext.runAsNonRoot: false
+    asserts:
+      - isNotEmpty:
           path: spec.statefulSet.spec.template.spec.securityContext
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+          value: false
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+          value: 10001
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+          value: 10002
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+          value: 10003
+      - isNotEmpty:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
 
   - it: with default values, no volumes are defined
     asserts:

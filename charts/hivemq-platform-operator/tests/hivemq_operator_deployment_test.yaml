@@ -111,16 +111,25 @@ tests:
           path: spec.template.spec.securityContext.runAsUser
           value: 185
       - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 0
+      - notExists:
+          path: spec.template.spec.securityContext.fsGroup
+      - isNotEmpty:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
 
-  - it: with security context values enabled
+  - it: with custom security context values enabled
     set:
       podSecurityContext.enabled: true
       podSecurityContext.runAsUser: 5000
-      podSecurityContext.runAsNonRoot: true
+      podSecurityContext.runAsGroup: 5001
+      podSecurityContext.fsGroup: 5002
+      podSecurityContext.runAsNonRoot: false
     asserts:
       - isNotEmpty:
           path: spec.template.spec.securityContext
@@ -128,12 +137,22 @@ tests:
           path: spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.template.spec.securityContext.runAsNonRoot
-          value: true
+          value: false
       - isNotEmpty:
           path: spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.template.spec.securityContext.runAsUser
           value: 5000
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 5001
+      - isNotEmpty:
+          path: spec.template.spec.securityContext.fsGroup
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 5002
       - isNotEmpty:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
