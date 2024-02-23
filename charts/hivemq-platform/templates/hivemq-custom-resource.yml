@@ -34,8 +34,12 @@ spec:
           {{- end }}
           {{- if .Values.nodes.podSecurityContext.enabled }}
           securityContext:
-            runAsUser: {{ .Values.nodes.podSecurityContext.runAsUser }}
             runAsNonRoot: {{ .Values.nodes.podSecurityContext.runAsNonRoot }}
+            runAsUser: {{ .Values.nodes.podSecurityContext.runAsUser | default 10000 }}
+            runAsGroup: {{ .Values.nodes.podSecurityContext.runAsGroup | default 0 }}
+            {{- if .Values.nodes.podSecurityContext.fsGroup }}
+            fsGroup: {{ .Values.nodes.podSecurityContext.fsGroup }}
+            {{- end }}
             fsGroupChangePolicy: "OnRootMismatch"
           {{- end }}
           {{- if .Values.config.overrideInitContainers }}

@@ -24,8 +24,12 @@ spec:
     spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext:
-        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
         runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        runAsUser: {{ .Values.podSecurityContext.runAsUser | default 185 }}
+        runAsGroup: {{ .Values.podSecurityContext.runAsGroup | default 0 }}
+        {{- if .Values.podSecurityContext.fsGroup }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+        {{- end }}
         fsGroupChangePolicy: "OnRootMismatch"
       {{- end }}
       {{- if typeIsLike "map[string]interface {}" .Values.podScheduling.affinity }}

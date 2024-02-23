@@ -26,14 +26,19 @@ nodes:
     memory: 2048M
 
   # Holds pod-level security attributes and common container settings.
-  # Note: The standard official HiveMQ image hivemq/hivemq4 comes with a pre-installed user "10000" and group "0".
-  #       Therefore, this defaults to non-root user with UID "10000" and GID "0".
-  #       However, if required, this user can be overwritten by any other UID.
-  #       Other settings might require a custom image that supports the changes.
+  # Note: The standard official HiveMQ image hivemq/hivemq4 comes with a pre-installed user "10000" and group "10000".
+  #       When enabled, this defaults to non-root user with UID "10000" and GID "0".
+  #       However, if required, user ID, group ID and filesystem group values can be overwritten. For group ID is
+  #       always recommended to use group "0". Example:
+  #         podSecurityContext:
+  #           enabled: true
+  #           runAsNonRoot: true
+  #           runAsUser: 10001
+  #           runAsGroup: 0
+  #           fsGroup: 10002
   podSecurityContext:
     enabled: false
     runAsNonRoot: true
-    runAsUser: 10000
 
   # Specifies environment variables to be added to the HiveMQ Platform container.
   # Environment variables can be defined as a list of either key-value pairs or
