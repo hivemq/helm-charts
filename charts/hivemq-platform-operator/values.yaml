@@ -71,12 +71,18 @@ tls:
   truststorePassword: nil
 
 # Holds pod-level security attributes and common container settings.
-# This defaults to non-root user with UID "185" and GID "0". However, if required, this user can be overwritten
-# by any other UID.
+# When enabled, this defaults to non-root user with UID "185" and GID "0".
+# However, if required, user ID, group ID and filesystem group values can be overwritten.
+# For group ID is always recommended to use group "0". Example:
+#   podSecurityContext:
+#     enabled: true
+#     runAsNonRoot: true
+#     runAsUser: 185
+#     runAsGroup: 0
+#     fsGroup: 186
 podSecurityContext:
   enabled: false
   runAsNonRoot: true
-  runAsUser: 185
 
 # Specifies environment variables to be added to the operator container.
 # Environment variables can be defined as a list of either key-value pairs or

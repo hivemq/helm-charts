@@ -3,8 +3,6 @@ nodes:
   podSecurityContext:
     enabled: true
     runAsNonRoot: true
-    runAsUser: 10000
-    runAsGroup: 0
 extensions:
   - name: hivemq-distributed-tracing-extension
     extensionUri: preinstalled
