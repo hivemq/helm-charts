@@ -347,13 +347,13 @@
       "type" : "object",
       "properties" : {
         "sessionExpiryMaxInterval" : {
-          "type" : "integer"
+          "type" : "string"
         },
         "messageExpiryMaxInterval" : {
-          "type" : "integer"
+          "type" : "string"
         },
         "maxPacketSize" : {
-          "type" : "integer"
+          "type" : "string"
         },
         "serverReceiveMaximum" : {
           "type" : "integer"
@@ -426,9 +426,6 @@
           "type" : "boolean"
         }
       }
-    },
-    "hivemqOverloadProtection" : {
-      "type" : "boolean"
     },
     "hivemqReplicationCount" : {
       "type" : "integer"

@@ -99,9 +99,9 @@ hivemqRestrictions:
 # Configures HiveMQ MQTT options:
 # see https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config
 hivemqMqtt:
-  sessionExpiryMaxInterval: 4294967296
-  messageExpiryMaxInterval: 4294967296
-  maxPacketSize: 268435460
+  sessionExpiryMaxInterval: "4294967295"
+  messageExpiryMaxInterval: "4294967296"
+  maxPacketSize: "268435460"
   serverReceiveMaximum: 10
   keepAliveMax: 65535
   keepAliveAllowUnlimited: true
@@ -113,7 +113,7 @@ hivemqMqtt:
   maxQualityOfService: 2
   retainedMessages: true
   queuedMessagesMaxSize: 1000
-  queuedMessagesStrategy: discard
+  queuedMessagesStrategy: "discard"
 
 # Configures HiveMQ MQTT Add-on options:
 # see https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html
@@ -130,10 +130,6 @@ hivemqMqttSecurity:
   utf8Validation: true
   allowRequestProblemInformation: true
   controlCenterAuditLog: true
-
-# Configures HiveMQ Overload protection:
-# see https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
-hivemqOverloadProtection: true
 
 # Configures HiveMQ replication factor:
 # see https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
