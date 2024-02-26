@@ -131,10 +131,6 @@ hivemqMqttSecurity:
   allowRequestProblemInformation: true
   controlCenterAuditLog: true
 
-# Configures HiveMQ replication factor:
-# see https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
-hivemqReplicationCount: 2
-
 # Selector name that is used to match the selector of the managing operator.
 # This selector assigns the HiveMQ Platform to a specific operator.
 operator:

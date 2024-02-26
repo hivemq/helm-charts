@@ -92,11 +92,6 @@ data:
         <discovery>
           <extension/>
         </discovery>
-        {{- if .Values.hivemqReplicationCount }}
-        <replication>
-          <replica-count>{{ .Values.hivemqReplicationCount }}</replica-count>
-        </replication>
-        {{- end }}
       </cluster>
       <!-- required and should not be configured different -->
       <health-api>
