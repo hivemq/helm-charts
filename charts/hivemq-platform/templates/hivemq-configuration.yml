@@ -108,7 +108,6 @@ data:
           </http>
         </listeners>
       </health-api>
-      <!-- -->
       {{- $hasControlCenter := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "control-center") }}
       {{- if $hasControlCenter }}
       <control-center>
