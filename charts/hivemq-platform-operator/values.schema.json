@@ -121,14 +121,20 @@
     "podSecurityContext" : {
       "type" : "object",
       "properties" : {
+        "enabled" : {
+          "type" : "boolean"
+        },
         "runAsNonRoot" : {
           "type" : "boolean"
         },
         "runAsUser" : {
           "type" : "integer"
         },
-        "enabled" : {
-          "type" : "boolean"
+        "runAsGroup" : {
+          "type" : "integer"
+        },
+        "fsGroup" : {
+          "type" : "integer"
         }
       }
     },
