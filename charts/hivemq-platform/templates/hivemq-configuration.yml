@@ -170,7 +170,6 @@ data:
         <max-client-id-length>{{ .Values.hivemqRestrictions.maxClientIdLength | default 65535 }}</max-client-id-length>
       </restrictions>
       {{- end }}
-
       {{- if .Values.hivemqMqtt }}
       <mqtt>
         <session-expiry>
