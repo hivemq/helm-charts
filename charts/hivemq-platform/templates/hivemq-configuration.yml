@@ -170,9 +170,9 @@ data:
       {{- end }}
       {{- if .Values.hivemqRestrictions }}
       <restrictions>
-        <max-connections>{{ .Values.hivemqRestrictions.maxConnections | default -1 }}</max-connections>
-        <incoming-bandwidth-throttling>{{ .Values.hivemqRestrictions.incomingBandwidthThrottling | default 0 }}</incoming-bandwidth-throttling>
-        <no-connect-idle-timeout>{{ .Values.hivemqRestrictions.noConnectIdleTimeout | default 1000 }}</no-connect-idle-timeout>
+        <max-connections>{{ .Values.hivemqRestrictions.maxConnections | default -1 | int64 }}</max-connections>
+        <incoming-bandwidth-throttling>{{ .Values.hivemqRestrictions.incomingBandwidthThrottling | default 0 | int64 }}</incoming-bandwidth-throttling>
+        <no-connect-idle-timeout>{{ .Values.hivemqRestrictions.noConnectIdleTimeout | default 1000 | int64 }}</no-connect-idle-timeout>
         <max-client-id-length>{{ .Values.hivemqRestrictions.maxClientIdLength | default 65535 }}</max-client-id-length>
       </restrictions>
       {{- end }}
@@ -180,13 +180,13 @@ data:
       {{- if .Values.hivemqMqtt }}
       <mqtt>
         <session-expiry>
-          <max-interval>{{ .Values.hivemqMqtt.sessionExpiryMaxInterval | default "4294967295" }}</max-interval>
+          <max-interval>{{ .Values.hivemqMqtt.sessionExpiryMaxInterval | default 4294967295 | int64 }}</max-interval>
         </session-expiry>
         <message-expiry>
-          <max-interval>{{ .Values.hivemqMqtt.messageExpiryMaxInterval | default "4294967296" }}</max-interval>
+          <max-interval>{{ .Values.hivemqMqtt.messageExpiryMaxInterval | default 4294967296 | int64 }}</max-interval>
         </message-expiry>
         <packets>
-          <max-packet-size>{{ .Values.hivemqMqtt.maxPacketSize | default "268435460" }}</max-packet-size>
+          <max-packet-size>{{ .Values.hivemqMqtt.maxPacketSize | default 268435460 | int64 }}</max-packet-size>
         </packets>
         <receive-maximum>
           <server-receive-maximum>{{ .Values.hivemqMqtt.serverReceiveMaximum | default 10 }}</server-receive-maximum>
@@ -215,7 +215,7 @@ data:
           <enabled>{{ printf "%t" .Values.hivemqMqtt.retainedMessages | default true }}</enabled>
         </retained-messages>
         <queued-messages>
-          <max-queue-size>{{ .Values.hivemqMqtt.queuedMessagesMaxSize | default 1000 }}</max-queue-size>
+          <max-queue-size>{{ .Values.hivemqMqtt.queuedMessagesMaxSize | default 1000 | int64 }}</max-queue-size>
           <strategy>{{ .Values.hivemqMqtt.queuedMessagesStrategy | default "discard" }}</strategy>
         </queued-messages>
       </mqtt>

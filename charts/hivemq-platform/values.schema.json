@@ -347,13 +347,13 @@
       "type" : "object",
       "properties" : {
         "sessionExpiryMaxInterval" : {
-          "type" : "string"
+          "type" : "integer"
         },
         "messageExpiryMaxInterval" : {
-          "type" : "string"
+          "type" : "integer"
         },
         "maxPacketSize" : {
-          "type" : "string"
+          "type" : "integer"
         },
         "serverReceiveMaximum" : {
           "type" : "integer"
