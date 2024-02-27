@@ -3392,7 +3392,6 @@ spec:
                     - SCALING
                     - SET_LOG_LEVEL
                     - STARTING
-                    - UPDATE_INIT_APP
                     type: string
                   statePhase:
                     description: "The recovery state phase, indicating the step of\
@@ -3410,9 +3409,7 @@ spec:
                     - SCALE_DOWN_IN_PROGRESS
                     - SET_LOG_LEVEL
                     - SURGE_IN_PROGRESS
-                    - UPDATE_INIT_APP
                     - WAIT_FOR_EXTENSION_RESTART
-                    - WAIT_FOR_INIT_APP_UPDATE
                     - WAIT_FOR_LOG_LEVEL_UPDATE
                     type: string
                 type: object
@@ -3431,7 +3428,6 @@ spec:
                 - SCALING
                 - SET_LOG_LEVEL
                 - STARTING
-                - UPDATE_INIT_APP
                 type: string
               statePhase:
                 description: "The state phase, indicating the current step of the\
@@ -3449,9 +3445,7 @@ spec:
                 - SCALE_DOWN_IN_PROGRESS
                 - SET_LOG_LEVEL
                 - SURGE_IN_PROGRESS
-                - UPDATE_INIT_APP
                 - WAIT_FOR_EXTENSION_RESTART
-                - WAIT_FOR_INIT_APP_UPDATE
                 - WAIT_FOR_LOG_LEVEL_UPDATE
                 type: string
             type: object
