@@ -325,6 +325,107 @@
           "type" : "string"
         }
       }
+    },
+    "hivemqRestrictions" : {
+      "type" : "object",
+      "properties" : {
+        "maxConnections" : {
+          "type" : "integer"
+        },
+        "incomingBandwidthThrottling" : {
+          "type" : "integer"
+        },
+        "noConnectIdleTimeout" : {
+          "type" : "integer"
+        },
+        "maxClientIdLength" : {
+          "type" : "integer"
+        }
+      }
+    },
+    "hivemqMqtt" : {
+      "type" : "object",
+      "properties" : {
+        "sessionExpiryMaxInterval" : {
+          "type" : "integer"
+        },
+        "messageExpiryMaxInterval" : {
+          "type" : "integer"
+        },
+        "maxPacketSize" : {
+          "type" : "integer"
+        },
+        "serverReceiveMaximum" : {
+          "type" : "integer"
+        },
+        "keepAliveMax" : {
+          "type" : "integer"
+        },
+        "keepAliveAllowUnlimited" : {
+          "type" : "boolean"
+        },
+        "topicAliasEnabled" : {
+          "type" : "boolean"
+        },
+        "topicAliasMaxPerClient" : {
+          "type" : "integer"
+        },
+        "subscriptionIdentifier" : {
+          "type" : "boolean"
+        },
+        "wildcardSubscriptions" : {
+          "type" : "boolean"
+        },
+        "sharedSubscriptions" : {
+          "type" : "boolean"
+        },
+        "maxQualityOfService" : {
+          "type" : "integer"
+        },
+        "retainedMessages" : {
+          "type" : "boolean"
+        },
+        "queuedMessagesMaxSize" : {
+          "type" : "integer"
+        },
+        "queuedMessagesStrategy" : {
+          "type" : "string"
+        }
+      }
+    },
+    "hivemqMqttAddons" : {
+      "type" : "object",
+      "properties" : {
+        "expiredMessagesTopic" : {
+          "type" : "boolean"
+        },
+        "droppedMessagesTopic" : {
+          "type" : "boolean"
+        },
+        "deadMessagesTopic" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "hivemqMqttSecurity" : {
+      "type" : "object",
+      "properties" : {
+        "allowEmptyClientId" : {
+          "type" : "boolean"
+        },
+        "payloadFormatValidation" : {
+          "type" : "boolean"
+        },
+        "utf8Validation" : {
+          "type" : "boolean"
+        },
+        "allowRequestProblemInformation" : {
+          "type" : "boolean"
+        },
+        "controlCenterAuditLog" : {
+          "type" : "boolean"
+        }
+      }
     }
   }
 }

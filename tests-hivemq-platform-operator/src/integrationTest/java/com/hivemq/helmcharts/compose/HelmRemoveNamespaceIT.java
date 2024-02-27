@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Tests the operator permissions when deleting the namespace.
@@ -34,12 +35,12 @@ class HelmRemoveNamespaceIT extends AbstractHelmChartIT {
 
         final var platform = K8sUtil.getHiveMQPlatform(client, namespace, platformReleaseName);
         assertThat(platform).isNotNull();
-        assertThat(platform.delete()).isNotEmpty();
-        assertThat(client.namespaces().withName(namespace).delete()).isNotEmpty();
-        assertThat(client.namespaces()
+        final var namespaceDeletedFuture = client.namespaces()
                 .withName(namespace)
                 .informOnCondition(namespaces -> namespaces.stream()
-                        .noneMatch(n -> Objects.equals(n.getMetadata().getName(), namespace)))
-                .get(2, TimeUnit.MINUTES)).isEmpty();
+                        .noneMatch(n -> Objects.equals(n.getMetadata().getName(), namespace)));
+        assertThat(platform.delete()).isNotEmpty();
+        assertThat(client.namespaces().withName(namespace).delete()).isNotEmpty();
+        await().atMost(2, TimeUnit.MINUTES).until(namespaceDeletedFuture::isDone);
     }
 }

@@ -103,7 +103,6 @@ data:
           </http>
         </listeners>
       </health-api>
-      <!-- -->
       {{- $hasControlCenter := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "control-center") }}
       {{- if $hasControlCenter }}
       <control-center>
@@ -162,6 +161,89 @@ data:
         </behavior-validation>
         {{- end }}
       </data-hub>
+      {{- end }}
+      {{- if .Values.hivemqRestrictions }}
+      <restrictions>
+        <max-connections>{{ .Values.hivemqRestrictions.maxConnections | default -1 | int64 }}</max-connections>
+        <incoming-bandwidth-throttling>{{ .Values.hivemqRestrictions.incomingBandwidthThrottling | default 0 | int64 }}</incoming-bandwidth-throttling>
+        <no-connect-idle-timeout>{{ .Values.hivemqRestrictions.noConnectIdleTimeout | default 1000 | int64 }}</no-connect-idle-timeout>
+        <max-client-id-length>{{ .Values.hivemqRestrictions.maxClientIdLength | default 65535 }}</max-client-id-length>
+      </restrictions>
+      {{- end }}
+      {{- if .Values.hivemqMqtt }}
+      <mqtt>
+        <session-expiry>
+          <max-interval>{{ .Values.hivemqMqtt.sessionExpiryMaxInterval | default 4294967295 | int64 }}</max-interval>
+        </session-expiry>
+        <message-expiry>
+          <max-interval>{{ .Values.hivemqMqtt.messageExpiryMaxInterval | default 4294967296 | int64 }}</max-interval>
+        </message-expiry>
+        <packets>
+          <max-packet-size>{{ .Values.hivemqMqtt.maxPacketSize | default 268435460 | int64 }}</max-packet-size>
+        </packets>
+        <receive-maximum>
+          <server-receive-maximum>{{ .Values.hivemqMqtt.serverReceiveMaximum | default 10 }}</server-receive-maximum>
+        </receive-maximum>
+        <keep-alive>
+          <max-keep-alive>{{ .Values.hivemqMqtt.keepAliveMax | default 65535 }}</max-keep-alive>
+          <allow-unlimited>{{ printf "%t" .Values.hivemqMqtt.keepAliveAllowUnlimited | default true }}</allow-unlimited>
+        </keep-alive>
+        <topic-alias>
+          <enabled>{{ printf "%t" .Values.hivemqMqtt.topicAliasEnabled | default true }}</enabled>
+          <max-per-client>{{ .Values.hivemqMqtt.topicAliasMaxPerClient | default 5 }}</max-per-client>
+        </topic-alias>
+        <subscription-identifier>
+          <enabled>{{ printf "%t" .Values.hivemqMqtt.subscriptionIdentifier | default true }}</enabled>
+        </subscription-identifier>
+        <wildcard-subscriptions>
+          <enabled>{{ printf "%t" .Values.hivemqMqtt.wildcardSubscriptions | default true }}</enabled>
+        </wildcard-subscriptions>
+        <shared-subscriptions>
+          <enabled>{{ printf "%t" .Values.hivemqMqtt.sharedSubscriptions | default true }}</enabled>
+        </shared-subscriptions>
+        <quality-of-service>
+          <max-qos>{{ .Values.hivemqMqtt.maxQualityOfService | default 2 }}</max-qos>
+        </quality-of-service>
+        <retained-messages>
+          <enabled>{{ printf "%t" .Values.hivemqMqtt.retainedMessages | default true }}</enabled>
+        </retained-messages>
+        <queued-messages>
+          <max-queue-size>{{ .Values.hivemqMqtt.queuedMessagesMaxSize | default 1000 | int64 }}</max-queue-size>
+          <strategy>{{ .Values.hivemqMqtt.queuedMessagesStrategy | default "discard" }}</strategy>
+        </queued-messages>
+      </mqtt>
+      {{- end }}
+      {{- if .Values.hivemqMqttAddons }}
+      <mqtt-addons>
+        <expired-messages-topic>
+          <enabled>{{ printf "%t" .Values.hivemqMqttAddons.expiredMessagesTopic | default false }}</enabled>
+        </expired-messages-topic>
+        <dropped-messages-topic>
+          <enabled>{{ printf "%t" .Values.hivemqMqttAddons.droppedMessagesTopic | default false }}</enabled>
+        </dropped-messages-topic>
+        <dead-messages-topic>
+          <enabled>{{ printf "%t" .Values.hivemqMqttAddons.deadMessagesTopic | default false }}</enabled>
+        </dead-messages-topic>
+      </mqtt-addons>
+      {{- end }}
+      {{- if .Values.hivemqMqttSecurity }}
+      <security>
+        <allow-empty-client-id>
+          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.allowEmptyClientId | default true }}</enabled>
+        </allow-empty-client-id>
+        <payload-format-validation>
+          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.payloadFormatValidation | default false }}</enabled>
+        </payload-format-validation>
+        <utf8-validation>
+          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.utf8Validation | default true }}</enabled>
+        </utf8-validation>
+        <allow-request-problem-information>
+          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.allowRequestProblemInformation | default true }}</enabled>
+        </allow-request-problem-information>
+        <control-center-audit-log>
+          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.controlCenterAuditLog | default true }}</enabled>
+        </control-center-audit-log>
+      </security>
       {{- end }}
     </hivemq>
   tracing.xml: |-
