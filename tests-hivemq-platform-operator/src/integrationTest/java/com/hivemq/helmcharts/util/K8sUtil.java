@@ -33,6 +33,19 @@ public class K8sUtil {
     private K8sUtil() {
     }
 
+    @SuppressWarnings("SameParameterValue")
+    private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String resourceName,
+            final @NotNull Class<T> clazz) {
+        try (final InputStream is = K8sUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
+            return client.resources(clazz).inNamespace(namespace).load(is);
+        } catch (final IOException e) {
+            throw new AssertionError("Could not read resource " + resourceName + ": " + e.getMessage());
+        }
+    }
+
     /**
      * Creates a ConfigMap from the given resource file on the classpath.
      *
@@ -129,19 +142,6 @@ public class K8sUtil {
         return namespace;
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String resourceName,
-            final @NotNull Class<T> clazz) {
-        try (final InputStream is = K8sUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
-            return client.resources(clazz).inNamespace(namespace).load(is);
-        } catch (final IOException e) {
-            throw new AssertionError("Could not read resource " + resourceName + ": " + e.getMessage());
-        }
-    }
-
     /**
      * Returns the HiveMQ container from the given {@link StatefulSetSpec}
      * instance.
@@ -165,6 +165,31 @@ public class K8sUtil {
                 .withNamespaced(true)
                 .build();
         return client.genericKubernetesResources(context).inNamespace(namespace).withName(name);
+    }
+
+    /**
+     * Returns some of the fixed default labels defined for a Platform Operator pod.
+     *
+     * @param releaseName the release name of the Platform Operator chart
+     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform Operator pod.
+     */
+    public static @NotNull Map<String, String> getHiveMQPlatformOperatorLabels(final @NotNull String releaseName) {
+        return Map.of("app.kubernetes.io/instance", releaseName, "app.kubernetes.io/name", "hivemq-platform-operator");
+    }
+
+    /**
+     * Returns some of the fixed default labels defined for Platform pod.
+     *
+     * @param releaseName the release name of the Platform chart
+     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform pod.
+     */
+    public static @NotNull Map<String, String> getHiveMQPlatformLabels(final @NotNull String releaseName) {
+        return Map.of("app.kubernetes.io/instance",
+                releaseName,
+                "app.kubernetes.io/name",
+                "hivemq-platform",
+                "hivemq-platform",
+                releaseName);
     }
 
     /**
@@ -257,6 +282,7 @@ public class K8sUtil {
 
     /**
      * Waits for all the pods to be deleted in the given namespace
+     *
      * @param client    the Kubernetes client to use
      * @param namespace the namespace to wait to check for all the pods to be removed
      */
