@@ -3369,6 +3369,11 @@ spec:
             type: object
           status:
             properties:
+              crdVersion:
+                description: The CRD version this custom resource was created with
+                enum:
+                - V1_2_0
+                type: string
               message:
                 description: A human readable state message
                 type: string
