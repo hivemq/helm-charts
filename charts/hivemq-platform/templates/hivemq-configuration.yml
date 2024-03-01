@@ -145,9 +145,6 @@ data:
         {{- end }}
       </rest-api>
       {{- end }}
-      <anonymous-usage-statistics>
-        <enabled>false</enabled>
-      </anonymous-usage-statistics>
       {{- if and .Values.config.dataHub (or .Values.config.dataHub.behaviorValidationEnabled .Values.config.dataHub.dataValidationEnabled) }}
       <data-hub>
         {{- if .Values.config.dataHub.dataValidationEnabled }}
@@ -162,87 +159,155 @@ data:
         {{- end }}
       </data-hub>
       {{- end }}
-      {{- if .Values.hivemqRestrictions }}
+      {{- $hasRestrictionsConfig := include "hivemq-platform.has-hivemq-restrictions-config" (dict "hivemqRestrictions" .Values.hivemqRestrictions) }}
+      {{- if $hasRestrictionsConfig }}
+      {{- $restrictionsConfig := .Values.hivemqRestrictions }}
       <restrictions>
-        <max-connections>{{ .Values.hivemqRestrictions.maxConnections | default -1 | int64 }}</max-connections>
-        <incoming-bandwidth-throttling>{{ .Values.hivemqRestrictions.incomingBandwidthThrottling | default 0 | int64 }}</incoming-bandwidth-throttling>
-        <no-connect-idle-timeout>{{ .Values.hivemqRestrictions.noConnectIdleTimeout | default 1000 | int64 }}</no-connect-idle-timeout>
-        <max-client-id-length>{{ .Values.hivemqRestrictions.maxClientIdLength | default 65535 }}</max-client-id-length>
+        {{- if (hasKey $restrictionsConfig "maxConnections") }}
+        <max-connections>{{ $restrictionsConfig.maxConnections | int64 }}</max-connections>
+        {{- end -}}
+        {{- if (hasKey $restrictionsConfig "incomingBandwidthThrottling") }}
+        <incoming-bandwidth-throttling>{{ $restrictionsConfig.incomingBandwidthThrottling | int64 }}</incoming-bandwidth-throttling>
+        {{- end -}}
+        {{- if (hasKey $restrictionsConfig "noConnectIdleTimeout") }}
+        <no-connect-idle-timeout>{{ $restrictionsConfig.noConnectIdleTimeout | int64 }}</no-connect-idle-timeout>
+        {{- end -}}
+        {{- if (hasKey $restrictionsConfig "maxClientIdLength") }}
+        <max-client-id-length>{{ $restrictionsConfig.maxClientIdLength }}</max-client-id-length>
+        {{- end }}
       </restrictions>
       {{- end }}
-      {{- if .Values.hivemqMqtt }}
+      {{- $hasMqttConfig := include "hivemq-platform.has-hivemq-mqtt-config" (dict "hivemqMqtt" .Values.hivemqMqtt) }}
+      {{- if $hasMqttConfig }}
+      {{- $mqttConfig := .Values.hivemqMqtt }}
       <mqtt>
+        {{- if (hasKey $mqttConfig "sessionExpiryMaxInterval") }}
         <session-expiry>
-          <max-interval>{{ .Values.hivemqMqtt.sessionExpiryMaxInterval | default 4294967295 | int64 }}</max-interval>
+          <max-interval>{{ $mqttConfig.sessionExpiryMaxInterval | int64 }}</max-interval>
         </session-expiry>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "messageExpiryMaxInterval") }}
         <message-expiry>
-          <max-interval>{{ .Values.hivemqMqtt.messageExpiryMaxInterval | default 4294967296 | int64 }}</max-interval>
+          <max-interval>{{ $mqttConfig.messageExpiryMaxInterval | int64 }}</max-interval>
         </message-expiry>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "maxPacketSize") }}
         <packets>
-          <max-packet-size>{{ .Values.hivemqMqtt.maxPacketSize | default 268435460 | int64 }}</max-packet-size>
+          <max-packet-size>{{ $mqttConfig.maxPacketSize | int64 }}</max-packet-size>
         </packets>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "serverReceiveMaximum") }}
         <receive-maximum>
-          <server-receive-maximum>{{ .Values.hivemqMqtt.serverReceiveMaximum | default 10 }}</server-receive-maximum>
+          <server-receive-maximum>{{ $mqttConfig.serverReceiveMaximum }}</server-receive-maximum>
         </receive-maximum>
+        {{- end }}
+        {{- if or (hasKey $mqttConfig "keepAliveMax") (hasKey $mqttConfig "keepAliveAllowUnlimited") }}
         <keep-alive>
-          <max-keep-alive>{{ .Values.hivemqMqtt.keepAliveMax | default 65535 }}</max-keep-alive>
-          <allow-unlimited>{{ printf "%t" .Values.hivemqMqtt.keepAliveAllowUnlimited | default true }}</allow-unlimited>
+          {{- if (hasKey $mqttConfig "keepAliveMax") }}
+          <max-keep-alive>{{ $mqttConfig.keepAliveMax }}</max-keep-alive>
+          {{- end }}
+          {{- if (hasKey $mqttConfig "keepAliveAllowUnlimited") }}
+          <allow-unlimited>{{ printf "%t" $mqttConfig.keepAliveAllowUnlimited }}</allow-unlimited>
+          {{- end }}
         </keep-alive>
+        {{- end }}
+        {{- if or (hasKey $mqttConfig "topicAliasEnabled") (hasKey $mqttConfig "topicAliasMaxPerClient") }}
         <topic-alias>
-          <enabled>{{ printf "%t" .Values.hivemqMqtt.topicAliasEnabled | default true }}</enabled>
-          <max-per-client>{{ .Values.hivemqMqtt.topicAliasMaxPerClient | default 5 }}</max-per-client>
+          {{- if (hasKey $mqttConfig "topicAliasEnabled") }}
+          <enabled>{{ printf "%t" $mqttConfig.topicAliasEnabled }}</enabled>
+          {{- end }}
+          {{- if (hasKey $mqttConfig "topicAliasMaxPerClient") }}
+          <max-per-client>{{ $mqttConfig.topicAliasMaxPerClient }}</max-per-client>
+          {{- end }}
         </topic-alias>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "subscriptionIdentifier") }}
         <subscription-identifier>
-          <enabled>{{ printf "%t" .Values.hivemqMqtt.subscriptionIdentifier | default true }}</enabled>
+          <enabled>{{ printf "%t" $mqttConfig.subscriptionIdentifier }}</enabled>
         </subscription-identifier>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "wildcardSubscriptions") }}
         <wildcard-subscriptions>
-          <enabled>{{ printf "%t" .Values.hivemqMqtt.wildcardSubscriptions | default true }}</enabled>
+          <enabled>{{ printf "%t" $mqttConfig.wildcardSubscriptions }}</enabled>
         </wildcard-subscriptions>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "sharedSubscriptions") }}
         <shared-subscriptions>
-          <enabled>{{ printf "%t" .Values.hivemqMqtt.sharedSubscriptions | default true }}</enabled>
+          <enabled>{{ printf "%t" $mqttConfig.sharedSubscriptions }}</enabled>
         </shared-subscriptions>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "maxQualityOfService") }}
         <quality-of-service>
-          <max-qos>{{ .Values.hivemqMqtt.maxQualityOfService | default 2 }}</max-qos>
+          <max-qos>{{ $mqttConfig.maxQualityOfService }}</max-qos>
         </quality-of-service>
+        {{- end }}
+        {{- if (hasKey $mqttConfig "retainedMessages") }}
         <retained-messages>
-          <enabled>{{ printf "%t" .Values.hivemqMqtt.retainedMessages | default true }}</enabled>
+          <enabled>{{ printf "%t" $mqttConfig.retainedMessages }}</enabled>
         </retained-messages>
+        {{- end }}
+        {{- if or (hasKey $mqttConfig "queuedMessagesMaxSize") (hasKey $mqttConfig "queuedMessagesStrategy") }}
         <queued-messages>
-          <max-queue-size>{{ .Values.hivemqMqtt.queuedMessagesMaxSize | default 1000 | int64 }}</max-queue-size>
-          <strategy>{{ .Values.hivemqMqtt.queuedMessagesStrategy | default "discard" }}</strategy>
+          {{- if (hasKey $mqttConfig "queuedMessagesMaxSize") }}
+          <max-queue-size>{{ $mqttConfig.queuedMessagesMaxSize | int64 }}</max-queue-size>
+          {{- end }}
+          {{- if (hasKey $mqttConfig "queuedMessagesStrategy") }}
+          <strategy>{{ $mqttConfig.queuedMessagesStrategy }}</strategy>
+          {{- end }}
         </queued-messages>
+        {{- end }}
       </mqtt>
       {{- end }}
-      {{- if .Values.hivemqMqttAddons }}
+      {{- $hasMqttAddonsConfig := include "hivemq-platform.has-hivemq-mqtt-addons-config" (dict "hivemqMqttAddons" .Values.hivemqMqttAddons) }}
+      {{- if $hasMqttAddonsConfig }}
+      {{- $mqttAddonsConfig := .Values.hivemqMqttAddons }}
       <mqtt-addons>
+        {{- if (hasKey $mqttAddonsConfig "expiredMessagesTopic") }}
         <expired-messages-topic>
-          <enabled>{{ printf "%t" .Values.hivemqMqttAddons.expiredMessagesTopic | default false }}</enabled>
+          <enabled>{{ printf "%t" $mqttAddonsConfig.expiredMessagesTopic }}</enabled>
         </expired-messages-topic>
+        {{- end }}
+        {{- if (hasKey $mqttAddonsConfig "droppedMessagesTopic") }}
         <dropped-messages-topic>
-          <enabled>{{ printf "%t" .Values.hivemqMqttAddons.droppedMessagesTopic | default false }}</enabled>
+          <enabled>{{ printf "%t" $mqttAddonsConfig.droppedMessagesTopic }}</enabled>
         </dropped-messages-topic>
+        {{- end }}
+        {{- if (hasKey $mqttAddonsConfig "deadMessagesTopic") }}
         <dead-messages-topic>
-          <enabled>{{ printf "%t" .Values.hivemqMqttAddons.deadMessagesTopic | default false }}</enabled>
+          <enabled>{{ printf "%t" $mqttAddonsConfig.deadMessagesTopic }}</enabled>
         </dead-messages-topic>
+        {{- end }}
       </mqtt-addons>
       {{- end }}
-      {{- if .Values.hivemqMqttSecurity }}
+      {{- $hasMqttSecurityConfig := include "hivemq-platform.has-hivemq-mqtt-security-config" (dict "hivemqMqttSecurity" .Values.hivemqMqttSecurity) }}
+      {{- if $hasMqttSecurityConfig }}
+      {{- $securityConfig := .Values.hivemqMqttSecurity }}
       <security>
+        {{- if (hasKey $securityConfig "allowEmptyClientId") }}
         <allow-empty-client-id>
-          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.allowEmptyClientId | default true }}</enabled>
+          <enabled>{{ printf "%t" $securityConfig.allowEmptyClientId }}</enabled>
         </allow-empty-client-id>
+        {{- end }}
+        {{- if (hasKey $securityConfig "payloadFormatValidation") }}
         <payload-format-validation>
-          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.payloadFormatValidation | default false }}</enabled>
+          <enabled>{{ printf "%t" $securityConfig.payloadFormatValidation }}</enabled>
         </payload-format-validation>
+        {{- end }}
+        {{- if (hasKey $securityConfig "utf8Validation") }}
         <utf8-validation>
-          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.utf8Validation | default true }}</enabled>
-        </utf8-validation>
+          <enabled>{{ printf "%t" $securityConfig.utf8Validation }}</enabled>
+        </utf8-validation> 
+        {{- end }}
+        {{- if (hasKey $securityConfig "allowRequestProblemInformation") }}
         <allow-request-problem-information>
-          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.allowRequestProblemInformation | default true }}</enabled>
+          <enabled>{{ printf "%t" $securityConfig.allowRequestProblemInformation }}</enabled>
         </allow-request-problem-information>
+        {{- end }}
+        {{- if (hasKey $securityConfig "controlCenterAuditLog") }}
         <control-center-audit-log>
-          <enabled>{{ printf "%t" .Values.hivemqMqttSecurity.controlCenterAuditLog | default true }}</enabled>
+          <enabled>{{ printf "%t" $securityConfig.controlCenterAuditLog }}</enabled>
         </control-center-audit-log>
+        {{- end }}
       </security>
       {{- end }}
     </hivemq>
