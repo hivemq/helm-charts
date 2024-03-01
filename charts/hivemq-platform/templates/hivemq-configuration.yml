@@ -159,9 +159,9 @@ data:
         {{- end }}
       </data-hub>
       {{- end }}
-      {{- $hasRestrictionsConfig := include "hivemq-platform.has-hivemq-restrictions-config" (dict "hivemqRestrictions" .Values.hivemqRestrictions) }}
-      {{- if $hasRestrictionsConfig }}
       {{- $restrictionsConfig := .Values.hivemqRestrictions }}
+      {{- $hasRestrictionsConfig := include "hivemq-platform.has-hivemq-restrictions-config" (dict "hivemqRestrictions" $restrictionsConfig) }}
+      {{- if $hasRestrictionsConfig }}
       <restrictions>
         {{- if (hasKey $restrictionsConfig "maxConnections") }}
         <max-connections>{{ $restrictionsConfig.maxConnections | int64 }}</max-connections>
@@ -177,9 +177,9 @@ data:
         {{- end }}
       </restrictions>
       {{- end }}
-      {{- $hasMqttConfig := include "hivemq-platform.has-hivemq-mqtt-config" (dict "hivemqMqtt" .Values.hivemqMqtt) }}
-      {{- if $hasMqttConfig }}
       {{- $mqttConfig := .Values.hivemqMqtt }}
+      {{- $hasMqttConfig := include "hivemq-platform.has-hivemq-mqtt-config" (dict "hivemqMqtt" $mqttConfig) }}
+      {{- if $hasMqttConfig }}
       <mqtt>
         {{- if (hasKey $mqttConfig "sessionExpiryMaxInterval") }}
         <session-expiry>
@@ -258,9 +258,9 @@ data:
         {{- end }}
       </mqtt>
       {{- end }}
-      {{- $hasMqttAddonsConfig := include "hivemq-platform.has-hivemq-mqtt-addons-config" (dict "hivemqMqttAddons" .Values.hivemqMqttAddons) }}
-      {{- if $hasMqttAddonsConfig }}
       {{- $mqttAddonsConfig := .Values.hivemqMqttAddons }}
+      {{- $hasMqttAddonsConfig := include "hivemq-platform.has-hivemq-mqtt-addons-config" (dict "hivemqMqttAddons" $mqttAddonsConfig) }}
+      {{- if $hasMqttAddonsConfig }}
       <mqtt-addons>
         {{- if (hasKey $mqttAddonsConfig "expiredMessagesTopic") }}
         <expired-messages-topic>
@@ -279,9 +279,9 @@ data:
         {{- end }}
       </mqtt-addons>
       {{- end }}
-      {{- $hasMqttSecurityConfig := include "hivemq-platform.has-hivemq-mqtt-security-config" (dict "hivemqMqttSecurity" .Values.hivemqMqttSecurity) }}
-      {{- if $hasMqttSecurityConfig }}
       {{- $securityConfig := .Values.hivemqMqttSecurity }}
+      {{- $hasMqttSecurityConfig := include "hivemq-platform.has-hivemq-mqtt-security-config" (dict "hivemqMqttSecurity" $securityConfig) }}
+      {{- if $hasMqttSecurityConfig }}
       <security>
         {{- if (hasKey $securityConfig "allowEmptyClientId") }}
         <allow-empty-client-id>
