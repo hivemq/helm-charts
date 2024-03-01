@@ -187,6 +187,98 @@ Get the container volume mounts
   {{- end }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Checks if there is any HiveMQ restriction options based on the .Values.hivemqRestrictions values
+Params:
+- hivemqRestrictions: The set of values from hivemqRestrictions
+Returns:
+- `true` if any of the expected values under the hivemqRestrictions top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-hivemq-restrictions-config" }}
+{{- $restrictionsConfig := .hivemqRestrictions }}
+{{- $contains := "" }}
+{{- if or
+    (hasKey $restrictionsConfig "maxConnections")
+    (hasKey $restrictionsConfig "incomingBandwidthThrottling")
+    (hasKey $restrictionsConfig "noConnectIdleTimeout")
+    (hasKey $restrictionsConfig "maxClientIdLength") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
+Checks if there is any HiveMQ MQTT options based on the .Values.hivemqMqtt values
+Params:
+- hivemqMqtt: The set of values from hivemqMqtt
+Returns:
+- `true` if any of the expected values under the hivemqMqtt top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-hivemq-mqtt-config" }}
+{{- $mqttConfig := .hivemqMqtt }}
+{{- $contains := "" }}
+{{- if or
+    (hasKey $mqttConfig "sessionExpiryMaxInterval")
+    (hasKey $mqttConfig "messageExpiryMaxInterval")
+    (hasKey $mqttConfig "maxPacketSize")
+    (hasKey $mqttConfig "serverReceiveMaximum")
+    (hasKey $mqttConfig "keepAliveMax")
+    (hasKey $mqttConfig "keepAliveAllowUnlimited")
+    (hasKey $mqttConfig "topicAliasEnabled")
+    (hasKey $mqttConfig "topicAliasMaxPerClient")
+    (hasKey $mqttConfig "subscriptionIdentifier")
+    (hasKey $mqttConfig "wildcardSubscriptions")
+    (hasKey $mqttConfig "sharedSubscriptions")
+    (hasKey $mqttConfig "maxQualityOfService")
+    (hasKey $mqttConfig "retainedMessages")
+    (hasKey $mqttConfig "queuedMessagesMaxSize")
+    (hasKey $mqttConfig "queuedMessagesStrategy") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
+Checks if there is any HiveMQ MQTT Add-on options based on the .Values.hivemqMqttAddons values
+Params:
+- hivemqMqttAddons: The set of values from hivemqMqttAddons
+Returns:
+- `true` if any of the expected values under the hivemqMqttAddons top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-hivemq-mqtt-addons-config" }}
+{{- $mqttAddonsConfig := .hivemqMqttAddons }}
+{{- $contains := "" }}
+{{- if or
+    (hasKey $mqttAddonsConfig "expiredMessagesTopic")
+    (hasKey $mqttAddonsConfig "droppedMessagesTopic")
+    (hasKey $mqttAddonsConfig "deadMessagesTopic") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
+Checks if there is any HiveMQ MQTT security options based on the .Values.hivemqMqttSecurity values
+Params:
+- hivemqMqttSecurity: The set of values from hivemqMqttSecurity
+Returns:
+- `true` if any of the expected values under the hivemqMqttSecurity top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-hivemq-mqtt-security-config" }}
+{{- $mqttSecurityConfig := .hivemqMqttSecurity }}
+{{- $contains := "" }}
+{{- if or
+    (hasKey $mqttSecurityConfig "allowEmptyClientId")
+    (hasKey $mqttSecurityConfig "payloadFormatValidation")
+    (hasKey $mqttSecurityConfig "utf8Validation")
+    (hasKey $mqttSecurityConfig "allowRequestProblemInformation")
+    (hasKey $mqttSecurityConfig "controlCenterAuditLog") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
 {{/*
 Get the volumes references
 */}}
