@@ -33,11 +33,11 @@ public class DockerImageNames {
         // https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.23
         V1_23("v1.23.17-k3s1"),
         V1_24("v1.24.17-k3s1"),
-        V1_25("v1.25.16-k3s1"),
-        V1_26("v1.26.12-k3s1"),
-        V1_27("v1.27.9-k3s1"),
-        V1_28("v1.28.5-k3s1"),
-        V1_29("v1.29.0-k3s1"),
+        V1_25("v1.25.16-k3s4"),
+        V1_26("v1.26.14-k3s1"),
+        V1_27("v1.27.11-k3s1"),
+        V1_28("v1.28.7-k3s1"),
+        V1_29("v1.29.2-k3s1"),
 
         MINIMUM(V1_23.version),
         LATEST(V1_29.version);
