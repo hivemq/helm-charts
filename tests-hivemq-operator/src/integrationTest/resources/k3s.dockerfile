@@ -1,4 +1,4 @@
-ARG K3S_VERSION=v1.29.1-k3s1@sha256:ce16e7fd2e884b72987e1a3cb29b9e9f4ff37e9086831e83b3a65fa4e7f1ee17
+ARG K3S_VERSION=v1.29.2-k3s1@sha256:f6d93da5505360cfec943c777da4a149e2a7b4cbc2ac92c77f38cda5853091ed
 
 FROM ubuntu:noble-20240212@sha256:ff0b5139e774bb0dee9ca8b572b4d69eaec2795deb8dc47c8c829becd67de41e AS builder
 RUN apt-get update && apt-get install curl gnupg2 apt-transport-https ca-certificates -yq
