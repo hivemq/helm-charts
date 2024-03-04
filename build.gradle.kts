@@ -1,19 +1,3 @@
-plugins {
-    java
-}
-
-group = "com.hivemq.helmcharts"
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
 /* ******************** update versions ******************** */
 
 val updateOperatorChartVersion by tasks.registering {
