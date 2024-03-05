@@ -34,7 +34,7 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public int compareTo(@NotNull final Version other) {
+    public int compareTo(final @NotNull Version other) {
         final int majorCompare = Integer.compare(this.major, other.major);
         if (majorCompare != 0) {
             return majorCompare;
