@@ -23,8 +23,8 @@ public class CustomTestExtensionMain implements ExtensionMain {
 
     @Override
     public void extensionStop(
-            @NotNull final ExtensionStopInput extensionStopInput,
-            @NotNull final ExtensionStopOutput extensionStopOutput) {
+            final @NotNull ExtensionStopInput extensionStopInput,
+            final @NotNull ExtensionStopOutput extensionStopOutput) {
         LOG.info("HiveMQ Custom Test Extension stopped");
     }
 }

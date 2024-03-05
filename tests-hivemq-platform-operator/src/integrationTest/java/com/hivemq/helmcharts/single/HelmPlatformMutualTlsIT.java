@@ -128,7 +128,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 withDefaultPublishSubscribeRunnable());
     }
 
-    private static void assertSecretMounted(StatefulSet statefulSet, @NotNull final String name) {
+    private static void assertSecretMounted(StatefulSet statefulSet, final @NotNull String name) {
         final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
         assertThat(volumes).isNotEmpty();
 
