@@ -3,7 +3,7 @@ package com.hivemq.helmcharts;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public int compareTo(@NotNull final Version other) {
+    public int compareTo(final @NotNull Version other) {
         final int majorCompare = Integer.compare(this.major, other.major);
         if (majorCompare != 0) {
             return majorCompare;
@@ -49,7 +49,7 @@ public class Version implements Comparable<Version> {
     static class Deserializer extends JsonDeserializer<Version> {
 
         @Override
-        public Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
+        public @NotNull Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
                 throws IOException {
             final String versionString = parser.getValueAsString();
 
@@ -93,7 +93,7 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return String.format("%s.%s.%s", major, minor, patch);
     }
 }
