@@ -7,31 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Objects;
 
-@SuppressWarnings("unused")
-public class Version implements Comparable<Version> {
-
-    private final int major;
-    private final int minor;
-    private final int patch;
-
-    public Version(final int major, final int minor, final int patch) {
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
-    }
-
-    public int getMajor() {
-        return major;
-    }
-
-    public int getMinor() {
-        return minor;
-    }
-
-    public int getPatch() {
-        return patch;
-    }
+public record Version(int major, int minor, int patch) implements Comparable<Version> {
 
     @Override
     public int compareTo(final @NotNull Version other) {
@@ -66,10 +44,7 @@ public class Version implements Comparable<Version> {
 
     @Override
     public int hashCode() {
-        int result = major;
-        result = 31 * result + minor;
-        result = 31 * result + patch;
-        return result;
+        return Objects.hash(major, minor, patch);
     }
 
     @Override
