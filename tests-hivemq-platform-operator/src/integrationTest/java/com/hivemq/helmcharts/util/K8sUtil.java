@@ -6,7 +6,9 @@ import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
+import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -290,5 +292,26 @@ public class K8sUtil {
             final @NotNull KubernetesClient client, final @NotNull String namespace) {
         await().atMost(1, TimeUnit.MINUTES)
                 .untilAsserted(() -> assertThat(client.pods().inNamespace(namespace).list().getItems()).isEmpty());
+    }
+
+    /**
+     * Asserts that the given MQTT service is of type ClusterIP.
+     *
+     * @param client          the Kubernetes client to use
+     * @param namespace       the namespace to wait to check for all the pods to be removed
+     * @param mqttServiceName the name of the MQTT service to assert
+     */
+    public static void assertMqttService(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String mqttServiceName) {
+        await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
+            final var services = client.services().inNamespace(namespace).list().getItems();
+            assertThat(services).isNotEmpty()
+                    .filteredOn(service -> mqttServiceName.equals(service.getMetadata().getName()))
+                    .extracting(Service::getSpec)
+                    .extracting(ServiceSpec::getType)
+                    .contains("ClusterIP");
+        });
     }
 }

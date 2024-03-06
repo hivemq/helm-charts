@@ -21,7 +21,6 @@ import static org.awaitility.Awaitility.await;
 
 @Tag("Services")
 @Tag("Services1")
-@SuppressWarnings("DuplicatedCode")
 class HelmMqttIT {
 
     private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-test-hivemq-platform-mqtt-1884";
@@ -61,14 +60,7 @@ class HelmMqttIT {
                 "/files/mqtt-test-values.yaml");
 
         K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, customResourceName);
-        await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
-            final var services = client.services().inNamespace(namespace).list().getItems();
-            assertThat(services).isNotEmpty()
-                    .filteredOn(service -> MQTT_SERVICE_NAME.equals(service.getMetadata().getName()))
-                    .extracting(Service::getSpec)
-                    .extracting(ServiceSpec::getType)
-                    .contains("ClusterIP");
-        });
+        K8sUtil.assertMqttService(client, namespace, MQTT_SERVICE_NAME);
         assertMqttListener(namespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
 
         HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
