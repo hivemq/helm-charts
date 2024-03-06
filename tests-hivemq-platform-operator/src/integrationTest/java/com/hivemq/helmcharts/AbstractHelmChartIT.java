@@ -24,8 +24,8 @@ public abstract class AbstractHelmChartIT {
     protected final @NotNull HelmChartContainer helmChartContainer = new HelmChartContainer().withNetwork(network);
 
     protected final @NotNull String namespace = K8sUtil.getNamespaceName(this.getClass());
-    protected final @NotNull String platformReleaseName = getPlatformReleaseName();
-    protected final @NotNull String operatorReleaseName = getOperatorReleaseName();
+    protected final @NotNull String platformReleaseName = "test-hivemq-platform";
+    protected final @NotNull String operatorReleaseName = "test-hivemq-platform-operator";
 
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected @NotNull KubernetesClient client;
@@ -58,14 +58,6 @@ public abstract class AbstractHelmChartIT {
         }
 
         network.close();
-    }
-
-    protected @NotNull String getOperatorReleaseName() {
-        return "test-hivemq-platform-operator";
-    }
-
-    protected @NotNull String getPlatformReleaseName() {
-        return "test-hivemq-platform";
     }
 
     protected boolean cleanupOperatorChart() {

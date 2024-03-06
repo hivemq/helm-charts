@@ -67,7 +67,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private @NotNull Path brokerCertificateStore;
 
     @BeforeEach
-    public void setup(@TempDir final @NotNull Path tempDir) throws Exception {
+    void setup(@TempDir final @NotNull Path tempDir) throws Exception {
         CertificatesUtil.generateCertificates(tempDir.toFile());
         final var encoder = Base64.getEncoder();
 
