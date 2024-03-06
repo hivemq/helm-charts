@@ -17,28 +17,30 @@ class HelmNonRootUserUpgradeExtensionIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void updateExtensionConfigMap_withNonRootUser_rollingRestart() throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName, "-f", "/files/operator-non-root-user-values.yaml");
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+                "-f",
+                "/files/operator-non-root-user-values.yaml");
 
         final var tracingConfigMap = K8sUtil.createConfigMap(client, namespace, "distributed-tracing-config-map.yml");
         assertThat(tracingConfigMap).isNotNull();
         final var extensionStartedFuture = helmChartContainer.getLogWaiter()
-                .waitFor(platformReleaseName + "-0",
+                .waitFor(PLATFORM_RELEASE_NAME + "-0",
                         ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
 
-        helmChartContainer.installPlatformChart(platformReleaseName,
+        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
                 "/files/platform-non-root-user-with-tracing-extension-values.yaml",
                 "--namespace",
                 namespace);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, PLATFORM_RELEASE_NAME);
         await().atMost(1, TimeUnit.MINUTES).until(extensionStartedFuture::isDone);
 
         K8sUtil.updateConfigMap(client, namespace, "distributed-tracing-config-map-update.yml");
         final var configurationUpdatedFuture = helmChartContainer.getLogWaiter()
-                .waitFor(platformReleaseName + "-0",
+                .waitFor(PLATFORM_RELEASE_NAME + "-0",
                         ".*HiveMQ Enterprise Distributed Tracing Extension: Successfully updated configuration from '/opt/hivemq/extensions/hivemq-distributed-tracing-extension/conf/config.xml'.");
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, platformReleaseName);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);

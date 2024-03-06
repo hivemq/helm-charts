@@ -31,14 +31,14 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
 
     @AfterEach
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(operatorReleaseName, "--cascade", "foreground", "--namespace", namespace);
+        helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, "--cascade", "foreground", "--namespace", namespace);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withDeployedOperator_upgradeUsingNewValues() throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName, "--namespace", namespace);
-        final var operatorName = "hivemq-" + operatorReleaseName;
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", namespace);
+        final var operatorName = "hivemq-" + OPERATOR_RELEASE_NAME;
         LOG.debug("Operator deployed successfully");
 
         final var deployment = client.apps()
@@ -58,7 +58,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
                 .anyMatch(containerPort -> containerPort.getContainerPort() == 8080));
 
         // upgrade chart and wait to be ready
-        helmChartContainer.upgradeOperatorChart(operatorReleaseName,
+        helmChartContainer.upgradeOperatorChart(OPERATOR_RELEASE_NAME,
                 "--set",
                 "http.port=8081",
                 "--namespace",

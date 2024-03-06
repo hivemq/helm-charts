@@ -1,4 +1,4 @@
-package com.hivemq.helmcharts;
+package com.hivemq.helmcharts.util;
 
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -18,7 +18,8 @@ public class K8sUtil {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(K8sUtil.class);
 
-    private K8sUtil() {}
+    private K8sUtil() {
+    }
 
     public static @NotNull Resource<GenericKubernetesResource> getHiveMQCluster(
             final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {

@@ -31,6 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelmUpgradeExtensionIT {
 
     private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
+    private static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
+
     private static final @NotNull Network NETWORK = Network.newNetwork();
     private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER =
             new HelmChartContainer().withNetwork(NETWORK);
@@ -44,7 +46,7 @@ class HelmUpgradeExtensionIT {
     public static void setup() throws Exception {
         HIVEMQ_CONTAINER.start();
         HELM_CHART_CONTAINER.start();
-        HELM_CHART_CONTAINER.installOperatorChart("test-hivemq-platform-operator");
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
     }
 
     @AfterAll
