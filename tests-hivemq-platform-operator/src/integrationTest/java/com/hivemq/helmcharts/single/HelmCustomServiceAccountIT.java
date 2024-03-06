@@ -17,10 +17,9 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformCharts_withNonExistingCustomServiceAccountThenCreate_hivemqRunning()
-            throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName);
-        helmChartContainer.installPlatformChart(platformReleaseName,
+    void platformCharts_withNonExistingCustomServiceAccountThenCreate_hivemqRunning() throws Exception {
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME);
+        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "--set",
                 "nodes.serviceAccountName=my-custom-sa",
                 "--set",
@@ -29,14 +28,13 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
                 namespace);
 
         final var hivemqCustomResource =
-                K8sUtil.waitForHiveMQPlatformState(client, namespace, platformReleaseName, "ERROR");
+                K8sUtil.waitForHiveMQPlatformState(client, namespace, PLATFORM_RELEASE_NAME, "ERROR");
         //noinspection unchecked
-        assertThat((Map<String, String>) hivemqCustomResource.getAdditionalProperties()
-                .get("status")).containsValues(
+        assertThat((Map<String, String>) hivemqCustomResource.getAdditionalProperties().get("status")).containsValues(
                 "The custom resource spec is invalid: The ServiceAccount 'my-custom-sa' does not exist",
                 "INVALID_CUSTOM_RESOURCE_SPEC");
 
         K8sUtil.createServiceAccount(client, namespace, "my-custom-sa");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, PLATFORM_RELEASE_NAME);
     }
 }

@@ -21,7 +21,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withPreviousPlatformInstalled_upgradeToLatestChartVersion() throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName);
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME);
 
         final var currentPlatformChart = helmChartContainer.getCurrentPlatformChart();
         final var previousPlatformChart = helmChartContainer.getPreviousPlatformChart();
@@ -33,7 +33,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
         LOG.info("Current platform chart: {}", helmChartContainer.getCurrentPlatformChart());
         LOG.info("Previous platform chart: {}", helmChartContainer.getPreviousPlatformChart());
 
-        helmChartContainer.installPlatformChart(platformReleaseName,
+        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
                 false,
                 "--set",
                 "nodes.replicaCount=1",
@@ -41,7 +41,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 previousPlatformChart.getVersion().toString(),
                 "--namespace",
                 namespace);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, PLATFORM_RELEASE_NAME);
         final var currentPodResourceVersion = client.pods()
                 .inNamespace(namespace)
                 .withName("test-hivemq-platform-0")
@@ -49,13 +49,13 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 .getMetadata()
                 .getResourceVersion();
 
-        helmChartContainer.upgradePlatformChart(platformReleaseName,
+        helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
                 "--set",
                 "nodes.replicaCount=1",
                 "--namespace",
                 namespace);
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, platformReleaseName);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
         final var requiresRollingRestart =
                 !previousPlatformChart.getAppVersion().equals(currentPlatformChart.getAppVersion());
         if (requiresRollingRestart) {
