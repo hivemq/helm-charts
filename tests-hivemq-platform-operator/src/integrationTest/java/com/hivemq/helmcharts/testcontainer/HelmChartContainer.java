@@ -50,7 +50,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,7 +120,7 @@ public class HelmChartContainer extends K3sContainer {
 
     /**
      * Checks if there are any images on the build containers directory to be loaded into K3s locally.
-     * Otherwise, it will try to pull the images from the Github container registry by using the secret set as
+     * Otherwise, it will try to pull the images from the GitHub container registry by using the secret set as
      * an environment variables.
      * See { @link #createContainerRegistrySecret() createContainerRegistrySecret} method
      */
@@ -346,7 +345,7 @@ public class HelmChartContainer extends K3sContainer {
                 "--wait",
                 "--timeout",
                 "5m0s"));
-        final var additionalCommandsList = additionalCommands.collect(Collectors.toList());
+        final var additionalCommandsList = additionalCommands.toList();
         helmCommandList.addAll(additionalCommandsList);
         if (chartName != null && withLocalCharts) {
             // helm dependency update /chart
@@ -379,8 +378,7 @@ public class HelmChartContainer extends K3sContainer {
                 "search",
                 "repo",
                 chartName));
-        final var additionalCommandsList = additionalCommands.collect(Collectors.toList());
-        helmCommandList.addAll(additionalCommandsList);
+        helmCommandList.addAll(additionalCommands.toList());
 
         LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
         final var execResult = execInContainer(helmCommandList.toArray(new String[0]));

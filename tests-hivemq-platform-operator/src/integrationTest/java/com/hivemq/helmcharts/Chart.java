@@ -3,10 +3,10 @@ package com.hivemq.helmcharts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@SuppressWarnings("unused")
 public class Chart {
 
     @JsonProperty("name")
@@ -20,7 +20,7 @@ public class Chart {
 
     @JsonProperty("version")
     @JsonDeserialize(using = Version.Deserializer.class)
-    private Version version;
+    private @Nullable Version version;
 
     public @Nullable String getName() {
         return name;
@@ -39,7 +39,7 @@ public class Chart {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "Chart{" +
                 "name='" +
                 name +
