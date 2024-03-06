@@ -2,6 +2,7 @@ package com.hivemq.helmcharts;
 
 import com.hivemq.helmcharts.testcontainer.DockerImageNames;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
+import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -17,26 +18,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Extensions")
 @Testcontainers
-public class EseExtensionInstallationIT {
+class EseExtensionInstallationIT {
+
     private static final @NotNull String CHART_NAME = "local-hivemq";
+
     @Container
-    private final @NotNull OperatorHelmChartContainer
-            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
-            "k3s.dockerfile",
-            "values/test-values.yaml",
-            CHART_NAME)
-            .withLocalImages();
+    private final @NotNull OperatorHelmChartContainer container =
+            new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
+                    "k3s.dockerfile",
+                    "values/test-values.yaml",
+                    CHART_NAME).withLocalImages();
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.MINUTES)
     void withExtensionConfiguration_hivemqRunning() throws Exception {
-
         final var client = container.getKubernetesClient();
         final var namespace = "default";
 
@@ -48,8 +47,7 @@ public class EseExtensionInstallationIT {
                 .endMetadata()
                 .withData(Map.of("hivemq-enterprise-security-extension.xml", configMapData))
                 .build();
-
-        client.configMaps().inNamespace(namespace).createOrReplace(eseConfigMap);
+        client.resource(eseConfigMap).inNamespace(namespace).create();
 
         container.upgradeLocalChart(CHART_NAME, "/values/ese-extension-values.yaml");
 
@@ -57,12 +55,15 @@ public class EseExtensionInstallationIT {
         K8sUtil.waitForHiveMQClusterState(client, namespace, CHART_NAME, "Running");
 
         final var deployment = client.apps().deployments().inNamespace(namespace).withName("local-hivemq").get();
-        assertNotNull(deployment);
+        assertThat(deployment).isNotNull();
         final var container = deployment.getSpec().getTemplate().getSpec().getContainers().getFirst();
-        assertNotNull(container);
-        assertEquals("hivemq", container.getName());
-        final var foundMount = container.getVolumeMounts().stream().filter(v -> v.getName().contains("ese-extension-config")).findFirst();
-        assertTrue(foundMount.isPresent());
-        assertEquals("/conf-override/extensions/hivemq-enterprise-security-extension", foundMount.get().getMountPath());
+        assertThat(container).isNotNull();
+        assertThat(container.getName()).isEqualTo("hivemq");
+        final var foundMount = container.getVolumeMounts()
+                .stream()
+                .filter(v -> v.getName().contains("ese-extension-config"))
+                .findFirst();
+        assertThat(foundMount).isPresent().hasValueSatisfying(volumeMount -> assertThat(volumeMount.getMountPath()) //
+                .isEqualTo("/conf-override/extensions/hivemq-enterprise-security-extension"));
     }
 }
