@@ -67,7 +67,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
                             "test-secret-volume",
                             "test-persistent-volume-claim",
                             "test-empty-dir-volume");
-            final var containerVolumeMounts = template.getSpec().getContainers().get(0).getVolumeMounts();
+            final var containerVolumeMounts = template.getSpec().getContainers().getFirst().getVolumeMounts();
             assertThat(containerVolumeMounts).isNotEmpty()
                     .map(VolumeMount::getName)
                     .contains("test-mount-volume",

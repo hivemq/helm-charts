@@ -82,7 +82,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     .get()
                     .getSpec()
                     .getContainers()
-                    .get(0)
+                    .getFirst()
                     .getImage()).isEqualTo("docker.io/hivemq/hivemq4:" + currentPlatformChart.getAppVersion());
         } else {
             // Make sure no rolling restart was executed.
@@ -95,7 +95,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     .get()
                     .getSpec()
                     .getContainers()
-                    .get(0)
+                    .getFirst()
                     .getImage()).isEqualTo("docker.io/hivemq/hivemq4:" + previousPlatformChart.getAppVersion());
         }
     }
