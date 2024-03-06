@@ -15,25 +15,23 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("UserPermissions")
-@SuppressWarnings("DuplicatedCode")
 @Testcontainers
-public class UserPermissionsIT {
+@SuppressWarnings("DuplicatedCode")
+class UserPermissionsIT {
 
     @Container
-    private final @NotNull OperatorHelmChartContainer
-            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
-            "k3s.dockerfile",
-            "values/permissions-values.yaml",
-            "local-hivemq")
-            .withLocalImages("hivemq-k8s-test-rootless.tar");
+    private final @NotNull OperatorHelmChartContainer container =
+            new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
+                    "k3s.dockerfile",
+                    "values/permissions-values.yaml",
+                    "local-hivemq").withLocalImages("hivemq-k8s-test-rootless.tar");
 
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     @Test
-    public void withLocalImages_mqttMessagePublishedReceived() throws Exception {
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void withLocalImages_mqttMessagePublishedReceived() throws Exception {
         final var client = Mqtt5Client.builder()
                 .automaticReconnectWithDefaultConfig()
                 .serverPort(container.getMappedPort(1883))
@@ -47,12 +45,13 @@ public class UserPermissionsIT {
             client.publishWith()
                     .topic("test")
                     .payload("Sending Message".getBytes(StandardCharsets.UTF_8))
-                    .qos(MqttQos.AT_LEAST_ONCE).send();
+                    .qos(MqttQos.AT_LEAST_ONCE)
+                    .send();
 
             final var receivedMessage = publishes.receive();
-            assertTrue(receivedMessage.getPayload().isPresent());
-            assertEquals("Sending Message",
-                    StandardCharsets.UTF_8.decode(receivedMessage.getPayload().get()).toString());
+            assertThat(receivedMessage.getPayload()).isPresent()
+                    .hasValueSatisfying(payload -> assertThat(StandardCharsets.UTF_8.decode(payload).toString()) //
+                            .isEqualTo("Sending Message"));
         }
     }
 }

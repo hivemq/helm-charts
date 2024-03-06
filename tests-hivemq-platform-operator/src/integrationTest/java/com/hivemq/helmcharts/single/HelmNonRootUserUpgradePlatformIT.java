@@ -14,16 +14,18 @@ class HelmNonRootUserUpgradePlatformIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void updateConfigMap_withNonRootUser_rollingRestart() throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName, "-f", "/files/operator-non-root-user-values.yaml");
-        helmChartContainer.installPlatformChart(platformReleaseName,
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+                "-f",
+                "/files/operator-non-root-user-values.yaml");
+        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
                 "/files/platform-non-root-user-values.yaml",
                 "--namespace",
                 namespace);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, PLATFORM_RELEASE_NAME);
 
         K8sUtil.updateConfigMap(client, namespace, "hivemq-config-map-update.yml");
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, platformReleaseName);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
                 3,
                 TimeUnit.MINUTES);
