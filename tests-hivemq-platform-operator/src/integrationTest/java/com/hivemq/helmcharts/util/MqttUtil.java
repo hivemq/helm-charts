@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("unused")
 public class MqttUtil {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(MqttUtil.class);
