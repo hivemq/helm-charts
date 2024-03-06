@@ -27,7 +27,6 @@ import static com.hivemq.helmcharts.util.MqttUtil.withDefaultPublishSubscribeRun
 
 @Tag("Services")
 @Tag("Services2")
-@SuppressWarnings("DuplicatedCode")
 class HelmWebsocketsIT extends AbstractHelmChartIT {
 
     private static final @NotNull String WEBSOCKET_SERVICE_NAME_PORT_8002 = "hivemq-test-hivemq-platform-ws-8002";
