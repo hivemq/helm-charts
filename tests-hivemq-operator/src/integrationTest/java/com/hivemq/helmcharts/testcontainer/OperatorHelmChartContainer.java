@@ -201,7 +201,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 K8sUtil.waitForHiveMQClusterState(client, "default", chartName, "Running");
 
                 // get the HiveMQ container logs inside the pod
-                final Pod pod = client.pods().inAnyNamespace().withLabel("app", "hivemq").list().getItems().get(0);
+                final Pod pod = client.pods().inAnyNamespace().withLabel("app", "hivemq").list().getItems().getFirst();
                 final var containerResource = client.pods()
                         .inNamespace("default")
                         .withName(pod.getMetadata().getName())
@@ -345,7 +345,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         @Override
         public void eventReceived(final @NotNull Action action, final @NotNull Pod pod) {
-            final var container = pod.getSpec().getContainers().get(0);
+            final var container = pod.getSpec().getContainers().getFirst();
             if (container != null) {
                 final var namespace = pod.getMetadata().getNamespace();
                 final var podName = pod.getMetadata().getName();
