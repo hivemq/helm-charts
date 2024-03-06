@@ -167,7 +167,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 .findFirst();
         assertThat(tlsVolume).isPresent();
 
-        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().get(0);
+        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().getFirst();
         assertThat(container).isNotNull();
 
         final var volumeMount = container.getVolumeMounts()

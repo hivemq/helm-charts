@@ -58,7 +58,7 @@ public class EseExtensionInstallationIT {
 
         final var deployment = client.apps().deployments().inNamespace(namespace).withName("local-hivemq").get();
         assertNotNull(deployment);
-        final var container = deployment.getSpec().getTemplate().getSpec().getContainers().get(0);
+        final var container = deployment.getSpec().getTemplate().getSpec().getContainers().getFirst();
         assertNotNull(container);
         assertEquals("hivemq", container.getName());
         final var foundMount = container.getVolumeMounts().stream().filter(v -> v.getName().contains("ese-extension-config")).findFirst();
