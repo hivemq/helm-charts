@@ -23,8 +23,9 @@ import static org.awaitility.Awaitility.await;
 @Tag("Services1")
 class HelmMqttIT {
 
-    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
+    private static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
+    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final int MQTT_SERVICE_PORT = 1884;
 
     private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER = new HelmChartContainer();
@@ -36,7 +37,7 @@ class HelmMqttIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     public static void setup() throws Exception {
         HELM_CHART_CONTAINER.start();
-        HELM_CHART_CONTAINER.installOperatorChart("test-hivemq-platform-operator");
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
         client = HELM_CHART_CONTAINER.getKubernetesClient();
     }
 

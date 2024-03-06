@@ -99,7 +99,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
         installChartsAndWaitForPlatformRunning("/files/tls-test-values.yaml");
 
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(namespace).withName("test-hivemq-platform").get();
+                client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(statefulSet).isNotNull();
 
         assertSecretMounted(statefulSet, "mqtts-keystore");

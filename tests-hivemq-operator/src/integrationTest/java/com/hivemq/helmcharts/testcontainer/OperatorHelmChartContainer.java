@@ -1,12 +1,12 @@
 package com.hivemq.helmcharts.testcontainer;
 
 import com.github.dockerjava.api.DockerClient;
-import com.hivemq.helmcharts.K8sUtil;
+import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
@@ -37,19 +37,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
 /**
  * Container that includes the helm binary to be able to install the HiveMQ helm charts
  */
 public class OperatorHelmChartContainer extends K3sContainer {
-    private static final @NotNull Logger LOG = LoggerFactory.getLogger(OperatorHelmChartContainer.class);
-
     public final static int MQTT_PORT = 1883;
+
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
@@ -57,15 +54,20 @@ public class OperatorHelmChartContainer extends K3sContainer {
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
     private static final @NotNull String HIVEMQ_OPERATOR_CONTAINER_NAME = "operator";
     private static final @NotNull String HIVEMQ_CONTAINER_NAME = "hivemq";
-    private final @NotNull List<String> imagesNames;
-    private final @NotNull String chartName;
-    private boolean withCustomImages = false;
+
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(OperatorHelmChartContainer.class);
+
     private final @NotNull ExecutorService executorService = Executors.newCachedThreadPool();
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull CountDownLatch terminateLatch = new CountDownLatch(1);
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
+    private final @NotNull List<String> imagesNames = new ArrayList<>();
+
+    private final @NotNull String chartName;
+
     private @Nullable KubernetesClient kubernetesClient;
+    private boolean withCustomImages = false;
 
     public OperatorHelmChartContainer(
             final @NotNull DockerImageNames.K3s k3s,
@@ -74,7 +76,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
             final @NotNull String chartName) {
         super(getAdHocImageName(k3s, dockerfileName));
         super.addExposedPort(MQTT_PORT);
-        // Mount all values for updates of the chart
+        // mount all values for updates of the chart
         super.withClasspathResourceMapping("values", "/values/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/hivemq-operator"), "/chart");
         super.withCopyFileToContainer(MountableFile.forClasspathResource(customValuesFile), "/files/values.yml");
@@ -85,7 +87,6 @@ public class OperatorHelmChartContainer extends K3sContainer {
             super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
         }
         this.chartName = chartName;
-        imagesNames = new ArrayList<>();
     }
 
     private static @NotNull DockerImageName getAdHocImageName(
@@ -116,25 +117,23 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
     public @NotNull KubernetesClient getKubernetesClient() {
         final var configYaml = this.getKubeConfigYaml();
-        assertNotNull(configYaml);
-
+        assertThat(configYaml).isNotNull();
         if (kubernetesClient == null) {
-            kubernetesClient = new DefaultKubernetesClient(Config.fromKubeconfig(configYaml));
+            kubernetesClient = new KubernetesClientBuilder().withConfig(Config.fromKubeconfig(configYaml)).build();
         }
         return kubernetesClient;
     }
 
     private void upgradeLocalChart(final @NotNull String chartName) throws Exception {
-
         this.upgradeLocalChart(chartName, "/files/values.yml");
     }
 
     public void upgradeLocalChart(final @NotNull String chartName, final @NotNull String valuesFilePath)
             throws Exception {
-        //helm dependency update /chart
+        // helm dependency update /chart
         final var outUpdate = this.execInContainer("/bin/helm", "dependency", "update", "/chart/");
+        assertThat(outUpdate.getStderr()).isEmpty();
 
-        assertTrue(outUpdate.getStderr().isEmpty());
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /chart -f /files/values.yml
         final var execDeploy = this.execInContainer("/bin/helm",
                 "--kubeconfig",
@@ -147,10 +146,10 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 valuesFilePath);
 
         if (!execDeploy.getStderr().isEmpty()) {
-            // Shows also warnings
-            System.err.println(execDeploy.getStderr());
+            // shows also warnings
+            LOG.warn(execDeploy.getStderr());
         }
-        assertFalse(execDeploy.getStdout().isEmpty(), execDeploy.getStderr());
+        assertThat(execDeploy.getStdout()).describedAs(execDeploy::getStderr).isNotEmpty();
         LOG.debug("Chart '{}' installed or upgraded", chartName);
     }
 
@@ -168,8 +167,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
         terminateLatch.countDown();
         logWatches.values().forEach(LogWatch::close);
         watches.values().forEach(Watch::close);
-        if (kubernetesClient != null) {
-            kubernetesClient.close();
+        final var client = kubernetesClient;
+        if (client != null) {
+            client.close();
         }
         executorService.shutdownNow();
         super.stop();
@@ -191,7 +191,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 // we need this to have the yaml read from the container
                 container.containerIsStarted(container.getContainerInfo());
                 final var yaml = container.getKubeConfigYaml();
-                assertNotNull(yaml);
+                assertThat(yaml).isNotNull();
                 if (container.withCustomImages) {
                     loadImages();
                 }
@@ -206,10 +206,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
                         .inNamespace("default")
                         .withName(pod.getMetadata().getName())
                         .inContainer("hivemq");
-                assertFalse(containerResource.getLog()
-                                .contains(
-                                        "Could not read the configuration file /opt/hivemq/conf/config.xml. Using default config"),
-                        "When using the default config a cluster could not be created");
+                assertThat(containerResource.getLog()).doesNotContain(
+                        "Could not read the configuration file /opt/hivemq/conf/config.xml. Using default config");
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
@@ -220,14 +218,12 @@ public class OperatorHelmChartContainer extends K3sContainer {
             container.getImagesNames().forEach(a -> {
                 try {
                     final var outLoadImage = container.execInContainer("/bin/ctr", "images", "import", "/build/" + a);
-                    assertFalse(outLoadImage.getStdout().isEmpty());
+                    assertThat(outLoadImage.getStdout()).isNotEmpty();
                 } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }
             });
-
         }
-
     }
 
     private class EventWatcher implements Watcher<Event> {

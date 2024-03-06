@@ -34,7 +34,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
         await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(namespace).withName("test-hivemq-platform").get();
+                    client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty().map(Volume::getName).contains(mountName);
