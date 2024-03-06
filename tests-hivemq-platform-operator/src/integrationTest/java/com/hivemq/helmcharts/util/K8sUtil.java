@@ -153,7 +153,7 @@ public class K8sUtil {
      * @return the HiveMQ container
      */
     public static @NotNull Container getHiveMQContainer(final @NotNull StatefulSetSpec statefulSetSpec) {
-        return statefulSetSpec.getTemplate().getSpec().getContainers().get(0);
+        return statefulSetSpec.getTemplate().getSpec().getContainers().getFirst();
     }
 
     public static @NotNull Resource<GenericKubernetesResource> getHiveMQPlatform(

@@ -651,7 +651,7 @@ public class HelmChartContainer extends K3sContainer {
 
         @Override
         public void eventReceived(final @NotNull Action action, final @NotNull Pod pod) {
-            final var container = pod.getSpec().getContainers().get(0);
+            final var container = pod.getSpec().getContainers().getFirst();
             if (container != null) {
                 final var namespace = pod.getMetadata().getNamespace();
                 final var podName = pod.getMetadata().getName();
