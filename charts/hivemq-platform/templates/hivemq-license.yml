@@ -1,17 +1,19 @@
-{{- if (include "hivemq-platform.has-license" .) -}}
+{{- if .Values.license.create }}
 apiVersion: v1
 data:
-  {{- if .Values.license.data}}
+  {{- if .Values.license.data }}
   license.lic: {{ .Values.license.data }}
-  {{- else}}
-  {{- if .Values.license.overrideLicense}}
+  {{- else }}
+  {{- if .Values.license.overrideLicense }}
   license.lic: |-
     {{ range (.Values.license.overrideLicense | b64enc) | toStrings }}
     {{ . | nindent 4 }}
     {{ end }}
-  {{- end}}
+  {{- else }}
+    {{- fail ("HiveMQ Platform license content cannot be empty") }}
+  {{- end }}
   {{- end }}
 kind: Secret
 metadata:
-  name: hivemq-license-{{.Release.Name}}
-{{- end}}
+  name: {{ .Values.license.name | default (include "hivemq-platform.default-license-name" .) }}
+{{- end }}

@@ -4,7 +4,6 @@ services:
   - type: websocket
     exposed: true
     containerPort: 8002
-    enabled: true
 
   - type: websocket
     exposed: true

@@ -276,6 +276,16 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           count: 4
 
+  - it: with invalid additional volumes, then fails
+    set:
+      additionalVolumes:
+        - type: fakeAdditionalVolume
+          name: fake-volume-name
+          path: /fake-volume-path
+    asserts:
+      - failedTemplate:
+          errorMessage: Invalid type or not supported type for additional volume
+
   - it: with pod scheduling values set
     values:
       - pod-scheduling-values.yaml
