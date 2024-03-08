@@ -7,12 +7,12 @@ If release name contains chart name it will be used as a full name.
 
 {{- define "hivemq-platform.configuration-name" -}}
 {{- if .Values.config.create -}}
-"hivemq-configuration-{{ .Release.Name}}"
-{{- else}}
+{{- printf "%s-%s" "hivemq-configuration" .Release.Name }}
+{{- else }}
     {{- if .Values.config.name -}}
-    {{.Values.config.name}}
-    {{- else}}
-    fail ("HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap")
+    {{- printf "%s" .Values.config.name }}
+    {{- else }}
+        {{- fail ("HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap") }}
     {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -57,6 +57,13 @@ Has license
 {{- end -}}
 
 {{/*
+Returns the default license name for the platform
+*/}}
+{{- define "hivemq-platform.default-license-name" -}}
+{{- printf "%s-%s" "hivemq-license" .Release.Name }}
+{{- end -}}
+
+{{/*
 Has additional volumes
 */}}
 {{- define "hivemq-platform.has-additional-volumes" -}}
@@ -66,7 +73,7 @@ Has additional volumes
 {{- end -}}
 
 {{/*
-Get the port name inside a range of the service values
+Gets the port name inside a range of the service values
 Format: <.Values.services.type>
 Usage: {{ include "hivemq-platform.range-service-port-name" . }}
 */}}
@@ -136,12 +143,8 @@ Check if there are services exposed with keystore
 {{- define "hivemq-platform.has-keystore" -}}
 {{- range $key, $val := .Values.services }}
     {{- if and $val.exposed $val.keystoreSecretName }}
-        {{- if or $val.keystorePassword $val.keystorePasswordSecretName }}
         {{- printf "found" }}
         {{- break }}
-        {{- else }}
-        fail (printf "A keystore password should be set either as a string or as a secret name")
-        {{- end }}
     {{- end }}
 {{- end -}}
 {{- end -}}
@@ -288,7 +291,7 @@ Get the volumes references
 - name: {{ $volume.mountName }}
 {{- else }}
 - name: {{ $volume.name }}
-{{- end}}
+{{- end }}
   {{- if eq $volume.type "configMap" }}
   configMap:
     name: {{ $volume.name }}
@@ -301,7 +304,7 @@ Get the volumes references
   persistentVolumeClaim:
     claimName: {{ $volume.name }}
   {{- else }}
-  fail ("Invalid type or not supported type for additional volume")
+    {{- fail ("Invalid type or not supported type for additional volume") }}
   {{- end }}
 {{- end -}}
 {{- end -}}
