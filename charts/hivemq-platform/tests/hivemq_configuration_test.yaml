@@ -985,6 +985,14 @@ tests:
           value: hivemq-configuration-platform-release
         template: hivemq-custom-resource.yml
 
+  - it: with existing configMap, but name not set, then fails
+    template: hivemq-custom-resource.yml
+    set:
+      config.create: false
+    asserts:
+      - failedTemplate:
+          errorMessage: HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap
+
   - it: with a MQTT service exposed
     template: hivemq-configuration.yml
     set:
@@ -1028,9 +1036,65 @@ tests:
           containerPort: 1884
           keystoreSecretName: "mqtt-secret"
           keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - isNotNull:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<path>/tls-mqtt-secret/keystore.jks</path>.*?</keystore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</password>.*?</keystore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<private-key-password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>.*?</keystore>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<path>/tls-truststore-secret/truststore.jks</path>.*?</truststore>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<password>\\$\\{mqtt_platform-release_truststore-secret_truststore_pass}</password>.*?</truststore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>OPTIONAL</client-authentication-mode>.*?</tls-tcp-listener>"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_mqtt-secret_keystore_pass
+            value: key-changeme
+        template: hivemq-custom-resource.yml
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_truststore-secret_truststore_pass
+            value: trust-changeme
+        template: hivemq-custom-resource.yml
+
+  - it: with a secure mutual TLS MQTT service exposed, using keystorePassword and truststorePassword
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
           tlsClientAuthenticationMode: "OPTIONAL"
           truststoreSecretName: "truststore-secret"
           truststoreSecretKey: "truststore.jks"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
     asserts:
       - isNotNull:
           path: data["config.xml"]
@@ -1058,8 +1122,120 @@ tests:
       - matchRegex:
           path: data["config.xml"]
           pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>OPTIONAL</client-authentication-mode>.*?</tls-tcp-listener>"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_mqtt-secret_keystore_pass
+            value: key-changeme
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_truststore-secret_truststore_pass
+            value: trust-changeme
+        template: hivemq-custom-resource.yml
 
-  - it: with a secure MQTT service not exposed
+  - it: with a secure mutual TLS MQTT service exposed, using keystorePasswordSecretName and truststorePasswordSecretName
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - isNotNull:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<path>/tls-mqtt-secret/keystore.jks</path>.*?</keystore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</password>.*?</keystore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<private-key-password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>.*?</keystore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<path>/tls-truststore-secret/truststore.jks</path>.*?</truststore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<password>\\$\\{mqtt_platform-release_truststore-secret_truststore_pass}</password>.*?</truststore>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>OPTIONAL</client-authentication-mode>.*?</tls-tcp-listener>"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: my-keystore-secret
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_truststore-secret_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                key: truststore.password
+                name: my-truststore-secret
+        template: hivemq-custom-resource.yml
+
+  - it: with a secure mutual TLS MQTT service exposed, but missing required keystore password
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+
+  - it: with a secure mutual TLS MQTT service exposed, but missing required truststore password
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+    asserts:
+      - failedTemplate:
+          errorMessage: A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)
+
+  - it: with a secure mutual TLS MQTT service not exposed
     template: hivemq-configuration.yml
     set:
       services:
@@ -1081,7 +1257,7 @@ tests:
           path: data["config.xml"]
           pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
 
-  - it: with a secure MQTT service exposed using default values
+  - it: with a secure mutual TLS MQTT service exposed using default values
     template: hivemq-configuration.yml
     set:
       services:
@@ -1089,7 +1265,9 @@ tests:
           exposed: true
           containerPort: 1884
           keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
     asserts:
       - isNotNull:
           path: data["config.xml"]
@@ -1117,6 +1295,27 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>.*?</client-authentication-mode>.*?</tls-tcp-listener>"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: my-keystore-secret
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_platform-release_truststore-secret_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                key: truststore.password
+                name: my-truststore-secret
+        template: hivemq-custom-resource.yml
 
   - it: with a Control Center service exposed
     template: hivemq-configuration.yml

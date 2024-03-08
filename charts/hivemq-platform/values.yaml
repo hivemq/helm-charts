@@ -81,7 +81,10 @@ restApi:
 
 # Configures the HiveMQ License information.
 license:
-  # The name of a secret with the License information. Add all required licenses into the secret.
+  # Creates a default HiveMQ Platform license as a Kubernetes Secret.
+  create: false
+  # The name of a secret with the license information.
+  # To create a new secret with a license, set create=true. Otherwise, false to reuse an existing one.
   name: ""
   # Inlines the License information as an encoded 64-bytes string.
   data: ""

@@ -58,7 +58,7 @@ spec:
                 {{- $envNamesKeyStoreList := list }}
                 {{- $envNamesTrustStoreList := list }}
                 {{- range $key, $val := .Values.services }}
-                {{- if and $val.exposed (or $val.keystorePassword $val.keystorePasswordSecretName) }}
+                {{- if and $val.exposed $val.keystoreSecretName }}
                 {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass") }}
                 {{- if not (has $envName $envNamesKeyStoreList) }}
                 - name: {{ $envName }}
@@ -69,6 +69,8 @@ spec:
                     secretKeyRef:
                       name: {{ $val.keystorePasswordSecretName }}
                       key: keystore.password
+                  {{- else }}
+                  {{- fail ("A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
                   {{- end }}
                 {{- $envNamesKeyStoreList = $envName | append $envNamesKeyStoreList}}
                 {{- end }}
@@ -79,11 +81,12 @@ spec:
                   {{- if $val.truststorePassword }}
                   value: {{ $val.truststorePassword | b64dec }}
                   {{- else if $val.truststorePasswordSecretName }}
-                  # Use truststore password from secret {{ $val.truststorePasswordSecretName }}
                   valueFrom:
                     secretKeyRef:
                       name: {{ $val.truststorePasswordSecretName }}
                       key: truststore.password
+                  {{- else }}
+                  {{- fail ("A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
                   {{- end }}
                   {{- $envNamesTrustStoreList = $envName | append $envNamesTrustStoreList}}
                 {{- end }}
@@ -132,8 +135,8 @@ spec:
             - name: licenses
               secret:
                 {{- if eq .Values.license.name "" }}
-                secretName: hivemq-license-{{ .Release.Name }}
-                {{- else}}
+                secretName: {{ include "hivemq-platform.default-license-name" . }}
+                {{- else }}
                 secretName: {{ .Values.license.name }}
                 {{- end }}
             {{- end }}
