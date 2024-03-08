@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "hivemq-configuration-my-platform"
+  name: hivemq-configuration-my-platform
   labels:
     app.kubernetes.io/name: "hivemq-platform"
     app.kubernetes.io/instance: "my-platform"

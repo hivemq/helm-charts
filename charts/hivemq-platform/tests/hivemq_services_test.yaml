@@ -339,7 +339,7 @@ tests:
       - notExists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
 
-  - it: with mutual tls secret defined and port
+  - it: with mutual TLS secret defined and port
     values:
       - mtls-service-values.yaml
     asserts:
@@ -372,6 +372,12 @@ tests:
             name: "truststore-secret1"
             secret:
               secretName: "truststore-secret1"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret-1886"
+            secret:
+              secretName: "mqtt-secret-1886"
       - isNotEmpty:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - lengthEqual:
@@ -406,11 +412,24 @@ tests:
               secretKeyRef:
                 name: "secret-password1"
                 key: "truststore.password"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_platform_mqtt-secret-1886_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password-1886"
+                key: "keystore.password"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_platform_truststore-secret-1886_truststore_pass"
+            value: "truststore-password"
       - isNotEmpty:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
-          count: 4
+          count: 5
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
           content:
@@ -426,6 +445,16 @@ tests:
           content:
             containerPort: 1885
             name: mqtts-1885
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1886
+            name: mqtts-1886
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1887
+            name: mqtt-1887
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
           content:
@@ -459,6 +488,18 @@ tests:
           content:
             name: "truststore-secret1"
             mountPath: "/tls-truststore-secret1"
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret-1886"
+            mountPath: "/tls-mqtt-secret-1886"
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret-1886"
+            mountPath: "/tls-truststore-secret-1886"
             readOnly: true
 
   - it: with multiple service listeners defined
