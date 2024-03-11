@@ -149,17 +149,13 @@ val saveDnsInitWaitDockerImage by tasks.registering(Exec::class) {
     commandLine("docker", "save", "-o", "hivemq-dns-init-wait.tar", "hivemq/init-dns-wait:snapshot")
 }
 
-val saveK8sDockerImage by tasks.registering {
+val saveK8sDockerImage by tasks.registering(Exec::class) {
     group = "container"
     description = "Save HiveMQ K8s Docker image"
     println("Saving HiveMQ K8s Docker image with tag: $k8sVersion")
     dependsOn(pullK8sDockerImage)
-    doLast {
-        exec {
-            workingDir(layout.buildDirectory)
-            commandLine("docker", "save", "-o", "hivemq-k8s.tar", "docker.io/hivemq/hivemq4:$k8sVersion")
-        }
-    }
+    workingDir(layout.buildDirectory)
+    commandLine("docker", "save", "-o", "hivemq-k8s.tar", "docker.io/hivemq/hivemq4:$k8sVersion")
 }
 
 val pullK8sDockerImage by tasks.registering(Exec::class) {
@@ -191,7 +187,10 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.md")
                 include("**/*.properties")
                 include("**/*.java")
-            }
+            }.plus(fileTree("../examples/hivemq-operator").matching{
+                include("**/*.yml")
+                include("**/*.yaml")
+            })
             filesToUpdate.filter{ file -> "gradle.properties" == file.name }.forEach {
                 val text = it.readText()
                 val replacedText = text.replace("""^version=.+""".toRegex(), "version=${appVersion}")
