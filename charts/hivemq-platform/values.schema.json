@@ -223,6 +223,9 @@
     "license" : {
       "type" : "object",
       "properties" : {
+        "create" : {
+          "type" : "boolean"
+        },
         "data" : {
           "type" : "string"
         },
