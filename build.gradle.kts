@@ -7,12 +7,14 @@ val updateOperatorChartVersion by tasks.registering(Exec::class) {
                 "\n\tUsage: ./gradlew updateOperatorChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Operator Legacy chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
-    updateChartAndValueFilesWithVersion(
-        arrayOf(
-            "charts/hivemq-operator/Chart.yaml",
-            "charts/hivemq-operator/values.yaml"
-        ), """(image:\s+[^:]+:\w+-)(\S+)"""
-    )
+    doFirst {
+        updateChartAndValueFilesWithVersion(
+            arrayOf(
+                "charts/hivemq-operator/Chart.yaml",
+                "charts/hivemq-operator/values.yaml"
+            ), """(image:\s+[^:]+:\w+-)(\S+)"""
+        )
+    }
     dependsOn(gradle.includedBuild("tests-hivemq-operator").task(":updatePlatformVersion"))
     workingDir(layout.projectDirectory)
     commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
@@ -25,10 +27,12 @@ val updateSwarmChartVersion by tasks.registering(Exec::class) {
                 "\n\tUsage: ./gradlew updateSwarmChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Swarm chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
-    updateChartAndValueFilesWithVersion(
-        arrayOf("charts/hivemq-swarm/Chart.yaml", "charts/hivemq-swarm/values.yaml"),
-        """(tag:\s*)(\S+)"""
-    )
+    doFirst {
+        updateChartAndValueFilesWithVersion(
+            arrayOf("charts/hivemq-swarm/Chart.yaml", "charts/hivemq-swarm/values.yaml"),
+            """(tag:\s*)(\S+)"""
+        )
+    }
     workingDir(layout.projectDirectory)
     commandLine("sh", "./manifests/hivemq-swarm/manifests.sh")
 }
@@ -40,12 +44,14 @@ val updatePlatformOperatorChartVersion by tasks.registering(Exec::class) {
                 "\n\tUsage: ./gradlew updatePlatformOperatorChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Platform Operator chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform Operator version. Optional."
-    updateChartAndValueFilesWithVersion(
-        arrayOf(
-            "charts/hivemq-platform-operator/Chart.yaml",
-            "charts/hivemq-platform-operator/values.yaml"
-        ), """(tag:\s*)(\S+)"""
-    )
+    doFirst {
+        updateChartAndValueFilesWithVersion(
+            arrayOf(
+                "charts/hivemq-platform-operator/Chart.yaml",
+                "charts/hivemq-platform-operator/values.yaml"
+            ), """(tag:\s*)(\S+)"""
+        )
+    }
     workingDir(layout.projectDirectory)
     commandLine("sh", "./manifests/hivemq-platform-operator/manifests.sh")
 }
@@ -57,12 +63,14 @@ val updatePlatformChartVersion by tasks.registering(Exec::class) {
                 "\n\tUsage: ./gradlew updatePlatformChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Platform chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform release version. Optional."
-    updateChartAndValueFilesWithVersion(
-        arrayOf(
-            "charts/hivemq-platform/Chart.yaml",
-            "charts/hivemq-platform/values.yaml"
-        ), """(tag:\s*)(\S+)"""
-    )
+    doFirst {
+        updateChartAndValueFilesWithVersion(
+            arrayOf(
+                "charts/hivemq-platform/Chart.yaml",
+                "charts/hivemq-platform/values.yaml"
+            ), """(tag:\s*)(\S+)"""
+        )
+    }
     dependsOn(gradle.includedBuild("tests-hivemq-platform-operator").task(":updatePlatformVersion"))
     workingDir(layout.projectDirectory)
     commandLine("sh", "./manifests/hivemq-platform/manifests.sh")
