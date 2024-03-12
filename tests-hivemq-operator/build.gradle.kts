@@ -198,16 +198,16 @@ val updatePlatformVersion by tasks.registering {
             }
             filesToUpdate.forEach {
                 val text = it.readText()
-                val replacedText1 = text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                var replacedText = text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                     "${matchResult.groupValues[1]}=${appVersion}"
                 }
-                val replacedText2 = replacedText1.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                replacedText = replacedText.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                     "${matchResult.groupValues[1]}=${appVersion}"
                 }
-                val replacedText3 = replacedText2.replace("""(?i)(hivemq/hivemq4:k8s-)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                replacedText = replacedText.replace("""(?i)(hivemq/hivemq4:k8s-)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                     "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
                 }
-                it.writeText(replacedText3)
+                it.writeText(replacedText)
             }
         }
     }
