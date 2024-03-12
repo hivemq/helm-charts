@@ -73,8 +73,7 @@ val updateAllPlatformChartVersions by tasks.registering {
     description =
         "Bumps all Platform Charts and Platform versions except HiveMQ Platform Operator chart. " +
                 "\n\tUsage: ./gradlew updateAllPlatformChartVersions -PappVersion=x.y.z" +
-                "\n\t\t- 'appVersion': Platform release version. Mandatory."
-    project.properties["appVersion"] ?: error("`appVersion` must be set")
+                "\n\t\t- 'appVersion': Platform release version. Optional."
     dependsOn(updateOperatorChartVersion)
     dependsOn(updateSwarmChartVersion)
     dependsOn(updatePlatformChartVersion)
