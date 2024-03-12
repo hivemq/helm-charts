@@ -76,12 +76,17 @@ val updatePlatformChartVersion by tasks.registering(Exec::class) {
     commandLine("sh", "./manifests/hivemq-platform/manifests.sh")
 }
 
+val appVersion = project.properties["appVersion"]
+
 val updateAllPlatformChartVersions by tasks.registering {
     group = "version"
     description =
         "Bumps all Platform Charts and Platform versions except HiveMQ Platform Operator chart. " +
                 "\n\tUsage: ./gradlew updateAllPlatformChartVersions -PappVersion=x.y.z" +
-                "\n\t\t- 'appVersion': Platform release version. Optional."
+                "\n\t\t- 'appVersion': Platform release version. Mandatory."
+    if (appVersion == null) {
+        error("appVersion` must be set\n\n$description")
+    }
     dependsOn(updateOperatorChartVersion)
     dependsOn(updateSwarmChartVersion)
     dependsOn(updatePlatformChartVersion)
