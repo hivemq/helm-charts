@@ -74,7 +74,7 @@ spec:
                   {{- end }}
                 {{- $envNamesKeyStoreList = $envName | append $envNamesKeyStoreList}}
                 {{- end }}
-                {{- if $val.truststoreSecretName }}
+                {{- if and $val.exposed $val.truststoreSecretName }}
                 {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass") }}
                 {{- if not (has $envName $envNamesTrustStoreList) }}
                 - name: {{ $envName }}
