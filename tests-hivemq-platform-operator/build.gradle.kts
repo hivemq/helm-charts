@@ -203,23 +203,23 @@ val updatePlatformVersion by tasks.registering {
             }
             filesToUpdate.forEach {
                 val text = it.readText()
-                val replacedText1 =
+                val replacedText =
                     text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                         "${matchResult.groupValues[1]}=${appVersion}"
                     }
-                val replacedText2 =
-                    replacedText1.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                val replacedText1 =
+                    replacedText.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                         "${matchResult.groupValues[1]}=${appVersion}"
                     }
+                val replacedText2 =
+                    replacedText1.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                        "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
+                    }
                 val replacedText3 =
-                    replacedText2.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
+                    replacedText2.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
                         "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
                     }
-                val replacedText4 =
-                    replacedText3.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                        "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
-                    }
-                it.writeText(replacedText4)
+                it.writeText(replacedText3)
             }
         }
     }
