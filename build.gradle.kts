@@ -4,7 +4,7 @@ val updateOperatorChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
         "Bumps Operator Legacy Chart and Platform versions. " +
-                "\n\tUsage: ./gradlew updateOperatorChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
+                "\n\tUsage: ./gradlew updateOperatorChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Operator Legacy chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
     doFirst {
@@ -24,7 +24,7 @@ val updateSwarmChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
         "Bumps Swarm Chart and Platform versions. " +
-                "\n\tUsage: ./gradlew updateSwarmChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
+                "\n\tUsage: ./gradlew updateSwarmChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Swarm chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
     doFirst {
@@ -41,7 +41,7 @@ val updatePlatformOperatorChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
         "Bumps Platform Operator Chart and Operator Platform versions. " +
-                "\n\tUsage: ./gradlew updatePlatformOperatorChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
+                "\n\tUsage: ./gradlew updatePlatformOperatorChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Platform Operator chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform Operator version. Optional."
     doFirst {
@@ -60,7 +60,7 @@ val updatePlatformChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
         "Bumps Platform Chart and Platform versions. " +
-                "\n\tUsage: ./gradlew updatePlatformChartVersion -PchartVersion=x.y.z -PappVersion=x.y.z" +
+                "\n\tUsage: ./gradlew updatePlatformChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Platform chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform release version. Optional."
     doFirst {
