@@ -198,7 +198,7 @@ hivemq:
       enabled: false
   ## Feel free to add other extensions as well. You should keep the blocks above to maintain control over the platform extensions though.
   #- name: hivemq-mqtt-message-log-extension
-  #  extensionUri: https://www.hivemq.com/releases/extensions/hivemq-mqtt-message-log-extension-1.1.0.zip
+  #  extensionUri: https://github.com/hivemq/hivemq-mqtt-message-log-extension/releases/download/1.1.3/hivemq-mqtt-message-log-extension-1.1.3.zip
   #  configMap: message-log-config
   configMaps: []
   # ConfigMaps to mount to the HiveMQ pods. These can be mounted to existing directories without shadowing the folder contents as well.
