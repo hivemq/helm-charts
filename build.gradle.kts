@@ -76,26 +76,28 @@ val updatePlatformChartVersion by tasks.registering(Exec::class) {
     commandLine("sh", "./manifests/hivemq-platform/manifests.sh")
 }
 
-val appVersion = project.properties["appVersion"]
+var checkAppVersion = false
+var checkAppVersionUsage = ""
 
 val updateAllPlatformChartVersions by tasks.registering {
+    val usage = "Usage: ./gradlew updateAllPlatformChartVersions -PappVersion=x.y.z" +
+            "\n\t\t- 'appVersion': Platform release version. Mandatory."
     group = "version"
-    description =
-        "Bumps all Platform Charts and Platform versions except HiveMQ Platform Operator chart. " +
-                "\n\tUsage: ./gradlew updateAllPlatformChartVersions -PappVersion=x.y.z" +
-                "\n\t\t- 'appVersion': Platform release version. Mandatory."
-    if (appVersion == null) {
-        error("appVersion` must be set\n\n$description")
-    }
+    description = "Bumps all Platform Charts and Platform versions except HiveMQ Platform Operator chart.\n\t$usage"
+    checkAppVersion = true
+    checkAppVersionUsage = usage
     dependsOn(updateOperatorChartVersion)
     dependsOn(updateSwarmChartVersion)
     dependsOn(updatePlatformChartVersion)
 }
 
 fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String) {
-    val filesToUpdate = files(versionFilesToUpdate)
     var chartVersion = project.properties["chartVersion"]
     val appVersion = project.properties["appVersion"]
+    if (checkAppVersion && appVersion == null) {
+        error("`appVersion` must be set\n\n$checkAppVersionUsage")
+    }
+    val filesToUpdate = files(versionFilesToUpdate)
     filesToUpdate.filter { file -> file.name == "Chart.yaml" }.forEach {
         var replacedTextAppVersion = it.readText()
         if (appVersion != null) {
