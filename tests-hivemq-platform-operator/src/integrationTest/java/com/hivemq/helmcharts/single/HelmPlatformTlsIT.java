@@ -139,7 +139,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
             final var webDriver = new RemoteWebDriver(webDriverContainer.getSeleniumAddress(), options, false);
 
-            webDriver.get("http://host.docker.internal:" + forwarded.getLocalPort());
+            webDriver.get("https://host.docker.internal:" + forwarded.getLocalPort());
             final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
 
             wait.until(webWaitDriver -> {
@@ -148,10 +148,8 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
                 webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys("hivemq");
                 webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
-                return true;
+                return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
             });
-
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON)));
             webDriver.quit();
         }
     }
