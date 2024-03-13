@@ -9,7 +9,7 @@ tests:
   - it: with default platform values
     template: hivemq-configuration.yml
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -63,7 +63,7 @@ tests:
         noConnectIdleTimeout: 10000
         maxClientIdLength: 65535
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -121,7 +121,7 @@ tests:
         incomingBandwidthThrottling: 0
         maxClientIdLength: 65535
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -175,7 +175,7 @@ tests:
     set:
       hivemqRestrictions: {}
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -240,7 +240,7 @@ tests:
         queuedMessagesMaxSize: 1000
         queuedMessagesStrategy: "discard"
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -339,7 +339,7 @@ tests:
         retainedMessages: true
         queuedMessagesStrategy: "discard"
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -415,7 +415,7 @@ tests:
     set:
       hivemqMqtt: {}
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -468,7 +468,7 @@ tests:
         droppedMessagesTopic: false
         deadMessagesTopic: false
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -530,7 +530,7 @@ tests:
       hivemqMqttAddons:
         droppedMessagesTopic: false
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -585,7 +585,7 @@ tests:
     set:
       hivemqMqttAddons: {}
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -640,7 +640,7 @@ tests:
         allowRequestProblemInformation: true
         controlCenterAuditLog: true
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -709,7 +709,7 @@ tests:
         allowEmptyClientId: true
         utf8Validation: true
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -767,7 +767,7 @@ tests:
     set:
       hivemqMqttSecurity: {}
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -847,7 +847,7 @@ tests:
         allowRequestProblemInformation: true
         controlCenterAuditLog: true
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - equal:
           path: data["config.xml"]
@@ -973,7 +973,7 @@ tests:
       config.create: true
       config.overrideContent: "content"
     asserts:
-      - isNotNull:
+      - exists:
           path: data
       - isKind:
           of: ConfigMap
@@ -1001,7 +1001,7 @@ tests:
           exposed: true
           containerPort: 1884
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1018,7 +1018,7 @@ tests:
           exposed: false
           containerPort: 1884
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
@@ -1036,35 +1036,53 @@ tests:
           containerPort: 1884
           keystoreSecretName: "mqtt-secret"
           keystoreSecretKey: "keystore.jks"
-          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           tlsClientAuthenticationMode: "OPTIONAL"
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
-      - notMatchRegex:
+      - equal:
           path: data["config.xml"]
-          pattern: "(?s)<tcp-listener>.*?</tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<path>/tls-mqtt-secret/keystore.jks</path>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<private-key-password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>.*?</keystore>.*?</tls-tcp-listener>"
-      - notMatchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<path>/tls-truststore-secret/truststore.jks</path>.*?</truststore>.*?</tls-tcp-listener>"
-      - notMatchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<password>\\$\\{mqtt_platform-release_truststore-secret_truststore_pass}</password>.*?</truststore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>OPTIONAL</client-authentication-mode>.*?</tls-tcp-listener>"
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore.jks</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <client-authentication-mode>OPTIONAL</client-authentication-mode>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
         template: hivemq-custom-resource.yml
@@ -1090,38 +1108,60 @@ tests:
           containerPort: 1884
           keystoreSecretName: "mqtt-secret"
           keystoreSecretKey: "keystore.jks"
-          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           tlsClientAuthenticationMode: "OPTIONAL"
           truststoreSecretName: "truststore-secret"
           truststoreSecretKey: "truststore.jks"
-          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
-      - notMatchRegex:
+      - equal:
           path: data["config.xml"]
-          pattern: "(?s)<tcp-listener>.*?</tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<path>/tls-mqtt-secret/keystore.jks</path>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<private-key-password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<path>/tls-truststore-secret/truststore.jks</path>.*?</truststore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<password>\\$\\{mqtt_platform-release_truststore-secret_truststore_pass}</password>.*?</truststore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>OPTIONAL</client-authentication-mode>.*?</tls-tcp-listener>"
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore.jks</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <truststore>
+                      <path>/tls-truststore-secret/truststore.jks</path>
+                      <password>${mqtt_platform-release_truststore-secret_truststore_pass}</password>
+                    </truststore>
+                    <client-authentication-mode>OPTIONAL</client-authentication-mode>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
         template: hivemq-custom-resource.yml
@@ -1153,32 +1193,54 @@ tests:
           truststoreSecretKey: "truststore.jks"
           truststorePasswordSecretName: "my-truststore-secret"
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
-      - notMatchRegex:
+      - equal:
           path: data["config.xml"]
-          pattern: "(?s)<tcp-listener>.*?</tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<path>/tls-mqtt-secret/keystore.jks</path>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<private-key-password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<path>/tls-truststore-secret/truststore.jks</path>.*?</truststore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<password>\\$\\{mqtt_platform-release_truststore-secret_truststore_pass}</password>.*?</truststore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>OPTIONAL</client-authentication-mode>.*?</tls-tcp-listener>"
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore.jks</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <truststore>
+                      <path>/tls-truststore-secret/truststore.jks</path>
+                      <password>${mqtt_platform-release_truststore-secret_truststore_pass}</password>
+                    </truststore>
+                    <client-authentication-mode>OPTIONAL</client-authentication-mode>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
         template: hivemq-custom-resource.yml
@@ -1248,7 +1310,7 @@ tests:
           truststoreSecretName: "truststore-secret"
           truststoreSecretKey: "truststore.jks"
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
@@ -1269,32 +1331,53 @@ tests:
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
-      - notMatchRegex:
+      - equal:
           path: data["config.xml"]
-          pattern: "(?s)<tcp-listener>.*?</tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<path>/tls-mqtt-secret/keystore</path>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<keystore>.*?<private-key-password>\\$\\{mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>.*?</keystore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<path>/tls-truststore-secret/truststore</path>.*?</truststore>.*?</tls-tcp-listener>"
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<truststore>.*?<password>\\$\\{mqtt_platform-release_truststore-secret_truststore_pass}</password>.*?</truststore>.*?</tls-tcp-listener>"
-      - notMatchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<tls-tcp-listener>.*?<client-authentication-mode>.*?</client-authentication-mode>.*?</tls-tcp-listener>"
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <truststore>
+                      <path>/tls-truststore-secret/truststore</path>
+                      <password>${mqtt_platform-release_truststore-secret_truststore_pass}</password>
+                    </truststore>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
         template: hivemq-custom-resource.yml
@@ -1325,7 +1408,7 @@ tests:
           exposed: true
           containerPort: 8081
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1339,11 +1422,281 @@ tests:
           exposed: false
           containerPort: 8081
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<control-center>.*?<port>8081</port>.*?</control-center>"
+
+  - it: with Control Center user and password
+    template: hivemq-configuration.yml
+    set:
+      controlCenter.username: "test-username"
+      controlCenter.password: "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+                <users>
+                  <user>
+                    <name>test-username</name>
+                    <password>c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265</password>
+                  </user>
+                </users>
+              </control-center>
+            </hivemq>
+
+  - it: with default Control Center username and password
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>test-password</password>.*?</user>"
+
+  - it: with a secure Control Center service enabled, using keystorePassword
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore.jks</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with a secure Control Center service enabled, using keystorePasswordSecretName
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore.jks</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with a secure Control Center service disabled, no secure Control Service is exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<listeners>.*?</control-center>"
+
+  - it: with several secure and non-secure Control Center services enabled and reusing keystores
+    template: hivemq-configuration.yml
+    values:
+      - tls-cc-services-values.yaml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8444</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8445</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret1_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
 
   - it: with a Rest API service exposed
     template: hivemq-configuration.yml
@@ -1353,7 +1706,7 @@ tests:
           exposed: true
           containerPort: 8890
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1370,7 +1723,7 @@ tests:
           exposed: false
           containerPort: 8890
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
@@ -1388,7 +1741,7 @@ tests:
           exposed: true
           containerPort: 8890
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1408,7 +1761,7 @@ tests:
           exposed: true
           containerPort: 8890
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1425,7 +1778,7 @@ tests:
           exposed: true
           containerPort: 8000
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1442,7 +1795,7 @@ tests:
           exposed: false
           containerPort: 8000
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
@@ -1451,34 +1804,13 @@ tests:
           path: data["config.xml"]
           pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
 
-  - it: with Control Center user and password
-    template: hivemq-configuration.yml
-    set:
-      controlCenter.username: "test-username"
-      controlCenter.password: "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265"
-    asserts:
-      - isNotNull:
-          path: data["config.xml"]
-      - matchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265</password>.*?</user>"
-
-  - it: with default Control Center username and password
-    template: hivemq-configuration.yml
-    asserts:
-      - isNotNull:
-          path: data["config.xml"]
-      - notMatchRegex:
-          path: data["config.xml"]
-          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>test-password</password>.*?</user>"
-
   - it: with Data Hub enabled
     template: hivemq-configuration.yml
     set:
       config.dataHub.dataValidationEnabled: true
       config.dataHub.behaviorValidationEnabled: true
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1493,7 +1825,7 @@ tests:
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: false
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
@@ -1505,7 +1837,7 @@ tests:
       config.dataHub.dataValidationEnabled: true
       config.dataHub.behaviorValidationEnabled: false
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - matchRegex:
           path: data["config.xml"]
@@ -1520,7 +1852,7 @@ tests:
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: true
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
@@ -1532,7 +1864,7 @@ tests:
   - it: with Data Hub default
     template: hivemq-configuration.yml
     asserts:
-      - isNotNull:
+      - exists:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
