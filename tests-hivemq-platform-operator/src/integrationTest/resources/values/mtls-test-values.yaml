@@ -9,10 +9,10 @@ services:
     exposed: true
     containerPort: 1884
     keystoreSecretName: "mqtts-keystore-1884"
-    keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     truststoreSecretName: "mqtts-truststore-1884"
     truststoreSecretKey: "truststore.jks"
-    truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+    truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
 
   - type: mqtt
     exposed: true

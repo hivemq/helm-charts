@@ -138,6 +138,22 @@ Returns:
 {{- end -}}
 
 {{/*
+Validate there is no duplicated `containerPort` defined for the services.
+Params:
+- services: The array of services to check.
+*/}}
+{{- define "hivemq-platform.validate-service-ports" -}}
+{{- $services := .services }}
+{{- $containerPortsList := list }}
+{{- range $service := $services }}
+  {{- if and $service.exposed (has $service.containerPort $containerPortsList) }}
+    {{- fail (printf "Container port %d in service `%s` already exists" (int $service.containerPort) $service.type) }}
+  {{- end }}
+  {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
+{{- end }}
+{{- end -}}
+
+{{/*
 Check if there are services exposed with keystore
 */}}
 {{- define "hivemq-platform.has-keystore" -}}
@@ -311,7 +327,7 @@ Get the volumes references
 
 {{/*
 Get secret volume mount
-- Only Add truststore if secret is set
+- Only add truststore if secret is set
 */}}
 {{- define "hivemq-platform.get-tls-secret-volumes" -}}
 {{- $secretNames := list }}

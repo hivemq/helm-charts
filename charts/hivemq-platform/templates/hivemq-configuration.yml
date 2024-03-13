@@ -108,11 +108,25 @@ data:
       <control-center>
         <listeners>
         {{- range $key, $val := .Values.services }}
-          {{- if eq $val.type "control-center" }}
+          {{- if and (eq $val.type "control-center") $val.exposed }}
+          {{- if (hasKey $val "keystoreSecretName") }}
+          <https>
+            <port>{{ $val.containerPort }}</port>
+            <bind-address>0.0.0.0</bind-address>
+            <tls>
+              <keystore>
+                <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
+                <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
+                <private-key-password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</private-key-password>
+              </keystore>
+            </tls>
+          </https>
+          {{- else }}
           <http>
             <port>{{ $val.containerPort }}</port>
             <bind-address>0.0.0.0</bind-address>
           </http>
+          {{- end }}
           {{- end }}
         {{- end }}
         </listeners>

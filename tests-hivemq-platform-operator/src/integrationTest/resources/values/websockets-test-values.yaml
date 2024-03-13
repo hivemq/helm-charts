@@ -9,10 +9,10 @@ services:
     exposed: true
     containerPort: 8003
     keystoreSecretName: "ws-keystore-8003"
-    keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     truststoreSecretName: "ws-truststore-8003"
     truststoreSecretKey: "truststore.jks"
-    truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+    truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
 
   - type: websocket
     exposed: true
