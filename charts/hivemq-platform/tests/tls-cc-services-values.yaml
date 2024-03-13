@@ -1,0 +1,24 @@
+services:
+  - type: control-center
+    exposed: true
+    containerPort: 8443
+    keystoreSecretName: "control-center-secret"
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+
+  - type: control-center
+    exposed: true
+    containerPort: 8444
+    keystoreSecretName: "control-center-secret"
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+
+  - type: control-center
+    exposed: true
+    containerPort: 8445
+    keystoreSecretName: "control-center-secret1"
+    keystorePasswordSecretName: "secret-password1"
+
+  - type: control-center
+    exposed: false
+    containerPort: 8446
+    keystoreSecretName: "control-center-secret2"
+    keystorePasswordSecretName: "secret-password2"

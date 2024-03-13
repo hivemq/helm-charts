@@ -198,6 +198,18 @@ services:
   - type: control-center
     exposed: true
     containerPort: 8080
+  # Secure Control Center service configuration
+  - type: control-center
+    exposed: false
+    containerPort: 8443
+    # The name of the Kubernetes secret that contains the keystore file.
+    keystoreSecretName: ""
+    # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
+    keystoreSecretKey: ""
+    # The inlined password for the keystore, Base 64 encoded.
+    keystorePassword: ""
+    # Alternatively, the name of the secret with the password, using the key: `keystore.password`.
+    keystorePasswordSecretName: ""
   # REST API service configuration
   - type: rest-api
     exposed: false

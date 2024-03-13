@@ -72,7 +72,7 @@ spec:
                   {{- else }}
                   {{- fail ("A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
                   {{- end }}
-                {{- $envNamesKeyStoreList = $envName | append $envNamesKeyStoreList}}
+                {{- $envNamesKeyStoreList = $envName | append $envNamesKeyStoreList }}
                 {{- end }}
                 {{- if and $val.exposed $val.truststoreSecretName }}
                 {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass") }}
@@ -159,6 +159,7 @@ spec:
       {{.Values.config.overrideStatefulSet | nindent 3}}
       {{- end }}
   services:
+    {{- include "hivemq-platform.validate-service-ports" (dict "services" .Values.services) -}}
     {{- range $key, $val := .Values.services }}
     {{- if and $val.exposed }}
     - metadata:
