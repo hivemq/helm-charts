@@ -138,18 +138,85 @@ Returns:
 {{- end -}}
 
 {{/*
-Validate there is no duplicated `containerPort` defined for the services.
+Gets the default Operator REST API port value.
+Usage: {{ include "hivemq-platform.operator-rest-api-port" . }}
+*/}}
+{{- define "hivemq-platform.operator-rest-api-port" -}}
+{{- 7979 }}
+{{- end -}}
+
+{{/*
+Gets the default Health API port value.
+Usage: {{ include "hivemq-platform.health-api-port" . }}
+*/}}
+{{- define "hivemq-platform.health-api-port" -}}
+{{- 8889 }}
+{{- end -}}
+
+{{/*
+Gets the default metrics port value.
+Usage: {{ include "hivemq-platform.metrics-port" . }}
+*/}}
+{{- define "hivemq-platform.metrics-port" -}}
+{{- 9399 }}
+{{- end -}}
+
+{{/*
+Gets the default cluster transport port value.
+Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
+*/}}
+{{- define "hivemq-platform.cluster-transport-port" -}}
+{{- 7000 }}
+{{- end -}}
+
+{{/*
+Validates all the exposed services.
+- No duplicated ports are defined as part of the `containerPort` values
+- No default ports (7979, 8889, 9399, 7000) are defined as part of the `containerPort` values
 Params:
 - services: The array of services to check.
+Usage: {{ include "hivemq-platform.validate-service-ports" (dict "services" .Values.services) }}
 */}}
 {{- define "hivemq-platform.validate-service-ports" -}}
 {{- $services := .services }}
+{{- include "hivemq-platform.validate-duplicated-service-ports" (dict "services" $services) -}}
+{{- include "hivemq-platform.validate-default-service-ports" (dict "services" $services) -}}
+{{- end -}}
+
+{{/*
+Validates there is no duplicated `containerPort` defined for the exposed services.
+Params:
+- services: The array of services to check.
+Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" (dict "services" .Values.services) }}
+*/}}
+{{- define "hivemq-platform.validate-duplicated-service-ports" -}}
+{{- $services := .services }}
 {{- $containerPortsList := list }}
 {{- range $service := $services }}
-  {{- if and $service.exposed (has $service.containerPort $containerPortsList) }}
-    {{- fail (printf "Container port %d in service `%s` already exists" (int $service.containerPort) $service.type) }}
+  {{- if and $service.exposed (has (int64 $service.containerPort) $containerPortsList) }}
+    {{- fail (printf "Container port %d in service `%s` already exists" (int64 $service.containerPort) $service.type) }}
   {{- end }}
-  {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
+  {{- $containerPortsList = (int64 $service.containerPort) | append $containerPortsList}}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates there is no default `containerPort` (7979, 8889, 9399, 7000) defined as part of the exposed services ports.
+Params:
+- services: The array of services to check.
+Usage: {{ include "hivemq-platform.validate-default-service-ports" (dict "services" .Values.services) }}
+*/}}
+{{- define "hivemq-platform.validate-default-service-ports" -}}
+{{- $services := .services }}
+{{- $defaultPortsList := list }}
+{{- $defaultPortsList := ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
+{{- $defaultPortsList := ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
+{{- $defaultPortsList := ( include "hivemq-platform.metrics-port" . | int64 ) | append $defaultPortsList }}
+{{- $defaultPortsList := ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
+{{- range $service := $services }}
+  {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
+    {{- fail (printf "Container port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
+  {{- end }}
 {{- end }}
 {{- end -}}
 

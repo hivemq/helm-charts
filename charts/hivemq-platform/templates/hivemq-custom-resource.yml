@@ -1,6 +1,7 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
-{{- $hasLicense:= ( include "hivemq-platform.has-license" . ) -}}
-{{- $hasAdditionalVolumes:= ( include "hivemq-platform.has-additional-volumes" . ) -}}
+{{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
+{{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
+{{- $defaultMetricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
 apiVersion: hivemq.com/v1
 kind: HiveMQPlatform
 metadata:
@@ -13,9 +14,9 @@ metadata:
 spec:
   configMapName: {{ include "hivemq-platform.configuration-name" . }}
   logLevel: {{ .Values.nodes.logLevel }}
-  operatorRestApiPort: 7979
-  healthApiPort: 8889
-  metricsPort: 9399
+  operatorRestApiPort: {{ include "hivemq-platform.operator-rest-api-port" . }}
+  healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
+  metricsPort: {{ include "hivemq-platform.metrics-port" . }}
   metricsPath: /
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
@@ -107,8 +108,8 @@ spec:
                 {{- end }}
                 {{- end }}
                   # Metric container ports are not configurable right now
-                - name: metrics-9399
-                  containerPort: 9399
+                - name: {{ printf "metrics-%s" $defaultMetricsPort }}
+                  containerPort: {{ printf "%d" (int64 $defaultMetricsPort) }}
               resources:
                 limits:
                   cpu: {{ .Values.nodes.resources.cpu | quote }}
@@ -187,12 +188,12 @@ spec:
     {{- end }}
     # Metric service ports are not configurable right now
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" "9399" "containerPort" "9399")) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" $defaultMetricsPort "containerPort" $defaultMetricsPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
       spec:
         ports:
-          - name: metrics-9399
-            targetPort: metrics-9399
-            port: 9399
+          - name: {{ printf "metrics-%s" $defaultMetricsPort }}
+            targetPort: {{ printf "metrics-%s" $defaultMetricsPort }}
+            port: {{ printf "%d" (int64 $defaultMetricsPort) }}
   {{- if hasKey .Values "extensions" }}
   extensions:
     {{- range $key, $val := .Values.extensions }}

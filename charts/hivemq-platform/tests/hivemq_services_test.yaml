@@ -513,6 +513,60 @@ tests:
                 - name: mqtt-1883
                   targetPort: mqtt-1883
                   port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            - metadata:
+                name: hivemq-test-hivemq-platform-cc-1883
+              spec:
+                sessionAffinity: ClientIP
+                ports:
+                  - name: cc-1883
+                    targetPort: cc-1883
+                    port: 1883
+
+  - it: with predefined default containerPorts in enabled services, then fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7000
+    asserts:
+      - failedTemplate:
+          errorMessage: Container port 7000 in service `mqtt` already exists as part of one of the predefined ports (7979, 8889, 9399, 7000)
+
+  - it: with predefined default containerPorts in disabled services, then works
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: false
+          containerPort: 7000
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            - metadata:
+                name: hivemq-test-hivemq-platform-mqtt-7000
+              spec:
+                ports:
+                  - name: mqtt-7000
+                    targetPort: mqtt-7000
+                    port: 7000
 
   - it: with a REST API service enabled
     set:
