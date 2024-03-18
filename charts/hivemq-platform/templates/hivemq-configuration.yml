@@ -85,7 +85,7 @@ data:
         <transport>
           <tcp>
             <bind-address>0.0.0.0</bind-address>
-            <bind-port>7000</bind-port>
+            <bind-port>{{- include "hivemq-platform.cluster-transport-port" . -}}</bind-port>
           </tcp>
         </transport>
         <enabled>true</enabled>
@@ -98,7 +98,7 @@ data:
         <enabled>true</enabled>
         <listeners>
           <http>
-            <port>8889</port>
+            <port>{{- include "hivemq-platform.health-api-port" . -}}</port>
             <bind-address>0.0.0.0</bind-address>
           </http>
         </listeners>
