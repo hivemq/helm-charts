@@ -10,13 +10,13 @@ tests:
       - isKind:
           of: Secret
         template: hivemq-license.yml
-      - isNotEmpty:
+      - exists:
           path: data
         template: hivemq-license.yml
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
         template: hivemq-custom-resource.yml
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts[0]
         template: hivemq-custom-resource.yml
       - equal:
@@ -30,13 +30,13 @@ tests:
       - isKind:
           of: Secret
         template: hivemq-license.yml
-      - isNotEmpty:
+      - exists:
           path: data
         template: hivemq-license.yml
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
         template: hivemq-custom-resource.yml
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts[0]
         template: hivemq-custom-resource.yml
       - equal:

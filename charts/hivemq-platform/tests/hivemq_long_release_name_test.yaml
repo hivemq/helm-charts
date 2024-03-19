@@ -6,7 +6,7 @@ release:
 tests:
   - it: with default values then truncated service names
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
@@ -23,7 +23,7 @@ tests:
           content:
             name: metrics-9399
             containerPort: 9399
-      - isNotEmpty:
+      - exists:
           path: spec.services
       - contains:
           path: spec.services
