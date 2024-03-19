@@ -21,12 +21,12 @@ tests:
       image.pullPolicy: IfNotPresent
       image.pullSecretName: test-secret
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.imagePullSecrets[0]
       - equal:
           path: spec.statefulSet.spec.template.spec.imagePullSecrets[0].name
           value: test-secret
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0]
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].image
@@ -44,7 +44,7 @@ tests:
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.initContainers
           count: 1
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.initContainers[0]
       - equal:
           path: spec.statefulSet.spec.template.spec.initContainers[0].name
@@ -69,7 +69,7 @@ tests:
     set:
       nodes.serviceAccountName: my-custom-sa
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.serviceAccountName
       - equal:
           path: spec.statefulSet.spec.template.spec.serviceAccountName
@@ -88,7 +88,7 @@ tests:
       - equal:
           path: spec.statefulSet.spec.replicas
           value: 10
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0]
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].name
@@ -98,9 +98,9 @@ tests:
     values:
       - custom-env-vars-values.yaml
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0]
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
@@ -131,7 +131,7 @@ tests:
       nodes.resources.cpu: 1c
       nodes.resources.memory: 1m
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0]
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
@@ -149,26 +149,26 @@ tests:
     set:
       nodes.podSecurityContext.enabled: true
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
           value: true
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
           value: 10000
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
           value: 0
       - notExists:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
@@ -182,29 +182,29 @@ tests:
       nodes.podSecurityContext.fsGroup: 10003
       nodes.podSecurityContext.runAsNonRoot: false
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
           value: false
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
           value: 10001
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
           value: 10002
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
           value: 10003
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
@@ -221,9 +221,9 @@ tests:
     values:
       - additional-volumes-values.yaml
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.volumes
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
@@ -280,7 +280,7 @@ tests:
     values:
       - pod-scheduling-values.yaml
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.affinity
       - isSubset:
           path: spec.statefulSet.spec.template.spec.affinity
@@ -294,7 +294,7 @@ tests:
                         values:
                           - my-app
                   topologyKey: "kubernetes.io/hostname"
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.spec.tolerations
       - contains:
           path: spec.statefulSet.spec.template.spec.tolerations
@@ -312,7 +312,7 @@ tests:
           ad.datadoghq.com/hivemq.instances: '[{"host": "%%host%%", "port": "9010"}]'
           ad.datadoghq.com/hivemq.logs: '[{"source": "hivemq", "service": "hivemq-platform-mqtt-1883"}]'
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.statefulSet.spec.template.metadata.annotations
       - isSubset:
           path: spec.statefulSet.spec.template.metadata.annotations

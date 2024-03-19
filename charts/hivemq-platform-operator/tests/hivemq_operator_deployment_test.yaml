@@ -16,9 +16,9 @@ tests:
           value: 1
       - isKind:
           of: Deployment
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0]
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].env
       - contains:
           path: spec.template.spec.containers[0].env
@@ -28,11 +28,11 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: "test-repo/test-image:test-tag"
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].livenessProbe
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].readinessProbe
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].resources
 
   - it: with environment variables override for init container
@@ -42,9 +42,9 @@ tests:
       image.initImageName: test-init-image
       image.pullSecretName: test-pull-secret-name
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0]
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].env
       - contains:
           path: spec.template.spec.containers[0].env
@@ -61,9 +61,9 @@ tests:
     values:
       - custom-env-vars-values.yaml
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0]
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].env
       - contains:
           path: spec.template.spec.containers[0].env
@@ -98,26 +98,26 @@ tests:
     set:
       podSecurityContext.enabled: true
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.template.spec.securityContext.runAsNonRoot
           value: true
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.template.spec.securityContext.runAsUser
           value: 185
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.runAsGroup
       - equal:
           path: spec.template.spec.securityContext.runAsGroup
           value: 0
       - notExists:
           path: spec.template.spec.securityContext.fsGroup
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
@@ -131,29 +131,29 @@ tests:
       podSecurityContext.fsGroup: 5002
       podSecurityContext.runAsNonRoot: false
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.template.spec.securityContext.runAsNonRoot
           value: false
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.runAsUser
       - equal:
           path: spec.template.spec.securityContext.runAsUser
           value: 5000
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.runAsGroup
       - equal:
           path: spec.template.spec.securityContext.runAsGroup
           value: 5001
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.fsGroup
       - equal:
           path: spec.template.spec.securityContext.fsGroup
           value: 5002
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
       - equal:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
@@ -163,7 +163,7 @@ tests:
     values:
       - pod-scheduling-values.yaml
     asserts:
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.affinity
       - isSubset:
           path: spec.template.spec.affinity
@@ -177,7 +177,7 @@ tests:
                         values:
                           - my-app
                   topologyKey: "kubernetes.io/hostname"
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.tolerations
       - contains:
           path: spec.template.spec.tolerations
