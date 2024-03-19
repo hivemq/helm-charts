@@ -97,8 +97,10 @@ public class HelmChartContainer extends K3sContainer {
     public HelmChartContainer(final @NotNull DockerImageNames.K3s k3s) {
         super(getAdHocImageName(k3s));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + OPERATOR_CHART), "/charts/" + OPERATOR_CHART);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_CHART), "/charts/" + PLATFORM_CHART);
+        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + OPERATOR_CHART),
+                "/charts/" + OPERATOR_CHART);
+        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_CHART),
+                "/charts/" + PLATFORM_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../" + MANIFEST_FILES), "/" + MANIFEST_FILES);
         super.withCopyFileToContainer(MountableFile.forHostPath("../scripts/test.sh"), "/bin/test.sh");
 
@@ -322,8 +324,9 @@ public class HelmChartContainer extends K3sContainer {
         LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
         try {
             final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
-            assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s", execResult.getStdout(), execResult.getStderr())
-                    .isEmpty();
+            assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s",
+                    execResult.getStdout(),
+                    execResult.getStderr()).isEmpty();
         } catch (final Exception e) {
             throw new AssertionError(e);
         }
@@ -371,7 +374,8 @@ public class HelmChartContainer extends K3sContainer {
 
     @SuppressWarnings("SameParameterValue")
     private @NotNull String executeHelmSearchCommand(
-            final @NotNull String chartName, final @NotNull Stream<String> additionalCommands) throws Exception {
+            final @NotNull String chartName,
+            final @NotNull Stream<String> additionalCommands) throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml search repo <repo|chart>
         final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
                 "--kubeconfig",
@@ -433,7 +437,8 @@ public class HelmChartContainer extends K3sContainer {
     }
 
     private static void createContainerRegistrySecret(
-            final @NotNull String namespace, final @NotNull K3sContainer container) {
+            final @NotNull String namespace,
+            final @NotNull K3sContainer container) {
         final var config = Config.fromKubeconfig(container.getKubeConfigYaml());
         final var dockerSecret = getDockerSecret();
         if (dockerSecret.equals(DOCKER_SECRET_ENV_NOT_FOUND)) {
@@ -587,13 +592,17 @@ public class HelmChartContainer extends K3sContainer {
                                     logWaiter.accept(podName, line);
                                 });
                             } catch (final Exception exception) {
-                                LOG.error("Error while reading and processing log output for [{}] [{}]", logPodName, containerName, exception);
+                                LOG.error("Error while reading and processing log output for [{}] [{}]",
+                                        logPodName,
+                                        containerName,
+                                        exception);
                             }
                             removeAndCloseLogWatcher(containerName, podName, podUid);
                         });
                         return logWatch;
                     });
                 } else if (reason.equals("Killing")) {
+                    LOG.info("Container [{}] [{}] [{}] was terminated", podName, containerName, podUid);
                     // close log watcher for container
                     removeAndCloseLogWatcher(containerName, podName, podUid);
                 }
@@ -615,7 +624,9 @@ public class HelmChartContainer extends K3sContainer {
         }
 
         private void removeAndCloseLogWatcher(
-                final @NotNull String containerName, final @NotNull String podName, final @NotNull String podUid) {
+                final @NotNull String containerName,
+                final @NotNull String podName,
+                final @NotNull String podUid) {
             final var logWatch = logWatches.remove(podUid + "-" + podName + "-" + containerName);
             if (logWatch != null) {
                 logWatch.close();
@@ -669,7 +680,8 @@ public class HelmChartContainer extends K3sContainer {
 
         @Override
         public @NotNull StartupStatus checkStartupState(
-                final @NotNull DockerClient dockerClient, final @NotNull String containerId) {
+                final @NotNull DockerClient dockerClient,
+                final @NotNull String containerId) {
             try {
                 await().until(() -> container.getLogs(STDERR).matches("(?s).*Node controller sync successful.*"));
                 // we need this to have the yaml read from the container

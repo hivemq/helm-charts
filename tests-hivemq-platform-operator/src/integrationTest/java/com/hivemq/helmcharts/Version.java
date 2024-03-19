@@ -3,8 +3,8 @@ package com.hivemq.helmcharts;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -46,24 +46,6 @@ public class Version implements Comparable<Version> {
         return Integer.compare(this.patch, other.patch);
     }
 
-    static class Deserializer extends JsonDeserializer<Version> {
-
-        @Override
-        public Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
-                throws IOException {
-            final String versionString = parser.getValueAsString();
-
-            final String[] versionParts = versionString.split("\\.");
-            if (versionParts.length != 3) {
-                throw new IllegalArgumentException(String.format("Invalid version format: %s", versionString));
-            }
-            int major = Integer.parseInt(versionParts[0]);
-            int minor = Integer.parseInt(versionParts[1]);
-            int patch = Integer.parseInt(versionParts[2]);
-            return new Version(major, minor, patch);
-        }
-    }
-
     @Override
     public boolean equals(final @Nullable Object o) {
         if (this == o) {
@@ -72,9 +54,7 @@ public class Version implements Comparable<Version> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final Version that = (Version) o;
-
         if (major != that.major) {
             return false;
         }
@@ -93,7 +73,25 @@ public class Version implements Comparable<Version> {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return String.format("%s.%s.%s", major, minor, patch);
+    }
+
+    static class Deserializer extends JsonDeserializer<Version> {
+
+        @Override
+        public @NotNull Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
+                throws IOException {
+            final String versionString = parser.getValueAsString();
+
+            final String[] versionParts = versionString.split("\\.");
+            if (versionParts.length != 3) {
+                throw new IllegalArgumentException(String.format("Invalid version format: %s", versionString));
+            }
+            int major = Integer.parseInt(versionParts[0]);
+            int minor = Integer.parseInt(versionParts[1]);
+            int patch = Integer.parseInt(versionParts[2]);
+            return new Version(major, minor, patch);
+        }
     }
 }
