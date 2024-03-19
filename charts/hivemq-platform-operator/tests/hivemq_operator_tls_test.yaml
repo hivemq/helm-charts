@@ -11,9 +11,9 @@ tests:
           value: 1
       - isKind:
           of: Deployment
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0]
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].env
       - contains:
           path: spec.template.spec.containers[0].env
@@ -46,7 +46,7 @@ tests:
               secretKeyRef:
                 name: my-tls-secret
                 key: truststore.password
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.containers[0].volumeMounts
       - contains:
           path: spec.template.spec.containers[0].volumeMounts
@@ -54,7 +54,7 @@ tests:
             name: tls
             mountPath: /mnt/tls
             readOnly: true
-      - isNotEmpty:
+      - exists:
           path: spec.template.spec.volumes
       - contains:
           path: spec.template.spec.volumes
