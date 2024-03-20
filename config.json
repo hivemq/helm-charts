@@ -1,0 +1,34 @@
+{
+  "release-type": "helm",
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "section": "Features"
+    },
+    {
+      "type": "fix",
+      "section": "Bug Fixes"
+    },
+    {
+      "type": "chore",
+      "section": "Miscellaneous Chores"
+    }
+  ],
+  "include-component-in-tag": true,
+  "pull-request-title-pattern": "chore${scope}: [bot] release${component}:${version}",
+  "separate-pull-requests": true,
+  "packages": {
+    "charts/hivemq-operator": {
+      "package-name": "hivemq-operator"
+    },
+    "charts/hivemq-platform": {
+      "package-name": "hivemq-platform"
+    },
+    "charts/hivemq-platform-operator": {
+      "package-name": "hivemq-platform-operator"
+    },
+    "charts/hivemq-swarm": {
+      "package-name": "hivemq-swarm"
+    }
+  }
+}
