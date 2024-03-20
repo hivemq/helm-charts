@@ -193,33 +193,19 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.md")
                 include("**/*.properties")
                 include("**/*.java")
-                // Include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform chart.
+                // include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform chart
             }.plus(file("../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml"))
-
-            filesToUpdate.filter { file -> "gradle.properties" == file.name }.forEach {
-                val text = it.readText()
-                val replacedText = text.replace("""^version=.+""".toRegex(), "version=${appVersion}")
-                it.writeText(replacedText)
-            }
-            filesToUpdate.forEach {
-                val text = it.readText()
-                var replacedText =
-                    text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                        "${matchResult.groupValues[1]}=${appVersion}"
-                    }
-                replacedText =
-                    replacedText.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                        "${matchResult.groupValues[1]}=${appVersion}"
-                    }
-                replacedText =
-                    replacedText.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                        "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
-                    }
-                replacedText =
-                    replacedText.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                        "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
-                    }
-                it.writeText(replacedText)
+            filesToUpdate.forEach { file ->
+                val text = file.readText()
+                file.writeText(text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}=${appVersion}"
+                }.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}=${appVersion}"
+                }.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
+                }.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
+                })
             }
         }
     }
