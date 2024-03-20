@@ -3,7 +3,7 @@
 val updateOperatorChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
-        "Bumps Operator Legacy Chart and Platform versions. " +
+        "Bumps Operator Legacy Chart and Platform versions." +
                 "\n\tUsage: ./gradlew updateOperatorChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Operator Legacy chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
@@ -23,14 +23,16 @@ val updateOperatorChartVersion by tasks.registering(Exec::class) {
 val updateSwarmChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
-        "Bumps Swarm Chart and Platform versions. " +
+        "Bumps Swarm Chart and Platform versions." +
                 "\n\tUsage: ./gradlew updateSwarmChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Swarm chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
     doFirst {
         updateChartAndValueFilesWithVersion(
-            arrayOf("charts/hivemq-swarm/Chart.yaml", "charts/hivemq-swarm/values.yaml"),
-            """(tag:\s*)(\S+)"""
+            arrayOf(
+                "charts/hivemq-swarm/Chart.yaml",
+                "charts/hivemq-swarm/values.yaml"
+            ), """(tag:\s*)(\S+)"""
         )
     }
     workingDir(layout.projectDirectory)
@@ -40,7 +42,7 @@ val updateSwarmChartVersion by tasks.registering(Exec::class) {
 val updatePlatformOperatorChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
-        "Bumps Platform Operator Chart and Operator Platform versions. " +
+        "Bumps Platform Operator Chart and Operator Platform versions." +
                 "\n\tUsage: ./gradlew updatePlatformOperatorChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Platform Operator chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform Operator version. Optional."
@@ -59,7 +61,7 @@ val updatePlatformOperatorChartVersion by tasks.registering(Exec::class) {
 val updatePlatformChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
-        "Bumps Platform Chart and Platform versions. " +
+        "Bumps Platform Chart and Platform versions." +
                 "\n\tUsage: ./gradlew updatePlatformChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
                 "\n\t\t- 'chartVersion': Platform chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform release version. Optional."
@@ -92,44 +94,39 @@ val updateAllPlatformChartVersions by tasks.registering {
 }
 
 fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String) {
-    var chartVersion = project.properties["chartVersion"]
     val appVersion = project.properties["appVersion"]
     if (checkAppVersion && appVersion == null) {
         error("`appVersion` must be set\n\n$checkAppVersionUsage")
     }
     val filesToUpdate = files(versionFilesToUpdate)
-    filesToUpdate.filter { file -> file.name == "Chart.yaml" }.forEach {
-        var replacedTextAppVersion = it.readText()
+    filesToUpdate.filter { file -> file.name == "Chart.yaml" }.forEach { file ->
+        var text = file.readText()
+        val chartVersion = project.properties["chartVersion"] ?: run {
+            // bump the last part of the current chart version
+            val chartVersionMatch = """(?m)^version:\s*(\S+)$""".toRegex().find(text)
+            val currentVersion = chartVersionMatch?.groupValues?.get(1)
+                ?: error("Failed to determine current chart version in $file, set `chartVersion` manually.")
+            val versionParts = currentVersion.split('.').takeIf { it.size == 3 }
+                ?: error("Failed to determine patch version of $currentVersion in $file, set `chartVersion` manually.")
+            val incrementedVersion = (versionParts[2].toIntOrNull() ?: 0) + 1
+            "${versionParts[0]}.${versionParts[1]}.$incrementedVersion"
+        }
+        text = text.replace("""(?m)^version:\s*\S+$""".toRegex(), "version: $chartVersion").also {
+            require(it != text) { error("Failed to replace version with $chartVersion in $file") }
+        }
         if (appVersion != null) {
-            replacedTextAppVersion =
-                replacedTextAppVersion.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion")
-        }
-        val currentChartVersionMatch = """(?m)^version:\s*(\S+)$""".toRegex().find(replacedTextAppVersion)
-        val currentChartVersion = currentChartVersionMatch?.groupValues?.get(1)
-        if (chartVersion == null) {
-            // Bump the last part of the chart version
-            val updatedVersion = currentChartVersion?.let { version ->
-                val parts = version.split('.')
-                if (parts.size == 3) {
-                    val incrementedVersion = (parts[2].toIntOrNull() ?: 0) + 1
-                    "${parts[0]}.${parts[1]}.$incrementedVersion"
-                } else {
-                    version
-                }
+            text = text.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion").also {
+                require(it != text) { error("Failed to replace appVersion with $appVersion in $file") }
             }
-            chartVersion = updatedVersion
         }
-        val replacedChartVersion =
-            replacedTextAppVersion.replace("""(?m)^version:\s*\S+$""".toRegex(), "version: $chartVersion")
-        it.writeText(replacedChartVersion)
+        file.writeText(text)
     }
     if (appVersion != null) {
-        filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach {
-            val text = it.readText()
-            val replacedText = text.replace(valuesRegex.toRegex()) { matchResult ->
-                "${matchResult.groupValues[1]}${appVersion}"
-            }
-            it.writeText(replacedText)
+        filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach { file ->
+            val text = file.readText()
+            file.writeText(text.replace(valuesRegex.toRegex()) {
+                "${it.groupValues[1]}${appVersion}"
+            })
         }
     }
 }

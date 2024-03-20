@@ -191,23 +191,15 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.yml")
                 include("**/*.yaml")
             })
-            filesToUpdate.filter{ file -> "gradle.properties" == file.name }.forEach {
-                val text = it.readText()
-                val replacedText = text.replace("""^version=.+""".toRegex(), "version=${appVersion}")
-                it.writeText(replacedText)
-            }
-            filesToUpdate.forEach {
-                val text = it.readText()
-                var replacedText = text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                    "${matchResult.groupValues[1]}=${appVersion}"
-                }
-                replacedText = replacedText.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                    "${matchResult.groupValues[1]}=${appVersion}"
-                }
-                replacedText = replacedText.replace("""(?i)(hivemq/hivemq4:k8s-)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) { matchResult ->
-                    "${matchResult.groupValues[1]}${appVersion}${matchResult.groupValues[3]}"
-                }
-                it.writeText(replacedText)
+            filesToUpdate.forEach { file ->
+                val text = file.readText()
+                file.writeText(text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}=${appVersion}"
+                }.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}=${appVersion}"
+                }.replace("""(?i)(hivemq/hivemq4:k8s-)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
+                })
             }
         }
     }
