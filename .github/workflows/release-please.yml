@@ -3,6 +3,8 @@ name: Release Please Charts
 on:
   push:
     branches: [master]
+    paths:
+      - charts/**
   # Allow to run the workflow from GitHub UI and other workflows.
   workflow_dispatch:
 
