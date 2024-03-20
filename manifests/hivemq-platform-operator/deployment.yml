@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-platform-operator"
     app.kubernetes.io/instance: "my-operator"
-    app.kubernetes.io/version: "1.2.0"
+    app.kubernetes.io/version: "1.2.1"
   name: hivemq-my-operator
 spec:
   # The Operator cannot have more than one replica
@@ -39,7 +39,7 @@ spec:
             - name: hivemq.platform.operator.release.name
               value: "my-operator"
             - name: hivemq.platform.operator.init.image
-              value: "docker.io/hivemq/hivemq-platform-operator-init:1.2.0"
+              value: "docker.io/hivemq/hivemq-platform-operator-init:1.2.1"
             - name: hivemq.platform.operator.image.pull.secret
               value: ""
             - name: hivemq.platform.operator.log.level
@@ -58,7 +58,7 @@ spec:
               value: "8080"
             - name: quarkus.http.ssl-port
               value: "8443"
-          image: "docker.io/hivemq/hivemq-platform-operator:1.2.0"
+          image: "docker.io/hivemq/hivemq-platform-operator:1.2.1"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
