@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -124,19 +124,19 @@ class HelmRestApiIT {
 
             given().header("Authorization", createBasicAuthHeader("test-user", "test-password"))
                     .when()
-                    .get(new URL(baseRestApiEndpoint + "/api/v1/mqtt/clients"))
+                    .get(new URI(baseRestApiEndpoint + "/api/v1/mqtt/clients").toURL())
                     .then()
                     .statusCode(HttpStatus.SC_OK);
 
             given().header("Authorization", createBasicAuthHeader("test-user", "wrong-password"))
                     .when()
-                    .get(new URL(baseRestApiEndpoint + "/api/v1/mqtt/clients"))
+                    .get(new URI(baseRestApiEndpoint + "/api/v1/mqtt/clients").toURL())
                     .then()
                     .statusCode(HttpStatus.SC_UNAUTHORIZED);
 
             given().header("Authorization", createBasicAuthHeader("test-user", "test-password"))
                     .when()
-                    .get(new URL(baseRestApiEndpoint + "/api/v1/management/backups"))
+                    .get(new URI(baseRestApiEndpoint + "/api/v1/management/backups").toURL())
                     .then()
                     .statusCode(HttpStatus.SC_FORBIDDEN);
         }

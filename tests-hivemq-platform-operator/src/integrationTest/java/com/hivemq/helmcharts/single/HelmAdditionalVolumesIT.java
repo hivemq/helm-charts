@@ -58,7 +58,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
 
         await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(namespace).withName("test-hivemq-platform").get();
+                    client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty()
@@ -67,7 +67,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
                             "test-secret-volume",
                             "test-persistent-volume-claim",
                             "test-empty-dir-volume");
-            final var containerVolumeMounts = template.getSpec().getContainers().get(0).getVolumeMounts();
+            final var containerVolumeMounts = template.getSpec().getContainers().getFirst().getVolumeMounts();
             assertThat(containerVolumeMounts).isNotEmpty()
                     .map(VolumeMount::getName)
                     .contains("test-mount-volume",

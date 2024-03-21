@@ -82,7 +82,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
         installChartsAndWaitForPlatformRunning("/files/mtls-test-values.yaml");
 
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(namespace).withName("test-hivemq-platform").get();
+                client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(statefulSet).isNotNull();
 
         LOG.info("Connecting to MQTT listener with no mTLS/SSL on port {}", MQTT_SERVICE_PORT_1883);
@@ -128,7 +128,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 withDefaultPublishSubscribeRunnable());
     }
 
-    private static void assertSecretMounted(StatefulSet statefulSet, @NotNull final String name) {
+    private static void assertSecretMounted(StatefulSet statefulSet, final @NotNull String name) {
         final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
         assertThat(volumes).isNotEmpty();
 
@@ -141,7 +141,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 .findFirst();
         assertThat(tlsVolume).isPresent();
 
-        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().get(0);
+        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().getFirst();
         assertThat(container).isNotNull();
 
         final var volumeMount = container.getVolumeMounts()

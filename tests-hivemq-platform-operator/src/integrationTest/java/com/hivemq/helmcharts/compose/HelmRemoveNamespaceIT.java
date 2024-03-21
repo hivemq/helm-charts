@@ -33,7 +33,7 @@ class HelmRemoveNamespaceIT extends AbstractHelmChartIT {
     void withSingleOperator_hivemqRunningThenDelete() throws Exception {
         installChartsAndWaitForPlatformRunning("/files/platform-test-values.yaml");
 
-        final var platform = K8sUtil.getHiveMQPlatform(client, namespace, platformReleaseName);
+        final var platform = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
         assertThat(platform).isNotNull();
         final var namespaceDeletedFuture = client.namespaces()
                 .withName(namespace)

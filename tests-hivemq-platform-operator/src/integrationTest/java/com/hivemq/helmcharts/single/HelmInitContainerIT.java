@@ -34,11 +34,11 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
         await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(namespace).withName(getPlatformReleaseName()).get();
+                    client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty().map(Volume::getName).contains(mountName);
-            final var containerVolumeMounts = template.getSpec().getContainers().get(0).getVolumeMounts();
+            final var containerVolumeMounts = template.getSpec().getContainers().getFirst().getVolumeMounts();
             assertThat(containerVolumeMounts).isNotEmpty().map(VolumeMount::getName).contains(mountName);
 
             await().untilAsserted(() -> assertThat(client.pods()

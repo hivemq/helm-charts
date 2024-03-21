@@ -15,28 +15,26 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Using locally build images tests that all the artifacts are installed and is possible to send a mqtt message
  */
 @Tag("LocalImages")
-@SuppressWarnings("DuplicatedCode")
 @Testcontainers
-public class LocalHelmChartDeploymentIT {
+@SuppressWarnings("DuplicatedCode")
+class LocalHelmChartDeploymentIT {
 
     @Container
-    private final @NotNull OperatorHelmChartContainer
-            container = new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
-            "k3s.dockerfile",
-            "values/test-values.yaml",
-            "local-hivemq")
-            .withLocalImages();
+    private final @NotNull OperatorHelmChartContainer container =
+            new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
+                    "k3s.dockerfile",
+                    "values/test-values.yaml",
+                    "local-hivemq").withLocalImages();
 
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     @Test
-    public void withLocalImages_mqttMessagePublishedReceived() throws Exception {
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void withLocalImages_mqttMessagePublishedReceived() throws Exception {
         final var client = Mqtt5Client.builder()
                 .automaticReconnectWithDefaultConfig()
                 .serverPort(container.getMappedPort(1883))
@@ -49,12 +47,13 @@ public class LocalHelmChartDeploymentIT {
             client.publishWith()
                     .topic("test")
                     .payload("Sending Message".getBytes(StandardCharsets.UTF_8))
-                    .qos(MqttQos.AT_LEAST_ONCE).send();
+                    .qos(MqttQos.AT_LEAST_ONCE)
+                    .send();
 
             final var receivedMessage = publishes.receive();
-            assertTrue(receivedMessage.getPayload().isPresent());
-            assertEquals("Sending Message",
-                    StandardCharsets.UTF_8.decode(receivedMessage.getPayload().get()).toString());
+            assertThat(receivedMessage.getPayload()).isPresent()
+                    .hasValueSatisfying(payload -> assertThat(StandardCharsets.UTF_8.decode(payload).toString()) //
+                            .isEqualTo("Sending Message"));
         }
     }
 }

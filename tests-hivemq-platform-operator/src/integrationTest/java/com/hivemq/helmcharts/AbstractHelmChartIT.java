@@ -18,14 +18,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 public abstract class AbstractHelmChartIT {
 
+    protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
+    protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
+
     protected final @NotNull Network network = Network.newNetwork();
 
     @Container
     protected final @NotNull HelmChartContainer helmChartContainer = new HelmChartContainer().withNetwork(network);
 
     protected final @NotNull String namespace = K8sUtil.getNamespaceName(this.getClass());
-    protected final @NotNull String platformReleaseName = getPlatformReleaseName();
-    protected final @NotNull String operatorReleaseName = getOperatorReleaseName();
 
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected @NotNull KubernetesClient client;
@@ -41,7 +42,7 @@ public abstract class AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     final void baseTearDown() throws Exception {
         if (cleanupPlatformChart()) {
-            helmChartContainer.uninstallRelease(platformReleaseName,
+            helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME,
                     "--cascade",
                     "foreground",
                     "--namespace",
@@ -54,18 +55,9 @@ public abstract class AbstractHelmChartIT {
             assertThat(client.namespaces().withName(namespace).get()).isNull();
         }
         if (cleanupOperatorChart()) {
-            helmChartContainer.uninstallRelease(operatorReleaseName, "--cascade", "foreground");
+            helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, "--cascade", "foreground");
         }
-
         network.close();
-    }
-
-    protected @NotNull String getOperatorReleaseName() {
-        return "test-hivemq-platform-operator";
-    }
-
-    protected @NotNull String getPlatformReleaseName() {
-        return "test-hivemq-platform";
     }
 
     protected boolean cleanupOperatorChart() {
@@ -96,9 +88,9 @@ public abstract class AbstractHelmChartIT {
 
     protected void installChartsAndWaitForPlatformRunning(
             final @NotNull String... commands) throws Exception {
-        helmChartContainer.installOperatorChart(operatorReleaseName);
-        helmChartContainer.installPlatformChart(platformReleaseName, commands);
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME);
+        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME, commands);
 
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, PLATFORM_RELEASE_NAME);
     }
 }

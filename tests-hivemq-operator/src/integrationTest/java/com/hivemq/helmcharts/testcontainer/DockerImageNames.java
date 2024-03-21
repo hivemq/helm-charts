@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.testcontainer;
 import org.jetbrains.annotations.NotNull;
 
 public class DockerImageNames {
+
     private DockerImageNames() {
     }
 

@@ -67,7 +67,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private @NotNull Path brokerCertificateStore;
 
     @BeforeEach
-    public void setup(@TempDir final @NotNull Path tempDir) throws Exception {
+    void setup(@TempDir final @NotNull Path tempDir) throws Exception {
         CertificatesUtil.generateCertificates(tempDir.toFile());
         final var encoder = Base64.getEncoder();
 
@@ -99,7 +99,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
         installChartsAndWaitForPlatformRunning("/files/tls-test-values.yaml");
 
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(namespace).withName("test-hivemq-platform").get();
+                client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(statefulSet).isNotNull();
 
         assertSecretMounted(statefulSet, "mqtts-keystore");
@@ -167,7 +167,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 .findFirst();
         assertThat(tlsVolume).isPresent();
 
-        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().get(0);
+        final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().getFirst();
         assertThat(container).isNotNull();
 
         final var volumeMount = container.getVolumeMounts()

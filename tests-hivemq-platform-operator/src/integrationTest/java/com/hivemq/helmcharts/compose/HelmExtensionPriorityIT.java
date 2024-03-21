@@ -5,11 +5,10 @@ import com.hivemq.helmcharts.extensions.AppendingBarPublishInboundInterceptorExt
 import com.hivemq.helmcharts.extensions.AppendingBazPublishInboundInterceptorExtensionMain;
 import com.hivemq.helmcharts.extensions.AppendingFooPublishInboundInterceptorExtensionMain;
 import com.hivemq.helmcharts.util.HiveMQExtension;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.NginxUtil;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceSpec;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -97,14 +96,7 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                             "<start-priority>3000</start-priority>");
                 }));
 
-        await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
-            final var services = client.services().inNamespace(namespace).list().getItems();
-            assertThat(services).isNotEmpty()
-                    .filteredOn(service -> MQTT_SERVICE_NAME.equals(service.getMetadata().getName()))
-                    .extracting(Service::getSpec)
-                    .extracting(ServiceSpec::getType)
-                    .contains("ClusterIP");
-        });
+        K8sUtil.assertMqttService(client, namespace, MQTT_SERVICE_NAME);
 
         MqttUtil.execute(client,
                 namespace,
