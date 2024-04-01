@@ -30,10 +30,7 @@ class CompatibilityHelmChartDeploymentIT {
     @Timeout(value = 10, unit = TimeUnit.MINUTES)
     void withHelmLocalVersionDeployment_mqttMessagePublishedReceived(final @NotNull DockerImageNames.K3s k3s)
             throws Exception {
-        try (final var container = new OperatorHelmChartContainer(k3s,
-                "k3s.dockerfile",
-                "values/test-values.yaml",
-                "test-hivemq")) {
+        try (final var container = new OperatorHelmChartContainer(k3s, "values/test-values.yaml", "test-hivemq")) {
             container.withLocalImages();
             container.start();
             final var client = Mqtt5Client.builder()
