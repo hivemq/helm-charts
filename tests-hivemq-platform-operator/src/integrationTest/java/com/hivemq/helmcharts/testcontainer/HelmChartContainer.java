@@ -210,20 +210,15 @@ public class HelmChartContainer extends K3sContainer {
 
     public void createNamespace(final @NotNull String name) {
         final var namespace = new NamespaceBuilder().withNewMetadata().withName(name).endMetadata().build();
-        final var response = getKubernetesClient().namespaces().resource(namespace).create();
-        assertThat(response).isNotNull();
+        assertThat(getKubernetesClient().namespaces().resource(namespace).create()).isNotNull();
         createContainerRegistrySecret(name, this);
     }
 
     public void deleteNamespace(final @NotNull String name) {
-        final var namespace = new NamespaceBuilder().withNewMetadata().withName(name).endMetadata().build();
         final var client = getKubernetesClient();
-        final var response = client.namespaces().resource(namespace).delete();
-        assertThat(response).isNotNull();
+        assertThat(client.namespaces().withName(name).delete()).isNotNull();
         await().atMost(1, TimeUnit.MINUTES)
-                .untilAsserted(() -> assertThat(client.namespaces()
-                        .list()
-                        .getItems()).noneMatch(n -> name.equals(n.getMetadata().getName())));
+                .untilAsserted(() -> assertThat(client.namespaces().withName(name).get()).isNull());
     }
 
     public @NotNull LogWaiterUtil getLogWaiter() {
