@@ -29,7 +29,6 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -52,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
@@ -427,8 +427,16 @@ public class HelmChartContainer extends K3sContainer {
     }
 
     private static @NotNull DockerImageName getAdHocImageName(final @NotNull DockerImageNames.K3s k3s) {
-        final var dockerfile = new File(MountableFile.forClasspathResource("/helm.dockerfile").getFilesystemPath());
-        final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile.toPath())
+        final var dockerfile = Path.of(MountableFile.forClasspathResource("helm.dockerfile").getFilesystemPath());
+        // fix pre-emptively checking local images by replacing the build args in the Dockerfile
+        // see https://github.com/testcontainers/testcontainers-java/issues/3238
+        try {
+            final var dockerfileString = Files.readString(dockerfile, UTF_8);
+            Files.writeString(dockerfile, dockerfileString.replace("${K3S_VERSION}", k3s.getVersion()), UTF_8);
+        } catch (IOException e) {
+            LOG.warn("Could not replace build args in Dockerfile", e);
+        }
+        final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile)
                 .withBuildArg("K3S_VERSION", k3s.getVersion())
                 .get();
         return DockerImageName.parse(imageName).asCompatibleSubstituteFor("rancher/k3s");

@@ -23,9 +23,11 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
@@ -71,10 +74,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
     public OperatorHelmChartContainer(
             final @NotNull DockerImageNames.K3s k3s,
-            final @NotNull String dockerfileName,
             final @NotNull String customValuesFile,
             final @NotNull String chartName) {
-        super(getAdHocImageName(k3s, dockerfileName));
+        super(getAdHocImageName(k3s));
         super.addExposedPort(MQTT_PORT);
         // mount all values for updates of the chart
         super.withClasspathResourceMapping("values", "/values/", BindMode.READ_ONLY);
@@ -89,15 +91,20 @@ public class OperatorHelmChartContainer extends K3sContainer {
         this.chartName = chartName;
     }
 
-    private static @NotNull DockerImageName getAdHocImageName(
-            final @NotNull DockerImageNames.K3s k3s, final @NotNull String dockerfileName) {
-        final var dockerfile = new File(MountableFile.forClasspathResource(dockerfileName).getFilesystemPath());
-
-        final var s = new ImageFromDockerfile().withDockerfile(dockerfile.toPath())
+    private static @NotNull DockerImageName getAdHocImageName(final @NotNull DockerImageNames.K3s k3s) {
+        final var dockerfile = Path.of(MountableFile.forClasspathResource("k3s.dockerfile").getFilesystemPath());
+        // fix pre-emptively checking local images by replacing the build args in the Dockerfile
+        // see https://github.com/testcontainers/testcontainers-java/issues/3238
+        try {
+            final var dockerfileString = Files.readString(dockerfile, UTF_8);
+            Files.writeString(dockerfile, dockerfileString.replace("${K3S_VERSION}", k3s.getVersion()), UTF_8);
+        } catch (IOException e) {
+            LOG.warn("Could not replace build args in Dockerfile", e);
+        }
+        final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile)
                 .withBuildArg("K3S_VERSION", k3s.getVersion())
                 .get();
-
-        return DockerImageName.parse(s).asCompatibleSubstituteFor("rancher/k3s");
+        return DockerImageName.parse(imageName).asCompatibleSubstituteFor("rancher/k3s");
     }
 
     /**

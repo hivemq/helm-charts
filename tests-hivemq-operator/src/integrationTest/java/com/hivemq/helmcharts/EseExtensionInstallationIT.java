@@ -29,7 +29,6 @@ class EseExtensionInstallationIT {
     @Container
     private final @NotNull OperatorHelmChartContainer container =
             new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
-                    "k3s.dockerfile",
                     "values/test-values.yaml",
                     CHART_NAME).withLocalImages();
 
