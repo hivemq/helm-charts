@@ -30,7 +30,7 @@ public class DockerImageNames {
     }
 
     public enum K3s {
-        // https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.23
+        // https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.29
         V1_23("v1.23.17-k3s1"),
         V1_24("v1.24.17-k3s1"),
         V1_25("v1.25.16-k3s4"),
