@@ -1,0 +1,2632 @@
+suite: test HiveMQ Platform secure services
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+tests:
+
+  - it: with a secure MQTT service enabled, using keystorePassword
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            value: key-changeme
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            value: key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with a secure MQTT service enabled, using keystorePassword and keystorePrivatePassword
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            value: private-key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with a secure MQTT service enabled, using keystorePasswordSecretName only
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "mqtt-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: mqtt-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: mqtt-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with a secure MQTT service enabled, using keystorePasswordSecretName and keystorePasswordSecretKey
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "mqtt-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: mqtt-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: mqtt-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: mqtt-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with a secure MQTT service enabled, using keystorePasswordSecretName and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "mqtt-keystore-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: mqtt-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: mqtt-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with a secure MQTT service enabled, using keystorePasswordSecretKey and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "mqtt-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: mqtt-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: mqtt-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with a secure MQTT service disabled, no secure MQTT Service is exposed
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "mqtt-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: mqtt-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+
+  - it: with several secure and non-secure MQTT services enabled and reusing keystores
+    values:
+      - tls-mqtt-services-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: keystore.password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password2
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret3_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret3_keystore_private_pass
+            value: private-key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret4_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret4_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: my-custom-secret-key.private-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1884
+            containerPort: 1884
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1885
+            containerPort: 1885
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1886
+            containerPort: 1886
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1887
+            containerPort: 1887
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtts-1888
+            containerPort: 1888
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1889
+            containerPort: 1889
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret1
+            mountPath: /tls-mqtt-secret1
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret2
+            mountPath: /tls-mqtt-secret2
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret3
+            mountPath: /tls-mqtt-secret3
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret4
+            mountPath: /tls-mqtt-secret4
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret1
+            secret:
+              secretName: mqtt-secret1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret2
+            secret:
+              secretName: mqtt-secret2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret3
+            secret:
+              secretName: mqtt-secret3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret4
+            secret:
+              secretName: mqtt-secret4
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 7
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtts-1883
+                  targetPort: mqtts-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtts-1884
+                  targetPort: mqtts-1884
+                  port: 1884
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1885
+            spec:
+              ports:
+                - name: mqtts-1885
+                  targetPort: mqtts-1885
+                  port: 1885
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1886
+            spec:
+              ports:
+                - name: mqtts-1886
+                  targetPort: mqtts-1886
+                  port: 1886
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1887
+            spec:
+              ports:
+                - name: mqtts-1887
+                  targetPort: mqtts-1887
+                  port: 1887
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1888
+            spec:
+              ports:
+                - name: mqtts-1888
+                  targetPort: mqtts-1888
+                  port: 1888
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1889
+            spec:
+              ports:
+                - name: mqtt-1889
+                  targetPort: mqtt-1889
+                  port: 1889
+
+  - it: with several secure MQTT services using mTLS
+    values:
+      - mtls-mqtt-services-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret"
+            secret:
+              secretName: "mqtt-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "truststore-secret"
+            secret:
+              secretName: "truststore-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret1"
+            secret:
+              secretName: "mqtt-secret1"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "truststore-secret1"
+            secret:
+              secretName: "truststore-secret1"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "mqtt-secret-1886"
+            secret:
+              secretName: "mqtt-secret-1886"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_mqtt-secret_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_truststore-secret_truststore_pass"
+            value: "truststore-password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_truststore-secret1_truststore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "truststore.password"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_platform_mqtt-secret-1886_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password-1886"
+                key: "keystore.password"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_platform_truststore-secret-1886_truststore_pass"
+            value: "truststore-password"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1883
+            name: mqtts-1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1884
+            name: mqtts-1884
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1885
+            name: mqtts-1885
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1886
+            name: mqtts-1886
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1887
+            name: mqtt-1887
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 9399
+            name: metrics-9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret"
+            mountPath: "/tls-mqtt-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret"
+            mountPath: "/tls-truststore-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret1"
+            mountPath: "/tls-mqtt-secret1"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret1"
+            mountPath: "/tls-truststore-secret1"
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "mqtt-secret-1886"
+            mountPath: "/tls-mqtt-secret-1886"
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret-1886"
+            mountPath: "/tls-truststore-secret-1886"
+            readOnly: true
+
+  - it: with a secure Control Center service enabled, using keystorePassword
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            value: key-changeme
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            value: key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with a secure Control Center service enabled, using keystorePassword and keystorePrivatePassword
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            value: private-key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with a secure Control Center service enabled, using keystorePasswordSecretName only
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: control-center-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: control-center-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with a secure Control Center service enabled, using keystorePasswordSecretName and keystorePasswordSecretKey
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: control-center-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: control-center-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: control-center-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with a secure Control Center service enabled, using keystorePasswordSecretName and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: control-center-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: control-center-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with a secure Control Center service enabled, using keystorePasswordSecretKey and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: control-center-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: control-center-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with a secure Control Center service disabled, no secure Control Service is exposed
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: control-center-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+
+  - it: with several secure and non-secure Control Center services enabled and reusing keystores
+    values:
+      - tls-cc-services-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: keystore.password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password2
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret3_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret3_keystore_private_pass
+            value: private-key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret4_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: control-center_test-hivemq-platform_control-center-secret4_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: my-custom-secret-key.private-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8443
+            containerPort: 8443
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8444
+            containerPort: 8444
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8445
+            containerPort: 8445
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8446
+            containerPort: 8446
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8447
+            containerPort: 8447
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8448
+            containerPort: 8448
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8081
+            containerPort: 8081
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret
+            mountPath: /tls-control-center-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret1
+            mountPath: /tls-control-center-secret1
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret2
+            mountPath: /tls-control-center-secret2
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret3
+            mountPath: /tls-control-center-secret3
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: control-center-secret4
+            mountPath: /tls-control-center-secret4
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret
+            secret:
+              secretName: control-center-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret1
+            secret:
+              secretName: control-center-secret1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret2
+            secret:
+              secretName: control-center-secret2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret3
+            secret:
+              secretName: control-center-secret3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: control-center-secret4
+            secret:
+              secretName: control-center-secret4
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 7
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8443
+            spec:
+              ports:
+                - name: cc-8443
+                  targetPort: cc-8443
+                  port: 8443
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8444
+            spec:
+              ports:
+                - name: cc-8444
+                  targetPort: cc-8444
+                  port: 8444
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8445
+            spec:
+              ports:
+                - name: cc-8445
+                  targetPort: cc-8445
+                  port: 8445
+              sessionAffinity: ClientIP
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8446
+            spec:
+              ports:
+                - name: cc-8446
+                  targetPort: cc-8446
+                  port: 8446
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8447
+            spec:
+              ports:
+                - name: cc-8447
+                  targetPort: cc-8447
+                  port: 8447
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8448
+            spec:
+              ports:
+                - name: cc-8448
+                  targetPort: cc-8448
+                  port: 8448
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with a secure WebSocket service enabled, using keystorePassword
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            value: key-changeme
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            value: key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with a secure WebSocket service enabled, using keystorePassword and keystorePrivatePassword
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            value: private-key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with a secure WebSocket service enabled, using keystorePasswordSecretName only
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "ws-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: ws-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: ws-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with a secure WebSocket service enabled, using keystorePasswordSecretName and keystorePasswordSecretKey
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "ws-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: ws-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: ws-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: ws-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with a secure WebSocket service enabled, using keystorePasswordSecretName and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "ws-keystore-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: ws-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: ws-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with a secure WebSocket service enabled, using keystorePasswordSecretKey and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "ws-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: ws-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: ws-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with a secure WebSocket service enabled but no keystorePassword or keystorePasswordSecretName set, then fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+    asserts:
+      - failedTemplate:
+          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+
+  - it: with a secure WebSocket service disabled, no secure WebSocket service is exposed
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "ws-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: ws-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with several secure and non-secure WebSocket services enabled and reusing keystores
+    values:
+      - tls-ws-services-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: keystore.password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password2
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret3_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret3_keystore_private_pass
+            value: private-key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret4_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: websocket_test-hivemq-platform_websocket-secret4_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: my-custom-secret-key.private-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8002
+            containerPort: 8002
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8003
+            containerPort: 8003
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8004
+            containerPort: 8004
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8005
+            containerPort: 8005
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8006
+            containerPort: 8006
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8007
+            containerPort: 8007
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret
+            mountPath: /tls-websocket-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret1
+            mountPath: /tls-websocket-secret1
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret2
+            mountPath: /tls-websocket-secret2
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret3
+            mountPath: /tls-websocket-secret3
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: websocket-secret4
+            mountPath: /tls-websocket-secret4
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret
+            secret:
+              secretName: websocket-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret1
+            secret:
+              secretName: websocket-secret1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret2
+            secret:
+              secretName: websocket-secret2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret3
+            secret:
+              secretName: websocket-secret3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: websocket-secret4
+            secret:
+              secretName: websocket-secret4
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 7
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8002
+            spec:
+              ports:
+                - name: ws-8002
+                  targetPort: ws-8002
+                  port: 8002
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8003
+            spec:
+              ports:
+                - name: ws-8003
+                  targetPort: ws-8003
+                  port: 8003
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8004
+            spec:
+              ports:
+                - name: ws-8004
+                  targetPort: ws-8004
+                  port: 8004
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8005
+            spec:
+              ports:
+                - name: ws-8005
+                  targetPort: ws-8005
+                  port: 8005
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8006
+            spec:
+              ports:
+                - name: ws-8006
+                  targetPort: ws-8006
+                  port: 8006
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8007
+            spec:
+              ports:
+                - name: ws-8007
+                  targetPort: ws-8007
+                  port: 8007
+
+  - it: with secure services using keystore passwords with inlined decoded password values
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            value: key-changeme
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+
+  - it: with secure services using keystore passwords with secrets resources values
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "secret-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: keystore.password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: keystore.password1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret1
+            mountPath: /tls-mqtt-secret1
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret1
+            secret:
+              secretName: mqtt-secret1
+
+  - it: with secure services using keystore private passwords with inlined decoded passwords values
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            value: private-key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+
+  - it: with secure services using keystore private passwords with secrets resources values
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "secret-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: my-custom-secret-key.private-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: keystore.password1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: my-custom-secret-key.private-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret1
+            mountPath: /tls-mqtt-secret1
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret1
+            secret:
+              secretName: mqtt-secret1
+
+  - it: secure services with same keystore passwords, then no duplicated environment variables are generated
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "secret-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "secret-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1886
+          keystoreSecretName: "mqtt-secret1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1887
+          keystoreSecretName: "mqtt-secret2"
+          keystorePasswordSecretName: "secret-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1888
+          keystoreSecretName: "mqtt-secret2"
+          keystorePasswordSecretName: "secret-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: my-custom-secret-key.private-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass
+            value: private-key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: my-custom-secret-key.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password
+                key: my-custom-secret-key.password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret
+            mountPath: /tls-mqtt-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret1
+            mountPath: /tls-mqtt-secret1
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: mqtt-secret2
+            mountPath: /tls-mqtt-secret2
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret
+            secret:
+              secretName: mqtt-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret1
+            secret:
+              secretName: mqtt-secret1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: mqtt-secret2
+            secret:
+              secretName: mqtt-secret2
+
+  - it: with a secure service enabled but no keystorePassword or keystorePasswordSecretName set, then fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+    asserts:
+      - failedTemplate:
+          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)

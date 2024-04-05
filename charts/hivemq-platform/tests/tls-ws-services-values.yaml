@@ -1,36 +1,36 @@
 services:
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1883
-    keystoreSecretName: "mqtt-secret"
+    containerPort: 8001
+    keystoreSecretName: "websocket-secret"
     keystorePasswordSecretName: "secret-password"
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1884
-    keystoreSecretName: "mqtt-secret"
+    containerPort: 8002
+    keystoreSecretName: "websocket-secret"
     keystorePasswordSecretName: "secret-password"
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1885
-    keystoreSecretName: "mqtt-secret1"
+    containerPort: 8003
+    keystoreSecretName: "websocket-secret1"
     keystorePasswordSecretName: "secret-password1"
-  - type: mqtt
+  - type: websocket
     exposed: false
-    containerPort: 1886
-    keystoreSecretName: "mqtt-secret2"
+    containerPort: 8004
+    keystoreSecretName: "websocket-secret2"
     keystorePasswordSecretName: "secret-password2"
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1887
-    keystoreSecretName: "mqtt-secret3"
+    containerPort: 8005
+    keystoreSecretName: "websocket-secret3"
     keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1888
-    keystoreSecretName: "mqtt-secret4"
+    containerPort: 8006
+    keystoreSecretName: "websocket-secret4"
     keystorePasswordSecretName: "secret-password4"
     keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1889
+    containerPort: 8007
