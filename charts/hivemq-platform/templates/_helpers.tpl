@@ -74,7 +74,7 @@ Has additional volumes
 
 {{/*
 Gets the port name inside a range of the service values
-Format: <.Values.services.type>
+Format: <.Values.services>
 Usage: {{ include "hivemq-platform.range-service-port-name" . }}
 */}}
 {{- define "hivemq-platform.range-service-port-name" -}}
@@ -94,7 +94,7 @@ Usage: {{ include "hivemq-platform.range-service-port-name" . }}
 {{/*
 Get the service name inside a range of the service values
 Format: hivemq-<.Release.Name>-<.Values.services.type>-<.Values.services.port | .Values.services.containerPort>
-Usage: {{ include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort) }}
+Usage: {{ include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort "keystoreSecretName" .keystoreSecretName) }}
 */}}
 {{- define "hivemq-platform.range-service-name" -}}
 {{- $type := "" }}
@@ -136,6 +136,20 @@ Returns:
 {{- end }}
 {{- $typeExists }}
 {{- end -}}
+
+{{/*
+Returns the placeholder name to be used by the `config.xml` file for the private keystore password used by the TLS listeners.
+This can only be used within a range of service values.
+Format: <.Values.services.type>_<.Release.Name>_<.Values.services.keystoreSecretName>_<keystore_pass | keystore_private_pass>
+Usage: {{ include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey) }}
+*/}}
+{{- define "hivemq-platform.keystore-private-password" -}}
+{{- if or .keystorePrivatePassword .keystorePrivatePasswordSecretKey }}
+{{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_private_pass" -}}
+{{- else }}
+{{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_pass" -}}
+{{- end }}
+{{- end }}
 
 {{/*
 Gets the default Operator REST API port value.
