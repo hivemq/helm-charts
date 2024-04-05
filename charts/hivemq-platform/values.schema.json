@@ -125,7 +125,16 @@
           "keystorePassword" : {
             "type" : "string"
           },
+          "keystorePrivatePassword" : {
+            "type" : "string"
+          },
           "keystorePasswordSecretName" : {
+            "type" : "string"
+          },
+          "keystorePasswordSecretKey" : {
+            "type" : "string"
+          },
+          "keystorePrivatePasswordSecretKey" : {
             "type" : "string"
           },
           "truststoreSecretName" : {

@@ -28,7 +28,7 @@ data:
             <keystore>
               <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
               <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
-              <private-key-password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</private-key-password>
+              <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
             </keystore>
             {{- if $val.truststoreSecretName }}
             <truststore>
@@ -57,7 +57,7 @@ data:
             <keystore>
               <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
               <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
-              <private-key-password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</private-key-password>
+              <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
             </keystore>
             {{- if $val.truststoreSecretName }}
             <truststore>
@@ -117,7 +117,7 @@ data:
               <keystore>
                 <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
                 <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
-                <private-key-password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</private-key-password>
+                <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
               </keystore>
             </tls>
           </https>
