@@ -1099,6 +1099,187 @@ tests:
             value: trust-changeme
         template: hivemq-custom-resource.yml
 
+  - it: with a secure MQTT services exposed using a custom keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1885</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure MQTT services exposed reusing the same keystore password and keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1886
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1887
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1885</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1886</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1887</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
   - it: with a secure mutual TLS MQTT service exposed, using keystorePassword and truststorePassword
     template: hivemq-configuration.yml
     set:
@@ -1400,6 +1581,103 @@ tests:
                 name: my-truststore-secret
         template: hivemq-custom-resource.yml
 
+  - it: with several secure and non-secure MQTT services
+    template: hivemq-configuration.yml
+    values:
+      - tls-mqtt-services-values.yaml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1885</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret1_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1887</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret3/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret3_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret3_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1888</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret4/keystore</path>
+                      <password>${mqtt_platform-release_mqtt-secret4_keystore_pass}</password>
+                      <private-key-password>${mqtt_platform-release_mqtt-secret4_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tcp-listener>
+                  <port>1889</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
   - it: with a Control Center service exposed
     template: hivemq-configuration.yml
     set:
@@ -1608,7 +1886,7 @@ tests:
               </control-center>
             </hivemq>
 
-  - it: with a secure Control Center service disabled, no secure Control Service is exposed
+  - it: with a secure Control Center service disabled, no secure Control Center service is exposed
     template: hivemq-configuration.yml
     set:
       services:
@@ -1625,7 +1903,192 @@ tests:
           path: data["config.xml"]
           pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<listeners>.*?</control-center>"
 
-  - it: with several secure and non-secure Control Center services enabled and reusing keystores
+  - it: with a secure Control Center services exposed using a custom keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          exposed: true
+          containerPort: 8444
+          keystoreSecretName: "control-center-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8444</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret1_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with a secure Control Center services exposed reusing the same keystore password and keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          exposed: true
+          containerPort: 8444
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          exposed: true
+          containerPort: 8445
+          keystoreSecretName: "control-center-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: control-center
+          exposed: true
+          containerPort: 8446
+          keystoreSecretName: "control-center-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8444</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8445</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret1_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8446</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret1_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with several secure and non-secure Control Center services
     template: hivemq-configuration.yml
     values:
       - tls-cc-services-values.yaml
@@ -1694,6 +2157,32 @@ tests:
                       </keystore>
                     </tls>
                   </https>
+                  <https>
+                    <port>8447</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret3/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret3_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret3_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8448</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret4/keystore</path>
+                        <password>${control-center_platform-release_control-center-secret4_keystore_pass}</password>
+                        <private-key-password>${control-center_platform-release_control-center-secret4_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <http>
+                    <port>8081</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
                 </listeners>
               </control-center>
             </hivemq>
@@ -1803,6 +2292,425 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service enabled, using keystorePassword
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore.jks</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure WebSocket service enabled, using keystorePasswordSecretName
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore.jks</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure WebSocket service disabled, no secure WebSocket service is exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8000</port>.*?<tls-websocket-listener>.*?</listeners>"
+
+  - it: with a secure WebSocket services exposed using a custom keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8001</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure WebSocket services exposed reusing the same keystore password and keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          exposed: true
+          containerPort: 8002
+          keystoreSecretName: "websocket-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: websocket
+          exposed: true
+          containerPort: 8003
+          keystoreSecretName: "websocket-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8001</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8002</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8003</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with several secure and non-secure WebSocket services
+    template: hivemq-configuration.yml
+    values:
+      - tls-ws-services-values.yaml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8001</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8002</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8003</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret1_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8005</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret3/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret3_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret3_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8006</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret4/keystore</path>
+                      <password>${websocket_platform-release_websocket-secret4_keystore_pass}</password>
+                      <private-key-password>${websocket_platform-release_websocket-secret4_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <websocket-listener>
+                  <port>8007</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                </websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
 
   - it: with Data Hub enabled
     template: hivemq-configuration.yml
