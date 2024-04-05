@@ -303,6 +303,112 @@ tests:
                   targetPort: ws-8000
                   port: 8000
 
+  - it: with all service types, then service names are correct
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "keystore-secret-password"
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "keystore-secret-password"
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "keystore-secret-password"
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  port: 1883
+                  targetPort: mqtt-1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-mqtts-1884
+            spec:
+              ports:
+                  - name: mqtts-1884
+                    port: 1884
+                    targetPort: mqtts-1884
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8080
+            spec:
+              ports:
+                  - name: cc-8080
+                    port: 8080
+                    targetPort: cc-8080
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                  - name: cc-8081
+                    port: 8081
+                    targetPort: cc-8081
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8000
+            spec:
+              ports:
+                  - name: ws-8000
+                    port: 8000
+                    targetPort: ws-8000
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                  - name: ws-8001
+                    port: 8001
+                    targetPort: ws-8001
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  port: 8888
+                  targetPort: rest-8888
+
   - it: with multiple service listeners defined
     values:
       - multiple-service-listeners.yaml
