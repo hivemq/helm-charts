@@ -56,31 +56,47 @@ spec:
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
                 {{- if $hasKeystore }}
-                {{- $envNamesKeyStoreList := list }}
+                {{- $envNamesKeyStorePasswordList := list }}
+                {{- $envNamesKeyStorePrivatePasswordList := list }}
                 {{- $envNamesTrustStoreList := list }}
                 {{- range $key, $val := .Values.services }}
                 {{- if and $val.exposed $val.keystoreSecretName }}
-                {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass") }}
-                {{- if not (has $envName $envNamesKeyStoreList) }}
-                - name: {{ $envName }}
+                {{- $envNameKeystorePassword := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass") }}
+                {{- if not (has $envNameKeystorePassword $envNamesKeyStorePasswordList) }}
+                - name: {{ $envNameKeystorePassword }}
                   {{- if $val.keystorePassword }}
-                  value: {{ $val.keystorePassword | b64dec }}
+                  value: {{ $val.keystorePassword | b64dec | trim -}}
                   {{- else if $val.keystorePasswordSecretName }}
                   valueFrom:
                     secretKeyRef:
                       name: {{ $val.keystorePasswordSecretName }}
-                      key: keystore.password
+                      key: {{ $val.keystorePasswordSecretKey | default "keystore.password" }}
                   {{- else }}
                   {{- fail ("A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
                   {{- end }}
-                {{- $envNamesKeyStoreList = $envName | append $envNamesKeyStoreList }}
+                {{- if or $val.keystorePrivatePassword (and $val.keystorePasswordSecretName $val.keystorePrivatePasswordSecretKey) }}
+                {{- $envNameKeystorePrivatePassword := include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey) }}
+                {{- if not (has $envNameKeystorePrivatePassword $envNamesKeyStorePrivatePasswordList) }}
+                - name: {{ $envNameKeystorePrivatePassword }}
+                {{- if $val.keystorePrivatePassword }}
+                  value: {{ $val.keystorePrivatePassword | b64dec | trim -}}
+                {{- else }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ $val.keystorePasswordSecretName }}
+                      key: {{ $val.keystorePrivatePasswordSecretKey }}
+                {{- end }}
+                {{- $envNamesKeyStorePrivatePasswordList = $envNameKeystorePrivatePassword | append $envNamesKeyStorePrivatePasswordList }}
+                {{- end }}
+                {{- end }}
+                {{- $envNamesKeyStorePasswordList = $envNameKeystorePassword | append $envNamesKeyStorePasswordList }}
                 {{- end }}
                 {{- if and $val.exposed $val.truststoreSecretName }}
-                {{- $envName := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass") }}
-                {{- if not (has $envName $envNamesTrustStoreList) }}
-                - name: {{ $envName }}
+                {{- $envNameTrustorePassword := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass") }}
+                {{- if not (has $envNameTrustorePassword $envNamesTrustStoreList) }}
+                - name: {{ $envNameTrustorePassword }}
                   {{- if $val.truststorePassword }}
-                  value: {{ $val.truststorePassword | b64dec }}
+                  value: {{ $val.truststorePassword | b64dec | trim -}}
                   {{- else if $val.truststorePasswordSecretName }}
                   valueFrom:
                     secretKeyRef:
@@ -89,7 +105,7 @@ spec:
                   {{- else }}
                   {{- fail ("A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
                   {{- end }}
-                  {{- $envNamesTrustStoreList = $envName | append $envNamesTrustStoreList}}
+                  {{- $envNamesTrustStoreList = $envNameTrustorePassword | append $envNamesTrustStoreList }}
                 {{- end }}
                 {{- end }}
                 {{- end }}
@@ -164,7 +180,7 @@ spec:
     {{- range $key, $val := .Values.services }}
     {{- if and $val.exposed }}
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort "keystoreSecretName" .keystoreSecretName)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
         {{- if and (typeIsLike "map[string]interface {}" $val.annotations) ($val.annotations) }}
         annotations:
           {{- $val.annotations | toYaml | nindent 10 }}
@@ -188,7 +204,7 @@ spec:
     {{- end }}
     # Metric service ports are not configurable right now
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" $defaultMetricsPort "containerPort" $defaultMetricsPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" $defaultMetricsPort "containerPort" $defaultMetricsPort "keystoreSecretName" "")) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
       spec:
         ports:
           - name: {{ printf "metrics-%s" $defaultMetricsPort }}
