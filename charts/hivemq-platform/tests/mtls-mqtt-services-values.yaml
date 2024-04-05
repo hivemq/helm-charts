@@ -5,8 +5,7 @@ services:
     keystoreSecretName: "mqtt-secret"
     keystorePasswordSecretName: "secret-password"
     truststoreSecretName: "truststore-secret"
-    truststorePassword: "dHJ1c3RzdG9yZS1wYXNzd29yZA=="
-
+    truststorePassword: "dHJ1c3RzdG9yZS1wYXNzd29yZA==" # truststore-password
   - type: mqtt
     exposed: true
     containerPort: 1884
@@ -14,7 +13,6 @@ services:
     keystorePasswordSecretName: "secret-password"
     truststoreSecretName: "truststore-secret"
     truststorePasswordSecretName: "secret-password"
-
   - type: mqtt
     exposed: true
     containerPort: 1885
@@ -22,15 +20,13 @@ services:
     keystorePasswordSecretName: "secret-password1"
     truststoreSecretName: "truststore-secret1"
     truststorePasswordSecretName: "secret-password1"
-
   - type: mqtt
     exposed: false
     containerPort: 1886
     keystoreSecretName: "mqtt-secret-1886"
     keystorePasswordSecretName: "secret-password-1886"
     truststoreSecretName: "truststore-secret-1886"
-    truststorePassword: "dHJ1c3RzdG9yZS1wYXNzd29yZA=="
-
+    truststorePassword: "dHJ1c3RzdG9yZS1wYXNzd29yZA==" # truststore-password
   - type: mqtt
     exposed: true
     containerPort: 1887
