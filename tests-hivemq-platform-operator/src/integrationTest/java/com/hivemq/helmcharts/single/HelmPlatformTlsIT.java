@@ -51,11 +51,11 @@ class HelmPlatformTlsIT {
     private static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
     private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     private static final @NotNull String NAMESPACE = K8sUtil.getNamespaceName(HelmPlatformTlsIT.class);
-    private static final @NotNull String MQTT_SERVICE_NAME_1883 = "hivemq-test-hivemq-platform-mqtts-1883";
+    private static final @NotNull String MQTT_SERVICE_NAME_1883 = "hivemq-test-hivemq-platform-mqtt-1883";
     private static final int MQTT_SERVICE_PORT_1883 = 1883;
-    private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtts-1884";
+    private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final int MQTT_SERVICE_PORT_1884 = 1884;
-    private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtts-1885";
+    private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
     private static final int MQTT_SERVICE_PORT_1885 = 1885;
     private static final @NotNull String MQTT_SERVICE_NAME_1886 = "hivemq-test-hivemq-platform-mqtt-1886";
     private static final int MQTT_SERVICE_PORT_1886 = 1886;

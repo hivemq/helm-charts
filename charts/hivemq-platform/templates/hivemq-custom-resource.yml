@@ -180,7 +180,7 @@ spec:
     {{- range $key, $val := .Values.services }}
     {{- if and $val.exposed }}
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort "keystoreSecretName" .keystoreSecretName)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
         {{- if and (typeIsLike "map[string]interface {}" $val.annotations) ($val.annotations) }}
         annotations:
           {{- $val.annotations | toYaml | nindent 10 }}
@@ -204,7 +204,7 @@ spec:
     {{- end }}
     # Metric service ports are not configurable right now
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" $defaultMetricsPort "containerPort" $defaultMetricsPort "keystoreSecretName" "")) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" $defaultMetricsPort "containerPort" $defaultMetricsPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
       spec:
         ports:
           - name: {{ printf "metrics-%s" $defaultMetricsPort }}
