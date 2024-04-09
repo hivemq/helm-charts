@@ -6,7 +6,6 @@ services:
     containerPort: 1883
     keystoreSecretName: "mqtts-keystore"
     keystorePasswordSecretName: "mqtts-keystore-password"
-
   - type: mqtt
     exposed: true
     containerPort: 1884
@@ -14,7 +13,6 @@ services:
     keystoreSecretKey: "keystore.jks"
     keystorePasswordSecretName: "mqtts-keystore-password"
     tlsClientAuthenticationMode: "OPTIONAL"
-
   - type: control-center
     exposed: true
     containerPort: 8080

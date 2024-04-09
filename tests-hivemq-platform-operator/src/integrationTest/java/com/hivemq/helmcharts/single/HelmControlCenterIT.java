@@ -27,9 +27,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
+import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSWORD;
+import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_KEYSTORE_PASSWORD;
+import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
 @Tag("Services")
@@ -41,8 +45,7 @@ class HelmControlCenterIT {
     private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8081 = "hivemq-test-hivemq-platform-cc-8081";
     private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8443 = "hivemq-test-hivemq-platform-cc-8443";
     private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8444 = "hivemq-test-hivemq-platform-cc-8444";
-    private static final @NotNull String KEYSTORE_PASSWORD = "key-changeme";
-    private static final @NotNull String NAMESPACE = K8sUtil.getNamespaceName(HelmLicenseSecretIT.class);
+    private static final @NotNull String NAMESPACE = K8sUtil.getNamespaceName(HelmControlCenterIT.class);
     private static final int HIVEMQ_CC_SERVICE_PORT_8081 = 8081;
     private static final int HIVEMQ_CC_SERVICE_PORT_8443 = 8443;
     private static final int HIVEMQ_CC_SERVICE_PORT_8444 = 8444;
@@ -95,24 +98,26 @@ class HelmControlCenterIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                NAMESPACE);
-        HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
+        try {
+            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
+                    "--cascade",
+                    "foreground",
+                    "--namespace",
+                    NAMESPACE);
+        } finally {
+            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
+        }
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenControlCenterEnabled_thenAbleToLogin() throws Exception {
-        final var customResourceName = "test-hivemq-platform";
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "--namespace",
                 NAMESPACE,
                 "-f",
                 "/files/control-center-test-values.yaml");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, customResourceName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
 
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
     }
@@ -126,20 +131,54 @@ class HelmControlCenterIT {
         final var keystoreContent = Files.readAllBytes(keystore);
 
         createSecret(client, NAMESPACE, "cc-keystore-8443", "keystore.jks", encoder.encodeToString(keystoreContent));
-        createSecret(client, NAMESPACE, "cc-keystore-8444", "keystore", encoder.encodeToString(keystoreContent));
         createSecret(client,
                 NAMESPACE,
                 "cc-keystore-password-8443",
                 "keystore.password",
-                encoder.encodeToString(KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+                encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+        createSecret(client, NAMESPACE, "cc-keystore-8444", "keystore", encoder.encodeToString(keystoreContent));
 
-        final var customResourceName = "test-hivemq-platform";
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "--namespace",
                 NAMESPACE,
                 "-f",
-                "/files/tls-control-center-test-values.yaml");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, customResourceName);
+                "/files/tls-cc-test-values.yaml");
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
+
+        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
+        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8443, HIVEMQ_CC_SERVICE_PORT_8443, true);
+        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8444, HIVEMQ_CC_SERVICE_PORT_8444, true);
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_whenTlsEnabledWithDifferentPrivateKey_thenAbleToLogin(@TempDir final @NotNull Path tmp)
+            throws Exception {
+        final var keystorePassword = "keystore-password";
+        final var privateKeyPassword = "private-key-password";
+        CertificatesUtil.generateCertificates(tmp.toFile(),
+                Map.of(ENV_VAR_KEYSTORE_PASSWORD, keystorePassword, ENV_VAR_PRIVATE_KEY_PASSWORD, privateKeyPassword));
+        final var encoder = Base64.getEncoder();
+        final var keystore = tmp.resolve("keystore.jks");
+        final var keystoreContent = Files.readAllBytes(keystore);
+        final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
+
+        createSecret(client, NAMESPACE, "cc-keystore-8443", "keystore.jks", base64KeystoreContent);
+        createSecret(client, NAMESPACE, "cc-keystore-8444", "keystore.jks", base64KeystoreContent);
+        createSecret(client,
+                NAMESPACE,
+                "cc-keystore-password-8444",
+                Map.of("my-keystore.password",
+                        encoder.encodeToString(keystorePassword.getBytes(StandardCharsets.UTF_8)),
+                        "my-private-key.password",
+                        encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
+
+        HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
+                "--namespace",
+                NAMESPACE,
+                "-f",
+                "/files/tls-cc-with-private-key-test-values.yaml");
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
 
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8443, HIVEMQ_CC_SERVICE_PORT_8443, true);
@@ -149,21 +188,18 @@ class HelmControlCenterIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenOverrideControlCenter_thenAbleToLogin() throws Exception {
-        final var customResourceName = "test-hivemq-platform";
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "--namespace",
                 NAMESPACE,
                 "-f",
                 "/files/override-control-center-test-values.yaml");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, customResourceName);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
 
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, "test", "abc123", false);
     }
 
     private void assertControlCenterListener(
-            final @NotNull String serviceName,
-            final int port,
-            final boolean isTlsEnabled) throws IOException {
+            final @NotNull String serviceName, final int port, final boolean isTlsEnabled) throws IOException {
         assertControlCenterListener(serviceName, port, "admin", "hivemq", isTlsEnabled);
     }
 
