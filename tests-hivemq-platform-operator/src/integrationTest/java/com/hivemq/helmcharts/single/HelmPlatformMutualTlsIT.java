@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.client.util.KeyStoreUtil.keyManagerFromKeystore;
 import static com.hivemq.client.util.KeyStoreUtil.trustManagerFromKeystore;
+import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSWORD;
+import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_TRUSTSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
 import static com.hivemq.helmcharts.util.MqttUtil.withDefaultPublishSubscribeRunnable;
@@ -42,14 +44,12 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final int MQTT_SERVICE_PORT_1885 = 1885;
     private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
-    private static final @NotNull String BROKER_KEYSTORE_PASSWORD = "key-changeme";
-    private static final @NotNull String BROKER_KEYSTORE_PRIVATE_PASSWORD = "key-changeme";
-    private static final @NotNull String CLIENT_KEYSTORE_PASSWORD = "trust-changeme";
 
     private @NotNull Path brokerCertificateStore;
     private @NotNull Path clientCertificateStore;
 
     @BeforeEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void setup(@TempDir final @NotNull Path tempDir) throws Exception {
         CertificatesUtil.generateCertificates(tempDir.toFile());
         final var encoder = Base64.getEncoder();
@@ -62,7 +62,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 namespace,
                 "mqtts-keystore-password-1885",
                 "keystore.password",
-                encoder.encodeToString(BROKER_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+                encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
         clientCertificateStore = tempDir.resolve("truststore.jks");
         final var truststoreContent = Files.readAllBytes(clientCertificateStore);
@@ -73,13 +73,13 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 namespace,
                 "mqtts-truststore-password-1885",
                 "truststore.password",
-                encoder.encodeToString(CLIENT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+                encoder.encodeToString(DEFAULT_TRUSTSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withMutualTls_hivemqRunning() throws Exception {
-        installChartsAndWaitForPlatformRunning("/files/mtls-test-values.yaml");
+        installChartsAndWaitForPlatformRunning("/files/mtls-mqtt-test-values.yaml");
 
         final var statefulSet =
                 client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
@@ -90,10 +90,10 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(brokerCertificateStore.toFile(),
-                        BROKER_KEYSTORE_PASSWORD,
-                        BROKER_KEYSTORE_PRIVATE_PASSWORD))
+                        DEFAULT_KEYSTORE_PASSWORD,
+                        DEFAULT_KEYSTORE_PASSWORD))
                 .trustManagerFactory(trustManagerFromKeystore(clientCertificateStore.toFile(),
-                        CLIENT_KEYSTORE_PASSWORD))
+                        DEFAULT_TRUSTSTORE_PASSWORD))
                 .hostnameVerifier((hostname, session) -> true)
                 .build();
 

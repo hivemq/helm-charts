@@ -138,7 +138,7 @@ Returns:
 {{- end -}}
 
 {{/*
-Returns the placeholder name to be used by the `config.xml` file for the private keystore password used by the TLS listeners.
+Returns the placeholder name to be used by the `config.xml` file for the private key password used by the TLS listeners.
 This can only be used within a range of service values.
 Format: <.Values.services.type>_<.Release.Name>_<.Values.services.keystoreSecretName>_<keystore_pass | keystore_private_pass>
 Usage: {{ include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey) }}

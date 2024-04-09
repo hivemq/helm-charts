@@ -1,0 +1,21 @@
+nodes:
+  replicaCount: 1
+services:
+  - type: control-center
+    exposed: true
+    containerPort: 8081
+  - type: control-center
+    exposed: true
+    containerPort: 8443
+    keystoreSecretName: "cc-keystore-8443"
+    keystoreSecretKey: "keystore.jks"
+    keystorePassword: "a2V5c3RvcmUtcGFzc3dvcmQ=" # keystore-password
+    keystorePrivatePassword: "cHJpdmF0ZS1rZXktcGFzc3dvcmQ=" # private-key-password
+  - type: control-center
+    exposed: true
+    containerPort: 8444
+    keystoreSecretName: "cc-keystore-8444"
+    keystoreSecretKey: "keystore.jks"
+    keystorePasswordSecretName: "cc-keystore-password-8444"
+    keystorePasswordSecretKey: "my-keystore.password"
+    keystorePrivatePasswordSecretKey: "my-private-key.password"
