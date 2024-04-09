@@ -350,7 +350,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-mqtts-1884
+              name:  hivemq-test-hivemq-platform-mqtt-1884 # FIXME: Expected secure MQTT service name should be `mqtts`
             spec:
               ports:
                   - name: mqtts-1884
