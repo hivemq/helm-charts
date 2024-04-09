@@ -1,12 +1,13 @@
 #!/bin/zsh
 : "${CHART_NAME=platform}"
-: "${SERVICE=mqtts}"
+: "${SERVICE=secure-service}"
 : "${SERVICE_NAME=${SERVICE}-${CHART_NAME}}"
 : "${NAMESPACE=default}"
 : "${KEYSTORE_PASSWORD=key-changeme}"
+: "${PRIVATE_KEY_PASSWORD=key-changeme}"
 : "${TRUSTSTORE_PASSWORD=trust-changeme}"
 
-function tls_certs() {
+function generate_certificates() {
   cd "$1" || exit 2
   openssl genrsa -out ca.key 2048 > /dev/null
 
@@ -25,7 +26,7 @@ function tls_certs() {
     -out server.csr >/dev/null
 
   openssl x509 -req \
-    -extfile <(printf "subjectAltName=DNS:$SERVICE_NAME.$NAMESPACE.svc,DNS:localhost") \
+    -extfile <(printf "subjectAltName=DNS:%s.%s.svc,DNS:localhost" "${SERVICE_NAME}" "${NAMESPACE}") \
     -sha256 \
     -days 3650 \
     -in server.csr \
@@ -35,7 +36,7 @@ function tls_certs() {
   echo ">> Generating keystore and truststore files"
 
   openssl pkcs12 -export -inkey server.key -in server.crt -out key.pkcs12 -password pass:"$KEYSTORE_PASSWORD" >/dev/null
-  keytool -importkeystore -noprompt -srckeystore key.pkcs12 -srcstoretype pkcs12 -destkeystore keystore.jks -storepass "$KEYSTORE_PASSWORD" -srcstorepass "$KEYSTORE_PASSWORD" >/dev/null
+  keytool -importkeystore -noprompt -srckeystore key.pkcs12 -srcstoretype pkcs12 -deststoretype JKS -destkeystore keystore.jks -destkeypass "$PRIVATE_KEY_PASSWORD" -storepass "$KEYSTORE_PASSWORD" -srcstorepass "$KEYSTORE_PASSWORD" >/dev/null
 
   keytool -exportcert \
             --alias 1 \
@@ -74,3 +75,5 @@ function tls_certs() {
   echo ">> Import the certificates"
   keytool -import -file "${SERVICE_NAME}"-client-cert.crt -alias "${SERVICE_NAME}"-client -keystore truststore.jks -storepass $TRUSTSTORE_PASSWORD -trustcacerts -noprompt
 }
+
+generate_certificates "$@"

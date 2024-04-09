@@ -4,7 +4,6 @@ services:
   - type: websocket
     exposed: true
     containerPort: 8002
-
   - type: websocket
     exposed: true
     containerPort: 8003
@@ -13,7 +12,6 @@ services:
     truststoreSecretName: "ws-truststore-8003"
     truststoreSecretKey: "truststore.jks"
     truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
-
   - type: websocket
     exposed: true
     containerPort: 8004
