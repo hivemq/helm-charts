@@ -94,7 +94,7 @@ Usage: {{ include "hivemq-platform.range-service-port-name" . }}
 {{/*
 Get the service name inside a range of the service values
 Format: hivemq-<.Release.Name>-<.Values.services.type>-<.Values.services.port | .Values.services.containerPort>
-Usage: {{ include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort "keystoreSecretName" .keystoreSecretName) }}
+Usage: {{ include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort) }}
 */}}
 {{- define "hivemq-platform.range-service-name" -}}
 {{- $type := "" }}
