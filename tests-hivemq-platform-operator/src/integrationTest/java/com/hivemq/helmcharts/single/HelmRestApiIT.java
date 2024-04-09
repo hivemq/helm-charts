@@ -57,20 +57,22 @@ class HelmRestApiIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                NAMESPACE);
-        K8sUtil.waitForAllPodsDeletedInNamespace(client, NAMESPACE);
-        HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
-
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                "default");
-        K8sUtil.waitForAllPodsDeletedInNamespace(client, "default");
+        try {
+            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
+                    "--cascade",
+                    "foreground",
+                    "--namespace",
+                    NAMESPACE);
+            K8sUtil.waitForAllPodsDeletedInNamespace(client, NAMESPACE);
+            HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
+                    "--cascade",
+                    "foreground",
+                    "--namespace",
+                    "default");
+            K8sUtil.waitForAllPodsDeletedInNamespace(client, "default");
+        } finally {
+            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
+        }
     }
 
     @Test

@@ -57,12 +57,15 @@ class HelmLicenseSecretIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                NAMESPACE);
-        HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
+        try {
+            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
+                    "--cascade",
+                    "foreground",
+                    "--namespace",
+                    NAMESPACE);
+        } finally {
+            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
+        }
     }
 
     @Test
