@@ -2,6 +2,8 @@ name: Release Charts
 on:
   push:
     branches: [master]
+    paths:
+      - charts/**
   workflow_dispatch:
 jobs:
   release:
@@ -34,5 +36,7 @@ jobs:
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_SKIP_EXISTING: true
-          CR_GENERATE_RELEASE_NOTES: true
+        with:
+          charts_dir: charts
+          mark_as_latest: false
+          skip_existing: true
