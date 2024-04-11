@@ -255,8 +255,10 @@ config:
   name: ""
   # Inlines the HiveMQ Platform configuration (config.xml) from a file:
   # --set-file config.overrideHiveMQConfig=your-config.xml
+  # WARNING: Whenever this value is set, all other values related to the HiveMQ platform configuration will be ignored.
   overrideHiveMQConfig: ""
   # Inlines the StatefulSet configuration and overrides the default StatefulSet.
+  # WARNING: Whenever this value is set, all other values related to the StatefulSet configuration will be ignored.
   overrideStatefulSet: ""
   # Inlines an init container configuration and adds it to the StatefulSet
   overrideInitContainers: ""
