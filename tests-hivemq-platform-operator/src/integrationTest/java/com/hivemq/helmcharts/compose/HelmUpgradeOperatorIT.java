@@ -31,7 +31,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
 
     @AfterEach
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, "--cascade", "foreground", "--namespace", namespace);
+        helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, namespace);
     }
 
     @Test

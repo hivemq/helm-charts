@@ -42,11 +42,7 @@ public abstract class AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     final void baseTearDown() throws Exception {
         if (cleanupPlatformChart()) {
-            helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME,
-                    "--cascade",
-                    "foreground",
-                    "--namespace",
-                    namespace);
+            helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         }
         if (cleanupNamespace()) {
             helmChartContainer.deleteNamespace(namespace);
@@ -55,7 +51,7 @@ public abstract class AbstractHelmChartIT {
             assertThat(client.namespaces().withName(namespace).get()).isNull();
         }
         if (cleanupOperatorChart()) {
-            helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, "--cascade", "foreground");
+            helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
         }
         network.close();
     }

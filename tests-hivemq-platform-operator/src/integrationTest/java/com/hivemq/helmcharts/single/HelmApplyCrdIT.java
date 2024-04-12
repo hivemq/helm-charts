@@ -63,11 +63,7 @@ class HelmApplyCrdIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                "default");
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
