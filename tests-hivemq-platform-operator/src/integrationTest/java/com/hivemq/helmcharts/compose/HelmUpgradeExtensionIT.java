@@ -5,10 +5,13 @@ import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -32,6 +35,7 @@ class HelmUpgradeExtensionIT {
 
     private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     private static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
+    private static final @NotNull String NAMESPACE = K8sUtil.getNamespaceName(HelmUpgradeExtensionIT.class);
 
     private static final @NotNull Network NETWORK = Network.newNetwork();
     private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER =
@@ -40,31 +44,44 @@ class HelmUpgradeExtensionIT {
             new HiveMQContainer(HIVEMQ_DOCKER_IMAGE).withLogLevel(Level.DEBUG)
                     .withNetwork(NETWORK)
                     .withNetworkAliases("remote");
+    @SuppressWarnings("NotNullFieldNotInitialized")
+    private static @NotNull KubernetesClient client;
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    public static void setup() throws Exception {
+    static void baseSetup() {
         HIVEMQ_CONTAINER.start();
         HELM_CHART_CONTAINER.start();
-        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
+        client = HELM_CHART_CONTAINER.getKubernetesClient();
     }
 
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    public static void shutdown() {
+    static void baseTearDown() {
         HELM_CHART_CONTAINER.stop();
         HIVEMQ_CONTAINER.stop();
         NETWORK.close();
+    }
+
+    @BeforeEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void setup() throws Exception {
+        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
+    }
+
+    @AfterEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void tearDown() throws Exception {
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withBridgeConfiguration_enableDisableBridged() throws Exception {
         final var customResourceName = "test-hivemq-platform";
-        final var namespace = "enable-disable-extension-test";
-        HELM_CHART_CONTAINER.createNamespace(namespace);
 
-        final var client = HELM_CHART_CONTAINER.getKubernetesClient();
         final var hivemqContainerNetwork =
                 HIVEMQ_CONTAINER.getContainerInfo().getNetworkSettings().getNetworks().values().stream().findFirst();
         assertThat(hivemqContainerNetwork).isPresent();
@@ -79,17 +96,17 @@ class HelmUpgradeExtensionIT {
                         configMapData.replace("<host>remote</host>",
                                 "<host>" + hivemqContainerNetwork.get().getIpAddress() + "</host>")))
                 .build();
-        client.configMaps().inNamespace(namespace).resource(bridgeConfigMap).create();
+        client.configMaps().inNamespace(NAMESPACE).resource(bridgeConfigMap).create();
 
         // deploy chart and wait to be ready
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
                 "/files/bridge-test-values.yaml",
                 "--namespace",
-                namespace);
+                NAMESPACE);
 
         final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
+                K8sUtil.getHiveMQPlatform(client, NAMESPACE, customResourceName);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
         // check that extensions are enabled
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
@@ -100,7 +117,7 @@ class HelmUpgradeExtensionIT {
                 "-f",
                 "/files/disable-bridge-test-values.yaml",
                 "--namespace",
-                namespace);
+                NAMESPACE);
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RESTART_EXTENSIONS"),
                 1,
@@ -109,19 +126,13 @@ class HelmUpgradeExtensionIT {
         // check that extensions are disabled
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=false,.*?id=hivemq-bridge-extension,.*?].*");
-
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
-        HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withBridgeConfiguration_updateExtensionWithNewConfig() throws Exception {
         final var customResourceName = "test-hivemq-platform";
-        final var namespace = "update-extension-new-config";
-        HELM_CHART_CONTAINER.createNamespace(namespace);
 
-        final var client = HELM_CHART_CONTAINER.getKubernetesClient();
         final var hivemqContainerNetwork =
                 HIVEMQ_CONTAINER.getContainerInfo().getNetworkSettings().getNetworks().values().stream().findFirst();
         assertThat(hivemqContainerNetwork).isPresent();
@@ -136,16 +147,16 @@ class HelmUpgradeExtensionIT {
                         configMapData.replace("<host>remote</host>",
                                 "<host>" + hivemqContainerNetwork.get().getIpAddress() + "</host>")))
                 .build();
-        client.configMaps().inNamespace(namespace).resource(bridgeConfigMap).create();
+        client.configMaps().inNamespace(NAMESPACE).resource(bridgeConfigMap).create();
 
         // deploy chart and wait to be ready
         HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
                 "/files/bridge-test-values.yaml",
                 "--namespace",
-                namespace);
+                NAMESPACE);
         final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
+                K8sUtil.getHiveMQPlatform(client, NAMESPACE, customResourceName);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
 
         // check that extensions are enabled
@@ -160,24 +171,21 @@ class HelmUpgradeExtensionIT {
                         configMapData.replace("<host>remote</host>",
                                 "<host>" + hivemqContainerNetwork.get().getIpAddress() + "</host>")))
                 .build();
-        client.configMaps().inNamespace(namespace).resource(newBridgeConfigMap).create();
+        client.configMaps().inNamespace(NAMESPACE).resource(newBridgeConfigMap).create();
 
         // upgrade chart and wait to be ready
         HELM_CHART_CONTAINER.upgradePlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
                 "/files/bridge-test-updated-values.yaml",
                 "--namespace",
-                namespace);
+                NAMESPACE);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
                 3,
                 TimeUnit.MINUTES);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
 
         final StatefulSet upgradedStatefulSet =
-                client.apps().statefulSets().inNamespace(namespace).withName(customResourceName).get();
+                client.apps().statefulSets().inNamespace(NAMESPACE).withName(customResourceName).get();
         assertThat(upgradedStatefulSet.getStatus().getAvailableReplicas()).isEqualTo(1);
-
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
-        HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 }

@@ -40,13 +40,13 @@ class HelmApplyCrdIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void beforeAll() {
+    static void baseSetUp() {
         HELM_CHART_CONTAINER.start();
     }
 
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void afterAll() {
+    static void baseTearDown() {
         HELM_CHART_CONTAINER.stop();
     }
 

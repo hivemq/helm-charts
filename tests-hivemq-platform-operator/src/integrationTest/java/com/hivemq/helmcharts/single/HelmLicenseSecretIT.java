@@ -36,10 +36,16 @@ class HelmLicenseSecretIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void start() throws Exception {
+    static void baseSetup() throws Exception {
         HELM_CHART_CONTAINER.start();
         HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
         client = HELM_CHART_CONTAINER.getKubernetesClient();
+    }
+
+    @AfterAll
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    static void baseTearDown() {
+        HELM_CHART_CONTAINER.stop();
     }
 
     @BeforeEach
@@ -48,20 +54,10 @@ class HelmLicenseSecretIT {
         HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
     }
 
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void shutdown() {
-        HELM_CHART_CONTAINER.stop();
-    }
-
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE);
-        } finally {
-            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
-        }
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
     }
 
     @Test
