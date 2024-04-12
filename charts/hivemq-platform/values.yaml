@@ -182,15 +182,13 @@ services:
     keystoreSecretKey: ""
     # The inlined password for the keystore, Base 64 encoded.
     keystorePassword: ""
-    # The inlined private key password for the keystore, Base 64 encoded. Fallbacks to the `keystorePassword` value if empty or not set.
+    # The inlined private key password for the keystore, Base 64 encoded. Defaults to the `keystorePassword` value.
     keystorePrivatePassword: ""
-    # Alternatively, the name of the secret to use to fetch:
-    # - The keystore password by using the key defined in the `keystorePasswordSecretKey` value. Defaults to `keystore.password`
-    # - Optionally, the private key password by using the key defined in the `keystorePrivatePasswordSecretKey` value. Defaults to `keystore.password`
+    # Alternatively, the name of the Kubernetes secret which may contain two entry keys, one for the keystore password and another for the private key for the keystore.
     keystorePasswordSecretName: ""
-    # The key of the Kubernetes secret that contains the keystore password. Defaults to `keystore.password`
+    # The entry key in the Kubernetes secret that contains the keystore password. Defaults to `keystore.password`
     keystorePasswordSecretKey: ""
-    # Optionally, the key of the Kubernetes secret that contains the keystore private key password. Defaults to `keystore.password`
+    # Optionally, the entry key in the Kubernetes secret that contains the private key password.
     keystorePrivatePasswordSecretKey: ""
     # The name of the Kubernetes secret that contains the truststore file.
     truststoreSecretName: ""
