@@ -85,11 +85,7 @@ class HelmControlCenterIT {
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     public static void shutdown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                "default");
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
         HELM_CHART_CONTAINER.stop();
         WEB_DRIVER_CONTAINER.stop();
         NETWORK.close();
@@ -99,11 +95,7 @@ class HelmControlCenterIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
         try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                    "--cascade",
-                    "foreground",
-                    "--namespace",
-                    NAMESPACE);
+            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE);
         } finally {
             HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
         }

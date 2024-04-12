@@ -110,11 +110,7 @@ class HelmUpgradeExtensionIT {
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=false,.*?id=hivemq-bridge-extension,.*?].*");
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 
@@ -181,11 +177,7 @@ class HelmUpgradeExtensionIT {
                 client.apps().statefulSets().inNamespace(namespace).withName(customResourceName).get();
         assertThat(upgradedStatefulSet.getStatus().getAvailableReplicas()).isEqualTo(1);
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 }
