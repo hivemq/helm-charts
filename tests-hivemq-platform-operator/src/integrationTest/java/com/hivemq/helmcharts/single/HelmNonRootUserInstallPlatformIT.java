@@ -49,7 +49,7 @@ class HelmNonRootUserInstallPlatformIT {
 
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void setup() throws Exception {
+    void setup() {
         HELM_CHART_CONTAINER.createNamespace(OPERATOR_NAMESPACE);
         HELM_CHART_CONTAINER.createNamespace(PLATFORM_NAMESPACE);
     }
@@ -57,13 +57,8 @@ class HelmNonRootUserInstallPlatformIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void uninstallChartReleases() throws Exception {
-        try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, PLATFORM_NAMESPACE);
-            HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, OPERATOR_NAMESPACE);
-        } finally {
-            HELM_CHART_CONTAINER.deleteNamespace(PLATFORM_NAMESPACE);
-            HELM_CHART_CONTAINER.deleteNamespace(OPERATOR_NAMESPACE);
-        }
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, PLATFORM_NAMESPACE, true);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, OPERATOR_NAMESPACE, true);
     }
 
     @Test

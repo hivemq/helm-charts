@@ -81,36 +81,32 @@ class HelmPlatformTlsIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void start() throws Exception {
+    static void baseSetup() {
         WEB_DRIVER_CONTAINER.start();
         HELM_CHART_CONTAINER.start();
-        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
         client = HELM_CHART_CONTAINER.getKubernetesClient();
-    }
-
-    @BeforeEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void setup() {
-        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
     }
 
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void shutdown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
+    static void baseTearDown() {
         HELM_CHART_CONTAINER.stop();
         WEB_DRIVER_CONTAINER.stop();
         NETWORK.close();
     }
 
+    @BeforeEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void setup() throws Exception {
+        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
+    }
+
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE);
-        } finally {
-            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
-        }
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
@@ -252,10 +248,7 @@ class HelmPlatformTlsIT {
         final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
         assertThat(volumes).isNotEmpty();
 
-        final var tlsVolume = volumes
-                .stream()
-                .filter(v -> Objects.equals(v.getName(), name))
-                .findFirst();
+        final var tlsVolume = volumes.stream().filter(v -> Objects.equals(v.getName(), name)).findFirst();
         assertThat(tlsVolume).isPresent();
 
         final var container = statefulSet.getSpec().getTemplate().getSpec().getContainers().getFirst();
