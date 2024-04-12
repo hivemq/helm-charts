@@ -69,11 +69,20 @@ class HelmControlCenterIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    public static void start() throws Exception {
+    static void baseSetup() throws Exception {
         WEB_DRIVER_CONTAINER.start();
         HELM_CHART_CONTAINER.start();
         HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
         client = HELM_CHART_CONTAINER.getKubernetesClient();
+    }
+
+    @AfterAll
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    static void baseShutdown() throws Exception {
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
+        HELM_CHART_CONTAINER.stop();
+        WEB_DRIVER_CONTAINER.stop();
+        NETWORK.close();
     }
 
     @BeforeEach
@@ -82,23 +91,10 @@ class HelmControlCenterIT {
         HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
     }
 
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    public static void shutdown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
-        HELM_CHART_CONTAINER.stop();
-        WEB_DRIVER_CONTAINER.stop();
-        NETWORK.close();
-    }
-
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE);
-        } finally {
-            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
-        }
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
     }
 
     @Test

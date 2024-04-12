@@ -28,14 +28,14 @@ class HelmCustomConfigIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void setup() {
+    static void baseSetup() {
         HELM_CHART_CONTAINER.start();
         client = HELM_CHART_CONTAINER.getKubernetesClient();
     }
 
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void shutdown() {
+    static void baseTearDown() {
         HELM_CHART_CONTAINER.stop();
     }
 
@@ -73,8 +73,7 @@ class HelmCustomConfigIT {
                     .anyMatch(p -> p.getContainerPort().equals(1884));
         });
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
-        HELM_CHART_CONTAINER.deleteNamespace(namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace, true);
         HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
@@ -94,17 +93,14 @@ class HelmCustomConfigIT {
         K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, customResourceName);
 
         await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
-            final var configmap = client.configMaps()
-                    .inNamespace(namespace)
-                    .withName("hivemq-configuration-hivemq-platform")
-                    .get();
+            final var configmap =
+                    client.configMaps().inNamespace(namespace).withName("hivemq-configuration-hivemq-platform").get();
             assertThat(configmap).isNotNull();
             final var xmlConfig = configmap.getData().get("config.xml");
             assertThat(xmlConfig).isNotNull().contains("<port>1884</port>");
         });
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
-        HELM_CHART_CONTAINER.deleteNamespace(namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace, true);
         HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
@@ -135,8 +131,7 @@ class HelmCustomConfigIT {
                     .containsIgnoringCase("configMapName=hivemq-configuration");
         });
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
-        HELM_CHART_CONTAINER.deleteNamespace(namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace, true);
         HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
@@ -174,9 +169,7 @@ class HelmCustomConfigIT {
                 .getEnv()).anyMatch(envVar -> "MY_CUSTOM_ENV_VAR".equals(envVar.getName()) &&
                 "mycustomvalue".equals(envVar.getValue()));
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace);
-        HELM_CHART_CONTAINER.deleteNamespace(platformNamespace);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace);
-        HELM_CHART_CONTAINER.deleteNamespace(operatorNamespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace, true);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
     }
 }

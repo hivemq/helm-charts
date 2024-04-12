@@ -269,12 +269,24 @@ public class HelmChartContainer extends K3sContainer {
 
     public void uninstallRelease(
             final @NotNull String releaseName, final @NotNull String namespace) throws Exception {
-        executeHelmCommand("uninstall",
-                releaseName,
-                null,
-                true,
-                Stream.of("--cascade", "foreground", "--namespace", namespace),
-                false);
+        uninstallRelease(releaseName, namespace, false);
+    }
+
+    public void uninstallRelease(
+            final @NotNull String releaseName, final @NotNull String namespace, final boolean deleteNamespace)
+            throws Exception {
+        try {
+            executeHelmCommand("uninstall",
+                    releaseName,
+                    null,
+                    true,
+                    Stream.of("--cascade", "foreground", "--namespace", namespace),
+                    false);
+        } finally {
+            if (deleteNamespace) {
+                deleteNamespace(namespace);
+            }
+        }
     }
 
     public void upgradeOperatorChart(

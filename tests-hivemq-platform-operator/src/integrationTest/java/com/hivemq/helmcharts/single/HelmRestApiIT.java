@@ -41,6 +41,12 @@ class HelmRestApiIT {
         client = HELM_CHART_CONTAINER.getKubernetesClient();
     }
 
+    @AfterAll
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    static void baseTearDown() {
+        HELM_CHART_CONTAINER.stop();
+    }
+
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void setup() throws Exception {
@@ -48,21 +54,11 @@ class HelmRestApiIT {
         HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
     }
 
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseTearDown() {
-        HELM_CHART_CONTAINER.stop();
-    }
-
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE);
-            HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
-        } finally {
-            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
-        }
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
