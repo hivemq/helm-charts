@@ -267,9 +267,14 @@ public class HelmChartContainer extends K3sContainer {
         installPlatformChart(releaseName, true, additionalCommands);
     }
 
-    public void uninstallRelease(final @NotNull String releaseName, final @NotNull String... additionalCommands)
-            throws Exception {
-        executeHelmCommand("uninstall", releaseName, null, true, Stream.of(additionalCommands), false);
+    public void uninstallRelease(
+            final @NotNull String releaseName, final @NotNull String namespace) throws Exception {
+        executeHelmCommand("uninstall",
+                releaseName,
+                null,
+                true,
+                Stream.of("--cascade", "foreground", "--namespace", namespace),
+                false);
     }
 
     public void upgradeOperatorChart(
@@ -368,8 +373,7 @@ public class HelmChartContainer extends K3sContainer {
 
     @SuppressWarnings("SameParameterValue")
     private @NotNull String executeHelmSearchCommand(
-            final @NotNull String chartName,
-            final @NotNull Stream<String> additionalCommands) throws Exception {
+            final @NotNull String chartName, final @NotNull Stream<String> additionalCommands) throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml search repo <repo|chart>
         final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
                 "--kubeconfig",
@@ -438,8 +442,7 @@ public class HelmChartContainer extends K3sContainer {
     }
 
     private static void createContainerRegistrySecret(
-            final @NotNull String namespace,
-            final @NotNull K3sContainer container) {
+            final @NotNull String namespace, final @NotNull K3sContainer container) {
         final var config = Config.fromKubeconfig(container.getKubeConfigYaml());
         final var dockerSecret = getDockerSecret();
         if (dockerSecret.equals(DOCKER_SECRET_ENV_NOT_FOUND)) {
@@ -625,9 +628,7 @@ public class HelmChartContainer extends K3sContainer {
         }
 
         private void removeAndCloseLogWatcher(
-                final @NotNull String containerName,
-                final @NotNull String podName,
-                final @NotNull String podUid) {
+                final @NotNull String containerName, final @NotNull String podName, final @NotNull String podUid) {
             final var logWatch = logWatches.remove(podUid + "-" + podName + "-" + containerName);
             if (logWatch != null) {
                 logWatch.close();
@@ -681,8 +682,7 @@ public class HelmChartContainer extends K3sContainer {
 
         @Override
         public @NotNull StartupStatus checkStartupState(
-                final @NotNull DockerClient dockerClient,
-                final @NotNull String containerId) {
+                final @NotNull DockerClient dockerClient, final @NotNull String containerId) {
             try {
                 await().until(() -> container.getLogs(STDERR).matches("(?s).*Node controller sync successful.*"));
                 // we need this to have the yaml read from the container

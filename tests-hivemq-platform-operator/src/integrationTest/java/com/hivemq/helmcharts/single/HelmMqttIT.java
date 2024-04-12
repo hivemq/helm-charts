@@ -64,11 +64,7 @@ class HelmMqttIT {
         K8sUtil.assertMqttService(client, namespace, MQTT_SERVICE_NAME);
         assertMqttListener(namespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 
@@ -95,11 +91,7 @@ class HelmMqttIT {
         });
         assertMqttListener(namespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 
@@ -126,11 +118,7 @@ class HelmMqttIT {
         });
         assertMqttListener(namespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 
@@ -159,11 +147,7 @@ class HelmMqttIT {
         });
         assertMqttListener(namespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
     }
 

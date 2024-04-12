@@ -73,17 +73,9 @@ class HelmCustomConfigIT {
                     .anyMatch(p -> p.getContainerPort().equals(1884));
         });
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                "default");
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
@@ -111,17 +103,9 @@ class HelmCustomConfigIT {
             assertThat(xmlConfig).isNotNull().contains("<port>1884</port>");
         });
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                "default");
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
@@ -151,17 +135,9 @@ class HelmCustomConfigIT {
                     .containsIgnoringCase("configMapName=hivemq-configuration");
         });
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                namespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, namespace);
         HELM_CHART_CONTAINER.deleteNamespace(namespace);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                "default");
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
@@ -198,17 +174,9 @@ class HelmCustomConfigIT {
                 .getEnv()).anyMatch(envVar -> "MY_CUSTOM_ENV_VAR".equals(envVar.getName()) &&
                 "mycustomvalue".equals(envVar.getValue()));
 
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                platformNamespace);
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace);
         HELM_CHART_CONTAINER.deleteNamespace(platformNamespace);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME,
-                "--cascade",
-                "foreground",
-                "--namespace",
-                operatorNamespace);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace);
         HELM_CHART_CONTAINER.deleteNamespace(operatorNamespace);
     }
 }
