@@ -59,33 +59,29 @@ class HelmWebsocketsIT {
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void start() throws Exception {
+    static void baseSetup() {
         HELM_CHART_CONTAINER.start();
-        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
         client = HELM_CHART_CONTAINER.getKubernetesClient();
-    }
-
-    @BeforeEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void setup() {
-        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
     }
 
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void shutdown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
+    static void baseTearDown() {
         HELM_CHART_CONTAINER.stop();
+    }
+
+    @BeforeEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void setup() throws Exception {
+        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
+        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
     }
 
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        try {
-            HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE);
-        } finally {
-            HELM_CHART_CONTAINER.deleteNamespace(NAMESPACE);
-        }
+        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
+        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
     }
 
     @Test
@@ -185,9 +181,7 @@ class HelmWebsocketsIT {
         K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
 
         final var sslConfig = MqttClientSslConfig.builder()
-                .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(),
-                        keystorePassword,
-                        privateKeyPassword))
+                .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(), keystorePassword, privateKeyPassword))
                 .trustManagerFactory(trustManagerFromKeystore(truststore.toFile(), truststorePassword))
                 .hostnameVerifier((hostname, session) -> true)
                 .build();
