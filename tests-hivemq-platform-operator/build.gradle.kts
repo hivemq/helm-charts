@@ -8,7 +8,7 @@ val hivemqVersion = "${project.properties["hivemq.version"]}"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
