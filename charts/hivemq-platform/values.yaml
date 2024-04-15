@@ -181,16 +181,23 @@ services:
     keystoreSecretName: ""
     # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
     keystoreSecretKey: ""
+
+    # Two options are available to configure secure MQTT listeners:
+    # 1. Using base64 encoded passwords configured via Helm chart values, as below
     # The inlined password for the keystore, Base 64 encoded.
     keystorePassword: ""
     # The inlined private key password for the keystore, Base 64 encoded. Defaults to the `keystorePassword` value.
     keystorePrivatePassword: ""
+
+    # 2. Using base64 encoded passwords stored in a Kubernetes secret, as below
     # Alternatively, the name of the Kubernetes secret which contains the keystore password and optionally the private key password for the keystore.
     keystorePasswordSecretName: ""
     # The optional entry key for the keystore password in the Kubernetes secret. Defaults to `keystore.password`
     keystorePasswordSecretKey: ""
     # The optional entry key for the keystore private password in the Kubernetes secret.
     keystorePrivatePasswordSecretKey: ""
+
+    # Mutual TLS configuration values
     # The name of the Kubernetes secret that contains the truststore file.
     truststoreSecretName: ""
     # The key of the Kubernetes secret that contains the truststore file. Defaults to `truststore`
@@ -213,10 +220,21 @@ services:
     keystoreSecretName: ""
     # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
     keystoreSecretKey: ""
+
+    # Two options are available to configure secure Control Center listeners:
+    # 1. Using base64 encoded passwords configured via Helm chart values, as below
     # The inlined password for the keystore, Base 64 encoded.
     keystorePassword: ""
-    # Alternatively, the name of the secret with the password, using the key: `keystore.password`.
+    # The inlined private key password for the keystore, Base 64 encoded. Defaults to the `keystorePassword` value.
+    keystorePrivatePassword: ""
+
+    # 2. Using base64 encoded passwords stored in a Kubernetes secret, as below
+    # Alternatively, the name of the Kubernetes secret which contains the keystore password and optionally the private key password for the keystore.
     keystorePasswordSecretName: ""
+    # The optional entry key for the keystore password in the Kubernetes secret. Defaults to `keystore.password`
+    keystorePasswordSecretKey: ""
+    # The optional entry key for the keystore private password in the Kubernetes secret.
+    keystorePrivatePasswordSecretKey: ""
   # REST API service configuration
   - type: rest-api
     exposed: false
@@ -233,17 +251,30 @@ services:
     keystoreSecretName: ""
     # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
     keystoreSecretKey: ""
+
+    # Two options are available to configure secure WebSocket listeners:
+    # 1. Using base64 encoded passwords configured via Helm chart values, as below
     # The inlined password for the keystore, Base 64 encoded.
     keystorePassword: ""
-    # Alternatively, the name of the secret with the password, using the key: "keystore.password".
+    # The inlined private key password for the keystore, Base 64 encoded. Defaults to the `keystorePassword` value.
+    keystorePrivatePassword: ""
+
+    # 2. Using base64 encoded passwords stored in a Kubernetes secret, as below
+    # Alternatively, the name of the Kubernetes secret which contains the keystore password and optionally the private key password for the keystore.
     keystorePasswordSecretName: ""
+    # The optional entry key for the keystore password in the Kubernetes secret. Defaults to `keystore.password`
+    keystorePasswordSecretKey: ""
+    # The optional entry key for the keystore private password in the Kubernetes secret.
+    keystorePrivatePasswordSecretKey: ""
+
+    # Mutual TLS configuration values
     # The name of the Kubernetes secret that contains the truststore file.
     truststoreSecretName: ""
     # The key of the Kubernetes secret that contains the truststore file. Defaults to `truststore`
     truststoreSecretKey: ""
     # The inlined password for the truststore, Base 64 encoded.
     truststorePassword: ""
-    # Alternatively, the name of the secret with the password, using the key: "truststore.password".
+    # Alternatively, the name of the secret with the password, using the key: `truststore.password`.
     truststorePasswordSecretName: ""
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
