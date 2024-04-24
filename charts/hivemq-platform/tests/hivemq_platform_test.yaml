@@ -180,7 +180,7 @@ tests:
       nodes.podSecurityContext.runAsUser: 10001
       nodes.podSecurityContext.runAsGroup: 10002
       nodes.podSecurityContext.fsGroup: 10003
-      nodes.podSecurityContext.runAsNonRoot: false
+      nodes.podSecurityContext.runAsNonRoot: true
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.securityContext
@@ -188,7 +188,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
-          value: false
+          value: true
       - exists:
           path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
       - equal:
