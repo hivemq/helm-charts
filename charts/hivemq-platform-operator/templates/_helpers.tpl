@@ -43,3 +43,23 @@ Create the name of the service account to use for the HiveMQ Platform Operator
 {{- printf "%s-%s" "hivemq-platform-operator" .Release.Name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validates the PodSecurityContext values have no invalid combination.
+Params:
+- podSecurityContext: The .Values.nodes.podSecurityContext value.
+Usage: {{- include "hivemq-platform-operator.validate-pod-security-context" (dict "podSecurityContext" .Values.podSecurityContext) }}
+*/}}
+{{- define "hivemq-platform-operator.validate-pod-security-context" -}}
+{{- $podSecurityContext := .podSecurityContext }}
+{{- if $podSecurityContext.enabled }}
+    {{- if hasKey $podSecurityContext "runAsUser" }}
+        {{- if and (eq $podSecurityContext.runAsNonRoot true) (eq ($podSecurityContext.runAsUser | toString) "0") }}
+            {{- fail (printf "`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)") }}
+        {{- end }}
+        {{- if and (eq $podSecurityContext.runAsNonRoot false) (ne ($podSecurityContext.runAsUser | toString) "0") }}
+            {{- fail (printf "`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)") }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+{{- end -}}
