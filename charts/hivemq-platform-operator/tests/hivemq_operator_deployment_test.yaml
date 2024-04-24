@@ -129,7 +129,7 @@ tests:
       podSecurityContext.runAsUser: 5000
       podSecurityContext.runAsGroup: 5001
       podSecurityContext.fsGroup: 5002
-      podSecurityContext.runAsNonRoot: false
+      podSecurityContext.runAsNonRoot: true
     asserts:
       - exists:
           path: spec.template.spec.securityContext
@@ -137,7 +137,7 @@ tests:
           path: spec.template.spec.securityContext.runAsNonRoot
       - equal:
           path: spec.template.spec.securityContext.runAsNonRoot
-          value: false
+          value: true
       - exists:
           path: spec.template.spec.securityContext.runAsUser
       - equal:
