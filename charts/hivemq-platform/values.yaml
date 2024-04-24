@@ -27,7 +27,7 @@ nodes:
     memory: 2048M
 
   # Holds pod-level security attributes and common container settings.
-  # Note: The standard official HiveMQ image hivemq/hivemq4 comes with a pre-installed user "10000" and group "10000".
+  # Note: The standard official HiveMQ image hivemq/hivemq4 runs with a non-root user with user ID (UID) "10000" and group ID (GID) "0" (root).
   #       When enabled, this defaults to non-root user with UID "10000" and GID "0".
   #       However, if required, user ID, group ID and filesystem group values can be overwritten. For group ID is
   #       always recommended to use group "0". Example:

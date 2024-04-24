@@ -34,12 +34,22 @@ spec:
             - name: {{ .Values.image.pullSecretName }}
           {{- end }}
           {{- if .Values.nodes.podSecurityContext.enabled }}
+          {{- $podSecurityContext := .Values.nodes.podSecurityContext }}
+          {{- include "hivemq-platform.validate-pod-security-context" (dict "podSecurityContext" $podSecurityContext) }}
           securityContext:
-            runAsNonRoot: {{ .Values.nodes.podSecurityContext.runAsNonRoot }}
-            runAsUser: {{ .Values.nodes.podSecurityContext.runAsUser | default 10000 }}
-            runAsGroup: {{ .Values.nodes.podSecurityContext.runAsGroup | default 0 }}
-            {{- if .Values.nodes.podSecurityContext.fsGroup }}
-            fsGroup: {{ .Values.nodes.podSecurityContext.fsGroup }}
+            runAsNonRoot: {{ $podSecurityContext.runAsNonRoot }}
+            {{- if eq $podSecurityContext.runAsNonRoot false }}
+            runAsUser: 0
+            {{- else }}
+            {{- if hasKey $podSecurityContext "runAsUser" }}
+            runAsUser: {{ $podSecurityContext.runAsUser }}
+            {{- else }}
+            runAsUser: 10000
+            {{- end }}
+            {{- end }}
+            runAsGroup: {{ $podSecurityContext.runAsGroup | default 0 }}
+            {{- if hasKey $podSecurityContext "fsGroup" }}
+            fsGroup: {{ $podSecurityContext.fsGroup }}
             {{- end }}
             fsGroupChangePolicy: "OnRootMismatch"
           {{- end }}
