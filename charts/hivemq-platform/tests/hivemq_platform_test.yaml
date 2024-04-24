@@ -174,7 +174,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
 
-  - it: with custom security context values enabled
+  - it: with custom security context enabled and using non-root user values
     set:
       nodes.podSecurityContext.enabled: true
       nodes.podSecurityContext.runAsUser: 10001
@@ -209,6 +209,92 @@ tests:
       - equal:
           path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
+
+  - it: with security context enabled and using root user values
+    set:
+      nodes.podSecurityContext.enabled: true
+      nodes.podSecurityContext.runAsUser: 0
+      nodes.podSecurityContext.runAsGroup: 0
+      nodes.podSecurityContext.fsGroup: 10003
+      nodes.podSecurityContext.runAsNonRoot: false
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+          value: false
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+          value: 0
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+          value: 0
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+          value: 10003
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
+
+  - it: when only setting security context enabled and runAsNonRoot to false, then no more pod security context values are needed
+    set:
+      nodes.podSecurityContext.enabled: true
+      nodes.podSecurityContext.runAsNonRoot: false
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsNonRoot
+          value: false
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsUser
+          value: 0
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.runAsGroup
+          value: 0
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroup
+      - exists:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.statefulSet.spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
+
+  - it: with security context enabled and runAsNonRoot is `false`, but runAsUser is set differently than root, then fails
+    set:
+      nodes.podSecurityContext.enabled: true
+      nodes.podSecurityContext.runAsNonRoot: false
+      nodes.podSecurityContext.runAsUser: 10000
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)
+
+  - it: with security context enabled and runAsNonRoot is `true`, but runAsUser is set to root, then fails
+    set:
+      nodes.podSecurityContext.enabled: true
+      nodes.podSecurityContext.runAsNonRoot: true
+      nodes.podSecurityContext.runAsUser: 0
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)
 
   - it: with default values, no volumes are defined
     asserts:

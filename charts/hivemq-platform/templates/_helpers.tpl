@@ -235,6 +235,26 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" (dict "servic
 {{- end -}}
 
 {{/*
+Validates the PodSecurityContext values have no invalid combination.
+Params:
+- podSecurityContext: The .Values.nodes.podSecurityContext value.
+Usage: {{- include "hivemq-platform.validate-pod-security-context" (dict "podSecurityContext" .Values.nodes.podSecurityContext) }}
+*/}}
+{{- define "hivemq-platform.validate-pod-security-context" -}}
+{{- $podSecurityContext := .podSecurityContext }}
+{{- if $podSecurityContext.enabled }}
+    {{- if hasKey $podSecurityContext "runAsUser" }}
+        {{- if and (eq $podSecurityContext.runAsNonRoot true) (eq ($podSecurityContext.runAsUser | toString) "0") }}
+            {{- fail (printf "`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)") }}
+        {{- end }}
+        {{- if and (eq $podSecurityContext.runAsNonRoot false) (ne ($podSecurityContext.runAsUser | toString) "0") }}
+            {{- fail (printf "`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)") }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Check if there are services exposed with keystore
 */}}
 {{- define "hivemq-platform.has-keystore" -}}
