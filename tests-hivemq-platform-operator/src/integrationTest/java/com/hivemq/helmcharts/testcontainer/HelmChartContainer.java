@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +80,6 @@ public class HelmChartContainer extends K3sContainer {
     private final @NotNull Map<String, String> imageNamePaths = new ConcurrentHashMap<>();
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
-    private final @NotNull CountDownLatch terminateLatch = new CountDownLatch(1);
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
     private @Nullable Chart currentPlatformChart;
 
@@ -181,7 +179,6 @@ public class HelmChartContainer extends K3sContainer {
 
     @Override
     public final void stop() {
-        terminateLatch.countDown();
         logWatches.values().forEach(LogWatch::close);
         watches.values().forEach(Watch::close);
         if (client != null) {
