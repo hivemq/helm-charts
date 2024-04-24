@@ -23,12 +23,22 @@ spec:
         {{- include "hivemq-platform-operator.selectorLabels" . | nindent 8 }}
     spec:
       {{- if .Values.podSecurityContext.enabled }}
+      {{- $podSecurityContext := .Values.podSecurityContext }}
+      {{- include "hivemq-platform-operator.validate-pod-security-context" (dict "podSecurityContext" $podSecurityContext) }}
       securityContext:
-        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
-        runAsUser: {{ .Values.podSecurityContext.runAsUser | default 185 }}
-        runAsGroup: {{ .Values.podSecurityContext.runAsGroup | default 0 }}
-        {{- if .Values.podSecurityContext.fsGroup }}
-        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+        runAsNonRoot: {{ $podSecurityContext.runAsNonRoot }}
+        {{- if eq $podSecurityContext.runAsNonRoot false }}
+        runAsUser: 0
+        {{- else }}
+        {{- if hasKey $podSecurityContext "runAsUser" }}
+        runAsUser: {{ $podSecurityContext.runAsUser }}
+        {{- else }}
+        runAsUser: 185
+        {{- end }}
+        {{- end }}
+        runAsGroup: {{ $podSecurityContext.runAsGroup | default 0 }}
+        {{- if hasKey $podSecurityContext "fsGroup" }}
+        fsGroup: {{ $podSecurityContext.fsGroup }}
         {{- end }}
         fsGroupChangePolicy: "OnRootMismatch"
       {{- end }}

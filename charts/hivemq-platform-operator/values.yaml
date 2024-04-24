@@ -72,7 +72,7 @@ tls:
   truststorePassword: nil
 
 # Holds pod-level security attributes and common container settings.
-# When enabled, this defaults to non-root user with UID "185" and GID "0".
+# When enabled, this defaults to non-root user with user ID (UID) "185" and group ID (GID) "0".
 # However, if required, user ID, group ID and filesystem group values can be overwritten.
 # For group ID is always recommended to use group "0". Example:
 #   podSecurityContext:
