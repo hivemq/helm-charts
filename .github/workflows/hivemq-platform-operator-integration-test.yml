@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-plan: [ Upgrade, Extensions, NonRootUser, Other ]
+        test-plan: [ Upgrade, Extensions, PodSecurityContext, Other ]
     steps:
       - name: Checkout HiveMQ Platform Helm Charts
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
@@ -83,7 +83,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-plan: [ CustomConfig, Services1, Services2, Platform, NonRootUser, Other ]
+        test-plan: [ CustomConfig, Services1, Services2, Platform, PodSecurityContext, Other ]
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:

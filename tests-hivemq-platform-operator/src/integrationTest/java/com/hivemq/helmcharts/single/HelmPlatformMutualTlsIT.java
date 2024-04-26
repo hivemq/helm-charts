@@ -56,10 +56,10 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
         brokerCertificateStore = tempDir.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(brokerCertificateStore);
-        createSecret(client, namespace, "mqtts-keystore-1884", "keystore", encoder.encodeToString(keystoreContent));
-        createSecret(client, namespace, "mqtts-keystore-1885", "keystore", encoder.encodeToString(keystoreContent));
+        createSecret(client, platformNamespace, "mqtts-keystore-1884", "keystore", encoder.encodeToString(keystoreContent));
+        createSecret(client, platformNamespace, "mqtts-keystore-1885", "keystore", encoder.encodeToString(keystoreContent));
         createSecret(client,
-                namespace,
+                platformNamespace,
                 "mqtts-keystore-password-1885",
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
@@ -67,10 +67,10 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
         clientCertificateStore = tempDir.resolve("truststore.jks");
         final var truststoreContent = Files.readAllBytes(clientCertificateStore);
         final var base64TruststoreContent = encoder.encodeToString(truststoreContent);
-        createSecret(client, namespace, "mqtts-truststore-1884", "truststore.jks", base64TruststoreContent);
-        createSecret(client, namespace, "mqtts-truststore-1885", "truststore", base64TruststoreContent);
+        createSecret(client, platformNamespace, "mqtts-truststore-1884", "truststore.jks", base64TruststoreContent);
+        createSecret(client, platformNamespace, "mqtts-truststore-1885", "truststore", base64TruststoreContent);
         createSecret(client,
-                namespace,
+                platformNamespace,
                 "mqtts-truststore-password-1885",
                 "truststore.password",
                 encoder.encodeToString(DEFAULT_TRUSTSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
@@ -79,10 +79,10 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withMutualTls_hivemqRunning() throws Exception {
-        installChartsAndWaitForPlatformRunning("/files/mtls-mqtt-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mtls-mqtt-test-values.yaml");
 
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(statefulSet).isNotNull();
 
         LOG.info("Connecting to MQTT listener with no mTLS/SSL on port {}", MQTT_SERVICE_PORT_1883);
@@ -116,7 +116,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     private void assertMqttListener(
             final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
         MqttUtil.execute(client,
-                namespace,
+                platformNamespace,
                 serviceName,
                 servicePort,
                 portForward -> getBlockingClient(portForward,

@@ -1,14 +1,9 @@
 package com.hivemq.helmcharts.single;
 
-import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
+import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -23,58 +18,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Services")
 @Tag("Services2")
-class HelmRestApiIT {
+class HelmRestApiIT extends AbstractHelmChartIT {
 
-    private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER = new HelmChartContainer();
-    private static final @NotNull String NAMESPACE = K8sUtil.getNamespaceName(HelmRestApiIT.class);
-    private static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
-    private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-test-hivemq-platform-rest-8890";
     private static final int REST_API_SERVICE_PORT = 8890;
-    @SuppressWarnings("NotNullFieldNotInitialized")
-    private static @NotNull KubernetesClient client;
-
-    @BeforeAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseSetup() {
-        HELM_CHART_CONTAINER.start();
-        client = HELM_CHART_CONTAINER.getKubernetesClient();
-    }
-
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseTearDown() {
-        HELM_CHART_CONTAINER.stop();
-    }
-
-    @BeforeEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void setup() throws Exception {
-        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
-        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
-    }
-
-    @AfterEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
-    }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenRestApiEnabled_thenCallsEndpoint() throws Exception {
-        HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "-f",
-                "/files/rest-api-test-values.yaml",
-                "--namespace",
-                NAMESPACE);
-
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
+        installPlatformChartAndWaitToBeRunning("/files/rest-api-test-values.yaml");
 
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,
-                NAMESPACE,
+                platformNamespace,
                 REST_API_SERVICE_NAME,
                 REST_API_SERVICE_PORT)) {
             final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();
@@ -92,20 +48,14 @@ class HelmRestApiIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenAuthEnabled_thenCallsEndpoint() throws Exception {
-        K8sUtil.createConfigMap(client, NAMESPACE, "ese-config-map.yml");
-        K8sUtil.createConfigMap(client, NAMESPACE, "ese-file-realm-config-map.yml");
+        K8sUtil.createConfigMap(client, platformNamespace, "ese-config-map.yml");
+        K8sUtil.createConfigMap(client, platformNamespace, "ese-file-realm-config-map.yml");
 
-        HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "-f",
-                "/files/rest-api-test-with-auth-values.yaml",
-                "--namespace",
-                NAMESPACE);
-
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
+        installPlatformChartAndWaitToBeRunning("/files/rest-api-test-with-auth-values.yaml");
 
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,
-                NAMESPACE,
+                platformNamespace,
                 REST_API_SERVICE_NAME,
                 REST_API_SERVICE_PORT)) {
             final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();

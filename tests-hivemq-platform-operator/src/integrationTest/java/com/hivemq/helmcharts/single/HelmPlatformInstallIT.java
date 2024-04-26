@@ -13,6 +13,6 @@ class HelmPlatformInstallIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withLocalCharts_hivemqRunning() throws Exception {
-        installChartsAndWaitForPlatformRunning("/files/platform-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/platform-test-values.yaml");
     }
 }

@@ -1,7 +1,7 @@
 package com.hivemq.helmcharts.compose;
 
-import com.hivemq.helmcharts.extensions.CustomTestExtensionMain;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.extensions.CustomTestExtensionMain;
 import com.hivemq.helmcharts.util.HiveMQExtension;
 import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.NginxUtil;
@@ -31,13 +31,11 @@ class HelmCustomExtensionIT extends AbstractHelmChartIT {
                 "HiveMQ Custom Test Extension",
                 "1.0.0",
                 CustomTestExtensionMain.class);
-        NginxUtil.deployNginx(client, namespace, helmChartContainer, List.of(customExtensionZip), true);
-        K8sUtil.createSecret(client, namespace, "nginx/nginx-auth-secret.yaml");
-        final var extensionStartedFuture = helmChartContainer.getLogWaiter()
-                .waitFor("test-hivemq-platform-0",
-                        ".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
+        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), true);
+        K8sUtil.createSecret(client, platformNamespace, "nginx/nginx-auth-secret.yaml");
+        final var extensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
 
-        installChartsAndWaitForPlatformRunning("/files/custom-extension-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/custom-extension-test-values.yaml");
         await().atMost(1, TimeUnit.MINUTES).until(extensionStartedFuture::isDone);
     }
 }
