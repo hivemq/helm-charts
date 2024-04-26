@@ -1,17 +1,13 @@
 package com.hivemq.helmcharts.single;
 
 import com.hivemq.client.mqtt.MqttClientSslConfig;
-import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
+import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -22,7 +18,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testcontainers.containers.BrowserWebDriverContainer;
-import org.testcontainers.containers.Network;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,12 +42,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Platform")
 @Tag("Tls")
+@Testcontainers
 @SuppressWarnings("DuplicatedCode")
-class HelmPlatformTlsIT {
+class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
-    private static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
-    private static final @NotNull String NAMESPACE = K8sUtil.getNamespaceName(HelmPlatformTlsIT.class);
     private static final @NotNull String MQTT_SERVICE_NAME_1883 = "hivemq-test-hivemq-platform-mqtt-1883";
     private static final int MQTT_SERVICE_PORT_1883 = 1883;
     private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
@@ -66,48 +61,14 @@ class HelmPlatformTlsIT {
     private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
     private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
 
-    private static final @NotNull Network NETWORK = Network.newNetwork();
-    private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER = new HelmChartContainer();
     @SuppressWarnings("resource")
+    @Container
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
             new BrowserWebDriverContainer<>(SELENIUM_DOCKER_IMAGE) //
-                    .withNetwork(NETWORK) //
+                    .withNetwork(network) //
                     // needed for Docker on Linux
                     .withExtraHost("host.docker.internal", "host-gateway") //
                     .withCapabilities(new ChromeOptions());
-
-    @SuppressWarnings("NotNullFieldNotInitialized")
-    private static @NotNull KubernetesClient client;
-
-    @BeforeAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseSetup() {
-        WEB_DRIVER_CONTAINER.start();
-        HELM_CHART_CONTAINER.start();
-        client = HELM_CHART_CONTAINER.getKubernetesClient();
-    }
-
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseTearDown() {
-        HELM_CHART_CONTAINER.stop();
-        WEB_DRIVER_CONTAINER.stop();
-        NETWORK.close();
-    }
-
-    @BeforeEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void setup() throws Exception {
-        HELM_CHART_CONTAINER.createNamespace(NAMESPACE);
-        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME);
-    }
-
-    @AfterEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(PLATFORM_RELEASE_NAME, NAMESPACE, true);
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
-    }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -118,29 +79,24 @@ class HelmPlatformTlsIT {
         final var keystoreContent = Files.readAllBytes(keystore);
         final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
         createSecret(client,
-                NAMESPACE,
+                platformNamespace,
                 "mqtts-keystore",
                 Map.of("keystore", base64KeystoreContent, "keystore.jks", base64KeystoreContent));
 
         createSecret(client,
-                NAMESPACE,
+                platformNamespace,
                 "mqtts-keystore-password",
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        createSecret(client, NAMESPACE, "https-keystore", "keystore", encoder.encodeToString(keystoreContent));
+        createSecret(client, platformNamespace, "https-keystore", "keystore", encoder.encodeToString(keystoreContent));
         createSecret(client,
-                NAMESPACE,
+                platformNamespace,
                 "https-keystore-password",
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "--namespace",
-                NAMESPACE,
-                "-f",
-                "/files/tls-mqtt-test-values.yaml");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
+        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-test-values.yaml");
 
         assertSecretMounted(client, "mqtts-keystore");
         assertSecretMounted(client, "https-keystore");
@@ -168,22 +124,17 @@ class HelmPlatformTlsIT {
         final var keystoreContent = Files.readAllBytes(keystore);
         final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
 
-        createSecret(client, NAMESPACE, "mqtt-keystore-1884", "keystore.jks", base64KeystoreContent);
-        createSecret(client, NAMESPACE, "mqtt-keystore-1885", "keystore.jks", base64KeystoreContent);
+        createSecret(client, platformNamespace, "mqtt-keystore-1884", "keystore.jks", base64KeystoreContent);
+        createSecret(client, platformNamespace, "mqtt-keystore-1885", "keystore.jks", base64KeystoreContent);
         createSecret(client,
-                NAMESPACE,
+                platformNamespace,
                 "mqtt-keystore-password-1885",
                 Map.of("keystore.password",
                         encoder.encodeToString(keystorePassword.getBytes(StandardCharsets.UTF_8)),
                         "my-private-key.password",
                         encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
-        HELM_CHART_CONTAINER.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "--namespace",
-                NAMESPACE,
-                "-f",
-                "/files/tls-mqtt-with-private-key-test-values.yaml");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, NAMESPACE, PLATFORM_RELEASE_NAME);
+        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-with-private-key-test-values.yaml");
 
         assertSecretMounted(client, "mqtt-keystore-1884");
         assertSecretMounted(client, "mqtt-keystore-1885");
@@ -206,7 +157,7 @@ class HelmPlatformTlsIT {
     private void assertMqttListener(
             final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
         MqttUtil.execute(client,
-                NAMESPACE,
+                platformNamespace,
                 serviceName,
                 servicePort,
                 portForward -> getBlockingClient(portForward,
@@ -220,7 +171,7 @@ class HelmPlatformTlsIT {
 
     @SuppressWarnings("SameParameterValue")
     private void assertControlCenter(final @NotNull String serviceName, final int servicePort) throws Exception {
-        try (final var forwarded = K8sUtil.getPortForward(client, NAMESPACE, serviceName, servicePort)) {
+        try (final var forwarded = K8sUtil.getPortForward(client, platformNamespace, serviceName, servicePort)) {
             final var options = new ChromeOptions();
             options.setAcceptInsecureCerts(true);
 
@@ -241,9 +192,9 @@ class HelmPlatformTlsIT {
         }
     }
 
-    private static void assertSecretMounted(final @NotNull KubernetesClient client, final @NotNull String name) {
+    private void assertSecretMounted(final @NotNull KubernetesClient client, final @NotNull String name) {
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(NAMESPACE).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(statefulSet).isNotNull();
         final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
         assertThat(volumes).isNotEmpty();

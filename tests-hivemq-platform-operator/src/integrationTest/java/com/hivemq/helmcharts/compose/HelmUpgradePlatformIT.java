@@ -21,23 +21,16 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withDeployedPlatform_upgradeIncreasingReplicaCount() throws Exception {
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME);
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "--set",
-                "nodes.replicaCount=1",
-                "--namespace",
-                namespace);
-
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
+        installPlatformChartAndWaitToBeRunning("--set", "nodes.replicaCount=1");
         LOG.debug("Platform ready");
 
         helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
                 "--set",
                 "nodes.replicaCount=2",
                 "--namespace",
-                namespace);
+                platformNamespace);
 
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("SCALING"), 2, TimeUnit.MINUTES);
         LOG.debug("Platform scaling");
 
@@ -45,7 +38,7 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
         LOG.debug("Platform upgraded");
 
         final var upgradedStatefulSet =
-                client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(upgradedStatefulSet.getStatus().getAvailableReplicas()).isEqualTo(2);
     }
 }

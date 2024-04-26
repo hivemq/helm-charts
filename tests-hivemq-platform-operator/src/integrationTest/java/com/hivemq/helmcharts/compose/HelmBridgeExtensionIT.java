@@ -1,8 +1,8 @@
 package com.hivemq.helmcharts.compose;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -12,11 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.testcontainers.hivemq.HiveMQContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.HIVEMQ_DOCKER_IMAGE;
@@ -24,6 +21,7 @@ import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Extensions")
+@Testcontainers
 class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 
     private static final byte @NotNull [] PAYLOAD = "test".getBytes();
@@ -47,22 +45,16 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
         final var ipAddress = hivemqContainerNetwork.get().getIpAddress();
 
         // setup bridge configuration
-        final var resource = getClass().getResource("/bridge-config.xml");
-        final var configMapData = Files.readString(Path.of(Objects.requireNonNull(resource).toURI()));
-        final var bridgeConfigMap = new ConfigMapBuilder().withNewMetadata()
-                .withName("test-bridge-configuration")
-                .endMetadata()
-                .withData(Map.of("config.xml",
-                        configMapData.replace("<host>remote</host>", "<host>" + ipAddress + "</host>")))
-                .build();
-        client.configMaps().inNamespace(namespace).resource(bridgeConfigMap).create();
+        final var bridgeConfiguration =
+                readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
+        K8sUtil.createConfigMap(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
 
         // deploy chart and wait to be ready
-        installChartsAndWaitForPlatformRunning("/files/bridge-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/bridge-test-values.yaml");
 
         // forward the port from the service
         MqttUtil.execute(client,
-                namespace,
+                platformNamespace,
                 MQTT_SERVICE_NAME,
                 MQTT_SERVICE_PORT,
                 portForward -> getBlockingClient(portForward, "PublishClient"),

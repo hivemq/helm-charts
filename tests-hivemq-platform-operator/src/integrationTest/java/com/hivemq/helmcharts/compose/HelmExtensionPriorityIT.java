@@ -57,28 +57,22 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                 "1.0.0",
                 AppendingBazPublishInboundInterceptorExtensionMain.class);
         NginxUtil.deployNginx(client,
-                namespace,
+                platformNamespace,
                 helmChartContainer,
                 List.of(appendingFooExtension, appendingBarExtension, appendingBazExtension),
                 false);
-        final var fooExtensionStartedFuture = helmChartContainer.getLogWaiter()
-                .waitFor("test-hivemq-platform-0",
-                        ".*Extension \"HiveMQ Appending Foo Extension\" version 1.0.0 started successfully.");
-        final var barExtensionStartedFuture = helmChartContainer.getLogWaiter()
-                .waitFor("test-hivemq-platform-0",
-                        ".*Extension \"HiveMQ Appending Bar Extension\" version 1.0.0 started successfully.");
-        final var bazExtensionStartedFuture = helmChartContainer.getLogWaiter()
-                .waitFor("test-hivemq-platform-0",
-                        ".*Extension \"HiveMQ Appending Baz Extension\" version 1.0.0 started successfully.");
+        final var fooExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Foo Extension\" version 1.0.0 started successfully.");
+        final var barExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Bar Extension\" version 1.0.0 started successfully.");
+        final var bazExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Baz Extension\" version 1.0.0 started successfully.");
 
-        installChartsAndWaitForPlatformRunning("/files/extension-priority-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/extension-priority-test-values.yaml");
 
         await().atMost(1, TimeUnit.MINUTES).until(fooExtensionStartedFuture::isDone);
         await().atMost(1, TimeUnit.MINUTES).until(barExtensionStartedFuture::isDone);
         await().atMost(1, TimeUnit.MINUTES).until(bazExtensionStartedFuture::isDone);
         await().untilAsserted(() -> assertThat(client.pods()
-                .inNamespace(namespace)
-                .withName("test-hivemq-platform-0")
+                .inNamespace(platformNamespace)
+                .withName(PLATFORM_RELEASE_NAME + "-0")
                 .get()) //
                 .isNotNull() //
                 .satisfies(pod -> {
@@ -96,10 +90,10 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                             "<start-priority>3000</start-priority>");
                 }));
 
-        K8sUtil.assertMqttService(client, namespace, MQTT_SERVICE_NAME);
+        K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
 
         MqttUtil.execute(client,
-                namespace,
+                platformNamespace,
                 MQTT_SERVICE_NAME,
                 MQTT_SERVICE_PORT,
                 (publishClient, subscribeClient, publishes) -> {
@@ -123,7 +117,7 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
             Files.createDirectories(extensionXml.getParent());
             Files.deleteIfExists(extensionXml);
             client.pods()
-                    .inNamespace(namespace)
+                    .inNamespace(platformNamespace)
                     .withName(pod.getMetadata().getName())
                     .file(String.format("/opt/hivemq/extensions/%s/hivemq-extension.xml", extensionId))
                     .copy(extensionXml);
