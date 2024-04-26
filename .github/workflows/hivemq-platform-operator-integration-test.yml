@@ -51,20 +51,19 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-      - name: Run HiveMQ Platform Operator integration tests
-        uses: gradle/gradle-build-action@e2097ccd7e8ed48671dc068ac4efa86d25745b39 # v3
-        env:
-          TEST_PLAN: ${{ matrix.test-plan }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@db19848a5fa7950289d3668fb053140cf3028d43 # v3
         with:
-          cache-disabled: true
           gradle-home-cache-includes: |
             caches
             notifications
             jdks
           gradle-home-cache-cleanup: true
-          build-root-directory: helm-charts
-          arguments: |
-            :tests-hivemq-platform-operator:integrationTest --tests "*.compose.*"
+      - name: Run HiveMQ Platform Operator integration tests
+        env:
+          TEST_PLAN: ${{ matrix.test-plan }}
+        working-directory: helm-charts
+        run: ./gradlew :tests-hivemq-platform-operator:integrationTest --tests "*.compose.*"
       - name: Upload HiveMQ Platform Operator test results
         if: always()
         uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # v4
@@ -117,20 +116,19 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-      - name: Run HiveMQ Platform Operator integration tests
-        uses: gradle/gradle-build-action@e2097ccd7e8ed48671dc068ac4efa86d25745b39 # v3
-        env:
-          TEST_PLAN: ${{ matrix.test-plan }}
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@db19848a5fa7950289d3668fb053140cf3028d43 # v3
         with:
-          cache-disabled: true
           gradle-home-cache-includes: |
             caches
             notifications
             jdks
           gradle-home-cache-cleanup: true
-          build-root-directory: helm-charts
-          arguments: |
-            :tests-hivemq-platform-operator:integrationTest --tests "*.single.*"
+      - name: Run HiveMQ Platform Operator integration tests
+        env:
+          TEST_PLAN: ${{ matrix.test-plan }}
+        working-directory: helm-charts
+        run: ./gradlew :tests-hivemq-platform-operator:integrationTest --tests "*.single.*"
       - name: Upload HiveMQ Platform Operator test results
         if: always()
         uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # v4
