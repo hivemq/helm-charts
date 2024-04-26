@@ -20,7 +20,7 @@ jobs:
         test-plan: [ Upgrade, Extensions, NonRootUser, Other ]
     steps:
       - name: Checkout HiveMQ Platform Helm Charts
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           path: helm-charts
       - name: Set up Docker QEMU
@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Checkout HiveMQ Platform Operator on the default branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_TOKEN }}
@@ -85,7 +85,7 @@ jobs:
       matrix:
         test-plan: [ CustomConfig, Services1, Services2, Platform, NonRootUser, Other ]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           path: helm-charts
       - name: Set up Docker QEMU
@@ -96,7 +96,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Checkout HiveMQ Platform Operator on the default branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_TOKEN }}
