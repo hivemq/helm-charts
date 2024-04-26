@@ -1,6 +1,6 @@
-ARG K3S_VERSION=v1.29.3-k3s1@sha256:2a91a826b6bfb5695d0c8978a6d7526bce72a06a1c4e6a09cb96a75d638b1f36
+ARG K3S_VERSION=v1.29.4-k3s1@sha256:70ffbbd322160e2ae0d830f185d1d3f50741c60a4c8d4b3034af1b1e037ffad5
 
-FROM ubuntu:noble-20240225@sha256:723ad8033f109978f8c7e6421ee684efb624eb5b9251b70c6788fdb2405d050b AS builder
+FROM ubuntu:noble-20240423@sha256:562456a05a0dbd62a671c1854868862a4687bf979a96d48ae8e766642cd911e8 AS builder
 RUN apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
     && bash get_helm.sh
