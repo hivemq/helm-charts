@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.util;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -61,6 +62,45 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName) {
         return loadResource(client, namespace, resourceName, ConfigMap.class).create();
+    }
+
+    /**
+     * Creates a {@link ConfigMap} with a {@code config.xml} entry with the given configuration.
+     *
+     * @param client        the Kubernetes client to use
+     * @param namespace     the namespace to create the ConfigMap in
+     * @param name          the name of the ConfigMap
+     * @param configuration the content of the {@code config.xml} file
+     * @return the created ConfigMap instance
+     */
+    public static @NotNull ConfigMap createConfigMap(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String name,
+            final @NotNull String configuration) {
+        return createConfigMap(client, namespace, name, Map.of("config.xml", configuration));
+    }
+
+    /**
+     * Creates a {@link ConfigMap} with the given data.
+     *
+     * @param client    the Kubernetes client to use
+     * @param namespace the namespace to create the ConfigMap in
+     * @param name      the name of the ConfigMap
+     * @param data      the data of the ConfigMap
+     * @return the created ConfigMap instance
+     */
+    public static @NotNull ConfigMap createConfigMap(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String name,
+            final @NotNull Map<String, String> data) {
+        final var configMap = client.configMaps()
+                .inNamespace(namespace)
+                .resource(new ConfigMapBuilder().withNewMetadata().withName(name).endMetadata().withData(data).build())
+                .create();
+        assertThat(configMap).isNotNull();
+        return configMap;
     }
 
     /**
@@ -142,6 +182,18 @@ public class K8sUtil {
             return namespace.substring(0, 63);
         }
         return namespace;
+    }
+
+    /**
+     * @param clazz Class object to get the operator namespace from.
+     * @return Namespace generated from the class passed as argument, up to 63 characters.
+     */
+    public static @NotNull String getOperatorNamespaceName(final @NotNull Class<?> clazz) {
+        final var namespace = clazz.getSimpleName().toLowerCase();
+        if (namespace.length() > 54) {
+            return namespace.substring(0, 54);
+        }
+        return namespace + "-operator";
     }
 
     /**
@@ -256,6 +308,34 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName) {
         loadResource(client, namespace, resourceName, ConfigMap.class).update();
+    }
+
+    /**
+     * Waits for the Operator pod based on the given name to be in a running status.
+     */
+    public static void waitForHiveMQOperatorPodStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String releaseName) {
+        waitForPodStateRunning(client, namespace, getHiveMQPlatformOperatorLabels(releaseName));
+    }
+
+    /**
+     * Waits for the pod based on the given labels to be in a running status.
+     */
+    public static void waitForPodStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull Map<String, String> labels) {
+        client.pods()
+                .inNamespace(namespace)
+                .withLabels(labels)
+                .waitUntilCondition(pod -> pod.getStatus()
+                                .getContainerStatuses()
+                                .stream()
+                                .allMatch(containerStatus -> containerStatus.getReady() && containerStatus.getStarted()),
+                        3,
+                        TimeUnit.MINUTES);
     }
 
     /**

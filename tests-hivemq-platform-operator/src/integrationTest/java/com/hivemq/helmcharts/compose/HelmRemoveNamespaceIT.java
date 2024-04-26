@@ -19,28 +19,23 @@ import static org.awaitility.Awaitility.await;
 class HelmRemoveNamespaceIT extends AbstractHelmChartIT {
 
     @Override
-    protected boolean cleanupPlatformChart() {
-        return false;
-    }
-
-    @Override
-    protected boolean cleanupNamespace() {
+    protected boolean uninstallPlatformChart() {
         return false;
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withSingleOperator_hivemqRunningThenDelete() throws Exception {
-        installChartsAndWaitForPlatformRunning("/files/platform-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/platform-test-values.yaml");
 
-        final var platform = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
+        final var platform = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertThat(platform).isNotNull();
         final var namespaceDeletedFuture = client.namespaces()
-                .withName(namespace)
+                .withName(platformNamespace)
                 .informOnCondition(namespaces -> namespaces.stream()
-                        .noneMatch(n -> Objects.equals(n.getMetadata().getName(), namespace)));
+                        .noneMatch(n -> Objects.equals(n.getMetadata().getName(), platformNamespace)));
         assertThat(platform.delete()).isNotEmpty();
-        assertThat(client.namespaces().withName(namespace).delete()).isNotEmpty();
+        assertThat(client.namespaces().withName(platformNamespace).delete()).isNotEmpty();
         await().atMost(2, TimeUnit.MINUTES).until(namespaceDeletedFuture::isDone);
     }
 }

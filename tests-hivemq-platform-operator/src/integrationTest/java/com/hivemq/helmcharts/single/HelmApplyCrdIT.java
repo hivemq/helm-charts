@@ -1,14 +1,9 @@
 package com.hivemq.helmcharts.single;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
-import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
+import com.hivemq.helmcharts.AbstractHelmChartIT;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -25,56 +20,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @Tag("ApplyCrd")
-class HelmApplyCrdIT {
+class HelmApplyCrdIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String OPERATOR_RELEASE_NAME = "platform-operator";
     private static final @NotNull String CRD_NAME = "hivemq-platforms.hivemq.com";
     private static final @NotNull String CRD_VERSION = "v1";
 
-    private static final @NotNull HelmChartContainer HELM_CHART_CONTAINER = new HelmChartContainer();
-
-    private final @NotNull LogWaiterUtil logWaiter = HELM_CHART_CONTAINER.getLogWaiter();
     private final @NotNull JsonNodeFactory jsonNodeFactory = new JsonNodeFactory(false);
 
-    private @NotNull KubernetesClient client;
-
-    @BeforeAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseSetUp() {
-        HELM_CHART_CONTAINER.start();
+    @Override
+    protected boolean createPlatformNamespace() {
+        return false;
     }
 
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseTearDown() {
-        HELM_CHART_CONTAINER.stop();
+    @Override
+    protected boolean installOperatorChart() {
+        return false;
+    }
+
+    @Override
+    protected boolean uninstallPlatformChart() {
+        return false;
     }
 
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void setUp() {
-        client = HELM_CHART_CONTAINER.getKubernetesClient();
-
         final var crdResource = client.apiextensions().v1().customResourceDefinitions().withName(CRD_NAME);
         crdResource.delete();
         crdResource.waitUntilCondition(Objects::isNull, 10, TimeUnit.SECONDS);
     }
 
-    @AfterEach
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void tearDown() throws Exception {
-        HELM_CHART_CONTAINER.uninstallRelease(OPERATOR_RELEASE_NAME, "default");
-    }
-
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCrdNotDeployed_withDisabledCrdApply_operatorIsFailing() throws Exception {
-        final var prefix = "hivemq-platform-operator-.*";
-        final var crdApplyDisabled = logWaiter.waitFor(prefix, ".*Apply HiveMQ Platform CRD: false");
-        final var crdWaiting = logWaiter.waitFor(prefix,
-                String.format(".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...", CRD_NAME));
-        final var crdReadyFailed = logWaiter.waitFor(prefix,
-                String.format(".*Could not verify ready status of applied HiveMQ Platform CRD '%s'", CRD_NAME));
+        final var crdApplyDisabled = waitForOperatorLog(".*Apply HiveMQ Platform CRD: false");
+        final var crdWaiting = waitForOperatorLog(String.format(
+                ".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...",
+                CRD_NAME));
+        final var crdReadyFailed = waitForOperatorLog(String.format(
+                ".*Could not verify ready status of applied HiveMQ Platform CRD '%s'",
+                CRD_NAME));
 
         // installOperatorChart() blocks until the Operator is ready, so we have to call it async
         final var additionalCommands = List.of("--skip-crds",
@@ -89,7 +74,7 @@ class HelmApplyCrdIT {
         final var uncaughtExceptionRef = new AtomicReference<Exception>();
         final var operatorInstallThread = new Thread(() -> {
             try {
-                HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME, additionalCommands);
+                installOperatorChartAndWaitToBeRunning(additionalCommands);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
@@ -153,16 +138,18 @@ class HelmApplyCrdIT {
 
     private void installAndAssertRunningOperator(final @NotNull String expectedCrdVerifyMessagePattern)
             throws Exception {
-        final var prefix = "hivemq-platform-operator-.*";
-        final var crdApplyEnabled = logWaiter.waitFor(prefix, ".*Apply HiveMQ Platform CRD: true");
-        final var crdVerify = logWaiter.waitFor(prefix, expectedCrdVerifyMessagePattern);
-        final var crdApplying = logWaiter.waitFor(prefix,
-                String.format(".*Applying %s HiveMQ Platform CRD '%s' \\(version: .*\\)", CRD_VERSION, CRD_NAME));
-        final var crdWaiting = logWaiter.waitFor(prefix,
-                String.format(".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...", CRD_NAME));
-        final var crdReady = logWaiter.waitFor(prefix, String.format(".*HiveMQ Platform CRD '%s' is ready", CRD_NAME));
+        final var crdApplyEnabled = waitForOperatorLog(".*Apply HiveMQ Platform CRD: true");
+        final var crdVerify = waitForOperatorLog(expectedCrdVerifyMessagePattern);
+        final var crdApplying = waitForOperatorLog(String.format(
+                ".*Applying %s HiveMQ Platform CRD '%s' \\(version: .*\\)",
+                CRD_VERSION,
+                CRD_NAME));
+        final var crdWaiting = waitForOperatorLog(String.format(
+                ".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...",
+                CRD_NAME));
+        final var crdReady = waitForOperatorLog(String.format(".*HiveMQ Platform CRD '%s' is ready", CRD_NAME));
 
-        HELM_CHART_CONTAINER.installOperatorChart(OPERATOR_RELEASE_NAME, "--skip-crds");
+        installOperatorChartAndWaitToBeRunning(List.of("--skip-crds").toArray(new String[0]));
         await().atMost(1, TimeUnit.MINUTES).until(crdApplyEnabled::isDone);
         await().atMost(1, TimeUnit.MINUTES).until(crdVerify::isDone);
         await().atMost(1, TimeUnit.MINUTES).until(crdApplying::isDone);
@@ -171,7 +158,7 @@ class HelmApplyCrdIT {
 
         client.apps()
                 .deployments()
-                .inNamespace("default")
+                .inNamespace(operatorNamespace)
                 .withName("hivemq-" + OPERATOR_RELEASE_NAME)
                 .waitUntilCondition(d -> d.getStatus() != null && d.getStatus().getAvailableReplicas() == 1,
                         3,

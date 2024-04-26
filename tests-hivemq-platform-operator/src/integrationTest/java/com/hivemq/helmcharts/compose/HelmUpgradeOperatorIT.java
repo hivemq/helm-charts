@@ -3,7 +3,6 @@ package com.hivemq.helmcharts.compose;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -20,30 +19,19 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmUpgradeOperatorIT.class);
 
     @Override
-    protected boolean cleanupPlatformChart() {
+    protected boolean uninstallPlatformChart() {
         return false;
-    }
-
-    @Override
-    protected boolean cleanupOperatorChart() {
-        return false;
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, namespace);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withDeployedOperator_upgradeUsingNewValues() throws Exception {
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", namespace);
         final var operatorName = "hivemq-" + OPERATOR_RELEASE_NAME;
         LOG.debug("Operator deployed successfully");
 
         final var deployment = client.apps()
                 .deployments()
-                .inNamespace(namespace)
+                .inNamespace(operatorNamespace)
                 .withName(operatorName)
                 .waitUntilCondition(d -> d.getStatus() != null && d.getStatus().getAvailableReplicas() == 1,
                         3,
@@ -62,11 +50,11 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
                 "--set",
                 "http.port=8081",
                 "--namespace",
-                namespace);
+                operatorNamespace);
 
         final Deployment upgradedDeployment = client.apps()
                 .deployments()
-                .inNamespace(namespace)
+                .inNamespace(operatorNamespace)
                 .withName(operatorName)
                 .waitUntilCondition(d -> d.getStatus().getUpdatedReplicas() == 1, 3, TimeUnit.MINUTES);
 

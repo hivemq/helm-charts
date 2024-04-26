@@ -21,8 +21,6 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withPreviousPlatformInstalled_upgradeToLatestChartVersion() throws Exception {
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME);
-
         final var currentPlatformChart = helmChartContainer.getCurrentPlatformChart();
         final var previousPlatformChart = helmChartContainer.getPreviousPlatformChart();
         assertThat(currentPlatformChart.getVersion()).isNotNull();
@@ -40,11 +38,11 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 "--version",
                 previousPlatformChart.getVersion().toString(),
                 "--namespace",
-                namespace);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespace, PLATFORM_RELEASE_NAME);
+                platformNamespace);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var currentPodResourceVersion = client.pods()
-                .inNamespace(namespace)
-                .withName("test-hivemq-platform-0")
+                .inNamespace(platformNamespace)
+                .withName(PLATFORM_RELEASE_NAME + "-0")
                 .get()
                 .getMetadata()
                 .getResourceVersion();
@@ -53,9 +51,9 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 "--set",
                 "nodes.replicaCount=1",
                 "--namespace",
-                namespace);
+                platformNamespace);
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var requiresRollingRestart =
                 !previousPlatformChart.getAppVersion().equals(currentPlatformChart.getAppVersion());
         if (requiresRollingRestart) {
@@ -66,8 +64,8 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
         }
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
         final var updatedPodResourceVersion = client.pods()
-                .inNamespace(namespace)
-                .withName("test-hivemq-platform-0")
+                .inNamespace(platformNamespace)
+                .withName(PLATFORM_RELEASE_NAME + "-0")
                 .get()
                 .getMetadata()
                 .getResourceVersion();
@@ -77,8 +75,8 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                             "Expected new Pod resource version field to be different than previous one, as a rolling restart was expected")
                     .isNotEqualTo(currentPodResourceVersion); // make sure the pod was restarted
             assertThat(client.pods()
-                    .inNamespace(namespace)
-                    .withName("test-hivemq-platform-0")
+                    .inNamespace(platformNamespace)
+                    .withName(PLATFORM_RELEASE_NAME + "-0")
                     .get()
                     .getSpec()
                     .getContainers()
@@ -90,8 +88,8 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                             "Expected new Pod resource version field to be equal as previous one, as no rolling restart/upgrade was expected")
                     .isEqualTo(currentPodResourceVersion);
             assertThat(client.pods()
-                    .inNamespace(namespace)
-                    .withName("test-hivemq-platform-0")
+                    .inNamespace(platformNamespace)
+                    .withName(PLATFORM_RELEASE_NAME + "-0")
                     .get()
                     .getSpec()
                     .getContainers()

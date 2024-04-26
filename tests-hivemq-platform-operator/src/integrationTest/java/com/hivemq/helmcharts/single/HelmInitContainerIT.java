@@ -29,12 +29,14 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
         final String mountName = "init-container-volume";
 
-        installChartsAndWaitForPlatformRunning(additionalVolumeFile,
-                "config.overrideInitContainers=" + additionalInitContainerFile);
+        installPlatformChartAndWaitToBeRunning("--set-file",
+                "config.overrideInitContainers=" + additionalInitContainerFile,
+                "-f",
+                additionalVolumeFile);
 
         await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty().map(Volume::getName).contains(mountName);
@@ -42,8 +44,8 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
             assertThat(containerVolumeMounts).isNotEmpty().map(VolumeMount::getName).contains(mountName);
 
             await().untilAsserted(() -> assertThat(client.pods()
-                    .inNamespace(namespace)
-                    .withName("test-hivemq-platform-0")
+                    .inNamespace(platformNamespace)
+                    .withName(PLATFORM_RELEASE_NAME + "-0")
                     .get()) //
                     .isNotNull() //
                     .satisfies(this::assertThatFileContains));
@@ -55,7 +57,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
         final String expectedContent = "test init container";
 
         try (InputStream in = client.pods()
-                .inNamespace(namespace)
+                .inNamespace(platformNamespace)
                 .withName(pod.getMetadata().getName())
                 .file(initContainerTextFile)
                 .read()) {

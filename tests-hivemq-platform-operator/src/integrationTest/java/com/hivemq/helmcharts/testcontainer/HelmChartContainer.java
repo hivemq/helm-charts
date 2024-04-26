@@ -7,7 +7,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.hivemq.helmcharts.Chart;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -25,6 +24,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.k3s.K3sContainer;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
@@ -32,13 +32,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +43,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -59,7 +55,6 @@ public class HelmChartContainer extends K3sContainer {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
-    private static final @NotNull String DOCKER_SECRET_ENV_NOT_FOUND = "DOCKER_SECRET_ENV_NOT_FOUND";
     private static final @NotNull String OPERATOR_CHART = "hivemq-platform-operator";
     private static final @NotNull String PLATFORM_CHART = "hivemq-platform";
     private static final @NotNull String OPERATOR_IMAGE_NAME = "hivemq-platform-operator-test";
@@ -169,23 +164,29 @@ public class HelmChartContainer extends K3sContainer {
 
     @Override
     public final void start() {
+        LOG.info("Starting HelmChartContainer...");
         super.start();
         addHiveMQHelmRepo();
         final var client = getKubernetesClient();
         watches.put("events", client.events().v1().events().inAnyNamespace().watch(new EventWatcher(client)));
         watches.put("pods", client.pods().inAnyNamespace().watch(new PodWatcher()));
         this.client = client;
+        LOG.info("HelmChartContainer is started");
     }
 
     @Override
     public final void stop() {
+        LOG.info("Stopping HelmChartContainer...");
         logWatches.values().forEach(LogWatch::close);
         watches.values().forEach(Watch::close);
+        final var client = this.client;
         if (client != null) {
             client.close();
+            this.client = null;
         }
         executorService.shutdownNow();
         super.stop();
+        LOG.info("HelmChartContainer is stopped");
     }
 
     @SuppressWarnings("unused")
@@ -206,26 +207,35 @@ public class HelmChartContainer extends K3sContainer {
     }
 
     public void createNamespace(final @NotNull String name) {
-        final var namespace = new NamespaceBuilder().withNewMetadata().withName(name).endMetadata().build();
-        assertThat(getKubernetesClient().namespaces().resource(namespace).create()).isNotNull();
-        createContainerRegistrySecret(name, this);
+        LOG.info("Creating namespace '{}'...", name);
+        final var client = getKubernetesClient();
+        final var namespace = client.namespaces()
+                .resource(new NamespaceBuilder().withNewMetadata().withName(name).endMetadata().build())
+                .create();
+        assertThat(namespace).isNotNull();
+        LOG.info("Namespace created");
     }
 
     public void deleteNamespace(final @NotNull String name) {
+        LOG.info("Deleting namespace '{}'...", name);
         final var client = getKubernetesClient();
-        assertThat(client.namespaces().withName(name).delete()).isNotNull();
-        await().atMost(1, TimeUnit.MINUTES)
-                .untilAsserted(() -> assertThat(client.namespaces().withName(name).get()).isNull());
+        final var namespaceDeleted = client.namespaces().withName(name).informOnCondition(List::isEmpty);
+        assertThat(client.namespaces().withName(name).delete()).isNotEmpty();
+        Awaitility.await()
+                .atMost(Duration.ofMinutes(1))
+                .pollInterval(Duration.ofMillis(100))
+                .until(namespaceDeleted::isDone);
+        LOG.info("Namespace deleted");
     }
 
     public @NotNull LogWaiterUtil getLogWaiter() {
         return logWaiter;
     }
 
-    public @NotNull KubernetesClient getKubernetesClient() {
+    public synchronized @NotNull KubernetesClient getKubernetesClient() {
         if (client == null) {
             final var config = Config.fromKubeconfig(getKubeConfigYaml());
-            return new KubernetesClientBuilder().withConfig(config).build();
+            client = new KubernetesClientBuilder().withConfig(config).build();
         }
         return client;
     }
@@ -262,11 +272,6 @@ public class HelmChartContainer extends K3sContainer {
     public void installPlatformChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
             throws Exception {
         installPlatformChart(releaseName, true, additionalCommands);
-    }
-
-    public void uninstallRelease(
-            final @NotNull String releaseName, final @NotNull String namespace) throws Exception {
-        uninstallRelease(releaseName, namespace, false);
     }
 
     public void uninstallRelease(
@@ -448,52 +453,6 @@ public class HelmChartContainer extends K3sContainer {
                 .withBuildArg("K3S_VERSION", k3s.getVersion())
                 .get();
         return DockerImageName.parse(imageName).asCompatibleSubstituteFor("rancher/k3s");
-    }
-
-    private static void createContainerRegistrySecret(
-            final @NotNull String namespace, final @NotNull K3sContainer container) {
-        final var config = Config.fromKubeconfig(container.getKubeConfigYaml());
-        final var dockerSecret = getDockerSecret();
-        if (dockerSecret.equals(DOCKER_SECRET_ENV_NOT_FOUND)) {
-            LOG.warn("Docker Secret not created, images have to be loaded into K3s");
-            return;
-        }
-        final var secret = new SecretBuilder().withNewMetadata()
-                .withName("ghcr")
-                .endMetadata()
-                .withData(Collections.singletonMap(".dockerconfigjson",
-                        Base64.getEncoder().encodeToString(dockerSecret.getBytes(StandardCharsets.UTF_8))))
-                .withType("kubernetes.io/dockerconfigjson")
-                .build();
-        try (final var client = new KubernetesClientBuilder().withConfig(config).build()) {
-            final var createdSecret = client.resource(secret).inNamespace(namespace).create();
-            assertThat(createdSecret).isNotNull();
-            LOG.debug("Docker secret '{}' created in namespace '{}'",
-                    createdSecret.getMetadata().getName(),
-                    createdSecret.getMetadata().getNamespace());
-        }
-    }
-
-    private static @NotNull String getDockerSecret() {
-        final String username = System.getenv("GITHUB_USER_NAME");
-        final String email = System.getenv("GITHUB_EMAIL");
-        final String password = System.getenv("GITHUB_PAT");
-        if (username == null || email == null || password == null) {
-            LOG.warn("Missing credentials for ghcr.io check the containers are available in the image. " +
-                    "Define username, email and PAT via env variables " +
-                    "GITHUB_USER_NAME, GITHUB_EMAIL and GITHUB_PAT");
-            return DOCKER_SECRET_ENV_NOT_FOUND;
-        }
-        return "{ \"auths\":{" +
-                "\"https://ghcr.io\":{" +
-                "\"username\":\"" +
-                username +
-                "\",\"email\":\"" +
-                email +
-                "\",\"password\":\"" +
-                password +
-                "\"" +
-                "}}}";
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
@@ -698,7 +657,6 @@ public class HelmChartContainer extends K3sContainer {
                 container.containerIsStarted(container.getContainerInfo());
                 final var yaml = container.getKubeConfigYaml();
                 assertThat(yaml).isNotNull();
-                createContainerRegistrySecret("default", container);
                 loadLocalImages();
             } catch (final Exception e) {
                 LOG.warn("K3s image not ready yet '{}'", e.getMessage());

@@ -23,11 +23,11 @@ class HelmDataHubIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withDataHubEnabled_messagesValidated() throws Exception {
-        installChartsAndWaitForPlatformRunning("/files/data-hub-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/data-hub-test-values.yaml");
 
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,
-                namespace,
+                platformNamespace,
                 REST_API_SERVICE_NAME,
                 REST_API_SERVICE_PORT)) {
             final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();

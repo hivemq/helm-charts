@@ -1,10 +1,9 @@
 package com.hivemq.helmcharts.single;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
-import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import org.junit.jupiter.api.Tag;
@@ -37,28 +36,20 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
                 .endResources()
                 .endSpec()
                 .build();
-        client.persistentVolumeClaims().inNamespace(namespace).resource(pvc).create();
+        client.persistentVolumeClaims().inNamespace(platformNamespace).resource(pvc).create();
 
-        final var testConfigMap = new ConfigMapBuilder().withNewMetadata()
-                .withName("test-configmap-volume")
-                .endMetadata()
-                .withData(Map.of("test.xml", "test-content"))
-                .build();
-        client.configMaps().inNamespace(namespace).resource(testConfigMap).create();
+        K8sUtil.createConfigMap(client, platformNamespace, "test-configmap-volume", Map.of("test.xml", "test-content"));
+        K8sUtil.createSecret(client,
+                platformNamespace,
+                "test-secret-volume",
+                Map.of("test.xml",
+                        Base64.getEncoder().encodeToString("test-content".getBytes(StandardCharsets.UTF_8))));
 
-        final var testSecret = new SecretBuilder().withNewMetadata()
-                .withName("test-secret-volume")
-                .endMetadata()
-                .withData(Map.of("test.xml",
-                        Base64.getEncoder().encodeToString("test-content".getBytes(StandardCharsets.UTF_8))))
-                .build();
-        client.secrets().inNamespace(namespace).resource(testSecret).create();
-
-        installChartsAndWaitForPlatformRunning("/files/additional-volumes-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/additional-volumes-test-values.yaml");
 
         await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(namespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty()
