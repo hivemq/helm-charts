@@ -66,7 +66,7 @@ jobs:
         run: ./gradlew :tests-hivemq-platform-operator:integrationTest --tests "*.compose.*"
       - name: Upload HiveMQ Platform Operator test results
         if: always()
-        uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
         with:
           name: Test results HiveMQ Platform Operator - Compose ${{ matrix.test-plan }}
           path: |
@@ -131,7 +131,7 @@ jobs:
         run: ./gradlew :tests-hivemq-platform-operator:integrationTest --tests "*.single.*"
       - name: Upload HiveMQ Platform Operator test results
         if: always()
-        uses: actions/upload-artifact@1746f4ab65b179e0ea60a494b83293b640dd5bba # v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
         with:
           name: Test results HiveMQ Platform Operator - Single ${{ matrix.test-plan }}
           path: |
