@@ -5,7 +5,7 @@ nodes:
     runAsNonRoot: false
   env:
     - name: HIVEMQ_NO_ROOT_STEP_DOWN
-      value: true
+      value: "true"
 extensions:
   - name: hivemq-distributed-tracing-extension
     extensionUri: preinstalled
