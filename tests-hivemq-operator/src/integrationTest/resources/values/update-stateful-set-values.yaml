@@ -17,5 +17,4 @@ hivemq:
   logLevel: DEBUG
   nodeCount: 2
   cpu: 512m
-  memory: 4Gi
   controllerTemplate: cluster-stateful-set.yaml
