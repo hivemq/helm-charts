@@ -16,7 +16,7 @@ hivemq:
   logLevel: DEBUG
   nodeCount: 1
   cpu: 512m
-  memory: 1Gi
+  memory: 4Gi
   extensions:
     - name: hivemq-mqtt-message-log-extension
       extensionUri: https://github.com/hivemq/hivemq-mqtt-message-log-extension/releases/download/1.1.3/hivemq-mqtt-message-log-extension-1.1.3.zip
