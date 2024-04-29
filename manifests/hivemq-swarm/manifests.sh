@@ -2,6 +2,9 @@
 
 PROMETHEUS_HELM_CHARTS_URL=https://prometheus-community.github.io/helm-charts
 
+echo "======================================"
+echo "Generating HiveMQ Swarm Manifest files"
+
 # change current directory to project root
 cd "$(dirname "$0")"/../.. || exit 1
 
