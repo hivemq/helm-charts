@@ -162,7 +162,7 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected final @NotNull CompletableFuture<String> waitForInitAppLog(final @NotNull String log) {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*\\[HiveMQ Platform Operator Init App\\] " + log);
+        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*\\[HiveMQ Platform Operator Init App [A-Z0-9.-]+\\] " + log);
     }
 
     @SuppressWarnings("SameParameterValue")
