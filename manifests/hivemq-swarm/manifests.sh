@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PROMETHEUS_HELM_CHARTS_URL=https://prometheus-community.github.io/helm-charts
+
 # change current directory to project root
 cd "$(dirname "$0")"/../.. || exit 1
 
@@ -7,6 +9,11 @@ echo "Create manifests directory"
 mkdir -p manifests && cd manifests || exit 1
 
 echo "Update HiveMQ Swarm dependencies"
+prometheus_repo=$(helm repo list -o json | jq -r '.[] | select(.url == "'${PROMETHEUS_HELM_CHARTS_URL}'") | .name')
+if [ -z "$prometheus_repo" ]; then
+  echo "Adding Prometheus Helm Chart dependency"
+  helm repo add prometheus ${PROMETHEUS_HELM_CHARTS_URL}
+fi
 helm dependency build ../charts/hivemq-swarm
 
 echo "Create HiveMQ Swarm Templates"
