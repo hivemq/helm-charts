@@ -16,7 +16,6 @@ hivemq:
   logLevel: DEBUG
   nodeCount: 1
   cpu: 1
-  memory: 4Gi
   extensions:
     - configMap: ese-extension-config
       enabled: true

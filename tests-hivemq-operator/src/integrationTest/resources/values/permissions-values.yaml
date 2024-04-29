@@ -15,7 +15,6 @@ hivemq:
   logLevel: INFO
   nodeCount: 1
   cpu: 512m
-  memory: 4Gi
   podSecurityContext:
     fsGroup: 10000
     runAsNonRoot: true
