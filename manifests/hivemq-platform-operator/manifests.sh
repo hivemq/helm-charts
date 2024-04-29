@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo "=================================================="
+echo "Generating HiveMQ Platform Operator Manifest files"
+
 # change current directory to project root
 cd "$(dirname "$0")"/../.. || exit 1
 
