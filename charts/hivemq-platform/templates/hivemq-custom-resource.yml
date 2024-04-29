@@ -40,12 +40,10 @@ spec:
             runAsNonRoot: {{ $podSecurityContext.runAsNonRoot }}
             {{- if eq $podSecurityContext.runAsNonRoot false }}
             runAsUser: 0
-            {{- else }}
-            {{- if hasKey $podSecurityContext "runAsUser" }}
+            {{- else if hasKey $podSecurityContext "runAsUser" }}
             runAsUser: {{ $podSecurityContext.runAsUser }}
             {{- else }}
             runAsUser: 10000
-            {{- end }}
             {{- end }}
             runAsGroup: {{ $podSecurityContext.runAsGroup | default 0 }}
             {{- if hasKey $podSecurityContext "fsGroup" }}
