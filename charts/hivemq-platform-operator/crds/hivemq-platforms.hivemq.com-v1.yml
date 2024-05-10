@@ -34,6 +34,8 @@ spec:
             properties:
               configMapName:
                 type: string
+              enabled:
+                type: boolean
               extensions:
                 items:
                   properties:
