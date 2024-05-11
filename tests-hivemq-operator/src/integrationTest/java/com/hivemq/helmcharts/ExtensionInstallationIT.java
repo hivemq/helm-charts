@@ -20,7 +20,7 @@ class ExtensionInstallationIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer container =
-            new OperatorHelmChartContainer(DockerImageNames.K3s.V1_27,
+            new OperatorHelmChartContainer(DockerImageNames.K3s.DEFAULT,
                     "values/test-values.yaml",
                     CHART_NAME).withLocalImages();
 
