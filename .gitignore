@@ -1,9 +1,10 @@
-charts/**/charts/**.tgz
-.idea
-!/charts/hivemq-operator/charts/
 **/.DS_Store
+.idea
 .gradle
 build
+
+# Files created for Helm dependencies
+charts/**/charts/**.tgz
 
 # Folders and files created when enabling debug mode in Helm
 .debug
