@@ -1,0 +1,367 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hivemq
+  namespace: migration
+  uid: 744be4cf-9e9f-4dad-95ad-993c57972709
+  resourceVersion: '1168'
+  generation: 2
+  creationTimestamp: '2024-04-17T14:41:23Z'
+  labels:
+    app.kubernetes.io/instance: hivemq
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: hivemq-platform
+    app.kubernetes.io/version: 4.27.0
+    helm.sh/chart: hivemq-platform-0.2.12
+    hivemq-platform: hivemq
+  annotations:
+    javaoperatorsdk.io/previous: f1b030aa-b34c-4151-ab0c-7d95d82711ce,1110
+    meta.helm.sh/release-name: hivemq
+    meta.helm.sh/release-namespace: migration
+  ownerReferences:
+    - apiVersion: hivemq.com/v1
+      kind: HiveMQPlatform
+      name: hivemq
+      uid: ceff34d0-fd71-4016-bd66-4b0d55fd7509
+  managedFields:
+    - manager: fabric8-kubernetes-client
+      operation: Update
+      apiVersion: apps/v1
+      time: '2024-04-17T14:41:23Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:javaoperatorsdk.io/previous: {}
+            f:meta.helm.sh/release-name: {}
+            f:meta.helm.sh/release-namespace: {}
+          f:labels:
+            .: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/managed-by: {}
+            f:app.kubernetes.io/name: {}
+            f:app.kubernetes.io/version: {}
+            f:helm.sh/chart: {}
+            f:hivemq-platform: {}
+          f:ownerReferences:
+            .: {}
+            k:{"uid":"ceff34d0-fd71-4016-bd66-4b0d55fd7509"}: {}
+        f:spec:
+          f:persistentVolumeClaimRetentionPolicy:
+            .: {}
+            f:whenDeleted: {}
+            f:whenScaled: {}
+          f:podManagementPolicy: {}
+          f:replicas: {}
+          f:revisionHistoryLimit: {}
+          f:selector: {}
+          f:serviceName: {}
+          f:template:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubernetes-resource-versions: {}
+              f:labels:
+                .: {}
+                f:app.kubernetes.io/instance: {}
+                f:app.kubernetes.io/managed-by: {}
+                f:app.kubernetes.io/name: {}
+                f:app.kubernetes.io/version: {}
+                f:helm.sh/chart: {}
+                f:hivemq-platform: {}
+            f:spec:
+              f:containers:
+                k:{"name":"hivemq"}:
+                  .: {}
+                  f:command: {}
+                  f:env:
+                    .: {}
+                    k:{"name":"HIVEMQ_BIND_ADDRESS"}:
+                      .: {}
+                      f:name: {}
+                      f:valueFrom:
+                        .: {}
+                        f:fieldRef: {}
+                    k:{"name":"JAVA_OPTS"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                  f:image: {}
+                  f:imagePullPolicy: {}
+                  f:livenessProbe:
+                    .: {}
+                    f:failureThreshold: {}
+                    f:httpGet:
+                      .: {}
+                      f:path: {}
+                      f:port: {}
+                      f:scheme: {}
+                    f:initialDelaySeconds: {}
+                    f:periodSeconds: {}
+                    f:successThreshold: {}
+                    f:timeoutSeconds: {}
+                  f:name: {}
+                  f:ports:
+                    .: {}
+                    k:{"containerPort":1883,"protocol":"TCP"}:
+                      .: {}
+                      f:containerPort: {}
+                      f:name: {}
+                      f:protocol: {}
+                    k:{"containerPort":8080,"protocol":"TCP"}:
+                      .: {}
+                      f:containerPort: {}
+                      f:name: {}
+                      f:protocol: {}
+                    k:{"containerPort":9399,"protocol":"TCP"}:
+                      .: {}
+                      f:containerPort: {}
+                      f:name: {}
+                      f:protocol: {}
+                  f:readinessProbe:
+                    .: {}
+                    f:failureThreshold: {}
+                    f:httpGet:
+                      .: {}
+                      f:path: {}
+                      f:port: {}
+                      f:scheme: {}
+                    f:initialDelaySeconds: {}
+                    f:periodSeconds: {}
+                    f:successThreshold: {}
+                    f:timeoutSeconds: {}
+                  f:resources:
+                    .: {}
+                    f:limits:
+                      .: {}
+                      f:cpu: {}
+                      f:memory: {}
+                    f:requests:
+                      .: {}
+                      f:cpu: {}
+                      f:memory: {}
+                  f:terminationMessagePath: {}
+                  f:terminationMessagePolicy: {}
+                  f:volumeMounts:
+                    .: {}
+                    k:{"mountPath":"/etc/podinfo/"}:
+                      .: {}
+                      f:mountPath: {}
+                      f:name: {}
+                    k:{"mountPath":"/opt/hivemq/conf-k8s/"}:
+                      .: {}
+                      f:mountPath: {}
+                      f:name: {}
+                    k:{"mountPath":"/opt/hivemq/operator/"}:
+                      .: {}
+                      f:mountPath: {}
+                      f:name: {}
+              f:dnsPolicy: {}
+              f:initContainers:
+                .: {}
+                k:{"name":"hivemq-platform-operator-init"}:
+                  .: {}
+                  f:image: {}
+                  f:imagePullPolicy: {}
+                  f:name: {}
+                  f:resources:
+                    .: {}
+                    f:limits:
+                      .: {}
+                      f:cpu: {}
+                      f:ephemeral-storage: {}
+                      f:memory: {}
+                    f:requests:
+                      .: {}
+                      f:cpu: {}
+                      f:ephemeral-storage: {}
+                      f:memory: {}
+                  f:terminationMessagePath: {}
+                  f:terminationMessagePolicy: {}
+                  f:volumeMounts:
+                    .: {}
+                    k:{"mountPath":"/hivemq"}:
+                      .: {}
+                      f:mountPath: {}
+                      f:name: {}
+              f:restartPolicy: {}
+              f:schedulerName: {}
+              f:securityContext: {}
+              f:serviceAccount: {}
+              f:serviceAccountName: {}
+              f:terminationGracePeriodSeconds: {}
+              f:volumes:
+                .: {}
+                k:{"name":"broker-configuration"}:
+                  .: {}
+                  f:configMap:
+                    .: {}
+                    f:defaultMode: {}
+                    f:name: {}
+                  f:name: {}
+                k:{"name":"operator-init"}:
+                  .: {}
+                  f:emptyDir: {}
+                  f:name: {}
+                k:{"name":"pod-info"}:
+                  .: {}
+                  f:configMap:
+                    .: {}
+                    f:defaultMode: {}
+                    f:name: {}
+                  f:name: {}
+          f:updateStrategy:
+            f:type: {}
+    - manager: kube-controller-manager
+      operation: Update
+      apiVersion: apps/v1
+      time: '2024-04-17T14:41:38Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:status:
+          f:availableReplicas: {}
+          f:collisionCount: {}
+          f:currentReplicas: {}
+          f:currentRevision: {}
+          f:observedGeneration: {}
+          f:readyReplicas: {}
+          f:replicas: {}
+          f:updateRevision: {}
+          f:updatedReplicas: {}
+      subresource: status
+  selfLink: /apis/apps/v1/namespaces/migration/statefulsets/hivemq
+status:
+  observedGeneration: 1
+  replicas: 1
+  readyReplicas: 1
+  currentReplicas: 1
+  updatedReplicas: 1
+  currentRevision: hivemq-74c4b55dbd
+  updateRevision: hivemq-74c4b55dbd
+  collisionCount: 0
+  availableReplicas: 1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      hivemq-platform: hivemq
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: hivemq
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: hivemq-platform
+        app.kubernetes.io/version: 4.27.0
+        helm.sh/chart: hivemq-platform-0.2.12
+        hivemq-platform: hivemq
+      annotations:
+        kubernetes-resource-versions: '{broker-configuration=192356907}'
+    spec:
+      volumes:
+        - name: pod-info
+          configMap:
+            name: hivemq-platform-hivemq-dynamic-state
+            defaultMode: 420
+        - name: broker-configuration
+          configMap:
+            name: hivemq-configuration-hivemq
+            defaultMode: 420
+        - name: operator-init
+          emptyDir: {}
+      initContainers:
+        - name: hivemq-platform-operator-init
+          image: docker.io/hivemq/hivemq-platform-operator-init:1.2.1
+          resources:
+            limits:
+              cpu: 250m
+              ephemeral-storage: 1Gi
+              memory: 100Mi
+            requests:
+              cpu: 250m
+              ephemeral-storage: 1Gi
+              memory: 100Mi
+          volumeMounts:
+            - name: operator-init
+              mountPath: /hivemq
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: hivemq
+          image: docker.io/hivemq/hivemq4:4.27.0
+          command:
+            - /opt/hivemq/operator/bin/run.sh
+          ports:
+            - name: mqtt-1883
+              containerPort: 1883
+              protocol: TCP
+            - name: cc-8080
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics-9399
+              containerPort: 9399
+              protocol: TCP
+          env:
+            - name: JAVA_OPTS
+              value: >-
+                -XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50
+                -XX:MaxRAMPercentage=50
+            - name: HIVEMQ_BIND_ADDRESS
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+          resources:
+            limits:
+              cpu: '1'
+              memory: 1Gi
+            requests:
+              cpu: '1'
+              memory: 1Gi
+          volumeMounts:
+            - name: broker-configuration
+              mountPath: /opt/hivemq/conf-k8s/
+            - name: pod-info
+              mountPath: /etc/podinfo/
+            - name: operator-init
+              mountPath: /opt/hivemq/operator/
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 7979
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 240
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 7979
+              scheme: HTTP
+            initialDelaySeconds: 3
+            timeoutSeconds: 1
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 3600
+      dnsPolicy: ClusterFirst
+      serviceAccountName: hivemq-platform-pod-hivemq
+      serviceAccount: hivemq-platform-pod-hivemq
+      securityContext: {}
+      schedulerName: default-scheduler
+  serviceName: hivemq-hivemq-cluster
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: OnDelete
+  revisionHistoryLimit: 10
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain

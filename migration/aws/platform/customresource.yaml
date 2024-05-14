@@ -1,0 +1,101 @@
+apiVersion: hivemq.com/v1
+kind: HiveMQPlatform
+metadata:
+  annotations:
+    meta.helm.sh/release-name: hivemq
+    meta.helm.sh/release-namespace: migration
+  finalizers:
+    - hivemq-platforms.hivemq.com/finalizer
+  labels:
+    app.kubernetes.io/instance: hivemq
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: hivemq-platform
+    app.kubernetes.io/version: 4.28.0
+    helm.sh/chart: hivemq-platform-0.2.14
+  name: hivemq
+  namespace: migration
+# Status field is not taking into account when creating the custom resource.
+#status:
+#  crdVersion: V1_3_0
+#  message: HiveMQ Platform is ready
+#  observedGeneration: 2
+#  recoveryInformation:
+#    message: HiveMQ Platform is starting
+#    state: STARTING
+#    statePhase: READY
+#  restartExtensions: ''
+#  state: RUNNING
+#  statePhase: READY
+spec:
+  configMapName: hivemq-configuration-hivemq
+  extensions:
+    - configMapName: ''
+      customizationUri: ''
+      enabled: true
+      extensionPriority: -1
+      extensionStartPriority: -1
+      extensionUri: preinstalled
+      id: hivemq-allow-all-extension
+      requestHeaderSecretName: ''
+      supportsHotReload: false
+  healthApiPort: 8889
+  logLevel: DEBUG
+  metricsPath: /
+  metricsPort: 9399
+  operatorRestApiPort: 7979
+  services:
+    # Updated services to match with existing services - remove port number from name
+    - metadata:
+        name: hivemq-hivemq-mqtt
+      spec:
+        ports:
+          - name: mqtt
+            port: 1883
+            targetPort: mqtt
+    - metadata:
+        name: hivemq-hivemq-cc
+      spec:
+        ports:
+          - name: cc
+            port: 8080
+            targetPort: cc
+        sessionAffinity: ClientIP
+    # Do we want to keep the metric service as it is new in the platform operator?
+    - metadata:
+        name: hivemq-hivemq-metrics-9399
+      spec:
+        ports:
+          - name: metrics-9399
+            port: 9399
+            targetPort: metrics-9399
+  statefulSet:
+    metadata: {}
+    spec:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - env:
+                - name: JAVA_OPTS
+                  value: >-
+                    -XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50
+                    -XX:MaxRAMPercentage=50
+              image: docker.io/hivemq/hivemq4:4.28.0
+              imagePullPolicy: IfNotPresent
+              name: hivemq
+              ports:
+                # Updated ports to match with existing services - remove port number from name
+                - containerPort: 1883
+                  name: mqtt
+                - containerPort: 8080
+                  name: cc
+                # Do we want to keep this new port for the metric service?
+                - containerPort: 9399
+                  name: metrics-9399
+              resources:
+                limits:
+                  cpu: '512m'
+                  memory: 2Gi
+                requests:
+                  cpu: '512m'
+                  memory: 2Gi

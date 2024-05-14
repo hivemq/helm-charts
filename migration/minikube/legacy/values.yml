@@ -1,0 +1,13 @@
+operator:
+  logLevel: TRACE
+  admissionWebhooks:
+    enabled: false
+hivemq:
+  image: hivemq/hivemq4:k8s-4.28.0
+  initDnsWaitImage: hivemq/init-dns-wait:1.0.1
+  imagePullPolicy: IfNotPresent
+  logLevel: DEBUG
+  nodeCount: 1
+  cpu: 512m
+  memory: 2Gi
+  controllerTemplate: cluster-stateful-set.yaml

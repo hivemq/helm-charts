@@ -1,0 +1,340 @@
+apiVersion: hivemq.com/v1
+kind: HiveMQCluster
+metadata:
+  annotations:
+    hivemq.com/deployment-type: StatefulSet
+    meta.helm.sh/release-name: hivemq
+    meta.helm.sh/release-namespace: migration
+  labels:
+    app: hivemq-operator
+    app.kubernetes.io/instance: hivemq
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: hivemq-operator
+    app.kubernetes.io/version: 4.28.0
+    helm.sh/chart: hivemq-operator-0.11.36
+    hivemq-cluster: hivemq
+  name: hivemq
+  namespace: migration
+status:
+  conditions:
+    - lastTransitionTime: '2024-04-17T14:50:16.253040501Z'
+      reason: StatefulSet update completed
+      status: 'True'
+      type: AllNodesReady
+    - lastTransitionTime: '2024-04-17T14:49:37.753128511Z'
+      reason: initial status
+      status: 'False'
+      type: AllExtensionsLoaded
+    - lastTransitionTime: '2024-04-17T14:49:37.753706845Z'
+      reason: Services transitioned to ready state
+      status: 'True'
+      type: AllServicesReady
+    - lastTransitionTime: '2024-04-17T14:49:37.753128511Z'
+      reason: initial status
+      status: 'True'
+      type: LogLevelApplied
+  message: StatefulSet update completed
+  state: Running
+  surgeStatus: READY
+spec:
+  additionalVolumeMounts: []
+  additionalVolumes: []
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        # Try not to co-locate with nodes from the same cluster
+        - weight: 60
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: hivemq-cluster
+                  operator: In
+                  values:
+                    - {{ spec.name }}
+            topologyKey: "kubernetes.io/hostname"
+        # Try not to co-locate with other HiveMQ clusters
+        - weight: 30
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - hivemq
+            topologyKey: "kubernetes.io/hostname"
+  clusterOverloadProtection: true
+  clusterReplicaCount: 2
+  configMaps: []
+  configOverride: |
+    <?xml version="1.0"?>
+    <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation="config.xsd">
+        <listeners>
+            --LISTENER-CONFIGURATION--
+        </listeners>
+        <control-center>
+            <listeners>
+                <http>
+                    <port>${HIVEMQ_CONTROL_CENTER_PORT}</port>
+                    <bind-address>0.0.0.0</bind-address>
+                </http>
+            </listeners>
+            <users>
+                <user>
+                    <name>${HIVEMQ_CONTROL_CENTER_USER}</name>
+                    <password>${HIVEMQ_CONTROL_CENTER_PASSWORD}</password>
+                </user>
+            </users>
+        </control-center>
+
+        <!--REST-API-CONFIGURATION-->
+        <cluster>
+            <enabled>true</enabled>
+            <transport>
+                <tcp>
+                    <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
+                    <bind-port>${HIVEMQ_CLUSTER_PORT}</bind-port>
+                </tcp>
+            </transport>
+            <discovery>
+                <extension/>
+            </discovery>
+
+            <replication>
+                <replica-count>${HIVEMQ_CLUSTER_REPLICA_COUNT}</replica-count>
+            </replication>
+
+            <failure-detection>
+                <tcp-health-check>
+                    <enabled>true</enabled>
+                    <bind-address>${HIVEMQ_BIND_ADDRESS}</bind-address>
+                    <bind-port>9000</bind-port>
+                    <port-range>50</port-range>
+                </tcp-health-check>
+
+                <heartbeat>
+                    <enabled>true</enabled>
+                    <interval>4000</interval>
+                    <timeout>30000</timeout>
+                </heartbeat>
+            </failure-detection>
+
+        </cluster>
+        <overload-protection>
+            <enabled>${HIVEMQ_CLUSTER_OVERLOAD_PROTECTION}</enabled>
+        </overload-protection>
+        <restrictions>
+            <max-client-id-length>${HIVEMQ_MAX_CLIENT_ID_LENGTH}</max-client-id-length>
+            <max-topic-length>${HIVEMQ_MAX_TOPIC_LENGTH}</max-topic-length>
+            <max-connections>${HIVEMQ_MAX_CONNECTIONS}</max-connections>
+            <incoming-bandwidth-throttling>${HIVEMQ_INCOMING_BANDWIDTH_THROTTLING}</incoming-bandwidth-throttling>
+            <no-connect-idle-timeout>${HIVEMQ_NO_CONNECT_IDLE_TIMEOUT}</no-connect-idle-timeout>
+        </restrictions>
+        <mqtt>
+            <session-expiry>
+                <max-interval>${HIVEMQ_SESSION_EXPIRY_INTERVAL}</max-interval>
+            </session-expiry>
+
+            <message-expiry>
+                <max-interval>${HIVEMQ_MESSAGE_EXPIRY_MAX_INTERVAL}</max-interval>
+            </message-expiry>
+
+            <packets>
+                <max-packet-size>${HIVEMQ_MAX_PACKET_SIZE}</max-packet-size>
+            </packets>
+
+            <receive-maximum>
+                <server-receive-maximum>${HIVEMQ_SERVER_RECEIVE_MAXIMUM}</server-receive-maximum>
+            </receive-maximum>
+
+            <keep-alive>
+                <max-keep-alive>${HIVEMQ_KEEPALIVE_MAX}</max-keep-alive>
+                <allow-unlimited>${HIVEMQ_KEEPALIVE_ALLOW_UNLIMITED}</allow-unlimited>
+            </keep-alive>
+
+            <topic-alias>
+                <enabled>${HIVEMQ_TOPIC_ALIAS_ENABLED}</enabled>
+                <max-per-client>${HIVEMQ_TOPIC_ALIAS_MAX_PER_CLIENT}</max-per-client>
+            </topic-alias>
+
+            <subscription-identifier>
+                <enabled>${HIVEMQ_SUBSCRIPTION_IDENTIFIER_ENABLED}</enabled>
+            </subscription-identifier>
+
+            <wildcard-subscriptions>
+                <enabled>${HIVEMQ_WILDCARD_SUBSCRIPTION_ENABLED}</enabled>
+            </wildcard-subscriptions>
+
+            <shared-subscriptions>
+                <enabled>${HIVEMQ_SHARED_SUBSCRIPTION_ENABLED}</enabled>
+            </shared-subscriptions>
+
+            <quality-of-service>
+                <max-qos>${HIVEMQ_MAX_QOS}</max-qos>
+            </quality-of-service>
+
+            <retained-messages>
+                <enabled>${HIVEMQ_RETAINED_MESSAGES_ENABLED}</enabled>
+            </retained-messages>
+
+            <queued-messages>
+                <max-queue-size>${HIVEMQ_QUEUED_MESSAGE_MAX_QUEUE_SIZE}</max-queue-size>
+                <strategy>${HIVEMQ_QUEUED_MESSAGE_STRATEGY}</strategy>
+            </queued-messages>
+        </mqtt>
+        <security>
+            <!-- Allows the use of empty client ids -->
+            <allow-empty-client-id>
+                <enabled>${HIVEMQ_ALLOW_EMPTY_CLIENT_ID}</enabled>
+            </allow-empty-client-id>
+
+            <!-- Configures validation for UTF-8 PUBLISH payloads -->
+            <payload-format-validation>
+                <enabled>${HIVEMQ_PAYLOAD_FORMAT_VALIDATION}</enabled>
+            </payload-format-validation>
+
+            <utf8-validation>
+                <enabled>${HIVEMQ_TOPIC_FORMAT_VALIDATION}</enabled>
+            </utf8-validation>
+
+            <!-- Allows clients to request problem information -->
+            <allow-request-problem-information>
+                <enabled>${HIVEMQ_ALLOW_REQUEST_PROBLEM_INFORMATION}</enabled>
+            </allow-request-problem-information>
+
+            <control-center-audit-log>
+                <enabled>${HIVEMQ_CONTROL_CENTER_AUDIT_LOG_ENABLED}</enabled>
+            </control-center-audit-log>
+        </security>
+    </hivemq>
+  controllerTemplate: cluster-stateful-set.yaml
+  cpu: '1'
+  cpuLimitRatio: 1
+  customProperties: {}
+  dnsSuffix: svc.cluster.local.
+  env: []
+  ephemeralStorage: 15Gi
+  ephemeralStorageLimitRatio: 1
+  extensions:
+    - enabled: false
+      extensionUri: preinstalled
+      name: hivemq-kafka-extension
+      offline: false
+      static: false
+      updateStrategy: serial
+    - enabled: false
+      extensionUri: preinstalled
+      name: hivemq-google-cloud-pubsub-extension
+      offline: false
+      static: false
+      updateStrategy: serial
+    - enabled: false
+      extensionUri: preinstalled
+      name: hivemq-bridge-extension
+      offline: false
+      static: false
+      updateStrategy: serial
+    - enabled: false
+      extensionUri: preinstalled
+      initialization: >
+        # Download JDBC driver for PostgreSQL
+
+        [[ ! -f drivers/postgres-jdbc.jar ]] &&
+
+        curl -L https://jdbc.postgresql.org/download/postgresql-42.2.14.jar
+        --output drivers/jdbc/postgres.jar
+      name: hivemq-enterprise-security-extension
+      offline: false
+      static: false
+      updateStrategy: serial
+    - enabled: false
+      extensionUri: preinstalled
+      name: hivemq-distributed-tracing-extension
+      offline: false
+      static: false
+      updateStrategy: serial
+    - enabled: false
+      extensionUri: preinstalled
+      name: hivemq-amazon-kinesis-extension
+      offline: false
+      static: false
+      updateStrategy: serial
+  hivemqVersion: k8s-4.28.0
+  image: hivemq/hivemq4
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  initBusyboxImage: busybox:latest
+  initContainers: []
+  initDnsWaitImage: hivemq/init-dns-wait:1.0.1
+  initialization: []
+  javaOptions: >-
+    -XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=40
+    -XX:MaxRAMPercentage=50 -XX:MinRAMPercentage=30
+  labels:
+    app.kubernetes.io/instance: hivemq
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: hivemq-operator
+    app.kubernetes.io/version: 4.28.0
+    helm.sh/chart: hivemq-operator-0.11.36
+  listenerConfiguration: |
+    <tcp-listener>
+        <port>${HIVEMQ_MQTT_PORT}</port>
+        <bind-address>0.0.0.0</bind-address>
+    </tcp-listener>
+  logLevel: DEBUG
+  memory: 1Gi
+  memoryLimitRatio: 1
+  mqtt:
+    keepaliveAllowUnlimited: true
+    keepaliveMax: 65535
+    maxPacketSize: 268435460
+    maxQos: 2
+    messageExpiryMaxInterval: 4294967296
+    queuedMessageStrategy: discard
+    queuedMessagesMaxQueueSize: 1000
+    retainedMessagesEnabled: true
+    serverReceiveMaximum: 10
+    sessionExpiryInterval: 4294967295
+    sharedSubscriptionEnabled: true
+    subscriptionIdentifierEnabled: true
+    topicAliasEnabled: true
+    topicAliasMaxPerClient: 5
+    wildcardSubscriptionEnabled: true
+  nodeCount: 1
+  nodeSelector: {}
+  podAnnotations: {}
+  podLabels: {}
+  ports:
+    - expose: true
+      name: mqtt
+      patch:
+        - >-
+          [{"op":"add","path":"/spec/selector/hivemq.com~1node-offline","value":"false"},{"op":"add","path":"/metadata/annotations","value":{"service.spec.externalTrafficPolicy":"Local"}}]
+      port: 1883
+    - expose: true
+      name: cc
+      patch:
+        - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+      port: 8080
+  priorityClassName: ''
+  restApiConfiguration: |
+    <rest-api/>
+  restrictions:
+    incomingBandwidthThrottling: 0
+    maxClientIdLength: 65535
+    maxConnections: -1
+    maxTopicLength: 65535
+    noConnectIdleTimeout: 10000
+  runtimeClassName: ''
+  secrets: []
+  security:
+    allowEmptyClientId: true
+    allowRequestProblemInformation: true
+    controlCenterAuditLogEnabled: true
+    payloadFormatValidation: false
+    topicFormatValidation: true
+  serviceAccountName: hivemq-hivemq-operator-hivemq
+  sidecars: []
+  tolerations: []
+  topologySpreadConstraints: []
+  volumeClaimTemplates: []
