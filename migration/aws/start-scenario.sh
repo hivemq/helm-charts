@@ -54,6 +54,7 @@ printf "\nHiveMQ Cluster and Legacy Operator are already up and running\n"
 printf "Press any key to delete custom resource with cascade=orphan flag enabled...\n"
 read -n 1 -s -r
 
+kubectl patch svc hivemq-${RELEASE_NAME}-mqtt -n ${NAMESPACE} --type='json' --patch='[{"op":"add","path":"/spec/type","value":"NodePort"}]'
 nohup kubectl port-forward services/hivemq-hivemq-mqtt 1883:1883 -n ${NAMESPACE} > /dev/null 2>&1 &
 portForwardPid=$!
 open -n -a Terminal ./mqtt-pub-test.sh
