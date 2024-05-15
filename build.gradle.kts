@@ -93,6 +93,29 @@ val updateAllPlatformChartVersions by tasks.registering {
     dependsOn(updatePlatformChartVersion)
 }
 
+val updateAllManifestFiles by tasks.registering {
+    group = "version"
+    description = "Updates all manifest files."
+    doLast {
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
+        }
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("sh", "./manifests/hivemq-platform/manifests.sh")
+        }
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("sh", "./manifests/hivemq-platform-operator/manifests.sh")
+        }
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("sh", "./manifests/hivemq-swarm/manifests.sh")
+        }
+    }
+}
+
 fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String) {
     val appVersion = project.properties["appVersion"]
     if (checkAppVersion && appVersion == null) {
