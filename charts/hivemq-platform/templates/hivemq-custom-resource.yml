@@ -154,6 +154,9 @@ spec:
                 {{- include "hivemq-platform.get-additional-volume-mounts" . | indent 16 }}
                 {{- end -}}
               {{- end }}
+            {{- with .Values.nodes.sidecars }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- if or $hasAdditionalVolumes (or $hasLicense $hasKeystore) }}
           volumes:
             {{- if $hasLicense }}
