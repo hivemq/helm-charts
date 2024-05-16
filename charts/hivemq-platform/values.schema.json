@@ -311,6 +311,13 @@
         },
         "serviceAccountName": {
           "type": "string"
+        },
+        "sidecars": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       }
     },
