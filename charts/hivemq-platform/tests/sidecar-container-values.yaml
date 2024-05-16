@@ -1,0 +1,16 @@
+nodes:
+  sidecars:
+    - name: my-sidecar1
+      image: alpine:latest
+      command: ['sh', '-c', 'while true; do echo "logging" >> /opt/logs.txt; sleep 1; done']
+      volumeMounts:
+        - name: data
+          mountPath: /opt
+    - name: my-sidecar2
+      image: alpine:latest
+      env:
+        - name: MY_ENV_VAR
+          valueFrom:
+            secretKeyRef:
+              name: mysecretname
+              key: mysecretkey
