@@ -27,7 +27,10 @@ tests:
           path: spec.statefulSet.spec.template.spec.imagePullSecrets[0].name
           value: test-secret
       - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0]
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].image
           value: test-repo/test-image:snapshot
@@ -89,17 +92,67 @@ tests:
           path: spec.statefulSet.spec.replicas
           value: 10
       - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0]
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].name
           value: hivemq
+
+  - it: with default values, no sidecar container is created
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].name
+          value: hivemq
+
+  - it: with sidecar containers
+    values:
+      - sidecar-container-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 3
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].name
+          value: hivemq
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers
+          content:
+            name: my-sidecar1
+            image: alpine:latest
+            command: ['sh', '-c', 'while true; do echo "logging" >> /opt/logs.txt; sleep 1; done']
+            volumeMounts:
+              - name: data
+                mountPath: /opt
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers
+          content:
+            name: my-sidecar2
+            image: alpine:latest
+            env:
+              - name: MY_ENV_VAR
+                valueFrom:
+                  secretKeyRef:
+                    name: mysecretname
+                    key: mysecretkey
 
   - it: with custom environment variables for the HiveMQ container
     values:
       - custom-env-vars-values.yaml
     asserts:
       - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0]
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - contains:
@@ -132,7 +185,10 @@ tests:
       nodes.resources.memory: 1m
     asserts:
       - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0]
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
           value: 1c
