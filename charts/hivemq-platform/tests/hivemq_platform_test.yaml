@@ -365,14 +365,15 @@ tests:
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.volumes
-      - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 6
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: test-mount-volume
+            name: test-configmap-mount-volume
             configMap:
-              name: test-volume
+              name:  test-configmap-volume
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -391,9 +392,31 @@ tests:
             persistentVolumeClaim:
               claimName: test-persistent-volume-claim-volume
       - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-hivemq-configmap-volume-mount
+            configMap:
+              name: test-hivemq-configmap-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-non-hivemq-configmap-volume-mount
+            configMap:
+              name: test-non-hivemq-configmap-volume
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0]
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].name
+          value: hivemq
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 5
+      - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: test-mount-volume
+            name: test-configmap-mount-volume
             mountPath: /additional-configmap-volume/subpath-configmap
             subPath: subpath-configmap
       - contains:
@@ -411,14 +434,204 @@ tests:
           content:
             name: test-persistent-volume-claim-volume
             mountPath: /additional-persistent-volume-claim-volume
-      - lengthEqual:
-          path: spec.statefulSet.spec.template.spec.volumes
-          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-hivemq-configmap-volume-mount
+            mountPath: /additional-configmap-volume/subpath-configmap
+            subPath: subpath-configmap
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-non-hivemq-volume-mount
+            mountPath: /additional-configmap-volume/subpath-configmap
+            subPath: subpath-configmap
+
+  - it: with duplicated additionalVolumes `mountName` value in same `hivemq` container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: test-configmap-volume-1
+          mountName: foobar-mount-volume
+          path: /additional-configmap-volume-1
+        - type: configMap
+          mountName: foobar-mount-volume
+          name: test-configmap-volume-2
+          path: /additional-configmap-volume-2
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
+
+  - it: with duplicated additionalVolumes `mountName` value in same `foobar` container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: test-configmap-volume-1
+          containerName: foobar
+          mountName: foobar-mount-volume
+          path: /additional-configmap-volume-1
+        - type: configMap
+          containerName: foobar
+          mountName: foobar-mount-volume
+          name: test-configmap-volume-2
+          path: /additional-configmap-volume-2
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
+
+  - it: with duplicated additionalVolumes `mountName` value but different containers, then success
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: test-configmap-volume-1
+          containerName: hivemq
+          mountName: foobar-mount-volume
+          path: /additional-configmap-volume-1
+        - type: configMap
+          containerName: foobar
+          mountName: foobar-mount-volume
+          name: test-configmap-volume-2
+          path: /additional-configmap-volume-2
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
-          count: 4
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: foobar-mount-volume
+            mountPath: /additional-configmap-volume-1
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: foobar-mount-volume
+            configMap:
+              name: test-configmap-volume-1
 
-  - it: with invalid additional volumes, then fails
+  - it: with duplicated additionalVolumes `name` value in same `hivemq` container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foobar-mount-volume
+          path: /additional-configmap-volume-1
+        - type: configMap
+          name: foobar-mount-volume
+          path: /additional-configmap-volume-2
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
+
+  - it: with duplicated additionalVolumes `name` value in same `foobar` container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume-1
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume-2
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
+
+  - it: with duplicated additionalVolumes `name` value but different containers, then success
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: hivemq
+          path: /additional-configmap-volume-1
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume-2
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: foobar-mount-volume
+            mountPath: /additional-configmap-volume-1
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: foobar-mount-volume
+            configMap:
+              name: foobar-mount-volume
+
+  - it: with duplicated volumes but same type, then success with no duplicates
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: hivemq
+          path: /additional-configmap-volume-1
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume-2
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: foobar-mount-volume
+            mountPath: /additional-configmap-volume-1
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: foobar-mount-volume
+            configMap:
+              name: foobar-mount-volume
+
+  - it: with duplicated volumes but different type, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foobar-mount-volume
+          containerName: hivemq
+          path: /additional-configmap-volume-1
+        - type: secret
+          name: foobar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume-2
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            Volume `foobar-mount-volume` is defined more than once but with different types
+
+  - it: with invalid additional volume `type`, then fails
     set:
       additionalVolumes:
         - type: fakeAdditionalVolume
@@ -426,7 +639,121 @@ tests:
           path: /fake-volume-path
     asserts:
       - failedTemplate:
-          errorMessage: Invalid type or not supported type for additional volume
+          errorMessage: |-
+            Invalid type or not supported type for additional volume (only "configMap", "secret", "emptyDir" or "persistentVolumeClaim" are allowed)
+
+  - it: with missing mandatory additional volume `type` for `hivemq` container, then fails
+    set:
+      additionalVolumes:
+        - name: fake-volume-name
+          path: /fake-volume-path
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `type` value is mandatory for all of the `additionalVolumes` defined
+
+  - it: with missing mandatory additional volume `type` for `foobar` container, then fails
+    set:
+      additionalVolumes:
+        - name: fake-volume-name
+          path: /fake-volume-path
+          containerName: foobar
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `type` value is mandatory for all of the `additionalVolumes` defined
+
+  - it: with missing mandatory additional volume `path` for `hivemq` container, then fails
+    set:
+      additionalVolumes:
+        - name: fake-volume-name
+          type: configMap
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container
+
+  - it: with missing mandatory additional volume `path` for `foobar` container, then success
+    set:
+      additionalVolumes:
+        - type: emptyDir
+          mountName: test-empty-mount-volume
+          containerName: foobar
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-empty-mount-volume
+            emptyDir: {}
+
+  - it: with missing both additional volume `name` and `mountName`, then fails
+    set:
+      additionalVolumes:
+        - type: fakeAdditionalVolume
+          path: /fake-volume-path
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            At least one of `name` or `mountName` values must be defined
+
+  - it: with additional volume type `configMap` but missing `name`, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
+
+  - it: with additional volume type `secret` but missing `name`, then fails
+    set:
+      additionalVolumes:
+        - type: secret
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
+
+  - it: with additional volume type `persistentVolumeClaim` but missing `name`, then fails
+    set:
+      additionalVolumes:
+        - type: persistentVolumeClaim
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
+
+  - it: with additional volume type `emptyDir` but missing `name`, then success
+    set:
+      additionalVolumes:
+        - type: emptyDir
+          path: /additional-empty-dir-volume
+          mountName: test-empty-mount-volume
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-empty-mount-volume
+            mountPath: /additional-empty-dir-volume
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-empty-mount-volume
+            emptyDir: {}
 
   - it: with pod scheduling values set
     values:
