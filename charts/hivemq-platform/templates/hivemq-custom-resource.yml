@@ -1,6 +1,7 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
+{{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $defaultMetricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
 apiVersion: hivemq.com/v1
 kind: HiveMQPlatform
@@ -141,7 +142,8 @@ spec:
                 requests:
                   cpu: {{ .Values.nodes.resources.cpu | quote }}
                   memory: {{ .Values.nodes.resources.memory | quote }}
-              {{- if or $hasAdditionalVolumes (or $hasLicense $hasKeystore) }}
+              {{- include "hivemq-platform.validate-additional-volumes" . -}}
+              {{- if or $hasAdditionalVolumeMounts (or $hasLicense $hasKeystore) }}
               volumeMounts:
                 {{- if $hasLicense }}
                 - name: licenses
@@ -150,7 +152,7 @@ spec:
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
                 {{- end}}
-                {{- if $hasAdditionalVolumes }}
+                {{- if $hasAdditionalVolumeMounts }}
                 {{- include "hivemq-platform.get-additional-volume-mounts" . | indent 16 }}
                 {{- end -}}
               {{- end }}
