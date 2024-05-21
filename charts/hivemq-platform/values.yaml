@@ -430,14 +430,19 @@ additionalVolumes: []
 #  - type: configMap
 #    name: configmap-name
 #    mountName: mount-name
+#    containerName: container-name
 #    path: /file/mount/path
 #    subPath: ""
 
 # type: Choose a type of volume that you want to mount.
-# name: Optional name for the secret or the configmap to be mounted
-# mountName: The volume mount name to be used for the StatefulSet Spec.
-# path: The path configures the directory to which the volume is mounted in the container
-#       If the directory already exists then the contents are overwritten!
-# subPath: Optional name for the subPath. If a volume is mounted with subPath than the contents
-#          of the directory are not overwritten. However, note that changes to a configmap for example
+# name: The name used for the Secret, the ConfigMap or the PersistentVolumeClaim to be mounted.
+#       It will be used either as the volume name or as the volume mount name when the `mountName` is not present as well.
+# mountName: Optional volume name and volume mount name to be used for the StatefulSet Spec.
+#       When not present, `name` will be used instead as volume name and as volume mount name.
+# containerName: Optional name for the container on which the volume will be mounted on.
+#       It defaults to the "hivemq" container.
+# path: The path configures the directory to which the volume is mounted in the container.
+#       If the directory already exists, then the contents are overwritten!
+# subPath: Optional name for the subPath. If a volume is mounted with subPath, then the contents
+#          of the directory are not overwritten. However, note that changes to a configmap, for example,
 #          mounted via subPath will not be propagated to the container. Therefore, pods have to be restarted.
