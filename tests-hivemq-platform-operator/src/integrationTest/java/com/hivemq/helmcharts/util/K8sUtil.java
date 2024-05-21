@@ -36,19 +36,6 @@ public class K8sUtil {
     private K8sUtil() {
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String resourceName,
-            final @NotNull Class<T> clazz) {
-        try (final InputStream is = K8sUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
-            return client.resources(clazz).inNamespace(namespace).load(is);
-        } catch (final IOException e) {
-            throw new AssertionError("Could not read resource " + resourceName + ": " + e.getMessage());
-        }
-    }
-
     /**
      * Creates a ConfigMap from the given resource file on the classpath.
      *
@@ -210,6 +197,37 @@ public class K8sUtil {
         return statefulSetSpec.getTemplate().getSpec().getContainers().getFirst();
     }
 
+    /**
+     * Returns the expected container as per the given containerName from the given {@link StatefulSetSpec}
+     * instance.
+     * <p>
+     * If the container with the given name is not found, a {@link java.util.NoSuchElementException} will be thrown.
+     *
+     * @param statefulSetSpec the {@link StatefulSetSpec} to retrieve the HiveMQ container from
+     * @param containerName the name of the container to look for
+     * @return the container
+     */
+    public static @NotNull Container getContainer(
+            final @NotNull StatefulSetSpec statefulSetSpec,
+            final @NotNull String containerName) {
+        return statefulSetSpec.getTemplate()
+                .getSpec()
+                .getContainers()
+                .stream()
+                .filter(container -> container.getName().equals(containerName))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    /**
+     * Returns the HiveMQ platform {@link Resource<GenericKubernetesResource>} from the namespace given by using
+     * the Kubernetes client provided.
+     *
+     * @param client    the Kubernetes client to use
+     * @param namespace the namespace to look up for the service to expose
+     * @param name      the HiveMQ platform name to fetch
+     * @return the HiveMQ platform {@link Resource<GenericKubernetesResource>}
+     */
     public static @NotNull Resource<GenericKubernetesResource> getHiveMQPlatform(
             final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
         final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
@@ -381,5 +399,20 @@ public class K8sUtil {
                     .extracting(ServiceSpec::getType)
                     .contains("ClusterIP");
         });
+    }
+
+    private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String resourceName,
+            final @NotNull Class<T> clazz) {
+        try (final InputStream is = K8sUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
+            final var resource = client.resources(clazz).load(is);
+            assertThat(resource).isNotNull();
+            resource.item().getMetadata().setNamespace(namespace);
+            return resource;
+        } catch (final IOException e) {
+            throw new AssertionError("Could not read resource " + resourceName + ": " + e.getMessage());
+        }
     }
 }

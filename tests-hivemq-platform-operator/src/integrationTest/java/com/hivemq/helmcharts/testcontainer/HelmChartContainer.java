@@ -605,11 +605,15 @@ public class HelmChartContainer extends K3sContainer {
         }
 
         private @Nullable String getContainerNameFromEventNote(final @NotNull String note) {
-            if (note.endsWith("container " + HIVEMQ_PLATFORM_CONTAINER_NAME)) {
+            final var container = "container ";
+            if (note.endsWith(container + HIVEMQ_PLATFORM_CONTAINER_NAME)) {
                 return HIVEMQ_PLATFORM_CONTAINER_NAME;
             }
-            if (note.endsWith("container " + HIVEMQ_OPERATOR_CONTAINER_NAME)) {
+            if (note.endsWith(container + HIVEMQ_OPERATOR_CONTAINER_NAME)) {
                 return HIVEMQ_OPERATOR_CONTAINER_NAME;
+            }
+            if (note.contains(container)) {
+                return note.substring(note.lastIndexOf(container) + container.length());
             }
             return null;
         }
