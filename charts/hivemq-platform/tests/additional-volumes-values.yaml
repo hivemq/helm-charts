@@ -1,7 +1,7 @@
 additionalVolumes:
   - type: configMap
-    name: test-volume
-    mountName: test-mount-volume
+    name: test-configmap-volume
+    mountName: test-configmap-mount-volume
     path: /additional-configmap-volume
     subPath: subpath-configmap
   - type: secret
@@ -13,4 +13,15 @@ additionalVolumes:
   - type: persistentVolumeClaim
     name: test-persistent-volume-claim-volume
     path: /additional-persistent-volume-claim-volume
-
+  - type: configMap
+    name: test-hivemq-configmap-volume
+    mountName: test-hivemq-configmap-volume-mount
+    containerName: hivemq
+    path: /additional-configmap-volume
+    subPath: subpath-configmap
+  - type: configMap
+    name: test-non-hivemq-configmap-volume
+    mountName: test-non-hivemq-configmap-volume-mount
+    containerName: foobar
+    path: /additional-configmap-volume
+    subPath: subpath-configmap
