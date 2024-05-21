@@ -73,6 +73,24 @@ Has additional volumes
 {{- end -}}
 
 {{/*
+Does the `hivemq` container have additional volume mounts
+Returns:
+- `true` if the main `hivemq` container is not explicitily set in any element of the .Values.additionalVolumes array
+    as a .Values.additionalVolumes.containerName` (default value), empty string otherwise.
+Usage: {{ include "hivemq-platform.has-additional-volume-mounts" . }}
+*/}}
+{{- define "hivemq-platform.has-additional-volume-mounts" -}}
+{{- $hasAdditionalVolumeMount := "" }}
+{{- range $additionalVolume := .Values.additionalVolumes }}
+  {{- if or (not (hasKey $additionalVolume "containerName")) ( and (hasKey $additionalVolume "containerName") (eq $additionalVolume.containerName "hivemq")) }}
+    {{- $hasAdditionalVolumeMount = true }}
+    {{- break }}
+  {{- end }}
+{{- end -}}
+{{- $hasAdditionalVolumeMount }}
+{{- end -}}
+
+{{/*
 Gets the port name inside a range of the service values
 Format: <.Values.services>
 Usage: {{ include "hivemq-platform.range-service-port-name" . }}
@@ -255,6 +273,59 @@ Usage: {{- include "hivemq-platform.validate-pod-security-context" (dict "podSec
 {{- end -}}
 
 {{/*
+Validates the addtionalVolumes values have a valid combination, duplicated volume mount are present and no duplicated volumes
+with different type exist
+Params:
+- addtionalVolumes: The .Values.addtionalVolumes value.
+Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
+*/}}
+{{- define "hivemq-platform.validate-additional-volumes" -}}
+{{- $additionalVolumes := .Values.additionalVolumes }}
+{{- $volumeMountList := list }}
+{{- range $additionalVolume := $additionalVolumes }}
+    {{- if not (hasKey $additionalVolume "type") }}
+        {{- fail (printf "`type` value is mandatory for all of the `additionalVolumes` defined") }}
+    {{- end -}}
+    {{- if and (not (hasKey $additionalVolume "path")) (or (eq $additionalVolume.containerName "hivemq") (not (hasKey $additionalVolume "containerName"))) }}
+        {{- fail (printf "`path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container") }}
+    {{- end -}}
+    {{- if and (not (hasKey $additionalVolume "name")) (not (hasKey $additionalVolume "mountName")) }}
+        {{- fail (printf "At least one of `name` or `mountName` values must be defined") }}
+    {{- end -}}
+    {{- if not (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "emptyDir") (eq $additionalVolume.type "persistentVolumeClaim")) }}
+        {{- fail (printf "Invalid type or not supported type for additional volume (only \"configMap\", \"secret\", \"emptyDir\" or \"persistentVolumeClaim\" are allowed)") }}
+    {{- end -}}
+    {{- if and (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "persistentVolumeClaim")) (not (hasKey $additionalVolume "name")) }}
+        {{- fail (printf "`name` value is required for types \"configMap\", \"secret\" and \"persistentVolumeClaim\"") }}
+    {{- end -}}
+
+    {{- $volumeName := "" }}
+    {{- $containerName := $additionalVolume.containerName | default "hivemq" }}
+    {{- if $additionalVolume.mountName }}
+        {{- $volumeName = $additionalVolume.mountName }}
+    {{- else }}
+        {{- $volumeName = $additionalVolume.name }}
+    {{- end -}}
+
+    {{/* Check for duplicates volume mounts within the same container */}}
+    {{- $volumeMountKey := printf "%s-%s" $volumeName $containerName }}
+    {{- if has $volumeMountKey $volumeMountList }}
+        {{- fail (printf "VolumeMount `%s` is duplicated for container `%s`" $volumeName $containerName) }}
+    {{- else }}
+        {{- $volumeMountList = $volumeMountKey | append $volumeMountList}}
+    {{- end }}
+
+    {{/* Volumes can only be defined with same name and same type */}}
+    {{- range $volume := $additionalVolumes }}
+    {{- if and (or (eq $volume.mountName $volumeName) (eq $volume.name $volumeName)) (not (eq $volume.type $additionalVolume.type)) }}
+        {{- fail (printf "Volume `%s` is defined more than once but with different types" $volumeName) }}
+    {{- end }}
+    {{- end -}}
+
+{{- end -}}
+{{- end -}}
+
+{{/*
 Check if there are services exposed with keystore
 */}}
 {{- define "hivemq-platform.has-keystore" -}}
@@ -290,21 +361,25 @@ Get secret volume mount
 {{- end -}}
 
 {{/*
-Get the container volume mounts
+Gets the additional `hivemq` container volume mounts
+Usage: {{ include "hivemq-platform.get-additional-volume-mounts" . }}
 */}}
 {{- define "hivemq-platform.get-additional-volume-mounts" -}}
-{{- range $volume := .Values.additionalVolumes }}
-{{- if $volume.mountName }}
-- name: {{ $volume.mountName }}
+{{- range $additionalVolume := .Values.additionalVolumes }}
+{{/* need to filter out those additional volumes whose `containerName` is different than `hivemq` or where the `containerName` is not present (defaults to `hivemq`) */}}
+{{- if or (not (hasKey $additionalVolume "containerName")) ( and (hasKey $additionalVolume "containerName") (eq $additionalVolume.containerName "hivemq")) }}
+{{- if $additionalVolume.mountName }}
+- name: {{ $additionalVolume.mountName }}
 {{- else }}
-- name: {{ $volume.name }}
+- name: {{ $additionalVolume.name }}
 {{- end}}
-  {{- if $volume.subPath }}
-  mountPath: {{ $volume.path }}/{{ $volume.subPath }}
-  subPath: {{ $volume.subPath }}
+  {{- if $additionalVolume.subPath }}
+  mountPath: {{ $additionalVolume.path }}/{{ $additionalVolume.subPath }}
+  subPath: {{ $additionalVolume.subPath }}
   {{- else }}
-  mountPath: {{ $volume.path }}
+  mountPath: {{ $additionalVolume.path }}
   {{- end }}
+{{- end }}
 {{- end -}}
 {{- end -}}
 
@@ -400,29 +475,37 @@ Returns:
 {{- end }}
 
 {{/*
-Get the volumes references
+Gets the volumes references. Filters out duplicated volumes by name and type
+Usage: {{ include "hivemq-platform.get-additional-volumes" . }}
 */}}
 {{- define "hivemq-platform.get-additional-volumes" -}}
+{{- $volumeList := list }}
 {{- range $volume := .Values.additionalVolumes -}}
+{{- $volumeName := "" }}
+{{- $volumeType := $volume.type }}
 {{- if $volume.mountName }}
-- name: {{ $volume.mountName }}
+    {{- $volumeName = $volume.mountName }}
 {{- else }}
-- name: {{ $volume.name }}
-{{- end }}
-  {{- if eq $volume.type "configMap" }}
+    {{- $volumeName = $volume.name }}
+{{- end -}}
+{{- $volumeKey := printf "%s-%s" $volumeName $volumeType }}
+{{- if not (has $volumeKey $volumeList) }}
+- name: {{ $volumeName }}
+  {{- if eq $volumeType "configMap" }}
   configMap:
     name: {{ $volume.name }}
-  {{- else if eq $volume.type "secret" }}
+  {{- else if eq $volumeType "secret" }}
   secret:
     secretName: {{ $volume.name }}
-  {{- else if eq $volume.type "emptyDir" }}
+  {{- else if eq $volumeType "emptyDir" }}
   emptyDir: {}
-  {{- else if eq $volume.type "persistentVolumeClaim" }}
+  {{- else if eq $volumeType "persistentVolumeClaim" }}
   persistentVolumeClaim:
     claimName: {{ $volume.name }}
-  {{- else }}
-    {{- fail ("Invalid type or not supported type for additional volume") }}
   {{- end }}
+{{- $volumeList = $volumeKey | append $volumeList}}
+{{- end }}
+
 {{- end -}}
 {{- end -}}
 
