@@ -23,23 +23,28 @@ jobs:
         run: |
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
           curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.18.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
+
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3
+
       - name: Login to Container Registry
         uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           path: helm-charts
+
       - name: Checkout HiveMQ Platform Operator on the default branch
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_TOKEN }}
           path: hivemq-platform-operator
+
       - name: Checkout HiveMQ Platform Operator on the same branch
         working-directory: ${{ github.workspace }}/hivemq-platform-operator
         run: |
@@ -50,11 +55,13 @@ jobs:
             git fetch --all
             git checkout origin/${GITHUB_REF_NAME}
           fi
+
       - name: Set up JDK 21
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@db19848a5fa7950289d3668fb053140cf3028d43 # v3
         with:
@@ -63,9 +70,11 @@ jobs:
             notifications
             jdks
           gradle-home-cache-cleanup: true
+
       - name: Build HiveMQ Platform Operator and HiveMQ Platform Operator Init images
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-platform-operator:build :tests-hivemq-platform-operator:saveDockerImages
+
       - name: Start up KinD cluster with local images
         working-directory: ${{ github.workspace }}/helm-charts
         run: |
@@ -73,12 +82,15 @@ jobs:
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator-init.tar
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator.tar
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform.tar
+
       - name: Install HiveMQ Platform Operator
         working-directory: ${{ github.workspace }}/helm-charts
         run: helm install operator-test --set image.name=hivemq-platform-operator-test --set image.initImageName=hivemq-platform-operator-init-test --set image.tag=snapshot ./charts/hivemq-platform-operator --wait
+
       - name: Install HiveMQ Platform
         working-directory: ${{ github.workspace }}/helm-charts
         run: helm install $RELEASE_NAME --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --create-namespace -n test
+
       - name: Test HiveMQ Platform
         run: |
           kubectl get events -n test -w &
@@ -86,12 +98,14 @@ jobs:
           echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=$RELEASE_NAME --timeout=5m -n test
           helm test $RELEASE_NAME -n test
+
       - name: Capture HiveMQ Platform Pods logs on failure
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/operator-pod.log
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test > ${{ runner.temp }}/logs/platform-pod.log
+
       - name: Upload HiveMQ Platform Pods logs on failure
         if: failure()
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
@@ -99,6 +113,7 @@ jobs:
           name: Pod logs
           path: ${{ runner.temp }}/logs/*.log
           retention-days: 5
+
       - name: Uninstall HiveMQ Platform charts
         if: always()
         run: |
@@ -119,23 +134,28 @@ jobs:
         run: |
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
           curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.18.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
+
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3
+
       - name: Login to Container Registry
         uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           path: helm-charts
+
       - name: Checkout HiveMQ Operator (legacy) on the default branch
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
         with:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_TOKEN }}
           path: hivemq-operator
+
       - name: Checkout HiveMQ Operator (legacy) on the same branch
         working-directory: ${{ github.workspace }}/hivemq-operator
         run: |
@@ -146,11 +166,13 @@ jobs:
             git fetch --all
             git checkout origin/${GITHUB_REF_NAME}
           fi
+
       - name: Set up JDK 21
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@db19848a5fa7950289d3668fb053140cf3028d43 # v3
         with:
@@ -159,9 +181,11 @@ jobs:
             notifications
             jdks
           gradle-home-cache-cleanup: true
+
       - name: Build HiveMQ Operator (legacy) images
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-operator:build :tests-hivemq-operator:saveDockerImages
+
       - name: Start up KinD cluster with local images
         working-directory: ${{ github.workspace }}/helm-charts
         run: |
@@ -169,12 +193,14 @@ jobs:
           kind load image-archive ./tests-hivemq-operator/build/hivemq-dns-init-wait.tar
           kind load image-archive ./tests-hivemq-operator/build/hivemq-k8s.tar
           kind load image-archive ./tests-hivemq-operator/build/hivemq-operator.tar
+
       - name: Install HiveMQ Operator (legacy)
         working-directory: ${{ github.workspace }}/helm-charts
         run: |
           helm repo add prometheus https://prometheus-community.github.io/helm-charts
           helm dependency build ./charts/hivemq-operator
           helm install $RELEASE_NAME ./charts/hivemq-operator -f ./examples/hivemq-operator/localStatefulTest.yml --wait --create-namespace -n test
+
       - name: Test HiveMQ Cluster
         run: |
           kubectl get events -n test -w &
@@ -182,12 +208,14 @@ jobs:
           echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
           kubectl wait --for=condition=ready pod -l hivemq-cluster=$RELEASE_NAME --timeout=5m -n test
           helm test $RELEASE_NAME -n test
+
       - name: Capture HiveMQ Operator (legacy) Pods logs on failure
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/operator-pod.log
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test > ${{ runner.temp }}/logs/platform-pod.log
+
       - name: Upload HiveMQ Operator (legacy) Pods logs on failure
         if: failure()
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
@@ -195,6 +223,7 @@ jobs:
           name: Pod logs
           path: ${{ runner.temp }}/logs/*.log
           retention-days: 5
+
       - name: Uninstall HiveMQ Operator (legacy) charts
         if: always()
         run: |
