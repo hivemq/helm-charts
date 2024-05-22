@@ -1,6 +1,6 @@
 name: HiveMQ Operator (Legacy) Integration Tests
 on:
-  push:
+  pull_request:
     branches:
       - "**"
   workflow_dispatch:
