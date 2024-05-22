@@ -1,6 +1,6 @@
 name: HiveMQ Platform Operator Integration Tests
 on:
-  push:
+  pull_request:
     branches:
       - "**"
   workflow_dispatch:
