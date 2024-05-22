@@ -45,6 +45,18 @@ jobs:
           token: ${{ secrets.JENKINS_TOKEN }}
           path: hivemq-platform-operator
 
+      - name: Checkout HiveMQ Platform Operator on the target branch
+        working-directory: ${{ github.workspace }}/hivemq-platform-operator
+        if: ${{ github.base_ref != 'master' }}
+        run: |
+          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
+          if [[ -n "${BRANCH}" ]]; then 
+            echo "Checking out target branch"
+            git fetch --all
+            git checkout origin/${GITHUB_BASE_REF}
+          fi
+
       - name: Checkout HiveMQ Platform Operator on the same branch
         working-directory: ${{ github.workspace }}/hivemq-platform-operator
         run: |
@@ -155,6 +167,18 @@ jobs:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_TOKEN }}
           path: hivemq-operator
+
+      - name: Checkout HiveMQ Operator (legacy) on the target branch
+        working-directory: ${{ github.workspace }}/hivemq-operator
+        if: ${{ github.base_ref != 'master' }}
+        run: |
+          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
+          if [[ -n "${BRANCH}" ]]; then 
+            echo "Checking out target branch"
+            git fetch --all
+            git checkout origin/${GITHUB_BASE_REF}
+          fi
 
       - name: Checkout HiveMQ Operator (legacy) on the same branch
         working-directory: ${{ github.workspace }}/hivemq-operator
