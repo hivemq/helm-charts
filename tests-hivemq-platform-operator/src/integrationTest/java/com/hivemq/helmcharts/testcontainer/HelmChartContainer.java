@@ -66,6 +66,7 @@ public class HelmChartContainer extends K3sContainer {
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
     private static final @NotNull String HIVEMQ_OPERATOR_CONTAINER_NAME = "hivemq-platform-operator";
     private static final @NotNull String HIVEMQ_PLATFORM_CONTAINER_NAME = "hivemq";
+    private static final @NotNull String CONSUL_TEMPLATE_CONTAINER_NAME = "consul-template";
     private static final @NotNull String POD_CPU_LIMIT = "512m";
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartContainer.class);
@@ -636,12 +637,10 @@ public class HelmChartContainer extends K3sContainer {
             final var container = "container ";
             if (note.endsWith(container + HIVEMQ_PLATFORM_CONTAINER_NAME)) {
                 return HIVEMQ_PLATFORM_CONTAINER_NAME;
-            }
-            if (note.endsWith(container + HIVEMQ_OPERATOR_CONTAINER_NAME)) {
+            } else if (note.endsWith(container + HIVEMQ_OPERATOR_CONTAINER_NAME)) {
                 return HIVEMQ_OPERATOR_CONTAINER_NAME;
-            }
-            if (note.contains(container)) {
-                return note.substring(note.lastIndexOf(container) + container.length());
+            } else if (note.endsWith(container + CONSUL_TEMPLATE_CONTAINER_NAME)) {
+                return CONSUL_TEMPLATE_CONTAINER_NAME;
             }
             return null;
         }
