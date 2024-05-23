@@ -25,13 +25,11 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.k3s.K3sContainer;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -103,7 +101,7 @@ public class HelmChartContainer extends K3sContainer {
         if (withLocalImages) {
             bindLocalImages();
         }
-        if (k3s.ordinal() > DockerImageNames.K3s.V1_24.ordinal()) {
+        if (k3s.ordinal() > K3s.V1_24.ordinal()) {
             if (withK3sDebugging) {
                 super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost(), "--debug", "-v", "10");
             } else {
@@ -122,7 +120,7 @@ public class HelmChartContainer extends K3sContainer {
      */
     private void bindLocalImages() {
         try {
-            final Path buildPath = Path.of("build/");
+            final var buildPath = Path.of("build/");
             try (var files = Files.list(buildPath).filter(file -> file.toString().endsWith(".tar"))) {
                 files.map(file -> file.getFileName().toString()).forEach(s -> imageNamePaths.put(s, "/containers"));
             }
@@ -229,10 +227,7 @@ public class HelmChartContainer extends K3sContainer {
         final var client = getKubernetesClient();
         final var namespaceDeleted = client.namespaces().withName(name).informOnCondition(List::isEmpty);
         assertThat(client.namespaces().withName(name).delete()).isNotEmpty();
-        Awaitility.await()
-                .atMost(Duration.ofMinutes(1))
-                .pollInterval(Duration.ofMillis(100))
-                .until(namespaceDeleted::isDone);
+        await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).until(namespaceDeleted::isDone);
         LOG.info("Namespace '{}' deleted", name);
     }
 
@@ -558,8 +553,8 @@ public class HelmChartContainer extends K3sContainer {
                         final var logPodName = getLogPodName(podName);
                         executorService.submit(() -> {
                             LOG.info("Started log watcher for {} in pod {} [{}]", containerName, podName, podUid);
-                            try (final InputStream inputStream = logWatch.getOutput();
-                                 final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                            try (final var inputStream = logWatch.getOutput();
+                                 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
                                 reader.lines().forEach(line -> {
                                     // skip the ISO8601 prefix for logging
                                     final var matcher = LOGBACK_DATE_PREFIX.matcher(line);
