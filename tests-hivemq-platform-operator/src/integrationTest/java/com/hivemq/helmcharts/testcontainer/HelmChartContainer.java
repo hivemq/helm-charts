@@ -220,7 +220,7 @@ public class HelmChartContainer extends K3sContainer {
                 .resource(new NamespaceBuilder().withNewMetadata().withName(name).endMetadata().build())
                 .create();
         assertThat(namespace).isNotNull();
-        LOG.info("Namespace created");
+        LOG.info("Namespace '{}' created", name);
     }
 
     public void deleteNamespace(final @NotNull String name) {
@@ -232,7 +232,7 @@ public class HelmChartContainer extends K3sContainer {
                 .atMost(Duration.ofMinutes(1))
                 .pollInterval(Duration.ofMillis(100))
                 .until(namespaceDeleted::isDone);
-        LOG.info("Namespace deleted");
+        LOG.info("Namespace '{}' deleted", name);
     }
 
     public @NotNull LogWaiterUtil getLogWaiter() {
