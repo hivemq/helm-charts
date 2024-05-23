@@ -443,6 +443,7 @@ additionalVolumes: []
 #       It defaults to the "hivemq" container.
 # path: The path configures the directory to which the volume is mounted in the container.
 #       If the directory already exists, then the contents are overwritten!
-# subPath: Optional name for the subPath. If a volume is mounted with subPath, then the contents
-#          of the directory are not overwritten. However, note that changes to a configmap, for example,
-#          mounted via subPath will not be propagated to the container. Therefore, pods have to be restarted.
+# subPath: Optional name for the subPath. The generated volume mount path will be a result of concatenating `path` and the `subPath` values together.
+#       If a volume is mounted with subPath, then the contents of the directory are not overwritten.
+#       However, note that changes to a configmap, for example, mounted via subPath will not be propagated to the container.
+#       Therefore, pods have to be restarted.
