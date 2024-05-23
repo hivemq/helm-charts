@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.hivemq.helmcharts.Chart;
+import com.hivemq.helmcharts.testcontainer.DockerImageNames.K3s;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
@@ -80,13 +81,13 @@ public class HelmChartContainer extends K3sContainer {
 
     private @Nullable KubernetesClient client;
     private boolean withLocalImages = true;
-    private boolean withK3sDebugging;
+    private boolean withK3sDebugging = false;
 
     public HelmChartContainer() {
-        this(DockerImageNames.K3s.LATEST);
+        this(K3s.LATEST);
     }
 
-    public HelmChartContainer(final @NotNull DockerImageNames.K3s k3s) {
+    public HelmChartContainer(final @NotNull K3s k3s) {
         super(getAdHocImageName(k3s));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + OPERATOR_CHART),
@@ -97,7 +98,7 @@ public class HelmChartContainer extends K3sContainer {
         super.withCopyFileToContainer(MountableFile.forHostPath("../scripts/test.sh"), "/bin/test.sh");
 
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
-        super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S));
+        super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
         if (withLocalImages) {
             bindLocalImages();
@@ -446,7 +447,7 @@ public class HelmChartContainer extends K3sContainer {
         }
     }
 
-    private static @NotNull DockerImageName getAdHocImageName(final @NotNull DockerImageNames.K3s k3s) {
+    private static @NotNull DockerImageName getAdHocImageName(final @NotNull K3s k3s) {
         final var dockerfile = Path.of(MountableFile.forClasspathResource("helm.dockerfile").getFilesystemPath());
         // fix pre-emptively checking local images by replacing the build args in the Dockerfile
         // see https://github.com/testcontainers/testcontainers-java/issues/3238
