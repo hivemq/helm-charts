@@ -171,6 +171,13 @@ public class HelmChartContainer extends K3sContainer {
         watches.put("events", client.events().v1().events().inAnyNamespace().watch(new EventWatcher(client)));
         watches.put("pods", client.pods().inAnyNamespace().watch(new PodWatcher()));
         this.client = client;
+        try {
+            final var configPath = Files.createTempFile("kubeconfig-", ".yaml").toAbsolutePath();
+            configPath.toFile().deleteOnExit();
+            Files.writeString(configPath, getKubeConfigYaml());
+        } catch (final IOException e) {
+            LOG.error("Could not save kubeconfig.yaml to temporary file", e);
+        }
         LOG.info("HelmChartContainer is started");
     }
 
