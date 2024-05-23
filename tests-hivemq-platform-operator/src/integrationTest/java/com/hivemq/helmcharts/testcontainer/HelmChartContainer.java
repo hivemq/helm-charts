@@ -101,14 +101,35 @@ public class HelmChartContainer extends K3sContainer {
         if (withLocalImages) {
             bindLocalImages();
         }
-        if (k3s.ordinal() > K3s.V1_24.ordinal()) {
-            if (withK3sDebugging) {
-                super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost(), "--debug", "-v", "10");
-            } else {
-                super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
-            }
-        } else if (withK3sDebugging) {
-            super.withCommand("server", "--no-deploy=traefik", "--tls-san=" + getHost(), "--debug", "-v", "10");
+        final var etcdNoDataSync = "--etcd-arg=unsafe-no-fsync";
+        final var etcdSnapshotCount = "--etcd-arg=snapshot-count=10000";
+        final var etcdAutoCompactionMode = "--etcd-arg=auto-compaction-mode=revision";
+        final var etcdAutoCompactionRetention = "--etcd-arg=auto-compaction-retention=1000000";
+        final var apiServerCompactionInterval = "--kube-apiserver-arg=etcd-compaction-interval=0s";
+        final var disableTraefik = k3s.ordinal() > K3s.V1_24.ordinal() ? "--disable=traefik" : "--no-deploy=traefik";
+        final var tlsSan = "--tls-san=" + getHost();
+        if (withK3sDebugging) {
+            LOG.debug("Starting K3s container with --debug");
+            super.withCommand("server",
+                    etcdNoDataSync,
+                    etcdSnapshotCount,
+                    etcdAutoCompactionMode,
+                    etcdAutoCompactionRetention,
+                    apiServerCompactionInterval,
+                    disableTraefik,
+                    tlsSan,
+                    "--debug",
+                    "-v",
+                    "10");
+        } else {
+            super.withCommand("server",
+                    etcdNoDataSync,
+                    etcdSnapshotCount,
+                    etcdAutoCompactionMode,
+                    etcdAutoCompactionRetention,
+                    apiServerCompactionInterval,
+                    disableTraefik,
+                    tlsSan);
         }
     }
 
