@@ -21,6 +21,7 @@ class K3sLogConsumer implements Consumer<OutputFrame> {
     private final @NotNull Logger logger;
 
     private @NotNull String prefix = "";
+    private boolean withDebugging = false;
 
     K3sLogConsumer(final @NotNull Logger logger) {
         this.logger = logger;
@@ -32,30 +33,37 @@ class K3sLogConsumer implements Consumer<OutputFrame> {
         return this;
     }
 
+    @NotNull K3sLogConsumer withDebugging(final boolean withDebugging) {
+        this.withDebugging = withDebugging;
+        return this;
+    }
+
     @Override
     public void accept(final @NotNull OutputFrame outputFrame) {
         var line = outputFrame.getUtf8String().replaceAll(LINE_BREAK_AT_END_REGEX, "");
         // filter verbose log messages and misleading errors
-        if (line.contains("Failed to kill all the processes attached to cgroup") ||
-                line.contains("Failed to set sysctl") ||
-                line.contains("Failed to load kernel module") ||
-                line.contains("desc = an error occurred when try to find container") ||
-                line.contains("Unable to fetch coredns config map") ||
-                line.contains("Skipping API") ||
-                line.contains("Adding GroupVersion") ||
-                line.contains("quota admission added evaluator for") ||
-                line.contains("clearQuota called, but quotas disabled") ||
-                line.contains("metrics.k8s.io") ||
-                line.contains("certificate CN") ||
-                line.contains("generated self-signed CA certificate") ||
-                line.contains("cache.go") ||
-                line.contains("garbagecollector.go") ||
-                line.contains("logs.go") ||
-                line.contains("operation_generator.go") ||
-                line.contains("pod_startup_latency_tracker.go") ||
-                line.contains("resource_quota_monitor.go") ||
-                line.contains("shared_informer.go")) {
-            return;
+        if (!withDebugging) {
+            if (line.contains("Failed to kill all the processes attached to cgroup") ||
+                    line.contains("Failed to set sysctl") ||
+                    line.contains("Failed to load kernel module") ||
+                    line.contains("desc = an error occurred when try to find container") ||
+                    line.contains("Unable to fetch coredns config map") ||
+                    line.contains("Skipping API") ||
+                    line.contains("Adding GroupVersion") ||
+                    line.contains("quota admission added evaluator for") ||
+                    line.contains("clearQuota called, but quotas disabled") ||
+                    line.contains("metrics.k8s.io") ||
+                    line.contains("certificate CN") ||
+                    line.contains("generated self-signed CA certificate") ||
+                    line.contains("cache.go") ||
+                    line.contains("garbagecollector.go") ||
+                    line.contains("logs.go") ||
+                    line.contains("operation_generator.go") ||
+                    line.contains("pod_startup_latency_tracker.go") ||
+                    line.contains("resource_quota_monitor.go") ||
+                    line.contains("shared_informer.go")) {
+                return;
+            }
         }
         try {
             // W0531 10:37:43.289602      76 script_file.go:123] ...
