@@ -20,7 +20,7 @@ jobs:
         test-plan: [ Upgrade, Extensions, PodSecurityContext, Other ]
     steps:
       - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:
           path: helm-charts
 
@@ -34,7 +34,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Checkout HiveMQ Platform Operator on the default branch
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_TOKEN }}
@@ -106,7 +106,7 @@ jobs:
         test-plan: [ CustomConfig, Services1, Services2, Platform, PodSecurityContext, Other ]
     steps:
       - name: Checkout HiveMQ Platform Helm Charts
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:
           path: helm-charts
       - name: Set up Docker QEMU
@@ -119,7 +119,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Checkout HiveMQ Platform Operator on the default branch
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_TOKEN }}
