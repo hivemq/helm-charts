@@ -460,3 +460,20 @@ additionalVolumes: []
 #       If a volume is mounted with subPath, then the contents of the directory are not overwritten.
 #       However, note that changes to a configmap, for example, mounted via subPath will not be propagated to the container.
 #       Therefore, pods have to be restarted.
+
+# List of PersistentVolumeClaims that pods are allowed to reference. Every claim in this list must have at least one matching (by name)
+# volumeMount in one container in the StatefulSet template. This can be achieved by defining an `additionalVolumes` entry of type `persistentVolumeClaim`
+# with a matching name.
+# A claim in this list takes precedence over any volumes in the StatefulSet template with the same name.
+volumeClaimTemplates: []
+# - kind: PersistentVolumeClaim
+#   apiVersion: v1
+#   metadata:
+#     name: data
+#   spec:
+#     accessModes:
+#       - ReadWriteOnce
+#     resources:
+#       requests:
+#         storage: 100Gi
+#     volumeMode: Filesystem
