@@ -272,3 +272,86 @@ tests:
             effect: NoSchedule
             key: my-key
             operator: Exists
+
+  - it: with default platform service account settings
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.create
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.validate
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.permissions.create
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.permissions.validate
+            value: "true"
+
+  - it: with platform service account create disabled
+    set:
+      hivemqPlatformServiceAccount.create: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.create
+            value: "false"
+
+  - it: with platform service account validate disabled
+    set:
+      hivemqPlatformServiceAccount.validate: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.validate
+            value: "false"
+
+  - it: with platform service account permissions create disabled
+    set:
+      hivemqPlatformServiceAccount.permissions.create: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.permissions.create
+            value: "false"
+
+  - it: with platform service account permissions validate disabled
+    set:
+      hivemqPlatformServiceAccount.permissions.validate: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.permissions.validate
+            value: "false"
