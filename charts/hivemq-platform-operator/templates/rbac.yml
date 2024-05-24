@@ -97,10 +97,12 @@ rules:
       - get
       - list
       - watch
+      {{- if .Values.hivemqPlatformServiceAccount.create }}
       - create
       - patch
       - update
       - delete
+      {{- end }}
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
@@ -110,10 +112,13 @@ rules:
       - get
       - list
       - watch
+      {{- if .Values.hivemqPlatformServiceAccount.permissions.create }}
       - create
       - patch
       - update
       - delete
+      {{- end }}
+  {{- if .Values.hivemqPlatformServiceAccount.permissions.validate }}
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
@@ -123,5 +128,6 @@ rules:
       - get
       - list
       - watch
+  {{- end }}
 ---
 {{- end }}
