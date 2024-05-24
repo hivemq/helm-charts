@@ -276,7 +276,7 @@ Usage: {{- include "hivemq-platform.validate-pod-security-context" (dict "podSec
 Validates the addtionalVolumes values have a valid combination, duplicated volume mount are present and no duplicated volumes
 with different type exist
 Params:
-- addtionalVolumes: The .Values.addtionalVolumes value.
+- additionalVolumes: The .Values.additionalVolumes value.
 Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 */}}
 {{- define "hivemq-platform.validate-additional-volumes" -}}
