@@ -47,6 +47,15 @@ spec:
             # additional option to show the configuration details in the log
             - name: hivemq.platform.operator.log.configuration
               value: "false"
+            # additional options for service accounts and permission functionality
+            - name: hivemq.platform.operator.serviceaccount.create
+              value: "true"
+            - name: hivemq.platform.operator.serviceaccount.validate
+              value: "true"
+            - name: hivemq.platform.operator.serviceaccount.permissions.create
+              value: "true"
+            - name: hivemq.platform.operator.serviceaccount.permissions.validate
+              value: "true"
             # additional options for fine-grained logging
             - name: hivemq.platform.operator.quarkus.log.level
               value: "INFO"
