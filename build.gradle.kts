@@ -116,6 +116,29 @@ val updateAllManifestFiles by tasks.registering {
     }
 }
 
+val test by tasks.registering {
+    group = "test"
+    description = "Executes all Helm unit tests."
+    doLast {
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("helm", "unittest", "./charts/hivemq-operator")
+        }
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("helm", "unittest", "./charts/hivemq-platform")
+        }
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("helm", "unittest", "./charts/hivemq-platform-operator")
+        }
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("helm", "unittest", "./charts/hivemq-swarm")
+        }
+    }
+}
+
 fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String) {
     val appVersion = project.properties["appVersion"]
     if (checkAppVersion && appVersion == null) {
