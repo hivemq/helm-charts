@@ -107,8 +107,8 @@ rules:
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
+      - roles
       - rolebindings
-      - clusterroles
     verbs:
       - get
       - list
@@ -117,18 +117,12 @@ rules:
       - patch
       - update
       - delete
----
-# Source: hivemq-platform-operator/templates/rbac.yml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: "hivemq-platform-operator-pod-resource-role-my-operator"
-rules:
   - apiGroups:
-      - ""
+      - rbac.authorization.k8s.io
     resources:
-      - pods
+      - clusterroles
+      - clusterrolebindings
     verbs:
       - get
-      - patch
-      - update
+      - list
+      - watch
