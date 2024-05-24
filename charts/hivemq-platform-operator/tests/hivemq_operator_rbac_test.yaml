@@ -1,0 +1,167 @@
+suite: test HiveMQ Platform Operator RBAC
+templates:
+  - rbac.yml
+tests:
+
+  - it: with disabled RBAC creation
+    set:
+      rbac.create: false
+    asserts:
+      - notFailedTemplate: { "rbac.yml" }
+      - hasDocuments:
+          count: 0
+
+  - it: with default platform service account settings
+    asserts:
+      - exists:
+          path: rules
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "serviceaccounts" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "roles", "rolebindings" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "clusterroles", "clusterrolebindings" ]
+            verbs: [ "get", "list", "watch" ]
+
+  - it: with platform service account create and validate enabled
+    set:
+      hivemqPlatformServiceAccount.create: true
+      hivemqPlatformServiceAccount.validate: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "serviceaccounts" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+
+  - it: with platform service account create disabled
+    set:
+      hivemqPlatformServiceAccount.create: false
+      hivemqPlatformServiceAccount.validate: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "serviceaccounts" ]
+            verbs: [ "get", "list", "watch" ]
+
+  - it: with platform service account validate disabled
+    set:
+      hivemqPlatformServiceAccount.create: true
+      hivemqPlatformServiceAccount.validate: false
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "serviceaccounts" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+
+  - it: with platform service account create and validate disabled
+    set:
+      hivemqPlatformServiceAccount.create: false
+      hivemqPlatformServiceAccount.validate: false
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "serviceaccounts" ]
+            verbs: [ "get", "list", "watch" ]
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "serviceaccounts" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+
+  - it: with platform service account permissions create and validate enabled
+    set:
+      hivemqPlatformServiceAccount.permissions.create: true
+      hivemqPlatformServiceAccount.permissions.validate: true
+    asserts:
+        - contains:
+            path: rules
+            content:
+              apiGroups: [ "rbac.authorization.k8s.io" ]
+              resources: [ "roles", "rolebindings" ]
+              verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+        - contains:
+            path: rules
+            content:
+              apiGroups: [ "rbac.authorization.k8s.io" ]
+              resources: [ "clusterroles", "clusterrolebindings" ]
+              verbs: [ "get", "list", "watch" ]
+
+  - it: with platform service account permissions create disabled
+    set:
+      hivemqPlatformServiceAccount.permissions.create: false
+      hivemqPlatformServiceAccount.permissions.validate: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "roles", "rolebindings" ]
+            verbs: [ "get", "list", "watch" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "clusterroles", "clusterrolebindings" ]
+            verbs: [ "get", "list", "watch" ]
+
+  - it: with platform service account permissions validate disabled
+    set:
+      hivemqPlatformServiceAccount.permissions.create: true
+      hivemqPlatformServiceAccount.permissions.validate: false
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "roles", "rolebindings" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "clusterroles", "clusterrolebindings" ]
+            verbs: [ "get", "list", "watch" ]
+
+  - it: with platform service account permissions create and validate disabled
+    set:
+      hivemqPlatformServiceAccount.permissions.create: false
+      hivemqPlatformServiceAccount.permissions.validate: false
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "roles", "rolebindings" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "roles", "rolebindings" ]
+            verbs: [ "get", "list", "watch" ]
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "clusterroles", "clusterrolebindings" ]
+            verbs: [ "get", "list", "watch" ]
