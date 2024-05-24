@@ -156,6 +156,29 @@
         }
       }
     },
+    "hivemqPlatformServiceAccount" : {
+      "type" : "object",
+      "properties" : {
+        "create" : {
+          "type" : "boolean"
+        },
+        "validate" : {
+          "type" : "boolean"
+        },
+        "permissions" : {
+          "type" : "object",
+          "properties" : {
+            "create" : {
+              "type" : "boolean"
+            },
+            "validate" : {
+              "type" : "boolean"
+            }
+          }
+        }
+      }
+    },
+
     "rbac" : {
       "type" : "object",
       "properties" : {

@@ -10,8 +10,8 @@ image:
   pullPolicy: IfNotPresent
   pullSecretName: ""
 
-# Resources, limits and requests are set to equal values
-# Note: Increase resources depending on how many HiveMQ Platforms this operator manages.
+# Resources, limits and requests are set to equal values.
+# Note: Increase resources depending on how many HiveMQ Platforms the Operator manages.
 resources:
   cpu: 512m
   memory: 512M
@@ -31,20 +31,32 @@ javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxR
 # Selector name that is used to watch HiveMQ Platforms with a matching selector.
 selector: nil
 
-# Configures whether Kubernetes RBAC permissions should be created.
+# Configures whether Kubernetes RBAC permissions for the Operator should be created.
 rbac:
   create: true
 
-# Configures the service account for Kubernetes RBAC permissions.
+# Configures the ServiceAccount for the Operator.
 serviceAccount:
-  # Specifies whether a service account should be created.
+  # Specifies whether a ServiceAccount should be created for the Operator.
   create: true
-  # The service account name to be used, or "hivemq-<release name>" if not set.
+  # The ServiceAccount name that is used. Defaults to "hivemq-<release name>" if not set.
   name: ""
 
-# Configures how the operator pod should be scheduled on the Kubernetes cluster nodes.
+# Configures the ServiceAccount and RBAC permissions (Role, RoleBinding) the Operator creates for the HiveMQ Platform Pods.
+hivemqPlatformServiceAccount:
+  # Specifies whether a ServiceAccount should be created for all HiveMQ Platforms.
+  create: true
+  # Specifies whether the ServiceAccount for all HiveMQ Platforms should be validated.
+  validate: true
+  permissions:
+    # Specifies whether the RBAC permissions for the ServiceAccount should be created for all HiveMQ Platforms.
+    create: true
+    # Specifies whether the RBAC permissions for the ServiceAccount for all HiveMQ Platforms should be validated.
+    validate: true
+
+# Configures how the Operator Pod should be scheduled on the Kubernetes cluster nodes.
 podScheduling:
-  # Configures the affinity for the Operator pod
+  # Configures the affinity for the Operator Pod.
   affinity:
   # podAffinity:
   #    requiredDuringSchedulingIgnoredDuringExecution:
@@ -56,19 +68,19 @@ podScheduling:
   #                - my-app
   #        topologyKey: "kubernetes.io/hostname"
 
-  # Configures the tolerations for the Operator pod
+  # Configures the tolerations for the Operator Pod.
   tolerations:
   #  - key: "example-key"
   #    operator: "Exists"
   #    effect: "NoSchedule"
 
-# TLS configuration for the operator to access the Kubernetes API.
+# TLS configuration for the Operator to access the Kubernetes API.
 tls:
-  # Name of the secret that contains keystore and truststore
+  # Name of the Secret that contains keystore and truststore.
   secretName: nil
-  # The keystore password. Can also be set as "keystore.password" in the secret.
+  # The keystore password. Can also be set as "keystore.password" in the Secret.
   keystorePassword: nil
-  # The truststore password. Can also be set as "truststore.password" in the secret.
+  # The truststore password. Can also be set as "truststore.password" in the Secret.
   truststorePassword: nil
 
 # Holds pod-level security attributes and common container settings.
@@ -85,9 +97,9 @@ podSecurityContext:
   enabled: false
   runAsNonRoot: true
 
-# Specifies environment variables to be added to the operator container.
+# Specifies environment variables to be added to the Operator container.
 # Environment variables can be defined as a list of either key-value pairs or
-# using valueFrom to reference a secret or config map.
+# using valueFrom to reference a Secret or ConfigMap.
 env: []
   # - name: <ENV_VAR_NAME1>
   #   value: <value>
