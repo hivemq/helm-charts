@@ -186,14 +186,18 @@ spec:
               {{- include "hivemq-platform.get-additional-volumes" . | indent 12 }}
             {{- end }}
           {{- end }}
-          {{- if and (typeIsLike "map[string]interface {}" .Values.podScheduling.affinity) (.Values.podScheduling.affinity) }}
+          {{- with .Values.podScheduling.affinity }}
           affinity:
-            {{- .Values.podScheduling.affinity | toYaml | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if and (typeIsLike "[]interface {}" .Values.podScheduling.tolerations) (.Values.podScheduling.tolerations) }}
+          {{- with .Values.podScheduling.tolerations }}
           tolerations:
-            {{- .Values.podScheduling.tolerations | toYaml | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- with .Values.volumeClaimTemplates }}
+      volumeClaimTemplates:
+        {{- toYaml . | nindent 12 }}
+      {{- end }}
       {{- else -}}
       {{.Values.config.overrideStatefulSet | nindent 3}}
       {{- end }}
