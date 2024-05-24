@@ -40,27 +40,26 @@ jobs:
           token: ${{ secrets.JENKINS_TOKEN }}
           path: hivemq-platform-operator
 
-      - name: Checkout HiveMQ Platform Operator on the target branch
+      - name: Checkout HiveMQ Platform Operator on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-platform-operator
-        if: ${{ github.base_ref != 'master' }}
         run: |
+          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+          if [[ -n "${BRANCH}" ]]; then 
+            echo "Checking out branch with the same name"
+            git fetch --all
+            git checkout origin/${GITHUB_HEAD_REF}
+            exit
+          fi
+          if [[ "${GITHUB_BASE_REF}" == "master" ]]; then
+            exit
+          fi
           echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
           BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
           if [[ -n "${BRANCH}" ]]; then 
             echo "Checking out target branch"
             git fetch --all
             git checkout origin/${GITHUB_BASE_REF}
-          fi
-
-      - name: Checkout HiveMQ Platform Operator on the same branch
-        working-directory: ${{ github.workspace }}/hivemq-platform-operator
-        run: |
-          echo "Checking if branch \"${GITHUB_REF_NAME}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_REF_NAME})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_REF_NAME}
           fi
 
       - name: Set up JDK 21
@@ -125,27 +124,26 @@ jobs:
           token: ${{ secrets.JENKINS_TOKEN }}
           path: hivemq-platform-operator
 
-      - name: Checkout HiveMQ Platform Operator on the target branch
+      - name: Checkout HiveMQ Platform Operator on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-platform-operator
-        if: ${{ github.base_ref != 'master' }}
         run: |
+          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+          if [[ -n "${BRANCH}" ]]; then 
+            echo "Checking out branch with the same name"
+            git fetch --all
+            git checkout origin/${GITHUB_HEAD_REF}
+            exit
+          fi
+          if [[ "${GITHUB_BASE_REF}" == "master" ]]; then
+            exit
+          fi
           echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
           BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
           if [[ -n "${BRANCH}" ]]; then 
             echo "Checking out target branch"
             git fetch --all
             git checkout origin/${GITHUB_BASE_REF}
-          fi
-
-      - name: Checkout HiveMQ Platform Operator on the same branch
-        working-directory: ${{ github.workspace }}/hivemq-platform-operator
-        run: |
-          echo "Checking if branch \"${GITHUB_REF_NAME}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_REF_NAME})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_REF_NAME}
           fi
 
       - name: Set up JDK 11
