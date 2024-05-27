@@ -5,7 +5,18 @@ Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operato
 {{- if ne .Values.serviceAccount.create true }}
 
 *** Warning ***
-The service account {{ .Values.serviceAccount.name }} should have correct permissions for the Operator to work correctly.
+The ServiceAccount {{ .Values.serviceAccount.name }} should have sufficient permissions for the Operator to work correctly.
+{{- end }}
+{{- if ne .Values.hivemqPlatformServiceAccount.create true }}
 
+*** Warning ***
+The Operator is not configured to create a ServiceAccount for the HiveMQ Platform Pods.
+Please make sure that you configure a valid custom ServiceAccount in the HiveMQ Platform Helm charts values.yaml (see nodes.serviceAccountName).
+{{- end }}
+{{- if ne .Values.hivemqPlatformServiceAccount.permissions.create true }}
+
+*** Warning ***
+The Operator is not configured to create the RBAC permissions (Role and RoleBinding) for the ServiceAccount of the HiveMQ Platform Pods.
+Please make sure the HiveMQ Platform Helm charts values.yaml configures a ServiceAccount (see nodes.serviceAccountName) with sufficient RBAC permissions to list, get and watch Pods.
 {{- end }}
 -----
