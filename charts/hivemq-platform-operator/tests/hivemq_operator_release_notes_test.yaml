@@ -29,5 +29,37 @@ tests:
             Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
             
             *** Warning ***
-            The service account foo-bar-sa should have correct permissions for the Operator to work correctly.
+            The ServiceAccount foo-bar-sa should have sufficient permissions for the Operator to work correctly.
+            -----
+
+  - it: with platform service account create disabled, shows warning
+    set:
+      hivemqPlatformServiceAccount.create: false
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            The Operator is not configured to create a ServiceAccount for the HiveMQ Platform Pods.
+            Please make sure that you configure a valid custom ServiceAccount in the HiveMQ Platform Helm charts values.yaml (see nodes.serviceAccountName).
+            -----
+
+  - it: with platform service account create and validate disabled
+    set:
+      hivemqPlatformServiceAccount.permissions.create: false
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            The Operator is not configured to create the RBAC permissions (Role and RoleBinding) for the ServiceAccount of the HiveMQ Platform Pods.
+            Please make sure the HiveMQ Platform Helm charts values.yaml configures a ServiceAccount (see nodes.serviceAccountName) with sufficient RBAC permissions to list, get and watch Pods.
             -----
