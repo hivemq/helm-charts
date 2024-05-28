@@ -1,0 +1,35 @@
+suite: test HiveMQ Platform NOTES
+templates:
+  - NOTES.txt
+release:
+  name: hivemq-platform-release
+  namespace: hivemq-platform-namespace
+tests:
+
+  - it: with default values
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform release "hivemq-platform-release" installed in namespace "hivemq-platform-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            -----
+
+  - it: with override init containers, shows warning
+    set:
+      config.overrideInitContainers: |-
+        - name: foo-bar-container
+          image: busybox
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform release "hivemq-platform-release" installed in namespace "hivemq-platform-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            `config.overrideInitContainers` value is deprecated and it might be removed in future releases.
+            Please, consider using `additionalInitContainers` value instead.
+            -----
