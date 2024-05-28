@@ -38,17 +38,17 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
-  - it: with init containers
+  - it: with override init containers
     set:
       config.overrideInitContainers: |-
         - name: test-init-container
           image: busybox
     asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.initContainers
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.initContainers
           count: 1
-      - exists:
-          path: spec.statefulSet.spec.template.spec.initContainers[0]
       - equal:
           path: spec.statefulSet.spec.template.spec.initContainers[0].name
           value: test-init-container
@@ -56,12 +56,55 @@ tests:
           path: spec.statefulSet.spec.template.spec.initContainers[0].image
           value: busybox
 
-  - it: without init containers
+  - it: with additional init containers
+    set:
+      additionalInitContainers:
+        - name: test-init-container
+          image: busybox
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.initContainers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.initContainers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.initContainers[0].name
+          value: test-init-container
+      - equal:
+          path: spec.statefulSet.spec.template.spec.initContainers[0].image
+          value: busybox
+
+  - it: with empty override init containers
     set:
       config.overrideInitContainers:
     asserts:
       - notExists:
           path: spec.statefulSet.spec.template.spec.initContainers
+
+  - it: with empty additional init containers
+    set:
+      additionalInitContainers:
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.initContainers
+
+  - it: with default settings, no init containers
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.initContainers
+
+  - it: with override init containers and additional init containers, then fails
+    set:
+      additionalInitContainers:
+        - name: foo-container
+          image: busybox
+      config.overrideInitContainers: |-
+        - name: bar-container
+          image: busybox
+    asserts:
+    - failedTemplate:
+        errorMessage: |-
+          Only `additionalInitContainers` or `config.overrideInitContainers` can be defined at a time
 
   - it: with default service account
     asserts:
@@ -100,7 +143,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].name
           value: hivemq
 
-  - it: with default values, no sidecar container is created
+  - it: with default values, no additional container is created
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers
@@ -111,9 +154,9 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].name
           value: hivemq
 
-  - it: with sidecar containers
+  - it: with additional containers
     values:
-      - sidecar-container-values.yaml
+      - additional-containers-values.yaml
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers
@@ -126,7 +169,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers
           content:
-            name: my-sidecar1
+            name: my-container1
             image: alpine:latest
             command: ['sh', '-c', 'while true; do echo "logging" >> /opt/logs.txt; sleep 1; done']
             volumeMounts:
@@ -135,7 +178,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers
           content:
-            name: my-sidecar2
+            name: my-container2
             image: alpine:latest
             env:
               - name: MY_ENV_VAR
