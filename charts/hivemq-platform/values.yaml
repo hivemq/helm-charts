@@ -63,14 +63,6 @@ nodes:
   # The name of the custom service account to use by the Platform pods.
   # If not set or empty, a default service account is created.
   serviceAccountName: ""
-  # Custom containers to be added to the HiveMQ platform pod
-  sidecars: []
-  #  - name: my-sidecar
-  #    image: alpine:latest
-  #    command: ['sh', '-c', 'while true; do echo "logging" >> /opt/hivemq/operator/logs.txt; sleep 30; done']
-  #    volumeMounts:
-  #      - name: operator-init
-  #        mountPath: /opt/hivemq/operator/
 
 # Configuration options for the default provided HiveMQ configuration (config.xml)
 #
@@ -307,12 +299,33 @@ config:
   # WARNING: When this configuration option is used, all other configuration options for the StatefulSetSpec configuration are ignored.
   overrideStatefulSet: ""
   # Inlines an init container configuration and adds it to the StatefulSet
+  # WARNING: This value is now marked as `deprecated` and might be removed in future releases.
+  #          Please, consider using `additionalInitContainers` value instead.
   overrideInitContainers: ""
 
   # Enables HiveMQ Data Hub
   dataHub:
     dataValidationEnabled: false
     behaviorValidationEnabled: false
+
+# Custom init containers to be added to the HiveMQ platform StatefulSet
+additionalInitContainers: []
+#  - name: my-custom-init-container
+#    image: alpine:latest
+#    restartPolicy: Always
+#    command: ['sh', '-c', 'tail -F /opt/logs.txt']
+#    volumeMounts:
+#      - name: data
+#        mountPath: /opt
+
+# Custom containers to be added to the HiveMQ platform pod
+additionalContainers: []
+#  - name: my-custom-container
+#    image: alpine:latest
+#    command: ['sh', '-c', 'while true; do echo "logging" >> /opt/hivemq/operator/logs.txt; sleep 30; done']
+#    volumeMounts:
+#      - name: operator-init
+#        mountPath: /opt/hivemq/operator/
 
 # HiveMQ Platform extension configuration
 extensions:
