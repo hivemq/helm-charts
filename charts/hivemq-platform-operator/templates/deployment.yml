@@ -75,8 +75,9 @@ spec:
             - name: hivemq.platform.operator.serviceaccount.create
               value: "{{ .Values.hivemqPlatformServiceAccount.create }}"
             - name: hivemq.platform.operator.serviceaccount.validate
-              value: "{{ .Values.platformServiceAccount.validate }}"
               value: "{{ .Values.hivemqPlatformServiceAccount.validate }}"
+            - name: hivemq.platform.operator.serviceaccount.name
+              value: "{{ .Values.hivemqPlatformServiceAccount.name }}"
             - name: hivemq.platform.operator.serviceaccount.permissions.create
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.create }}"
             - name: hivemq.platform.operator.serviceaccount.permissions.validate
