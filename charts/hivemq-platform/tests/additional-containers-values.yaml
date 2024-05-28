@@ -1,12 +1,11 @@
-nodes:
-  sidecars:
-    - name: my-sidecar1
+additionalContainers:
+    - name: my-container1
       image: alpine:latest
       command: ['sh', '-c', 'while true; do echo "logging" >> /opt/logs.txt; sleep 1; done']
       volumeMounts:
         - name: data
           mountPath: /opt
-    - name: my-sidecar2
+    - name: my-container2
       image: alpine:latest
       env:
         - name: MY_ENV_VAR
