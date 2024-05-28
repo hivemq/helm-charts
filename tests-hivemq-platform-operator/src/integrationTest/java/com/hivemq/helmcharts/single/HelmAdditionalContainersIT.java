@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Tag("CustomConfig")
 @Tag("Containers")
 @SuppressWarnings("DuplicatedCode")
 class HelmAdditionalContainersIT extends AbstractHelmChartIT {
