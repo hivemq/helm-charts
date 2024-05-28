@@ -48,6 +48,10 @@ hivemqPlatformServiceAccount:
   create: true
   # Specifies whether the ServiceAccount for all HiveMQ Platforms should be validated.
   validate: true
+  # The ServiceAccount name that is used for all HiveMQ Platforms.
+  # This overrides the default name "hivemq-platform-pod-<platform-name>" the Operator creates.
+  # The ServiceAccount can also be overridden in the HiveMQ Platform Helm chart (see nodes.serviceAccountName) for each specific HiveMQ Platform.
+  name: ""
   permissions:
     # Specifies whether the RBAC permissions for the ServiceAccount should be created for all HiveMQ Platforms.
     create: true
