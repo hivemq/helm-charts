@@ -33,6 +33,20 @@
         }
       }
     },
+    "additionalInitContainers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "additionalContainers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
     "controlCenter" : {
       "type" : "object",
       "properties" : {
@@ -314,13 +328,6 @@
         },
         "serviceAccountName": {
           "type": "string"
-        },
-        "sidecars": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": true
-          }
         }
       }
     },
