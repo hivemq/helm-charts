@@ -5,7 +5,7 @@ Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operato
 {{- if .Values.config.overrideInitContainers }}
 
 *** Warning ***
-`config.overrideInitContainers` value is deprecated and it might be removed in future releases.
+`config.overrideInitContainers` value is deprecated and will be removed in future releases.
 Please, consider using `additionalInitContainers` value instead.
 
 {{- end }}
