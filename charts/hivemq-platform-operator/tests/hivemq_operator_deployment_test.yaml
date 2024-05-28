@@ -292,6 +292,11 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
+            name: hivemq.platform.operator.serviceaccount.name
+            value: ""
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: hivemq.platform.operator.serviceaccount.permissions.create
             value: "true"
       - contains:
@@ -327,6 +332,20 @@ tests:
           content:
             name: hivemq.platform.operator.serviceaccount.validate
             value: "false"
+
+  - it: with platform service account name set
+    set:
+      hivemqPlatformServiceAccount.name: "my-serviceaccount-name"
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.serviceaccount.name
+            value: "my-serviceaccount-name"
 
   - it: with platform service account permissions create disabled
     set:
