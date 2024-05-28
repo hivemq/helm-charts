@@ -1,0 +1,33 @@
+suite: test HiveMQ Platform Operator NOTES
+templates:
+  - NOTES.txt
+release:
+  name: hivemq-platform-operator-release
+  namespace: hivemq-platform-operator-namespace
+tests:
+
+  - it: with default values
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            -----
+
+  - it: with custom service account, shows warning
+    set:
+      serviceAccount.create: false
+      serviceAccount.name: foo-bar-sa
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            The service account foo-bar-sa should have correct permissions for the Operator to work correctly.
+            -----
