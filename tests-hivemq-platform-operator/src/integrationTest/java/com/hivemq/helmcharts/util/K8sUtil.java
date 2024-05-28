@@ -204,17 +204,40 @@ public class K8sUtil {
      * If the container with the given name is not found, a {@link java.util.NoSuchElementException} will be thrown.
      *
      * @param statefulSetSpec the {@link StatefulSetSpec} to retrieve the HiveMQ container from
-     * @param containerName the name of the container to look for
+     * @param containerName   the name of the container to look for
      * @return the container
      */
     public static @NotNull Container getContainer(
-            final @NotNull StatefulSetSpec statefulSetSpec,
-            final @NotNull String containerName) {
+            final @NotNull StatefulSetSpec statefulSetSpec, final @NotNull String containerName) {
         return statefulSetSpec.getTemplate()
                 .getSpec()
                 .getContainers()
                 .stream()
                 .filter(container -> container.getName().equals(containerName))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    /**
+     * Returns the expected init container with as per the given initContainerName from the given
+     * {@link StatefulSetSpec}
+     * instance.
+     * <p>
+     * If the init container with the given name is not found, a {@link java.util.NoSuchElementException} will be
+     * thrown.
+     *
+     * @param statefulSetSpec   the {@link StatefulSetSpec} to retrieve the HiveMQ container from
+     * @param initContainerName the name of the container to look for
+     * @return the container
+     */
+    public static @NotNull Container getInitContainer(
+            final @NotNull StatefulSetSpec statefulSetSpec,
+            final @NotNull String initContainerName) {
+        return statefulSetSpec.getTemplate()
+                .getSpec()
+                .getInitContainers()
+                .stream()
+                .filter(container -> container.getName().equals(initContainerName))
                 .findFirst()
                 .orElseThrow();
     }
