@@ -52,9 +52,18 @@ spec:
             {{- end }}
             fsGroupChangePolicy: "OnRootMismatch"
           {{- end }}
-          {{- if .Values.config.overrideInitContainers }}
+          {{- $additionalInitContainers := .Values.additionalInitContainers }}
+          {{- $overrideInitContainers := .Values.config.overrideInitContainers }}
+          {{- if and $overrideInitContainers $additionalInitContainers }}
+              {{- fail ("Only `additionalInitContainers` or `config.overrideInitContainers` can be defined at a time") }}
+          {{- end }}
+          {{- if or $overrideInitContainers $additionalInitContainers }}
           initContainers:
-            {{.Values.config.overrideInitContainers | nindent 12}}
+          {{- if $overrideInitContainers }}
+          {{- $overrideInitContainers | nindent 12 }}
+          {{- else }}
+          {{- $additionalInitContainers | toYaml | nindent 12 }}
+          {{- end }}
           {{- end }}
           {{- if .Values.nodes.serviceAccountName }}
           serviceAccountName: {{ .Values.nodes.serviceAccountName }}
@@ -156,7 +165,7 @@ spec:
                 {{- include "hivemq-platform.get-additional-volume-mounts" . | indent 16 }}
                 {{- end -}}
               {{- end }}
-            {{- with .Values.nodes.sidecars }}
+            {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- if or $hasAdditionalVolumes (or $hasLicense $hasKeystore) }}
