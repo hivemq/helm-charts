@@ -81,7 +81,7 @@ val integrationTest by tasks.registering(Test::class) {
         val testPlan = environment["TEST_PLAN"].toString()
         if (testPlan == "Other") {
             systemProperty(
-                "excludeTags", "Upgrade,Extensions,Services1,Services2,CustomConfig,Services,Platform,PodSecurityContext"
+                "excludeTags", "Upgrade,Extensions,CustomConfig,Containers,Services,Platform,PodSecurityContext"
             )
         } else {
             systemProperty(
