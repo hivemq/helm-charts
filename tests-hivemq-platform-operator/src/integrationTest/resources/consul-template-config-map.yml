@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: consul-template-config-map
 data:
-  consul-template-sidecar.hcl: |
+  consul-template.hcl: |
     template {
       source      = "/consul-template/license.lic"
       destination = "/opt/hivemq/license/license.lic"
