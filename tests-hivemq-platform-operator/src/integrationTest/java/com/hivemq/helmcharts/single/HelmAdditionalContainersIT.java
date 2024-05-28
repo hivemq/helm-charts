@@ -12,16 +12,19 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Tag("Platform")
-class HelmSidecarContainerIT extends AbstractHelmChartIT {
+@Tag("CustomConfig")
+@Tag("Containers")
+@SuppressWarnings("DuplicatedCode")
+class HelmAdditionalContainersIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platform_whenSidecarContainer_withConsulTemplateThenLicenseUpdated() throws Exception {
+    void whenAdditionalContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
         K8sUtil.createConfigMap(client,
                 platformNamespace,
                 "consul-template-config-map.yml");
-        installPlatformChartAndWaitToBeRunning("/files/sidecar-containers-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/additional-containers-test-values.yaml");
+
         await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
@@ -30,8 +33,8 @@ class HelmSidecarContainerIT extends AbstractHelmChartIT {
             assertThat(hivemqContainer.getVolumeMounts().stream()) //
                     .anyMatch(volumeMount -> volumeMount.getName().equals("license-volume") &&
                             volumeMount.getMountPath().equals("/opt/hivemq/license"));
-            final var sidecarContainer = K8sUtil.getContainer(statefulSet.getSpec(), "consul-template");
-            assertThat(sidecarContainer.getVolumeMounts().stream()) //
+            final var additionalContainer = K8sUtil.getContainer(statefulSet.getSpec(), "consul-template-container");
+            assertThat(additionalContainer.getVolumeMounts().stream()) //
                     .anyMatch(volumeMount -> volumeMount.getName().equals("license-volume") &&
                             volumeMount.getMountPath().equals("/opt/hivemq/license"));
 
