@@ -299,7 +299,7 @@ config:
   # WARNING: When this configuration option is used, all other configuration options for the StatefulSetSpec configuration are ignored.
   overrideStatefulSet: ""
   # Inlines an init container configuration and adds it to the StatefulSet
-  # WARNING: This value is now marked as `deprecated` and might be removed in future releases.
+  # WARNING: This value is now marked as `deprecated` and will be removed in future releases.
   #          Please, consider using `additionalInitContainers` value instead.
   overrideInitContainers: ""
 
