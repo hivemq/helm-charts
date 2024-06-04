@@ -56,7 +56,7 @@ testing {
                         if (testPlan == "Other") {
                             systemProperty(
                                 "excludeTags",
-                                "Upgrade,Extensions,CustomConfig,Containers,Services,Platform,PodSecurityContext",
+                                "Upgrade,Extensions,CustomConfig,Volumes,Containers,Services,Platform,PodSecurityContext",
                             )
                         } else {
                             systemProperty("includeTags", testPlan)
