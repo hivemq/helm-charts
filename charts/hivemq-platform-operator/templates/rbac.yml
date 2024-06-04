@@ -89,6 +89,7 @@ rules:
       - create
       - patch
       - update
+  {{- if or .Values.hivemqPlatformServiceAccount.create .Values.hivemqPlatformServiceAccount.validate }}
   - apiGroups:
       - ""
     resources:
@@ -103,6 +104,8 @@ rules:
       - update
       - delete
       {{- end }}
+  {{- end }}
+  {{- if or .Values.hivemqPlatformServiceAccount.permissions.create .Values.hivemqPlatformServiceAccount.permissions.validate }}
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
@@ -118,6 +121,7 @@ rules:
       - update
       - delete
       {{- end }}
+  {{- end }}
   {{- if .Values.hivemqPlatformServiceAccount.permissions.validate }}
   - apiGroups:
       - rbac.authorization.k8s.io
