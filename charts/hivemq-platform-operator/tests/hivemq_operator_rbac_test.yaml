@@ -75,7 +75,7 @@ tests:
       hivemqPlatformServiceAccount.create: false
       hivemqPlatformServiceAccount.validate: false
     asserts:
-      - contains:
+      - notContains:
           path: rules
           content:
             apiGroups: [ "" ]
@@ -153,7 +153,7 @@ tests:
             apiGroups: [ "rbac.authorization.k8s.io" ]
             resources: [ "roles", "rolebindings" ]
             verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
-      - contains:
+      - notContains:
           path: rules
           content:
             apiGroups: [ "rbac.authorization.k8s.io" ]
