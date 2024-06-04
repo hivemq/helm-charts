@@ -798,6 +798,46 @@ tests:
             name: test-empty-mount-volume
             emptyDir: {}
 
+  - it: with default settings, no volume claim template is set
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.volumeClaimTemplates
+
+  - it: with custom volume claim template
+    set:
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            volumeMode: Filesystem
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+      - lengthEqual:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          content:
+            kind: PersistentVolumeClaim
+            apiVersion: v1
+            metadata:
+              name: data
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 100Gi
+              volumeMode: Filesystem
+
   - it: with pod scheduling values set
     values:
       - pod-scheduling-values.yaml
