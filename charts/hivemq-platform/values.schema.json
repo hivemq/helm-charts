@@ -96,7 +96,23 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": true
+        "properties" : {
+          "kind" : {
+            "type" : "string",
+            "enum": ["PersistentVolumeClaim"]
+          },
+          "apiVersion" : {
+            "type" : "string",
+            "enum": ["v1"]
+          },
+          "metadata" : {
+            "type" : "object"
+          },
+          "spec" : {
+            "type" : "object"
+          }
+        },
+        "required": ["kind", "apiVersion", "metadata", "spec"]
       }
     },
     "services" : {
