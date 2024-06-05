@@ -838,6 +838,97 @@ tests:
                   storage: 100Gi
               volumeMode: Filesystem
 
+  - it: with missing mandatory element `kind` for volume claim template, then schema validation fails
+    set:
+      volumeClaimTemplates:
+        - apiVersion: v1
+          metadata:
+            name: data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate: {}
+
+  - it: with missing mandatory element `apiVersion` for volume claim template, then schema validation fails
+    set:
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          metadata:
+            name: data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate: {}
+
+  - it: with missing mandatory element `metadata` for volume claim template, then schema validation fails
+    set:
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate: {}
+
+  - it: with missing mandatory element `spec` for volume claim template, then schema validation fails
+    set:
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: data
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid `kind` element for volume claim template, then schema validation fails
+    set:
+      volumeClaimTemplates:
+        - kind: InvalidKind
+          apiVersion: v1
+          metadata:
+            name: data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid `apiVersion` element for volume claim template, then schema validation fails
+    set:
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: InvalidVersion
+          metadata:
+            name: data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 100Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate: {}
+
   - it: with pod scheduling values set
     values:
       - pod-scheduling-values.yaml
