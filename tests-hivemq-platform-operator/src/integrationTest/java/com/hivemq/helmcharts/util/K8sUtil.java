@@ -5,6 +5,7 @@ import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 public class K8sUtil {
@@ -60,6 +62,7 @@ public class K8sUtil {
      * @param configuration the content of the {@code config.xml} file
      * @return the created ConfigMap instance
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static @NotNull ConfigMap createConfigMap(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
@@ -160,6 +163,52 @@ public class K8sUtil {
     }
 
     /**
+     * Executes the the given command in the HiveMQ platform pod for the HiveMQ container
+     * and asserts the output, error results and exit code
+     *
+     * @param client        the Kubernetes client to use
+     * @param namespace     the namespace to create the service account in
+     * @param pod           the pod to execute the command in
+     * @param command       the command line to execute
+     */
+    public static void executeInHiveMQPod(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull Pod pod,
+            final @NotNull String... command) {
+        executeInPod(client, namespace, pod, "hivemq", command);
+    }
+
+    /**
+     * Executes the the given command in the specified pod and asserts the output,
+     * error results and exit code
+     *
+     * @param client        the Kubernetes client to use
+     * @param namespace     the namespace to create the service account in
+     * @param pod           the pod to execute the command in
+     * @param containerName the container to execute the command in
+     * @param command       the command line to execute
+     */
+    public static void executeInPod(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull Pod pod,
+            final @NotNull String containerName,
+            final @NotNull String... command) {
+        final var execResult = PodUtil.execute(client, namespace, pod.getMetadata().getName(), containerName, command);
+        try {
+            assertThat(execResult.await(15, TimeUnit.SECONDS)).isTrue();
+            assertThat(execResult.getOutput()).as("stdout: %s", execResult.getOutput()).isNull();
+            assertThat(execResult.getError()).as("stderr: %s", execResult.getError()).isNull();
+            assertThat(execResult.exitCode()).isNotNull().isEqualTo(0);
+        } catch (final Exception e) {
+            fail("Could not execute '%s' in Pod '%s': %s", command, pod.getMetadata().getName(), e);
+        } finally {
+            execResult.close();
+        }
+    }
+
+    /**
      * @param clazz Class object to get the namespace from.
      * @return Namespace generated from the class passed as argument, up to 63 characters.
      */
@@ -231,8 +280,7 @@ public class K8sUtil {
      * @return the container
      */
     public static @NotNull Container getInitContainer(
-            final @NotNull StatefulSetSpec statefulSetSpec,
-            final @NotNull String initContainerName) {
+            final @NotNull StatefulSetSpec statefulSetSpec, final @NotNull String initContainerName) {
         return statefulSetSpec.getTemplate()
                 .getSpec()
                 .getInitContainers()
@@ -379,9 +427,23 @@ public class K8sUtil {
                         TimeUnit.MINUTES);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
+    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunningAfterRollingRestart(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName) {
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
+        assertThat(hivemqCustomResource).isNotNull();
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
+                3,
+                TimeUnit.MINUTES);
+        return hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+    }
+
     /**
      * Waits for the given platform to be in a RUNNING status.
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunning(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,

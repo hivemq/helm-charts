@@ -41,10 +41,6 @@ class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityCon
                 chartValues.platform().gid());
 
         K8sUtil.updateConfigMap(client, platformNamespace, "hivemq-config-map-update.yml");
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
-                3,
-                TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
     }
 }
