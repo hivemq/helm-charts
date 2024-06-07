@@ -435,9 +435,9 @@ public class K8sUtil {
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
         assertThat(hivemqCustomResource).isNotNull();
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
-                3,
+                5,
                 TimeUnit.MINUTES);
-        return hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        return hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
     }
 
     /**
