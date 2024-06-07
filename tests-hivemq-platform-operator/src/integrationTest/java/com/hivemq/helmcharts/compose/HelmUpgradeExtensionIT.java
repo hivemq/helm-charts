@@ -116,10 +116,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
                 "/files/bridge-test-updated-values.yaml",
                 "--namespace",
                 platformNamespace);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
-                3,
-                TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().until(extensionEnabledInitAppFuture2::isDone);
         await().until(extensionStartedBrokerFuture2::isDone);
 
