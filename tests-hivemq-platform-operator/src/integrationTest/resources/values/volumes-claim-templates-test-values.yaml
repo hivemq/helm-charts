@@ -1,5 +1,5 @@
 nodes:
-  replicaCount: 1
+  replicaCount: 2
 additionalVolumes:
   - type: persistentVolumeClaim
     name: hivemq-pvc-data

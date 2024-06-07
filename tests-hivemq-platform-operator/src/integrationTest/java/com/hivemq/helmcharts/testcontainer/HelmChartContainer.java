@@ -196,6 +196,7 @@ public class HelmChartContainer extends K3sContainer {
             final var configPath = Files.createTempFile("kubeconfig-", ".yaml").toAbsolutePath();
             configPath.toFile().deleteOnExit();
             Files.writeString(configPath, getKubeConfigYaml());
+            LOG.info("Saved kubeconfig file on {}", configPath);
         } catch (final IOException e) {
             LOG.error("Could not save kubeconfig.yaml to temporary file", e);
         }
