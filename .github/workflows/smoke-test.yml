@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:
           repository: hivemq/hivemq-platform-operator
-          token: ${{ secrets.JENKINS_TOKEN }}
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-platform-operator
 
       - name: Checkout HiveMQ Platform Operator on the same or target branch
@@ -164,7 +164,7 @@ jobs:
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
         with:
           repository: hivemq/hivemq-operator
-          token: ${{ secrets.JENKINS_TOKEN }}
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-operator
 
       - name: Checkout HiveMQ Operator (legacy) on the same or target branch
