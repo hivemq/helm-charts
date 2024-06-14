@@ -3474,6 +3474,19 @@ spec:
                 type: string
               observedGeneration:
                 type: integer
+              reconciliationRequests:
+                description: Requests for state changes in the next reconciliation
+                items:
+                  enum:
+                  - RECOVER
+                  - REQUESTS_UPDATED
+                  - RESTART_EXTENSIONS
+                  - ROLLING_RESTART
+                  - SCALING
+                  - SET_LOG_LEVEL
+                  - UPDATE_INIT_APP
+                  type: string
+                type: array
               recoveryInformation:
                 description: Recovery information for the ERROR state
                 properties:
