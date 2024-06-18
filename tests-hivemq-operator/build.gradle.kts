@@ -4,7 +4,7 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val k8sVersion = "k8s-${project.properties["hivemq.version"]}"
+val k8sVersion = "k8s-${libs.versions.hivemq.platform.get()}"
 
 java {
     toolchain {
@@ -19,24 +19,29 @@ repositories {
 /* ******************** test ******************** */
 
 dependencies {
-    testImplementation("org.assertj:assertj-core:${property("assertj.version")}")
-    testImplementation("org.codehaus.groovy:groovy-all:${property("groovy.version")}")
-    testImplementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit.version")}")
-    testImplementation("org.testcontainers:testcontainers:${property("testcontainers.version")}")
-    testImplementation("org.testcontainers:k3s:${property("testcontainers.version")}")
-    testImplementation("org.testcontainers:junit-jupiter:${property("testcontainers.version")}")
-    testImplementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
-    testImplementation("org.slf4j:slf4j-simple:${property("slf4j.version")}")
-    testImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-client.version")}")
-    testImplementation("io.fabric8:kubernetes-client:${property("fabric8.version")}")
-    testImplementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
-    testImplementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
-    testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
-    testImplementation("ch.qos.logback:logback-classic:${property("logback.version")}")
-    testImplementation("ch.qos.logback:logback-core:${property("logback.version")}")
-    testImplementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
-    testImplementation("org.testcontainers:hivemq:${property("testcontainers.version")}")
+    // Testing
+    testImplementation(libs.assertj)
+    testImplementation(libs.awaitility)
+
+    // JUnit
+    testImplementation(libs.junit.jupiter)
+
+    // Testcontainers
+    testImplementation(libs.testcontainers)
+    testImplementation(libs.testcontainers.k3s)
+    testImplementation(libs.testcontainers.hivemq)
+    testImplementation(libs.testcontainers.junit.jupiter)
+
+    // Certificates
+    testImplementation(libs.bouncycastle.pkix)
+    testImplementation(libs.bouncycastle.prov)
+
+    // Misc
+    testImplementation(libs.fabric8.kubernetes.client)
+    testImplementation(libs.groovy)
+    testImplementation(libs.hivemq.mqttClient)
+    testImplementation(libs.logback.classic)
+    testImplementation(libs.slf4j.api)
 }
 
 fun Test.configureJUnitPlatform() {
@@ -183,9 +188,7 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.yaml")
                 include("**/*.json")
                 include("**/*.sh")
-                include("**/*.adoc")
-                include("**/*.md")
-                include("**/*.properties")
+                include("**/*.toml")
                 include("**/*.java")
             }.plus(fileTree("../examples/hivemq-operator").matching{
                 include("**/*.yml")
@@ -193,10 +196,8 @@ val updatePlatformVersion by tasks.registering {
             })
             filesToUpdate.forEach { file ->
                 val text = file.readText()
-                file.writeText(text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
-                    "${it.groupValues[1]}=${appVersion}"
-                }.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
-                    "${it.groupValues[1]}=${appVersion}"
+                file.writeText(text.replace("""^hivemq-platform = \"(.*)\"$""".toRegex(RegexOption.MULTILINE)) {
+                    "hivemq-platform = \"${appVersion}\""
                 }.replace("""(?i)(hivemq/hivemq4:k8s-)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
                     "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
                 })

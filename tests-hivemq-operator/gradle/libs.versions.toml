@@ -1,0 +1,28 @@
+[versions]
+assertj = "3.26.0"
+awaitility = "4.2.1"
+bouncycastle = "1.78.1"
+fabric8-kubernetes-client = "6.13.0"
+groovy = "4.0.21"
+hivemq-mqttClient = "1.3.3"
+hivemq-platform = "4.29.0"
+junit-jupiter = "5.10.2"
+logback = "1.5.6"
+slf4j = "2.0.13"
+testcontainers = "1.19.8"
+
+[libraries]
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
+bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version.ref = "fabric8-kubernetes-client" }
+groovy = { module = "org.apache.groovy:groovy-all", version.ref = "groovy" }
+hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-hivemq = { module = "org.testcontainers:hivemq", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers-k3s = { module = "org.testcontainers:k3s", version.ref = "testcontainers" }
