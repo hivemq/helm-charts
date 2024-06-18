@@ -4,7 +4,7 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val hivemqVersion = "${project.properties["hivemq.version"]}"
+val hivemqVersion = libs.versions.hivemq.platform.get()
 
 java {
     toolchain {
@@ -20,40 +20,38 @@ repositories {
 
 dependencies {
     // JUnit
-    testImplementation("org.junit.jupiter:junit-jupiter:${property("junit.version")}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit.version")}")
+    testImplementation(libs.junit.jupiter)
 
     // Custom Extension
-    testImplementation("com.hivemq:hivemq-extension-sdk:${property("hivemq.extension-sdk.version")}")
-    testImplementation("org.javassist:javassist:${property("javassist.version")}")
-    testImplementation("org.jboss.shrinkwrap:shrinkwrap-api:${property("shrinkwrap.version")}")
-    testImplementation("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
+    testImplementation(libs.hivemq.extensionSdk)
+    testImplementation(libs.javassist)
+    testImplementation(libs.shrinkwrap.api)
+    testImplementation(libs.shrinkwrap.impl)
 
     // Testcontainers
-    testImplementation("org.testcontainers:testcontainers:${property("testcontainers.version")}")
-    testImplementation("org.testcontainers:k3s:${property("testcontainers.version")}")
-    testImplementation("org.testcontainers:hivemq:${property("testcontainers.version")}")
-    testImplementation("org.testcontainers:junit-jupiter:${property("testcontainers.version")}")
-    testImplementation("org.testcontainers:selenium:${property("testcontainers.version")}")
+    testImplementation(libs.testcontainers)
+    testImplementation(libs.testcontainers.k3s)
+    testImplementation(libs.testcontainers.hivemq)
+    testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.testcontainers.selenium)
 
     // Certificates
-    testImplementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
-    testImplementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
+    testImplementation(libs.bouncycastle.pkix)
+    testImplementation(libs.bouncycastle.prov)
 
     // Testing
-    testImplementation("org.assertj:assertj-core:${property("assertj.version")}")
-    testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
-    testImplementation("org.seleniumhq.selenium:selenium-remote-driver:${property("selenium.version")}")
-    testImplementation("org.seleniumhq.selenium:selenium-java:${property("selenium.version")}")
+    testImplementation(libs.assertj)
+    testImplementation(libs.awaitility)
+    testImplementation(libs.selenium.remote.driver)
+    testImplementation(libs.selenium.java)
 
     // Misc
-    testImplementation("io.fabric8:kubernetes-client:${property("fabric8-kubernetes-client.version")}")
-    testImplementation("ch.qos.logback:logback-classic:${property("logback.version")}")
-    testImplementation("ch.qos.logback:logback-core:${property("logback.version")}")
-    testImplementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
-    testImplementation("io.rest-assured:rest-assured:${property("rest-assured.version")}")
-    testImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-client.version")}")
-    testImplementation("io.netty:netty-codec-http:${property("netty-codec-http.version")}")
+    testImplementation(libs.fabric8.kubernetes.client)
+    testImplementation(libs.logback.classic)
+    testImplementation(libs.slf4j.api)
+    testImplementation(libs.rest.assured)
+    testImplementation(libs.hivemq.mqttClient)
+    testImplementation(libs.netty.codec.http)
 }
 
 fun Test.configureJUnitPlatform() {
@@ -101,9 +99,9 @@ val integrationTest by tasks.registering(Test::class) {
 
     // sets docker images versions for the tests
     systemProperties(
-        "hivemq.version" to "${project.properties["hivemq.version"]}",
-        "selenium.version" to "${project.properties["selenium.version"]}",
-        "nginx.version" to "${project.properties["nginx.version"]}"
+        "hivemq.version" to libs.versions.hivemq.platform.get(),
+        "selenium.version" to libs.versions.selenium.container.get(),
+        "nginx.version" to libs.versions.nginx.container.get()
     )
 
     dependsOn(saveDockerImages)  // Platform Operator images
@@ -189,18 +187,14 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.yaml")
                 include("**/*.json")
                 include("**/*.sh")
-                include("**/*.adoc")
-                include("**/*.md")
-                include("**/*.properties")
+                include("**/*.toml")
                 include("**/*.java")
                 // include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform chart
             }.plus(file("../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml"))
             filesToUpdate.forEach { file ->
                 val text = file.readText()
-                file.writeText(text.replace("""^(hivemq.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
-                    "${it.groupValues[1]}=${appVersion}"
-                }.replace("""^(hivemq\..*\.version)=(.*)$""".toRegex(RegexOption.MULTILINE)) {
-                    "${it.groupValues[1]}=${appVersion}"
+                file.writeText(text.replace("""^hivemq-platform = \"(.*)\"$""".toRegex(RegexOption.MULTILINE)) {
+                    "hivemq-platform = \"${appVersion}\""
                 }.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
                     "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
                 }.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
