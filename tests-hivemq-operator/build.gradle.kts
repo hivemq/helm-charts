@@ -42,21 +42,6 @@ dependencies {
     "integrationTestImplementation"(libs.slf4j.api)
 }
 
-fun Test.configureJUnitPlatform() {
-    useJUnitPlatform {
-        if (systemProperties["includeTags"] != null) {
-            val includeTags = systemProperties["includeTags"].toString().split(",")
-            println("JUnit includeTags: $includeTags")
-            includeTags(*includeTags.toTypedArray())
-        }
-        if (systemProperties["excludeTags"] != null) {
-            val excludeTags = systemProperties["excludeTags"].toString().split(",")
-            println("JUnit excludeTags: $excludeTags")
-            excludeTags(*excludeTags.toTypedArray())
-        }
-    }
-}
-
 val integrationTest by tasks.registering(Test::class) {
     group = "verification"
     description = "Runs integration tests"
@@ -75,7 +60,18 @@ val integrationTest by tasks.registering(Test::class) {
             )
         }
     }
-    configureJUnitPlatform()
+    useJUnitPlatform {
+        if (systemProperties["includeTags"] != null) {
+            val includeTags = systemProperties["includeTags"].toString().split(",")
+            println("JUnit includeTags: $includeTags")
+            includeTags(*includeTags.toTypedArray())
+        }
+        if (systemProperties["excludeTags"] != null) {
+            val excludeTags = systemProperties["excludeTags"].toString().split(",")
+            println("JUnit excludeTags: $excludeTags")
+            excludeTags(*excludeTags.toTypedArray())
+        }
+    }
     testLogging {
         events("started", "passed", "skipped", "failed")
         showStandardStreams = true
