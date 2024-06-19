@@ -16,32 +16,32 @@ repositories {
     mavenCentral()
 }
 
-/* ******************** test ******************** */
+sourceSets.create("integrationTest")
 
 dependencies {
     // Testing
-    testImplementation(libs.assertj)
-    testImplementation(libs.awaitility)
+    "integrationTestImplementation"(libs.assertj)
+    "integrationTestImplementation"(libs.awaitility)
 
     // JUnit
-    testImplementation(libs.junit.jupiter)
+    "integrationTestImplementation"(libs.junit.jupiter)
 
     // Testcontainers
-    testImplementation(libs.testcontainers)
-    testImplementation(libs.testcontainers.k3s)
-    testImplementation(libs.testcontainers.hivemq)
-    testImplementation(libs.testcontainers.junitJupiter)
+    "integrationTestImplementation"(libs.testcontainers)
+    "integrationTestImplementation"(libs.testcontainers.k3s)
+    "integrationTestImplementation"(libs.testcontainers.hivemq)
+    "integrationTestImplementation"(libs.testcontainers.junitJupiter)
 
     // Certificates
-    testImplementation(libs.bouncycastle.pkix)
-    testImplementation(libs.bouncycastle.prov)
+    "integrationTestImplementation"(libs.bouncycastle.pkix)
+    "integrationTestImplementation"(libs.bouncycastle.prov)
 
     // Misc
-    testImplementation(libs.fabric8.kubernetes.client)
-    testImplementation(libs.groovy)
-    testImplementation(libs.hivemq.mqttClient)
-    testImplementation(libs.logback.classic)
-    testImplementation(libs.slf4j.api)
+    "integrationTestImplementation"(libs.fabric8.kubernetes.client)
+    "integrationTestImplementation"(libs.groovy)
+    "integrationTestImplementation"(libs.hivemq.mqttClient)
+    "integrationTestImplementation"(libs.logback.classic)
+    "integrationTestImplementation"(libs.slf4j.api)
 }
 
 fun Test.configureJUnitPlatform() {
@@ -94,18 +94,6 @@ val integrationTest by tasks.registering(Test::class) {
         layout.buildDirectory.file("hivemq-operator.tar"),
         layout.buildDirectory.file("hivemq-k8s.tar"),
     )
-}
-
-sourceSets.create("integrationTest") {
-    compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-    runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-}
-
-val integrationTestImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
-}
-val integrationTestRuntimeOnly: Configuration by configurations.getting {
-    extendsFrom(configurations.testRuntimeOnly.get())
 }
 
 /* ******************** Legacy Docker Operator Images ******************** */

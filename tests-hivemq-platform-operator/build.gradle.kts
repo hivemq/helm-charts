@@ -16,42 +16,42 @@ repositories {
     mavenCentral()
 }
 
-/* ******************** test ******************** */
+sourceSets.create("integrationTest")
 
 dependencies {
     // JUnit
-    testImplementation(libs.junit.jupiter)
+    "integrationTestImplementation"(libs.junit.jupiter)
 
     // Custom Extension
-    testImplementation(libs.hivemq.extensionSdk)
-    testImplementation(libs.javassist)
-    testImplementation(libs.shrinkwrap.api)
-    testImplementation(libs.shrinkwrap.impl)
+    "integrationTestImplementation"(libs.hivemq.extensionSdk)
+    "integrationTestImplementation"(libs.javassist)
+    "integrationTestImplementation"(libs.shrinkwrap.api)
+    "integrationTestImplementation"(libs.shrinkwrap.impl)
 
     // Testcontainers
-    testImplementation(libs.testcontainers)
-    testImplementation(libs.testcontainers.k3s)
-    testImplementation(libs.testcontainers.hivemq)
-    testImplementation(libs.testcontainers.junitJupiter)
-    testImplementation(libs.testcontainers.selenium)
+    "integrationTestImplementation"(libs.testcontainers)
+    "integrationTestImplementation"(libs.testcontainers.k3s)
+    "integrationTestImplementation"(libs.testcontainers.hivemq)
+    "integrationTestImplementation"(libs.testcontainers.junitJupiter)
+    "integrationTestImplementation"(libs.testcontainers.selenium)
 
     // Certificates
-    testImplementation(libs.bouncycastle.pkix)
-    testImplementation(libs.bouncycastle.prov)
+    "integrationTestImplementation"(libs.bouncycastle.pkix)
+    "integrationTestImplementation"(libs.bouncycastle.prov)
 
     // Testing
-    testImplementation(libs.assertj)
-    testImplementation(libs.awaitility)
-    testImplementation(libs.selenium.remote.driver)
-    testImplementation(libs.selenium.java)
+    "integrationTestImplementation"(libs.assertj)
+    "integrationTestImplementation"(libs.awaitility)
+    "integrationTestImplementation"(libs.selenium.remote.driver)
+    "integrationTestImplementation"(libs.selenium.java)
 
     // Misc
-    testImplementation(libs.fabric8.kubernetes.client)
-    testImplementation(libs.logback.classic)
-    testImplementation(libs.slf4j.api)
-    testImplementation(libs.rest.assured)
-    testImplementation(libs.hivemq.mqttClient)
-    testImplementation(libs.netty.codec.http)
+    "integrationTestImplementation"(libs.fabric8.kubernetes.client)
+    "integrationTestImplementation"(libs.logback.classic)
+    "integrationTestImplementation"(libs.slf4j.api)
+    "integrationTestImplementation"(libs.rest.assured)
+    "integrationTestImplementation"(libs.hivemq.mqttClient)
+    "integrationTestImplementation"(libs.netty.codec.http)
 }
 
 fun Test.configureJUnitPlatform() {
@@ -114,18 +114,6 @@ val integrationTest by tasks.registering(Test::class) {
         layout.buildDirectory.file("hivemq-platform-operator.tar"),
         layout.buildDirectory.file("hivemq-platform.tar"),
     )
-}
-
-sourceSets.create("integrationTest") {
-    compileClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-    runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
-}
-
-val integrationTestImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
-}
-val integrationTestRuntimeOnly: Configuration by configurations.getting {
-    extendsFrom(configurations.testRuntimeOnly.get())
 }
 
 /* ******************** Docker Platform Operator Images ******************** */
