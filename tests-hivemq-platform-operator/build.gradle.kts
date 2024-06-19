@@ -41,6 +41,8 @@ testing {
 
                 // Misc
                 implementation(libs.fabric8.kubernetes.client)
+                runtimeOnly(libs.bouncycastle.pkix)
+                runtimeOnly(libs.bouncycastle.prov)
                 implementation(libs.slf4j.api)
                 runtimeOnly(libs.logback.classic)
                 implementation(libs.rest.assured)
