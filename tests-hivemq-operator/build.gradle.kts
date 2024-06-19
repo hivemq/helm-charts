@@ -14,74 +14,63 @@ repositories {
     mavenCentral()
 }
 
-sourceSets.create("integrationTest")
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+        val integrationTest by registering(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.jupiter)
+            dependencies {
+                implementation(libs.assertj)
+                implementation(libs.awaitility)
+                implementation(libs.testcontainers)
+                implementation(libs.testcontainers.k3s)
+                implementation(libs.testcontainers.junitJupiter)
+                implementation(libs.fabric8.kubernetes.client)
+                implementation(libs.hivemq.mqttClient)
+                implementation(libs.slf4j.api)
+                runtimeOnly(libs.logback.classic)
+            }
+            targets.configureEach {
+                testTask {
+                    if (environment["TEST_PLAN"] != null) {
+                        val testPlan = environment["TEST_PLAN"].toString()
+                        if (testPlan == "Other") {
+                            systemProperty("excludeTags", "K8sVersionCompatibility,Extensions,RollingUpgrades")
+                        } else {
+                            systemProperty("includeTags", testPlan)
+                        }
+                    }
+                    useJUnitPlatform {
+                        if (systemProperties["includeTags"] != null) {
+                            val includeTags = systemProperties["includeTags"].toString().split(",")
+                            println("JUnit includeTags: $includeTags")
+                            includeTags(*includeTags.toTypedArray())
+                        }
+                        if (systemProperties["excludeTags"] != null) {
+                            val excludeTags = systemProperties["excludeTags"].toString().split(",")
+                            println("JUnit excludeTags: $excludeTags")
+                            excludeTags(*excludeTags.toTypedArray())
+                        }
+                    }
+                    testLogging {
+                        events("started", "passed", "skipped", "failed")
+                        showStandardStreams = true
+                    }
+                    reports {
+                        junitXml.isOutputPerTestCase = true
+                    }
+                    maxHeapSize = "3g"
 
-dependencies {
-    // Testing
-    "integrationTestImplementation"(libs.assertj)
-    "integrationTestImplementation"(libs.awaitility)
-
-    // JUnit
-    "integrationTestImplementation"(libs.junit.jupiter)
-
-    // Testcontainers
-    "integrationTestImplementation"(libs.testcontainers)
-    "integrationTestImplementation"(libs.testcontainers.k3s)
-    "integrationTestImplementation"(libs.testcontainers.junitJupiter)
-
-    // Misc
-    "integrationTestImplementation"(libs.fabric8.kubernetes.client)
-    "integrationTestImplementation"(libs.hivemq.mqttClient)
-    "integrationTestImplementation"(libs.slf4j.api)
-    "integrationTestRuntimeOnly"(libs.logback.classic)
-}
-
-val integrationTest by tasks.registering(Test::class) {
-    group = "verification"
-    description = "Runs integration tests"
-    testClassesDirs = sourceSets[name].output.classesDirs
-    classpath = sourceSets[name].runtimeClasspath
-
-    if (environment["TEST_PLAN"] != null) {
-        val testPlan = environment["TEST_PLAN"].toString()
-        if (testPlan == "Other") {
-            systemProperty(
-                "excludeTags", "K8sVersionCompatibility,Extensions,RollingUpgrades"
-            )
-        } else {
-            systemProperty(
-                "includeTags", testPlan
-            )
+                    dependsOn(saveDockerImages)
+                    inputs.files(
+                        layout.buildDirectory.file("hivemq-dns-init-wait.tar"),
+                        layout.buildDirectory.file("hivemq-operator.tar"),
+                        layout.buildDirectory.file("hivemq-k8s.tar"),
+                    )
+                }
+            }
         }
     }
-    useJUnitPlatform {
-        if (systemProperties["includeTags"] != null) {
-            val includeTags = systemProperties["includeTags"].toString().split(",")
-            println("JUnit includeTags: $includeTags")
-            includeTags(*includeTags.toTypedArray())
-        }
-        if (systemProperties["excludeTags"] != null) {
-            val excludeTags = systemProperties["excludeTags"].toString().split(",")
-            println("JUnit excludeTags: $excludeTags")
-            excludeTags(*excludeTags.toTypedArray())
-        }
-    }
-    testLogging {
-        events("started", "passed", "skipped", "failed")
-        showStandardStreams = true
-    }
-    reports {
-        junitXml.isOutputPerTestCase = true
-    }
-    maxHeapSize = "3g"
-
-    dependsOn(saveDockerImages)  // Platform Operator images
-
-    inputs.files(
-        layout.buildDirectory.file("hivemq-dns-init-wait.tar"),
-        layout.buildDirectory.file("hivemq-operator.tar"),
-        layout.buildDirectory.file("hivemq-k8s.tar"),
-    )
 }
 
 /* ******************** Legacy Docker Operator Images ******************** */
