@@ -24,7 +24,7 @@ dependencies {
     "integrationTestImplementation"(libs.hivemq.extensionSdk)
     "integrationTestImplementation"(libs.javassist)
     "integrationTestImplementation"(libs.shrinkwrap.api)
-    "integrationTestImplementation"(libs.shrinkwrap.impl)
+    "integrationTestRuntimeOnly"(libs.shrinkwrap.impl)
 
     // Testcontainers
     "integrationTestImplementation"(libs.testcontainers)
@@ -32,10 +32,6 @@ dependencies {
     "integrationTestImplementation"(libs.testcontainers.hivemq)
     "integrationTestImplementation"(libs.testcontainers.junitJupiter)
     "integrationTestImplementation"(libs.testcontainers.selenium)
-
-    // Certificates
-    "integrationTestImplementation"(libs.bouncycastle.pkix)
-    "integrationTestImplementation"(libs.bouncycastle.prov)
 
     // Testing
     "integrationTestImplementation"(libs.assertj)
