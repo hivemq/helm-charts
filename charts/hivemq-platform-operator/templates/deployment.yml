@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{include "hivemq-platform-operator.name" . }}
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
-  name: {{include "hivemq-platform-operator.name" . }}
 spec:
   # The Operator cannot have more than one replica
   replicas: 1
