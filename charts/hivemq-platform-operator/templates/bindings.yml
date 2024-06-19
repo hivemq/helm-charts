@@ -5,6 +5,7 @@ kind: RoleBinding
 metadata:
   name: "hivemq-platform-operator-view-{{.Release.Name}}"
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
   name: view
@@ -17,6 +18,7 @@ kind: ClusterRoleBinding
 metadata:
   name: "hivemq-platform-operator-role-binding-{{.Release.Name}}"
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
   name: "hivemq-platform-operator-role-{{.Release.Name}}"
