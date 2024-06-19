@@ -4,8 +4,6 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val k8sVersion = "k8s-${libs.versions.hivemq.platform.get()}"
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -138,14 +136,14 @@ val saveDnsInitWaitDockerImage by tasks.registering(Exec::class) {
     description = "Save HiveMQ DNS Init Wait Docker image"
     dependsOn(gradle.includedBuild("hivemq-operator").task(":buildDnsInitWaitImage"))
     workingDir(layout.buildDirectory)
-    println("Saving HiveMQ DNS Init Wait Docker image with tag: snapshot")
     commandLine("docker", "save", "-o", "hivemq-dns-init-wait.tar", "hivemq/init-dns-wait:snapshot")
 }
+
+val k8sVersion = "k8s-${libs.versions.hivemq.platform.get()}"
 
 val saveK8sDockerImage by tasks.registering(Exec::class) {
     group = "container"
     description = "Save HiveMQ K8s Docker image"
-    println("Saving HiveMQ K8s Docker image with tag: $k8sVersion")
     dependsOn(pullK8sDockerImage)
     workingDir(layout.buildDirectory)
     commandLine("docker", "save", "-o", "hivemq-k8s.tar", "docker.io/hivemq/hivemq4:$k8sVersion")

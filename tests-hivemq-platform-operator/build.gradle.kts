@@ -4,8 +4,6 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val hivemqVersion = libs.versions.hivemq.platform.get()
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -123,7 +121,6 @@ val savePlatformOperatorDockerImage by tasks.registering(Exec::class) {
     description = "Save HiveMQ Platform Operator Docker image"
     dependsOn(gradle.includedBuild("hivemq-platform-operator").task(":quarkusBuild"))
     workingDir(layout.buildDirectory)
-    println("Saving HiveMQ Platform Operator Docker image with tag: snapshot")
     commandLine("docker", "save", "-o", "hivemq-platform-operator.tar", "hivemq/hivemq-platform-operator-test:snapshot")
 }
 
@@ -132,7 +129,6 @@ val savePlatformOperatorInitDockerImage by tasks.registering(Exec::class) {
     description = "Save HiveMQ Platform Operator Init Docker image"
     dependsOn(gradle.includedBuild("hivemq-platform-operator-init").task(":docker"))
     workingDir(layout.buildDirectory)
-    println("Saving HiveMQ Platform Operator Init Docker image with tag: snapshot")
     commandLine(
         "docker",
         "save",
@@ -142,10 +138,11 @@ val savePlatformOperatorInitDockerImage by tasks.registering(Exec::class) {
     )
 }
 
+val hivemqVersion = libs.versions.hivemq.platform.get()
+
 val savePlatformDockerImage by tasks.registering(Exec::class) {
     group = "container"
     description = "Save HiveMQ Platform Docker image"
-    println("Saving HiveMQ Platform Docker image with tag: $hivemqVersion")
     dependsOn(pullPlatformDockerImage)
     workingDir(layout.buildDirectory)
     commandLine("docker", "save", "-o", "hivemq-platform.tar", "docker.io/hivemq/hivemq4:$hivemqVersion")
