@@ -24,7 +24,6 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.k3s.K3sContainer;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
@@ -221,10 +220,7 @@ public class HelmChartContainer extends K3sContainer {
         final var client = getKubernetesClient();
         final var namespaceDeleted = client.namespaces().withName(name).informOnCondition(List::isEmpty);
         assertThat(client.namespaces().withName(name).delete()).isNotEmpty();
-        Awaitility.await()
-                .atMost(Duration.ofMinutes(1))
-                .pollInterval(Duration.ofMillis(100))
-                .until(namespaceDeleted::isDone);
+        await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).until(namespaceDeleted::isDone);
         LOG.info("Namespace deleted");
     }
 

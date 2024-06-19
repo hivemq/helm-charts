@@ -27,16 +27,10 @@ dependencies {
     // Testcontainers
     "integrationTestImplementation"(libs.testcontainers)
     "integrationTestImplementation"(libs.testcontainers.k3s)
-    "integrationTestImplementation"(libs.testcontainers.hivemq)
     "integrationTestImplementation"(libs.testcontainers.junitJupiter)
-
-    // Certificates
-    "integrationTestImplementation"(libs.bouncycastle.pkix)
-    "integrationTestImplementation"(libs.bouncycastle.prov)
 
     // Misc
     "integrationTestImplementation"(libs.fabric8.kubernetes.client)
-    "integrationTestImplementation"(libs.groovy)
     "integrationTestImplementation"(libs.hivemq.mqttClient)
     "integrationTestImplementation"(libs.slf4j.api)
     "integrationTestRuntimeOnly"(libs.logback.classic)
