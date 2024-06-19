@@ -38,8 +38,8 @@ dependencies {
     "integrationTestImplementation"(libs.fabric8.kubernetes.client)
     "integrationTestImplementation"(libs.groovy)
     "integrationTestImplementation"(libs.hivemq.mqttClient)
-    "integrationTestImplementation"(libs.logback.classic)
     "integrationTestImplementation"(libs.slf4j.api)
+    "integrationTestRuntimeOnly"(libs.logback.classic)
 }
 
 val integrationTest by tasks.registering(Test::class) {
