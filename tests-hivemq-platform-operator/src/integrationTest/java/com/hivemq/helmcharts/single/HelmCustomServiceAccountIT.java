@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @Tag("CustomConfig")
 @Tag("ServiceAccount")
@@ -52,6 +53,9 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
         K8sUtil.createServiceAccount(client, platformNamespace, SERVICE_ACCOUNT_NAME);
 
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+
+        // assert that the ServiceAccount and permissions are working
+        assertPlatformPodAnnotations();
     }
 
     @Test
@@ -88,6 +92,9 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
         createRoleBinding();
 
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+
+        // assert that the ServiceAccount and permissions are working
+        assertPlatformPodAnnotations();
     }
 
     @Test
@@ -118,6 +125,42 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
                 platformNamespace);
 
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+
+        // assert that the ServiceAccount and permissions are working
+        assertPlatformPodAnnotations();
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformCharts_withCreateAndValidateDisabled_hivemqRunning() throws Exception {
+        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+                "--set",
+                "hivemqPlatformServiceAccount.create=false",
+                "--set",
+                "hivemqPlatformServiceAccount.validate=false",
+                "--set",
+                "hivemqPlatformServiceAccount.permissions.create=false",
+                "--set",
+                "hivemqPlatformServiceAccount.permissions.validate=false",
+                "--namespace",
+                operatorNamespace);
+        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
+                "--set",
+                "nodes.serviceAccountName=" + SERVICE_ACCOUNT_NAME,
+                "--set",
+                "nodes.replicaCount=1",
+                "--namespace",
+                platformNamespace);
+
+        // create the ServiceAccount and permissions correctly
+        K8sUtil.createServiceAccount(client, platformNamespace, SERVICE_ACCOUNT_NAME);
+        createRole();
+        createRoleBinding();
+
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+
+        // assert that the ServiceAccount and permissions are working
+        assertPlatformPodAnnotations();
     }
 
     private void createRole() {
@@ -145,5 +188,16 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
                 .withRoleRef(new RoleRefBuilder().withName("pod-resource-role").withKind("Role").build())
                 .build()).create();
         assertThat(roleBinding).isNotNull();
+    }
+
+    private void assertPlatformPodAnnotations() {
+        // asserts an annotation that is set by the PodReconciler in the Platform Pods
+        // when the ServiceAccount and permissions are set up correctly
+        await().untilAsserted(() -> client.pods()
+                .inNamespace(platformNamespace)
+                .list()
+                .getItems()
+                .forEach(pod -> assertThat(pod.getMetadata().getAnnotations()) //
+                        .containsKey("hivemq/platform-operator-init-app-version")));
     }
 }
