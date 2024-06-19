@@ -26,6 +26,8 @@ testing {
                 implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.fabric8.kubernetes.client)
+                runtimeOnly(libs.bouncycastle.pkix)
+                runtimeOnly(libs.bouncycastle.prov)
                 implementation(libs.hivemq.mqttClient)
                 implementation(libs.slf4j.api)
                 runtimeOnly(libs.logback.classic)
