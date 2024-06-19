@@ -32,7 +32,7 @@ dependencies {
     testImplementation(libs.testcontainers)
     testImplementation(libs.testcontainers.k3s)
     testImplementation(libs.testcontainers.hivemq)
-    testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.testcontainers.junitJupiter)
     testImplementation(libs.testcontainers.selenium)
 
     // Certificates
