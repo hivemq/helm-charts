@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: "hivemq-platform-operator-{{.Release.Name}}"
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
-  name: "hivemq-platform-operator-{{.Release.Name}}"
 spec:
   ports:
     - name: {{ printf "http-%s" .Release.Name }}
