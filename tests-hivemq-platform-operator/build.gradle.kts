@@ -45,8 +45,8 @@ dependencies {
 
     // Misc
     "integrationTestImplementation"(libs.fabric8.kubernetes.client)
-    "integrationTestImplementation"(libs.logback.classic)
     "integrationTestImplementation"(libs.slf4j.api)
+    "integrationTestRuntimeOnly"(libs.logback.classic)
     "integrationTestImplementation"(libs.rest.assured)
     "integrationTestImplementation"(libs.hivemq.mqttClient)
     "integrationTestImplementation"(libs.netty.codec.http)
