@@ -14,96 +14,93 @@ repositories {
     mavenCentral()
 }
 
-sourceSets.create("integrationTest")
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+        val integrationTest by registering(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit.jupiter)
+            dependencies {
+                // Custom Extension
+                implementation(libs.hivemq.extensionSdk)
+                implementation(libs.javassist)
+                implementation(libs.shrinkwrap.api)
+                runtimeOnly(libs.shrinkwrap.impl)
 
-dependencies {
-    // JUnit
-    "integrationTestImplementation"(libs.junit.jupiter)
+                // Testcontainers
+                implementation(libs.testcontainers)
+                implementation(libs.testcontainers.k3s)
+                implementation(libs.testcontainers.hivemq)
+                implementation(libs.testcontainers.junitJupiter)
+                implementation(libs.testcontainers.selenium)
 
-    // Custom Extension
-    "integrationTestImplementation"(libs.hivemq.extensionSdk)
-    "integrationTestImplementation"(libs.javassist)
-    "integrationTestImplementation"(libs.shrinkwrap.api)
-    "integrationTestRuntimeOnly"(libs.shrinkwrap.impl)
+                // Testing
+                implementation(libs.assertj)
+                implementation(libs.awaitility)
+                implementation(libs.selenium.remote.driver)
+                implementation(libs.selenium.java)
 
-    // Testcontainers
-    "integrationTestImplementation"(libs.testcontainers)
-    "integrationTestImplementation"(libs.testcontainers.k3s)
-    "integrationTestImplementation"(libs.testcontainers.hivemq)
-    "integrationTestImplementation"(libs.testcontainers.junitJupiter)
-    "integrationTestImplementation"(libs.testcontainers.selenium)
+                // Misc
+                implementation(libs.fabric8.kubernetes.client)
+                implementation(libs.slf4j.api)
+                runtimeOnly(libs.logback.classic)
+                implementation(libs.rest.assured)
+                implementation(libs.hivemq.mqttClient)
+                implementation(libs.netty.codec.http)
+            }
+            targets.configureEach {
+                testTask {
+                    if (environment["TEST_PLAN"] != null) {
+                        val testPlan = environment["TEST_PLAN"].toString()
+                        if (testPlan == "Other") {
+                            systemProperty(
+                                "excludeTags",
+                                "Upgrade,Extensions,Services1,Services2,CustomConfig,Services,Platform,PodSecurityContext",
+                            )
+                        } else {
+                            systemProperty("includeTags", testPlan)
+                        }
+                    }
+                    useJUnitPlatform {
+                        if (systemProperties["includeTags"] != null) {
+                            val includeTags = systemProperties["includeTags"].toString().split(",")
+                            println("JUnit includeTags: $includeTags")
+                            includeTags(*includeTags.toTypedArray())
+                        }
+                        if (systemProperties["excludeTags"] != null) {
+                            val excludeTags = systemProperties["excludeTags"].toString().split(",")
+                            println("JUnit excludeTags: $excludeTags")
+                            excludeTags(*excludeTags.toTypedArray())
+                        }
+                    }
+                    testLogging {
+                        events("started", "passed", "skipped", "failed")
+                        showStandardStreams = true
+                    }
+                    reports {
+                        junitXml.isOutputPerTestCase = true
+                    }
+                    maxHeapSize = "3g"
 
-    // Testing
-    "integrationTestImplementation"(libs.assertj)
-    "integrationTestImplementation"(libs.awaitility)
-    "integrationTestImplementation"(libs.selenium.remote.driver)
-    "integrationTestImplementation"(libs.selenium.java)
+                    // sets docker images versions for the tests
+                    systemProperties(
+                        "hivemq.version" to libs.versions.hivemq.platform.get(),
+                        "selenium.version" to libs.versions.selenium.container.get(),
+                        "nginx.version" to libs.versions.nginx.container.get()
+                    )
 
-    // Misc
-    "integrationTestImplementation"(libs.fabric8.kubernetes.client)
-    "integrationTestImplementation"(libs.slf4j.api)
-    "integrationTestRuntimeOnly"(libs.logback.classic)
-    "integrationTestImplementation"(libs.rest.assured)
-    "integrationTestImplementation"(libs.hivemq.mqttClient)
-    "integrationTestImplementation"(libs.netty.codec.http)
-}
-
-val integrationTest by tasks.registering(Test::class) {
-    group = "verification"
-    description = "Runs integration tests"
-    testClassesDirs = sourceSets[name].output.classesDirs
-    classpath = sourceSets[name].runtimeClasspath
-
-    if (environment["TEST_PLAN"] != null) {
-        val testPlan = environment["TEST_PLAN"].toString()
-        if (testPlan == "Other") {
-            systemProperty(
-                "excludeTags", "Upgrade,Extensions,Services1,Services2,CustomConfig,Services,Platform,PodSecurityContext"
-            )
-        } else {
-            systemProperty(
-                "includeTags", testPlan
-            )
+                    dependsOn(saveDockerImages)
+                    inputs.files(
+                        layout.buildDirectory.file("hivemq-dns-init-wait.tar"),
+                        layout.buildDirectory.file("hivemq-operator.tar"),
+                        layout.buildDirectory.file("hivemq-k8s.tar"),
+                        layout.buildDirectory.file("hivemq-platform-operator-init.tar"),
+                        layout.buildDirectory.file("hivemq-platform-operator.tar"),
+                        layout.buildDirectory.file("hivemq-platform.tar"),
+                    )
+                }
+            }
         }
     }
-    useJUnitPlatform {
-        if (systemProperties["includeTags"] != null) {
-            val includeTags = systemProperties["includeTags"].toString().split(",")
-            println("JUnit includeTags: $includeTags")
-            includeTags(*includeTags.toTypedArray())
-        }
-        if (systemProperties["excludeTags"] != null) {
-            val excludeTags = systemProperties["excludeTags"].toString().split(",")
-            println("JUnit excludeTags: $excludeTags")
-            excludeTags(*excludeTags.toTypedArray())
-        }
-    }
-    testLogging {
-        events("started", "passed", "skipped", "failed")
-        showStandardStreams = true
-    }
-    reports {
-        junitXml.isOutputPerTestCase = true
-    }
-    maxHeapSize = "3g"
-
-    // sets docker images versions for the tests
-    systemProperties(
-        "hivemq.version" to libs.versions.hivemq.platform.get(),
-        "selenium.version" to libs.versions.selenium.container.get(),
-        "nginx.version" to libs.versions.nginx.container.get()
-    )
-
-    dependsOn(saveDockerImages)  // Platform Operator images
-
-    inputs.files(
-        layout.buildDirectory.file("hivemq-dns-init-wait.tar"),
-        layout.buildDirectory.file("hivemq-operator.tar"),
-        layout.buildDirectory.file("hivemq-k8s.tar"),
-        layout.buildDirectory.file("hivemq-platform-operator-init.tar"),
-        layout.buildDirectory.file("hivemq-platform-operator.tar"),
-        layout.buildDirectory.file("hivemq-platform.tar"),
-    )
 }
 
 /* ******************** Docker Platform Operator Images ******************** */
