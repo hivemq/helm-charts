@@ -90,6 +90,8 @@ spec:
                 type: integer
               operatorRestApiPort:
                 type: integer
+              secretName:
+                type: string
               services:
                 items:
                   properties:
