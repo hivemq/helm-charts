@@ -71,7 +71,7 @@ class FilenameUtils {
     public static @NotNull String removeExtension(final @NotNull String fileName) {
         requireNonNullChars(fileName);
 
-        final int index = indexOfExtension(fileName);
+        final var index = indexOfExtension(fileName);
         if (index == NOT_FOUND) {
             return fileName;
         }
@@ -116,13 +116,13 @@ class FilenameUtils {
     private static int indexOfExtension(final @NotNull String fileName) throws IllegalArgumentException {
         if (isSystemWindows()) {
             // special handling for NTFS ADS: don't accept colon in the fileName
-            final int offset = fileName.indexOf(':', getAdsCriticalOffset(fileName));
+            final var offset = fileName.indexOf(':', getAdsCriticalOffset(fileName));
             if (offset != -1) {
                 throw new IllegalArgumentException("NTFS ADS separator (':') in file name is forbidden.");
             }
         }
-        final int extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
-        final int lastSeparator = indexOfLastSeparator(fileName);
+        final var extensionPos = fileName.lastIndexOf(EXTENSION_SEPARATOR);
+        final var lastSeparator = indexOfLastSeparator(fileName);
         return lastSeparator > extensionPos ? NOT_FOUND : extensionPos;
     }
 
@@ -143,8 +143,8 @@ class FilenameUtils {
      */
     private static int getAdsCriticalOffset(final @NotNull String fileName) {
         // step 1: remove leading path segments
-        final int offset1 = fileName.lastIndexOf(SYSTEM_SEPARATOR);
-        final int offset2 = fileName.lastIndexOf(OTHER_SEPARATOR);
+        final var offset1 = fileName.lastIndexOf(SYSTEM_SEPARATOR);
+        final var offset2 = fileName.lastIndexOf(OTHER_SEPARATOR);
         if (offset1 == -1) {
             if (offset2 == -1) {
                 return 0;
@@ -170,8 +170,8 @@ class FilenameUtils {
      *         is no such character
      */
     private static int indexOfLastSeparator(final @NotNull String fileName) {
-        final int lastUnixPos = fileName.lastIndexOf(UNIX_SEPARATOR);
-        final int lastWindowsPos = fileName.lastIndexOf(WINDOWS_SEPARATOR);
+        final var lastUnixPos = fileName.lastIndexOf(UNIX_SEPARATOR);
+        final var lastWindowsPos = fileName.lastIndexOf(WINDOWS_SEPARATOR);
         return Math.max(lastUnixPos, lastWindowsPos);
     }
 }
