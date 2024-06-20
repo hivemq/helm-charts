@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -491,8 +490,8 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName,
             final @NotNull Class<T> clazz) {
-        try (final InputStream is = K8sUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
-            final var resource = client.resources(clazz).load(is);
+        try (final var inputStream = K8sUtil.class.getClassLoader().getResourceAsStream(resourceName)) {
+            final var resource = client.resources(clazz).load(inputStream);
             assertThat(resource).isNotNull();
             resource.item().getMetadata().setNamespace(namespace);
             return resource;

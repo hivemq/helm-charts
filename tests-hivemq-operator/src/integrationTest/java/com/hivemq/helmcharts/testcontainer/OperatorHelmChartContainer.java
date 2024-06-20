@@ -208,7 +208,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 K8sUtil.waitForHiveMQClusterState(client, "default", chartName, "Running");
 
                 // get the HiveMQ container logs inside the pod
-                final Pod pod = client.pods().inAnyNamespace().withLabel("app", "hivemq").list().getItems().getFirst();
+                final var pod = client.pods().inAnyNamespace().withLabel("app", "hivemq").list().getItems().getFirst();
                 final var containerResource = client.pods()
                         .inNamespace("default")
                         .withName(pod.getMetadata().getName())
@@ -280,8 +280,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
                         final var logPodName = getLogPodName(podName);
                         executorService.submit(() -> {
                             LOG.info("Started log watcher for {} in pod {} [{}]", containerName, podName, podUid);
-                            try (final InputStream inputStream = logWatch.getOutput();
-                                 final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                            try (final var inputStream = logWatch.getOutput();
+                                 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
                                 reader.lines().forEach(line -> {
                                     // skip the ISO8601 prefix for logging
                                     final var matcher = LOGBACK_DATE_PREFIX.matcher(line);

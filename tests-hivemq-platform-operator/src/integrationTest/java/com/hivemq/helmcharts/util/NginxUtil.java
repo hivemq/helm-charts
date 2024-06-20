@@ -68,7 +68,7 @@ public class NginxUtil {
         client.resource(nginxService).create();
 
         await().atMost(Duration.ofMinutes(3)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
-            final Deployment nginx = client.apps().deployments().inNamespace(namespace).withName("nginx").get();
+            final var nginx = client.apps().deployments().inNamespace(namespace).withName("nginx").get();
             assertThat(nginx).isNotNull();
             assertThat(nginx.getStatus().getReadyReplicas()).isEqualTo(1);
         });

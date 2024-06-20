@@ -13,11 +13,11 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
 
     @Override
     public int compareTo(final @NotNull Version other) {
-        final int majorCompare = Integer.compare(this.major, other.major);
+        final var majorCompare = Integer.compare(this.major, other.major);
         if (majorCompare != 0) {
             return majorCompare;
         }
-        final int minorCompare = Integer.compare(this.minor, other.minor);
+        final var minorCompare = Integer.compare(this.minor, other.minor);
         if (minorCompare != 0) {
             return minorCompare;
         }
@@ -32,7 +32,7 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Version that = (Version) o;
+        final var that = (Version) o;
         if (major != that.major) {
             return false;
         }
@@ -57,15 +57,14 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
         @Override
         public @NotNull Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
                 throws IOException {
-            final String versionString = parser.getValueAsString();
-
-            final String[] versionParts = versionString.split("\\.");
+            final var versionString = parser.getValueAsString();
+            final var versionParts = versionString.split("\\.");
             if (versionParts.length != 3) {
                 throw new IllegalArgumentException(String.format("Invalid version format: %s", versionString));
             }
-            int major = Integer.parseInt(versionParts[0]);
-            int minor = Integer.parseInt(versionParts[1]);
-            int patch = Integer.parseInt(versionParts[2]);
+            final var major = Integer.parseInt(versionParts[0]);
+            final var minor = Integer.parseInt(versionParts[1]);
+            final var patch = Integer.parseInt(versionParts[2]);
             return new Version(major, minor, patch);
         }
     }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Timeout;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -38,7 +37,7 @@ class EseExtensionInstallationIT {
         final var client = container.getKubernetesClient();
         final var namespace = "default";
 
-        final URL resource = getClass().getResource("/ese-config.xml");
+        final var resource = getClass().getResource("/ese-config.xml");
 
         final var configMapData = Files.readString(Path.of(Objects.requireNonNull(resource).toURI()));
         final var eseConfigMap = new ConfigMapBuilder().withNewMetadata()

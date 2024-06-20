@@ -2,9 +2,6 @@ package com.hivemq.helmcharts.compose;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
-import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
-import io.fabric8.kubernetes.api.model.apps.StatefulSet;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -51,8 +48,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         await().until(extensionEnabledInitAppFuture::isDone);
         await().until(extensionStartedBrokerFuture::isDone);
 
-        final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         // check that extensions are enabled
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=true,.*?id=hivemq-bridge-extension,.*?].*");
@@ -100,8 +96,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         await().until(extensionStartedBrokerFuture1::isDone);
 
         // check that extensions are enabled
-        final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=true,.*?id=hivemq-bridge-extension,.*?].*");
 
@@ -120,7 +115,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         await().until(extensionEnabledInitAppFuture2::isDone);
         await().until(extensionStartedBrokerFuture2::isDone);
 
-        final StatefulSet upgradedStatefulSet =
+        final var upgradedStatefulSet =
                 client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(upgradedStatefulSet.getStatus().getAvailableReplicas()).isEqualTo(1);
     }
