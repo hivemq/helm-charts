@@ -62,7 +62,7 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
                         hivemqContainer.getMqttPort(),
                         "SubscribeClient"),
                 (publishClient, subscribeClient, publishes) -> {
-                    final String validTopic = "bridge/topic/test";
+                    final var validTopic = "bridge/topic/test";
                     subscribeClient.subscribeWith().topicFilter(validTopic).send();
                     LOG.info("remote client subscribed");
 

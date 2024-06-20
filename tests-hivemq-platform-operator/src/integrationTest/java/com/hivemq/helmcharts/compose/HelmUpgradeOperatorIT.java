@@ -1,7 +1,6 @@
 package com.hivemq.helmcharts.compose;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -52,7 +51,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
                 "--namespace",
                 operatorNamespace);
 
-        final Deployment upgradedDeployment = client.apps()
+        final var upgradedDeployment = client.apps()
                 .deployments()
                 .inNamespace(operatorNamespace)
                 .withName(operatorName)

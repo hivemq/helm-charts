@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -26,10 +25,10 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withOverrideInitContainer_hivemqRunningWithVolumeMounts() throws Exception {
-        final String additionalVolumeFile = "/files/init-container-additional-volumes-test-values.yaml";
-        final String additionalInitContainerFile = "/files/init-containers-spec.yaml";
+        final var additionalVolumeFile = "/files/init-container-additional-volumes-test-values.yaml";
+        final var additionalInitContainerFile = "/files/init-containers-spec.yaml";
 
-        final String mountName = "init-container-volume";
+        final var mountName = "init-container-volume";
 
         installPlatformChartAndWaitToBeRunning("--set-file",
                 "config.overrideInitContainers=" + additionalInitContainerFile,
@@ -57,9 +56,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
-        K8sUtil.createConfigMap(client,
-                platformNamespace,
-                "consul-template-config-map.yml");
+        K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
         installPlatformChartAndWaitToBeRunning("/files/additional-init-containers-test-values.yaml");
 
         await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
@@ -70,7 +67,8 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
             assertThat(hivemqContainer.getVolumeMounts().stream()) //
                     .anyMatch(volumeMount -> volumeMount.getName().equals("license-volume") &&
                             volumeMount.getMountPath().equals("/opt/hivemq/license"));
-            final var additionalInitContainer = K8sUtil.getInitContainer(statefulSet.getSpec(), "consul-template-init-container");
+            final var additionalInitContainer =
+                    K8sUtil.getInitContainer(statefulSet.getSpec(), "consul-template-init-container");
             assertThat(additionalInitContainer.getVolumeMounts().stream()) //
                     .anyMatch(volumeMount -> volumeMount.getName().equals("license-volume") &&
                             volumeMount.getMountPath().equals("/opt/hivemq/license"));
@@ -78,22 +76,20 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
             final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
             assertThat(volumes).isNotNull();
             assertThat(volumes.stream()) //
-                    .anyMatch(volume -> volume.getName().equals("license-volume") &&
-                            volume.getEmptyDir() != null);
+                    .anyMatch(volume -> volume.getName().equals("license-volume") && volume.getEmptyDir() != null);
         });
         waitForPlatformLog(".*License file license.lic is corrupt.");
     }
 
     private void assertThatFileContains(final @NotNull Pod pod) {
-        final String initContainerTextFile = "/init-container-test/init-container-test.txt";
-        final String expectedContent = "test init container";
-
-        try (InputStream in = client.pods()
+        final var initContainerTextFile = "/init-container-test/init-container-test.txt";
+        final var expectedContent = "test init container";
+        try (final var inputStream = client.pods()
                 .inNamespace(platformNamespace)
                 .withName(pod.getMetadata().getName())
                 .file(initContainerTextFile)
                 .read()) {
-            final String foundContent = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            final var foundContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             assertThat(foundContent).isEqualTo(expectedContent);
         } catch (final IOException e) {
             throw new AssertionError("Could not read test file of init container from pod", e);

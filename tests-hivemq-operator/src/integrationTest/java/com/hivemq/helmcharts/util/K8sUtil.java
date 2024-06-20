@@ -58,8 +58,7 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String customResourceName,
             final @NotNull String state) {
-        final Resource<GenericKubernetesResource> hivemqCustomResource =
-                K8sUtil.getHiveMQCluster(client, namespace, customResourceName);
+        final var hivemqCustomResource = K8sUtil.getHiveMQCluster(client, namespace, customResourceName);
         hivemqCustomResource.waitUntilCondition(getHiveMQClusterStatus(state), 5, TimeUnit.MINUTES);
         assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
     }
