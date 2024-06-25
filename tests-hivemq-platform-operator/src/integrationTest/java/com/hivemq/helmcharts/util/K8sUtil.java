@@ -212,11 +212,7 @@ public class K8sUtil {
      * @return Namespace generated from the class passed as argument, up to 63 characters.
      */
     public static @NotNull String getNamespaceName(final @NotNull Class<?> clazz) {
-        final var namespace = clazz.getSimpleName().toLowerCase();
-        if (namespace.length() > 63) {
-            return namespace.substring(0, 63);
-        }
-        return namespace;
+        return getNamespaceName(clazz, "");
     }
 
     /**
@@ -224,11 +220,16 @@ public class K8sUtil {
      * @return Namespace generated from the class passed as argument, up to 63 characters.
      */
     public static @NotNull String getOperatorNamespaceName(final @NotNull Class<?> clazz) {
+        return getNamespaceName(clazz, "-operator");
+    }
+
+    private static @NotNull String getNamespaceName(final @NotNull Class<?> clazz, final @NotNull String suffix) {
+        final var maxLength = 63 - suffix.length();
         final var namespace = clazz.getSimpleName().toLowerCase();
-        if (namespace.length() > 54) {
-            return namespace.substring(0, 54);
+        if (namespace.length() > maxLength) {
+            return namespace.substring(0, maxLength) + suffix;
         }
-        return namespace + "-operator";
+        return namespace + suffix;
     }
 
     /**
