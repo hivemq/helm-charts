@@ -303,17 +303,19 @@ public class HelmChartContainer extends K3sContainer {
     public void uninstallRelease(
             final @NotNull String releaseName, final @NotNull String namespace, final boolean deleteNamespace)
             throws Exception {
+        LOG.info("Uninstalling release '{}' in namespace '{}'...", releaseName, namespace);
         try {
             executeHelmCommand("uninstall",
                     releaseName,
                     null,
                     true,
                     Stream.of("--cascade", "foreground", "--namespace", namespace),
-                    false);
+                    true);
         } finally {
             if (deleteNamespace) {
                 deleteNamespace(namespace);
             }
+            LOG.info("Release '{}' in namespace '{}' is uninstalled", releaseName, namespace);
         }
     }
 
