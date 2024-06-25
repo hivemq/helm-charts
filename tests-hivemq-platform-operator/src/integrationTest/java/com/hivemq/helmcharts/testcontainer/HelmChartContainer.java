@@ -483,16 +483,16 @@ public class HelmChartContainer extends K3sContainer {
 
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
         if (withLocalCharts) {
-            return Stream.concat(getLocalOperatorRepositoryValues(), getOperatorResourcesFixedValues());
+            return Stream.concat(getLocalOperatorRepositoryValues(), getOperatorFixedValues());
         }
-        return getOperatorResourcesFixedValues();
+        return getOperatorFixedValues();
     }
 
     private static @NotNull Stream<String> getPlatformFixedValues(final boolean withLocalCharts) {
         if (withLocalCharts) {
-            return Stream.concat(getLocalPlatformRepositoryValues(), getPlatformResourcesFixedValues());
+            return Stream.concat(getLocalPlatformRepositoryValues(), getPlatformFixedValues());
         }
-        return getPlatformResourcesFixedValues();
+        return getPlatformFixedValues();
     }
 
     private static @NotNull Stream<String> getLocalOperatorRepositoryValues() {
@@ -519,14 +519,16 @@ public class HelmChartContainer extends K3sContainer {
                 "image.pullPolicy=Never");
     }
 
-    private static @NotNull Stream<String> getOperatorResourcesFixedValues() {
-        // need to limit cpu resource value for CI jobs
-        return Stream.of("--set", "resources.cpu=" + POD_CPU_LIMIT);
+    private static @NotNull Stream<String> getOperatorFixedValues() {
+        return Stream.of("--set", "logLevel=DEBUG",
+                // need to limit cpu resource value for CI jobs
+                "--set", "resources.cpu=" + POD_CPU_LIMIT);
     }
 
-    private static @NotNull Stream<String> getPlatformResourcesFixedValues() {
-        // need to limit cpu resource value for CI jobs
-        return Stream.of("--set", "nodes.resources.cpu=" + POD_CPU_LIMIT);
+    private static @NotNull Stream<String> getPlatformFixedValues() {
+        return Stream.of(
+                // need to limit cpu resource value for CI jobs
+                "--set", "nodes.resources.cpu=" + POD_CPU_LIMIT);
     }
 
     private class EventWatcher implements Watcher<Event> {
