@@ -82,11 +82,14 @@ public abstract class AbstractHelmChartIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     final void baseTearDown() throws Exception {
-        if (uninstallPlatformChart()) {
-            helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace, true);
-        }
-        if (uninstallOperatorChart()) {
-            helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
+        try {
+            if (uninstallPlatformChart()) {
+                helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace, true);
+            }
+        } finally {
+            if (uninstallOperatorChart()) {
+                helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
+            }
         }
     }
 
