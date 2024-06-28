@@ -28,6 +28,7 @@ fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version.r
 hivemq-extensionSdk = { module = "com.hivemq:hivemq-extension-sdk", version.ref = "hivemq-platform" }
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
 rest-assured = { module = "io.rest-assured:rest-assured", version.ref = "rest-assured" }
