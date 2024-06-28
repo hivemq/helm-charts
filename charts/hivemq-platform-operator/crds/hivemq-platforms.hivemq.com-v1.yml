@@ -68,6 +68,10 @@ spec:
                       description: "The name of the Secret that contains headers,\
                         \ that should be used for the download of custom extensions."
                       type: string
+                    secretName:
+                      description: The name of the Secret that contains configuration
+                        files for this extension
+                      type: string
                     supportsHotReload:
                       description: Whether this extension supports hot-reload of configuration
                         changes
