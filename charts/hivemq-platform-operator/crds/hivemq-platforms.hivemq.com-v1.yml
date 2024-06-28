@@ -3462,6 +3462,8 @@ spec:
                         type: array
                     type: object
                 type: object
+              statefulSetMigration:
+                type: boolean
             type: object
           status:
             properties:
@@ -3508,6 +3510,7 @@ spec:
                     - SCALING
                     - SET_LOG_LEVEL
                     - STARTING
+                    - STATEFULSET_MIGRATION
                     - UPDATE_INIT_APP
                     type: string
                   statePhase:
@@ -3525,6 +3528,9 @@ spec:
                     - RESTART_PODS_IN_PROGRESS
                     - SCALE_DOWN_IN_PROGRESS
                     - SET_LOG_LEVEL
+                    - STATEFULSET_MIGRATION_IN_PROGRESS
+                    - STATEFULSET_MIGRATION_STARTING
+                    - STATEFULSET_MIGRATION_VALIDATION
                     - SURGE_IN_PROGRESS
                     - UPDATE_INIT_APP
                     - WAIT_FOR_EXTENSION_RESTART
@@ -3547,6 +3553,7 @@ spec:
                 - SCALING
                 - SET_LOG_LEVEL
                 - STARTING
+                - STATEFULSET_MIGRATION
                 - UPDATE_INIT_APP
                 type: string
               statePhase:
@@ -3564,6 +3571,9 @@ spec:
                 - RESTART_PODS_IN_PROGRESS
                 - SCALE_DOWN_IN_PROGRESS
                 - SET_LOG_LEVEL
+                - STATEFULSET_MIGRATION_IN_PROGRESS
+                - STATEFULSET_MIGRATION_STARTING
+                - STATEFULSET_MIGRATION_VALIDATION
                 - SURGE_IN_PROGRESS
                 - UPDATE_INIT_APP
                 - WAIT_FOR_EXTENSION_RESTART
