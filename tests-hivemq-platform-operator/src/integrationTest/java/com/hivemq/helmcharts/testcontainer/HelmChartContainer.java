@@ -250,7 +250,7 @@ public class HelmChartContainer extends K3sContainer {
         final var client = getKubernetesClient();
         final var namespaceDeleted = client.namespaces().withName(name).informOnCondition(List::isEmpty);
         assertThat(client.namespaces().withName(name).delete()).isNotEmpty();
-        await().atMost(Duration.ofMinutes(3)).pollInterval(Duration.ofMillis(100)).until(namespaceDeleted::isDone);
+        await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofMillis(100)).until(namespaceDeleted::isDone);
         LOG.info("Namespace '{}' deleted", name);
     }
 
