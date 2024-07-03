@@ -138,11 +138,11 @@
         }
       }
     },
-    "env": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": true
+    "env" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "additionalProperties" : true
       }
     },
     "serviceAccount" : {
@@ -181,7 +181,14 @@
         }
       }
     },
-
+    "hivemqPlatformStatefulSet" : {
+      "type" : "object",
+      "properties" : {
+        "rollingRestartOnTemplateMetadataChange" : {
+          "type" : "boolean"
+        }
+      }
+    },
     "rbac" : {
       "type" : "object",
       "properties" : {
