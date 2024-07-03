@@ -374,3 +374,31 @@ tests:
           content:
             name: hivemq.platform.operator.serviceaccount.permissions.validate
             value: "false"
+
+  - it: with platform statefulset rolling-restart-on-template-metadata-change enabled
+    set:
+      hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange: true
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+            value: "true"
+
+  - it: with platform statefulset rolling-restart-on-template-metadata-change disabled
+    set:
+      hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+            value: "false"

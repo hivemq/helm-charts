@@ -82,6 +82,9 @@ spec:
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.create }}"
             - name: hivemq.platform.operator.serviceaccount.permissions.validate
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.validate }}"
+            # additional options for StatefulSet reconciliation
+            - name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+              value: "{{ .Values.hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange }}"
             # additional options for fine-grained logging
             - name: hivemq.platform.operator.quarkus.log.level
               value: "{{ .Values.quarkusLogLevel | default "INFO" }}"

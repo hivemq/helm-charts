@@ -58,6 +58,9 @@ spec:
               value: "true"
             - name: hivemq.platform.operator.serviceaccount.permissions.validate
               value: "true"
+            # additional options for StatefulSet reconciliation
+            - name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+              value: "false"
             # additional options for fine-grained logging
             - name: hivemq.platform.operator.quarkus.log.level
               value: "INFO"
