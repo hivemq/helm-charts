@@ -13,8 +13,8 @@ image:
 # Resources, limits and requests are set to equal values.
 # Note: Increase resources depending on how many HiveMQ Platforms the Operator manages.
 resources:
-  cpu: 512m
-  memory: 512M
+  cpu: 1024m
+  memory: 1Gi
 
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
