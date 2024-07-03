@@ -313,7 +313,12 @@ additionalInitContainers: []
 #  - name: my-custom-init-container
 #    image: busybox:latest
 #    restartPolicy: Always
-#    command: ['sh', '-c', 'tail -F /opt/hivemq/conf-k8s/config.xml']
+#    command: ['/bin/sh', '-c']
+#    args:
+#      - |
+#        trap 'echo "Terminating container"; exit 0' SIGTERM
+#        tail -n 200 -F /opt/hivemq/conf-k8s/config.xml &
+#        while true; do sleep 1; done
 #    volumeMounts:
 #      - name: broker-configuration
 #        mountPath: /opt/hivemq/conf-k8s/
@@ -322,7 +327,12 @@ additionalInitContainers: []
 additionalContainers: []
 #  - name: my-custom-container
 #    image: busybox:latest
-#    command: ['sh', '-c', 'tail -F /opt/hivemq/conf-k8s/config.xml']
+#    command: ['/bin/sh', '-c']
+#    args:
+#      - |
+#        trap 'echo "Terminating container"; exit 0' SIGTERM
+#        tail -n 200 -F /opt/hivemq/conf-k8s/config.xml &
+#        while true; do sleep 1; done
 #    volumeMounts:
 #      - name: broker-configuration
 #        mountPath: /opt/hivemq/conf-k8s/
