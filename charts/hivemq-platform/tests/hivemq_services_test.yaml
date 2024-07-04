@@ -87,7 +87,8 @@ tests:
           exposed: true
           containerPort: 1884
           annotations:
-            test-annotation-key: test-annotation-value
+            annotation-key-1: annotation-value-1
+            annotation-key-2: annotation-value-2
     asserts:
       - exists:
           path: spec.services
@@ -97,7 +98,66 @@ tests:
             metadata:
               name: hivemq-test-hivemq-platform-mqtt-1884
               annotations:
-                test-annotation-key: test-annotation-value
+                annotation-key-1: annotation-value-1
+                annotation-key-2: annotation-value-2
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with additional labels
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          labels:
+            label-key-1: label-value-1
+            label-key-2: label-value-2
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+              labels:
+                label-key-1: label-value-1
+                label-key-2: label-value-2
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with additional annotations and labels
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          annotations:
+            annotation-key-1: annotation-value-1
+            annotation-key-2: annotation-value-2
+          labels:
+            label-key-1: label-value-1
+            label-key-2: label-value-2
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+              annotations:
+                annotation-key-1: annotation-value-1
+                annotation-key-2: annotation-value-2
+              labels:
+                label-key-1: label-value-1
+                label-key-2: label-value-2
             spec:
               ports:
                 - name: mqtt-1884
