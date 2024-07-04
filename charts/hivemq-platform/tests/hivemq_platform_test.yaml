@@ -187,6 +187,68 @@ tests:
                     name: mysecretname
                     key: mysecretkey
 
+  - it: with custom annotations for the HiveMQ container
+    set:
+      nodes.annotations:
+         annotation-key-1: annotation-value-1
+         annotation-key-2: annotation-value-2
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.metadata
+      - exists:
+          path: spec.statefulSet.spec.template.metadata.annotations
+      - notExists:
+          path: spec.statefulSet.spec.template.metadata.labels
+      - equal:
+          path: spec.statefulSet.spec.template.metadata.annotations
+          value:
+            annotation-key-1: annotation-value-1
+            annotation-key-2: annotation-value-2
+
+  - it: with custom labels for the HiveMQ container
+    set:
+      nodes.labels:
+        label-key-1: label-value-1
+        label-key-2: label-value-2
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.metadata
+      - notExists:
+          path: spec.statefulSet.spec.template.metadata.annotations
+      - exists:
+          path: spec.statefulSet.spec.template.metadata.labels
+      - equal:
+          path: spec.statefulSet.spec.template.metadata.labels
+          value:
+            label-key-1: label-value-1
+            label-key-2: label-value-2
+
+  - it: with custom annotations and labels for the HiveMQ container
+    set:
+      nodes.annotations:
+        annotation-key-1: annotation-value-1
+        annotation-key-2: annotation-value-2
+      nodes.labels:
+        label-key-1: label-value-1
+        label-key-2: label-value-2
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.metadata
+      - exists:
+          path: spec.statefulSet.spec.template.metadata.annotations
+      - exists:
+          path: spec.statefulSet.spec.template.metadata.labels
+      - equal:
+          path: spec.statefulSet.spec.template.metadata.annotations
+          value:
+            annotation-key-1: annotation-value-1
+            annotation-key-2: annotation-value-2
+      - equal:
+          path: spec.statefulSet.spec.template.metadata.labels
+          value:
+            label-key-1: label-value-1
+            label-key-2: label-value-2
+
   - it: with custom environment variables for the HiveMQ container
     values:
       - custom-env-vars-values.yaml
