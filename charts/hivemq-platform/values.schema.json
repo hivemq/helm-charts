@@ -134,6 +134,10 @@
             "type": "object",
             "additionalProperties": true
           },
+          "labels": {
+            "type": "object",
+            "additionalProperties": true
+          },
           "serviceType": {
             "type" : "string",
             "enum" : [
@@ -317,6 +321,10 @@
         },
         "annotations" : {
           "type" : "object",
+          "additionalProperties": true
+        },
+        "labels": {
+          "type": "object",
           "additionalProperties": true
         },
         "podSecurityContext" : {

@@ -24,10 +24,16 @@ spec:
     spec:
       replicas: {{.Values.nodes.replicaCount}}
       template:
-        {{- if and (typeIsLike "map[string]interface {}" .Values.nodes.annotations) (.Values.nodes.annotations) }}
+        {{- if or .Values.nodes.annotations .Values.nodes.labels }}
         metadata:
+          {{- with .Values.nodes.annotations }}
           annotations:
-          {{- .Values.nodes.annotations | toYaml | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.nodes.labels }}
+          labels:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- end }}
         spec:
           {{- if .Values.image.pullSecretName }}
@@ -207,9 +213,13 @@ spec:
     {{- if and $val.exposed }}
     - metadata:
         name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
-        {{- if and (typeIsLike "map[string]interface {}" $val.annotations) ($val.annotations) }}
+        {{- with $val.annotations }}
         annotations:
-          {{- $val.annotations | toYaml | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $val.labels }}
+        labels:
+          {{- toYaml . | nindent 10 }}
         {{- end }}
       spec:
         {{- if and $val.serviceType (or (eq $val.serviceType "NodePort") (eq $val.serviceType "LoadBalancer")) }}
