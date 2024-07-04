@@ -18,6 +18,8 @@ nodes:
 
   # Annotations to add to the HiveMQ Pods
   annotations: {}
+  # Labels to add to the HiveMQ Pods
+  labels: {}
 
   # Resources, limits and requests are set to equal values.
   # Note: For production use-cases HiveMQ requires a minimum of 4 CPUs and 4G of memory.
@@ -173,6 +175,8 @@ services:
     # serviceType: NodePort
     # Annotations to add to the service
     annotations: {}
+    # Labels to add to the service
+    labels: {}
   # Secure MQTT service configuration
   - type: mqtt
     exposed: false
