@@ -6,5 +6,7 @@ build
 # Files created for Helm dependencies
 charts/**/charts/**.tgz
 
+examples/hivemq-platform/manifest-customization/deployment/**
+
 # Folders and files created when enabling debug mode in Helm
 .debug
