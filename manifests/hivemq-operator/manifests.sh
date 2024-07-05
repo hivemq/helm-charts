@@ -4,8 +4,12 @@ PROMETHEUS_HELM_CHARTS_URL=https://prometheus-community.github.io/helm-charts
 
 echo "=================================================="
 echo "Generating HiveMQ Operator (legacy) Manifest files"
+echo "=================================================="
+
+RELEASE_NAME="${1:-hivemq-operator}"
 
 # change current directory to project root
+CWD=$(pwd)
 cd "$(dirname "$0")"/../.. || exit 1
 
 echo "Create manifests directory"
@@ -20,7 +24,7 @@ fi
 helm dependency build ../charts/hivemq-operator
 
 echo "Create HiveMQ Operator Templates"
-helm template hivemq-operator ../charts/hivemq-operator -n hivemq -f ./hivemq-operator/manifest.yaml --skip-tests --output-dir . > /dev/null
+helm template "${RELEASE_NAME}" ../charts/hivemq-operator -n hivemq -f ./hivemq-operator/manifest.yaml --skip-tests --output-dir . > /dev/null
 
 echo "Flatten directory structure"
 find hivemq-operator/templates -type f -exec mv {} hivemq-operator/operator/ \; > /dev/null
@@ -29,5 +33,7 @@ if [ -d hivemq-operator/templates ]; then
 fi
 
 # Shorten Helm's a little redundant naming
-sed -i.bak 's|operator\-operator|operator|' hivemq-operator/operator/*.yaml
-find . -type f -name "*.bak" -delete
+sed -i 's|operator\-operator|operator|' hivemq-operator/operator/*.yaml
+
+# return to original working directory
+cd "${CWD}" || exit 1
