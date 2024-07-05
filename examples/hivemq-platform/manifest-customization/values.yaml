@@ -1,0 +1,22 @@
+# Configure exposed Services and ports
+# Possible service types are: "control-center", "rest-api", "mqtt", "websocket"
+services:
+  # MQTT service configuration
+  - type: mqtt
+    exposed: true
+    containerPort: 1883
+    # Set if service port is different from container port
+    port: 1883
+    # Set if different from ClusterIP. Possible values are `ClusterIP`, `NodePort` and `LoadBalancer`
+    # serviceType: NodePort
+    # Annotations to add to the service
+    annotations: {}
+  - type: mqtt
+    exposed: true
+    containerPort: 1884
+    # Set if service port is different from container port
+    port: 1884
+    # Set if different from ClusterIP. Possible values are `ClusterIP`, `NodePort` and `LoadBalancer`
+    # serviceType: NodePort
+    # Annotations to add to the service
+    annotations: {}
