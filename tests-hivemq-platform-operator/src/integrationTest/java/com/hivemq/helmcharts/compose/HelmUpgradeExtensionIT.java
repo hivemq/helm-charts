@@ -24,10 +24,10 @@ import static org.awaitility.Awaitility.await;
 class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
 
     @Container
-    private static final @NotNull HiveMQContainer HIVEMQ_CONTAINER =
-            new HiveMQContainer(HIVEMQ_DOCKER_IMAGE).withLogLevel(Level.DEBUG)
-                    .withNetwork(network)
-                    .withNetworkAliases("remote");
+    private static final @NotNull HiveMQContainer HIVEMQ_CONTAINER = new HiveMQContainer(HIVEMQ_DOCKER_IMAGE) //
+            .withNetwork(network) //
+            .withNetworkAliases("remote") //
+            .withLogLevel(Level.DEBUG);
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)

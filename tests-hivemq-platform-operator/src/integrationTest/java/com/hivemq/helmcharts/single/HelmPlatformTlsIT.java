@@ -61,8 +61,8 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
     private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
 
-    @SuppressWarnings("resource")
     @Container
+    @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
             new BrowserWebDriverContainer<>(SELENIUM_DOCKER_IMAGE) //
                     .withNetwork(network) //
