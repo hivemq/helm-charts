@@ -31,10 +31,10 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmBridgeExtensionIT.class);
 
     @Container
-    private final @NotNull HiveMQContainer hivemqContainer =
-            new HiveMQContainer(HIVEMQ_DOCKER_IMAGE).withLogLevel(Level.DEBUG)
-                    .withNetwork(network)
-                    .withNetworkAliases("remote");
+    private final @NotNull HiveMQContainer hivemqContainer = new HiveMQContainer(HIVEMQ_DOCKER_IMAGE) //
+            .withNetwork(network) //
+            .withNetworkAliases("remote") //
+            .withLogLevel(Level.DEBUG);
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)

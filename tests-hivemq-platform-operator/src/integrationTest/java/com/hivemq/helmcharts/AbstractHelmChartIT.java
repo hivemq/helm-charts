@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts;
 
 import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
+import com.hivemq.helmcharts.testcontainer.HelmChartContainerExtension;
 import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.Network;
 
 import java.nio.file.Files;
@@ -33,14 +35,18 @@ public abstract class AbstractHelmChartIT {
     protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
     protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX = "hivemq-" + OPERATOR_RELEASE_NAME + "-.*";
 
+    @RegisterExtension
+    private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
+            new HelmChartContainerExtension();
+
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull HelmChartContainer helmChartContainer;
+    @SuppressWarnings("NotNullFieldNotInitialized")
+    protected static @NotNull Network network;
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull KubernetesClient client;
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull LogWaiterUtil logWaiter;
-    @SuppressWarnings("NotNullFieldNotInitialized")
-    protected static @NotNull Network network;
 
     protected final @NotNull String platformNamespace = getNamespaceName(getClass());
     protected final @NotNull String operatorNamespace = getOperatorNamespaceName(getClass());
@@ -50,9 +56,8 @@ public abstract class AbstractHelmChartIT {
     static void baseBeforeAll() {
         Awaitility.setDefaultPollInterval(Duration.ofSeconds(3));
         Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
-        network = Network.newNetwork();
-        helmChartContainer = new HelmChartContainer().withNetwork(network);
-        helmChartContainer.start();
+        helmChartContainer = HELM_CHART_CONTAINER_EXTENSION.getHelmChartContainer();
+        network = HELM_CHART_CONTAINER_EXTENSION.getNetwork();
         client = helmChartContainer.getKubernetesClient();
         logWaiter = helmChartContainer.getLogWaiter();
     }
@@ -60,8 +65,6 @@ public abstract class AbstractHelmChartIT {
     @AfterAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     static void baseAfterAll() {
-        helmChartContainer.stop();
-        network.close();
         Awaitility.reset();
     }
 
@@ -108,8 +111,7 @@ public abstract class AbstractHelmChartIT {
         installPlatformChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installPlatformChartAndWaitToBeRunning(
-            final @NotNull String... commands) throws Exception {
+    protected void installPlatformChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
         helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
                 Stream.concat(Arrays.stream(commands), Stream.of("--namespace", platformNamespace))
                         .toArray(String[]::new));
@@ -165,7 +167,8 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected final @NotNull CompletableFuture<String> waitForInitAppLog(final @NotNull String log) {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*\\[HiveMQ Platform Operator Init App [A-Z0-9.-]+\\] " + log);
+        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX,
+                ".*\\[HiveMQ Platform Operator Init App [A-Z0-9.-]+\\] " + log);
     }
 
     @SuppressWarnings("SameParameterValue")
