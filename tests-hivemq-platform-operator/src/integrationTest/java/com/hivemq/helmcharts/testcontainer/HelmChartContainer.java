@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -50,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
-public class HelmChartContainer extends K3sContainer {
+public class HelmChartContainer extends K3sContainer implements ExtensionContext.Store.CloseableResource {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
@@ -83,10 +84,14 @@ public class HelmChartContainer extends K3sContainer {
     private boolean withK3sDebugging = false;
 
     public HelmChartContainer() {
-        this(K3s.LATEST);
+        this(List.of(), K3s.LATEST);
     }
 
-    public HelmChartContainer(final @NotNull K3s k3s) {
+    public HelmChartContainer(final @NotNull List<String> additionalCommands) {
+        this(additionalCommands, K3s.LATEST);
+    }
+
+    public HelmChartContainer(final @NotNull List<String> additionalCommands, final @NotNull K3s k3s) {
         super(getAdHocImageName(k3s));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + OPERATOR_CHART),
@@ -102,36 +107,25 @@ public class HelmChartContainer extends K3sContainer {
         if (withLocalImages) {
             bindLocalImages();
         }
-        final var etcdNoDataSync = "--etcd-arg=unsafe-no-fsync";
-        final var etcdSnapshotCount = "--etcd-arg=snapshot-count=10000";
-        final var etcdAutoCompactionMode = "--etcd-arg=auto-compaction-mode=revision";
-        final var etcdAutoCompactionRetention = "--etcd-arg=auto-compaction-retention=1000000";
-        final var apiServerCompactionInterval = "--kube-apiserver-arg=etcd-compaction-interval=0s";
-        final var disableTraefik = k3s.ordinal() > K3s.V1_24.ordinal() ? "--disable=traefik" : "--no-deploy=traefik";
-        final var tlsSan = "--tls-san=" + getHost();
+        final var k3sCommands = new ArrayList<>(List.of("server",
+                "--etcd-arg=unsafe-no-fsync",
+                "--etcd-arg=snapshot-count=10000",
+                "--etcd-arg=auto-compaction-mode=revision",
+                "--etcd-arg=auto-compaction-retention=1000000",
+                "--kube-apiserver-arg=etcd-compaction-interval=0s",
+                k3s.ordinal() > K3s.V1_24.ordinal() ? "--disable=traefik" : "--no-deploy=traefik",
+                "--tls-san=" + getHost()));
+        if (!additionalCommands.isEmpty()) {
+            LOG.debug("Starting K3s container with additional commands: {}", additionalCommands);
+            k3sCommands.addAll(additionalCommands);
+        }
         if (withK3sDebugging) {
             LOG.debug("Starting K3s container with --debug");
-            super.withCommand("server",
-                    etcdNoDataSync,
-                    etcdSnapshotCount,
-                    etcdAutoCompactionMode,
-                    etcdAutoCompactionRetention,
-                    apiServerCompactionInterval,
-                    disableTraefik,
-                    tlsSan,
-                    "--debug",
-                    "-v",
-                    "10");
-        } else {
-            super.withCommand("server",
-                    etcdNoDataSync,
-                    etcdSnapshotCount,
-                    etcdAutoCompactionMode,
-                    etcdAutoCompactionRetention,
-                    apiServerCompactionInterval,
-                    disableTraefik,
-                    tlsSan);
+            k3sCommands.add("--debug");
+            k3sCommands.add("-v");
+            k3sCommands.add("10");
         }
+        super.withCommand(k3sCommands.toArray(new String[0]));
     }
 
     /**
@@ -216,6 +210,11 @@ public class HelmChartContainer extends K3sContainer {
         executorService.shutdownNow();
         super.stop();
         LOG.info("HelmChartContainer is stopped");
+    }
+
+    @Override
+    public void close() {
+        stop();
     }
 
     @SuppressWarnings("unused")
