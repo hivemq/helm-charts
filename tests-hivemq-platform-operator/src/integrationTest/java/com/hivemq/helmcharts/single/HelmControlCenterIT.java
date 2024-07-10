@@ -4,8 +4,6 @@ import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -16,6 +14,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +34,7 @@ import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
 @Tag("Services")
 @Tag("Services1")
+@Testcontainers
 class HelmControlCenterIT extends AbstractHelmChartIT {
 
     private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8081 = "hivemq-test-hivemq-platform-cc-8081";
@@ -47,6 +48,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
     private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
 
+    @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
             new BrowserWebDriverContainer<>(SELENIUM_DOCKER_IMAGE) //
@@ -54,18 +56,6 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
                     // needed for Docker on Linux
                     .withExtraHost("host.docker.internal", "host-gateway") //
                     .withCapabilities(new ChromeOptions());
-
-    @BeforeAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseSetup() {
-        WEB_DRIVER_CONTAINER.start();
-    }
-
-    @AfterAll
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    static void baseShutdown() {
-        WEB_DRIVER_CONTAINER.stop();
-    }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
