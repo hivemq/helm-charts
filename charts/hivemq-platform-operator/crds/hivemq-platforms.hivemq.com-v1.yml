@@ -3527,6 +3527,7 @@ spec:
                     - INVALID_PLATFORM_STATE
                     - INVALID_POD_CONDITION
                     - INVALID_SECRET
+                    - INVALID_VOLUME_CLAIM_TEMPLATES
                     - READY
                     - RESTART_EXTENSIONS
                     - RESTART_PODS_IN_PROGRESS
@@ -3570,6 +3571,7 @@ spec:
                 - INVALID_PLATFORM_STATE
                 - INVALID_POD_CONDITION
                 - INVALID_SECRET
+                - INVALID_VOLUME_CLAIM_TEMPLATES
                 - READY
                 - RESTART_EXTENSIONS
                 - RESTART_PODS_IN_PROGRESS
