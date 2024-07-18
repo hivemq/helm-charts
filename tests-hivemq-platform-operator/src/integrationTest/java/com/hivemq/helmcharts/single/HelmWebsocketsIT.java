@@ -30,7 +30,7 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_TRUSTSTORE_PAS
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
 @Tag("Services")
-@Tag("Services2")
+@Tag("Services3")
 @SuppressWarnings("DuplicatedCode")
 class HelmWebsocketsIT extends AbstractHelmChartIT {
 

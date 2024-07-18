@@ -102,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-plan: [ CustomConfig, Containers, Volumes, Services1, Services2, Platform, PodSecurityContext, Other ]
+        test-plan: [ CustomConfig, Containers, Volumes, Services1, Services2, Services3, Platform, PodSecurityContext, Other ]
     steps:
       - name: Checkout HiveMQ Platform Helm Charts
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
