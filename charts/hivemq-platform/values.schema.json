@@ -115,6 +115,22 @@
         "required": ["kind", "apiVersion", "metadata", "spec"]
       }
     },
+    "metrics" : {
+      "type": "object",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "port" : {
+          "type" : "integer",
+          "minimum" : 0,
+          "maximum": 65535
+        },
+        "path" : {
+          "type" : "string"
+        }
+      }
+    },
     "services" : {
       "type" : "array",
       "items" : {
@@ -149,13 +165,19 @@
           "exposed" : {
             "type" : "boolean"
           },
+          "name" : {
+            "type" : "string",
+            "maxLength": 63
+          },
           "port" : {
             "type" : "integer",
-            "minimum" : 0
+            "minimum" : 0,
+            "maximum": 65535
           },
           "containerPort" : {
             "type" : "integer",
-            "minimum" : 0
+            "minimum" : 0,
+            "maximum": 65535
           },
           "keystoreSecretName" : {
             "type" : "string"

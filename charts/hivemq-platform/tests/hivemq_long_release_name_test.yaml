@@ -4,7 +4,8 @@ templates:
 release:
   name: this-is-more-than-32-chars-long-release-name
 tests:
-  - it: with default values then truncated service names
+
+  - it: with default values, then truncated service names
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
