@@ -37,12 +37,16 @@ import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 @Testcontainers
 class HelmControlCenterIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8081 = "hivemq-test-hivemq-platform-cc-8081";
-    private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8443 = "hivemq-test-hivemq-platform-cc-8443";
-    private static final @NotNull String HIVEMQ_CC_SERVICE_NAME_8444 = "hivemq-test-hivemq-platform-cc-8444";
-    private static final int HIVEMQ_CC_SERVICE_PORT_8081 = 8081;
-    private static final int HIVEMQ_CC_SERVICE_PORT_8443 = 8443;
-    private static final int HIVEMQ_CC_SERVICE_PORT_8444 = 8444;
+    private static final int CC_SERVICE_PORT_8081 = 8081;
+    private static final int CC_SERVICE_PORT_8443 = 8443;
+    private static final int CC_SERVICE_PORT_8444 = 8444;
+    private static final @NotNull String CC_SERVICE_NAME_8081 =
+            "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8081;
+    private static final @NotNull String CC_SERVICE_NAME_8443 =
+            "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8443;
+    private static final @NotNull String CC_SERVICE_NAME_8444 =
+            "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8444;
+    private static final @NotNull String CC_CUSTOM_SERVICE_NAME = "control-center-service";
     private static final @NotNull String LOGIN_BUTTON = ".v-button-hmq-login-button";
     private static final @NotNull String LOGOUT_BUTTON = ".hmq-logout-button";
     private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
@@ -61,7 +65,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenControlCenterEnabled_thenAbleToLogin() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/control-center-values.yaml");
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
+        assertControlCenterListener(CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081, false);
     }
 
     @Test
@@ -90,9 +94,9 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
 
         installPlatformChartAndWaitToBeRunning("/files/tls-cc-values.yaml");
 
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8443, HIVEMQ_CC_SERVICE_PORT_8443, true);
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8444, HIVEMQ_CC_SERVICE_PORT_8444, true);
+        assertControlCenterListener(CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081, false);
+        assertControlCenterListener(CC_SERVICE_NAME_8443, CC_SERVICE_PORT_8443, true);
+        assertControlCenterListener(CC_SERVICE_NAME_8444, CC_SERVICE_PORT_8444, true);
     }
 
     @Test
@@ -120,16 +124,23 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
 
         installPlatformChartAndWaitToBeRunning("/files/tls-cc-with-private-key-values.yaml");
 
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8443, HIVEMQ_CC_SERVICE_PORT_8443, true);
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8444, HIVEMQ_CC_SERVICE_PORT_8444, true);
+        assertControlCenterListener(CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081, false);
+        assertControlCenterListener(CC_SERVICE_NAME_8443, CC_SERVICE_PORT_8443, true);
+        assertControlCenterListener(CC_SERVICE_NAME_8444, CC_SERVICE_PORT_8444, true);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenOverrideControlCenter_thenAbleToLogin() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/override-control-center-values.yaml");
-        assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, "test", "abc123", false);
+        assertControlCenterListener(CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081, "test", "abc123", false);
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_withCustomServiceName_thenAbleToLogin() throws Exception {
+        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+        assertControlCenterListener(CC_CUSTOM_SERVICE_NAME, CC_SERVICE_PORT_8081, false);
     }
 
     private void assertControlCenterListener(

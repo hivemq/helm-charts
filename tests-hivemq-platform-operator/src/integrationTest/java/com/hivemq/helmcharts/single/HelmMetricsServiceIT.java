@@ -14,8 +14,12 @@ import java.util.concurrent.TimeUnit;
 @Tag("Services1")
 class HelmMetricsServiceIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String METRICS_SERVICE_NAME = "hivemq-test-hivemq-platform-metrics-9499";
-    private static final int METRICS_SERVICE_PORT = 9499;
+    private static final int METRICS_SERVICE_PORT_9499 = 9499;
+    private static final int METRICS_SERVICE_PORT_9399 = 9399;
+    private static final @NotNull String CUSTOM_MQTT_SERVICE_NAME = "mqtt-service";
+    private static final @NotNull String METRICS_SERVICE_NAME =
+            "hivemq-test-hivemq-platform-metrics-" + METRICS_SERVICE_PORT_9499;
+    private static final @NotNull String METRICS_CUSTOM_SERVICE_NAME = "metrics-service";
     private static final @NotNull String METRICS_SERVICE_PATH = "/metrics";
 
     @Test
@@ -28,7 +32,15 @@ class HelmMetricsServiceIT extends AbstractHelmChartIT {
         MonitoringUtil.assertMetrics(client,
                 platformNamespace,
                 METRICS_SERVICE_NAME,
-                METRICS_SERVICE_PORT,
+                METRICS_SERVICE_PORT_9499,
                 METRICS_SERVICE_PATH);
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_withCustomServiceName_thenMetricsAvailable() throws Exception {
+        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+        MqttUtil.assertMessages(client, platformNamespace, CUSTOM_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT);
+        MonitoringUtil.assertMetrics(client, platformNamespace, METRICS_CUSTOM_SERVICE_NAME, METRICS_SERVICE_PORT_9399);
     }
 }
