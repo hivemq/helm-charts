@@ -25,8 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 
     private static final byte @NotNull [] PAYLOAD = "test".getBytes();
-    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-test-hivemq-platform-mqtt-1883";
-    private static final int MQTT_SERVICE_PORT = 1883;
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmBridgeExtensionIT.class);
 
@@ -54,9 +52,7 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 
         // forward the port from the service
         MqttUtil.execute(client,
-                platformNamespace,
-                MQTT_SERVICE_NAME,
-                MQTT_SERVICE_PORT,
+                platformNamespace, DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT,
                 portForward -> getBlockingClient(portForward, "PublishClient"),
                 portForward -> getBlockingClient(hivemqContainer.getHost(),
                         hivemqContainer.getMqttPort(),

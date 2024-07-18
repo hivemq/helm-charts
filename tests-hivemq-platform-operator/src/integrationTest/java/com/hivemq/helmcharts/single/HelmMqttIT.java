@@ -81,6 +81,6 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @SuppressWarnings("SameParameterValue")
     private void assertMqttListener(
             final @NotNull String namespace, final @NotNull String serviceName, final int servicePort) {
-        MqttUtil.execute(client, namespace, serviceName, servicePort, MqttUtil.withDefaultPublishSubscribeRunnable());
+        MqttUtil.assertMessages(client, namespace, serviceName, servicePort);
     }
 }
