@@ -5,6 +5,12 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-%s" "hivemq" .Release.Name }}
 {{- end -}}
 
+{{/*
+Returns a string containing the HiveMQ configuration ConfigMap name, depending on the `.Values.config.create` value.
+It will return the default ConfigMap for the HiveMQ Platform or will reuse the ConfigMap name defined in the `.Values.config.name` if present.
+Otherwise, an exception will be thrown.
+Usage: {{ include "hivemq-platform.configuration-name" . }}
+*/}}
 {{- define "hivemq-platform.configuration-name" -}}
 {{- if .Values.config.create -}}
 {{- printf "%s-%s" "hivemq-configuration" .Release.Name }}
@@ -75,8 +81,8 @@ Has additional volumes
 {{/*
 Does the `hivemq` container have additional volume mounts
 Returns:
-- `true` if the main `hivemq` container is not explicitily set in any element of the .Values.additionalVolumes array
-    as a .Values.additionalVolumes.containerName` (default value), empty string otherwise.
+- `true` if the main `hivemq` container is not explicitily set in any element of the `.Values.additionalVolumes` array
+    as a `.Values.additionalVolumes.containerName` (default value), empty string otherwise.
 Usage: {{ include "hivemq-platform.has-additional-volume-mounts" . }}
 */}}
 {{- define "hivemq-platform.has-additional-volume-mounts" -}}
@@ -96,42 +102,48 @@ Format: <.Values.services>
 Usage: {{ include "hivemq-platform.range-service-port-name" . }}
 */}}
 {{- define "hivemq-platform.range-service-port-name" -}}
-{{- if eq .type "control-center"}}
-{{ printf "%s-%s" "cc" (toString .containerPort) }}
+{{- $type := "mqtt" }}
+{{- if eq .type "control-center" }}
+    {{- $type = "cc" }}
 {{- else if eq .type "rest-api" }}
-{{ printf "%s-%s" "rest" (toString .containerPort) }}
+    {{- $type = "rest" }}
 {{- else if eq .type "websocket" }}
-{{ printf "%s-%s" "ws" (toString .containerPort) }}
-{{- else if and (eq .type "mqtt") .keystoreSecretName }}
-{{- printf "%s-%s" "mqtts" (toString .containerPort) }}
-{{- else }}
-{{- printf "%s-%s" .type (toString .containerPort) }}
+    {{- $type = "ws" }}
+{{- else if eq .type "metrics" }}
+    {{- $type = "metrics" }}
+{{- else if .keystoreSecretName }}
+    {{- $type = "mqtts" }}
 {{- end -}}
+{{- printf "%s-%s" $type (toString .containerPort) }}
 {{- end -}}
 
 {{/*
-Get the service name inside a range of the service values
+Get the service name inside a range of the service values. It truncates the service name to 63 characters.
 Format: hivemq-<.Release.Name>-<.Values.services.type>-<.Values.services.port | .Values.services.containerPort>
-Usage: {{ include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort) }}
+Usage: {{ include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort) }}
 */}}
 {{- define "hivemq-platform.range-service-name" -}}
-{{- $type := "" }}
-{{- $port := (toString .containerPort) }}
-{{- if eq .type "control-center"}}
-{{- $type = "cc" }}
-{{- else if eq .type "rest-api" }}
-{{- $type = "rest" }}
-{{- else if eq .type "websocket" }}
-{{- $type = "ws" }}
-{{- else if and (eq .type "mqtt") .keystoreSecretName }}
-{{- $type = "mqtts" }}
+{{- if .name }}
+  {{- printf "%s" .name }}
 {{- else }}
-{{- $type = .type }}
-{{- end -}}
-{{- if (.port) }}
-{{- $port = (toString .port) }}
+  {{- $type := "mqtt" }}
+  {{- $port := (toString .containerPort) }}
+  {{- if eq .type "control-center" }}
+    {{- $type = "cc" }}
+  {{- else if eq .type "rest-api" }}
+    {{- $type = "rest" }}
+  {{- else if eq .type "websocket" }}
+    {{- $type = "ws" }}
+  {{- else if eq .type "metrics" }}
+    {{- $type = "metrics" }}
+  {{- else if .keystoreSecretName }}
+    {{- $type = "mqtts" }}
+  {{- end -}}
+  {{- if (.port) }}
+    {{- $port = (toString .port) }}
+  {{- end }}
+  {{- printf "hivemq-%s-%s-%s" (trunc 42 .releaseName | trimSuffix "-") $type $port | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
 {{- end }}
-{{- printf "hivemq-%s-%s-%s" (trunc 42 .releaseName | trimSuffix "-") $type $port }}
 {{- end -}}
 
 {{/*
@@ -141,18 +153,40 @@ Params:
 - expectedType: The expected type to check for.
 Returns:
 - `true` if the desired type is found and the service is marked as `exposed`, empty string otherwise.
+Usage: {{ include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "mqtt") }}
 */}}
 {{- define "hivemq-platform.has-service-type" -}}
 {{- $services := .services }}
 {{- $expectedType := .expectedType }}
 {{- $typeExists := "" }}
 {{- range $service := $services }}
-  {{- if and $service.exposed (eq $service.type $expectedType) }}
+  {{- if and ($service.exposed) (eq $service.type $expectedType) }}
     {{- $typeExists = true }}
     {{- break }}
   {{- end }}
 {{- end }}
 {{- $typeExists }}
+{{- end -}}
+
+{{/*
+Checks if there is default metrics service available as part of the `.Values.services` based on the `.Values.metrics.port` used,
+regardless of whether it is exposed or not.
+Params:
+- services: The array of services to check.
+Returns:
+- `true` if a default `metrics` service is found, empty string otherwise.
+Usage: {{ include "hivemq-platform.has-default-metrics-service" . }}
+*/}}
+{{- define "hivemq-platform.has-default-metrics-service" -}}
+{{- $metricsServiceExists := "" }}
+{{- $metricsPort := (include "hivemq-platform.metrics-port" .) }}
+{{- range $service := .Values.services }}
+  {{- if and (eq $service.type "metrics") (eq (int64 $service.containerPort) (int64 $metricsPort)) }}
+    {{- $metricsServiceExists = true }}
+    {{- break }}
+  {{- end }}
+{{- end }}
+{{- $metricsServiceExists }}
 {{- end -}}
 
 {{/*
@@ -163,9 +197,9 @@ Usage: {{ include "hivemq-platform.keystore-private-password" (dict "releaseName
 */}}
 {{- define "hivemq-platform.keystore-private-password" -}}
 {{- if or .keystorePrivatePassword .keystorePrivatePasswordSecretKey }}
-{{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_private_pass" -}}
+    {{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_private_pass" -}}
 {{- else }}
-{{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_pass" -}}
+    {{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_pass" -}}
 {{- end }}
 {{- end }}
 
@@ -186,11 +220,17 @@ Usage: {{ include "hivemq-platform.health-api-port" . }}
 {{- end -}}
 
 {{/*
-Gets the default metrics port value.
+Gets the metrics port value from the .Values.metrics value.
+If metrics is disabled, the metrics port will be 0. Otherwise, it will use the `port` value defined for the metrics.
 Usage: {{ include "hivemq-platform.metrics-port" . }}
 */}}
 {{- define "hivemq-platform.metrics-port" -}}
-{{- 9399 }}
+{{- $metrics := .Values.metrics }}
+{{- $metricsPort := 0 }}
+{{- if $metrics.enabled }}
+  {{- $metricsPort = $metrics.port }}
+{{- end }}
+{{- $metricsPort }}
 {{- end -}}
 
 {{/*
@@ -203,47 +243,79 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 
 {{/*
 Validates all the exposed services.
-- No duplicated ports are defined as part of the `containerPort` values
-- No default ports (7979, 8889, 9399, 7000) are defined as part of the `containerPort` values
+- No duplicated service names are defined as part of the `.Values.services` values list.
+- No default ports (7979, 8889, 7000) are defined as part of the `containerPort` defined in the `.Values.services` values list.
 Params:
 - services: The array of services to check.
-Usage: {{ include "hivemq-platform.validate-service-ports" (dict "services" .Values.services) }}
+Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" $.Release.Name) }}
 */}}
-{{- define "hivemq-platform.validate-service-ports" -}}
+{{- define "hivemq-platform.validate-services" -}}
 {{- $services := .services }}
-{{- include "hivemq-platform.validate-duplicated-service-ports" (dict "services" $services) -}}
+{{- include "hivemq-platform.validate-duplicated-service-names" (dict "services" $services "releaseName" .releaseName) -}}
+{{- include "hivemq-platform.validate-service-container-ports" (dict "services" $services) -}}
 {{- include "hivemq-platform.validate-default-service-ports" (dict "services" $services) -}}
 {{- end -}}
 
 {{/*
-Validates there is no duplicated `containerPort` defined for the exposed services.
+Validates there is no duplicated service name defined.
 Params:
 - services: The array of services to check.
-Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" (dict "services" .Values.services) }}
+Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" (dict "services" .Values.services "releaseName" $.Release.Name ) }}
 */}}
-{{- define "hivemq-platform.validate-duplicated-service-ports" -}}
+{{- define "hivemq-platform.validate-duplicated-service-names" -}}
 {{- $services := .services }}
-{{- $containerPortsList := list }}
+{{- $releaseName := .releaseName }}
+{{- $serviceNamesDict := dict }}
+{{- $serviceName := "" }}
 {{- range $service := $services }}
-  {{- if and $service.exposed (has (int64 $service.containerPort) $containerPortsList) }}
-    {{- fail (printf "Container port %d in service `%s` already exists" (int64 $service.containerPort) $service.type) }}
+  {{- $serviceName = (include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $releaseName "type" .type "port" .port "containerPort" .containerPort)) }}
+  {{- if (hasKey $serviceNamesDict $serviceName) }}
+    {{- $matchingService := get $serviceNamesDict $serviceName }}
+    {{- if not (eq $matchingService.exposed $service.exposed) }}
+        {{- fail (printf "Ambiguous definition found for service %s (set as exposed and not exposed)" $serviceName) }}
+    {{- else }}
+        {{- fail (printf "Found duplicated service name %s" $serviceName) }}
+    {{- end }}
+  {{- else }}
+    {{- $serviceNamesDict = set $serviceNamesDict $serviceName $service }}
   {{- end }}
-  {{- $containerPortsList = (int64 $service.containerPort) | append $containerPortsList}}
 {{- end }}
 {{- end -}}
 
 {{/*
-Validates there is no default `containerPort` (7979, 8889, 9399, 7000) defined as part of the exposed services ports.
+Validates there is no duplicated container port for different service types.
+Params:
+- services: The array of services to check.
+Usage: {{ include "hivemq-platform.validate-service-container-ports" (dict "services" .Values.services ) }}
+*/}}
+{{- define "hivemq-platform.validate-service-container-ports" -}}
+{{- $services := .services }}
+{{- $servicesDict := dict }}
+{{- range $service := $services }}
+  {{- $containerPort := $service.containerPort | toString }}
+  {{- if (hasKey $servicesDict $containerPort) }}
+    {{- $matchingServiceContainerPort := get $servicesDict $containerPort }}
+    {{- if and ($service.exposed) (not (eq $matchingServiceContainerPort.type $service.type)) }}
+        {{- fail (printf "Services with same container port (%s) but different types cannot be set" $containerPort) }}
+    {{- end }}
+  {{- else if $service.exposed }}
+    {{- $servicesDict = set $servicesDict $containerPort $service }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates there is no default `containerPort` (7979, 8889, 7000) defined as part of the exposed services ports.
 Params:
 - services: The array of services to check.
 Usage: {{ include "hivemq-platform.validate-default-service-ports" (dict "services" .Values.services) }}
 */}}
 {{- define "hivemq-platform.validate-default-service-ports" -}}
 {{- $services := .services }}
+{{- $metrics := .metrics }}
 {{- $defaultPortsList := list }}
 {{- $defaultPortsList := ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList := ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
-{{- $defaultPortsList := ( include "hivemq-platform.metrics-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList := ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
@@ -255,7 +327,7 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" (dict "servic
 {{/*
 Validates the PodSecurityContext values have no invalid combination.
 Params:
-- podSecurityContext: The .Values.nodes.podSecurityContext value.
+- podSecurityContext: The `.Values.nodes.podSecurityContext` value.
 Usage: {{- include "hivemq-platform.validate-pod-security-context" (dict "podSecurityContext" .Values.nodes.podSecurityContext) }}
 */}}
 {{- define "hivemq-platform.validate-pod-security-context" -}}
@@ -273,10 +345,10 @@ Usage: {{- include "hivemq-platform.validate-pod-security-context" (dict "podSec
 {{- end -}}
 
 {{/*
-Validates the addtionalVolumes values have a valid combination, duplicated volume mount are present and no duplicated volumes
+Validates the additionalVolumes values have a valid combination, duplicated volume mount are present and no duplicated volumes
 with different type exist
 Params:
-- additionalVolumes: The .Values.additionalVolumes value.
+- additionalVolumes: The `.Values.additionalVolumes` value.
 Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 */}}
 {{- define "hivemq-platform.validate-additional-volumes" -}}
@@ -384,7 +456,7 @@ Usage: {{ include "hivemq-platform.get-additional-volume-mounts" . }}
 {{- end -}}
 
 {{/*
-Checks if there is any HiveMQ restriction options based on the .Values.hivemqRestrictions values
+Checks if there is any HiveMQ restriction options based on the `.Values.hivemqRestrictions` values
 Params:
 - hivemqRestrictions: The set of values from hivemqRestrictions
 Returns:
@@ -404,7 +476,7 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ MQTT options based on the .Values.hivemqMqtt values
+Checks if there is any HiveMQ MQTT options based on the `.Values.hivemqMqtt` values
 Params:
 - hivemqMqtt: The set of values from hivemqMqtt
 Returns:
@@ -435,7 +507,7 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ MQTT Add-on options based on the .Values.hivemqMqttAddons values
+Checks if there is any HiveMQ MQTT Add-on options based on the `.Values.hivemqMqttAddons` values
 Params:
 - hivemqMqttAddons: The set of values from hivemqMqttAddons
 Returns:
@@ -454,7 +526,7 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ MQTT security options based on the .Values.hivemqMqttSecurity values
+Checks if there is any HiveMQ MQTT security options based on the `.Values.hivemqMqttSecurity` values
 Params:
 - hivemqMqttSecurity: The set of values from hivemqMqttSecurity
 Returns:

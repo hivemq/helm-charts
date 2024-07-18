@@ -2,7 +2,8 @@
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
-{{- $defaultMetricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
+{{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
+{{- $hasMetricService := ( include "hivemq-platform.has-default-metrics-service" . ) -}}
 apiVersion: hivemq.com/v1
 kind: HiveMQPlatform
 metadata:
@@ -10,15 +11,15 @@ metadata:
   labels:
     {{- include "hivemq-platform.labels" . | nindent 4 }}
     {{- if and (ne .Values.operator.selector "nil") (.Values.operator.selector) }}
-    operator: {{.Values.operator.selector}}
+    operator: {{ .Values.operator.selector }}
     {{- end }}
 spec:
   configMapName: {{ include "hivemq-platform.configuration-name" . }}
   logLevel: {{ .Values.nodes.logLevel }}
   operatorRestApiPort: {{ include "hivemq-platform.operator-rest-api-port" . }}
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
-  metricsPort: {{ include "hivemq-platform.metrics-port" . }}
-  metricsPath: /
+  metricsPort: {{ $metricsPort }}
+  metricsPath: {{ .Values.metrics.path }}
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:
@@ -141,15 +142,23 @@ spec:
               image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               ports:
+                {{- $containerPortNameList := list }}
+                {{- $containerPortName := "" }}
                 {{- range $key, $val := .Values.services }}
-                {{- if $val.exposed}}
-                - name: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 15 | trimSuffix "-" |  trim }}
-                  containerPort: {{$val.containerPort}}
+                  {{- $containerPortName = (include "hivemq-platform.range-service-port-name" .) | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
+                  {{- if ($val.exposed) }}
+                      {{- if (not (has $containerPortName $containerPortNameList)) }}
+                - name: {{ $containerPortName }}
+                  containerPort: {{ $val.containerPort }}
+                      {{- end }}
+                      {{- $containerPortNameList = $containerPortName | append $containerPortNameList }}
+                  {{- end }}
                 {{- end }}
+                {{- $metricsContainerPortName := printf "metrics-%s" $metricsPort }}
+                {{- if and (not $hasMetricService) (not (has $metricsContainerPortName $containerPortNameList)) (.Values.metrics.enabled) }}
+                - name: {{ $metricsContainerPortName }}
+                  containerPort: {{ printf "%d" (int64 $metricsPort) }}
                 {{- end }}
-                  # Metric container ports are not configurable right now
-                - name: {{ printf "metrics-%s" $defaultMetricsPort }}
-                  containerPort: {{ printf "%d" (int64 $defaultMetricsPort) }}
               resources:
                 limits:
                   cpu: {{ .Values.nodes.resources.cpu | quote }}
@@ -208,11 +217,11 @@ spec:
       {{.Values.config.overrideStatefulSet | nindent 3}}
       {{- end }}
   services:
-    {{- include "hivemq-platform.validate-service-ports" (dict "services" .Values.services) -}}
+    {{- include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" .Release.Name) -}}
     {{- range $key, $val := .Values.services }}
-    {{- if and $val.exposed }}
+    {{- if $val.exposed }}
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) }}
         {{- with $val.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}
@@ -233,19 +242,20 @@ spec:
             targetPort: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
           {{- if $val.port}}
             port: {{ $val.port }}
-          {{- else}}
+          {{- else }}
             port: {{ $val.containerPort }}
           {{- end }}
     {{- end }}
     {{- end }}
-    # Metric service ports are not configurable right now
+    {{- if and (not $hasMetricService) (.Values.metrics.enabled) }}
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "releaseName" $.Release.Name "type" "metrics" "port" $defaultMetricsPort "containerPort" $defaultMetricsPort)) | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "name" "" "releaseName" $.Release.Name "type" "metrics" "port" $metricsPort "containerPort" $metricsPort)) }}
       spec:
         ports:
-          - name: {{ printf "metrics-%s" $defaultMetricsPort }}
-            targetPort: {{ printf "metrics-%s" $defaultMetricsPort }}
-            port: {{ printf "%d" (int64 $defaultMetricsPort) }}
+          - name: {{ printf "metrics-%s" $metricsPort }}
+            targetPort: {{ printf "metrics-%s" $metricsPort }}
+            port: {{ printf "%d" (int64 $metricsPort) }}
+    {{- end }}
   {{- if hasKey .Values "extensions" }}
   extensions:
     {{- range $key, $val := .Values.extensions }}
