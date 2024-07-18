@@ -36,8 +36,6 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSW
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_KEYSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
-import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
-import static com.hivemq.helmcharts.util.MqttUtil.withDefaultPublishSubscribeRunnable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Platform")
@@ -46,8 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("DuplicatedCode")
 class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String MQTT_SERVICE_NAME_1883 = "hivemq-test-hivemq-platform-mqtt-1883";
-    private static final int MQTT_SERVICE_PORT_1883 = 1883;
     private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final int MQTT_SERVICE_PORT_1884 = 1884;
     private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
@@ -106,7 +102,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 .hostnameVerifier((hostname, session) -> true)
                 .build();
 
-        assertMqttListener(MQTT_SERVICE_NAME_1883, MQTT_SERVICE_PORT_1883, sslConfig);
+        assertMqttListener(DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT, sslConfig);
         assertMqttListener(MQTT_SERVICE_NAME_1884, MQTT_SERVICE_PORT_1884, sslConfig);
         assertControlCenter(HIVEMQ_CC_SERVICE_NAME, HIVEMQ_CC_SERVICE_PORT);
     }
@@ -156,17 +152,11 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
     private void assertMqttListener(
             final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
-        MqttUtil.execute(client,
+        MqttUtil.assertMessages(client,
                 platformNamespace,
                 serviceName,
                 servicePort,
-                portForward -> getBlockingClient(portForward,
-                        "PublishClient",
-                        clientBuilder -> clientBuilder.sslConfig(sslConfig)),
-                portForward -> getBlockingClient(portForward,
-                        "SubscribeClient",
-                        clientBuilder -> clientBuilder.sslConfig(sslConfig)),
-                withDefaultPublishSubscribeRunnable());
+                mqttClientModifier -> mqttClientModifier.sslConfig(sslConfig));
     }
 
     @SuppressWarnings("SameParameterValue")

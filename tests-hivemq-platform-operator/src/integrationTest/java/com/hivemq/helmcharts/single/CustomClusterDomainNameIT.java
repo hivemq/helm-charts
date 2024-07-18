@@ -27,11 +27,7 @@ class CustomClusterDomainNameIT extends AbstractHelmChartIT {
     void whenK8sHasCustomClusterDomainName_thenServicesAreRunning() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/mqtt-values.yaml");
         K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
-        MqttUtil.execute(client,
-                platformNamespace,
-                MQTT_SERVICE_NAME,
-                MQTT_SERVICE_PORT,
-                MqttUtil.withDefaultPublishSubscribeRunnable());
+        MqttUtil.assertMessages(client, platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
 
         // assert cluster domain name is set as expected `hivemq.com` and does not contain default `cluster.local`
         client.pods().inNamespace(platformNamespace).list().getItems().forEach(pod -> {
