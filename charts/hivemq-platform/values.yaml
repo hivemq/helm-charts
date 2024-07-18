@@ -162,8 +162,17 @@ podScheduling:
   #    operator: "Exists"
   #    effect: "NoSchedule"
 
-# Configure exposed Services and ports
-# Possible service types are: "control-center", "rest-api", "mqtt", "websocket"
+# Monitoring settings used by the HiveMQ Prometheus extension.
+metrics:
+  # Set to disable or enable the HiveMQ Prometheus extension.
+  enabled: true
+  # Defines the port to be used by the HiveMQ Prometheus extension.
+  port: 9399
+  # Defines the URL path to be used by HiveMQ Prometheus extension.
+  path: /
+
+# Configures exposed Services and ports
+# Possible service types are: "control-center", "rest-api", "mqtt", "websocket" and "metrics"
 services:
   # MQTT service configuration
   - type: mqtt
@@ -179,6 +188,9 @@ services:
     labels: {}
   # Secure MQTT service configuration
   - type: mqtt
+    # The custom name of the Kubernetes service resource. If not set or empty, the default service name will be as follows:
+    # "hivemq-<release-name>-<.Values.services.type>-<.Values.services.port>"
+    name: "my-custom-mqtt-service-name"
     exposed: false
     containerPort: 8883
     # The name of the Kubernetes secret that contains the keystore file.
