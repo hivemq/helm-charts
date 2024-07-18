@@ -26,7 +26,7 @@ class HelmRestApiIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenRestApiEnabled_thenCallsEndpoint() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/rest-api-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/rest-api-values.yaml");
 
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,
@@ -51,7 +51,7 @@ class HelmRestApiIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client, platformNamespace, "ese-config-map.yml");
         K8sUtil.createConfigMap(client, platformNamespace, "ese-file-realm-config-map.yml");
 
-        installPlatformChartAndWaitToBeRunning("/files/rest-api-test-with-auth-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/rest-api-with-auth-values.yaml");
 
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,

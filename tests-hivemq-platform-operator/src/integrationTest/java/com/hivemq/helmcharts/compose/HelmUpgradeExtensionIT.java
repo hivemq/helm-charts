@@ -44,7 +44,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         // deploy chart and wait to be ready
         final var extensionEnabledInitAppFuture = initAppExtensionEnabledFuture();
         final var extensionStartedBrokerFuture = brokerExtensionStartedFuture();
-        installPlatformChartAndWaitToBeRunning("/files/bridge-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
         await().until(extensionEnabledInitAppFuture::isDone);
         await().until(extensionStartedBrokerFuture::isDone);
 
@@ -59,7 +59,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         final var extensionUpdateDoneInitAppFuture = initAppExtensionUpdateDoneFuture();
         helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
-                "/files/disable-bridge-test-values.yaml",
+                "/files/disable-bridge-values.yaml",
                 "--namespace",
                 platformNamespace);
 
@@ -91,7 +91,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         // deploy chart and wait to be ready
         final var extensionEnabledInitAppFuture1 = initAppExtensionEnabledFuture();
         final var extensionStartedBrokerFuture1 = brokerExtensionStartedFuture();
-        installPlatformChartAndWaitToBeRunning("/files/bridge-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
         await().until(extensionEnabledInitAppFuture1::isDone);
         await().until(extensionStartedBrokerFuture1::isDone);
 
@@ -108,7 +108,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         // upgrade chart and wait to be ready
         helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
                 "-f",
-                "/files/bridge-test-updated-values.yaml",
+                "/files/bridge-updated-values.yaml",
                 "--namespace",
                 platformNamespace);
         K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);

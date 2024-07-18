@@ -79,7 +79,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withMutualTls_hivemqRunning() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mtls-mqtt-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mtls-mqtt-values.yaml");
 
         final var statefulSet =
                 client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();

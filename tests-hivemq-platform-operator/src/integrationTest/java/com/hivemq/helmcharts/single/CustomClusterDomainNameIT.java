@@ -25,7 +25,7 @@ class CustomClusterDomainNameIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void whenK8sHasCustomClusterDomainName_thenServicesAreRunning() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mqtt-values.yaml");
         K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
         MqttUtil.execute(client,
                 platformNamespace,

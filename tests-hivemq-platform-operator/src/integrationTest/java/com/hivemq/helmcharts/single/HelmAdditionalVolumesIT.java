@@ -44,7 +44,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
                 Map.of("test.xml",
                         Base64.getEncoder().encodeToString("test-content".getBytes(StandardCharsets.UTF_8))));
 
-        installPlatformChartAndWaitToBeRunning("/files/additional-volumes-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/additional-volumes-values.yaml");
 
         await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
             final var statefulSet =

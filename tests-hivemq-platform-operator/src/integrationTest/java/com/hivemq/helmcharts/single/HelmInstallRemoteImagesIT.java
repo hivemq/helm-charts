@@ -18,7 +18,7 @@ class HelmInstallRemoteImagesIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withRemoteImages_hivemqRunning() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/platform-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/platform-values.yaml");
 
         await().atMost(2, TimeUnit.MINUTES).untilAsserted(() -> {
             // check the StatefulSet spec contains the same default "ghcr" imagePullSecrets as per the default created for the operator
