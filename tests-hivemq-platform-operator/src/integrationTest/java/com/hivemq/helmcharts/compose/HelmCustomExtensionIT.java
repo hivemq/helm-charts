@@ -35,7 +35,7 @@ class HelmCustomExtensionIT extends AbstractHelmChartIT {
         K8sUtil.createSecret(client, platformNamespace, "nginx/nginx-auth-secret.yaml");
         final var extensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
 
-        installPlatformChartAndWaitToBeRunning("/files/custom-extension-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/custom-extension-values.yaml");
         await().atMost(1, TimeUnit.MINUTES).until(extensionStartedFuture::isDone);
     }
 }

@@ -25,7 +25,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withOverrideInitContainer_hivemqRunningWithVolumeMounts() throws Exception {
-        final var additionalVolumeFile = "/files/init-container-additional-volumes-test-values.yaml";
+        final var additionalVolumeFile = "/files/init-container-additional-volumes-values.yaml";
         final var additionalInitContainerFile = "/files/init-containers-spec.yaml";
 
         final var mountName = "init-container-volume";
@@ -57,7 +57,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
         K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
-        installPlatformChartAndWaitToBeRunning("/files/additional-init-containers-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/additional-init-containers-values.yaml");
 
         await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
             final var statefulSet =

@@ -184,7 +184,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-mqtt-1884
+              name: hivemq-test-hivemq-platform-mqtt-1884
             spec:
               ports:
                 - name: mqtt-1884
@@ -211,7 +211,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-cc-8081
+              name: hivemq-test-hivemq-platform-cc-8081
             spec:
               ports:
                 - name: cc-8081
@@ -219,7 +219,1027 @@ tests:
                   port: 8081
               sessionAffinity: ClientIP
 
-  - it: with duplicated containerPorts in enabled services, then fails
+  - it: with default container ports in enabled services, then fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7000
+    asserts:
+      - failedTemplate:
+          errorMessage: Container port 7000 in service `mqtt` already exists as part of one of the predefined ports (7979, 8889, 7000)
+
+  - it: with default containerPort in enabled metrics service, then no error is thrown
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with default container ports in disabled services, no error is thrown and only enabled services are created
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: false
+          containerPort: 7000
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            - metadata:
+                name: hivemq-test-hivemq-platform-mqtt-7000
+              spec:
+                ports:
+                  - name: mqtt-7000
+                    targetPort: mqtt-7000
+                    port: 7000
+
+  - it: with default containerPort in disabled metrics service, then no default metrics service is created
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            - metadata:
+                name: hivemq-test-hivemq-platform-metrics-9399
+              spec:
+                ports:
+                  - name: metrics-9399
+                    targetPort: metrics-9399
+                    port: 9399
+
+  - it: with default containerPort in disabled metrics service, then no metric container port in HiveMQ container
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with default metrics service disabled, then no service is added
+    set:
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+    asserts:
+      - isNullOrEmpty:
+          path: spec.services
+
+  - it: with default metrics service disabled, then no container port is added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0]
+      - isNullOrEmpty:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+
+  - it: with custom metrics service enabled but without default metrics port, then additional default metric service is added
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9499
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with custom metrics service enabled but without default metrics port, then additional default metrics container port is added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with custom metrics service enabled and with default metrics port, then no additional default metric service is added
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+          count: 1
+
+  - it: with custom metrics service enabled and with default metrics port, then no additional default metrics container port is added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+
+  - it: with custom metrics service disabled but without default metrics port, then additional default metric service is added
+    set:
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9499
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with custom metrics service disabled but without default metrics port, then default metrics container port is added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with default metrics values
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.metricsPath
+      - equal:
+          path: spec.metricsPath
+          value: /
+
+  - it: with default metrics values, default metrics service is created
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with default metrics values, default metrics service port is added to the HiveMQ container
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with metrics values disabled, then metrics port 0
+    set:
+      metrics:
+        enabled: false
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 0
+      - exists:
+          path: spec.metricsPath
+      - equal:
+          path: spec.metricsPath
+          value: /
+
+  - it: with metrics values disabled, then no metrics service is created
+    set:
+      metrics:
+        enabled: false
+    asserts:
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-0
+            spec:
+              ports:
+                - name: metrics-0
+                  targetPort: metrics-0
+                  port: 0
+
+  - it: with metrics values disabled, then no metrics port is added to the HiveMQ container
+    set:
+      metrics:
+        enabled: false
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-0
+            containerPort: 0
+
+  - it: with custom metrics port
+    set:
+      metrics:
+        port: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+
+  - it: with custom metrics port, default metrics service is created in custom port
+    set:
+      metrics:
+        port: 9499
+    asserts:
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9499
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+
+  - it: with custom metrics port, default metrics port is added to the HiveMQ container
+    set:
+      metrics:
+        port: 9499
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+
+  - it: with metrics enabled but port set to 0, default metrics service is created
+    set:
+      metrics:
+        port: 0
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-0
+            spec:
+              ports:
+                - name: metrics-0
+                  targetPort: metrics-0
+                  port: 0
+
+  - it: with metrics enabled but port set to 0, default metrics port is added to the HiveMQ container
+    set:
+      metrics:
+        port: 0
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-0
+            containerPort: 0
+
+  - it: with custom metrics path
+    set:
+      metrics:
+        path: /foo
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPath
+          value: /foo
+
+  - it: with metrics port within range, no schema validation fails
+    set:
+      metrics:
+        port: 0
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with metrics port within range, no schema validation fails
+    set:
+      metrics:
+        port: 65535
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with metrics port out of range, schema validation fails
+    set:
+      metrics:
+        port: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom service names
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with custom metrics service name with default metrics port, no additional default metrics service is created
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with custom metrics service name with default metrics port, no additional default metrics port is added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+
+  - it: with custom metrics service name with custom metrics port, no additional default metrics service is created
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          name: my-custom-metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+          count: 1
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with custom metrics service name with custom metrics port, no additional default metrics port is added to the HiveMQ container
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          name: my-custom-metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+          count: 1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with custom metrics service name with non matching metrics port, additional default metrics service is created
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with custom metrics service name with non matching metrics port, additional default metrics port is added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with multiple metrics services with default metrics port, then multiple metrics services are created with no default additional metrics service
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9399
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics-1
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics-2
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with multiple metrics services with default metrics port, then no duplicated metrics port are added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9399
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+
+  - it: with multiple metrics services with non matching default metrics port, then default metric port is added with no ports are added to the HiveMQ container
+    set:
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9499
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+          count: 1
+
+  - it: with multiple metrics services with custom metrics port, then multiple metrics services are created with no default additional metrics service
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9499
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics-1
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics-2
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with multiple metrics services with custom metrics port, then no default metrics port is added to the HiveMQ container
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9499
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+          count: 1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with multiple metrics services with matching and non matching metrics port, then multiple metrics services are created with no default additional metrics service
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9399
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics-1
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-metrics-2
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with multiple metrics services with matching and non matching metrics port, then no default metrics port is added to the HiveMQ container
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          name: my-custom-metrics-1
+          exposed: true
+          containerPort: 9399
+        - type: metrics
+          name: my-custom-metrics-2
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+
+  - it: with duplicated container ports and different services types, then validation fails
     set:
       services:
         - type: mqtt
@@ -230,9 +1250,9 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Container port 1883 in service `control-center` already exists
+          errorMessage: Services with same container port (1883) but different types cannot be set
 
-  - it: with duplicated containerPorts in disabled services, then works
+  - it: with duplicated container ports and different services types but disabled services, only enabled services are created
     set:
       services:
         - type: mqtt
@@ -248,7 +1268,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-mqtt-1883
+              name: hivemq-test-hivemq-platform-mqtt-1883
             spec:
               ports:
                 - name: mqtt-1883
@@ -266,25 +1286,47 @@ tests:
                     targetPort: cc-1883
                     port: 1883
 
-  - it: with predefined default containerPorts in enabled services, then fails
-    set:
-      services:
-        - type: mqtt
-          exposed: true
-          containerPort: 7000
-    asserts:
-      - failedTemplate:
-          errorMessage: Container port 7000 in service `mqtt` already exists as part of one of the predefined ports (7979, 8889, 9399, 7000)
-
-  - it: with predefined default containerPorts in disabled services, then works
+  - it: with duplicated container ports and different services types but disabled services, then only enabled container ports added to the HiveMQ container
     set:
       services:
         - type: mqtt
           exposed: true
           containerPort: 1883
-        - type: mqtt
+        - type: control-center
           exposed: false
-          containerPort: 7000
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+          count: 1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+
+  - it: with duplicated service container port, same type but different custom names, then services are created
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: true
+          containerPort: 1883
     asserts:
       - exists:
           path: spec.services
@@ -292,7 +1334,63 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-mqtt-1883
+              name: my-custom-mqtt-1
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt-2
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with duplicated service container port, same type but different custom names, then no duplicated ports added to the HiveMQ container
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+          count: 1
+
+  - it: with duplicated service container port, same type but different custom names in disabled services, then only enabled services are created
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt-1
             spec:
               ports:
                 - name: mqtt-1883
@@ -301,13 +1399,207 @@ tests:
       - notContains:
           path: spec.services
           content:
-            - metadata:
-                name: hivemq-test-hivemq-platform-mqtt-7000
-              spec:
-                ports:
-                  - name: mqtt-7000
-                    targetPort: mqtt-7000
-                    port: 7000
+            metadata:
+              name: my-custom-mqtt-2
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with duplicated service container port, same type but different custom names in disabled services, then no duplicated ports added to the HiveMQ container
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+          count: 1
+
+  - it: with duplicated service container port and type, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt-1883
+
+  - it: with duplicated service container port and type in disabled services, then validation fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt-1883 (set as exposed and not exposed)
+
+  - it: with duplicated custom service names and container port, validation fails
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name my-custom-mqtt
+
+  - it: with duplicated service container port and custom name but different type in disabled services, then validation fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          name: my-custom-mqtt
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+
+  - it: with duplicated custom service names and container port but different types in disabled services, then fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          name: my-custom-mqtt
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+
+  - it: with duplicated custom service names and container port and type, validation fails
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name my-custom-mqtt
+
+  - it: with duplicated service container port, custom name and type in disabled services, then validation fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+
+  - it: with custom service name longer than 63 characters, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          name: my-so-huge-and-extremely-very-very-long-custom-mqtt-service-name
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate: {}
+
+  - it: with container service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 0
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with container service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65535
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with container service port out of range, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 0
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65535
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with service port out of range, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65536
+    asserts:
+      - failedTemplate: {}
 
   - it: with a REST API service enabled
     set:
@@ -329,7 +1621,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-rest-8890
+              name: hivemq-test-hivemq-platform-rest-8890
             spec:
               ports:
                 - name: rest-8890
@@ -356,7 +1648,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-ws-8000
+              name: hivemq-test-hivemq-platform-ws-8000
             spec:
               ports:
                 - name: ws-8000
@@ -393,6 +1685,9 @@ tests:
         - type: rest-api
           exposed: true
           containerPort: 8888
+        - type: metrics
+          exposed: true
+          containerPort: 9399
     asserts:
       - exists:
           path: spec.services
@@ -400,7 +1695,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-mqtt-1883
+              name: hivemq-test-hivemq-platform-mqtt-1883
             spec:
               ports:
                 - name: mqtt-1883
@@ -410,7 +1705,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-mqtt-1884 # FIXME: Expected secure MQTT service name should be `mqtts`
+              name: hivemq-test-hivemq-platform-mqtt-1884 # FIXME: Expected secure MQTT service name should be `mqtts`
             spec:
               ports:
                   - name: mqtts-1884
@@ -420,7 +1715,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-cc-8080
+              name: hivemq-test-hivemq-platform-cc-8080
             spec:
               ports:
                   - name: cc-8080
@@ -431,7 +1726,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-cc-8081
+              name: hivemq-test-hivemq-platform-cc-8081
             spec:
               ports:
                   - name: cc-8081
@@ -442,7 +1737,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-ws-8000
+              name: hivemq-test-hivemq-platform-ws-8000
             spec:
               ports:
                   - name: ws-8000
@@ -452,7 +1747,7 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-ws-8001
+              name: hivemq-test-hivemq-platform-ws-8001
             spec:
               ports:
                   - name: ws-8001
@@ -462,12 +1757,22 @@ tests:
           path: spec.services
           content:
             metadata:
-              name:  hivemq-test-hivemq-platform-rest-8888
+              name: hivemq-test-hivemq-platform-rest-8888
             spec:
               ports:
                 - name: rest-8888
                   port: 8888
                   targetPort: rest-8888
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
 
   - it: with multiple service listeners defined
     values:

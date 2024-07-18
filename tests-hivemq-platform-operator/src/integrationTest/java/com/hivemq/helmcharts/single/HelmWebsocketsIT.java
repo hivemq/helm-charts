@@ -73,7 +73,7 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 "truststore.password",
                 encoder.encodeToString(DEFAULT_TRUSTSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-ws-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-ws-values.yaml");
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(),
@@ -128,7 +128,7 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 "truststore.password",
                 encoder.encodeToString(truststorePassword.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-ws-with-private-key-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-ws-with-private-key-values.yaml");
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(), keystorePassword, privateKeyPassword))

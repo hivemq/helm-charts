@@ -50,7 +50,7 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
 
         // deploy chart and wait to be ready
-        installPlatformChartAndWaitToBeRunning("/files/bridge-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
 
         // forward the port from the service
         MqttUtil.execute(client,

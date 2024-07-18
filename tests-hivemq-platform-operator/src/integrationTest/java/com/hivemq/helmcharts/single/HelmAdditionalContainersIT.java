@@ -22,7 +22,7 @@ class HelmAdditionalContainersIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client,
                 platformNamespace,
                 "consul-template-config-map.yml");
-        installPlatformChartAndWaitToBeRunning("/files/additional-containers-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/additional-containers-values.yaml");
 
         await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
             final var statefulSet =

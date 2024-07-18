@@ -60,7 +60,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenControlCenterEnabled_thenAbleToLogin() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/control-center-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/control-center-values.yaml");
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
     }
 
@@ -88,7 +88,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
                 "keystore",
                 encoder.encodeToString(keystoreContent));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-cc-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-cc-values.yaml");
 
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8443, HIVEMQ_CC_SERVICE_PORT_8443, true);
@@ -118,7 +118,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
                         "my-private-key.password",
                         encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-cc-with-private-key-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-cc-with-private-key-values.yaml");
 
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, false);
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8443, HIVEMQ_CC_SERVICE_PORT_8443, true);
@@ -128,7 +128,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenOverrideControlCenter_thenAbleToLogin() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/override-control-center-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/override-control-center-values.yaml");
         assertControlCenterListener(HIVEMQ_CC_SERVICE_NAME_8081, HIVEMQ_CC_SERVICE_PORT_8081, "test", "abc123", false);
     }
 
