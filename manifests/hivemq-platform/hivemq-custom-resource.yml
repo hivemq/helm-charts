@@ -32,7 +32,6 @@ spec:
                   containerPort: 1883
                 - name: cc-8080
                   containerPort: 8080
-                  # Metric container ports are not configurable right now
                 - name: metrics-9399
                   containerPort: 9399
               resources:
@@ -58,7 +57,6 @@ spec:
           - name: cc-8080
             targetPort: cc-8080
             port: 8080
-    # Metric service ports are not configurable right now
     - metadata:
         name: hivemq-my-platform-metrics-9399
       spec:
