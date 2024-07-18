@@ -32,6 +32,10 @@ public abstract class AbstractHelmChartIT {
     protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
 
+    protected static final int DEFAULT_MQTT_SERVICE_PORT = 1883;
+    protected static final @NotNull String DEFAULT_MQTT_SERVICE_NAME =
+            "hivemq-" + PLATFORM_RELEASE_NAME + "-mqtt-" + DEFAULT_MQTT_SERVICE_PORT;
+
     protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
     protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX = "hivemq-" + OPERATOR_RELEASE_NAME + "-.*";
 

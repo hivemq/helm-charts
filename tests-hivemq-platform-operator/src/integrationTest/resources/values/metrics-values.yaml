@@ -1,0 +1,13 @@
+nodes:
+  replicaCount: 1
+metrics:
+  enabled: true
+  port: 9499
+  path: /metrics
+services:
+  - type: mqtt
+    exposed: true
+    containerPort: 1883
+  - type: metrics
+    exposed: true
+    containerPort: 9499

@@ -28,8 +28,6 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_KEYSTORE_PASSW
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PASSWORD;
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_TRUSTSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
-import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
-import static com.hivemq.helmcharts.util.MqttUtil.withDefaultPublishSubscribeRunnable;
 
 @Tag("Services")
 @Tag("Services2")
@@ -148,20 +146,12 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
 
     private void assertWebSocketListener(
             final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
-        MqttUtil.execute(client,
+        MqttUtil.assertMessages(client,
                 platformNamespace,
                 serviceName,
                 servicePort,
-                portForward -> getBlockingClient(portForward,
-                        "PublishClient",
-                        clientBuilder -> clientBuilder.webSocketConfig(MqttWebSocketConfig.builder()
-                                .serverPath(WEBSOCKET_SERVICE_PATH)
-                                .build()).sslConfig(sslConfig)),
-                portForward -> getBlockingClient(portForward,
-                        "SubscribeClient",
-                        clientBuilder -> clientBuilder.webSocketConfig(MqttWebSocketConfig.builder()
-                                .serverPath(WEBSOCKET_SERVICE_PATH)
-                                .build()).sslConfig(sslConfig)),
-                withDefaultPublishSubscribeRunnable());
+                clientBuilder -> clientBuilder.webSocketConfig(MqttWebSocketConfig.builder()
+                        .serverPath(WEBSOCKET_SERVICE_PATH)
+                        .build()).sslConfig(sslConfig));
     }
 }

@@ -27,8 +27,6 @@ import static com.hivemq.client.util.KeyStoreUtil.trustManagerFromKeystore;
 import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_TRUSTSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
-import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
-import static com.hivemq.helmcharts.util.MqttUtil.withDefaultPublishSubscribeRunnable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Platform")
@@ -38,8 +36,6 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmPlatformMutualTlsIT.class);
 
-    private static final int MQTT_SERVICE_PORT_1883 = 1883;
-    private static final @NotNull String MQTT_SERVICE_NAME_1883 = "hivemq-test-hivemq-platform-mqtt-1883";
     private static final int MQTT_SERVICE_PORT_1884 = 1884;
     private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final int MQTT_SERVICE_PORT_1885 = 1885;
@@ -56,8 +52,16 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
         brokerCertificateStore = tempDir.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(brokerCertificateStore);
-        createSecret(client, platformNamespace, "mqtts-keystore-1884", "keystore", encoder.encodeToString(keystoreContent));
-        createSecret(client, platformNamespace, "mqtts-keystore-1885", "keystore", encoder.encodeToString(keystoreContent));
+        createSecret(client,
+                platformNamespace,
+                "mqtts-keystore-1884",
+                "keystore",
+                encoder.encodeToString(keystoreContent));
+        createSecret(client,
+                platformNamespace,
+                "mqtts-keystore-1885",
+                "keystore",
+                encoder.encodeToString(keystoreContent));
         createSecret(client,
                 platformNamespace,
                 "mqtts-keystore-password-1885",
@@ -85,8 +89,8 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
         assertThat(statefulSet).isNotNull();
 
-        LOG.info("Connecting to MQTT listener with no mTLS/SSL on port {}", MQTT_SERVICE_PORT_1883);
-        assertMqttListener(MQTT_SERVICE_NAME_1883, MQTT_SERVICE_PORT_1883);
+        LOG.info("Connecting to MQTT listener with no mTLS/SSL on port {}", DEFAULT_MQTT_SERVICE_PORT);
+        assertMqttListener(DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT);
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(brokerCertificateStore.toFile(),
@@ -115,17 +119,11 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
     private void assertMqttListener(
             final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
-        MqttUtil.execute(client,
+        MqttUtil.assertMessages(client,
                 platformNamespace,
                 serviceName,
                 servicePort,
-                portForward -> getBlockingClient(portForward,
-                        "PublishClient",
-                        clientBuilder -> clientBuilder.sslConfig(sslConfig)),
-                portForward -> getBlockingClient(portForward,
-                        "SubscribeClient",
-                        clientBuilder -> clientBuilder.sslConfig(sslConfig)),
-                withDefaultPublishSubscribeRunnable());
+                clientBuilder -> clientBuilder.sslConfig(sslConfig));
     }
 
     private static void assertSecretMounted(StatefulSet statefulSet, final @NotNull String name) {
