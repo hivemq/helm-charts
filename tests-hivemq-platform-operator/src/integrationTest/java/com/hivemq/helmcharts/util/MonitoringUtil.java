@@ -31,6 +31,22 @@ public class MonitoringUtil {
      * @param namespace          the namespace to use for metadata
      * @param metricsServiceName the metrics service name to fetch the probes from
      * @param metricsServicePort the metrics service port to fetch the probes from
+     */
+    public static void assertMetrics(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String metricsServiceName,
+            final int metricsServicePort) {
+        assertMetrics(client, namespace, metricsServiceName, metricsServicePort, "/", DEFAULT_METRICS_COUNT);
+    }
+
+    /**
+     * Asserts the monitoring probes.
+     *
+     * @param client             the Kubernetes client to create the resources with
+     * @param namespace          the namespace to use for metadata
+     * @param metricsServiceName the metrics service name to fetch the probes from
+     * @param metricsServicePort the metrics service port to fetch the probes from
      * @param metricsPath        the metrics service path for the monitoring URL endpoint
      */
     public static void assertMetrics(

@@ -20,8 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("Services2")
 class HelmRestApiIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-test-hivemq-platform-rest-8890";
     private static final int REST_API_SERVICE_PORT = 8890;
+    private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-test-hivemq-platform-rest-" + REST_API_SERVICE_PORT;
+    private static final @NotNull String REST_API_CUSTOM_SERVICE_NAME = "rest-api-service";
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -77,6 +78,27 @@ class HelmRestApiIT extends AbstractHelmChartIT {
                     .get(new URI(baseRestApiEndpoint + "/api/v1/management/backups").toURL())
                     .then()
                     .statusCode(HttpStatus.SC_FORBIDDEN);
+        }
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_withCustomServiceName_thenCallsEndpoint() throws Exception {
+        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+
+        // forward the port from the service
+        try (final var forwarded = K8sUtil.getPortForward(client,
+                platformNamespace, REST_API_CUSTOM_SERVICE_NAME,
+                REST_API_SERVICE_PORT)) {
+            final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();
+
+            final var body = given().when()
+                    .get(baseRestApiEndpoint + "/api/v1/mqtt/clients")
+                    .then()
+                    .statusCode(HttpStatus.SC_OK)
+                    .extract()
+                    .body();
+            assertThat(body.jsonPath().getList("items")).isEmpty();
         }
     }
 
