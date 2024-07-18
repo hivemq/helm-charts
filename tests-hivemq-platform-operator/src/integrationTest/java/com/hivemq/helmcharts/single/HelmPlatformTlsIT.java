@@ -96,7 +96,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-values.yaml");
 
         assertSecretMounted(client, "mqtts-keystore");
         assertSecretMounted(client, "https-keystore");
@@ -134,7 +134,7 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                         "my-private-key.password",
                         encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-with-private-key-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-with-private-key-values.yaml");
 
         assertSecretMounted(client, "mqtt-keystore-1884");
         assertSecretMounted(client, "mqtt-keystore-1885");

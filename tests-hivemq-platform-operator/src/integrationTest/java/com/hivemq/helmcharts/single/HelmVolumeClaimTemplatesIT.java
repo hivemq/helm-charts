@@ -31,7 +31,7 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
     void platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()
             throws Exception {
 
-        installPlatformChartAndWaitToBeRunning("/files/volumes-claim-templates-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/volumes-claim-templates-values.yaml");
 
         // assert StatefulSet
         await().atMost(Duration.ofMinutes(3)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {

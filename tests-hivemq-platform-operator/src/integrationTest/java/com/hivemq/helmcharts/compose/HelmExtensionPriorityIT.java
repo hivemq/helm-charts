@@ -65,7 +65,7 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
         final var barExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Bar Extension\" version 1.0.0 started successfully.");
         final var bazExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Baz Extension\" version 1.0.0 started successfully.");
 
-        installPlatformChartAndWaitToBeRunning("/files/extension-priority-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/extension-priority-values.yaml");
 
         await().atMost(1, TimeUnit.MINUTES).until(fooExtensionStartedFuture::isDone);
         await().atMost(1, TimeUnit.MINUTES).until(barExtensionStartedFuture::isDone);

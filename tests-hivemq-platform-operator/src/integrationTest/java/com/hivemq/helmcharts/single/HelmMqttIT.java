@@ -26,7 +26,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttEnabled_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mqtt-values.yaml");
         K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
         assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
     }
@@ -34,7 +34,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttNodePortEnabled_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-node-port-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mqtt-node-port-values.yaml");
         await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
@@ -49,7 +49,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttLoadBalancerEnabled_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-load-balancer-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mqtt-load-balancer-values.yaml");
         await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
@@ -64,7 +64,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttAnnotationsEnabled_thenAnnotationsExist() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-annotations-test-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/mqtt-annotations-values.yaml");
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
