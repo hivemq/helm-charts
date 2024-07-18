@@ -20,15 +20,18 @@ import static org.awaitility.Awaitility.await;
 @Tag("Services1")
 class HelmMqttIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-test-hivemq-platform-mqtt-1884";
-    private static final int MQTT_SERVICE_PORT = 1884;
+    private static final int MQTT_SERVICE_PORT_1883 = 1883;
+    private static final int MQTT_SERVICE_PORT_1884 = 1884;
+    private static final @NotNull String MQTT_SERVICE_NAME =
+            "hivemq-test-hivemq-platform-mqtt-" + MQTT_SERVICE_PORT_1884;
+    private static final @NotNull String MQTT_CUSTOM_SERVICE_NAME = "mqtt-service";
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttEnabled_thenSendsReceivesMessage() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/mqtt-values.yaml");
         K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
+        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
@@ -43,7 +46,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
                     .extracting(ServiceSpec::getType)
                     .contains("NodePort");
         });
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
+        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
@@ -58,7 +61,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
                     .extracting(ServiceSpec::getType)
                     .contains("LoadBalancer");
         });
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
+        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
@@ -75,7 +78,15 @@ class HelmMqttIT extends AbstractHelmChartIT {
                             "test-annotation-key/v1",
                             "test-annotation-value-v1")));
         });
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
+        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_withCustomServiceName_thenSendsReceivesMessage() throws Exception {
+        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+        K8sUtil.assertMqttService(client, platformNamespace, MQTT_CUSTOM_SERVICE_NAME);
+        assertMqttListener(platformNamespace, MQTT_CUSTOM_SERVICE_NAME, MQTT_SERVICE_PORT_1883);
     }
 
     @SuppressWarnings("SameParameterValue")

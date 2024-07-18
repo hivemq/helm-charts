@@ -1,0 +1,19 @@
+nodes:
+  replicaCount: 1
+services:
+  - type: mqtt
+    name: mqtt-service
+    exposed: true
+    containerPort: 1883
+  - type: control-center
+    name: control-center-service
+    exposed: true
+    containerPort: 8081
+  - type: rest-api
+    name: rest-api-service
+    exposed: true
+    containerPort: 8890
+  - type: metrics
+    name: metrics-service
+    exposed: true
+    containerPort: 9399
