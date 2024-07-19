@@ -145,7 +145,7 @@ spec:
                 {{- $containerPortNameList := list }}
                 {{- $containerPortName := "" }}
                 {{- range $key, $val := .Values.services }}
-                  {{- $containerPortName = (include "hivemq-platform.range-service-port-name" .) | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
+                  {{- $containerPortName = (include "hivemq-platform.container-port-name" .) }}
                   {{- if ($val.exposed) }}
                       {{- if (not (has $containerPortName $containerPortNameList)) }}
                 - name: {{ $containerPortName }}
@@ -238,8 +238,8 @@ spec:
         sessionAffinity: ClientIP
         {{- end }}
         ports:
-          - name: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 63 | trimSuffix "-" |  trim }}
-            targetPort: {{ include "hivemq-platform.range-service-port-name" . | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
+          - name: {{ include "hivemq-platform.service-port-name" . }}
+            targetPort: {{ include "hivemq-platform.container-port-name" . }}
           {{- if $val.port}}
             port: {{ $val.port }}
           {{- else }}
