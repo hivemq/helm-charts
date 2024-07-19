@@ -52,7 +52,9 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 
         // forward the port from the service
         MqttUtil.execute(client,
-                platformNamespace, DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT,
+                platformNamespace,
+                DEFAULT_MQTT_SERVICE_NAME,
+                DEFAULT_MQTT_SERVICE_PORT,
                 portForward -> getBlockingClient(portForward, "PublishClient"),
                 portForward -> getBlockingClient(hivemqContainer.getHost(),
                         hivemqContainer.getMqttPort(),
