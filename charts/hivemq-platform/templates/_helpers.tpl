@@ -97,11 +97,11 @@ Usage: {{ include "hivemq-platform.has-additional-volume-mounts" . }}
 {{- end -}}
 
 {{/*
-Gets the port name inside a range of the service values
-Format: <.Values.services>
-Usage: {{ include "hivemq-platform.range-service-port-name" . }}
+Returns the service port name inside a range of the service values, truncating the name up to 63 characters.
+Format: <.Values.services.type>-<.Values.services.containerPort>
+Usage: {{ include "hivemq-platform.service-port-name" . }}
 */}}
-{{- define "hivemq-platform.range-service-port-name" -}}
+{{- define "hivemq-platform.service-port-name" -}}
 {{- $type := "mqtt" }}
 {{- if eq .type "control-center" }}
     {{- $type = "cc" }}
@@ -114,7 +114,28 @@ Usage: {{ include "hivemq-platform.range-service-port-name" . }}
 {{- else if .keystoreSecretName }}
     {{- $type = "mqtts" }}
 {{- end -}}
-{{- printf "%s-%s" $type (toString .containerPort) }}
+{{- printf "%s-%s" $type (toString .containerPort) | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
+{{- end -}}
+
+{{/*
+Returns the container port name inside a range of the service values, truncating the name up to 15 characters.
+Format: <.Values.services.type>-<.Values.services.containerPort>
+Usage: {{ include "hivemq-platform.container-port-name" . }}
+*/}}
+{{- define "hivemq-platform.container-port-name" -}}
+{{- $type := "mqtt" }}
+{{- if eq .type "control-center" }}
+    {{- $type = "cc" }}
+{{- else if eq .type "rest-api" }}
+    {{- $type = "rest" }}
+{{- else if eq .type "websocket" }}
+    {{- $type = "ws" }}
+{{- else if eq .type "metrics" }}
+    {{- $type = "metrics" }}
+{{- else if .keystoreSecretName }}
+    {{- $type = "mqtts" }}
+{{- end -}}
+{{- printf "%s-%s" $type (toString .containerPort) | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
 {{- end -}}
 
 {{/*
