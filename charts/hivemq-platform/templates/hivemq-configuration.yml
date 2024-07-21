@@ -18,8 +18,10 @@ data:
       {{- $hasWebsocket := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "websocket") }}
       {{- if or $hastMqtt $hasWebsocket }}
       <listeners>
+      {{- $containerPortsList := list }}
       {{- range $key, $val := .Values.services }}
-        {{- if and (eq $val.type "mqtt") $val.exposed }}
+        {{- if and ($val.exposed) (not (has $val.containerPort $containerPortsList)) }}
+        {{- if eq $val.type "mqtt" }}
         {{- if $val.keystoreSecretName }}
         <tls-tcp-listener>
           <port>{{ $val.containerPort }}</port>
@@ -47,7 +49,7 @@ data:
           <bind-address>0.0.0.0</bind-address>
         </tcp-listener>
         {{- end }}
-        {{- else if and (eq $val.type "websocket") $val.exposed }}
+        {{- else if eq $val.type "websocket" }}
         {{- if $val.keystoreSecretName }}
         <tls-websocket-listener>
           <port>{{ $val.containerPort }}</port>
@@ -78,6 +80,10 @@ data:
         </websocket-listener>
         {{- end }}
         {{- end }}
+        {{- end }}
+        {{- if $val.exposed }}
+          {{- $containerPortsList = $val.containerPort | append $containerPortsList}}
+        {{- end }}
       {{- end }}
       </listeners>
       {{- end }}
@@ -107,8 +113,10 @@ data:
       {{- if $hasControlCenter }}
       <control-center>
         <listeners>
+        {{- $containerPortsList := list }}
         {{- range $key, $val := .Values.services }}
-          {{- if and (eq $val.type "control-center") $val.exposed }}
+          {{- if and ($val.exposed) (not (has $val.containerPort $containerPortsList)) }}
+          {{- if eq $val.type "control-center" }}
           {{- if (hasKey $val "keystoreSecretName") }}
           <https>
             <port>{{ $val.containerPort }}</port>
@@ -127,6 +135,10 @@ data:
             <bind-address>0.0.0.0</bind-address>
           </http>
           {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- if $val.exposed }}
+            {{- $containerPortsList = $val.containerPort | append $containerPortsList}}
           {{- end }}
         {{- end }}
         </listeners>
@@ -147,7 +159,9 @@ data:
         <auth>
           <enabled>{{ printf "%t" .Values.restApi.authEnabled | default false }}</enabled>
         </auth>
+        {{- $containerPortsList := list }}
         {{- range $key, $val := .Values.services }}
+        {{- if and ($val.exposed) (not (has $val.containerPort $containerPortsList)) }}
         {{- if eq $val.type "rest-api" }}
         <listeners>
           <http>
@@ -155,6 +169,10 @@ data:
             <bind-address>0.0.0.0</bind-address>
           </http>
         </listeners>
+        {{- end }}
+        {{- end }}
+        {{- if $val.exposed }}
+          {{- $containerPortsList = $val.containerPort | append $containerPortsList}}
         {{- end }}
         {{- end }}
       </rest-api>
