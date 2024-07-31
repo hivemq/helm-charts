@@ -8,11 +8,7 @@ spec:
   containers:
     - name: hivemq-mqtt-cli
       image: hivemq/mqtt-cli:4.31.0
-      command: [ "java" ]
-      args: [ "-cp",
-              "/app/resources:/app/classes:/app/libs/*",
-              "com.hivemq.cli.MqttCLIMain",
-              "test",
+      args: [ "test",
               "-h",
               "{{ printf "hivemq-%s-mqtt-1883" $.Release.Name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}" ]
   restartPolicy: Never
