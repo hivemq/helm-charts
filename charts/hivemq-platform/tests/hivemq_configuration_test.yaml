@@ -53,6 +53,26 @@ tests:
                 </listeners>
               </control-center>
             </hivemq>
+      - exists:
+          path: data["tracing.xml"]
+      - equal:
+          path: data["tracing.xml"]
+          value: |-
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <tracing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tracing.xsd">
+              <context-propagation>
+                <outbound-context-propagation>
+                  <enabled>false</enabled>
+                </outbound-context-propagation>
+              </context-propagation>
+              <sampling>
+                <publish-sampling>
+                  <enabled>true</enabled>
+                </publish-sampling>
+              </sampling>
+            </tracing>
+      - notExists:
+          path: data["logback.xml"]
 
   - it: with default platform values and all default hivemqRestrictions config values
     template: hivemq-configuration.yml
@@ -2886,7 +2906,6 @@ tests:
           path: data["config.xml"]
           pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?</listeners>"
 
-
   - it: with Data Hub enabled
     template: hivemq-configuration.yml
     set:
@@ -2952,3 +2971,33 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
+
+  - it: with custom tracing.xml
+    template: hivemq-configuration.yml
+    set:
+      config.customTracingConfig: <tracing/>
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notExists:
+          path: data["logback.xml"]
+      - exists:
+          path: data["tracing.xml"]
+      - equal:
+          path: data["tracing.xml"]
+          value: <tracing/>
+
+  - it: with custom logback.xml
+    template: hivemq-configuration.yml
+    set:
+      config.customLogbackConfig: <configuration/>
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - exists:
+          path: data["tracing.xml"]
+      - exists:
+          path: data["logback.xml"]
+      - equal:
+          path: data["logback.xml"]
+          value: <configuration/>
