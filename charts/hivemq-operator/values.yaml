@@ -142,7 +142,7 @@ hivemq:
   # Annotations to apply to the service account
   serviceAccountAnnotations: {}
   # The values below apply to the HiveMQCluster object. If you are using deployCr: false, this is unused
-  image: hivemq/hivemq4:k8s-4.30.0
+  image: hivemq/hivemq4:k8s-4.31.0
   imagePullPolicy: IfNotPresent
   nodeCount: "3"
   cpu: "4"
