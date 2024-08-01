@@ -343,7 +343,11 @@ data:
       </security>
       {{- end }}
     </hivemq>
+    {{- end }}
   tracing.xml: |-
+  {{- if .Values.config.customTracingConfig -}}
+    {{ .Values.config.customTracingConfig | nindent 4}}
+    {{- else }}
     <?xml version="1.0" encoding="UTF-8" ?>
     <tracing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tracing.xsd">
       <context-propagation>
@@ -357,5 +361,9 @@ data:
         </publish-sampling>
       </sampling>
     </tracing>
-    {{- end -}}
+  {{- end }}
+  {{- if .Values.config.customLogbackConfig }}
+  logback.xml: |-
+    {{ .Values.config.customLogbackConfig | nindent 4}}
+  {{- end }}
 {{- end }}
