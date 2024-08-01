@@ -309,11 +309,12 @@ config:
   # Create a default HiveMQ Platform configuration (config.xml) as a Kubernetes ConfigMap.
   create: true
   # Override the default HiveMQ Platform configuration (config.xml) by providing
-  # the name of a Kubernetes ConfigMap that contains the (config.xml). (set create=false).
+  # the name of a Kubernetes ConfigMap that contains the config.xml file (also set create=false).
   name: ""
   # Inlines the HiveMQ Platform configuration (config.xml) from a file:
   # --set-file config.overrideHiveMQConfig=your-config.xml
   # WARNING: When this configuration option is used, all other configuration options for the HiveMQ Platform configuration are ignored.
+  #          This does not affect the tracing.xml and logback.xml files, these can still be customized using `customTracingConfig` and `customLogbackConfig` values.
   overrideHiveMQConfig: ""
   # Inlines the StatefulSet configuration and overrides the default StatefulSet.
   # WARNING: When this configuration option is used, all other configuration options for the StatefulSetSpec configuration are ignored.
@@ -322,11 +323,16 @@ config:
   # WARNING: This value is now marked as `deprecated` and will be removed in future releases.
   #          Please, consider using `additionalInitContainers` value instead.
   overrideInitContainers: ""
-
   # Enables HiveMQ Data Hub
   dataHub:
     dataValidationEnabled: false
     behaviorValidationEnabled: false
+  # Inlines a custom HiveMQ Platform tracing configuration (tracing.xml) from a file:
+  # --set-file config.customTracingConfig=your-tracing.xml
+  customTracingConfig: ""
+  # Inlines a custom HiveMQ Platform logging configuration (logback.xml) from a file:
+  # --set-file config.customLogbackConfig=your-logback.xml
+  customLogbackConfig: ""
 
 # Custom init containers to be added to the HiveMQ platform StatefulSet
 additionalInitContainers: []
