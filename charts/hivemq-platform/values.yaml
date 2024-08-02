@@ -31,14 +31,18 @@ nodes:
   # Holds pod-level security attributes and common container settings.
   # Note: The standard official HiveMQ image hivemq/hivemq4 runs with a non-root user with user ID (UID) "10000" and group ID (GID) "0" (root).
   #       When enabled, this defaults to non-root user with UID "10000" and GID "0".
-  #       However, if required, user ID, group ID and filesystem group values can be overwritten. For group ID is
-  #       always recommended to use group "0". Example:
+  #       However, if required, user ID, group ID and filesystem group values can be overwritten.
+  #       For group ID is always recommended to use group "0". Example:
   #         podSecurityContext:
   #           enabled: true
   #           runAsNonRoot: true
   #           runAsUser: 10001
   #           runAsGroup: 0
   #           fsGroup: 10002
+  # Note: When `volumeClaimTemplates` are defined, you need a security context with an `fsGroup`. Example:
+  #         podSecurityContext:
+  #           enabled: true
+  #           fsGroup: 0
   podSecurityContext:
     enabled: false
     runAsNonRoot: true
@@ -491,6 +495,8 @@ additionalVolumes: []
 # volumeMount in one container in the StatefulSet template. This can be achieved by defining an `additionalVolumes` entry of type `persistentVolumeClaim`
 # with a matching name.
 # A claim in this list takes precedence over any volumes in the StatefulSet template with the same name.
+# Note: A PersistentVolume is mounted with file permissions that depend on the `nodes.podSecurityContext` configuration.
+# Enable the `podSecurityContext` and add an `fsGroup` field to allow the HiveMQ process to write to the mounted volume.
 volumeClaimTemplates: []
 # - kind: PersistentVolumeClaim
 #   apiVersion: v1
