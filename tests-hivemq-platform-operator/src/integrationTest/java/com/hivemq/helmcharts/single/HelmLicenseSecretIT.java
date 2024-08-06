@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.TWO_MINUTES;
 
 @Tag("Licenses")
 @Tag("Secrets")
@@ -46,7 +47,7 @@ class HelmLicenseSecretIT extends AbstractHelmChartIT {
 
     @SuppressWarnings("SameParameterValue")
     private void assertLicense(final @NotNull String licenseSecretName) {
-        await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
+        await().atMost(TWO_MINUTES).untilAsserted(() -> {
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();

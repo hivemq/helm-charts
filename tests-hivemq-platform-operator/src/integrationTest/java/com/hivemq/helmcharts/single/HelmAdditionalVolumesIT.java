@@ -46,7 +46,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
 
         installPlatformChartAndWaitToBeRunning("/files/additional-volumes-values.yaml");
 
-        await().atMost(5, TimeUnit.MINUTES).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();

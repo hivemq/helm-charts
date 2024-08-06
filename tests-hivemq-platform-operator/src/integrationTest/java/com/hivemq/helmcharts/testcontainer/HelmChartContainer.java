@@ -49,6 +49,8 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.FIVE_MINUTES;
+import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
 public class HelmChartContainer extends K3sContainer implements ExtensionContext.Store.CloseableResource {
@@ -249,7 +251,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         final var client = getKubernetesClient();
         final var namespaceDeleted = client.namespaces().withName(name).informOnCondition(List::isEmpty);
         assertThat(client.namespaces().withName(name).delete()).isNotEmpty();
-        await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofMillis(100)).until(namespaceDeleted::isDone);
+        await().atMost(FIVE_MINUTES).pollInterval(ONE_HUNDRED_MILLISECONDS).until(namespaceDeleted::isDone);
         LOG.info("Namespace '{}' deleted", name);
     }
 

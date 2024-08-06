@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Timeout;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("ApplyCrd")
 class HelmApplyCrdIT extends AbstractHelmChartIT {
@@ -86,9 +88,9 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
         try {
             operatorInstallThread.start();
 
-            await().atMost(1, TimeUnit.MINUTES).until(crdApplyDisabled::isDone);
-            await().atMost(1, TimeUnit.MINUTES).until(crdWaiting::isDone);
-            await().atMost(1, TimeUnit.MINUTES).until(crdReadyFailed::isDone);
+            await().atMost(ONE_MINUTE).until(crdApplyDisabled::isDone);
+            await().atMost(ONE_MINUTE).until(crdWaiting::isDone);
+            await().atMost(ONE_MINUTE).until(crdReadyFailed::isDone);
         } finally {
             operatorInstallThread.interrupt();
             operatorInstallThread.join();
@@ -150,11 +152,11 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
         final var crdReady = waitForOperatorLog(String.format(".*HiveMQ Platform CRD '%s' is ready", CRD_NAME));
 
         installOperatorChartAndWaitToBeRunning(List.of("--skip-crds").toArray(new String[0]));
-        await().atMost(1, TimeUnit.MINUTES).until(crdApplyEnabled::isDone);
-        await().atMost(1, TimeUnit.MINUTES).until(crdVerify::isDone);
-        await().atMost(1, TimeUnit.MINUTES).until(crdApplying::isDone);
-        await().atMost(1, TimeUnit.MINUTES).until(crdWaiting::isDone);
-        await().atMost(1, TimeUnit.MINUTES).until(crdReady::isDone);
+        await().atMost(ONE_MINUTE).until(crdApplyEnabled::isDone);
+        await().atMost(ONE_MINUTE).until(crdVerify::isDone);
+        await().atMost(ONE_MINUTE).until(crdApplying::isDone);
+        await().atMost(ONE_MINUTE).until(crdWaiting::isDone);
+        await().atMost(ONE_MINUTE).until(crdReady::isDone);
 
         client.apps()
                 .deployments()

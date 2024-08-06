@@ -6,6 +6,7 @@ import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.awaitility.Awaitility;
+import org.awaitility.Durations;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +27,8 @@ import java.util.stream.Stream;
 import static com.hivemq.helmcharts.util.K8sUtil.getNamespaceName;
 import static com.hivemq.helmcharts.util.K8sUtil.getOperatorNamespaceName;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Durations.FIVE_MINUTES;
+import static org.awaitility.Durations.TWO_SECONDS;
 
 public abstract class AbstractHelmChartIT {
 
@@ -58,8 +61,8 @@ public abstract class AbstractHelmChartIT {
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     static void baseBeforeAll() {
-        Awaitility.setDefaultPollInterval(Duration.ofSeconds(3));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
+        Awaitility.setDefaultPollInterval(TWO_SECONDS);
+        Awaitility.setDefaultTimeout(FIVE_MINUTES);
         helmChartContainer = HELM_CHART_CONTAINER_EXTENSION.getHelmChartContainer();
         network = HELM_CHART_CONTAINER_EXTENSION.getNetwork();
         client = helmChartContainer.getKubernetesClient();

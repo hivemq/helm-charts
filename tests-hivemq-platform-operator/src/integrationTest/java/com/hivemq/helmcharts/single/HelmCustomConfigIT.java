@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("CustomConfig")
 class HelmCustomConfigIT extends AbstractHelmChartIT {
@@ -27,7 +27,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
         installPlatformChartAndWaitToBeRunning("--set-file",
                 "config.overrideStatefulSet=/files/stateful-set-spec.yaml");
 
-        await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
@@ -54,7 +54,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
         installPlatformChartAndWaitToBeRunning("--set-file",
                 "config.overrideHiveMQConfig=/files/hivemq-config-override.xml");
 
-        await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var configmap = client.configMaps()
                     .inNamespace(platformNamespace)
                     .withName("hivemq-configuration-" + PLATFORM_RELEASE_NAME)
@@ -76,7 +76,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
                 "--set",
                 "config.name=" + configMap.getMetadata().getName());
 
-        await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var hivemqCustomResource =
                     K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME).get();
             assertThat(hivemqCustomResource.getAdditionalProperties().get("spec")).isNotNull()
@@ -91,9 +91,11 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
         final var configMap =
                 K8sUtil.createConfigMap(client, operatorNamespace, "operator-custom-env-var-config-map.yml");
         assertThat(configMap).isNotNull();
-        final var operatorStartedFuture = waitForOperatorLog(String.format(".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]", platformNamespace));
+        final var operatorStartedFuture = waitForOperatorLog(String.format(
+                ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]",
+                platformNamespace));
         installOperatorChartAndWaitToBeRunning("/files/custom-operator-env-vars-values.yaml");
-        await().atMost(1, TimeUnit.MINUTES).until(operatorStartedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(operatorStartedFuture::isDone);
 
         installPlatformChartAndWaitToBeRunning("/files/custom-platform-env-vars-values.yaml");
 

@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.TWO_MINUTES;
 
 @Disabled
 class HelmInstallRemoteImagesIT extends AbstractHelmChartIT {
@@ -20,7 +21,7 @@ class HelmInstallRemoteImagesIT extends AbstractHelmChartIT {
     void withRemoteImages_hivemqRunning() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/platform-values.yaml");
 
-        await().atMost(2, TimeUnit.MINUTES).untilAsserted(() -> {
+        await().atMost(TWO_MINUTES).untilAsserted(() -> {
             // check the StatefulSet spec contains the same default "ghcr" imagePullSecrets as per the default created for the operator
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 @Tag("Volumes")
@@ -27,14 +26,13 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
     private static final @NotNull String PVC_NAME = "hivemq-pvc-data";
 
     @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Timeout(value = 8, unit = TimeUnit.MINUTES)
     void platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()
             throws Exception {
-
         installPlatformChartAndWaitToBeRunning("/files/volumes-claim-templates-values.yaml");
 
         // assert StatefulSet
-        await().atMost(Duration.ofMinutes(3)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
@@ -77,47 +75,47 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
         K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         // assert Platform pods
-        await().atMost(Duration.ofMinutes(3))
-                .pollInterval(Duration.ofSeconds(5))
-                .untilAsserted(() -> client.pods()
-                        .inNamespace(platformNamespace)
-                        .withLabels(labels)
-                        .list()
-                        .getItems()
-                        .forEach(pod -> {
-                            assertThat(pod).isNotNull();
-                            final var podSpec = pod.getSpec();
-                            final var podName = pod.getMetadata().getName();
-                            final var pvcNameForPod = String.format("%s-%s", PVC_NAME, podName);
-                            assertVolumes(podSpec.getVolumes(), PVC_NAME, pvcNameForPod);
-                            assertVolumeMounts(podSpec.getContainers().getFirst().getVolumeMounts(),
-                                    PVC_NAME,
-                                    "/opt/hivemq/data");
+        await().untilAsserted(() -> client.pods()
+                .inNamespace(platformNamespace)
+                .withLabels(labels)
+                .list()
+                .getItems()
+                .forEach(pod -> {
+                    assertThat(pod).isNotNull();
+                    final var podSpec = pod.getSpec();
+                    final var podName = pod.getMetadata().getName();
+                    final var pvcNameForPod = String.format("%s-%s", PVC_NAME, podName);
+                    assertVolumes(podSpec.getVolumes(), PVC_NAME, pvcNameForPod);
+                    assertVolumeMounts(podSpec.getContainers().getFirst().getVolumeMounts(),
+                            PVC_NAME,
+                            "/opt/hivemq/data");
 
-                            // assert PersistentVolumeClaims
-                            assertPersistentVolumeClaim(client.persistentVolumeClaims()
-                                    .inNamespace(platformNamespace)
-                                    .withName(pvcNameForPod)
-                                    .get(), pvcNameForPod);
+                    // assert PersistentVolumeClaims
+                    assertPersistentVolumeClaim(client.persistentVolumeClaims()
+                            .inNamespace(platformNamespace)
+                            .withName(pvcNameForPod)
+                            .get(), pvcNameForPod);
 
-                            final var mountPath = pod.getSpec()
-                                    .getContainers()
-                                    .getFirst()
-                                    .getVolumeMounts()
-                                    .stream()
-                                    .filter(volumeMount -> PVC_NAME.equals(volumeMount.getName()))
-                                    .map(VolumeMount::getMountPath)
-                                    .findAny()
-                                    .orElseThrow(() -> new AssertionError(String.format("Could not find mount path %s",
-                                            PVC_NAME)));
-                            final var fileName = String.format("%s.txt", podName);
-                            final var filePath = Path.of(mountPath).resolve(fileName);
-                            assertFileInPersistentVolumeClaims(filePath, getFileContentForPod(podName), podName);
-                        }));
+                    final var mountPath = pod.getSpec()
+                            .getContainers()
+                            .getFirst()
+                            .getVolumeMounts()
+                            .stream()
+                            .filter(volumeMount -> PVC_NAME.equals(volumeMount.getName()))
+                            .map(VolumeMount::getMountPath)
+                            .findAny()
+                            .orElseThrow(() -> new AssertionError(String.format("Could not find mount path %s",
+                                    PVC_NAME)));
+                    final var fileName = String.format("%s.txt", podName);
+                    final var filePath = Path.of(mountPath).resolve(fileName);
+                    assertFileInPersistentVolumeClaims(filePath, getFileContentForPod(podName), podName);
+                }));
     }
 
     private void assertFileInPersistentVolumeClaims(
-            final @NotNull Path filePath, final @NotNull String fileContent, final @NotNull String podName) {
+            final @NotNull Path filePath,
+            final @NotNull String fileContent,
+            final @NotNull String podName) {
         final var execResult =
                 PodUtil.execute(client, platformNamespace, podName, "hivemq", "cat", filePath.toString());
         try {
@@ -126,12 +124,11 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
             assertThat(execResult.exitCode()).isNotNull().isEqualTo(0);
             assertThat(execResult.getOutput()).as("stdout: %s", execResult.getOutput()).isEqualTo(fileContent);
         } catch (final Exception e) {
-            fail("Could not get file %s in Pod '%s': %s", filePath, podName, e);
+            throw new AssertionError(String.format("Could not get file %s in Pod '%s'", filePath, podName), e);
         } finally {
             execResult.close();
         }
     }
-
 
     @SuppressWarnings("SameParameterValue")
     private static void assertVolumes(

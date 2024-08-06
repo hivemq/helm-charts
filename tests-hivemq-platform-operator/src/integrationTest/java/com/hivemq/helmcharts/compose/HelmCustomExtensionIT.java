@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("Extensions")
 class HelmCustomExtensionIT extends AbstractHelmChartIT {
@@ -36,6 +37,6 @@ class HelmCustomExtensionIT extends AbstractHelmChartIT {
         final var extensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
 
         installPlatformChartAndWaitToBeRunning("/files/custom-extension-values.yaml");
-        await().atMost(1, TimeUnit.MINUTES).until(extensionStartedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
     }
 }

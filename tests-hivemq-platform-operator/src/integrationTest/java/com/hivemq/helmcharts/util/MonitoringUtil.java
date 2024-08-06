@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 /**
  * Monitoring utility class for the HiveMQ Platform metrics.
@@ -81,7 +83,7 @@ public class MonitoringUtil {
                 namespace,
                 metricsServiceName,
                 metricsServicePort)) {
-            await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).untilAsserted(() -> {
+            await().atMost(ONE_MINUTE).pollInterval(ONE_HUNDRED_MILLISECONDS).untilAsserted(() -> {
                 final var prometheusMetrics = PrometheusUtil.getPrometheusMetrics(portForward, metricsPath);
 
                 // assert the total rate of incoming MQTT PUBLISH messages

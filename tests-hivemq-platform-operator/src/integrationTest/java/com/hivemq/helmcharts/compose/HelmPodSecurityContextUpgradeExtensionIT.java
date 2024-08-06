@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("PodSecurityContext")
 @SuppressWarnings("DuplicatedCode")
@@ -58,7 +59,7 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
                 "hivemq",
                 chartValues.platform().uid(),
                 chartValues.platform().gid());
-        await().atMost(1, TimeUnit.MINUTES).until(extensionStartedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
 
         K8sUtil.updateConfigMap(client, platformNamespace, "distributed-tracing-config-map-update.yml");
         final var configurationUpdatedFuture = waitForPlatformLog(
@@ -69,7 +70,6 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
                 3,
                 TimeUnit.MINUTES);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
-        await().atMost(1, TimeUnit.MINUTES).until(configurationUpdatedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(configurationUpdatedFuture::isDone);
     }
-
 }
