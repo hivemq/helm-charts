@@ -17,7 +17,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-plan: [ Upgrade, Extensions, PodSecurityContext, Other ]
+        test-plan: [
+          Extensions,
+          PodSecurityContext,
+          Upgrade,
+          Other
+        ]
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -102,25 +107,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-plan: [ CustomConfig, Containers, Volumes, Services1, Services2, Services3, Platform, PodSecurityContext, Other ]
+        test-plan: [
+          Containers,
+          CustomConfig,
+          Platform,
+          PodSecurityContext,
+          ServiceAccount,
+          Services1,
+          Services2,
+          Services3,
+          Volumes,
+          Other
+        ]
     steps:
-      - name: Maximize build space
-        if: ${{ matrix.test-plan == 'CustomConfig' || matrix.test-plan == 'Services1' }}
-        uses: AdityaGarg8/remove-unwanted-software@e379ba59405864059cedd318f38b6574dffd0ef8 # v4
-        with:
-          # frees ~2 GB
-          remove-dotnet: 'true'
-          # frees ~9 GB
-          remove-android: 'true'
-          # frees ~5.2 GB
-          remove-haskell: 'true'
-          # frees ~5.4 GB
-          remove-codeql: 'true'
-          # frees ~3.1 GB
-          remove-large-packages: 'true'
-          # frees ~4 GB
-          remove-swapfile: 'true'
-
       - name: Checkout HiveMQ Platform Helm Charts
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:

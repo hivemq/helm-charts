@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Services")
-@Tag("Services2")
+@Tag("Services1")
 @AdditionalK3sCommands(commands = {"--cluster-domain=hivemq.com"})
 class CustomClusterDomainNameIT extends AbstractHelmChartIT {
 
