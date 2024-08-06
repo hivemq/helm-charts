@@ -7,6 +7,7 @@ hivemq-mqttClient = "1.3.3"
 hivemq-platform = "4.31.0"
 javassist = "3.30.2-GA"
 junit-jupiter = "5.10.3"
+junit-platform = "1.10.3"
 logback = "1.5.6"
 netty = "4.1.112.Final"
 # https://hub.docker.com/_/nginx/tags?page=&page_size=&ordering=&name=1.27
@@ -29,6 +30,7 @@ hivemq-extensionSdk = { module = "com.hivemq:hivemq-extension-sdk", version.ref 
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform"}
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
 rest-assured = { module = "io.rest-assured:rest-assured", version.ref = "rest-assured" }

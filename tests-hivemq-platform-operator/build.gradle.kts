@@ -4,6 +4,8 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
+val testPlanOtherExcludeTags = "Upgrade,Extensions,CustomConfig,Volumes,Containers,Services,Platform,PodSecurityContext"
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -43,6 +45,7 @@ testing {
                 implementation(libs.fabric8.kubernetes.client)
                 runtimeOnly(libs.bouncycastle.pkix)
                 runtimeOnly(libs.bouncycastle.prov)
+                implementation(libs.junit.platform.launcher)
                 implementation(libs.slf4j.api)
                 runtimeOnly(libs.logback.classic)
                 implementation(libs.rest.assured)
@@ -56,7 +59,7 @@ testing {
                         if (testPlan == "Other") {
                             systemProperty(
                                 "excludeTags",
-                                "Upgrade,Extensions,CustomConfig,Volumes,Containers,Services,Platform,PodSecurityContext",
+                                testPlanOtherExcludeTags,
                             )
                         } else {
                             systemProperty("includeTags", testPlan)
@@ -102,6 +105,25 @@ testing {
                 }
             }
         }
+    }
+}
+
+val listIntegrationTests by tasks.registering(JavaExec::class) {
+    val usage = "Usage: ./gradlew listIntegrationTests -PtestPlan=xxx" +
+            "\n\t\t- 'testPlan': The test plan from the GitHub action. Mandatory."
+    group = "help"
+    description = "Lists all integration tests from the given test plan.\n\t$usage"
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+    mainClass = "com.hivemq.helmcharts.util.JUnitUtil"
+    doFirst {
+        val testPlan: String = (project.properties["testPlan"] ?: error("`testPlan` must be set\n\n$usage")).toString()
+        var includeTags = testPlan
+        var excludeTags = ""
+        if (testPlan == "Other") {
+            includeTags = ""
+            excludeTags = testPlanOtherExcludeTags
+        }
+        args = listOf("com.hivemq.helmcharts", includeTags, excludeTags, "true")
     }
 }
 
