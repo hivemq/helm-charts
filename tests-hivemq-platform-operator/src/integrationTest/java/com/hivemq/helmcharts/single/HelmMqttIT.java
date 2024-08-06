@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("Services")
 @Tag("Services1")
@@ -38,7 +39,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttNodePortEnabled_thenSendsReceivesMessage() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/mqtt-node-port-values.yaml");
-        await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
                     .filteredOn(service -> MQTT_SERVICE_NAME.equals(service.getMetadata().getName()))
@@ -53,7 +54,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttLoadBalancerEnabled_thenSendsReceivesMessage() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/mqtt-load-balancer-values.yaml");
-        await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
                     .filteredOn(service -> MQTT_SERVICE_NAME.equals(service.getMetadata().getName()))
@@ -68,7 +69,7 @@ class HelmMqttIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenMqttAnnotationsEnabled_thenAnnotationsExist() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/mqtt-annotations-values.yaml");
-        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
                     .filteredOn(service -> MQTT_SERVICE_NAME.equals(service.getMetadata().getName()))

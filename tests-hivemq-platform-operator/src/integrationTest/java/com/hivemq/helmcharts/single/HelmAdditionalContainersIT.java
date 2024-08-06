@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +23,7 @@ class HelmAdditionalContainersIT extends AbstractHelmChartIT {
                 "consul-template-config-map.yml");
         installPlatformChartAndWaitToBeRunning("/files/additional-containers-values.yaml");
 
-        await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(5)).untilAsserted(() -> {
+        await().untilAsserted(() -> {
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();

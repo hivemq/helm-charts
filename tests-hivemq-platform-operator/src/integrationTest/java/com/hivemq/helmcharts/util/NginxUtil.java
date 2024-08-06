@@ -15,10 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.testcontainers.utility.MountableFile;
 
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -27,6 +26,8 @@ import static org.awaitility.Awaitility.await;
  * Deploys Nginx into a K8s cluster.
  */
 public class NginxUtil {
+
+    public static final @NotNull String NGINX_APP_NAME = "nginx";
 
     private NginxUtil() {
     }
@@ -67,9 +68,10 @@ public class NginxUtil {
         final var nginxService = createNginxService(namespace);
         client.resource(nginxService).create();
 
-        await().atMost(Duration.ofMinutes(3)).pollInterval(Duration.ofSeconds(1)).untilAsserted(() -> {
-            final var nginx = client.apps().deployments().inNamespace(namespace).withName("nginx").get();
-            assertThat(nginx).isNotNull();
+        await().untilAsserted(() -> {
+            final var nginx = client.apps().deployments().inNamespace(namespace).withName(NGINX_APP_NAME).get();
+            assertThat(nginx).as("%s deployment", NGINX_APP_NAME).isNotNull();
+            assertThat(nginx.getStatus()).as("%s status", NGINX_APP_NAME).isNotNull();
             assertThat(nginx.getStatus().getReadyReplicas()).isEqualTo(1);
         });
     }
@@ -116,24 +118,25 @@ public class NginxUtil {
                     .build());
         }
 
+        final var labels = Map.of("app", NGINX_APP_NAME);
         return new DeploymentBuilder() //
                 .withNewMetadata()
                 .withNamespace(namespace)
-                .withName("nginx")
+                .withName(NGINX_APP_NAME)
                 .endMetadata()
                 .withNewSpec()
                 .withReplicas(1)
                 .withNewSelector()
-                .withMatchLabels(Collections.singletonMap("app", "nginx"))
+                .withMatchLabels(labels)
                 .endSelector()
                 .withNewTemplate()
                 .withNewMetadata()
-                .withLabels(Collections.singletonMap("app", "nginx"))
+                .withLabels(labels)
                 .endMetadata()
                 .withNewSpec()
                 .withVolumes(volumes)
                 .addNewContainer()
-                .withName("nginx")
+                .withName(NGINX_APP_NAME)
                 .withImage(DockerImageNames.NGINX_DOCKER_IMAGE.asCanonicalNameString())
                 .addNewPort()
                 .withName("http")
@@ -154,7 +157,7 @@ public class NginxUtil {
                 .withName("nginx-service")
                 .endMetadata()
                 .withNewSpec()
-                .withSelector(Collections.singletonMap("app", "nginx"))
+                .withSelector(Map.of("app", NGINX_APP_NAME))
                 .withType("ClusterIP")
                 .addNewPort()
                 .withName("http")

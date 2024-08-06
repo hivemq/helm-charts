@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.TWO_MINUTES;
 
 /**
  * Tests the operator permissions when deleting the namespace.
@@ -36,6 +37,6 @@ class HelmRemoveNamespaceIT extends AbstractHelmChartIT {
                         .noneMatch(n -> Objects.equals(n.getMetadata().getName(), platformNamespace)));
         assertThat(platform.delete()).isNotEmpty();
         assertThat(client.namespaces().withName(platformNamespace).delete()).isNotEmpty();
-        await().atMost(2, TimeUnit.MINUTES).until(namespaceDeletedFuture::isDone);
+        await().atMost(TWO_MINUTES).until(namespaceDeletedFuture::isDone);
     }
 }

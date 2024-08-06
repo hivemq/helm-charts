@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("Extensions")
 class HelmExtensionPriorityIT extends AbstractHelmChartIT {
@@ -67,9 +68,9 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
 
         installPlatformChartAndWaitToBeRunning("/files/extension-priority-values.yaml");
 
-        await().atMost(1, TimeUnit.MINUTES).until(fooExtensionStartedFuture::isDone);
-        await().atMost(1, TimeUnit.MINUTES).until(barExtensionStartedFuture::isDone);
-        await().atMost(1, TimeUnit.MINUTES).until(bazExtensionStartedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(fooExtensionStartedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(barExtensionStartedFuture::isDone);
+        await().atMost(ONE_MINUTE).until(bazExtensionStartedFuture::isDone);
         await().untilAsserted(() -> assertThat(client.pods()
                 .inNamespace(platformNamespace)
                 .withName(PLATFORM_RELEASE_NAME + "-0")

@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.ONE_MINUTE;
 
 public class K8sUtil {
 
@@ -476,7 +477,7 @@ public class K8sUtil {
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String mqttServiceName) {
-        await().atMost(1, TimeUnit.MINUTES).untilAsserted(() -> {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(namespace).list().getItems();
             assertThat(services).isNotEmpty()
                     .filteredOn(service -> mqttServiceName.equals(service.getMetadata().getName()))
