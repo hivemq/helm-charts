@@ -4,7 +4,7 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val testPlanOtherExcludeTags = "K8sVersionCompatibility,Extensions,RollingUpgrades"
+val testPlanOtherExcludeTags = "Extensions,K8sVersionCompatibility,RollingUpgrades"
 
 java {
     toolchain {

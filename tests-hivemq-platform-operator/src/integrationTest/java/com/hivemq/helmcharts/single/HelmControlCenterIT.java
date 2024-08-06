@@ -33,7 +33,7 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PA
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
 @Tag("Services")
-@Tag("Services1")
+@Tag("Services2")
 @Testcontainers
 class HelmControlCenterIT extends AbstractHelmChartIT {
 

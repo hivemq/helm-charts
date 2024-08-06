@@ -17,7 +17,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Services")
-@Tag("Services2")
+@Tag("Services3")
 class HelmRestApiIT extends AbstractHelmChartIT {
 
     private static final int REST_API_SERVICE_PORT = 8890;
