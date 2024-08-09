@@ -50,8 +50,17 @@ public class JUnitUtil {
                 .stream()
                 .filter(testIdentifier -> !searchIntegrationTests || testIdentifier.getDisplayName().endsWith("IT"))
                 .toList();
-        System.out.printf("Found %s integration tests:%n", tests.size());
-        tests.forEach(testIdentifier -> System.out.println("  " + testIdentifier.getDisplayName()));
+        System.out.printf("Found %s %s:%n", tests.size(), searchIntegrationTests ? "integration tests": "tests");
+        tests.forEach(testIdentifier -> {
+            if (testIdentifier.getSource().isEmpty()) {
+                throw new IllegalStateException("Test '" + testIdentifier.getDisplayName() + "' has no source");
+            }
+            final var testSource = testIdentifier.getSource().get();
+            if (!(testSource instanceof final ClassSource classSource)) {
+                throw new IllegalStateException("Test '" + testIdentifier.getDisplayName() + "' is no ClassSource");
+            }
+            System.out.println("  " + classSource.getClassName());
+        });
     }
 
     private static class TestDiscoveryListener implements TestExecutionListener {
