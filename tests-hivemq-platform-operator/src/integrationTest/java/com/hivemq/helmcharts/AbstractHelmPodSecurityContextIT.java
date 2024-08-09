@@ -43,7 +43,7 @@ public class AbstractHelmPodSecurityContextIT extends AbstractHelmChartIT {
         });
     }
 
-    protected Stream<Arguments> chartValues() {
+    protected @NotNull Stream<Arguments> chartValues() {
         return Stream.of(arguments(new ChartValues(new Values(0, 0, operatorChartRootUserValuesFile()),
                         new Values(0, 0, platformChartRootUserValuesFile()))),
                 // Default Operator non-root UID is 185 and GID is 0

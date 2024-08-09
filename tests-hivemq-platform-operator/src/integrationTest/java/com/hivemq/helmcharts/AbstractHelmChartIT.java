@@ -6,7 +6,6 @@ import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.awaitility.Awaitility;
-import org.awaitility.Durations;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -14,11 +13,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Network;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +41,8 @@ public abstract class AbstractHelmChartIT {
 
     protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
     protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX = "hivemq-" + OPERATOR_RELEASE_NAME + "-.*";
+
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(AbstractHelmChartIT.class);
 
     @RegisterExtension
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
@@ -97,8 +99,12 @@ public abstract class AbstractHelmChartIT {
                 helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace, true);
             }
         } finally {
-            if (uninstallOperatorChart()) {
-                helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
+            try {
+                if (uninstallOperatorChart()) {
+                    helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
+                }
+            } finally {
+                cleanupK3s();
             }
         }
     }
@@ -186,6 +192,44 @@ public abstract class AbstractHelmChartIT {
             return Files.readString(Path.of(resource.toURI()));
         } catch (final Exception e) {
             throw new AssertionError(String.format("Could not read resource file '%s'", filename), e);
+        }
+    }
+
+    // free disk space in K3s
+    private void cleanupK3s() throws Exception {
+        final var pruneContainerResult = helmChartContainer.execInContainer("sh", "-c", """
+                for ID in $(ctr container ls --quiet); do \
+                TASK=$(ctr task ls | grep $ID); \
+                # skip empty tasks \
+                if [ -z "$TASK" ]; then \
+                continue; \
+                fi; \
+                STATUS=$(echo $TASK | awk '{print $3}' | tr -d '[:space:]'); \
+                if [ "$STATUS" != "RUNNING" ]; then \
+                echo "Removing container $ID (status: $STATUS)"; \
+                ctr container rm $ID; \
+                fi; \
+                done""");
+        LOG.info("Removed unused containers:\n{}", pruneContainerResult.getStdout());
+        if (pruneContainerResult.getExitCode() != 0) {
+            LOG.warn("Error during removal of containers:\n{}", pruneContainerResult.getStderr());
+        }
+        // the removal will fail if the snapshot has children, so we just print a warning
+        final var pruneSnapshots = helmChartContainer.execInContainer("sh", "-c", """
+                for ID in $(ctr snapshot ls | awk '{print $1}'); do \
+                # skip the first line \
+                if [ "$ID" == "KEY" ]; then \
+                continue; \
+                fi; \
+                SNAPSHOT=$(ctr snapshot ls | grep $ID);\
+                if echo "$SNAPSHOT" | grep -q "Committed"; then \
+                echo "Removing snapshot $ID"; \
+                ctr snapshot rm $ID; \
+                fi; \
+                done""");
+        LOG.info("Removed unused snapshots:\n{}", pruneSnapshots.getStdout());
+        if (pruneSnapshots.getExitCode() != 0) {
+            LOG.warn("Error during removal of snapshots:\n{}", pruneSnapshots.getStderr());
         }
     }
 }
