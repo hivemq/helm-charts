@@ -21,6 +21,7 @@ import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Extensions")
+@Tag("Extensions1")
 @Testcontainers
 class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 

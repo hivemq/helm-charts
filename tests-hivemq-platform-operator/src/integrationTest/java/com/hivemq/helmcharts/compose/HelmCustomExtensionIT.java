@@ -19,6 +19,7 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("Extensions")
+@Tag("Extensions1")
 class HelmCustomExtensionIT extends AbstractHelmChartIT {
 
     @TempDir

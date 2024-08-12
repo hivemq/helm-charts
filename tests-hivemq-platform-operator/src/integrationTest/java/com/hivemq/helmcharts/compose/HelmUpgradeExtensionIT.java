@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @Tag("Extensions")
+@Tag("Extensions2")
 @Testcontainers
 @SuppressWarnings("DuplicatedCode")
 class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
