@@ -18,7 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         test-plan: [
-          Extensions,
+          Extensions1,
+          Extensions2,
           PodSecurityContext,
           Upgrade,
           Other
