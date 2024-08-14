@@ -115,6 +115,13 @@
         },
         "memory" : {
           "type" : "string"
+        },
+        "ephemeralStorage" : {
+          "type" : "string"
+        },
+        "overrideLimits" : {
+          "type": "object",
+          "additionalProperties": true
         }
       }
     },

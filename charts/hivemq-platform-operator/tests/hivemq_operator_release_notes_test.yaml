@@ -63,3 +63,18 @@ tests:
             The Operator is not configured to create the RBAC permissions (Role and RoleBinding) for the ServiceAccount of the HiveMQ Platform Pods.
             Please make sure the HiveMQ Platform Helm charts values.yaml configures a ServiceAccount (see nodes.serviceAccountName) with sufficient RBAC permissions to list, get and watch Pods.
             -----
+
+  - it: with override resource limits, shows warning
+    set:
+      resources.overrideLimits: {}
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            `resources.overrideLimits` is not recommended for production use cases and may lead to unpredictable memory and cpu allocation for pods.
+            -----
