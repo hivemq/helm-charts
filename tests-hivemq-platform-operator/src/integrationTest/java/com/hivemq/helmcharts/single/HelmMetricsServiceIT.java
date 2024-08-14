@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Timeout;
 import java.util.concurrent.TimeUnit;
 
 @Tag("Services")
-@Tag("Services2")
+@Tag("Services4")
 class HelmMetricsServiceIT extends AbstractHelmChartIT {
 
     private static final int METRICS_SERVICE_PORT_9499 = 9499;
