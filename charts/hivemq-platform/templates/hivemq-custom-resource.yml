@@ -160,12 +160,25 @@ spec:
                   containerPort: {{ printf "%d" (int64 $metricsPort) }}
                 {{- end }}
               resources:
+                {{- if hasKey .Values.nodes.resources "overrideLimits" }}
+                {{- with .Values.nodes.resources.overrideLimits }}
                 limits:
-                  cpu: {{ .Values.nodes.resources.cpu | quote }}
-                  memory: {{ .Values.nodes.resources.memory | quote }}
+                  {{- toYaml . | nindent 18 }}
+                {{- end }}
+                {{- else }}
+                limits:
+                  cpu: {{ .Values.nodes.resources.cpu | trim }}
+                  memory: {{ .Values.nodes.resources.memory | trim }}
+                  {{- with .Values.nodes.resources.ephemeralStorage }}
+                  ephemeral-storage: {{ . | trim }}
+                  {{- end }}
+                {{- end }}
                 requests:
-                  cpu: {{ .Values.nodes.resources.cpu | quote }}
-                  memory: {{ .Values.nodes.resources.memory | quote }}
+                  cpu: {{ .Values.nodes.resources.cpu | trim }}
+                  memory: {{ .Values.nodes.resources.memory | trim }}
+                  {{- with .Values.nodes.resources.ephemeralStorage }}
+                  ephemeral-storage: {{ . | trim }}
+                  {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
               {{- if or $hasAdditionalVolumeMounts (or $hasLicense $hasKeystore) }}
               volumeMounts:

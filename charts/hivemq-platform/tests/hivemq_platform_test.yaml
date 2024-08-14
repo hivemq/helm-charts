@@ -284,10 +284,7 @@ tests:
                 key: myconfigmapkey
                 optional: true
 
-  - it: with resource limits
-    set:
-      nodes.resources.cpu: 1c
-      nodes.resources.memory: 1m
+  - it: with default resource requests
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers
@@ -295,11 +292,159 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers
           count: 1
       - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1024m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 2048M
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: 1024m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: 2048M
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+
+  - it: with custom resource requests
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+      nodes.resources.ephemeralStorage: 1M
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
           value: 1c
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
           value: 1m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: 1M
+
+  - it: with override resource limits and default resource requests
+    set:
+      nodes.resources.overrideLimits:
+        cpu: 2c
+        memory: 2m
+        ephemeral-storage: 2M
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1024m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 2048M
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: 2c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: 2m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: 2M
+
+  - it: with override resource limits and custom resource requests
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+      nodes.resources.ephemeralStorage: 1M
+      nodes.resources.overrideLimits:
+        cpu: 2c
+        memory: 2m
+        ephemeral-storage: 2M
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: 2c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: 2m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: 2M
+
+  - it: with empty override resource limits
+    set:
+      nodes.resources.overrideLimits: {}
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1024m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 2048M
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits
+
+  - it: with empty override resource limits and custom resource requests
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+      nodes.resources.ephemeralStorage: 1M
+      nodes.resources.overrideLimits: {}
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits
 
   - it: with default security context disabled
     asserts:

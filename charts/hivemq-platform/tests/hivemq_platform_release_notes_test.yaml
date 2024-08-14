@@ -33,3 +33,19 @@ tests:
             `config.overrideInitContainers` value is deprecated and will be removed in future releases.
             Please, consider using `additionalInitContainers` value instead.
             -----
+
+  - it: with override resource limits, shows warning
+    set:
+      nodes.resources.overrideLimits:
+        cpu: 1m
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform release "hivemq-platform-release" installed in namespace "hivemq-platform-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            `nodes.resources.overrideLimits` is not recommended for production use cases and may lead to unpredictable memory and cpu allocation for pods.
+            -----

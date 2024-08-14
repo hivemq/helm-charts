@@ -36,11 +36,11 @@ spec:
                   containerPort: 9399
               resources:
                 limits:
-                  cpu: "1024m"
-                  memory: "2048M"
+                  cpu: 1024m
+                  memory: 2048M
                 requests:
-                  cpu: "1024m"
-                  memory: "2048M"
+                  cpu: 1024m
+                  memory: 2048M
   services:
     - metadata:
         name: hivemq-my-platform-mqtt-1883
