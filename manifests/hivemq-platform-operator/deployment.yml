@@ -104,9 +104,9 @@ spec:
             timeoutSeconds: 10
           resources:
             limits:
-              cpu: "1024m"
-              memory: "1Gi"
+              cpu: 1024m
+              memory: 1Gi
             requests:
-              cpu: "1024m"
-              memory: "1Gi"
+              cpu: 1024m
+              memory: 1Gi
       serviceAccountName: hivemq-platform-operator-my-operator

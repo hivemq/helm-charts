@@ -156,12 +156,25 @@ spec:
             successThreshold: 1
             timeoutSeconds: 10
           resources:
+            {{- if hasKey .Values.resources "overrideLimits" }}
+            {{- with .Values.resources.overrideLimits }}
             limits:
-              cpu: {{.Values.resources.cpu | quote}}
-              memory: {{.Values.resources.memory | quote}}
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- else }}
+            limits:
+              cpu: {{ .Values.resources.cpu | trim }}
+              memory: {{ .Values.resources.memory | trim }}
+              {{- with .Values.resources.ephemeralStorage }}
+              ephemeral-storage: {{ . | trim }}
+              {{- end }}
+            {{- end }}
             requests:
-              cpu: {{.Values.resources.cpu | quote}}
-              memory: {{.Values.resources.memory | quote}}
+              cpu: {{.Values.resources.cpu | trim }}
+              memory: {{.Values.resources.memory | trim }}
+              {{- with .Values.resources.ephemeralStorage }}
+              ephemeral-storage: {{ . | trim }}
+              {{- end }}
           {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
           volumeMounts:
             - name: tls

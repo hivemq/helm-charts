@@ -245,7 +245,6 @@ tests:
           errorMessage: |-
             `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)
 
-
   - it: with pod scheduling values set
     values:
       - pod-scheduling-values.yaml
@@ -402,3 +401,165 @@ tests:
           content:
             name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
             value: "false"
+
+  - it: with default resource requests
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 1024m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 1Gi
+      - notExists:
+          path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 1024m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 1Gi
+      - notExists:
+          path: spec.template.spec.containers[0].resources.limits.ephemeral-storage
+
+  - it: with custom resource requests
+    set:
+      resources.cpu: 1c
+      resources.memory: 1m
+      resources.ephemeralStorage: 1M
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 1c
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 1m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: 1M
+
+  - it: with override resource limits and default resource requests
+    set:
+      resources.overrideLimits:
+        cpu: 2c
+        memory: 2m
+        ephemeral-storage: 2M
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 1024m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 1Gi
+      - notExists:
+          path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 2c
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 2m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: 2M
+
+  - it: with override resource limits and custom resource requests
+    set:
+      resources.cpu: 1c
+      resources.memory: 1m
+      resources.ephemeralStorage: 1M
+      resources.overrideLimits:
+        cpu: 2c
+        memory: 2m
+        ephemeral-storage: 2M
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: 2c
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: 2m
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: 2M
+
+  - it: with empty override resource limits
+    set:
+      resources.overrideLimits: {}
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 1024m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 1Gi
+      - notExists:
+          path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - notExists:
+          path: spec.template.spec.containers[0].resources.limits
+
+  - it: with empty override resource limits and custom resource requests
+    set:
+      resources.cpu: 1c
+      resources.memory: 1m
+      resources.ephemeralStorage: 1M
+      resources.overrideLimits: {}
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - notExists:
+          path: spec.template.spec.containers[0].resources.limits
