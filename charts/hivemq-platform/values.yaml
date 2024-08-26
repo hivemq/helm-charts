@@ -27,6 +27,8 @@ nodes:
   resources:
     cpu: 1024m
     memory: 2048M
+    # Set to specify the ephemeral-storage needed for managing local ephemeral storage in the Platform pods.
+    # ephemeralStorage: 15Gi
 
   # Holds pod-level security attributes and common container settings.
   # Note: The standard official HiveMQ image hivemq/hivemq4 runs with a non-root user with user ID (UID) "10000" and group ID (GID) "0" (root).
