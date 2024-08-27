@@ -74,15 +74,16 @@ update_manifests() {
   if [ "${CHART_NAME}" = "hivemq-swarm" ]; then
       echo "Remove Helm annotations"
       # the BSD implementation of sed does NOT support case-insensitive matching
-      sed -i '/helm/d' "${MANIFEST_DIR}"/*.yaml
-      sed -i '/Helm/d' "${MANIFEST_DIR}"/*.yaml
+      sed -i.bak '/helm/d' "${MANIFEST_DIR}"/*.yaml
+      sed -i.bak '/Helm/d' "${MANIFEST_DIR}"/*.yaml
   else
     echo "Remove Helm annotations"
     # the BSD implementation of sed does NOT support case-insensitive matching
-    sed -i '/helm/d' "${MANIFEST_DIR}"/*.yml
-    sed -i '/Helm/d' "${MANIFEST_DIR}"/*.yml
+    sed -i.bak '/helm/d' "${MANIFEST_DIR}"/*.yml
+    sed -i.bak '/Helm/d' "${MANIFEST_DIR}"/*.yml
     if [ "${CHART_NAME}" = "hivemq-platform" ]; then
-      sed -i '/namespace:/d' "${MANIFEST_DIR}"/*.yml
+      sed -i.bak '/namespace:/d' "${MANIFEST_DIR}"/*.yml
     fi
   fi
+  find . -type f -name "*.bak" -delete
 }
