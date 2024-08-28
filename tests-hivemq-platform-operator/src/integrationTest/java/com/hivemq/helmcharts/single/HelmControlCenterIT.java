@@ -9,10 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -36,6 +39,8 @@ import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 @Tag("Services2")
 @Testcontainers
 class HelmControlCenterIT extends AbstractHelmChartIT {
+
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmControlCenterIT.class);
 
     private static final int CC_SERVICE_PORT_8081 = 8081;
     private static final int CC_SERVICE_PORT_8443 = 8443;
@@ -160,21 +165,25 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
             options.setAcceptInsecureCerts(true);
 
             final var webDriver = new RemoteWebDriver(WEB_DRIVER_CONTAINER.getSeleniumAddress(), options, false);
-
             webDriver.get(String.format("%s://host.docker.internal:%s",
                     isTlsEnabled ? "https" : "http",
                     forwarded.getLocalPort()));
-            final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
-
-            wait.until(webWaitDriver -> {
-                webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
-                webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
-                webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
-                webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
-                webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
-                return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
-            });
-            webDriver.quit();
+            final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(60));
+            try {
+                wait.until(webWaitDriver -> {
+                    webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
+                    webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
+                    webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
+                    webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
+                    webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
+                    return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
+                });
+            } catch (final TimeoutException e) {
+                LOG.info("Source:\n{}", webDriver.getPageSource());
+                throw new AssertionError("Failed trying to login into Control Center", e);
+            } finally {
+                webDriver.quit();
+            }
         }
     }
 }
