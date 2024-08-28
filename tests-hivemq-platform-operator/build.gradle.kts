@@ -89,7 +89,7 @@ testing {
                     // sets docker images versions for the tests
                     systemProperties(
                         "hivemq.version" to libs.versions.hivemq.platform.get(),
-                        "selenium.version" to libs.versions.selenium.container.get(),
+                        "selenium.version" to libs.versions.selenium.get(),
                         "nginx.version" to libs.versions.nginx.container.get()
                     )
 
