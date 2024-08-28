@@ -17,7 +17,7 @@ public class DockerImageNames {
                     .asCompatibleSubstituteFor("hivemq/hivemq4");
 
     public static final @NotNull DockerImageName SELENIUM_DOCKER_IMAGE =
-            DockerImageName.parse("seleniarm/standalone-chromium")
+            DockerImageName.parse("selenium/standalone-chrome")
                     .withTag(System.getProperty("selenium.version", "latest"))
                     .asCompatibleSubstituteFor("selenium/standalone-chrome");
 
