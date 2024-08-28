@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -20,7 +19,6 @@ import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +26,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
 import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSWORD;
@@ -40,8 +39,7 @@ import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 @Testcontainers
 class HelmControlCenterIT extends AbstractHelmChartIT {
 
-    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmControlCenterIT.class);
-
+    private static final int MAX_LOGIN_RETRIES = 5;
     private static final int CC_SERVICE_PORT_8081 = 8081;
     private static final int CC_SERVICE_PORT_8443 = 8443;
     private static final int CC_SERVICE_PORT_8444 = 8444;
@@ -56,6 +54,8 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     private static final @NotNull String LOGOUT_BUTTON = ".hmq-logout-button";
     private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
     private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
+
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmControlCenterIT.class);
 
     @Container
     @SuppressWarnings("resource")
@@ -149,7 +149,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     }
 
     private void assertControlCenterListener(
-            final @NotNull String serviceName, final int port, final boolean isTlsEnabled) throws IOException {
+            final @NotNull String serviceName, final int port, final boolean isTlsEnabled) throws Exception {
         assertControlCenterListener(serviceName, port, "admin", "hivemq", isTlsEnabled);
     }
 
@@ -158,32 +158,50 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
             final int port,
             final @NotNull String username,
             final @NotNull String password,
-            final boolean isTlsEnabled) throws IOException {
-        // forward the port from the service
-        try (final var forwarded = K8sUtil.getPortForward(client, platformNamespace, serviceName, port)) {
-            final var options = new ChromeOptions();
-            options.setAcceptInsecureCerts(true);
+            final boolean isTlsEnabled) throws Exception {
+        LOG.info("Log into CC on {}:{} (username: {}) (password: {}) (TLS: {})",
+                serviceName,
+                port,
+                username,
+                password,
+                isTlsEnabled);
+        final var loginRetry = new AtomicInteger();
+        while (true) {
+            final var loginAttempt = loginRetry.incrementAndGet();
+            // forward the port from the service
+            try (final var forwarded = K8sUtil.getPortForward(client, platformNamespace, serviceName, port)) {
+                final var options = new ChromeOptions();
+                options.setAcceptInsecureCerts(true);
 
-            final var webDriver = new RemoteWebDriver(WEB_DRIVER_CONTAINER.getSeleniumAddress(), options, false);
-            webDriver.get(String.format("%s://host.docker.internal:%s",
-                    isTlsEnabled ? "https" : "http",
-                    forwarded.getLocalPort()));
-            final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(60));
-            try {
-                wait.until(webWaitDriver -> {
-                    webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
-                    webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
-                    webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
-                    webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
-                    webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
-                    return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
-                });
-            } catch (final TimeoutException e) {
-                LOG.info("Source:\n{}", webDriver.getPageSource());
-                throw new AssertionError("Failed trying to login into Control Center", e);
-            } finally {
-                webDriver.quit();
+                final var webDriver = new RemoteWebDriver(WEB_DRIVER_CONTAINER.getSeleniumAddress(), options, false);
+                webDriver.get(String.format("%s://host.docker.internal:%s",
+                        isTlsEnabled ? "https" : "http",
+                        forwarded.getLocalPort()));
+
+                final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+                try {
+                    wait.until(webWaitDriver -> {
+                        webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
+                        webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
+                        webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
+                        webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
+                        webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
+                        return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
+                    });
+                } catch (final Exception e) {
+                    if (loginAttempt == MAX_LOGIN_RETRIES) {
+                        LOG.error("Login attempt {} of {} failed, giving up", loginAttempt, MAX_LOGIN_RETRIES);
+                        LOG.info("Source:\n{}", webDriver.getPageSource());
+                        throw e;
+                    }
+                    LOG.warn("Login attempt {} of {} failed, will retry", loginAttempt, MAX_LOGIN_RETRIES);
+                    continue;
+                } finally {
+                    webDriver.quit();
+                }
             }
+            LOG.info("Login attempt {} was successful", loginAttempt);
+            break;
         }
     }
 }
