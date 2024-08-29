@@ -36,9 +36,9 @@ public class DockerImageNames {
         V1_25("v1.25.16-k3s4"),
         V1_26("v1.26.15-k3s1"),
         V1_27("v1.27.16-k3s1"),
-        V1_28("v1.28.12-k3s1"),
-        V1_29("v1.29.7-k3s1"),
-        V1_30("v1.30.3-k3s1"),
+        V1_28("v1.28.13-k3s1"),
+        V1_29("v1.29.8-k3s1"),
+        V1_30("v1.30.4-k3s1"),
 
         MINIMUM(V1_23.version),
         LATEST(V1_30.version);
