@@ -160,6 +160,9 @@
             "type": "object",
             "additionalProperties": true
           },
+          "legacyPortName": {
+            "type": "string"
+          },
           "serviceType": {
             "type" : "string",
             "enum" : [
@@ -226,12 +229,7 @@
               "REQUIRED"
             ]
           }
-        },
-        "required" : [
-          "type",
-          "containerPort",
-          "exposed"
-        ]
+        }
       }
     },
     "extensions" : {
@@ -518,6 +516,56 @@
           "type" : "boolean"
         }
       }
+    },
+    "migration" : {
+      "type" : "object",
+      "properties" : {
+        "statefulSet" : {
+          "type" : "boolean"
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "migration": {
+            "properties": {
+              "statefulSet": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "services": {
+            "items": {
+              "required": [
+                "type",
+                "exposed",
+                "legacyPortName",
+                "containerPort"
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "services": {
+            "items": {
+              "required": [
+                "type",
+                "exposed",
+                "containerPort"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
 }
