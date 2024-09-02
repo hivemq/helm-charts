@@ -84,48 +84,48 @@ spec:
                 {{- $envNamesKeyStorePasswordList := list }}
                 {{- $envNamesKeyStorePrivatePasswordList := list }}
                 {{- $envNamesTrustStoreList := list }}
-                {{- range $key, $val := .Values.services }}
-                {{- if and $val.exposed $val.keystoreSecretName }}
-                {{- $envNameKeystorePassword := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass") }}
+                {{- range $service := .Values.services }}
+                {{- if and $service.exposed $service.keystoreSecretName }}
+                {{- $envNameKeystorePassword := (printf "%s_%s_%s_%s" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass") }}
                 {{- if not (has $envNameKeystorePassword $envNamesKeyStorePasswordList) }}
                 - name: {{ $envNameKeystorePassword }}
-                  {{- if $val.keystorePassword }}
-                  value: {{ $val.keystorePassword | b64dec | trim -}}
-                  {{- else if $val.keystorePasswordSecretName }}
+                  {{- if $service.keystorePassword }}
+                  value: {{ $service.keystorePassword | b64dec | trim -}}
+                  {{- else if $service.keystorePasswordSecretName }}
                   valueFrom:
                     secretKeyRef:
-                      name: {{ $val.keystorePasswordSecretName }}
-                      key: {{ $val.keystorePasswordSecretKey | default "keystore.password" }}
+                      name: {{ $service.keystorePasswordSecretName }}
+                      key: {{ $service.keystorePasswordSecretKey | default "keystore.password" }}
                   {{- else }}
                   {{- fail ("A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
                   {{- end }}
-                {{- if or $val.keystorePrivatePassword (and $val.keystorePasswordSecretName $val.keystorePrivatePasswordSecretKey) }}
-                {{- $envNameKeystorePrivatePassword := include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey) }}
+                {{- if or $service.keystorePrivatePassword (and $service.keystorePasswordSecretName $service.keystorePrivatePasswordSecretKey) }}
+                {{- $envNameKeystorePrivatePassword := include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" $service.type "keystoreSecretName" $service.keystoreSecretName "keystorePrivatePassword" $service.keystorePrivatePassword "keystorePrivatePasswordSecretKey" $service.keystorePrivatePasswordSecretKey) }}
                 {{- if not (has $envNameKeystorePrivatePassword $envNamesKeyStorePrivatePasswordList) }}
                 - name: {{ $envNameKeystorePrivatePassword }}
-                {{- if $val.keystorePrivatePassword }}
-                  value: {{ $val.keystorePrivatePassword | b64dec | trim -}}
+                {{- if $service.keystorePrivatePassword }}
+                  value: {{ $service.keystorePrivatePassword | b64dec | trim -}}
                 {{- else }}
                   valueFrom:
                     secretKeyRef:
-                      name: {{ $val.keystorePasswordSecretName }}
-                      key: {{ $val.keystorePrivatePasswordSecretKey }}
+                      name: {{ $service.keystorePasswordSecretName }}
+                      key: {{ $service.keystorePrivatePasswordSecretKey }}
                 {{- end }}
                 {{- $envNamesKeyStorePrivatePasswordList = $envNameKeystorePrivatePassword | append $envNamesKeyStorePrivatePasswordList }}
                 {{- end }}
                 {{- end }}
                 {{- $envNamesKeyStorePasswordList = $envNameKeystorePassword | append $envNamesKeyStorePasswordList }}
                 {{- end }}
-                {{- if and $val.exposed $val.truststoreSecretName }}
-                {{- $envNameTrustorePassword := (printf "%s_%s_%s_%s" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass") }}
+                {{- if and $service.exposed $service.truststoreSecretName }}
+                {{- $envNameTrustorePassword := (printf "%s_%s_%s_%s" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass") }}
                 {{- if not (has $envNameTrustorePassword $envNamesTrustStoreList) }}
                 - name: {{ $envNameTrustorePassword }}
-                  {{- if $val.truststorePassword }}
-                  value: {{ $val.truststorePassword | b64dec | trim -}}
-                  {{- else if $val.truststorePasswordSecretName }}
+                  {{- if $service.truststorePassword }}
+                  value: {{ $service.truststorePassword | b64dec | trim -}}
+                  {{- else if $service.truststorePasswordSecretName }}
                   valueFrom:
                     secretKeyRef:
-                      name: {{ $val.truststorePasswordSecretName }}
+                      name: {{ $service.truststorePasswordSecretName }}
                       key: truststore.password
                   {{- else }}
                   {{- fail ("A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
@@ -144,18 +144,18 @@ spec:
               ports:
                 {{- $containerPortNameList := list }}
                 {{- $containerPortName := "" }}
-                {{- range $key, $val := .Values.services }}
+                {{- range $service := .Values.services }}
                   {{- $containerPortName = (include "hivemq-platform.container-port-name" .) }}
-                  {{- if ($val.exposed) }}
+                  {{- if ($service.exposed) }}
                       {{- if (not (has $containerPortName $containerPortNameList)) }}
                 - name: {{ $containerPortName }}
-                  containerPort: {{ $val.containerPort }}
+                  containerPort: {{ $service.containerPort }}
                       {{- end }}
                       {{- $containerPortNameList = $containerPortName | append $containerPortNameList }}
                   {{- end }}
                 {{- end }}
                 {{- $metricsContainerPortName := printf "metrics-%s" $metricsPort }}
-                {{- if and (not $hasMetricService) (not (has $metricsContainerPortName $containerPortNameList)) (.Values.metrics.enabled) }}
+                {{- if and (not $hasMetricService) (not (has $metricsContainerPortName $containerPortNameList)) (.Values.metrics.enabled) (not .Values.migration.statefulSet) }}
                 - name: {{ $metricsContainerPortName }}
                   containerPort: {{ printf "%d" (int64 $metricsPort) }}
                 {{- end }}
@@ -185,7 +185,7 @@ spec:
                 {{- if $hasLicense }}
                 - name: licenses
                   mountPath: /opt/hivemq/license
-                {{- end}}
+                {{- end }}
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
                 {{- end}}
@@ -230,37 +230,37 @@ spec:
       {{.Values.config.overrideStatefulSet | nindent 3}}
       {{- end }}
   services:
-    {{- include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" .Release.Name) -}}
-    {{- range $key, $val := .Values.services }}
-    {{- if $val.exposed }}
+    {{- include "hivemq-platform.validate-services" . -}}
+    {{- range $service := .Values.services }}
+    {{- if $service.exposed }}
     - metadata:
-        name: {{ (include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort)) }}
-        {{- with $val.annotations }}
+        name: {{ (include "hivemq-platform.range-service-name" (dict "name" $service.name "releaseName" $.Release.Name "type" $service.type "port" $service.port "containerPort" $service.containerPort "legacyPortName" $service.legacyPortName)) }}
+        {{- with $service.annotations }}
         annotations:
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- with $val.labels }}
+        {{- with $service.labels }}
         labels:
           {{- toYaml . | nindent 10 }}
         {{- end }}
       spec:
-        {{- if and $val.serviceType (or (eq $val.serviceType "NodePort") (eq $val.serviceType "LoadBalancer")) }}
-        type: {{ $val.serviceType }}
+        {{- if and $service.serviceType (or (eq $service.serviceType "NodePort") (eq $service.serviceType "LoadBalancer")) }}
+        type: {{ $service.serviceType }}
         {{- end }}
-        {{- if eq $val.type "control-center" }}
+        {{- if eq $service.type "control-center" }}
         sessionAffinity: ClientIP
         {{- end }}
         ports:
           - name: {{ include "hivemq-platform.service-port-name" . }}
             targetPort: {{ include "hivemq-platform.container-port-name" . }}
-          {{- if $val.port}}
-            port: {{ $val.port }}
+          {{- if $service.port}}
+            port: {{ $service.port }}
           {{- else }}
-            port: {{ $val.containerPort }}
+            port: {{ $service.containerPort }}
           {{- end }}
     {{- end }}
     {{- end }}
-    {{- if and (not $hasMetricService) (.Values.metrics.enabled) }}
+    {{- if and (not $hasMetricService) (.Values.metrics.enabled) (not .Values.migration.statefulSet) }}
     - metadata:
         name: {{ (include "hivemq-platform.range-service-name" (dict "name" "" "releaseName" $.Release.Name "type" "metrics" "port" $metricsPort "containerPort" $metricsPort)) }}
       spec:
@@ -271,33 +271,34 @@ spec:
     {{- end }}
   {{- if hasKey .Values "extensions" }}
   extensions:
-    {{- range $key, $val := .Values.extensions }}
-    - id: {{$val.name}}
-      {{- if hasKey $val "enabled" }}
-      enabled: {{ printf "%t" $val.enabled | default false }}
-      {{- else}}
+    {{- range $extension := .Values.extensions }}
+    - id: {{$extension.name}}
+      {{- if hasKey $extension "enabled" }}
+      enabled: {{ printf "%t" $extension.enabled | default false }}
+      {{- else }}
       enabled: false
-      {{- end}}
-      {{- if hasKey $val "supportsHotReload" }}
-      supportsHotReload: {{ printf "%t" $val.supportsHotReload | default false }}
-      {{- else}}
+      {{- end }}
+      {{- if hasKey $extension "supportsHotReload" }}
+      supportsHotReload: {{ printf "%t" $extension.supportsHotReload | default false }}
+      {{- else }}
       supportsHotReload: false
-      {{- end}}
-      {{- if hasKey $val "configMapName" }}
-      configMapName: {{ $val.configMapName | quote }}
-      {{- end}}
-      {{- if hasKey $val "requestHeaderSecretName" }}
-      requestHeaderSecretName: {{$val.requestHeaderSecretName | quote }}
-      {{- end}}
-      extensionUri: {{ $val.extensionUri | default "preinstalled" | quote }}
-      {{- if hasKey $val "customizationUri" }}
-      customizationUri: {{ $val.customizationUri | quote }}
-      {{- end}}
-      {{- if hasKey $val "priority" }}
-      extensionPriority: {{ $val.priority | default -1 }}
-      {{- end}}
-      {{- if hasKey $val "startPriority" }}
-      extensionStartPriority: {{ $val.startPriority | default -1 }}
-      {{- end}}
-    {{- end}}
-  {{- end}}
+      {{- end }}
+      {{- if hasKey $extension "configMapName" }}
+      configMapName: {{ $extension.configMapName | quote }}
+      {{- end }}
+      {{- if hasKey $extension "requestHeaderSecretName" }}
+      requestHeaderSecretName: {{$extension.requestHeaderSecretName | quote }}
+      {{- end }}
+      extensionUri: {{ $extension.extensionUri | default "preinstalled" | quote }}
+      {{- if hasKey $extension "customizationUri" }}
+      customizationUri: {{ $extension.customizationUri | quote }}
+      {{- end }}
+      {{- if hasKey $extension "priority" }}
+      extensionPriority: {{ $extension.priority | default -1 }}
+      {{- end }}
+      {{- if hasKey $extension "startPriority" }}
+      extensionStartPriority: {{ $extension.startPriority | default -1 }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  statefulSetMigration: {{ .Values.migration.statefulSet }}
