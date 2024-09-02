@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Timeout;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,7 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
     }
 
     @Override
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return false;
     }
 
@@ -76,7 +75,7 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
         final var uncaughtExceptionRef = new AtomicReference<Exception>();
         final var operatorInstallThread = new Thread(() -> {
             try {
-                installOperatorChartAndWaitToBeRunning(additionalCommands);
+                installPlatformOperatorChartAndWaitToBeRunning(additionalCommands);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
@@ -151,7 +150,7 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
                 CRD_NAME));
         final var crdReady = waitForOperatorLog(String.format(".*HiveMQ Platform CRD '%s' is ready", CRD_NAME));
 
-        installOperatorChartAndWaitToBeRunning(List.of("--skip-crds").toArray(new String[0]));
+        installPlatformOperatorChartAndWaitToBeRunning(List.of("--skip-crds").toArray(new String[0]));
         await().atMost(ONE_MINUTE).until(crdApplyEnabled::isDone);
         await().atMost(ONE_MINUTE).until(crdVerify::isDone);
         await().atMost(ONE_MINUTE).until(crdApplying::isDone);
