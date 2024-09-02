@@ -16,14 +16,14 @@ import static org.awaitility.Durations.ONE_MINUTE;
 class HelmCustomConfigIT extends AbstractHelmChartIT {
 
     @Override
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return false;
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCustomYml_hivemqRunning() throws Exception {
-        installOperatorChartAndWaitToBeRunning();
+        installPlatformOperatorChartAndWaitToBeRunning();
         installPlatformChartAndWaitToBeRunning("--set-file",
                 "config.overrideStatefulSet=/files/stateful-set-spec.yaml");
 
@@ -50,7 +50,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCustomXml_hivemqRunning() throws Exception {
-        installOperatorChartAndWaitToBeRunning();
+        installPlatformOperatorChartAndWaitToBeRunning();
         installPlatformChartAndWaitToBeRunning("--set-file",
                 "config.overrideHiveMQConfig=/files/hivemq-config-override.xml");
 
@@ -68,7 +68,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withExistingConfigMap_customResourceCreated() throws Exception {
-        installOperatorChartAndWaitToBeRunning();
+        installPlatformOperatorChartAndWaitToBeRunning();
         final var configMap = K8sUtil.createConfigMap(client, platformNamespace, "hivemq-config-map.yml");
 
         installPlatformChartAndWaitToBeRunning("--set",
@@ -94,7 +94,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
         final var operatorStartedFuture = waitForOperatorLog(String.format(
                 ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]",
                 platformNamespace));
-        installOperatorChartAndWaitToBeRunning("/files/custom-operator-env-vars-values.yaml");
+        installPlatformOperatorChartAndWaitToBeRunning("/files/custom-operator-env-vars-values.yaml");
         await().atMost(ONE_MINUTE).until(operatorStartedFuture::isDone);
 
         installPlatformChartAndWaitToBeRunning("/files/custom-platform-env-vars-values.yaml");
