@@ -58,6 +58,30 @@ tests:
                   port: 9399
                   targetPort: metrics-9399
 
+  - it: with no mandatory `type` value for service, schema validation fails
+    set:
+      services:
+        - exposed: true
+          containerPort: 1884
+    asserts:
+      - failedTemplate: {}
+
+  - it: with no mandatory `exposed` value for service, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          containerPort: 1884
+    asserts:
+      - failedTemplate: {}
+
+  - it: with no mandatory `containerPort` value for service, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+    asserts:
+      - failedTemplate: {}
+
   - it: with NodePort
     set:
       services:
@@ -523,6 +547,55 @@ tests:
             name: metrics-9499
             containerPort: 9499
       - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+
+  - it: with statefulSet migration, then no default metrics service is created
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with statefulSet migration, then no default metrics service port is added to the HiveMQ container
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
           content:
             name: metrics-9399
@@ -1252,6 +1325,22 @@ tests:
       - failedTemplate:
           errorMessage: Services with same container port (1883) but different types cannot be set
 
+  - it: with duplicated legacy port name and different services types, validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt
+        - type: control-center
+          exposed: true
+          containerPort: 1884
+          legacyPortName: mqtt
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt
+
   - it: with duplicated container ports and different services types but disabled services, only enabled services are created
     set:
       services:
@@ -1440,6 +1529,139 @@ tests:
     asserts:
       - failedTemplate:
           errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt-1883
+
+  - it: with duplicated legacy port names, validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          legacyPortName: mqtt
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt
+
+  - it: with different legacy port names but duplicated ports, validation succeeds
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt1
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with duplicated legacy port names in disabled services, then validation fails with ambiguous definition
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1883
+          legacyPortName: mqtt
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt (set as exposed and not exposed)
+
+  - it: with duplicated custom legacy service names, then validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt1
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1884
+          legacyPortName: mqtt2
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name my-custom-mqtt
+
+  - it: with statefulSet migration and `port` value set, then validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt1
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          port: 1885
+          legacyPortName: mqtt2
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type `mqtt` with container port `1884` cannot use `port` value as `migration.statefulSet` value is enabled
+
+  - it: with statefulSet migration and `port` value set in not exposed services, then validation succeeds
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: mqtt1
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          port: 1885
+          legacyPortName: mqtt2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with statefulSet migration disabled and `legacyPortName` value set, then validation fails
+    set:
+      migration.statefulSet: false
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          legacyPortName: mqtt2
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type `mqtt` with container port `1884` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled
+
+  - it: with statefulSet migration disabled and `legacyPortName` value set in not exposed services, then validation succeeds
+    set:
+      migration.statefulSet: false
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          legacyPortName: mqtt2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
 
   - it: with duplicated service container port and type in disabled services, then validation fails with ambiguous definition
     set:
@@ -1857,3 +2079,137 @@ tests:
                 - name: metrics-9399
                   port: 9399
                   targetPort: metrics-9399
+
+  - it: with statefulSet migration and no mandatory `type` value for service, schema validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - exposed: true
+          legacyPortName: mqtt
+          containerPort: 1883
+    asserts:
+      - failedTemplate: {}
+
+  - it: with statefulSet migration and no mandatory `exposed` value for service, schema validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          legacyPortName: mqtt
+          containerPort: 1883
+    asserts:
+      - failedTemplate: {}
+
+  - it: with statefulSet migration and no mandatory `legacyPortName` value for service, schema validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate: {}
+
+  - it: with statefulSet migration and no mandatory `containerPort` value for service, schema validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          legacyPortName: mqtt
+    asserts:
+      - failedTemplate: {}
+
+  - it: with statefulSet migration and missing mandatory values in some services, schema validation fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          legacyPortName: legacy
+    asserts:
+      - failedTemplate: {}
+
+  - it: with statefulSet migration, then legacy service name
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 1
+      - equal:
+          path: spec.services[0].metadata.name
+          value: hivemq-test-hivemq-platform-legacy
+
+  - it: with statefulSet migration and custom service name, then custom service name
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          name: my-custom-legacy-mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 1
+      - equal:
+          path: spec.services[0].metadata.name
+          value: my-custom-legacy-mqtt
+
+  - it: with statefulSet migration, then legacy service ports
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 1
+      - equal:
+          path: spec.services[0].metadata.name
+          value: hivemq-test-hivemq-platform-legacy
+      - exists:
+          path: spec.services[0].spec.ports
+      - contains:
+          path: spec.services[0].spec.ports
+          content:
+            name: legacy
+            targetPort: legacy
+            port: 1883
+
+  - it: with statefulSet migration, then legacy container ports
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: legacy
+            containerPort: 1883
