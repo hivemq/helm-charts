@@ -24,14 +24,14 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
     private static final @NotNull String SERVICE_ACCOUNT_NAME = "my-custom-sa";
 
     @Override
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return false;
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformCharts_withNonExistingCustomServiceAccountThenCreate_hivemqRunning() throws Exception {
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
+        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
         helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
                 "--set",
                 "nodes.serviceAccountName=" + SERVICE_ACCOUNT_NAME,
@@ -62,7 +62,7 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
     void platformCharts_withNonExistingPermissionsThenCreate_hivemqRunning() throws Exception {
         K8sUtil.createServiceAccount(client, platformNamespace, SERVICE_ACCOUNT_NAME);
 
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
                 "--set",
                 "hivemqPlatformServiceAccount.create=false",
                 "--set",
@@ -104,7 +104,7 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
         createRole();
         createRoleBinding();
 
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
                 "--set",
                 "hivemqPlatformServiceAccount.create=false",
                 "--set",
@@ -132,7 +132,7 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformCharts_withCreateAndValidateDisabled_hivemqRunning() throws Exception {
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
                 "--set",
                 "hivemqPlatformServiceAccount.create=false",
                 "--set",
