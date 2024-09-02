@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import io.fabric8.kubernetes.api.model.apps.StatefulSetSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -36,6 +37,27 @@ public class K8sUtil {
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(K8sUtil.class);
 
     private K8sUtil() {
+    }
+
+    /**
+     * Asserts that the given MQTT service is of type ClusterIP.
+     *
+     * @param client          the Kubernetes client to use
+     * @param namespace       the namespace to wait to check for all the pods to be removed
+     * @param mqttServiceName the name of the MQTT service to assert
+     */
+    public static void assertMqttService(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String mqttServiceName) {
+        await().atMost(ONE_MINUTE).untilAsserted(() -> {
+            final var services = client.services().inNamespace(namespace).list().getItems();
+            assertThat(services).isNotEmpty()
+                    .filteredOn(service -> mqttServiceName.equals(service.getMetadata().getName()))
+                    .extracting(Service::getSpec)
+                    .extracting(ServiceSpec::getType)
+                    .contains("ClusterIP");
+        });
     }
 
     /**
@@ -166,10 +188,10 @@ public class K8sUtil {
      * Executes the the given command in the HiveMQ platform pod for the HiveMQ container
      * and asserts the output, error results and exit code
      *
-     * @param client        the Kubernetes client to use
-     * @param namespace     the namespace to create the service account in
-     * @param pod           the pod to execute the command in
-     * @param command       the command line to execute
+     * @param client    the Kubernetes client to use
+     * @param namespace the namespace to create the service account in
+     * @param pod       the pod to execute the command in
+     * @param command   the command line to execute
      */
     public static void executeInHiveMQPod(
             final @NotNull KubernetesClient client,
@@ -209,45 +231,6 @@ public class K8sUtil {
     }
 
     /**
-     * @param clazz Class object to get the namespace from.
-     * @return Namespace generated from the class passed as argument, up to 63 characters.
-     */
-    public static @NotNull String getNamespaceName(final @NotNull Class<?> clazz) {
-        return getNamespaceName(clazz, "");
-    }
-
-    /**
-     * @param clazz Class object to get the operator namespace from.
-     * @return Namespace generated from the class passed as argument, up to 63 characters.
-     */
-    public static @NotNull String getOperatorNamespaceName(final @NotNull Class<?> clazz) {
-        return getNamespaceName(clazz, "-operator");
-    }
-
-    private static @NotNull String getNamespaceName(final @NotNull Class<?> clazz, final @NotNull String suffix) {
-        final var maxLength = 63 - suffix.length();
-        final var namespace = clazz.getSimpleName().toLowerCase();
-        if (namespace.length() > maxLength) {
-            return namespace.substring(0, maxLength) + suffix;
-        }
-        return namespace + suffix;
-    }
-
-    /**
-     * Returns the HiveMQ container from the given {@link StatefulSetSpec}
-     * instance.
-     * <p>
-     * This is safe to use and cannot return {@code null} after the custom resource validation (that asserts the
-     * existence of the HiveMQ container).
-     *
-     * @param statefulSetSpec the {@link StatefulSetSpec} to retrieve the HiveMQ container from
-     * @return the HiveMQ container
-     */
-    public static @NotNull Container getHiveMQContainer(final @NotNull StatefulSetSpec statefulSetSpec) {
-        return statefulSetSpec.getTemplate().getSpec().getContainers().getFirst();
-    }
-
-    /**
      * Returns the expected container as per the given containerName from the given {@link StatefulSetSpec}
      * instance.
      * <p>
@@ -266,6 +249,75 @@ public class K8sUtil {
                 .filter(container -> container.getName().equals(containerName))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    /**
+     * Returns the HiveMQ container from the given {@link StatefulSetSpec}
+     * instance.
+     * <p>
+     * This is safe to use and cannot return {@code null} after the custom resource validation (that asserts the
+     * existence of the HiveMQ container).
+     *
+     * @param statefulSetSpec the {@link StatefulSetSpec} to retrieve the HiveMQ container from
+     * @return the HiveMQ container
+     */
+    public static @NotNull Container getHiveMQContainer(final @NotNull StatefulSetSpec statefulSetSpec) {
+        return statefulSetSpec.getTemplate().getSpec().getContainers().getFirst();
+    }
+
+    /**
+     * Returns the default labels defined for a legacy Operator pod.
+     *
+     * @param releaseName the release name of the legacy Operator chart
+     * @return {@link Map}  Map containing some of the fixed labels expected for a legacy Operator pod.
+     */
+    public static @NotNull Map<String, String> getHiveMQLegacyOperatorLabels(final @NotNull String releaseName) {
+        return Map.of("app", "hivemq-operator", "operator", String.format("%s-hivemq-operator", releaseName));
+    }
+
+    /**
+     * Returns the HiveMQ platform {@link Resource<GenericKubernetesResource>} from the namespace given by using
+     * the Kubernetes client provided.
+     *
+     * @param client    the Kubernetes client to use
+     * @param namespace the namespace to look up for the service to expose
+     * @param name      the HiveMQ platform name to fetch
+     * @return the HiveMQ platform {@link Resource<GenericKubernetesResource>}
+     */
+    public static @NotNull Resource<GenericKubernetesResource> getHiveMQPlatform(
+            final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
+        final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
+                .withKind("HiveMQPlatform")
+                .withVersion("v1")
+                .withPlural("hivemq-platforms")
+                .withNamespaced(true)
+                .build();
+        return client.genericKubernetesResources(context).inNamespace(namespace).withName(name);
+    }
+
+    /**
+     * Returns the default labels defined for Platform pod.
+     *
+     * @param releaseName the release name of the Platform chart
+     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform pod.
+     */
+    public static @NotNull Map<String, String> getHiveMQPlatformLabels(final @NotNull String releaseName) {
+        return Map.of("app.kubernetes.io/instance",
+                releaseName,
+                "app.kubernetes.io/name",
+                "hivemq-platform",
+                "hivemq-platform",
+                releaseName);
+    }
+
+    /**
+     * Returns the default labels defined for a Platform Operator pod.
+     *
+     * @param releaseName the release name of the Platform Operator chart
+     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform Operator pod.
+     */
+    public static @NotNull Map<String, String> getHiveMQPlatformOperatorLabels(final @NotNull String releaseName) {
+        return Map.of("app.kubernetes.io/instance", releaseName, "app.kubernetes.io/name", "hivemq-platform-operator");
     }
 
     /**
@@ -292,55 +344,10 @@ public class K8sUtil {
     }
 
     /**
-     * Returns the HiveMQ platform {@link Resource<GenericKubernetesResource>} from the namespace given by using
-     * the Kubernetes client provided.
-     *
-     * @param client    the Kubernetes client to use
-     * @param namespace the namespace to look up for the service to expose
-     * @param name      the HiveMQ platform name to fetch
-     * @return the HiveMQ platform {@link Resource<GenericKubernetesResource>}
-     */
-    public static @NotNull Resource<GenericKubernetesResource> getHiveMQPlatform(
-            final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
-        final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
-                .withKind("HiveMQPlatform")
-                .withVersion("v1")
-                .withPlural("hivemq-platforms")
-                .withNamespaced(true)
-                .build();
-        return client.genericKubernetesResources(context).inNamespace(namespace).withName(name);
-    }
-
-    /**
-     * Returns some of the fixed default labels defined for a Platform Operator pod.
-     *
-     * @param releaseName the release name of the Platform Operator chart
-     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform Operator pod.
-     */
-    public static @NotNull Map<String, String> getHiveMQPlatformOperatorLabels(final @NotNull String releaseName) {
-        return Map.of("app.kubernetes.io/instance", releaseName, "app.kubernetes.io/name", "hivemq-platform-operator");
-    }
-
-    /**
-     * Returns some of the fixed default labels defined for Platform pod.
-     *
-     * @param releaseName the release name of the Platform chart
-     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform pod.
-     */
-    public static @NotNull Map<String, String> getHiveMQPlatformLabels(final @NotNull String releaseName) {
-        return Map.of("app.kubernetes.io/instance",
-                releaseName,
-                "app.kubernetes.io/name",
-                "hivemq-platform",
-                "hivemq-platform",
-                releaseName);
-    }
-
-    /**
      * Returns a Predicate condition based on the state of a Kubernetes resource.
      */
     @SuppressWarnings("unchecked")
-    public static @NotNull Predicate<GenericKubernetesResource> getHiveMQPlatformStatus(final @NotNull String state) {
+    public static @NotNull Predicate<GenericKubernetesResource> getKubernetesResourceStatus(final @NotNull String expectedState) {
         return resource -> {
             if (resource == null) {
                 return false;
@@ -349,9 +356,58 @@ public class K8sUtil {
             if (status == null) {
                 return false;
             }
-            LOG.debug("State to compare {} and waiting for {}", status.get("state"), state);
-            return status.get("state").contains(state);
+            final var actualState = status.get("state");
+            if (actualState == null || actualState.isBlank()) {
+                return false;
+            }
+            LOG.debug("Comparing actual state '{}' and waiting for '{}'", actualState, expectedState);
+            return actualState.contains(expectedState);
         };
+    }
+
+    /**
+     * Returns the HiveMQ cluster {@link Resource<GenericKubernetesResource>} from the namespace given by using
+     * the Kubernetes client provided.
+     *
+     * @param client    the Kubernetes client to use
+     * @param namespace the namespace to look up for the service to expose
+     * @param name      the HiveMQ cluster name to fetch
+     * @return the HiveMQ platform {@link Resource<GenericKubernetesResource>}
+     */
+    public static @NotNull Resource<GenericKubernetesResource> getLegacyHiveMQPlatform(
+            final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
+        final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
+                .withKind("HiveMQCluster")
+                .withVersion("v1")
+                .withPlural("hivemq-clusters")
+                .withNamespaced(true)
+                .build();
+        return client.genericKubernetesResources(context).inNamespace(namespace).withName(name);
+    }
+
+    /**
+     * @param clazz Class object to get the namespace from.
+     * @return Namespace generated from the class passed as argument, up to 63 characters.
+     */
+    public static @NotNull String getNamespaceName(final @NotNull Class<?> clazz) {
+        return getNamespaceName(clazz, "");
+    }
+
+    private static @NotNull String getNamespaceName(final @NotNull Class<?> clazz, final @NotNull String suffix) {
+        final var maxLength = 63 - suffix.length();
+        final var namespace = clazz.getSimpleName().toLowerCase();
+        if (namespace.length() > maxLength) {
+            return namespace.substring(0, maxLength) + suffix;
+        }
+        return namespace + suffix;
+    }
+
+    /**
+     * @param clazz Class object to get the operator namespace from.
+     * @return Namespace generated from the class passed as argument, up to 63 characters.
+     */
+    public static @NotNull String getOperatorNamespaceName(final @NotNull Class<?> clazz) {
+        return getNamespaceName(clazz, "-operator");
     }
 
     /**
@@ -387,6 +443,24 @@ public class K8sUtil {
     }
 
     /**
+     * Scales a {@link Deployment} to the given number of replicas.
+     *
+     * @param client         the Kubernetes client to use
+     * @param namespace      the namespace to use to scale the deployment from
+     * @param deploymentName the name of the deployment to scale
+     * @param replicas       the number of replicas to scale
+     */
+    public static void scaleDeployment(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String deploymentName,
+            final int replicas) {
+        final var deployment = client.apps().deployments().inNamespace(namespace).withName(deploymentName).get();
+        deployment.getSpec().setReplicas(replicas);
+        client.resource(deployment).update();
+    }
+
+    /**
      * Updates a ConfigMap from the given resource file on the classpath.
      *
      * @param client       the Kubernetes client to use
@@ -401,9 +475,84 @@ public class K8sUtil {
     }
 
     /**
-     * Waits for the Operator pod based on the given name to be in a running status.
+     * Waits for the given HiveMQ Platform to be in a specific status.
      */
-    public static void waitForHiveMQOperatorPodStateRunning(
+    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformState(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName,
+            final @NotNull String state) {
+        final var hivemqCustomResource = getHiveMQPlatform(client, namespace, customResourceName);
+        hivemqCustomResource.waitUntilCondition(getKubernetesResourceStatus(state), 5, TimeUnit.MINUTES);
+        assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
+        return hivemqCustomResource.get();
+    }
+
+    /**
+     * Waits for the given HiveMQ Platform to be in a RUNNING status.
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName) {
+        return waitForHiveMQPlatformState(client, namespace, customResourceName, "RUNNING");
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunningAfterRollingRestart(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName) {
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
+        assertThat(hivemqCustomResource).isNotNull();
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("ROLLING_RESTART"),
+                5,
+                TimeUnit.MINUTES);
+        return hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RUNNING"),
+                5,
+                TimeUnit.MINUTES);
+    }
+
+    /**
+     * Waits for the given HiveMQ Cluster to be in a specific status.
+     */
+    public static @NotNull GenericKubernetesResource waitForLegacyHiveMQPlatformState(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName,
+            final @NotNull String state) {
+        final var hivemqCustomResource = getLegacyHiveMQPlatform(client, namespace, customResourceName);
+        hivemqCustomResource.waitUntilCondition(getKubernetesResourceStatus(state), 5, TimeUnit.MINUTES);
+        assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
+        return hivemqCustomResource.get();
+    }
+
+    /**
+     * Waits for the given HiveMQ Cluster to be in a RUNNING status.
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static @NotNull GenericKubernetesResource waitForLegacyHiveMQPlatformStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String customResourceName) {
+        return waitForLegacyHiveMQPlatformState(client, namespace, customResourceName, "Running");
+    }
+
+    /**
+     * Waits for the legacy Operator pods based on the given name to be in a running status.
+     */
+    public static void waitForLegacyOperatorPodStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String releaseName) {
+        waitForPodStateRunning(client, namespace, getHiveMQLegacyOperatorLabels(releaseName));
+    }
+
+    /**
+     * Waits for the Platform Operator pod based on the given name to be in a running status.
+     */
+    public static void waitForPlatformOperatorPodStateRunning(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String releaseName) {
@@ -420,71 +569,12 @@ public class K8sUtil {
         client.pods()
                 .inNamespace(namespace)
                 .withLabels(labels)
-                .waitUntilCondition(pod -> pod.getStatus()
+                .waitUntilCondition(pod -> pod != null &&
+                        pod.getStatus()
                                 .getContainerStatuses()
                                 .stream()
-                                .allMatch(containerStatus -> containerStatus.getReady() && containerStatus.getStarted()),
-                        3,
-                        TimeUnit.MINUTES);
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunningAfterRollingRestart(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String customResourceName) {
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
-        assertThat(hivemqCustomResource).isNotNull();
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
-                5,
-                TimeUnit.MINUTES);
-        return hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 5, TimeUnit.MINUTES);
-    }
-
-    /**
-     * Waits for the given platform to be in a RUNNING status.
-     */
-    @SuppressWarnings("UnusedReturnValue")
-    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformStateRunning(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String customResourceName) {
-        return waitForHiveMQPlatformState(client, namespace, customResourceName, "RUNNING");
-    }
-
-    /**
-     * Waits for the given platform to be in a specific status.
-     */
-    public static @NotNull GenericKubernetesResource waitForHiveMQPlatformState(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String customResourceName,
-            final @NotNull String state) {
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
-        hivemqCustomResource.waitUntilCondition(getHiveMQPlatformStatus(state), 5, TimeUnit.MINUTES);
-        assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
-        return hivemqCustomResource.get();
-    }
-
-    /**
-     * Asserts that the given MQTT service is of type ClusterIP.
-     *
-     * @param client          the Kubernetes client to use
-     * @param namespace       the namespace to wait to check for all the pods to be removed
-     * @param mqttServiceName the name of the MQTT service to assert
-     */
-    public static void assertMqttService(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String mqttServiceName) {
-        await().atMost(ONE_MINUTE).untilAsserted(() -> {
-            final var services = client.services().inNamespace(namespace).list().getItems();
-            assertThat(services).isNotEmpty()
-                    .filteredOn(service -> mqttServiceName.equals(service.getMetadata().getName()))
-                    .extracting(Service::getSpec)
-                    .extracting(ServiceSpec::getType)
-                    .contains("ClusterIP");
-        });
+                                .allMatch(containerStatus -> containerStatus.getReady() &&
+                                        containerStatus.getStarted()), 3, TimeUnit.MINUTES);
     }
 
     private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
