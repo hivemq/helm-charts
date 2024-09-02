@@ -13,6 +13,7 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("CustomConfig")
+@Tag("CustomValues")
 class HelmCustomConfigIT extends AbstractHelmChartIT {
 
     @Override
