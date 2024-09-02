@@ -1,5 +1,8 @@
 nodes:
   replicaCount: 2
+  podSecurityContext:
+    enabled: true
+    fsGroup: 0
 additionalVolumes:
   - type: persistentVolumeClaim
     name: hivemq-pvc-data

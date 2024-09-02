@@ -58,11 +58,11 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 !previousPlatformChart.getAppVersion().equals(currentPlatformChart.getAppVersion());
         if (requiresRollingRestart) {
             // appVersion is tied to the HiveMQ version, so if they are different it should trigger a rolling restart
-            hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("ROLLING_RESTART"),
+            hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("ROLLING_RESTART"),
                     3,
                     TimeUnit.MINUTES);
         }
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RUNNING"), 3, TimeUnit.MINUTES);
         final var updatedPodResourceVersion = client.pods()
                 .inNamespace(platformNamespace)
                 .withName(PLATFORM_RELEASE_NAME + "-0")
