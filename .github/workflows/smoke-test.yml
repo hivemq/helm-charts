@@ -80,7 +80,6 @@ jobs:
             caches
             notifications
             jdks
-          gradle-home-cache-cleanup: true
 
       - name: Build HiveMQ Platform Operator and HiveMQ Platform Operator Init images
         working-directory: helm-charts
@@ -202,7 +201,6 @@ jobs:
             caches
             notifications
             jdks
-          gradle-home-cache-cleanup: true
 
       - name: Build HiveMQ Operator (legacy) images
         working-directory: helm-charts

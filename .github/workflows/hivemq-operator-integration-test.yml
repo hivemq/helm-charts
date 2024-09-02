@@ -80,7 +80,6 @@ jobs:
             caches
             notifications
             jdks
-          gradle-home-cache-cleanup: true
 
       - name: Run HiveMQ Operator (legacy) integration tests
         env:

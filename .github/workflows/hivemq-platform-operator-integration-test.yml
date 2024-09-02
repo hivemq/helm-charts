@@ -81,7 +81,6 @@ jobs:
             caches
             notifications
             jdks
-          gradle-home-cache-cleanup: true
 
       - name: Run HiveMQ Platform Operator integration tests
         env:
@@ -177,7 +176,6 @@ jobs:
             caches
             notifications
             jdks
-          gradle-home-cache-cleanup: true
 
       - name: Run HiveMQ Platform Operator integration tests
         env:
