@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.concurrent.TimeUnit;
 
 @Tag("PodSecurityContext")
+@Tag("PodSecurityContextUpgradePlatform")
 @SuppressWarnings("DuplicatedCode")
 class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityContextIT {
 

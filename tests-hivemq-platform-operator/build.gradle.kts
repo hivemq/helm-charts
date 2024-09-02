@@ -4,7 +4,7 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val testPlanOtherExcludeTags = "Containers,CustomConfig,Extensions,Platform,PodSecurityContext,ServiceAccount,Services,Upgrade,Volumes"
+val testPlanOtherExcludeTags = "Containers,ClusterDomainName,CustomConfig,Extensions,Platform,PodSecurityContext,ServiceAccount,Services,Upgrade,Volumes"
 
 java {
     toolchain {
