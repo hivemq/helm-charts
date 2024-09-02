@@ -97,55 +97,71 @@ Usage: {{ include "hivemq-platform.has-additional-volume-mounts" . }}
 {{- end -}}
 
 {{/*
-Returns the service port name inside a range of the service values, truncating the name up to 63 characters.
-Format: <.Values.services.type>-<.Values.services.containerPort>
+Returns the service port name inside a range of the service values, truncating the name up to 63 characters (no truncation
+for legacy services).
+Legacy format: <.Values.services.legacyPortName>
+Platform format: <.Values.services.type>-<.Values.services.containerPort>
 Usage: {{ include "hivemq-platform.service-port-name" . }}
 */}}
 {{- define "hivemq-platform.service-port-name" -}}
-{{- $type := "mqtt" }}
-{{- if eq .type "control-center" }}
+{{- if .legacyPortName }}
+  {{- printf "%s" .legacyPortName | trim }}
+{{- else }}
+  {{- $type := "mqtt" }}
+  {{- if eq .type "control-center" }}
     {{- $type = "cc" }}
-{{- else if eq .type "rest-api" }}
+  {{- else if eq .type "rest-api" }}
     {{- $type = "rest" }}
-{{- else if eq .type "websocket" }}
+  {{- else if eq .type "websocket" }}
     {{- $type = "ws" }}
-{{- else if eq .type "metrics" }}
+  {{- else if eq .type "metrics" }}
     {{- $type = "metrics" }}
-{{- else if .keystoreSecretName }}
+  {{- else if .keystoreSecretName }}
     {{- $type = "mqtts" }}
+  {{- end -}}
+  {{- printf "%s-%s" $type (toString .containerPort) | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
 {{- end -}}
-{{- printf "%s-%s" $type (toString .containerPort) | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
 {{- end -}}
 
 {{/*
-Returns the container port name inside a range of the service values, truncating the name up to 15 characters.
-Format: <.Values.services.type>-<.Values.services.containerPort>
+Returns the container port name inside a range of the service values, truncating the name up to 15 characters (no truncation
+for legacy services).
+Legacy format: <.Values.services.legacyPortName>
+Platform format: <.Values.services.type>-<.Values.services.containerPort>
 Usage: {{ include "hivemq-platform.container-port-name" . }}
 */}}
 {{- define "hivemq-platform.container-port-name" -}}
-{{- $type := "mqtt" }}
-{{- if eq .type "control-center" }}
+{{- if .legacyPortName }}
+  {{- printf "%s" .legacyPortName | trim }}
+{{- else }}
+  {{- $type := "mqtt" }}
+  {{- if eq .type "control-center" }}
     {{- $type = "cc" }}
-{{- else if eq .type "rest-api" }}
+  {{- else if eq .type "rest-api" }}
     {{- $type = "rest" }}
-{{- else if eq .type "websocket" }}
+  {{- else if eq .type "websocket" }}
     {{- $type = "ws" }}
-{{- else if eq .type "metrics" }}
+  {{- else if eq .type "metrics" }}
     {{- $type = "metrics" }}
-{{- else if .keystoreSecretName }}
+  {{- else if .keystoreSecretName }}
     {{- $type = "mqtts" }}
+  {{- end -}}
+  {{- printf "%s-%s" $type (toString .containerPort) | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
 {{- end -}}
-{{- printf "%s-%s" $type (toString .containerPort) | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
 {{- end -}}
 
 {{/*
-Get the service name inside a range of the service values. It truncates the service name to 63 characters.
-Format: hivemq-<.Release.Name>-<.Values.services.type>-<.Values.services.port | .Values.services.containerPort>
-Usage: {{ include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort) }}
+Get the service name inside a range of the service values. It truncates the service name to 63 characters (no truncation for
+legacy services).
+Legacy format: hivemq-<.Release.Name>-<.Values.services.type>-<.Values.services.port | .Values.services.containerPort>
+Platform format: hivemq-<.Release.Name>-<.Values.services.legacyPortName>
+Usage: {{ include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $.Release.Name "type" .type "port" .port "containerPort" .containerPort "legacyPortName" .legacyPortName) }}
 */}}
 {{- define "hivemq-platform.range-service-name" -}}
 {{- if .name }}
   {{- printf "%s" .name }}
+{{- else if .legacyPortName }}
+  {{- printf "hivemq-%s-%s" .releaseName .legacyPortName | trim }}
 {{- else }}
   {{- $type := "mqtt" }}
   {{- $port := (toString .containerPort) }}
@@ -266,30 +282,29 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 Validates all the exposed services.
 - No duplicated service names are defined as part of the `.Values.services` values list.
 - No default ports (7979, 8889, 7000) are defined as part of the `containerPort` defined in the `.Values.services` values list.
-Params:
-- services: The array of services to check.
+- When migration.statefulSet flag is enabled, `.Values.services.legacyPortName` is mandatory.
 Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" $.Release.Name) }}
 */}}
 {{- define "hivemq-platform.validate-services" -}}
-{{- $services := .services }}
-{{- include "hivemq-platform.validate-duplicated-service-names" (dict "services" $services "releaseName" .releaseName) -}}
-{{- include "hivemq-platform.validate-service-container-ports" (dict "services" $services) -}}
-{{- include "hivemq-platform.validate-default-service-ports" (dict "services" $services) -}}
+{{- $services := .Values.services }}
+{{- $releaseName := .Release.Name }}
+{{- include "hivemq-platform.validate-duplicated-service-names" . -}}
+{{- include "hivemq-platform.validate-service-container-ports" . -}}
+{{- include "hivemq-platform.validate-default-service-ports" . -}}
+{{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
 
 {{/*
 Validates there is no duplicated service name defined.
-Params:
-- services: The array of services to check.
-Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" (dict "services" .Values.services "releaseName" $.Release.Name ) }}
+Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
 */}}
 {{- define "hivemq-platform.validate-duplicated-service-names" -}}
-{{- $services := .services }}
-{{- $releaseName := .releaseName }}
+{{- $services := .Values.services }}
+{{- $releaseName := .Release.Name }}
 {{- $serviceNamesDict := dict }}
 {{- $serviceName := "" }}
 {{- range $service := $services }}
-  {{- $serviceName = (include "hivemq-platform.range-service-name" (dict "name" .name "releaseName" $releaseName "type" .type "port" .port "containerPort" .containerPort)) }}
+  {{- $serviceName = (include "hivemq-platform.range-service-name" (dict "name" $service.name "releaseName" $releaseName "type" $service.type "port" $service.port "containerPort" $service.containerPort "legacyPortName" $service.legacyPortName)) }}
   {{- if (hasKey $serviceNamesDict $serviceName) }}
     {{- $matchingService := get $serviceNamesDict $serviceName }}
     {{- if not (eq $matchingService.exposed $service.exposed) }}
@@ -305,12 +320,10 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" (dict "ser
 
 {{/*
 Validates there is no duplicated container port for different service types.
-Params:
-- services: The array of services to check.
-Usage: {{ include "hivemq-platform.validate-service-container-ports" (dict "services" .Values.services ) }}
+Usage: {{ include "hivemq-platform.validate-service-container-ports" . }}
 */}}
 {{- define "hivemq-platform.validate-service-container-ports" -}}
-{{- $services := .services }}
+{{- $services := .Values.services }}
 {{- $servicesDict := dict }}
 {{- range $service := $services }}
   {{- $containerPort := $service.containerPort | toString }}
@@ -327,13 +340,10 @@ Usage: {{ include "hivemq-platform.validate-service-container-ports" (dict "serv
 
 {{/*
 Validates there is no default `containerPort` (7979, 8889, 7000) defined as part of the exposed services ports.
-Params:
-- services: The array of services to check.
-Usage: {{ include "hivemq-platform.validate-default-service-ports" (dict "services" .Values.services) }}
+Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 */}}
 {{- define "hivemq-platform.validate-default-service-ports" -}}
-{{- $services := .services }}
-{{- $metrics := .metrics }}
+{{- $services := .Values.services }}
 {{- $defaultPortsList := list }}
 {{- $defaultPortsList := ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList := ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
@@ -341,6 +351,25 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" (dict "servic
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
     {{- fail (printf "Container port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates legacy services to make sure:
+- No `legacyPortName` value is used when the `migration.statufulSet` value is disabled.
+- No `port` value is used when the `migration.statefulSet` value is enabled.
+Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
+*/}}
+{{- define "hivemq-platform.validate-legacy-services" -}}
+{{- $services := .Values.services }}
+{{- $isStatefulSetMigrationEnabled := .Values.migration.statefulSet }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) ($isStatefulSetMigrationEnabled) (hasKey $service "port") }}
+    {{- fail (printf "Service type `%s` with container port `%d` cannot use `port` value as `migration.statefulSet` value is enabled" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+  {{- if and ($service.exposed) (not $isStatefulSetMigrationEnabled) (hasKey $service "legacyPortName") }}
+    {{- fail (printf "Service type `%s` with container port `%d` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
