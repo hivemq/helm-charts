@@ -3,7 +3,6 @@ package com.hivemq.helmcharts.single;
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
-import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jetbrains.annotations.NotNull;
@@ -12,11 +11,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
-import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -24,7 +19,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +29,7 @@ import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCK
 import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_KEYSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PASSWORD;
+import static com.hivemq.helmcharts.util.ControlCenterUtil.assertLogin;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,10 +47,6 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private static final int MQTT_SERVICE_PORT_1886 = 1886;
     private static final @NotNull String HIVEMQ_CC_SERVICE_NAME = "hivemq-test-hivemq-platform-cc-8080";
     private static final int HIVEMQ_CC_SERVICE_PORT = 8080;
-    private static final @NotNull String LOGIN_BUTTON = ".v-button-hmq-login-button";
-    private static final @NotNull String LOGOUT_BUTTON = ".hmq-logout-button";
-    private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
-    private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
 
     @Container
     @SuppressWarnings("resource")
@@ -104,7 +95,12 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
         assertMqttListener(DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT, sslConfig);
         assertMqttListener(MQTT_SERVICE_NAME_1884, MQTT_SERVICE_PORT_1884, sslConfig);
-        assertControlCenter(HIVEMQ_CC_SERVICE_NAME, HIVEMQ_CC_SERVICE_PORT);
+        assertLogin(client,
+                platformNamespace,
+                WEB_DRIVER_CONTAINER,
+                HIVEMQ_CC_SERVICE_NAME,
+                HIVEMQ_CC_SERVICE_PORT,
+                true);
     }
 
     @Test
@@ -157,29 +153,6 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 serviceName,
                 servicePort,
                 mqttClientModifier -> mqttClientModifier.sslConfig(sslConfig));
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private void assertControlCenter(final @NotNull String serviceName, final int servicePort) throws Exception {
-        try (final var forwarded = K8sUtil.getPortForward(client, platformNamespace, serviceName, servicePort)) {
-            final var options = new ChromeOptions();
-            options.setAcceptInsecureCerts(true);
-
-            final var webDriver = new RemoteWebDriver(WEB_DRIVER_CONTAINER.getSeleniumAddress(), options, false);
-
-            webDriver.get("https://host.docker.internal:" + forwarded.getLocalPort());
-            final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(30));
-
-            wait.until(webWaitDriver -> {
-                webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
-                webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys("admin");
-                webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
-                webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys("hivemq");
-                webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
-                return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
-            });
-            webDriver.quit();
-        }
     }
 
     private void assertSecretMounted(final @NotNull KubernetesClient client, final @NotNull String name) {

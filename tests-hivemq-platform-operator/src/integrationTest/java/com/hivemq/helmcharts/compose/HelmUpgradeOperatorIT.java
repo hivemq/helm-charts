@@ -45,7 +45,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
                 .anyMatch(containerPort -> containerPort.getContainerPort() == 8080));
 
         // upgrade chart and wait to be ready
-        helmChartContainer.upgradeOperatorChart(OPERATOR_RELEASE_NAME,
+        helmChartContainer.upgradePlatformOperatorChart(OPERATOR_RELEASE_NAME,
                 "--set",
                 "http.port=8081",
                 "--namespace",
