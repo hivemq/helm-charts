@@ -109,9 +109,12 @@ jobs:
       matrix:
         test-plan: [
           Containers,
-          CustomConfig,
+          ClusterDomainName,
+          CustomLogback,
+          CustomValues,
           Platform,
-          PodSecurityContext,
+          PodSecurityContextInstallPlatform,
+          PodSecurityContextUpgradePlatform,
           ServiceAccount,
           Services1,
           Services2,
