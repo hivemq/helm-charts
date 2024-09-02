@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityContextIT {
 
     @Override
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return false;
     }
 
@@ -24,7 +24,7 @@ class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityCon
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void updateConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
             throws Exception {
-        installOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
+        installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,

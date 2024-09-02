@@ -20,7 +20,7 @@ class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityCon
     private static final int MAX_UID = 2147483647;
 
     @Override
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return false;
     }
 
@@ -29,7 +29,7 @@ class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityCon
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void installPlatform_withRootAndNonRootUsers_hivemqRunning(final @NotNull ChartValues chartValues)
             throws Exception {
-        installOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
+        installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
@@ -50,7 +50,7 @@ class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityCon
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void installPlatform_withRandomNonRootUsers_hivemqRunning() throws Exception {
         final var operatorUid = ThreadLocalRandom.current().nextInt(MIN_UID, MAX_UID);
-        installOperatorChartAndWaitToBeRunning("-f",
+        installPlatformOperatorChartAndWaitToBeRunning("-f",
                 "/files/operator-non-root-user-values.yaml",
                 "--set",
                 "podSecurityContext.runAsUser=" + operatorUid);

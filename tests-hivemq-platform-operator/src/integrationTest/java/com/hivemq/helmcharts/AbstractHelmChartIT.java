@@ -34,6 +34,7 @@ public abstract class AbstractHelmChartIT {
 
     protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
+    protected static final @NotNull String LEGACY_RELEASE_NAME = "test-hivemq-legacy-platform";
 
     protected static final int DEFAULT_MQTT_SERVICE_PORT = 1883;
     protected static final @NotNull String DEFAULT_MQTT_SERVICE_NAME =
@@ -86,8 +87,8 @@ public abstract class AbstractHelmChartIT {
         if (createPlatformNamespace()) {
             helmChartContainer.createNamespace(platformNamespace);
         }
-        if (installOperatorChart()) {
-            helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
+        if (installPlatformOperatorChart()) {
+            helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
         }
     }
 
@@ -100,7 +101,7 @@ public abstract class AbstractHelmChartIT {
             }
         } finally {
             try {
-                if (uninstallOperatorChart()) {
+                if (uninstallPlatformOperatorChart()) {
                     helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
                 }
             } finally {
@@ -109,15 +110,28 @@ public abstract class AbstractHelmChartIT {
         }
     }
 
-    protected void installOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
-        installOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
+    @SuppressWarnings("SameParameterValue")
+    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
+        installLegacyOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        helmChartContainer.installOperatorChart(OPERATOR_RELEASE_NAME,
+    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
+        helmChartContainer.installLegacyOperatorChart(LEGACY_RELEASE_NAME,
                 Stream.concat(Arrays.stream(commands), Stream.of("--namespace", operatorNamespace))
                         .toArray(String[]::new));
-        K8sUtil.waitForHiveMQOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
+        K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
+        K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
+    }
+
+    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
+        installPlatformOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
+    }
+
+    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
+        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
+                Stream.concat(Arrays.stream(commands), Stream.of("--namespace", operatorNamespace))
+                        .toArray(String[]::new));
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
     }
 
     protected void installPlatformChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
@@ -151,7 +165,7 @@ public abstract class AbstractHelmChartIT {
      * Override with {@code return false;} to prevent the installation of the Platform Operator chart in the
      * {@code @BeforeEach} method.
      */
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return true;
     }
 
@@ -159,7 +173,7 @@ public abstract class AbstractHelmChartIT {
      * Override with {@code return false;} to prevent the uninstallation of the Platform Operator chart in the
      * {@code @AfterEach} method.
      */
-    protected boolean uninstallOperatorChart() {
+    protected boolean uninstallPlatformOperatorChart() {
         return true;
     }
 

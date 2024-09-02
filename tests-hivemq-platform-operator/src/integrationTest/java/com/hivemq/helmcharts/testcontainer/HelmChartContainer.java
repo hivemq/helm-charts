@@ -57,7 +57,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
-    private static final @NotNull String OPERATOR_CHART = "hivemq-platform-operator";
+    private static final @NotNull String LEGACY_OPERATOR_CHART = "hivemq-operator";
+    private static final @NotNull String PLATFORM_OPERATOR_CHART = "hivemq-platform-operator";
     private static final @NotNull String PLATFORM_CHART = "hivemq-platform";
     private static final @NotNull String OPERATOR_IMAGE_NAME = "hivemq-platform-operator-test";
     private static final @NotNull String OPERATOR_INIT_IMAGE_NAME = "hivemq-platform-operator-init-test";
@@ -67,8 +68,9 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
-    private static final @NotNull String HIVEMQ_OPERATOR_CONTAINER_NAME = "hivemq-platform-operator";
-    private static final @NotNull String HIVEMQ_PLATFORM_CONTAINER_NAME = "hivemq";
+    private static final @NotNull String PLATFORM_OPERATOR_CONTAINER_NAME = "hivemq-platform-operator";
+    private static final @NotNull String LEGACY_OPERATOR_CONTAINER_NAME = "operator";
+    private static final @NotNull String PLATFORM_CONTAINER_NAME = "hivemq";
     private static final @NotNull String CONSUL_TEMPLATE_CONTAINER_NAME = "consul-template";
     private static final @NotNull String POD_CPU_LIMIT = "512m";
 
@@ -96,8 +98,10 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     public HelmChartContainer(final @NotNull List<String> additionalCommands, final @NotNull K3s k3s) {
         super(getAdHocImageName(k3s));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + OPERATOR_CHART),
-                "/charts/" + OPERATOR_CHART);
+        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
+                "/charts/" + LEGACY_OPERATOR_CHART);
+        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_OPERATOR_CHART),
+                "/charts/" + PLATFORM_OPERATOR_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_CHART),
                 "/charts/" + PLATFORM_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../" + MANIFEST_FILES), "/" + MANIFEST_FILES);
@@ -267,21 +271,32 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         return client;
     }
 
-    public void installOperatorChart(
+    public void installLegacyOperatorChart(
+            final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
+        executeHelmCommand("install",
+                releaseName,
+                resolveChartLocation(LEGACY_OPERATOR_CHART, true),
+                true,
+                Stream.of(additionalCommands),
+                true);
+    }
+
+    public void installPlatformOperatorChart(
             final @NotNull String releaseName,
             final boolean withLocalCharts,
             final @NotNull String... additionalCommands) throws Exception {
         executeHelmCommand("install",
                 releaseName,
-                resolveChartLocation(OPERATOR_CHART, withLocalCharts),
+                resolveChartLocation(PLATFORM_OPERATOR_CHART, withLocalCharts),
                 withLocalCharts,
                 Stream.concat(getOperatorFixedValues(withLocalCharts), Stream.of(additionalCommands)),
                 true);
     }
 
-    public void installOperatorChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
-            throws Exception {
-        installOperatorChart(releaseName, true, additionalCommands);
+    public void installPlatformOperatorChart(
+            final @NotNull String releaseName,
+            final @NotNull String... additionalCommands) throws Exception {
+        installPlatformOperatorChart(releaseName, true, additionalCommands);
     }
 
     public void installPlatformChart(
@@ -302,15 +317,25 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public void uninstallRelease(
-            final @NotNull String releaseName, final @NotNull String namespace, final boolean deleteNamespace)
-            throws Exception {
+            final @NotNull String releaseName,
+            final @NotNull String namespace,
+            final @NotNull String... additionalCommands) throws Exception {
+        uninstallRelease(releaseName, namespace, false, additionalCommands);
+    }
+
+    public void uninstallRelease(
+            final @NotNull String releaseName,
+            final @NotNull String namespace,
+            final boolean deleteNamespace,
+            final @NotNull String... additionalCommands) throws Exception {
         LOG.info("Uninstalling release '{}' in namespace '{}'...", releaseName, namespace);
         try {
             executeHelmCommand("uninstall",
                     releaseName,
                     null,
                     true,
-                    Stream.of("--cascade", "foreground", "--namespace", namespace),
+                    Stream.concat(Stream.of("--cascade", "foreground", "--namespace", namespace),
+                            Stream.of(additionalCommands)),
                     true);
         } finally {
             if (deleteNamespace) {
@@ -320,21 +345,22 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         }
     }
 
-    public void upgradeOperatorChart(
+    public void upgradePlatformOperatorChart(
             final @NotNull String releaseName,
             final boolean withLocalCharts,
             final @NotNull String... additionalCommands) throws Exception {
         executeHelmCommand("upgrade",
                 releaseName,
-                resolveChartLocation(OPERATOR_CHART, withLocalCharts),
+                resolveChartLocation(PLATFORM_OPERATOR_CHART, withLocalCharts),
                 withLocalCharts,
                 Stream.concat(getOperatorFixedValues(withLocalCharts), Stream.of(additionalCommands)),
                 true);
     }
 
-    public void upgradeOperatorChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
-            throws Exception {
-        upgradeOperatorChart(releaseName, true, additionalCommands);
+    public void upgradePlatformOperatorChart(
+            final @NotNull String releaseName,
+            final @NotNull String... additionalCommands) throws Exception {
+        upgradePlatformOperatorChart(releaseName, true, additionalCommands);
     }
 
     public void upgradePlatformChart(
@@ -641,10 +667,12 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
         private @Nullable String getContainerNameFromEventNote(final @NotNull String note) {
             final var container = "container ";
-            if (note.endsWith(container + HIVEMQ_PLATFORM_CONTAINER_NAME)) {
-                return HIVEMQ_PLATFORM_CONTAINER_NAME;
-            } else if (note.endsWith(container + HIVEMQ_OPERATOR_CONTAINER_NAME)) {
-                return HIVEMQ_OPERATOR_CONTAINER_NAME;
+            if (note.endsWith(container + PLATFORM_CONTAINER_NAME)) {
+                return PLATFORM_CONTAINER_NAME;
+            } else if (note.endsWith(container + PLATFORM_OPERATOR_CONTAINER_NAME)) {
+                return PLATFORM_OPERATOR_CONTAINER_NAME;
+            } else if (note.endsWith(container + LEGACY_OPERATOR_CONTAINER_NAME)) {
+                return LEGACY_OPERATOR_CONTAINER_NAME;
             } else if (note.endsWith(container + CONSUL_TEMPLATE_CONTAINER_NAME)) {
                 return CONSUL_TEMPLATE_CONTAINER_NAME;
             }
