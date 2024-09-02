@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Tag("PodSecurityContext")
+@Tag("PodSecurityContextInstallPlatform")
 @SuppressWarnings("DuplicatedCode")
 class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityContextIT {
 
