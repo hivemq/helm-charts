@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("CustomConfig")
+@Tag("CustomLogback")
 class HelmCustomLogbackIT extends AbstractHelmChartIT {
 
     @Test
