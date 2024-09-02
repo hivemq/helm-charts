@@ -1181,3 +1181,37 @@ tests:
             ad.datadoghq.com/hivemq.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
             ad.datadoghq.com/hivemq.instances: '[{"host": "%%host%%", "port": "9010"}]'
             ad.datadoghq.com/hivemq.logs: '[{"source": "hivemq", "service": "hivemq-platform-mqtt-1883"}]'
+
+  - it: with default settings, statefulsetMigration spec disabled
+    asserts:
+      - equal:
+          path: spec.statefulSetMigration
+          value: false
+
+  - it: with statefulSet migration enabled, then statefulsetMigration spec enabled
+    set:
+      migration.statefulSet: true
+      services: []
+    asserts:
+      - equal:
+          path: spec.statefulSetMigration
+          value: true
+
+  - it: with statefulSet migration enabled, but no mandatory values set for service, then fails
+    set:
+      migration.statefulSet: true
+      services:
+        - type: mqtt
+          exposed: true
+          port: 1883
+          legacyPortName: mqtt
+    asserts:
+      - failedTemplate: {}
+
+  - it: with statefulSet migration disabled, then statefulsetMigration spec disabled
+    set:
+      migration.statefulSet: false
+    asserts:
+      - equal:
+          path: spec.statefulSetMigration
+          value: false
