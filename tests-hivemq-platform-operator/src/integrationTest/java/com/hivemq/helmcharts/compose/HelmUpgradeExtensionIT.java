@@ -64,10 +64,10 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
                 "--namespace",
                 platformNamespace);
 
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RESTART_EXTENSIONS"),
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RESTART_EXTENSIONS"),
                 1,
                 TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RUNNING"), 3, TimeUnit.MINUTES);
         await().until(extensionStoppedBrokerFuture::isDone);
         await().until(extensionStoppedInitAppFuture::isDone);
         await().until(extensionUpdateDoneInitAppFuture::isDone);

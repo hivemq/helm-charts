@@ -19,7 +19,7 @@ import static org.awaitility.Durations.ONE_MINUTE;
 class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityContextIT {
 
     @Override
-    protected boolean installOperatorChart() {
+    protected boolean installPlatformOperatorChart() {
         return false;
     }
 
@@ -38,7 +38,7 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void updateExtensionConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
             throws Exception {
-        installOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
+        installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
@@ -66,10 +66,10 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
                 ".*HiveMQ Enterprise Distributed Tracing Extension: Successfully updated configuration from '/opt/hivemq/extensions/hivemq-distributed-tracing-extension/conf/config.xml'.");
 
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RESTART_EXTENSIONS"),
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getHiveMQPlatformStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RUNNING"), 3, TimeUnit.MINUTES);
         await().atMost(ONE_MINUTE).until(configurationUpdatedFuture::isDone);
     }
 }
