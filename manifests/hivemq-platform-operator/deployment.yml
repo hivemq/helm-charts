@@ -29,7 +29,8 @@ spec:
         app.kubernetes.io/instance: "my-operator"
     spec:
       containers:
-        - env:
+        - name: hivemq-platform-operator
+          env:
             - name: JAVA_OPTS
               value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
             - name: KUBERNETES_NAMESPACE
@@ -38,16 +39,20 @@ spec:
                   fieldPath: metadata.namespace
             - name: hivemq.platform.operator.release.name
               value: "my-operator"
+            - name: hivemq.platform.operator.crd.apply
+              value: "true"
+            - name: hivemq.platform.operator.crd.wait-until-ready
+              value: "true"
+            - name: hivemq.platform.operator.crd.wait-until-ready.timeout
+              value: "PT10S"
             - name: hivemq.platform.operator.init.image
               value: "docker.io/hivemq/hivemq-platform-operator-init:1.5.2"
             - name: hivemq.platform.operator.image.pull.secret
               value: ""
             - name: hivemq.platform.operator.log.level
               value: "INFO"
-            # additional option to show the configuration details in the log
             - name: hivemq.platform.operator.log.configuration
               value: "false"
-            # additional options for service accounts and permission functionality
             - name: hivemq.platform.operator.serviceaccount.create
               value: "true"
             - name: hivemq.platform.operator.serviceaccount.validate
@@ -58,10 +63,8 @@ spec:
               value: "true"
             - name: hivemq.platform.operator.serviceaccount.permissions.validate
               value: "true"
-            # additional options for StatefulSet reconciliation
             - name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
               value: "false"
-            # additional options for fine-grained logging
             - name: hivemq.platform.operator.quarkus.log.level
               value: "INFO"
             - name: hivemq.platform.operator.sdk.log.level
@@ -84,7 +87,6 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 10
-          name: hivemq-platform-operator
           ports:
             - name: http-my-operato
               containerPort: 8080
