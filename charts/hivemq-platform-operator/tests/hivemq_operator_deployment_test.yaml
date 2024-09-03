@@ -563,3 +563,65 @@ tests:
           value: 1M
       - notExists:
           path: spec.template.spec.containers[0].resources.limits
+
+  - it: with default CRD values
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.crd.apply
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.crd.wait-until-ready
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.crd.wait-until-ready.timeout
+            value: "PT10S"
+
+  - it: with custom CRD values
+    set:
+      crd:
+        apply: false
+        waitReady: false
+        waitTimeout: PT2M
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.crd.apply
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.crd.wait-until-ready
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.crd.wait-until-ready.timeout
+            value: "PT2M"
+
+  - it: with invalid duration format for CRD wait timeout, then schema validation fails
+    set:
+      crd:
+        waitTimeout: P1S
+    asserts:
+      - failedTemplate: {}
