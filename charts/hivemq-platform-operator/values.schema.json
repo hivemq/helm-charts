@@ -217,6 +217,21 @@
           }
         }
       }
+    },
+    "crd" : {
+      "type" : "object",
+      "properties" : {
+        "apply" : {
+          "type" : "boolean"
+        },
+        "waitReady" : {
+          "type" : "boolean"
+        },
+        "waitTimeout" : {
+          "type" : "string",
+          "pattern": "^P(?:(?:\\d+Y)?(?:\\d+M)?(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?)$"
+        }
+      }
     }
   }
 }

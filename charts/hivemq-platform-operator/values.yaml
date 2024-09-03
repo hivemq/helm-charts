@@ -31,7 +31,7 @@ https:
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
 
 # Selector name that is used to watch HiveMQ Platforms with a matching selector.
-selector: nil
+selector: ""
 
 # Configures whether Kubernetes RBAC permissions for the Operator should be created.
 rbac:
@@ -89,11 +89,11 @@ podScheduling:
 # TLS configuration for the Operator to access the Kubernetes API.
 tls:
   # Name of the Secret that contains keystore and truststore.
-  secretName: nil
+  secretName: ""
   # The keystore password. Can also be set as "keystore.password" in the Secret.
-  keystorePassword: nil
+  keystorePassword: ""
   # The truststore password. Can also be set as "truststore.password" in the Secret.
-  truststorePassword: nil
+  truststorePassword: ""
 
 # Holds pod-level security attributes and common container settings.
 # When enabled, this defaults to non-root user with user ID (UID) "185" and group ID (GID) "0".
@@ -127,3 +127,13 @@ env: []
   #        name: myconfigmap
   #        key: myconfigmapkey
   #        optional: true
+
+# CustomResourceDefinition configuration options
+crd:
+  # Enables the CustomResourceDefinition creation in the Kubernetes cluster by the Operator.
+  apply: true
+  # Waits for the CustomResourceDefinition to become ready once installed.
+  waitReady: true
+  # Waiting timeout for the CustomResourceDefinition to become ready once installed.
+  # Format is based on the ISO-8601 Duration format.
+  waitTimeout: PT10S

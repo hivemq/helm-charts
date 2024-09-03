@@ -51,10 +51,10 @@ spec:
       containers:
         - env:
             - name: JAVA_OPTS
-              value: {{.Values.javaOpts | quote }}
-            {{- if and (ne .Values.selector "nil") (.Values.selector) }}
+              value: {{ .Values.javaOpts | quote }}
+            {{- with .Values.selector }}
             - name: quarkus.operator-sdk.controllers.hivemq-controller.selector
-              value: operator={{ .Values.selector }}
+              value: operator={{ . | trim }}
             {{- end }}
             - name: KUBERNETES_NAMESPACE
               valueFrom:
@@ -62,16 +62,20 @@ spec:
                   fieldPath: metadata.namespace
             - name: hivemq.platform.operator.release.name
               value: "{{ .Release.Name }}"
+            - name: hivemq.platform.operator.crd.apply
+              value: "{{ .Values.crd.apply }}"
+            - name: hivemq.platform.operator.crd.wait-until-ready
+              value: "{{ .Values.crd.waitReady }}"
+            - name: hivemq.platform.operator.crd.wait-until-ready.timeout
+              value: "{{ .Values.crd.waitTimeout }}"
             - name: hivemq.platform.operator.init.image
               value: "{{ .Values.image.repository}}/{{ .Values.image.initImageName}}:{{.Values.image.tag}}"
             - name: hivemq.platform.operator.image.pull.secret
               value: "{{ .Values.image.pullSecretName }}"
             - name: hivemq.platform.operator.log.level
               value: "{{ .Values.logLevel }}"
-            # additional option to show the configuration details in the log
             - name: hivemq.platform.operator.log.configuration
               value: "{{ .Values.logConfiguration | default "false"}}"
-            # additional options for service accounts and permission functionality
             - name: hivemq.platform.operator.serviceaccount.create
               value: "{{ .Values.hivemqPlatformServiceAccount.create }}"
             - name: hivemq.platform.operator.serviceaccount.validate
@@ -82,10 +86,8 @@ spec:
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.create }}"
             - name: hivemq.platform.operator.serviceaccount.permissions.validate
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.validate }}"
-            # additional options for StatefulSet reconciliation
             - name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
               value: "{{ .Values.hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange }}"
-            # additional options for fine-grained logging
             - name: hivemq.platform.operator.quarkus.log.level
               value: "{{ .Values.quarkusLogLevel | default "INFO" }}"
             - name: hivemq.platform.operator.sdk.log.level
@@ -96,7 +98,7 @@ spec:
               value: "{{ .Values.http.port }}"
             - name: quarkus.http.ssl-port
               value: "{{ .Values.https.port }}"
-            {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
+            {{- if .Values.tls.secretName }}
             - name: quarkus.http.ssl.certificate.key-store-file-type
               value: "JKS"
             - name: quarkus.http.ssl.certificate.key-store-file
@@ -104,7 +106,7 @@ spec:
             - name: quarkus.http.ssl.certificate.trust-store-file
               value: "/mnt/tls/truststore.jks"
             - name: quarkus.http.ssl.certificate.key-store-password
-              {{- if and (ne .Values.tls.keystorePassword "nil") (.Values.tls.keystorePassword) }}
+              {{- if .Values.tls.keystorePassword }}
               value: "{{ .Values.tls.keystorePassword }}"
               {{- else }}
               valueFrom:
@@ -113,7 +115,7 @@ spec:
                   key: keystore.password
               {{- end }}
             - name: quarkus.http.ssl.certificate.trust-store-password
-              {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
+              {{- if .Values.tls.truststorePassword }}
               value: "{{ .Values.tls.truststorePassword }}"
               {{- else }}
               valueFrom:
@@ -170,25 +172,25 @@ spec:
               {{- end }}
             {{- end }}
             requests:
-              cpu: {{.Values.resources.cpu | trim }}
-              memory: {{.Values.resources.memory | trim }}
+              cpu: {{ .Values.resources.cpu | trim }}
+              memory: {{ .Values.resources.memory | trim }}
               {{- with .Values.resources.ephemeralStorage }}
               ephemeral-storage: {{ . | trim }}
               {{- end }}
-          {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
+          {{- if .Values.tls.secretName }}
           volumeMounts:
             - name: tls
               mountPath: /mnt/tls
               readOnly: true
-          {{- end}}
+          {{- end }}
       {{- if .Values.image.pullSecretName }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecretName }}
       {{- end }}
       serviceAccountName: {{ include "hivemq-platform-operator.serviceAccountName" . }}
-      {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
+      {{- if .Values.tls.secretName }}
       volumes:
         - name: tls
           secret:
             secretName: "{{ .Values.tls.secretName }}"
-      {{- end}}
+      {{- end }}
