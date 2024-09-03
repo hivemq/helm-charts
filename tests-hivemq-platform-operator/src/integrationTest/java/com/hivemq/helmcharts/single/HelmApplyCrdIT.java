@@ -65,13 +65,9 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
         // installOperatorChart() blocks until the Operator is ready, so we have to call it async
         final var additionalCommands = List.of("--skip-crds",
                 "--set",
-                "env[0].name=hivemq.platform.operator.crd.apply",
+                "crd.apply=false",
                 "--set",
-                "env[0].value='false'",
-                "--set",
-                "env[1].name=hivemq.platform.operator.crd.wait-until-ready.timeout",
-                "--set",
-                "env[1].value=1s").toArray(new String[0]);
+                "crd.waitTimeout=PT1S").toArray(new String[0]);
         final var uncaughtExceptionRef = new AtomicReference<Exception>();
         final var operatorInstallThread = new Thread(() -> {
             try {
