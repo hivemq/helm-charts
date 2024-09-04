@@ -30,7 +30,7 @@ public class DockerImageNames {
     }
 
     public enum K3s {
-        // https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.30
+        // https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.31
         V1_23("v1.23.17-k3s1"),
         V1_24("v1.24.17-k3s1"),
         V1_25("v1.25.16-k3s4"),
@@ -39,9 +39,10 @@ public class DockerImageNames {
         V1_28("v1.28.13-k3s1"),
         V1_29("v1.29.8-k3s1"),
         V1_30("v1.30.4-k3s1"),
+        V1_31("v1.31.0-k3s1"),
 
         MINIMUM(V1_23.version),
-        LATEST(V1_30.version);
+        LATEST(V1_31.version);
 
         private final @NotNull String version;
 
