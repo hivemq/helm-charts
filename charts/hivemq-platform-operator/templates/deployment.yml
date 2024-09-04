@@ -51,10 +51,10 @@ spec:
       containers:
         - env:
             - name: JAVA_OPTS
-              value: {{ .Values.javaOpts | quote }}
-            {{- with .Values.selector }}
+              value: {{.Values.javaOpts | quote }}
+            {{- if and (ne .Values.selector "nil") (.Values.selector) }}
             - name: quarkus.operator-sdk.controllers.hivemq-controller.selector
-              value: operator={{ . | trim }}
+              value: operator={{ .Values.selector }}
             {{- end }}
             - name: KUBERNETES_NAMESPACE
               valueFrom:
@@ -98,7 +98,7 @@ spec:
               value: "{{ .Values.http.port }}"
             - name: quarkus.http.ssl-port
               value: "{{ .Values.https.port }}"
-            {{- if .Values.tls.secretName }}
+            {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
             - name: quarkus.http.ssl.certificate.key-store-file-type
               value: "JKS"
             - name: quarkus.http.ssl.certificate.key-store-file
@@ -106,7 +106,7 @@ spec:
             - name: quarkus.http.ssl.certificate.trust-store-file
               value: "/mnt/tls/truststore.jks"
             - name: quarkus.http.ssl.certificate.key-store-password
-              {{- if .Values.tls.keystorePassword }}
+              {{- if and (ne .Values.tls.keystorePassword "nil") (.Values.tls.keystorePassword) }}
               value: "{{ .Values.tls.keystorePassword }}"
               {{- else }}
               valueFrom:
@@ -115,7 +115,7 @@ spec:
                   key: keystore.password
               {{- end }}
             - name: quarkus.http.ssl.certificate.trust-store-password
-              {{- if .Values.tls.truststorePassword }}
+              {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
               value: "{{ .Values.tls.truststorePassword }}"
               {{- else }}
               valueFrom:
@@ -177,7 +177,7 @@ spec:
               {{- with .Values.resources.ephemeralStorage }}
               ephemeral-storage: {{ . | trim }}
               {{- end }}
-          {{- if .Values.tls.secretName }}
+          {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
           volumeMounts:
             - name: tls
               mountPath: /mnt/tls
@@ -188,7 +188,7 @@ spec:
         - name: {{ .Values.image.pullSecretName }}
       {{- end }}
       serviceAccountName: {{ include "hivemq-platform-operator.serviceAccountName" . }}
-      {{- if .Values.tls.secretName }}
+      {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
       volumes:
         - name: tls
           secret:
