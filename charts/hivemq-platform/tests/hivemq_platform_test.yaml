@@ -894,16 +894,14 @@ tests:
           errorMessage: |-
             Volume `foobar-mount-volume` is defined more than once but with different types
 
-  - it: with invalid additional volume `type`, then fails
+  - it: with invalid additional volume `type`, then schema validation fails
     set:
       additionalVolumes:
         - type: fakeAdditionalVolume
           name: fake-volume-name
           path: /fake-volume-path
     asserts:
-      - failedTemplate:
-          errorMessage: |-
-            Invalid type or not supported type for additional volume (only "configMap", "secret", "emptyDir" or "persistentVolumeClaim" are allowed)
+      - failedTemplate: {}
 
   - it: with missing mandatory additional volume `type` for `hivemq` container, then fails
     set:
@@ -956,7 +954,7 @@ tests:
   - it: with missing both additional volume `name` and `mountName`, then fails
     set:
       additionalVolumes:
-        - type: fakeAdditionalVolume
+        - type: emptyDir
           path: /fake-volume-path
     asserts:
       - failedTemplate:
