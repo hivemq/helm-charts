@@ -36,6 +36,7 @@ jobs:
         uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          flags: --file './tests/**/*_test.yaml'
           unittest-version: 0.6.1 # TODO: Remove once the latest Helm unittest plugin is fixed, see https://github.com/helm-unittest/helm-unittest/issues/431
 
       - name: Check manifests are up-to-date
