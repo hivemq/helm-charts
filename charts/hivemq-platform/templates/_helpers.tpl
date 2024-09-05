@@ -51,15 +51,17 @@ app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{/*
-Has license
+Checks whether a license is in use by the Platform.
+Returns:
+- `true` if it's reusing an existing license created in a separate Secret or if it's creating a new one. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-license" . }}
 */}}
 {{- define "hivemq-platform.has-license" -}}
-{{- $licenseExists := false }}
-{{- if .Values.license }}
-    {{- if or .Values.license.name (or .Values.license.overrideLicense .Values.license.data) }}
-        {{- printf "found" }}
-    {{- end }}
+{{- $licenseExists := "" -}}
+{{- if or (and (not .Values.license.create) .Values.license.name) .Values.license.create -}}
+    {{- $licenseExists = true -}}
 {{- end -}}
+{{- $licenseExists -}}
 {{- end -}}
 
 {{/*
@@ -442,9 +444,6 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{- if and (not (hasKey $additionalVolume "name")) (not (hasKey $additionalVolume "mountName")) }}
         {{- fail (printf "At least one of `name` or `mountName` values must be defined") }}
     {{- end -}}
-    {{- if not (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "emptyDir") (eq $additionalVolume.type "persistentVolumeClaim")) }}
-        {{- fail (printf "Invalid type or not supported type for additional volume (only \"configMap\", \"secret\", \"emptyDir\" or \"persistentVolumeClaim\" are allowed)") }}
-    {{- end -}}
     {{- if and (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "persistentVolumeClaim")) (not (hasKey $additionalVolume "name")) }}
         {{- fail (printf "`name` value is required for types \"configMap\", \"secret\" and \"persistentVolumeClaim\"") }}
     {{- end -}}
@@ -472,6 +471,80 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{- end }}
     {{- end -}}
 
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the broker license, additional broker licenses, the enterprise extension licenses and the Data Hub license so:
+ - When the `license.create` value is enabled, at least one license content is defined.
+ - Only one of `data` or `overrideLicense` are set, and not both.
+ - No duplicated "license.lic" Secret entries is found for additional broker licenses.
+Usage: {{ include "hivemq-platform.validate-licenses" . }}
+*/}}
+{{- define "hivemq-platform.validate-licenses" -}}
+{{- $licenseContentExists := "" -}}
+{{- if .Values.license.create -}}
+    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.additionalLicenses "licenseLabel" "Additional HiveMQ Broker") -}}
+    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.extensions "licenseLabel" "HiveMQ Enterprise Extension") -}}
+    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.dataHub "licenseLabel" "HiveMQ Data Hub") -}}
+    {{- if and (not .Values.license.overrideLicense) (not .Values.license.data) (not .Values.license.additionalLicenses) (not .Values.license.extensions) (not .Values.license.dataHub) -}}
+        {{- fail (printf "HiveMQ Platform license content cannot be empty") -}}
+    {{- end -}}
+    {{- if and .Values.license.data .Values.license.overrideLicense -}}
+        {{- fail (printf "Both `data` and `overrideLicense` values are set for the HiveMQ Broker license content. Please, use only one of them") -}}
+    {{- end -}}
+    {{- include "hivemq-platform.validate-duplicated-additional-broker-license" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the licenses content within a range function:
+ - At least either `data` or `overrideLicense` is not empty.
+ - Only one of `data` or `overrideLicense` are set, and not both.
+Usage: {{ include "hivemq-platform.validate-license-content" (dict "licenses" .licenses "licenseLabel" "HiveMQ Enterprise Extension") }}
+*/}}
+{{- define "hivemq-platform.validate-license-content" -}}
+{{- $label := .licenseLabel -}}
+{{- range $licenseName, $license := .licenses -}}
+    {{- if and (not (hasKey $license "data")) (not (hasKey $license "overrideLicense")) -}}
+        {{- fail (printf "Invalid values for setting the %s '%s' license content. Only `data` or `overrideLicense` values are allowed" $label $licenseName) }}
+    {{- else if and (not $license.data) (not $license.overrideLicense) -}}
+        {{- fail (printf "%s '%s' license content cannot be empty. Please, use either `data` or `overrideLicense` values" $label $licenseName) }}
+    {{- else if and $license.data $license.overrideLicense -}}
+        {{- fail (printf "Both `data` and `overrideLicense` values are set for the %s '%s' license content. Please, use only one of them" $label $licenseName) }}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates there is no "license.lic" defined in the additional broker license values, so it doesn't clash with the default broker name.
+Usage: {{ include "hivemq-platform.validate-duplicated-additional-broker-license" . }}
+*/}}
+{{- define "hivemq-platform.validate-duplicated-additional-broker-license" -}}
+{{- if or .Values.license.data .Values.license.overrideLicense -}}
+    {{- range $licenseName, $license := .Values.license.additionalLicenses -}}
+      {{- if eq $licenseName "license" -}}
+        {{- fail (printf "Additional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name") -}}
+      {{- end -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generates the Secret entry for each of the licenses defined in the license value list passed as argument.
+Usage: {{ include "hivemq-platform.generate-licenses-content" (dict "licenses" .licenses "licenseExtension" ".lic") }}
+*/}}
+{{- define "hivemq-platform.generate-licenses-content" -}}
+{{- $extension := .licenseExtension -}}
+{{- range $licenseName, $license := .licenses -}}
+    {{- if $license.data -}}
+        {{- printf "%s%s: %s" $licenseName $extension $license.data | nindent 2 -}}
+    {{- else if $license.overrideLicense -}}
+        {{- printf "%s%s: |-" $licenseName $extension | nindent 2 -}}
+        {{ range ($license.overrideLicense | b64enc) | toStrings -}}
+            {{ . | nindent 4 -}}
+        {{ end -}}
+    {{- end -}}
 {{- end -}}
 {{- end -}}
 

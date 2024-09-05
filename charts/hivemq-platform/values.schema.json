@@ -36,18 +36,16 @@
         }
       }
     },
-    "additionalInitContainers": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": true
+    "additionalInitContainers" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object"
       }
     },
-    "additionalContainers": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": true
+    "additionalContainers" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object"
       }
     },
     "controlCenter" : {
@@ -71,45 +69,52 @@
     },
     "additionalVolumes" : {
       "type" : "array",
-      "properties" : {
-        "name" : {
-          "type" : "string"
-        },
-        "mountName" : {
-          "type" : "string"
-        },
-        "containerName" : {
-          "type" : "string"
-        },
-        "path" : {
-          "type" : "string"
-        },
-        "subPath": {
-          "type" : "string"
-        },
-        "type" : {
-          "type" : "string",
-          "enum" : [
-            "configMap",
-            "secret",
-            "emptyDir",
-            "persistentVolumeClaim"
-          ]
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "mountName" : {
+            "type" : "string"
+          },
+          "containerName" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          },
+          "subPath" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [
+              "configMap",
+              "secret",
+              "emptyDir",
+              "persistentVolumeClaim"
+            ]
+          }
         }
       }
     },
     "volumeClaimTemplates" : {
-      "type": "array",
-      "items": {
-        "type": "object",
+      "type" : "array",
+      "items" : {
+        "type" : "object",
         "properties" : {
           "kind" : {
             "type" : "string",
-            "enum": ["PersistentVolumeClaim"]
+            "enum" : [
+              "PersistentVolumeClaim"
+            ]
           },
           "apiVersion" : {
             "type" : "string",
-            "enum": ["v1"]
+            "enum" : [
+              "v1"
+            ]
           },
           "metadata" : {
             "type" : "object"
@@ -118,11 +123,16 @@
             "type" : "object"
           }
         },
-        "required": ["kind", "apiVersion", "metadata", "spec"]
+        "required" : [
+          "kind",
+          "apiVersion",
+          "metadata",
+          "spec"
+        ]
       }
     },
     "metrics" : {
-      "type": "object",
+      "type" : "object",
       "properties" : {
         "enabled" : {
           "type" : "boolean"
@@ -130,7 +140,7 @@
         "port" : {
           "type" : "integer",
           "minimum" : 0,
-          "maximum": 65535
+          "maximum" : 65535
         },
         "path" : {
           "type" : "string"
@@ -152,18 +162,16 @@
               "websocket"
             ]
           },
-          "annotations": {
-            "type": "object",
-            "additionalProperties": true
+          "annotations" : {
+            "type" : "object"
           },
-          "labels": {
-            "type": "object",
-            "additionalProperties": true
+          "labels" : {
+            "type" : "object"
           },
-          "legacyPortName": {
+          "legacyPortName" : {
             "type": "string"
           },
-          "serviceType": {
+          "serviceType" : {
             "type" : "string",
             "enum" : [
               "ClusterIP",
@@ -176,17 +184,17 @@
           },
           "name" : {
             "type" : "string",
-            "maxLength": 63
+            "maxLength" : 63
           },
           "port" : {
             "type" : "integer",
             "minimum" : 0,
-            "maximum": 65535
+            "maximum" : 65535
           },
           "containerPort" : {
             "type" : "integer",
             "minimum" : 0,
-            "maximum": 65535
+            "maximum" : 65535
           },
           "hivemqProxyProtocol" : {
             "type": "boolean"
@@ -224,7 +232,7 @@
           "truststorePasswordSecretName" : {
             "type" : "string"
           },
-          "tlsClientAuthenticationMode": {
+          "tlsClientAuthenticationMode" : {
             "type" : "string",
             "enum" : [
               "NONE",
@@ -302,16 +310,25 @@
     "license" : {
       "type" : "object",
       "properties" : {
+        "additionalLicenses" : {
+          "type" : "object"
+        },
         "create" : {
           "type" : "boolean"
         },
         "data" : {
           "type" : "string"
         },
-        "overrideLicense" : {
-          "type" : "string"
+        "dataHub" : {
+          "type" : "object"
+        },
+        "extensions" : {
+          "type" : "object"
         },
         "name" : {
+          "type" : "string"
+        },
+        "overrideLicense" : {
           "type" : "string"
         }
       }
@@ -350,18 +367,15 @@
               "type" : "string"
             },
             "overrideLimits" : {
-              "type": "object",
-              "additionalProperties": true
+              "type" : "object"
             }
           }
         },
         "annotations" : {
-          "type" : "object",
-          "additionalProperties": true
+          "type" : "object"
         },
-        "labels": {
-          "type": "object",
-          "additionalProperties": true
+        "labels" : {
+          "type" : "object"
         },
         "podSecurityContext" : {
           "type" : "object",
@@ -383,30 +397,27 @@
             }
           }
         },
-        "env": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": true
+        "env" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object"
           }
         },
-        "serviceAccountName": {
-          "type": "string"
+        "serviceAccountName" : {
+          "type" : "string"
         }
       }
     },
-    "podScheduling": {
-      "type": "object",
+    "podScheduling" : {
+      "type" : "object",
       "properties" : {
         "affinity" : {
-          "type" : "object",
-          "additionalProperties": true
+          "type" : "object"
         },
-        "tolerations": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": true
+        "tolerations" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object"
           }
         }
       }

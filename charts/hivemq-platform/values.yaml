@@ -88,17 +88,50 @@ restApi:
   # Enables or disables authentication and authorization.
   authEnabled: false
 
-# Configures the HiveMQ License information.
+# Configures all HiveMQ licenses.
 license:
-  # Creates a default HiveMQ Platform license as a Kubernetes Secret.
+  # Creates a Kubernetes Secret for the configured HiveMQ licenses.
   create: false
-  # The name of a secret with the license information.
-  # To create a new secret with a license, set create=true. Otherwise, false to reuse an existing one.
+  # The name of the Kubernetes Secret with all HiveMQ licenses.
+  # To create a new Kubernetes Secret with licenses, set create=true. Otherwise, false to reuse an existing Secret.
   name: ""
-  # Inlines the License information as an encoded 64-bytes string.
+  # Inlines the main HiveMQ license as an encoded 64-bytes string.
   data: ""
-  # Overrides the License information via file using --set-file license.lic.
+  # Overrides the main HiveMQ license via file using --set-file license.lic.
   overrideLicense: ""
+
+  # Adds additional main HiveMQ licenses to the Kubernetes Secret as .lic files if needed.
+  additionalLicenses: {}
+    ## Defines the name of the additional main HiveMQ license (the .lic suffix will be added automatically).
+    #license-name:
+    #  # Inlines the additional main HiveMQ license as an encoded 64-bytes string.
+    #  data: ""
+    #  # Overrides the additional main HiveMQ license via file using --set-file additional-license.lic.
+    #  overrideLicense: ""
+
+  # HiveMQ Enterprise Extension licenses to include as part of the Kubernetes Secret. Add your required licenses to the list.
+  extensions: {}
+    ## Defines the name of the HiveMQ Enterprise Extension license in the Kubernetes Secret (the .elic suffix will be added automatically).
+    #extension-license-name:
+    #  # Inlines the HiveMQ Enterprise Extension license as an encoded 64-bytes string.
+    #  data: ""
+    #  # Overrides the HiveMQ Enterprise Extension license via file using --set-file license.elic.
+    #  overrideLicense: ""
+    ## Example of a HiveMQ Enterprise Extension for Kafka license configuration:
+    ## license:
+    ##   create: true
+    ##   extensions:
+    ##     hivemq-kafka-extension-license:
+    ##       data: kafka-license-content
+
+  # HiveMQ Data Hub licenses to include as part of the Kubernetes Secret.
+  dataHub: {}
+    ## Defines the name of the HiveMQ Data Hub license in the Kubernetes Secret (the .plic suffix will be added automatically).
+    #data-hub-license-name:
+    #  # Inlines the HiveMQ Data Hub license as an encoded 64-bytes string.
+    #  data: ""
+    #  # Overrides the HiveMQ Data Hub license via file using --set-file license.plic.
+    #  overrideLicense: ""
 
 # Configures HiveMQ restriction options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html
@@ -420,6 +453,13 @@ extensions:
 #    # The ConfigMap name that contains the Security extension configuration.
 #    configMapName: ""
 
+# HiveMQ Enterprise Extension for Data Lake
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-data-lake-extension
+#    enabled: true
+#    # The ConfigMap name that contains the Data Lake extension configuration.
+#    configMapName: ""
+
 # HiveMQ Enterprise Distributed Tracing Extension
 #  - name: hivemq-distributed-tracing-extension
 #    enabled: true
@@ -435,18 +475,25 @@ extensions:
 #    # The ConfigMap name that contains the MongoDB extension configuration.
 #    configMapName: ""
 
-# HiveMQ Enterprise Extension for PostgreSQL
+# HiveMQ Enterprise Extension for MySQL
 # This extension does not support hot-reload of the configuration.
 #  - name: hivemq-mysql-extension
 #    enabled: true
-#    # The ConfigMap name that contains the PostgreSQL extension configuration.
+#    # The ConfigMap name that contains the MySQL extension configuration.
 #    configMapName: ""
 
-# HiveMQ Enterprise Extension for MySQL
+# HiveMQ Enterprise Extension for Microsoft SQL Server
+# This extension does not support hot-reload of the configuration.
+#  - name: hivemq-microsoft-sql-server-extension
+#    enabled: true
+#    # The ConfigMap name that contains the MySQL extension configuration.
+#    configMapName: ""
+
+# HiveMQ Enterprise Extension for PostgreSQL
 # This extension does not support hot-reload of the configuration.
 #  - name: hivemq-postgresql-extension
 #    enabled: true
-#    # The ConfigMap name that contains the MySQL extension configuration.
+#    # The ConfigMap name that contains the PostgreSQL extension configuration.
 #    configMapName: ""
 
 # HiveMQ Enterprise Extension for Snowflake
