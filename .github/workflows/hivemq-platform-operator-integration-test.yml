@@ -108,10 +108,14 @@ jobs:
       fail-fast: false
       matrix:
         test-plan: [
+          AdditionalBrokerLicense,
+          BrokerLicense,
           Containers,
           ClusterDomainName,
           CustomLogback,
           CustomValues,
+          DataHubLicense,
+          ExtensionsLicense,
           Platform,
           PodSecurityContextInstallPlatform,
           PodSecurityContextUpgradePlatform,
