@@ -132,7 +132,7 @@
       }
     },
     "metrics" : {
-      "type" : "object",
+      "type": "object",
       "properties" : {
         "enabled" : {
           "type" : "boolean"
@@ -140,7 +140,7 @@
         "port" : {
           "type" : "integer",
           "minimum" : 0,
-          "maximum" : 65535
+          "maximum": 65535
         },
         "path" : {
           "type" : "string"
@@ -162,16 +162,18 @@
               "websocket"
             ]
           },
-          "annotations" : {
-            "type" : "object"
+          "annotations": {
+            "type": "object",
+            "additionalProperties": true
           },
-          "labels" : {
-            "type" : "object"
+          "labels": {
+            "type": "object",
+            "additionalProperties": true
           },
           "legacyPortName" : {
             "type": "string"
           },
-          "serviceType" : {
+          "serviceType": {
             "type" : "string",
             "enum" : [
               "ClusterIP",
@@ -184,20 +186,20 @@
           },
           "name" : {
             "type" : "string",
-            "maxLength" : 63
+            "maxLength": 63
           },
           "port" : {
             "type" : "integer",
             "minimum" : 0,
-            "maximum" : 65535
+            "maximum": 65535
           },
           "containerPort" : {
             "type" : "integer",
             "minimum" : 0,
-            "maximum" : 65535
+            "maximum": 65535
           },
           "hivemqProxyProtocol" : {
-            "type" : "boolean"
+            "type": "boolean"
           },
           "keystoreSecretName" : {
             "type" : "string"
