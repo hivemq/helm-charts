@@ -1,3 +1,8 @@
+## HiveMQ Swarm Helm Chart default values
+## See documentation for more information: https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#deploy-on-k8s
+
+## HiveMQ Swarm container image configuration
+##
 image:
   repository: hivemq/hivemq-swarm
   pullPolicy: IfNotPresent
@@ -114,18 +119,9 @@ agents:
   ## JVM options to start the agents with
   ##
   javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
-## Monitoring configuration
+## Configures the ServiceAccount for HiveMQ Swarm
+## ref: https://kubernetes.io/docs/concepts/security/service-accounts/
 ##
-monitoring:
-  # Deploy ServiceMonitor for Prometheus Operator and Configmap for Grafana Dashboard
-  enabled: false
-  # Deploy a dedicated instance of the prometheus operator, including grafana, as sub-chart
-  dedicated: false
-  # dashboardNamespace: monitoring (defaults to use the namespace this chart is deployed to)
-  serviceMonitor:
-    interval: 15s
-    #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
-    scrapeTimeout: 10s
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -134,7 +130,7 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-## Configure the service to access toe HiveMQ Swarm commander
+## Configure the service to access the HiveMQ Swarm commander
 ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
 ##
 service:

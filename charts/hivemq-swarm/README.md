@@ -7,10 +7,6 @@ This Helm chart bootstraps a [HiveMQ Swarm](https://docs.hivemq.com/hivemq-swarm
 This chart deploys:
 - a HiveMQ Swarm commander with the [REST-API](https://docs.hivemq.com/hivemq-swarm/latest/rest-service.html) enabled to start scenarios
 - a number of HiveMQ Swarm agents
-- an optional Prometheus for monitoring
-    - with an optional Prometheus Operator as a dedicated Prometheus instance
-    - with a pre-defined Grafana dashboard, called `HiveMQ Swarm`
-
 
 See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-swarm/) for
 more details.
