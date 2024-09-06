@@ -4,6 +4,7 @@
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
 {{- $hasMetricService := ( include "hivemq-platform.has-default-metrics-service" . ) -}}
+{{- $hasStatefulSetMigration := ( include "hivemq-platform.has-legacy-statefulset-migration" . ) -}}
 apiVersion: hivemq.com/v1
 kind: HiveMQPlatform
 metadata:
@@ -155,7 +156,7 @@ spec:
                   {{- end }}
                 {{- end }}
                 {{- $metricsContainerPortName := printf "metrics-%s" $metricsPort }}
-                {{- if and (not $hasMetricService) (not (has $metricsContainerPortName $containerPortNameList)) (.Values.metrics.enabled) (not .Values.migration.statefulSet) }}
+                {{- if and (not $hasMetricService) (not (has $metricsContainerPortName $containerPortNameList)) (.Values.metrics.enabled) (not $hasStatefulSetMigration) }}
                 - name: {{ $metricsContainerPortName }}
                   containerPort: {{ printf "%d" (int64 $metricsPort) }}
                 {{- end }}
@@ -260,7 +261,7 @@ spec:
           {{- end }}
     {{- end }}
     {{- end }}
-    {{- if and (not $hasMetricService) (.Values.metrics.enabled) (not .Values.migration.statefulSet) }}
+    {{- if and (not $hasMetricService) (.Values.metrics.enabled) (not $hasStatefulSetMigration) }}
     - metadata:
         name: {{ (include "hivemq-platform.range-service-name" (dict "name" "" "releaseName" $.Release.Name "type" "metrics" "port" $metricsPort "containerPort" $metricsPort)) }}
       spec:
@@ -301,4 +302,6 @@ spec:
       {{- end }}
     {{- end }}
   {{- end }}
-  statefulSetMigration: {{ .Values.migration.statefulSet }}
+  {{- if $hasStatefulSetMigration }}
+  statefulSetMigration: true
+  {{- end }}
