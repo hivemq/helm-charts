@@ -1,0 +1,12 @@
+# default charts location
+charts_dir: charts
+# marks release as 'latest'
+mark_as_latest: false
+# skips the chart if it is not released
+skip_existing: true
+
+# PGP signing
+sign: true
+key: HiveMQ
+# keyring:          # set via env variable CR_KEYRING
+# passphrase-file:  # set via env variable CR_PASSPHRASE_FILE

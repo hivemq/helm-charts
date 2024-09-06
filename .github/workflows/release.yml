@@ -30,11 +30,23 @@ jobs:
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
+      - name: Prepare PGP keys for signing HiveMQ Helm charts
+        run: |
+          echo "${{ secrets.SIGNING_KEY }}" | gpg --dearmor > $HOME/secring.gpg
+          echo "${{ secrets.SIGNING_PASSWORD }}" > $HOME/passphrase
+
+          echo "CR_KEYRING=$HOME/secring.gpg" >> "$GITHUB_ENV"
+          echo "CR_PASSPHRASE_FILE=$HOME/passphrase" >> "$GITHUB_ENV"
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          charts_dir: charts
-          mark_as_latest: false
-          skip_existing: true
+          config: .github/configs/chart-releaser.yml
+
+      - name: Cleanup GPG files
+        if: always() # ensures cleanup even if the previous step fails
+        run: |
+          rm -f $HOME/secring.gpg
+          rm -f $HOME/passphrase
