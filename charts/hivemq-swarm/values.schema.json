@@ -1,0 +1,245 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "agents" : {
+      "type" : "object",
+      "properties" : {
+        "affinity" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "agentCount" : {
+          "type" : "integer"
+        },
+        "env" : {
+          "type" : "array"
+        },
+        "extraVolumeMounts" : {
+          "type" : "array"
+        },
+        "extraVolumes" : {
+          "type" : "array"
+        },
+        "javaOpts" : {
+          "type" : "string"
+        },
+        "logLevel" : {
+          "type" : "string"
+        },
+        "nodeSelector" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "podAnnotations" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "podSecurityContext" : {
+          "type" : "object",
+          "properties" : {
+            "sysctls" : {
+              "type" : "array",
+              "items" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "value" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "resources" : {
+          "type" : "object",
+          "properties" : {
+            "cpu" : {
+              "type" : "string"
+            },
+            "memory" : {
+              "type" : "string"
+            }
+          }
+        },
+        "securityContext" : {
+          "type" : "object",
+          "properties" : {}
+        }
+      }
+    },
+    "clusterDomain" : {
+      "type" : "string"
+    },
+    "commander" : {
+      "type" : "object",
+      "properties" : {
+        "affinity" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "env" : {
+          "type" : "array"
+        },
+        "extraVolumeMounts" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "mountPath" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "extraVolumes" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "emptyDir" : {
+                "type" : "object",
+                "properties" : {}
+              },
+              "name" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "javaOpts" : {
+          "type" : "string"
+        },
+        "logLevel" : {
+          "type" : "string"
+        },
+        "nodeSelector" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "podAnnotations" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "podSecurityContext" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "resources" : {
+          "type" : "object",
+          "properties" : {
+            "cpu" : {
+              "type" : "string"
+            },
+            "memory" : {
+              "type" : "string"
+            }
+          }
+        },
+        "securityContext" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "volumeClaimTemplates" : {
+          "type" : "array"
+        }
+      }
+    },
+    "fullnameOverride" : {
+      "type" : "string"
+    },
+    "generateLabels" : {
+      "type" : "boolean"
+    },
+    "image" : {
+      "type" : "object",
+      "properties" : {
+        "pullPolicy" : {
+          "type" : "string"
+        },
+        "repository" : {
+          "type" : "string"
+        },
+        "tag" : {
+          "type" : "string"
+        }
+      }
+    },
+    "imagePullSecrets" : {
+      "type" : "array"
+    },
+    "ingress" : {
+      "type" : "object",
+      "properties" : {
+        "annotations" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "hosts" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "host" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "tls" : {
+          "type" : "array"
+        }
+      }
+    },
+    "license" : {
+      "type" : "string"
+    },
+    "nameOverride" : {
+      "type" : "string"
+    },
+    "namespaceOverride" : {
+      "type" : "string"
+    },
+    "service" : {
+      "type" : "object",
+      "properties" : {
+        "nodePort" : {
+          "type" : "string"
+        },
+        "port" : {
+          "type" : "integer"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      }
+    },
+    "serviceAccount" : {
+      "type" : "object",
+      "properties" : {
+        "annotations" : {
+          "type" : "object",
+          "properties" : {}
+        },
+        "create" : {
+          "type" : "boolean"
+        },
+        "name" : {
+          "type" : "string"
+        }
+      }
+    },
+    "tolerations" : {
+      "type" : "array"
+    }
+  }
+}
