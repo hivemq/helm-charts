@@ -227,6 +227,20 @@ Usage: {{ include "hivemq-platform.has-default-metrics-service" . }}
 {{- end -}}
 
 {{/*
+Checks if there is a `migration.statefulSet` value set to `true`..
+Returns:
+- `true` if a `.Values.migration.statufSet` flag is set to true, empty string otherwise.
+Usage: {{ include "hivemq-platform.has-legacy-statefulset-migration" . }}
+*/}}
+{{- define "hivemq-platform.has-legacy-statefulset-migration" -}}
+{{- $hasStatefulSetMigration := "" -}}
+{{- if and (hasKey .Values "migration") (hasKey .Values.migration "statefulSet") (eq .Values.migration.statefulSet true) -}}
+    {{- $hasStatefulSetMigration = true -}}
+{{- end -}}
+{{- $hasStatefulSetMigration -}}
+{{- end -}}
+
+{{/*
 Returns the placeholder name to be used by the `config.xml` file for the private key password used by the TLS listeners.
 This can only be used within a range of service values.
 Format: <.Values.services.type>_<.Release.Name>_<.Values.services.keystoreSecretName>_<keystore_pass | keystore_private_pass>
@@ -363,12 +377,12 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
 */}}
 {{- define "hivemq-platform.validate-legacy-services" -}}
 {{- $services := .Values.services }}
-{{- $isStatefulSetMigrationEnabled := .Values.migration.statefulSet }}
+{{- $hasStatefulSetMigration := ( include "hivemq-platform.has-legacy-statefulset-migration" . ) }}
 {{- range $service := $services }}
-  {{- if and ($service.exposed) ($isStatefulSetMigrationEnabled) (hasKey $service "port") }}
+  {{- if and ($service.exposed) ($hasStatefulSetMigration) (hasKey $service "port") }}
     {{- fail (printf "Service type `%s` with container port `%d` cannot use `port` value as `migration.statefulSet` value is enabled" $service.type (int64 $service.containerPort)) }}
   {{- end }}
-  {{- if and ($service.exposed) (not $isStatefulSetMigrationEnabled) (hasKey $service "legacyPortName") }}
+  {{- if and ($service.exposed) (not $hasStatefulSetMigration) (hasKey $service "legacyPortName") }}
     {{- fail (printf "Service type `%s` with container port `%d` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}

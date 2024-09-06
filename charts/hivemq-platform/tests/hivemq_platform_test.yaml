@@ -1182,11 +1182,10 @@ tests:
             ad.datadoghq.com/hivemq.instances: '[{"host": "%%host%%", "port": "9010"}]'
             ad.datadoghq.com/hivemq.logs: '[{"source": "hivemq", "service": "hivemq-platform-mqtt-1883"}]'
 
-  - it: with default settings, statefulsetMigration spec disabled
+  - it: with default settings, statefulsetMigration spec is not present
     asserts:
-      - equal:
+      - notExists:
           path: spec.statefulSetMigration
-          value: false
 
   - it: with statefulSet migration enabled, then statefulsetMigration spec enabled
     set:
@@ -1212,6 +1211,5 @@ tests:
     set:
       migration.statefulSet: false
     asserts:
-      - equal:
+      - notExists:
           path: spec.statefulSetMigration
-          value: false

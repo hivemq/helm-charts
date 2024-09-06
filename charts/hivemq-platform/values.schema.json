@@ -531,13 +531,16 @@
       "if": {
         "properties": {
           "migration": {
+            "type": "object",
+            "required": ["statefulSet"],
             "properties": {
               "statefulSet": {
                 "const": true
               }
             }
           }
-        }
+        },
+        "required": ["migration"]
       },
       "then": {
         "properties": {
