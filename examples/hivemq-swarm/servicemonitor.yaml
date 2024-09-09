@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hivemq-swarm-service-monitor
+  labels:
+    # Helm release-name of prometheus-stack
+    release: monitoring-stack
+spec:
+  selector:
+    matchLabels:
+      # agent and commander pods labels
+      app.kubernetes.io/instance: swarm # Helm release-name of HiveMQ Swarm chart
+      app.kubernetes.io/name: hivemq-swarm
+  namespaceSelector:
+    matchNames:
+      # namespace of the Swarm deployment
+      - default
+  endpoints:
+    # port name of the commander service to scrape
+    - port: api
+      interval: 15s
+      scrapeTimeout: 10s
+    # port name of the agent service to scrape
+    - port: metrics
+      interval: 15s
+      scrapeTimeout: 10s
