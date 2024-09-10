@@ -21,6 +21,7 @@ hivemq:
       port: 8888
       expose: true
       patch:
+        # TODO: session affinity is only hardcoded for the Control Center service and not configurable yet for any other service
         - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
   env:
     - name: HIVEMQ_ALLOW_ALL_CLIENTS

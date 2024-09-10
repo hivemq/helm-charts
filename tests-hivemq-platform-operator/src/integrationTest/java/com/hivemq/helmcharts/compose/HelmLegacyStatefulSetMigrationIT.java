@@ -13,13 +13,17 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +56,8 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     private static final int REST_API_SERVICE_PORT = 8888;
     private static final @NotNull String REST_API_SERVICE_NAME = String.format("hivemq-%s-api", LEGACY_RELEASE_NAME);
 
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmLegacyStatefulSetMigrationIT.class);
+
     @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
@@ -79,6 +85,9 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client, operatorNamespace, "ese-file-realm-config-map.yml");
         installLegacyOperatorChartAndWaitToBeRunning("/files/migration-legacy-stateful-set-values.yaml");
 
+        // assert MQTT service annotations
+        final var mqttServiceAnnotations = new HashMap<>(Map.of("service.spec.externalTrafficPolicy", "Local"));
+        assertMqttServiceAnnotations(mqttServiceAnnotations);
         // assert Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -153,6 +162,9 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, LEGACY_RELEASE_NAME, "ROLLING_RESTART");
         K8sUtil.waitForHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
 
+        // assert MQTT service annotations
+        mqttServiceAnnotations.putAll(Map.of("meta.helm.sh/release-name", LEGACY_RELEASE_NAME, "meta.helm.sh/release-namespace", operatorNamespace));
+        assertMqttServiceAnnotations(mqttServiceAnnotations);
         // assert again Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -165,5 +177,18 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT);
         // assert subscribe and publishes metrics
         MonitoringUtil.assertSubscribesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
+    }
+
+    private void assertMqttServiceAnnotations(
+            final @NotNull Map<String, String> expectedAnnotations) {
+        final var mqttService = client.services().inNamespace(operatorNamespace).withName(MQTT_SERVICE_NAME).get();
+        LOG.info("MQTT service labels {}", mqttService.getMetadata().getLabels());
+        LOG.info("MQTT service annotations {}", mqttService.getMetadata().getAnnotations());
+        final var actualAnnotations = mqttService.getMetadata().getAnnotations()
+                .entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().startsWith("javaoperatorsdk.io"))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        assertThat(actualAnnotations).as("MQTT Service").isEqualTo(expectedAnnotations);
     }
 }
