@@ -347,7 +347,7 @@ public class K8sUtil {
      * Returns a Predicate condition based on the state of a Kubernetes resource.
      */
     @SuppressWarnings("unchecked")
-    public static @NotNull Predicate<GenericKubernetesResource> getKubernetesResourceStatus(final @NotNull String expectedState) {
+    public static @NotNull Predicate<GenericKubernetesResource> getCustomResourceStateCondition(final @NotNull String expectedState) {
         return resource -> {
             if (resource == null) {
                 return false;
@@ -483,7 +483,7 @@ public class K8sUtil {
             final @NotNull String customResourceName,
             final @NotNull String state) {
         final var hivemqCustomResource = getHiveMQPlatform(client, namespace, customResourceName);
-        hivemqCustomResource.waitUntilCondition(getKubernetesResourceStatus(state), 5, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(getCustomResourceStateCondition(state), 5, TimeUnit.MINUTES);
         assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
         return hivemqCustomResource.get();
     }
@@ -506,10 +506,10 @@ public class K8sUtil {
             final @NotNull String customResourceName) {
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, namespace, customResourceName);
         assertThat(hivemqCustomResource).isNotNull();
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("ROLLING_RESTART"),
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("ROLLING_RESTART"),
                 5,
                 TimeUnit.MINUTES);
-        return hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RUNNING"),
+        return hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"),
                 5,
                 TimeUnit.MINUTES);
     }
@@ -523,7 +523,7 @@ public class K8sUtil {
             final @NotNull String customResourceName,
             final @NotNull String state) {
         final var hivemqCustomResource = getLegacyHiveMQPlatform(client, namespace, customResourceName);
-        hivemqCustomResource.waitUntilCondition(getKubernetesResourceStatus(state), 5, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(getCustomResourceStateCondition(state), 5, TimeUnit.MINUTES);
         assertThat(hivemqCustomResource.get().get("status").toString()).contains(state);
         return hivemqCustomResource.get();
     }

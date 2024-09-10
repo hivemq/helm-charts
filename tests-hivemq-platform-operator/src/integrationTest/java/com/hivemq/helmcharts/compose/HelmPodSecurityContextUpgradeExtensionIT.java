@@ -66,10 +66,10 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
                 ".*HiveMQ Enterprise Distributed Tracing Extension: Successfully updated configuration from '/opt/hivemq/extensions/hivemq-distributed-tracing-extension/conf/config.xml'.");
 
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RESTART_EXTENSIONS"),
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getKubernetesResourceStatus("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 3, TimeUnit.MINUTES);
         await().atMost(ONE_MINUTE).until(configurationUpdatedFuture::isDone);
     }
 }
