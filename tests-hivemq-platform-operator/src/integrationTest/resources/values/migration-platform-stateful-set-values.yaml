@@ -30,6 +30,8 @@ volumeClaimTemplates:
 services:
   - type: "mqtt"
     name: "hivemq-test-hivemq-legacy-platform-mqtt"
+    annotations:
+      service.spec.externalTrafficPolicy: Local
     exposed: true
     containerPort: 1883
     legacyPortName: "mqtt"
