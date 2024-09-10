@@ -1,12 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: swarm-hivemq-swarm-dashboard
-  namespace: monitoring # Namespace where the prometheus-community/kube-prometheus-stack is installed
+  name: hivemq-swarm-grafana-dashboard
+  namespace: monitoring # CUSTOMIZE: Namespace where the prometheus-community/kube-prometheus-stack is installed
   labels:
-    app.kubernetes.io/instance: swarm # Helm release-name of HiveMQ Swarm chart
-    app.kubernetes.io/name: hivemq-swarm
-    app.kubernetes.io/version: 4.32.0
     grafana_dashboard: '1' # Grafana annotation needed to load this dashboard
 data:
   swarm.json: |
