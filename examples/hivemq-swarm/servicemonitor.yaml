@@ -3,18 +3,16 @@ kind: ServiceMonitor
 metadata:
   name: hivemq-swarm-service-monitor
   labels:
-    # Helm release-name of prometheus-stack
-    release: monitoring-stack
+    release: monitoring-stack # CUSTOMIZE: Helm release-name of the prometheus-stack
 spec:
   selector:
     matchLabels:
       # agent and commander pods labels
-      app.kubernetes.io/instance: swarm # Helm release-name of HiveMQ Swarm chart
+      app.kubernetes.io/instance: swarm # CUSTOMIZE: Helm release-name of HiveMQ Swarm
       app.kubernetes.io/name: hivemq-swarm
   namespaceSelector:
     matchNames:
-      # namespace of the Swarm deployment
-      - default
+      - default # CUSTOMIZE: namespace of the Swarm deployment
   endpoints:
     # port name of the commander service to scrape
     - port: api
