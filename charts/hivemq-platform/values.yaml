@@ -301,14 +301,6 @@ services:
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
 
-  # Legacy MQTT service configuration
-  # For legacy HiveMQ Operator services, i.e. when the `.migration.statufulSet` flag is enabled, `legacyPortName` is mandatory.
-  - type: mqtt
-    exposed: false
-    containerPort: 8883
-    # The corresponding legacy HiveMQ Operator charts value used in the `hivemq.ports.name` for the service.
-    legacyPortName: "mqtt"
-
 # Configurations and Overrides
 # These configurations provide a convenient option to override entire sections with your customized files,
 # such as the StatefulSet or the HiveMQ configuration (config.xml)
