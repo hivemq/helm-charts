@@ -30,10 +30,10 @@ testing {
 
                 // Testcontainers
                 implementation(libs.testcontainers)
-                implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.testcontainers.selenium)
+                implementation(libs.kind.container)
 
                 // Testing
                 implementation(libs.assertj)

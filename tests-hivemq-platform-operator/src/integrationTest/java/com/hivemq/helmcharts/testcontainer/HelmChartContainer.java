@@ -1,5 +1,6 @@
 package com.hivemq.helmcharts.testcontainer;
 
+import com.dajudge.kindcontainer.K3sContainer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -25,8 +26,6 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testcontainers.k3s.K3sContainer;
-import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
@@ -53,7 +52,8 @@ import static org.awaitility.Durations.FIVE_MINUTES;
 import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
-public class HelmChartContainer extends K3sContainer implements ExtensionContext.Store.CloseableResource {
+public class HelmChartContainer extends K3sContainer<HelmChartContainer>
+        implements ExtensionContext.Store.CloseableResource {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
@@ -96,7 +96,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public HelmChartContainer(final @NotNull List<String> additionalCommands, final @NotNull K3s k3s) {
-        super(getAdHocImageName(k3s));
+        super.setDockerImageName(getAdHocImageName(k3s));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
                 "/charts/" + LEGACY_OPERATOR_CHART);
@@ -109,7 +109,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
-        super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
+        super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.toString().trim()));
         if (withLocalImages) {
             bindLocalImages();
         }
@@ -195,7 +195,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         try {
             final var configPath = Files.createTempFile("kubeconfig-", ".yaml").toAbsolutePath();
             configPath.toFile().deleteOnExit();
-            Files.writeString(configPath, getKubeConfigYaml());
+            Files.writeString(configPath, getKubeconfig());
             LOG.info("Saved kubeconfig file on {}", configPath);
         } catch (final IOException e) {
             LOG.error("Could not save kubeconfig.yaml to temporary file", e);
@@ -265,7 +265,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
     public synchronized @NotNull KubernetesClient getKubernetesClient() {
         if (client == null) {
-            final var config = Config.fromKubeconfig(getKubeConfigYaml());
+            final var config = Config.fromKubeconfig(getKubeconfig());
             client = new KubernetesClientBuilder().withConfig(config).build();
         }
         return client;
@@ -494,7 +494,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         }
     }
 
-    private static @NotNull DockerImageName getAdHocImageName(final @NotNull K3s k3s) {
+    private static @NotNull String getAdHocImageName(final @NotNull K3s k3s) {
         final var dockerfile = Path.of(MountableFile.forClasspathResource("helm.dockerfile").getFilesystemPath());
         // fix pre-emptively checking local images by replacing the build args in the Dockerfile
         // see https://github.com/testcontainers/testcontainers-java/issues/3238
@@ -504,10 +504,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         } catch (IOException e) {
             LOG.warn("Could not replace build args in Dockerfile", e);
         }
-        final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile)
-                .withBuildArg("K3S_VERSION", k3s.getVersion())
-                .get();
-        return DockerImageName.parse(imageName).asCompatibleSubstituteFor("rancher/k3s");
+        return new ImageFromDockerfile().withDockerfile(dockerfile).withBuildArg("K3S_VERSION", k3s.getVersion()).get();
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
@@ -716,7 +713,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
                 await().until(() -> container.getLogs(STDERR).matches("(?s).*Node controller sync successful.*"));
                 // we need this to have the yaml read from the container
                 container.containerIsStarted(container.getContainerInfo());
-                final var yaml = container.getKubeConfigYaml();
+                final var yaml = container.getKubeconfig();
                 assertThat(yaml).isNotNull();
                 loadLocalImages();
             } catch (final Exception e) {

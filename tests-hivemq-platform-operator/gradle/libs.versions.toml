@@ -8,6 +8,7 @@ hivemq-platform = "4.33.0"
 javassist = "3.30.2-GA"
 junit-jupiter = "5.11.0"
 junit-platform = "1.11.0"
+kind-container = "1.4.7"
 logback = "1.5.8"
 netty = "4.1.113.Final"
 # https://hub.docker.com/_/nginx/tags?page=&page_size=&ordering=&name=1.27
@@ -29,6 +30,7 @@ hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "h
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform"}
+kind-container = { module =  "com.dajudge.kindcontainer:kindcontainer", version.ref = "kind-container"}
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
 rest-assured = { module = "io.rest-assured:rest-assured", version.ref = "rest-assured" }
@@ -40,5 +42,4 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 testcontainers-hivemq = { module = "org.testcontainers:hivemq", version.ref = "testcontainers" }
 testcontainers-junitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-testcontainers-k3s = { module = "org.testcontainers:k3s", version.ref = "testcontainers" }
 testcontainers-selenium = { module = "org.testcontainers:selenium", version.ref = "testcontainers" }
