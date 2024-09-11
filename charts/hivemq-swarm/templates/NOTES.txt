@@ -22,5 +22,11 @@ To access the commander, please execute the following commands:
   echo "Commander is available via http://127.0.0.1:8080"
   kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "hivemq-swarm.fullname" . }}-api 8080:{{ .Values.service.port }}
 {{- end }}
+{{- if hasKey .Values "monitoring" }}
 
-For more information and configuration guidance, visit https://www.hivemq.com/docs/swarm/
+*** Warning ***
+All `monitoring` values are deprecated and removed completely from the chart.
+Please, consider creating your own Prometheus Monitoring stack manually. Check https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#monitor for more help and guidance.
+{{- end }}
+
+For more information and configuration guidance, visit https://docs.hivemq.com/hivemq-swarm/latest/index.html
