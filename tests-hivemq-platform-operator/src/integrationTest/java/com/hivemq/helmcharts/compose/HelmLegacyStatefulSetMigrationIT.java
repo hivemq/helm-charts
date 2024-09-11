@@ -86,11 +86,11 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         final var mqttAnnotations = new HashMap<>(Map.of("service.spec.externalTrafficPolicy", "Local"));
         final var metricsAnnotations = new HashMap<>(Map.of("prometheus.io/scrape", "true"));
         final var legacyLabels = Map.of("app", "hivemq", "hivemq-cluster", LEGACY_RELEASE_NAME);
-        assertAnnotationsAndLabels("MQTT Service", MQTT_SERVICE_NAME, mqttAnnotations, legacyLabels);
-        assertAnnotationsAndLabels("Control Center Service", CC_SERVICE_NAME, Map.of(), legacyLabels);
-        assertAnnotationsAndLabels("Metrics Service", METRICS_SERVICE_NAME, metricsAnnotations, legacyLabels);
-        assertAnnotationsAndLabels("REST API Service", REST_API_SERVICE_NAME, Map.of(), legacyLabels);
-        assertAnnotationsAndLabels("Cluster Service", CLUSTER_SERVICE_NAME, Map.of(), legacyLabels);
+        assertServiceAnnotationsAndLabels("MQTT Service", MQTT_SERVICE_NAME, mqttAnnotations, legacyLabels);
+        assertServiceAnnotationsAndLabels("Control Center Service", CC_SERVICE_NAME, Map.of(), legacyLabels);
+        assertServiceAnnotationsAndLabels("Metrics Service", METRICS_SERVICE_NAME, metricsAnnotations, legacyLabels);
+        assertServiceAnnotationsAndLabels("REST API Service", REST_API_SERVICE_NAME, Map.of(), legacyLabels);
+        assertServiceAnnotationsAndLabels("Cluster Service", CLUSTER_SERVICE_NAME, Map.of(), legacyLabels);
         // assert Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -137,11 +137,14 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 .getItems()
                 .size()).isEqualTo(1);
 
-        //TODO: We cannot execute `helm uninstall my-release --cascade orphan` - See: https://github.com/helm/helm/issues/13279
-        // we need to uninstall the legacy release with orphan option so the new platform Helm install takes over existing resources
+        // we need to uninstall the legacy release with orphan option so existing resources can be taken over by the platform Helm install
+        // TODO: We cannot execute `helm uninstall my-release --cascade orphan` because this will delete resources
+        //  without an owner reference, that are still needed - See: https://github.com/helm/helm/issues/13279
         //helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace, "--cascade", "orphan");
 
-        // as a workaround we need to delete the Helm secret installed
+        // as a workaround we need to delete all the corresponding Helm versioned Secrets installed for each of the possible Helm releases
+        // we may have. These will be named with a format like "sh.helm.release.v1.<release-name>.v<release-version>" and we will delete them
+        // based on the labels instead as follows:
         // kubectl delete secret -l owner=helm,name=<release-name> -n <namespace>
         final var helmSecretLabels = Map.of("owner", "helm", "name", LEGACY_RELEASE_NAME);
         client.secrets().inNamespace(operatorNamespace).withLabels(helmSecretLabels).withTimeoutInMillis(5000).delete();
@@ -185,15 +188,15 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 "meta.helm.sh/release-namespace",
                 operatorNamespace);
         mqttAnnotations.putAll(helmAnnotations);
-        assertAnnotationsAndLabels("MQTT Service", MQTT_SERVICE_NAME, mqttAnnotations, platformServiceLabels);
-        assertAnnotationsAndLabels("Control Center Service", CC_SERVICE_NAME, helmAnnotations, platformServiceLabels);
+        assertServiceAnnotationsAndLabels("MQTT Service", MQTT_SERVICE_NAME, mqttAnnotations, platformServiceLabels);
+        assertServiceAnnotationsAndLabels("Control Center Service", CC_SERVICE_NAME, helmAnnotations, platformServiceLabels);
         metricsAnnotations.putAll(helmAnnotations);
-        assertAnnotationsAndLabels("Metrics Service", METRICS_SERVICE_NAME, metricsAnnotations, platformServiceLabels);
-        assertAnnotationsAndLabels("REST API Service", REST_API_SERVICE_NAME, helmAnnotations, platformServiceLabels);
+        assertServiceAnnotationsAndLabels("Metrics Service", METRICS_SERVICE_NAME, metricsAnnotations, platformServiceLabels);
+        assertServiceAnnotationsAndLabels("REST API Service", REST_API_SERVICE_NAME, helmAnnotations, platformServiceLabels);
         final var clusterServiceLabels = new HashMap<String, String>(platformLabels.size() + 1);
         clusterServiceLabels.putAll(platformLabels);
         clusterServiceLabels.put("hivemq/cluster-service", "true");
-        assertAnnotationsAndLabels("Cluster Service", CLUSTER_SERVICE_NAME, helmAnnotations, clusterServiceLabels);
+        assertServiceAnnotationsAndLabels("Cluster Service", CLUSTER_SERVICE_NAME, helmAnnotations, clusterServiceLabels);
         // assert again Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -208,7 +211,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         MonitoringUtil.assertSubscribesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
     }
 
-    private void assertAnnotationsAndLabels(
+    private void assertServiceAnnotationsAndLabels(
             final @NotNull String label,
             final @NotNull String serviceName,
             final @NotNull Map<String, String> expectedAnnotations,
