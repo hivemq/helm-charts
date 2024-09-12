@@ -7,6 +7,7 @@ import com.hivemq.helmcharts.util.MonitoringUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
@@ -86,11 +88,84 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         final var mqttAnnotations = new HashMap<>(Map.of("service.spec.externalTrafficPolicy", "Local"));
         final var metricsAnnotations = new HashMap<>(Map.of("prometheus.io/scrape", "true"));
         final var legacyLabels = Map.of("app", "hivemq", "hivemq-cluster", LEGACY_RELEASE_NAME);
-        assertServiceAnnotationsAndLabels("MQTT Service", MQTT_SERVICE_NAME, mqttAnnotations, legacyLabels);
-        assertServiceAnnotationsAndLabels("Control Center Service", CC_SERVICE_NAME, Map.of(), legacyLabels);
-        assertServiceAnnotationsAndLabels("Metrics Service", METRICS_SERVICE_NAME, metricsAnnotations, legacyLabels);
-        assertServiceAnnotationsAndLabels("REST API Service", REST_API_SERVICE_NAME, Map.of(), legacyLabels);
-        assertServiceAnnotationsAndLabels("Cluster Service", CLUSTER_SERVICE_NAME, Map.of(), legacyLabels);
+        assertAnnotationsAndLabels("MQTT Service",
+                () -> client.services().inNamespace(operatorNamespace).withName(MQTT_SERVICE_NAME).get().getMetadata(),
+                mqttAnnotations,
+                legacyLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("Control Center Service",
+                () -> client.services().inNamespace(operatorNamespace).withName(CC_SERVICE_NAME).get().getMetadata(),
+                Map.of(),
+                legacyLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("Metrics Service",
+                () -> client.services()
+                        .inNamespace(operatorNamespace)
+                        .withName(METRICS_SERVICE_NAME)
+                        .get()
+                        .getMetadata(),
+                metricsAnnotations,
+                legacyLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("REST API Service",
+                () -> client.services()
+                        .inNamespace(operatorNamespace)
+                        .withName(REST_API_SERVICE_NAME)
+                        .get()
+                        .getMetadata(),
+                Map.of(),
+                legacyLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("Cluster Service",
+                () -> client.services()
+                        .inNamespace(operatorNamespace)
+                        .withName(CLUSTER_SERVICE_NAME)
+                        .get()
+                        .getMetadata(),
+                Map.of(),
+                legacyLabels,
+                true,
+                true);
+        final var hiveMQVersion = System.getProperty("hivemq.version", "latest");
+        final var legacyStatefulSetLabels = new HashMap<>(Map.of("app.kubernetes.io/instance",
+                LEGACY_RELEASE_NAME,
+                "app.kubernetes.io/managed-by",
+                "Helm",
+                "app.kubernetes.io/name",
+                "hivemq-operator",
+                "app.kubernetes.io/version",
+                hiveMQVersion));
+        legacyStatefulSetLabels.putAll(legacyLabels);
+        assertAnnotationsAndLabels("StatefulSet",
+                () -> client.apps()
+                        .statefulSets()
+                        .inNamespace(operatorNamespace)
+                        .withName(LEGACY_RELEASE_NAME)
+                        .get()
+                        .getMetadata(),
+                Map.of(),
+                legacyStatefulSetLabels,
+                false,
+                true);
+        final var legacyStatefulSetTemplateLabels = new HashMap<>(Map.of("hivemq.com/node-offline", "false"));
+        legacyStatefulSetTemplateLabels.putAll(legacyLabels);
+        assertAnnotationsAndLabels("StatefulSet Template",
+                () -> client.apps()
+                        .statefulSets()
+                        .inNamespace(operatorNamespace)
+                        .withName(LEGACY_RELEASE_NAME)
+                        .get()
+                        .getSpec()
+                        .getTemplate()
+                        .getMetadata(),
+                Map.of(),
+                legacyStatefulSetTemplateLabels,
+                true,
+                true);
         // assert Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -169,7 +244,6 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         K8sUtil.waitForHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
 
         // assert service annotations and labels
-        final var hiveMQVersion = System.getProperty("hivemq.version", "latest");
         final var platformLabels = Map.of("app.kubernetes.io/instance",
                 LEGACY_RELEASE_NAME,
                 "app.kubernetes.io/managed-by",
@@ -188,15 +262,76 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 "meta.helm.sh/release-namespace",
                 operatorNamespace);
         mqttAnnotations.putAll(helmAnnotations);
-        assertServiceAnnotationsAndLabels("MQTT Service", MQTT_SERVICE_NAME, mqttAnnotations, platformServiceLabels);
-        assertServiceAnnotationsAndLabels("Control Center Service", CC_SERVICE_NAME, helmAnnotations, platformServiceLabels);
+        assertAnnotationsAndLabels("MQTT Service",
+                () -> client.services().inNamespace(operatorNamespace).withName(MQTT_SERVICE_NAME).get().getMetadata(),
+                mqttAnnotations,
+                platformServiceLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("Control Center Service",
+                () -> client.services().inNamespace(operatorNamespace).withName(CC_SERVICE_NAME).get().getMetadata(),
+                helmAnnotations,
+                platformServiceLabels,
+                true,
+                true);
         metricsAnnotations.putAll(helmAnnotations);
-        assertServiceAnnotationsAndLabels("Metrics Service", METRICS_SERVICE_NAME, metricsAnnotations, platformServiceLabels);
-        assertServiceAnnotationsAndLabels("REST API Service", REST_API_SERVICE_NAME, helmAnnotations, platformServiceLabels);
+        assertAnnotationsAndLabels("Metrics Service",
+                () -> client.services()
+                        .inNamespace(operatorNamespace)
+                        .withName(METRICS_SERVICE_NAME)
+                        .get()
+                        .getMetadata(),
+                metricsAnnotations,
+                platformServiceLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("REST API Service",
+                () -> client.services()
+                        .inNamespace(operatorNamespace)
+                        .withName(REST_API_SERVICE_NAME)
+                        .get()
+                        .getMetadata(),
+                helmAnnotations,
+                platformServiceLabels,
+                true,
+                true);
         final var clusterServiceLabels = new HashMap<String, String>(platformLabels.size() + 1);
         clusterServiceLabels.putAll(platformLabels);
         clusterServiceLabels.put("hivemq/cluster-service", "true");
-        assertServiceAnnotationsAndLabels("Cluster Service", CLUSTER_SERVICE_NAME, helmAnnotations, clusterServiceLabels);
+        assertAnnotationsAndLabels("Cluster Service",
+                () -> client.services()
+                        .inNamespace(operatorNamespace)
+                        .withName(CLUSTER_SERVICE_NAME)
+                        .get()
+                        .getMetadata(),
+                helmAnnotations,
+                clusterServiceLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("StatefulSet",
+                () -> client.apps()
+                        .statefulSets()
+                        .inNamespace(operatorNamespace)
+                        .withName(LEGACY_RELEASE_NAME)
+                        .get()
+                        .getMetadata(),
+                helmAnnotations,
+                platformLabels,
+                true,
+                true);
+        assertAnnotationsAndLabels("StatefulSet Template",
+                () -> client.apps()
+                        .statefulSets()
+                        .inNamespace(operatorNamespace)
+                        .withName(LEGACY_RELEASE_NAME)
+                        .get()
+                        .getSpec()
+                        .getTemplate()
+                        .getMetadata(),
+                helmAnnotations,
+                platformLabels,
+                true,
+                true);
         // assert again Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -211,27 +346,36 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         MonitoringUtil.assertSubscribesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
     }
 
-    private void assertServiceAnnotationsAndLabels(
+    @SuppressWarnings("SameParameterValue")
+    private void assertAnnotationsAndLabels(
             final @NotNull String label,
-            final @NotNull String serviceName,
+            final @NotNull Supplier<ObjectMeta> metadataSupplier,
             final @NotNull Map<String, String> expectedAnnotations,
-            final @NotNull Map<String, String> expectedLabels) {
-        final var service = client.services().inNamespace(operatorNamespace).withName(serviceName).get();
-        final var actualAnnotations = service.getMetadata()
-                .getAnnotations()
+            final @NotNull Map<String, String> expectedLabels,
+            final boolean expectedAnnotationsToBeEqual,
+            final boolean expectedLabelsToBeEqual) {
+        final var metadata = metadataSupplier.get();
+        final var actualAnnotations = metadata.getAnnotations()
                 .entrySet()
                 .stream()
-                .filter(entry -> !entry.getKey().startsWith("javaoperatorsdk.io") &&
-                        !entry.getKey().startsWith("jobLabel"))
+                .filter(entry -> !entry.getKey().contains("javaoperatorsdk.io") &&
+                        !entry.getKey().contains("jobLabel") &&
+                        !entry.getKey().contains("kubernetes-resource-versions"))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        assertThat(actualAnnotations).as(String.format("%s annotations", label)).isEqualTo(expectedAnnotations);
-
-        final var actualLabels = service.getMetadata()
-                .getLabels()
+        if (expectedAnnotationsToBeEqual) {
+            assertThat(actualAnnotations).as(String.format("%s annotations", label)).isEqualTo(expectedAnnotations);
+        } else {
+            assertThat(actualAnnotations).as(String.format("%s annotations", label)).isNotEqualTo(expectedAnnotations);
+        }
+        final var actualLabels = metadata.getLabels()
                 .entrySet()
                 .stream()
-                .filter(entry -> !entry.getKey().startsWith("helm.sh/chart") && !entry.getKey().startsWith("jobLabel"))
+                .filter(entry -> !entry.getKey().contains("helm.sh/chart") && !entry.getKey().contains("jobLabel"))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        assertThat(actualLabels).as(String.format("%s labels", label)).isEqualTo(expectedLabels);
+        if (expectedLabelsToBeEqual) {
+            assertThat(actualLabels).as(String.format("%s labels", label)).isEqualTo(expectedLabels);
+        } else {
+            assertThat(actualLabels).as(String.format("%s labels", label)).isNotEqualTo(expectedLabels);
+        }
     }
 }
