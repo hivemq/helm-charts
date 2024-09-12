@@ -49,9 +49,11 @@ spec:
         {{- .Values.podScheduling.tolerations | toYaml | nindent 8 }}
       {{- end }}
       containers:
-        - env:
+        - name: hivemq-platform-operator
+          env:
             - name: JAVA_OPTS
               value: {{.Values.javaOpts | quote }}
+            {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
             - name: quarkus.operator-sdk.controllers.hivemq-controller.selector
               value: operator={{ .Values.selector }}
@@ -98,6 +100,7 @@ spec:
               value: "{{ .Values.http.port }}"
             - name: quarkus.http.ssl-port
               value: "{{ .Values.https.port }}"
+            {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
             - name: quarkus.http.ssl.certificate.key-store-file-type
               value: "JKS"
@@ -106,6 +109,7 @@ spec:
             - name: quarkus.http.ssl.certificate.trust-store-file
               value: "/mnt/tls/truststore.jks"
             - name: quarkus.http.ssl.certificate.key-store-password
+              {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.keystorePassword "nil") (.Values.tls.keystorePassword) }}
               value: "{{ .Values.tls.keystorePassword }}"
               {{- else }}
@@ -115,6 +119,7 @@ spec:
                   key: keystore.password
               {{- end }}
             - name: quarkus.http.ssl.certificate.trust-store-password
+              {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
               value: "{{ .Values.tls.truststorePassword }}"
               {{- else }}
@@ -139,7 +144,6 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 10
-          name: hivemq-platform-operator
           ports:
             - name: {{ printf "http-%s" .Release.Name | lower | trunc 15 | trimSuffix "-"  }}
               containerPort: {{ .Values.http.port }}
@@ -177,6 +181,7 @@ spec:
               {{- with .Values.resources.ephemeralStorage }}
               ephemeral-storage: {{ . | trim }}
               {{- end }}
+          {{- /* `nil` check needed for backward compatibility */ -}}
           {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
           volumeMounts:
             - name: tls
@@ -188,6 +193,7 @@ spec:
         - name: {{ .Values.image.pullSecretName }}
       {{- end }}
       serviceAccountName: {{ include "hivemq-platform-operator.serviceAccountName" . }}
+      {{- /* `nil` check needed for backward compatibility */ -}}
       {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
       volumes:
         - name: tls

@@ -564,6 +564,53 @@ tests:
       - notExists:
           path: spec.template.spec.containers[0].resources.limits
 
+  - it: with default values, no selector environment variable is set
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+
+  - it: with nil selector value set, no selector environment variable is set
+    set:
+      selector: nil
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+
+  - it: with custom selector value set, selector environment variable is set
+    set:
+      selector: foobar
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+            value: "operator=foobar"
+
   - it: with default CRD values
     asserts:
       - exists:
