@@ -3,15 +3,30 @@ templates:
   - hivemq-custom-resource.yml
 tests:
 
-  - it: with operator selector
-    set:
-      operator.selector: north
+  - it: default Kind is HiveMQPlatform
     asserts:
       - isKind:
           of: HiveMQPlatform
+
+  - it: with a custom operator selector
+    set:
+      operator.selector: north
+    asserts:
+      - exists:
+          path: metadata.labels.operator
       - equal:
           path: metadata.labels.operator
           value: north
+
+  - it: with default values, no operator selector label set
+    asserts:
+      - notExists:
+          path: metadata.labels.operator
+
+  - it: with nil operator selector value, no operator selector label set
+    asserts:
+      - notExists:
+          path: metadata.labels.operator
 
   - it: with image definition
     set:
@@ -126,8 +141,6 @@ tests:
       nodes.replicaCount: 10
       nodes.logLevel: ERROR
     asserts:
-      - isKind:
-          of: HiveMQPlatform
       - equal:
           path: spec.logLevel
           value: ERROR
