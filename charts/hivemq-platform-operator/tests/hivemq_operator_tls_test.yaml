@@ -2,7 +2,75 @@ suite: test HiveMQ Platform Operator with TLS
 templates:
   - deployment.yml
 tests:
-  - it: with TLS configuration
+
+  - it: with default values, no TLS configuration is set
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            - name: quarkus.http.ssl.certificate.key-store-file-type
+              value: "JKS"
+            - name: quarkus.http.ssl.certificate.key-store-file
+              value: "/mnt/tls/keystore.jks"
+            - name: quarkus.http.ssl.certificate.trust-store-file
+              value: "/mnt/tls/truststore.jks"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.key-store-password
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.trust-store-password
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.template.spec.volumes
+
+  - it: with TLS nil values set, no TLS configuration is set
+    set:
+      tls:
+        secretName: nil
+        keystorePassword: nil
+        truststorePassword: nil
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            - name: quarkus.http.ssl.certificate.key-store-file-type
+              value: "JKS"
+            - name: quarkus.http.ssl.certificate.key-store-file
+              value: "/mnt/tls/keystore.jks"
+            - name: quarkus.http.ssl.certificate.trust-store-file
+              value: "/mnt/tls/truststore.jks"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.key-store-password
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.trust-store-password
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.template.spec.volumes
+
+  - it: with custom secret name
     set:
       tls.secretName: my-tls-secret
     asserts:
@@ -46,6 +114,63 @@ tests:
               secretKeyRef:
                 name: my-tls-secret
                 key: truststore.password
+      - exists:
+          path: spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: tls
+            mountPath: /mnt/tls
+            readOnly: true
+      - exists:
+          path: spec.template.spec.volumes
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: tls
+            secret:
+              secretName: my-tls-secret
+
+  - it: with custom TLS values set
+    set:
+      tls.secretName: my-tls-secret
+      tls.keystorePassword: my-keystore-password
+      tls.truststorePassword: my-truststore-password
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+      - isKind:
+          of: Deployment
+      - exists:
+          path: spec.template.spec.containers[0]
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.key-store-file-type
+            value: "JKS"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.key-store-file
+            value: "/mnt/tls/keystore.jks"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.trust-store-file
+            value: "/mnt/tls/truststore.jks"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.key-store-password
+            value: "my-keystore-password"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: quarkus.http.ssl.certificate.trust-store-password
+            value: "my-truststore-password"
       - exists:
           path: spec.template.spec.containers[0].volumeMounts
       - contains:
