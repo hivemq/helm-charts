@@ -1,0 +1,157 @@
+suite: HiveMQ Swarm ServiceMonitor
+templates:
+  - servicemonitor.yaml
+release:
+  name: swarm
+  namespace: swarm
+chart:
+  appVersion: 4.31.0
+  version: 0.2.37
+tests:
+
+  - it: with default values, no ServiceMonitor is created
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: with monitoring enabled and CRD available in the K8s cluster, ServiceMonitor created
+    # TODO: Would be nice to be able to unset the capabilities.apiVersions, so we could define the below as a global values
+    # for this testsuite, and only unset this for the specific test where we assert this API version is not available.
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    set:
+      monitoring.enabled: true
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with no Prometheus Monitoring CRDs installed, validation fails
+    set:
+      monitoring.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: There is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
+
+  - it: kind is ServiceMonitor and apiVersion is monitoring.coreos.com/v1
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    set:
+      monitoring.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - isAPIVersion:
+          of: monitoring.coreos.com/v1
+
+  - it: with monitoring enabled and default values, ServiceMonitor metadata created with defaults values
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    set:
+      monitoring.enabled: true
+    asserts:
+      - isSubset:
+          path: metadata
+          content:
+            labels:
+              release: swarm
+              helm.sh/chart: hivemq-swarm-0.2.37
+              app.kubernetes.io/name: hivemq-swarm
+              app.kubernetes.io/instance: swarm
+              app.kubernetes.io/version: "4.31.0"
+              app.kubernetes.io/managed-by: Helm
+            name: swarm-hivemq-swarm
+            namespace: swarm
+
+  - it: with monitoring enabled and custom metadata values, ServiceMonitor metadata created with custom values
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    release:
+      name: custom-release-name
+      namespace: custom-release-namespace
+    # TODO: This chart object below seems to not be overwritten, and chart values remain from the ones defined at the top root element.
+    # See issue: https://github.com/helm-unittest/helm-unittest/issues/412.
+    chart:
+      appVersion: 1.0.0
+      version: 0.1.0
+    set:
+      monitoring:
+        enabled: true
+        namespace: custom-namespace
+    asserts:
+      - isSubset:
+          path: metadata
+          content:
+            labels:
+              app.kubernetes.io/instance: custom-release-name
+              app.kubernetes.io/managed-by: Helm
+              app.kubernetes.io/name: hivemq-swarm
+              app.kubernetes.io/version: 4.31.0
+              helm.sh/chart: hivemq-swarm-0.2.37
+              release: custom-release-name
+            name: custom-release-name-hivemq-swarm
+            namespace: custom-release-namespace
+
+  - it: with monitoring enabled and default values, ServiceMonitor spec created with defaults values
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    set:
+      monitoring.enabled: true
+    asserts:
+      - isSubset:
+          path: spec
+          content:
+            endpoints:
+              - interval: 15s
+                scrapeTimeout: 10s
+                port: api
+              - interval: 15s
+                scrapeTimeout: 10s
+                port: metrics
+            jobLabel: swarm-hivemq-swarm
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: hivemq-swarm
+                app.kubernetes.io/instance: swarm
+            namespaceSelector:
+              matchNames:
+                - swarm
+
+  - it: with monitoring enabled and custom spec values, ServiceMonitor spec created with custom values
+    capabilities:
+      apiVersions:
+        - monitoring.coreos.com/v1
+    release:
+      name: custom-release-name
+      namespace: custom-release-namespace
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 20s
+          scrapeTimeout: 5s
+      nameOverride: custom-hivemq-swarm
+    asserts:
+      - isSubset:
+          path: spec
+          content:
+            endpoints:
+              - interval: 20s
+                port: api
+                scrapeTimeout: 5s
+              - interval: 20s
+                port: metrics
+                scrapeTimeout: 5s
+            jobLabel: custom-release-name-custom-hivemq-swarm
+            namespaceSelector:
+              matchNames:
+                - custom-release-namespace
+            selector:
+              matchLabels:
+                app.kubernetes.io/instance: custom-release-name
+                app.kubernetes.io/name: custom-hivemq-swarm
