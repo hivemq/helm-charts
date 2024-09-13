@@ -119,6 +119,15 @@ agents:
   ## JVM options to start the agents with
   ##
   javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=30 -XX:MaxRAMPercentage=80 -XX:MinRAMPercentage=30 -XX:MaxDirectMemorySize=500M"
+## Monitoring configuration
+##
+monitoring:
+  # Deploy ServiceMonitor for Prometheus Operator and Configmap for Grafana Dashboard
+  enabled: false
+  # dashboardNamespace: monitoring (defaults to use the namespace this chart is deployed to)
+  serviceMonitor:
+    interval: 15s
+    scrapeTimeout: 10s
 ## Configures the ServiceAccount for HiveMQ Swarm
 ## ref: https://kubernetes.io/docs/concepts/security/service-accounts/
 ##

@@ -1,0 +1,19 @@
+{{- if .Values.monitoring.enabled }}
+{{- include "hivemq-swarm.validate-prometheus-monitoring-stack-installed" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hivemq-swarm.fullname" . }}-dashboard
+  {{- if .Values.monitoring.dashboardNamespace }}
+  namespace: {{ .Values.monitoring.dashboardNamespace }}
+  {{- else }}
+  namespace: {{ template "hivemq-swarm.namespace" . }}
+  {{- end }}
+  labels:
+    grafana_dashboard: "1"
+    {{- include "hivemq-swarm.labels" . | nindent 4 }}
+data:
+  swarm.json: |
+    {{- .Files.Get "files/grafana-dashboard.json" | nindent 4 }}
+
+{{- end }}
