@@ -1,12 +1,12 @@
 {{/*
-Expand the name of the chart.
+Expands the name of the chart.
 */}}
 {{- define "hivemq-swarm.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
-Create a default fully qualified app name.
+Creates a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
@@ -24,7 +24,7 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
-Create chart name and version as used by the chart label.
+Creates chart name and version as used by the chart label.
 */}}
 {{- define "hivemq-swarm.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
@@ -51,7 +51,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the service account to use
+Creates the name of the service account to use
 */}}
 {{- define "hivemq-swarm.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
@@ -61,7 +61,6 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
-
 {{- define "hivemq-swarm.namespace" -}}
   {{- if .Values.namespaceOverride -}}
     {{- .Values.namespaceOverride -}}
@@ -69,3 +68,14 @@ Create the name of the service account to use
     {{- .Release.Namespace -}}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Validates that the required Prometheus Monitoring CRDs are installed in the Kubernetes cluster.
+If the CRD is not present the ServiceMonitor cannot be installed and the installation fails.
+*/}}
+{{- define "hivemq-swarm.validate-prometheus-monitoring-stack-installed" -}}
+{{- $isCRDPresent := .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if not $isCRDPresent }}
+    {{- fail (printf "There is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#monitor for more help and guidance.") }}
+{{- end }}
+{{- end }}

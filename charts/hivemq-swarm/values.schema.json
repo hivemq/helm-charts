@@ -203,6 +203,25 @@
     "license" : {
       "type" : "string"
     },
+    "monitoring" : {
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "serviceMonitor" : {
+          "properties" : {
+            "interval" : {
+              "type" : "string"
+            },
+            "scrapeTimeout" : {
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
+    },
     "nameOverride" : {
       "type" : "string"
     },
