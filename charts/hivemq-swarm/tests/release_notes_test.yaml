@@ -1,0 +1,57 @@
+suite: HiveMQ Swarm Chart Notes
+templates:
+  - NOTES.txt
+release:
+  name: swarm
+  namespace: hivemq-swarm-namespace
+tests:
+
+  - it: with default values
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Swarm release "swarm" installed in namespace "hivemq-swarm-namespace"
+            To access the commander, please execute the following commands:
+
+              echo "Commander is available via http://127.0.0.1:8080"
+              kubectl --namespace hivemq-swarm-namespace port-forward svc/swarm-hivemq-swarm-api 8080:80
+
+            For more information and configuration guidance, visit https://docs.hivemq.com/hivemq-swarm/latest/index.html
+            -----
+
+  - it: with legacy monitoring dedicated value enabled, shows warning
+    set:
+      monitoring.dedicated: true
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Swarm release "swarm" installed in namespace "hivemq-swarm-namespace"
+            To access the commander, please execute the following commands:
+            
+              echo "Commander is available via http://127.0.0.1:8080"
+              kubectl --namespace hivemq-swarm-namespace port-forward svc/swarm-hivemq-swarm-api 8080:80
+            
+            *** Warning ***
+            Value `monitoring.dedicated` is removed from the chart.
+            Please, create and setup your Prometheus Monitoring stack separately: check https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#monitor for help.
+            
+            For more information and configuration guidance, visit https://docs.hivemq.com/hivemq-swarm/latest/index.html
+            -----
+
+  - it: with legacy monitoring dedicated value disabled, shows no warning
+    set:
+      monitoring.dedicated: false
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Swarm release "swarm" installed in namespace "hivemq-swarm-namespace"
+            To access the commander, please execute the following commands:
+
+              echo "Commander is available via http://127.0.0.1:8080"
+              kubectl --namespace hivemq-swarm-namespace port-forward svc/swarm-hivemq-swarm-api 8080:80
+
+            For more information and configuration guidance, visit https://docs.hivemq.com/hivemq-swarm/latest/index.html
+            -----
