@@ -36,10 +36,10 @@ spec:
                   containerPort: 9399
               resources:
                 limits:
-                  cpu: 1024m
+                  cpu: 1000m
                   memory: 2048M
                 requests:
-                  cpu: 1024m
+                  cpu: 1000m
                   memory: 2048M
   services:
     - metadata:
