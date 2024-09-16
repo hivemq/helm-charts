@@ -306,7 +306,7 @@ tests:
           count: 1
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
           value: 2048M
@@ -314,7 +314,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
           value: 2048M
@@ -365,7 +365,7 @@ tests:
           count: 1
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
           value: 2048M
@@ -426,7 +426,7 @@ tests:
           count: 1
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
           value: 2048M
