@@ -305,6 +305,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-duplicated-service-names" . -}}
 {{- include "hivemq-platform.validate-service-container-ports" . -}}
 {{- include "hivemq-platform.validate-default-service-ports" . -}}
+{{- include "hivemq-platform.validate-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
 
@@ -359,9 +360,9 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 {{- define "hivemq-platform.validate-default-service-ports" -}}
 {{- $services := .Values.services }}
 {{- $defaultPortsList := list }}
-{{- $defaultPortsList := ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
-{{- $defaultPortsList := ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
-{{- $defaultPortsList := ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
+{{- $defaultPortsList = ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
+{{- $defaultPortsList = ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
+{{- $defaultPortsList = ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
     {{- fail (printf "Container port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
@@ -384,6 +385,19 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
   {{- end }}
   {{- if and ($service.exposed) (not $hasStatefulSetMigration) (hasKey $service "legacyPortName") }}
     {{- fail (printf "Service type `%s` with container port `%d` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that proxy protocol value is only used by either MQTT or WebSocket services.
+Usage: {{ include "hivemq-platform.validate-proxy-protocol-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-proxy-protocol-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "hivemqProxyProtocol") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
+    {{- fail (printf "Service type %s with container port %d is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
