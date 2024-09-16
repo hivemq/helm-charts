@@ -25,7 +25,7 @@ nodes:
   # Note: For production use-cases HiveMQ requires a minimum of 4 CPUs and 4G of memory.
   #       See: https://docs.hivemq.com/hivemq/latest/user-guide/system-requirements.html#minimum
   resources:
-    cpu: 1024m
+    cpu: 1000m
     memory: 2048M
     # Set to specify the ephemeral-storage needed for managing local ephemeral storage in the Platform pods.
     # ephemeralStorage: 15Gi

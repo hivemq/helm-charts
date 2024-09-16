@@ -411,7 +411,7 @@ tests:
           count: 1
       - equal:
           path: spec.template.spec.containers[0].resources.requests.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.template.spec.containers[0].resources.requests.memory
           value: 1Gi
@@ -419,7 +419,7 @@ tests:
           path: spec.template.spec.containers[0].resources.requests.ephemeral-storage
       - equal:
           path: spec.template.spec.containers[0].resources.limits.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.template.spec.containers[0].resources.limits.memory
           value: 1Gi
@@ -470,7 +470,7 @@ tests:
           count: 1
       - equal:
           path: spec.template.spec.containers[0].resources.requests.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.template.spec.containers[0].resources.requests.memory
           value: 1Gi
@@ -531,7 +531,7 @@ tests:
           count: 1
       - equal:
           path: spec.template.spec.containers[0].resources.requests.cpu
-          value: 1024m
+          value: 1000m
       - equal:
           path: spec.template.spec.containers[0].resources.requests.memory
           value: 1Gi
