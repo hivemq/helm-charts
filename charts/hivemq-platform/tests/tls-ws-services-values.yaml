@@ -19,18 +19,22 @@ services:
     containerPort: 8004
     keystoreSecretName: "websocket-secret2"
     keystorePasswordSecretName: "secret-password2"
+    hivemqProxyProtocol: true
   - type: websocket
     exposed: true
     containerPort: 8005
     keystoreSecretName: "websocket-secret3"
     keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    hivemqProxyProtocol: false
   - type: websocket
     exposed: true
     containerPort: 8006
     keystoreSecretName: "websocket-secret4"
     keystorePasswordSecretName: "secret-password4"
     keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    hivemqProxyProtocol: true
   - type: websocket
     exposed: true
     containerPort: 8007
+    hivemqProxyProtocol: true
