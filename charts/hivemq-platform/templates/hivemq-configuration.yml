@@ -19,70 +19,82 @@ data:
       {{- if or $hastMqtt $hasWebsocket }}
       <listeners>
       {{- $containerPortsList := list }}
-      {{- range $key, $val := .Values.services }}
-        {{- if and ($val.exposed) (not (has $val.containerPort $containerPortsList)) }}
-        {{- if eq $val.type "mqtt" }}
-        {{- if $val.keystoreSecretName }}
+      {{- range $service := .Values.services }}
+        {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) }}
+        {{- if eq $service.type "mqtt" }}
+        {{- if $service.keystoreSecretName }}
         <tls-tcp-listener>
-          <port>{{ $val.containerPort }}</port>
+          <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if hasKey $service "hivemqProxyProtocol" }}
+          <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
+          {{- end }}
           <tls>
             <keystore>
-              <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
-              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
+              <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
               <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
             </keystore>
-            {{- if $val.truststoreSecretName }}
+            {{- if $service.truststoreSecretName }}
             <truststore>
-              <path>/tls-{{ $val.truststoreSecretName }}/{{ $val.truststoreSecretKey | default "truststore" }}</path>
-              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass" }}</password>
+              <path>/tls-{{ $service.truststoreSecretName }}/{{ $service.truststoreSecretKey | default "truststore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
             </truststore>
-            {{- end}}
-            {{- if $val.tlsClientAuthenticationMode}}
-            <client-authentication-mode>{{ $val.tlsClientAuthenticationMode }}</client-authentication-mode>
-            {{- end}}
+            {{- end }}
+            {{- if $service.tlsClientAuthenticationMode}}
+            <client-authentication-mode>{{ $service.tlsClientAuthenticationMode }}</client-authentication-mode>
+            {{- end }}
           </tls>
         </tls-tcp-listener>
         {{- else }}
         <tcp-listener>
-          <port>{{ $val.containerPort }}</port>
+          <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if hasKey $service "hivemqProxyProtocol" }}
+          <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
+          {{- end }}
         </tcp-listener>
         {{- end }}
-        {{- else if eq $val.type "websocket" }}
-        {{- if $val.keystoreSecretName }}
+        {{- else if eq $service.type "websocket" }}
+        {{- if $service.keystoreSecretName }}
         <tls-websocket-listener>
-          <port>{{ $val.containerPort }}</port>
+          <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if hasKey $service "hivemqProxyProtocol" }}
+          <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
+          {{- end }}
           <path>/mqtt</path>
           <tls>
             <keystore>
-              <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
-              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
+              <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
               <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
             </keystore>
-            {{- if $val.truststoreSecretName }}
+            {{- if $service.truststoreSecretName }}
             <truststore>
-              <path>/tls-{{ $val.truststoreSecretName }}/{{ $val.truststoreSecretKey | default "truststore" }}</path>
-              <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.truststoreSecretName "truststore_pass" }}</password>
+              <path>/tls-{{ $service.truststoreSecretName }}/{{ $service.truststoreSecretKey | default "truststore" }}</path>
+              <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
             </truststore>
-            {{- end}}
-            {{- if $val.tlsClientAuthenticationMode}}
-            <client-authentication-mode>{{ $val.tlsClientAuthenticationMode }}</client-authentication-mode>
-            {{- end}}
+            {{- end }}
+            {{- if $service.tlsClientAuthenticationMode}}
+            <client-authentication-mode>{{ $service.tlsClientAuthenticationMode }}</client-authentication-mode>
+            {{- end }}
           </tls>
         </tls-websocket-listener>
         {{- else }}
         <websocket-listener>
-          <port>{{ $val.containerPort }}</port>
+          <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if hasKey $service "hivemqProxyProtocol" }}
+          <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
+          {{- end }}
           <path>/mqtt</path>
         </websocket-listener>
         {{- end }}
         {{- end }}
         {{- end }}
-        {{- if $val.exposed }}
-          {{- $containerPortsList = $val.containerPort | append $containerPortsList}}
+        {{- if $service.exposed }}
+          {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
         {{- end }}
       {{- end }}
       </listeners>
@@ -114,31 +126,31 @@ data:
       <control-center>
         <listeners>
         {{- $containerPortsList := list }}
-        {{- range $key, $val := .Values.services }}
-          {{- if and ($val.exposed) (not (has $val.containerPort $containerPortsList)) }}
-          {{- if eq $val.type "control-center" }}
-          {{- if (hasKey $val "keystoreSecretName") }}
+        {{- range $service := .Values.services }}
+          {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) }}
+          {{- if eq $service.type "control-center" }}
+          {{- if (hasKey $service "keystoreSecretName") }}
           <https>
-            <port>{{ $val.containerPort }}</port>
+            <port>{{ $service.containerPort }}</port>
             <bind-address>0.0.0.0</bind-address>
             <tls>
               <keystore>
-                <path>/tls-{{ $val.keystoreSecretName }}/{{ $val.keystoreSecretKey | default "keystore" }}</path>
-                <password>{{ printf "${%s_%s_%s_%s}" $val.type $.Release.Name $val.keystoreSecretName "keystore_pass" }}</password>
+                <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
+                <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
                 <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
               </keystore>
             </tls>
           </https>
           {{- else }}
           <http>
-            <port>{{ $val.containerPort }}</port>
+            <port>{{ $service.containerPort }}</port>
             <bind-address>0.0.0.0</bind-address>
           </http>
           {{- end }}
           {{- end }}
           {{- end }}
-          {{- if $val.exposed }}
-            {{- $containerPortsList = $val.containerPort | append $containerPortsList}}
+          {{- if $service.exposed }}
+            {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
           {{- end }}
         {{- end }}
         </listeners>
@@ -160,19 +172,19 @@ data:
           <enabled>{{ printf "%t" .Values.restApi.authEnabled | default false }}</enabled>
         </auth>
         {{- $containerPortsList := list }}
-        {{- range $key, $val := .Values.services }}
-        {{- if and ($val.exposed) (not (has $val.containerPort $containerPortsList)) }}
-        {{- if eq $val.type "rest-api" }}
+        {{- range $service := .Values.services }}
+        {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) }}
+        {{- if eq $service.type "rest-api" }}
         <listeners>
           <http>
-            <port>{{ $val.containerPort }}</port>
+            <port>{{ $service.containerPort }}</port>
             <bind-address>0.0.0.0</bind-address>
           </http>
         </listeners>
         {{- end }}
         {{- end }}
-        {{- if $val.exposed }}
-          {{- $containerPortsList = $val.containerPort | append $containerPortsList}}
+        {{- if $service.exposed }}
+          {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
         {{- end }}
         {{- end }}
       </rest-api>
