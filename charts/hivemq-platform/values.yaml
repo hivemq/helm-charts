@@ -100,16 +100,16 @@ license:
   # Overrides the License information via file using --set-file license.lic.
   overrideLicense: ""
 
-# Configures HiveMQ restriction options,
-# see https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html
+# Configures HiveMQ restriction options.
+# See https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html
 #hivemqRestrictions:
 #  maxConnections: -1
 #  incomingBandwidthThrottling: 0
 #  noConnectIdleTimeout: 10000
 #  maxClientIdLength: 65535
 
-# Configures HiveMQ MQTT options:
-# see https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config
+# Configures HiveMQ MQTT options.
+# See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config
 #hivemqMqtt:
 #  sessionExpiryMaxInterval: 4294967295
 #  messageExpiryMaxInterval: 4294967296
@@ -127,15 +127,15 @@ license:
 #  queuedMessagesMaxSize: 1000
 #  queuedMessagesStrategy: "discard"
 
-# Configures HiveMQ MQTT Add-on options:
-# see https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html
+# Configures HiveMQ MQTT Add-on options.
+# See https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html
 #hivemqMqttAddons:
 #  expiredMessagesTopic: false
 #  droppedMessagesTopic: false
 #  deadMessagesTopic: false
 
-# Configures HiveMQ MQTT security options:
-# see https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#security
+# Configures HiveMQ MQTT security options.
+# See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#security
 #hivemqMqttSecurity:
 #  allowEmptyClientId: true
 #  payloadFormatValidation: false
@@ -192,6 +192,9 @@ services:
     annotations: {}
     # Labels to add to the service
     labels: {}
+    # Configures the HiveMQ PROXY protocol for a HiveMQ listener. Only applicable to MQTT and WebSocket services.
+    # See https://docs.hivemq.com/hivemq/latest/user-guide/proxy-protocol.html
+    # hivemqProxyProtocol: false
   # Secure MQTT service configuration
   - type: mqtt
     # The custom name of the Kubernetes service resource. If not set or empty, the default service name will be as follows:

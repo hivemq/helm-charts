@@ -1823,6 +1823,29 @@ tests:
     asserts:
       - failedTemplate: {}
 
+  - it: with a non MQTT or WebSocket service enabled and PROXY protocol enabled, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          hivemqProxyProtocol: true
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type control-center with container port 8081 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+
+  - it: with a non MQTT or WebSocket service disabled and PROXY protocol enabled, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+          hivemqProxyProtocol: true
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
   - it: with a REST API service enabled
     set:
       services:
