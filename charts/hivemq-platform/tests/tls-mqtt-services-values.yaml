@@ -14,17 +14,20 @@ services:
     containerPort: 1885
     keystoreSecretName: "mqtt-secret1"
     keystorePasswordSecretName: "secret-password1"
+    hivemqProxyProtocol: true
   - type: mqtt
     exposed: false
     containerPort: 1886
     keystoreSecretName: "mqtt-secret2"
     keystorePasswordSecretName: "secret-password2"
+    hivemqProxyProtocol: true
   - type: mqtt
     exposed: true
     containerPort: 1887
     keystoreSecretName: "mqtt-secret3"
     keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    hivemqProxyProtocol: false
   - type: mqtt
     exposed: true
     containerPort: 1888
@@ -34,3 +37,4 @@ services:
   - type: mqtt
     exposed: true
     containerPort: 1889
+    hivemqProxyProtocol: true
