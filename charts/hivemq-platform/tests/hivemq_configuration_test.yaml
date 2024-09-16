@@ -1028,7 +1028,49 @@ tests:
           pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
       - notMatchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-tcp-listener>"
+
+  - it: with a MQTT service exposed and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tcp-listener>"
+
+  - it: with a MQTT service exposed and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tcp-listener>"
 
   - it: with a MQTT service not exposed
     template: hivemq-configuration.yml
@@ -1037,6 +1079,7 @@ tests:
         - type: mqtt
           exposed: false
           containerPort: 1884
+          hivemqProxyProtocol: true
     asserts:
       - exists:
           path: data["config.xml"]
@@ -1045,7 +1088,13 @@ tests:
           pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
       - notMatchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-tcp-listener>"
 
   - it: with a secure MQTT service exposed
     template: hivemq-configuration.yml
@@ -1510,6 +1559,7 @@ tests:
           tlsClientAuthenticationMode: "OPTIONAL"
           truststoreSecretName: "truststore-secret"
           truststoreSecretKey: "truststore.jks"
+          hivemqProxyProtocol: true
     asserts:
       - exists:
           path: data["config.xml"]
@@ -1518,7 +1568,13 @@ tests:
           pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
       - notMatchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-tcp-listener>"
 
   - it: with a secure mutual TLS MQTT service exposed using default values
     template: hivemq-configuration.yml
@@ -1601,6 +1657,62 @@ tests:
                 name: my-truststore-secret
         template: hivemq-custom-resource.yml
 
+  - it: with a secure mutual TLS MQTT service exposed and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-tcp-listener>"
+
+  - it: with a secure mutual TLS MQTT service exposed and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tls-tcp-listener>"
+
   - it: with several secure and non-secure MQTT services
     template: hivemq-configuration.yml
     values:
@@ -1639,6 +1751,7 @@ tests:
                 <tls-tcp-listener>
                   <port>1885</port>
                   <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>true</proxy-protocol>
                   <tls>
                     <keystore>
                       <path>/tls-mqtt-secret1/keystore</path>
@@ -1650,6 +1763,7 @@ tests:
                 <tls-tcp-listener>
                   <port>1887</port>
                   <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>false</proxy-protocol>
                   <tls>
                     <keystore>
                       <path>/tls-mqtt-secret3/keystore</path>
@@ -1672,6 +1786,7 @@ tests:
                 <tcp-listener>
                   <port>1889</port>
                   <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>true</proxy-protocol>
                 </tcp-listener>
               </listeners>
               <cluster>
@@ -2418,7 +2533,61 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
       - notMatchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a WebSocket service not exposed
     template: hivemq-configuration.yml
@@ -2435,7 +2604,13 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
       - notMatchRegex:
           path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
           pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service enabled, using keystorePassword
     template: hivemq-configuration.yml
@@ -2564,7 +2739,10 @@ tests:
           path: data["config.xml"]
       - notMatchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8000</port>.*?<tls-websocket-listener>.*?</listeners>"
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?<tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket services exposed using a custom keystore private password
     template: hivemq-configuration.yml
@@ -2805,6 +2983,7 @@ tests:
                 <tls-websocket-listener>
                   <port>8005</port>
                   <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>false</proxy-protocol>
                   <path>/mqtt</path>
                   <tls>
                     <keystore>
@@ -2817,6 +2996,7 @@ tests:
                 <tls-websocket-listener>
                   <port>8006</port>
                   <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>true</proxy-protocol>
                   <path>/mqtt</path>
                   <tls>
                     <keystore>
@@ -2829,6 +3009,7 @@ tests:
                 <websocket-listener>
                   <port>8007</port>
                   <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>true</proxy-protocol>
                   <path>/mqtt</path>
                 </websocket-listener>
               </listeners>
@@ -2905,6 +3086,60 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?</listeners>"
+
+  - it: with a secure WebSocket service and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?<websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?<websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>.*?</listeners>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with Data Hub enabled
     template: hivemq-configuration.yml
