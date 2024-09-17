@@ -208,9 +208,15 @@
         "enabled" : {
           "type" : "boolean"
         },
+        "dashboardNamespace" : {
+          "type" : "string"
+        },
         "serviceMonitor" : {
           "properties" : {
             "interval" : {
+              "type" : "string"
+            },
+            "namespace" : {
               "type" : "string"
             },
             "scrapeTimeout" : {
