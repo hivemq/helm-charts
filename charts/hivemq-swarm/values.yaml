@@ -124,8 +124,11 @@ agents:
 monitoring:
   # Deploy ServiceMonitor for Prometheus Operator and Configmap for Grafana Dashboard
   enabled: false
+  # Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the namespace this chart is deployed to.
   # dashboardNamespace: monitoring (defaults to use the namespace this chart is deployed to)
   serviceMonitor:
+    # Namespace where the ServiceMonitor will be deployed to. Defaults to use the namespace this chart is deployed to.
+    # namespace: monitoring
     interval: 15s
     scrapeTimeout: 10s
 ## Configures the ServiceAccount for HiveMQ Swarm
