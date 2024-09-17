@@ -1,7 +1,7 @@
 nodes:
   replicaCount: 1
   resources:
-    cpu: 1024m
+    cpu: 1000m
     memory: 1024M
   podSecurityContext:
     enabled: true
