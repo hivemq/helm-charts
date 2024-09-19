@@ -119,8 +119,6 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
                 "--etcd-arg=auto-compaction-mode=revision",
                 "--etcd-arg=auto-compaction-retention=1000000",
                 "--kube-apiserver-arg=etcd-compaction-interval=0s",
-                // TODO: workaround for the operator startup failure with K8s v1.31.0 or newer
-                "--kube-apiserver-arg=feature-gates=ResilientWatchCacheInitialization=false",
                 k3s.ordinal() > K3s.V1_24.ordinal() ? "--disable=traefik" : "--no-deploy=traefik",
                 "--tls-san=" + getHost()));
         if (!additionalCommands.isEmpty()) {
