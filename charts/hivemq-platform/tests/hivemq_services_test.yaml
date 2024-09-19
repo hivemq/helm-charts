@@ -2236,3 +2236,58 @@ tests:
           content:
             name: legacy
             containerPort: 1883
+
+  - it: with default values, then truncated service names
+    release:
+      name: this-is-more-than-32-chars-long-release-name
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8080
+            containerPort: 8080
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-this-is-more-than-32-chars-long-release-na-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-this-is-more-than-32-chars-long-release-na-cc-8080
+            spec:
+              ports:
+                - name: cc-8080
+                  targetPort: cc-8080
+                  port: 8080
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-this-is-more-than-32-chars-long-release-na-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
