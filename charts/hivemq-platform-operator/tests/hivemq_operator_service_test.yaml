@@ -1,0 +1,79 @@
+suite: HiveMQ Platform Operator service tests
+templates:
+  - service.yml
+release:
+  name: operator
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with default values, default Service created
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: Service
+          name: hivemq-platform-operator-operator
+
+  - it: with default values, default labels created
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-operator-0.0.1
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+
+  - it: with long Helm release name, Service name truncated
+    release:
+      name: a-very-long-hivemq-platform-operator-release-name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-platform-operator-a-very-long-hivemq-platform-operator-r
+
+  - it: with long Helm release name, Service target ports truncated
+    release:
+      name: a-very-long-hivemq-platform-operator-release-name
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: http-a-very-long-hivemq-platform-operator-release-name
+            port: 8080
+            protocol: TCP
+            targetPort: http-a-very-lon
+      - contains:
+          path: spec.ports
+          content:
+            name: https-a-very-long-hivemq-platform-operator-release-name
+            port: 8443
+            protocol: TCP
+            targetPort: https-a-very-lo
+
+  - it: with default values, default Service spec created
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: http-operator
+            port: 8080
+            protocol: TCP
+            targetPort: http-operator
+      - contains:
+          path: spec.ports
+          content:
+            name: https-operator
+            port: 8443
+            protocol: TCP
+            targetPort: https-operator
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+      - equal:
+          path: spec.type
+          value: ClusterIP
