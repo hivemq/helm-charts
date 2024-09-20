@@ -24,21 +24,12 @@ Usage: {{ include "hivemq-platform.configuration-name" . }}
 {{- end -}}
 
 {{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "hivemq-platform.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end -}}
-
-{{/*
 Common labels
 */}}
 {{- define "hivemq-platform.labels" -}}
-helm.sh/chart: {{ include "hivemq-platform.chart" . }}
+helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 {{ include "hivemq-platform.selector-labels" . }}
-{{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
