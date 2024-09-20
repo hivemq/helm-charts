@@ -2,8 +2,8 @@ suite: test HiveMQ Platform NOTES
 templates:
   - NOTES.txt
 release:
-  name: hivemq-platform-release
-  namespace: hivemq-platform-namespace
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
 tests:
 
   - it: with default values
@@ -11,7 +11,7 @@ tests:
       - equalRaw:
           value: |
             -----
-            HiveMQ Platform release "hivemq-platform-release" installed in namespace "hivemq-platform-namespace"
+            HiveMQ Platform release "test-hivemq-platform" installed in namespace "test-hivemq-platform-namespace"
             
             Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
             -----
@@ -25,7 +25,7 @@ tests:
       - equalRaw:
           value: |
             -----
-            HiveMQ Platform release "hivemq-platform-release" installed in namespace "hivemq-platform-namespace"
+            HiveMQ Platform release "test-hivemq-platform" installed in namespace "test-hivemq-platform-namespace"
             
             Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
             
@@ -42,7 +42,7 @@ tests:
       - equalRaw:
           value: |
             -----
-            HiveMQ Platform release "hivemq-platform-release" installed in namespace "hivemq-platform-namespace"
+            HiveMQ Platform release "test-hivemq-platform" installed in namespace "test-hivemq-platform-namespace"
             
             Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
             
