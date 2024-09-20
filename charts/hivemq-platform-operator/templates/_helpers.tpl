@@ -7,21 +7,12 @@ If release name contains chart name it will be used as a full name.
 {{- end}}
 
 {{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "hivemq-platform-operator.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
 Common labels
 */}}
 {{- define "hivemq-platform-operator.labels" -}}
-helm.sh/chart: {{ include "hivemq-platform-operator.chart" . }}
+helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 {{ include "hivemq-platform-operator.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
