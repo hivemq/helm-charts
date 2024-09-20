@@ -4,7 +4,32 @@ templates:
   - hivemq-custom-resource.yml
 release:
   name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
 tests:
+
+  - it: with default values, default ConfigMap created
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: ConfigMap
+          name: hivemq-configuration-test-hivemq-platform
+          namespace: test-hivemq-platform-namespace
+        template: hivemq-configuration.yml
+
+  - it: with default values, default labels created
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-0.0.1
+            app.kubernetes.io/name: hivemq-platform
+            app.kubernetes.io/instance: test-hivemq-platform
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+        template: hivemq-configuration.yml
 
   - it: with default platform values
     template: hivemq-configuration.yml
