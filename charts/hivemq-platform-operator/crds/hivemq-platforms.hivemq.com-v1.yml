@@ -77,6 +77,14 @@ spec:
                       description: "The name of the Secret that contains configuration\
                         \ files for this extension"
                       type: "string"
+                    skipHttpsCertificateVerification:
+                      description: "Configures if the HTTPs certificate verification\
+                        \ should be skipped for extension and customization downloads."
+                      type: "boolean"
+                    skipHttpsHostnameVerification:
+                      description: "Configures if the HTTPs hostname verification\
+                        \ should be skipped for extension and customization downloads."
+                      type: "boolean"
                     supportsHotReload:
                       description: "Whether this extension supports hot-reload of\
                         \ configuration changes"
