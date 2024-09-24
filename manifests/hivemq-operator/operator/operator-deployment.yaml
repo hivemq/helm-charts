@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hivemq-operator
+  name: hivemq-operator-operator
   namespace: hivemq
   labels:
     app: hivemq-operator
@@ -34,7 +34,7 @@ spec:
             - name: MICRONAUT_SSL_ENABLED
               value: "false"
             - name: SSL_FQDN
-              value: "hivemq-operator.hivemq.svc"
+              value: "hivemq-operator-operator.hivemq.svc"
           resources: 
             limits:
               cpu: 800m
@@ -53,8 +53,8 @@ spec:
               containerPort: 8443
               protocol: TCP
       restartPolicy: Always
-      serviceAccountName: "hivemq-operator"
+      serviceAccountName: "hivemq-operator-operator"
       volumes:
         - name: templates
           configMap:
-            name: "hivemq-operator-templates"
+            name: "hivemq-operator-operator-templates"
