@@ -1257,5 +1257,5 @@ data:
           hivemq-cluster: {{ spec.name }}
 kind: ConfigMap
 metadata:
-  name: "hivemq-operator-operator-templates"
+  name: "hivemq-operator-templates"
   namespace: hivemq
