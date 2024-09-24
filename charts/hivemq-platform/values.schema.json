@@ -197,7 +197,7 @@
             "maximum" : 65535
           },
           "hivemqProxyProtocol" : {
-            "type": "boolean"
+            "type" : "boolean"
           },
           "keystoreSecretName" : {
             "type" : "string"
@@ -540,27 +540,31 @@
       }
     }
   },
-  "allOf": [
+  "allOf" : [
     {
-      "if": {
-        "properties": {
-          "migration": {
-            "type": "object",
-            "required": ["statefulSet"],
-            "properties": {
-              "statefulSet": {
-                "const": true
+      "if" : {
+        "properties" : {
+          "migration" : {
+            "type" : "object",
+            "required" : [
+              "statefulSet"
+            ],
+            "properties" : {
+              "statefulSet" : {
+                "const" : true
               }
             }
           }
         },
-        "required": ["migration"]
+        "required" : [
+          "migration"
+        ]
       },
-      "then": {
-        "properties": {
-          "services": {
-            "items": {
-              "required": [
+      "then" : {
+        "properties" : {
+          "services" : {
+            "items" : {
+              "required" : [
                 "type",
                 "exposed",
                 "legacyPortName",
@@ -570,11 +574,11 @@
           }
         }
       },
-      "else": {
-        "properties": {
-          "services": {
-            "items": {
-              "required": [
+      "else" : {
+        "properties" : {
+          "services" : {
+            "items" : {
+              "required" : [
                 "type",
                 "exposed",
                 "containerPort"
