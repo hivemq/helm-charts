@@ -33,7 +33,8 @@ if [ -d hivemq-operator/templates ]; then
 fi
 
 # Shorten Helm's a little redundant naming
-sed -i 's|operator\-operator|operator|' hivemq-operator/operator/*.yaml
+sed -i.bak 's|operator\-operator|operator|' hivemq-operator/operator/*.yaml
+find . -type f -name "*.bak" -delete
 
 # return to original working directory
 cd "${CWD}" || exit 1
