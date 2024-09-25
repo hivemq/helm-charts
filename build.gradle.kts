@@ -122,19 +122,19 @@ val test by tasks.registering {
     doLast {
         exec {
             workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-operator")
+            commandLine("helm", "unittest", "./charts/hivemq-operator", "-f", "./tests/**/*_test.yaml")
         }
         exec {
             workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-platform")
+            commandLine("helm", "unittest", "./charts/hivemq-platform", "-f", "./tests/**/*_test.yaml")
         }
         exec {
             workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-platform-operator")
+            commandLine("helm", "unittest", "./charts/hivemq-platform-operator", "-f", "./tests/**/*_test.yaml")
         }
         exec {
             workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-swarm")
+            commandLine("helm", "unittest", "./charts/hivemq-swarm", "-f", "./tests/**/*_test.yaml")
         }
     }
 }
