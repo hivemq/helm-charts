@@ -1,20 +1,28 @@
 ## Development
 
-Generate templates with values to check
+Generate templates with custom values
 
 ```bash
-helm template ./hivemq-platform-operator
-helm template ./hivemq-platform
+helm template operator ./charts/hivemq-platform-operator -f my-operator-values.yaml
+helm template platform ./charts/hivemq-platform -f my-platform-values.yaml
 ```
 
-Simulate without deploying into the k8s cluster to check the correctness of the templates.
+Simulate without deploying into the K8s cluster to check the correctness of the templates.
 
-NOTE: CRD has to be installed first in the k8s cluster
+**NOTE**: CRD has to be installed first in the K8s cluster
 
 ```bash
 kind create cluster
-helm install --dry-run my-operator-release hivemq-platform-operator
-helm install --dry-run my-platform-release hivemq-platform 
+helm install operator ./charts/hivemq-platform-operator --dry-run
+helm install platform ./charts/hivemq-platform --dry-run 
+```
+
+### Unit tests
+For running unit tests, the Helm [helm-unittest](https://github.com/helm-unittest/helm-unittest?tab=readme-ov-file#helm-unittest) plugin is required to be installed as part of your Helm installation.
+
+```bash
+helm unittest ./charts/hivemq-platform-operator -f './tests/**/*_test.yaml'
+helm unittest ./charts/hivemq-platform -f './tests/**/*_test.yaml'
 ```
 
 ### Integration tests
