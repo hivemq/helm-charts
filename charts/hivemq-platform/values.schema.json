@@ -1,40 +1,60 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "type" : "object",
-  "properties" : {
-    "config" : {
-      "type" : "object",
-      "properties" : {
-        "create" : {
-          "type" : "boolean"
-        },
-        "name" : {
-          "type" : "string"
-        },
-        "overrideHiveMQConfig" : {
-          "type" : "string"
-        },
-        "overrideStatefulSet" : {
-          "type" : "string"
-        },
-        "dataHub" : {
-          "type" : "object",
-          "properties" : {
-            "dataValidationEnabled" : {
-              "type" : "boolean"
+  "allOf" : [
+    {
+      "if" : {
+        "properties" : {
+          "migration" : {
+            "properties" : {
+              "statefulSet" : {
+                "const" : true
+              }
             },
-            "behaviorValidationEnabled" : {
-              "type" : "boolean"
-            }
+            "required" : [
+              "statefulSet"
+            ],
+            "type" : "object"
           }
         },
-        "customTracingConfig" : {
-          "type" : "string"
-        },
-        "customLogbackConfig" : {
-          "type" : "string"
+        "required" : [
+          "migration"
+        ]
+      },
+      "then" : {
+        "properties" : {
+          "services" : {
+            "items" : {
+              "required" : [
+                "containerPort",
+                "exposed",
+                "legacyPortName",
+                "type"
+              ]
+            }
+          }
+        }
+      },
+      "else" : {
+        "properties" : {
+          "services" : {
+            "items" : {
+              "required" : [
+                "containerPort",
+                "exposed",
+                "type"
+              ]
+            }
+          }
         }
       }
+    }
+  ],
+  "properties" : {
+    "additionalContainers" : {
+      "items" : {
+        "type" : "object"
+      },
+      "type" : "array"
     },
     "additionalInitContainers" : {
       "type" : "array",
@@ -42,43 +62,16 @@
         "type" : "object"
       }
     },
-    "additionalContainers" : {
-      "type" : "array",
-      "items" : {
-        "type" : "object"
-      }
-    },
-    "controlCenter" : {
-      "type" : "object",
-      "properties" : {
-        "username" : {
-          "type" : "string"
-        },
-        "password" : {
-          "type" : "string"
-        }
-      }
-    },
-    "restApi" : {
-      "type" : "object",
-      "properties" : {
-        "authEnabled" : {
-          "type" : "boolean"
-        }
-      }
-    },
     "additionalVolumes" : {
-      "type" : "array",
       "items" : {
-        "type" : "object",
         "properties" : {
-          "name" : {
+          "containerName" : {
             "type" : "string"
           },
           "mountName" : {
             "type" : "string"
           },
-          "containerName" : {
+          "name" : {
             "type" : "string"
           },
           "path" : {
@@ -88,198 +81,201 @@
             "type" : "string"
           },
           "type" : {
-            "type" : "string",
             "enum" : [
               "configMap",
-              "secret",
               "emptyDir",
-              "persistentVolumeClaim"
-            ]
-          }
-        }
-      }
-    },
-    "volumeClaimTemplates" : {
-      "type" : "array",
-      "items" : {
-        "type" : "object",
-        "properties" : {
-          "kind" : {
-            "type" : "string",
-            "enum" : [
-              "PersistentVolumeClaim"
-            ]
-          },
-          "apiVersion" : {
-            "type" : "string",
-            "enum" : [
-              "v1"
-            ]
-          },
-          "metadata" : {
-            "type" : "object"
-          },
-          "spec" : {
-            "type" : "object"
+              "persistentVolumeClaim",
+              "secret"
+            ],
+            "type" : "string"
           }
         },
-        "required" : [
-          "kind",
-          "apiVersion",
-          "metadata",
-          "spec"
-        ]
-      }
+        "type" : "object"
+      },
+      "type" : "array"
     },
-    "metrics" : {
-      "type" : "object",
+    "config" : {
       "properties" : {
-        "enabled" : {
+        "create" : {
           "type" : "boolean"
         },
-        "port" : {
-          "type" : "integer",
-          "minimum" : 0,
-          "maximum" : 65535
+        "customLogbackConfig" : {
+          "type" : "string"
         },
-        "path" : {
+        "customTracingConfig" : {
+          "type" : "string"
+        },
+        "dataHub" : {
+          "properties" : {
+            "behaviorValidationEnabled" : {
+              "type" : "boolean"
+            },
+            "dataValidationEnabled" : {
+              "type" : "boolean"
+            }
+          },
+          "type" : "object"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "overrideHiveMQConfig" : {
+          "type" : "string"
+        },
+        "overrideStatefulSet" : {
           "type" : "string"
         }
-      }
+      },
+      "type" : "object"
     },
-    "services" : {
-      "type" : "array",
-      "items" : {
-        "type" : "object",
-        "properties" : {
-          "type" : {
-            "type" : "string",
-            "enum" : [
-              "control-center",
-              "rest-api",
-              "metrics",
-              "mqtt",
-              "websocket"
-            ]
-          },
-          "annotations" : {
-            "type" : "object"
-          },
-          "labels" : {
-            "type" : "object"
-          },
-          "legacyPortName" : {
-            "type": "string"
-          },
-          "serviceType" : {
-            "type" : "string",
-            "enum" : [
-              "ClusterIP",
-              "NodePort",
-              "LoadBalancer"
-            ]
-          },
-          "exposed" : {
-            "type" : "boolean"
-          },
-          "name" : {
-            "type" : "string",
-            "maxLength" : 63
-          },
-          "port" : {
-            "type" : "integer",
-            "minimum" : 0,
-            "maximum" : 65535
-          },
-          "containerPort" : {
-            "type" : "integer",
-            "minimum" : 0,
-            "maximum" : 65535
-          },
-          "hivemqProxyProtocol" : {
-            "type": "boolean"
-          },
-          "keystoreSecretName" : {
-            "type" : "string"
-          },
-          "keystoreSecretKey" : {
-            "type" : "string"
-          },
-          "keystorePassword" : {
-            "type" : "string"
-          },
-          "keystorePrivatePassword" : {
-            "type" : "string"
-          },
-          "keystorePasswordSecretName" : {
-            "type" : "string"
-          },
-          "keystorePasswordSecretKey" : {
-            "type" : "string"
-          },
-          "keystorePrivatePasswordSecretKey" : {
-            "type" : "string"
-          },
-          "truststoreSecretName" : {
-            "type" : "string"
-          },
-          "truststoreSecretKey" : {
-            "type" : "string"
-          },
-          "truststorePassword" : {
-            "type" : "string"
-          },
-          "truststorePasswordSecretName" : {
-            "type" : "string"
-          },
-          "tlsClientAuthenticationMode" : {
-            "type" : "string",
-            "enum" : [
-              "NONE",
-              "OPTIONAL",
-              "REQUIRED"
-            ]
-          }
+    "controlCenter" : {
+      "properties" : {
+        "password" : {
+          "type" : "string"
+        },
+        "username" : {
+          "type" : "string"
         }
-      }
+      },
+      "type" : "object"
     },
     "extensions" : {
-      "type" : "array",
       "items" : {
-        "type" : "object",
         "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "enabled" : {
-            "type" : "boolean"
-          },
-          "supportsHotReload" : {
-            "type" : "boolean"
-          },
           "configMapName" : {
-            "type" : "string"
-          },
-          "requestHeaderSecretName" : {
-            "type" : "string"
-          },
-          "extensionUri" : {
             "type" : "string"
           },
           "customizationUri" : {
             "type" : "string"
           },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "extensionUri" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
           "priority" : {
             "type" : "integer"
           },
+          "requestHeaderSecretName" : {
+            "type" : "string"
+          },
           "startPriority" : {
             "type" : "integer"
+          },
+          "supportsHotReload" : {
+            "type" : "boolean"
           }
+        },
+        "type" : "object"
+      },
+      "type" : "array"
+    },
+    "hivemqMqtt" : {
+      "properties" : {
+        "keepAliveAllowUnlimited" : {
+          "type" : "boolean"
+        },
+        "keepAliveMax" : {
+          "type" : "integer"
+        },
+        "maxPacketSize" : {
+          "type" : "integer"
+        },
+        "maxQualityOfService" : {
+          "type" : "integer"
+        },
+        "messageExpiryMaxInterval" : {
+          "type" : "integer"
+        },
+        "queuedMessagesMaxSize" : {
+          "type" : "integer"
+        },
+        "queuedMessagesStrategy" : {
+          "type" : "string"
+        },
+        "retainedMessages" : {
+          "type" : "boolean"
+        },
+        "serverReceiveMaximum" : {
+          "type" : "integer"
+        },
+        "sharedSubscriptions" : {
+          "type" : "boolean"
+        },
+        "sessionExpiryMaxInterval" : {
+          "type" : "integer"
+        },
+        "subscriptionIdentifier" : {
+          "type" : "boolean"
+        },
+        "topicAliasEnabled" : {
+          "type" : "boolean"
+        },
+        "topicAliasMaxPerClient" : {
+          "type" : "integer"
+        },
+        "wildcardSubscriptions" : {
+          "type" : "boolean"
         }
-      }
+      },
+      "type" : "object"
+    },
+    "hivemqMqttAddons" : {
+      "properties" : {
+        "deadMessagesTopic" : {
+          "type" : "boolean"
+        },
+        "droppedMessagesTopic" : {
+          "type" : "boolean"
+        },
+        "expiredMessagesTopic" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "hivemqMqttSecurity" : {
+      "properties" : {
+        "allowEmptyClientId" : {
+          "type" : "boolean"
+        },
+        "allowRequestProblemInformation" : {
+          "type" : "boolean"
+        },
+        "controlCenterAuditLog" : {
+          "type" : "boolean"
+        },
+        "payloadFormatValidation" : {
+          "type" : "boolean"
+        },
+        "utf8Validation" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "hivemqRestrictions" : {
+      "properties" : {
+        "incomingBandwidthThrottling" : {
+          "type" : "integer"
+        },
+        "maxClientIdLength" : {
+          "type" : "integer"
+        },
+        "maxConnections" : {
+          "type" : "integer"
+        },
+        "noConnectIdleTimeout" : {
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
     },
     "image" : {
-      "type" : "object",
       "properties" : {
         "name" : {
           "type" : "string"
@@ -287,9 +283,9 @@
         "pullPolicy" : {
           "type" : "string",
           "enum" : [
+            "Always",
             "IfNotPresent",
-            "Never",
-            "Always"
+            "Never"
           ]
         },
         "pullSecretName" : {
@@ -303,12 +299,12 @@
         }
       },
       "required" : [
-        "repository",
-        "name"
-      ]
+        "name",
+        "repository"
+      ],
+      "type" : "object"
     },
     "license" : {
-      "type" : "object",
       "properties" : {
         "additionalLicenses" : {
           "type" : "object"
@@ -331,258 +327,266 @@
         "overrideLicense" : {
           "type" : "string"
         }
-      }
+      },
+      "type" : "object"
     },
-    "nodes" : {
-      "type" : "object",
+    "metrics" : {
       "properties" : {
-        "javaOpts" : {
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "path" : {
           "type" : "string"
         },
-        "logLevel" : {
-          "type" : "string",
-          "enum" : [
-            "FATAL",
-            "ERROR",
-            "WARN",
-            "INFO",
-            "DEBUG",
-            "TRACE"
-          ]
-        },
-        "replicaCount" : {
+        "port" : {
           "type" : "integer",
-          "minimum" : 1
-        },
-        "resources" : {
-          "type" : "object",
-          "properties" : {
-            "cpu" : {
-              "type" : "string"
-            },
-            "memory" : {
-              "type" : "string"
-            },
-            "ephemeralStorage" : {
-              "type" : "string"
-            },
-            "overrideLimits" : {
-              "type" : "object"
-            }
-          }
-        },
+          "maximum" : 65535,
+          "minimum" : 0
+        }
+      },
+      "type" : "object"
+    },
+    "migration" : {
+      "properties" : {
+        "statefulSet" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "nodes" : {
+      "properties" : {
         "annotations" : {
           "type" : "object"
+        },
+        "env" : {
+          "items" : {
+            "type" : "object"
+          },
+          "type" : "array"
+        },
+        "javaOpts" : {
+          "type" : "string"
         },
         "labels" : {
           "type" : "object"
         },
+        "logLevel" : {
+          "type" : "string",
+          "enum" : [
+            "DEBUG",
+            "ERROR",
+            "FATAL",
+            "INFO",
+            "TRACE",
+            "WARN"
+          ]
+        },
         "podSecurityContext" : {
-          "type" : "object",
           "properties" : {
             "enabled" : {
               "type" : "boolean"
+            },
+            "fsGroup" : {
+              "type" : "integer"
+            },
+            "runAsGroup" : {
+              "type" : "integer"
             },
             "runAsNonRoot" : {
               "type" : "boolean"
             },
             "runAsUser" : {
               "type" : "integer"
-            },
-            "runAsGroup" : {
-              "type" : "integer"
-            },
-            "fsGroup" : {
-              "type" : "integer"
             }
-          }
+          },
+          "type" : "object"
         },
-        "env" : {
-          "type" : "array",
-          "items" : {
-            "type" : "object"
-          }
+        "replicaCount" : {
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "resources" : {
+          "properties" : {
+            "cpu" : {
+              "type" : "string"
+            },
+            "ephemeralStorage" : {
+              "type" : "string"
+            },
+            "memory" : {
+              "type" : "string"
+            },
+            "overrideLimits" : {
+              "type" : "object"
+            }
+          },
+          "type" : "object"
         },
         "serviceAccountName" : {
           "type" : "string"
         }
-      }
+      },
+      "type" : "object"
+    },
+    "operator" : {
+      "properties" : {
+        "selector" : {
+          "type" : "string"
+        }
+      },
+      "type" : "object"
     },
     "podScheduling" : {
-      "type" : "object",
       "properties" : {
         "affinity" : {
           "type" : "object"
         },
         "tolerations" : {
-          "type" : "array",
           "items" : {
             "type" : "object"
+          },
+          "type" : "array"
+        }
+      },
+      "type" : "object"
+    },
+    "restApi" : {
+      "properties" : {
+        "authEnabled" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "services" : {
+      "items" : {
+        "properties" : {
+          "annotations" : {
+            "type" : "object"
+          },
+          "containerPort" : {
+            "maximum" : 65535,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "exposed" : {
+            "type" : "boolean"
+          },
+          "hivemqProxyProtocol" : {
+            "type" : "boolean"
+          },
+          "keystorePassword" : {
+            "type" : "string"
+          },
+          "keystorePasswordSecretKey" : {
+            "type" : "string"
+          },
+          "keystorePasswordSecretName" : {
+            "type" : "string"
+          },
+          "keystorePrivatePassword" : {
+            "type" : "string"
+          },
+          "keystorePrivatePasswordSecretKey" : {
+            "type" : "string"
+          },
+          "keystoreSecretKey" : {
+            "type" : "string"
+          },
+          "keystoreSecretName" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "type" : "object"
+          },
+          "legacyPortName" : {
+            "type" : "string"
+          },
+          "name" : {
+            "maxLength" : 63,
+            "type" : "string"
+          },
+          "port" : {
+            "maximum" : 65535,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "serviceType" : {
+            "type" : "string",
+            "enum" : [
+              "ClusterIP",
+              "LoadBalancer",
+              "NodePort"
+            ]
+          },
+          "tlsClientAuthenticationMode" : {
+            "enum" : [
+              "NONE",
+              "OPTIONAL",
+              "REQUIRED"
+            ],
+            "type" : "string"
+          },
+          "truststorePassword" : {
+            "type" : "string"
+          },
+          "truststorePasswordSecretName" : {
+            "type" : "string"
+          },
+          "truststoreSecretKey" : {
+            "type" : "string"
+          },
+          "truststoreSecretName" : {
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [
+              "control-center",
+              "metrics",
+              "mqtt",
+              "rest-api",
+              "websocket"
+            ],
+            "type" : "string"
           }
-        }
-      }
+        },
+        "type" : "object"
+      },
+      "type" : "array"
     },
-    "operator" : {
-      "type" : "object",
-      "properties" : {
-        "selector" : {
-          "type" : "string"
-        }
-      }
-    },
-    "hivemqRestrictions" : {
-      "type" : "object",
-      "properties" : {
-        "maxConnections" : {
-          "type" : "integer"
+    "volumeClaimTemplates" : {
+      "items" : {
+        "properties" : {
+          "apiVersion" : {
+            "enum" : [
+              "v1"
+            ],
+            "type" : "string"
+          },
+          "kind" : {
+            "enum" : [
+              "PersistentVolumeClaim"
+            ],
+            "type" : "string"
+          },
+          "metadata" : {
+            "type" : "object"
+          },
+          "spec" : {
+            "type" : "object"
+          }
         },
-        "incomingBandwidthThrottling" : {
-          "type" : "integer"
-        },
-        "noConnectIdleTimeout" : {
-          "type" : "integer"
-        },
-        "maxClientIdLength" : {
-          "type" : "integer"
-        }
-      }
-    },
-    "hivemqMqtt" : {
-      "type" : "object",
-      "properties" : {
-        "sessionExpiryMaxInterval" : {
-          "type" : "integer"
-        },
-        "messageExpiryMaxInterval" : {
-          "type" : "integer"
-        },
-        "maxPacketSize" : {
-          "type" : "integer"
-        },
-        "serverReceiveMaximum" : {
-          "type" : "integer"
-        },
-        "keepAliveMax" : {
-          "type" : "integer"
-        },
-        "keepAliveAllowUnlimited" : {
-          "type" : "boolean"
-        },
-        "topicAliasEnabled" : {
-          "type" : "boolean"
-        },
-        "topicAliasMaxPerClient" : {
-          "type" : "integer"
-        },
-        "subscriptionIdentifier" : {
-          "type" : "boolean"
-        },
-        "wildcardSubscriptions" : {
-          "type" : "boolean"
-        },
-        "sharedSubscriptions" : {
-          "type" : "boolean"
-        },
-        "maxQualityOfService" : {
-          "type" : "integer"
-        },
-        "retainedMessages" : {
-          "type" : "boolean"
-        },
-        "queuedMessagesMaxSize" : {
-          "type" : "integer"
-        },
-        "queuedMessagesStrategy" : {
-          "type" : "string"
-        }
-      }
-    },
-    "hivemqMqttAddons" : {
-      "type" : "object",
-      "properties" : {
-        "expiredMessagesTopic" : {
-          "type" : "boolean"
-        },
-        "droppedMessagesTopic" : {
-          "type" : "boolean"
-        },
-        "deadMessagesTopic" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "hivemqMqttSecurity" : {
-      "type" : "object",
-      "properties" : {
-        "allowEmptyClientId" : {
-          "type" : "boolean"
-        },
-        "payloadFormatValidation" : {
-          "type" : "boolean"
-        },
-        "utf8Validation" : {
-          "type" : "boolean"
-        },
-        "allowRequestProblemInformation" : {
-          "type" : "boolean"
-        },
-        "controlCenterAuditLog" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "migration" : {
-      "type" : "object",
-      "properties" : {
-        "statefulSet" : {
-          "type" : "boolean"
-        }
-      }
+        "required" : [
+          "apiVersion",
+          "kind",
+          "metadata",
+          "spec"
+        ],
+        "type" : "object"
+      },
+      "type" : "array"
     }
   },
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "migration": {
-            "type": "object",
-            "required": ["statefulSet"],
-            "properties": {
-              "statefulSet": {
-                "const": true
-              }
-            }
-          }
-        },
-        "required": ["migration"]
-      },
-      "then": {
-        "properties": {
-          "services": {
-            "items": {
-              "required": [
-                "type",
-                "exposed",
-                "legacyPortName",
-                "containerPort"
-              ]
-            }
-          }
-        }
-      },
-      "else": {
-        "properties": {
-          "services": {
-            "items": {
-              "required": [
-                "type",
-                "exposed",
-                "containerPort"
-              ]
-            }
-          }
-        }
-      }
-    }
-  ]
+  "type" : "object"
 }
