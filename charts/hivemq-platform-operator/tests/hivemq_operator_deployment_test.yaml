@@ -89,12 +89,12 @@ tests:
                 key: myconfigmapkey
                 optional: true
 
-  - it: with default security context disabled
+  - it: with defaults, no pod security context set
     asserts:
       - notExists:
           path: spec.template.spec.securityContext
 
-  - it: with default security context values enabled
+  - it: with default pod security context enabled, then default pod security context set
     set:
       podSecurityContext.enabled: true
     asserts:
@@ -123,13 +123,14 @@ tests:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
 
-  - it: with custom security context enabled and using non-root user values
+  - it: with custom pod security context using non-root user values, then custom pod security context set
     set:
-      podSecurityContext.enabled: true
-      podSecurityContext.runAsUser: 5000
-      podSecurityContext.runAsGroup: 5001
-      podSecurityContext.fsGroup: 5002
-      podSecurityContext.runAsNonRoot: true
+      podSecurityContext:
+        enabled: true
+        runAsUser: 5000
+        runAsGroup: 5001
+        fsGroup: 5002
+        runAsNonRoot: true
     asserts:
       - exists:
           path: spec.template.spec.securityContext
@@ -159,13 +160,14 @@ tests:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
 
-  - it: with security context enabled and using root user values
+  - it: with pod security context root user values, then pod security context set
     set:
-      podSecurityContext.enabled: true
-      podSecurityContext.runAsUser: 0
-      podSecurityContext.runAsGroup: 0
-      podSecurityContext.fsGroup: 10003
-      podSecurityContext.runAsNonRoot: false
+      podSecurityContext:
+        enabled: true
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 10003
+        runAsNonRoot: false
     asserts:
       - exists:
           path: spec.template.spec.securityContext
@@ -195,10 +197,11 @@ tests:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
 
-  - it: when only setting security context enabled and runAsNonRoot to false, then no more pod security context values are needed
+  - it: with only pod security context runAsNonRoot false, then no more pod security context values are needed
     set:
-      podSecurityContext.enabled: true
-      podSecurityContext.runAsNonRoot: false
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: false
     asserts:
       - exists:
           path: spec.template.spec.securityContext
@@ -225,25 +228,316 @@ tests:
           path: spec.template.spec.securityContext.fsGroupChangePolicy
           value: "OnRootMismatch"
 
-  - it: with security context enabled and runAsNonRoot is `false`, but runAsUser is set differently than root, then fails
+  - it: with additional custom pod security context values, then custom pod security context set
     set:
-      podSecurityContext.enabled: true
-      podSecurityContext.runAsNonRoot: false
-      podSecurityContext.runAsUser: 185
+      podSecurityContext:
+        enabled: true
+        supplementalGroups: [4000]
+        supplementalGroupsPolicy: Strict
+    asserts:
+      - exists:
+          path: spec.template.spec.securityContext
+      - exists:
+          path: spec.template.spec.securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - exists:
+          path: spec.template.spec.securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 185
+      - exists:
+          path: spec.template.spec.securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 0
+      - notExists:
+          path: spec.template.spec.securityContext.fsGroup
+      - exists:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+      - equal:
+          path: spec.template.spec.securityContext.fsGroupChangePolicy
+          value: "OnRootMismatch"
+      - exists:
+          path: spec.template.spec.securityContext.supplementalGroups
+      - equal:
+          path: spec.template.spec.securityContext.supplementalGroups
+          value: [4000]
+      - exists:
+          path: spec.template.spec.securityContext.supplementalGroupsPolicy
+      - equal:
+          path: spec.template.spec.securityContext.supplementalGroupsPolicy
+          value: Strict
+
+  - it: with pod security context runAsNonRoot false, and runAsUser is different than root, then validation fails
+    set:
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: false
+        runAsUser: 185
     asserts:
       - failedTemplate:
           errorMessage: |-
             `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)
 
-  - it: with security context enabled and runAsNonRoot is `true`, but runAsUser is set to root, then fails
+  - it: with pod security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
-      podSecurityContext.enabled: true
-      podSecurityContext.runAsNonRoot: true
-      podSecurityContext.runAsUser: 0
+      podSecurityContext:
+        enabled: true
+        runAsNonRoot: true
+        runAsUser: 0
     asserts:
       - failedTemplate:
           errorMessage: |-
             `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)
+
+  - it: with defaults, no container security context set
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext
+
+  - it: with custom container security context using non-root user values, then custom container security context set
+    set:
+      containerSecurityContext:
+        runAsUser: 5000
+        runAsGroup: 5001
+        runAsNonRoot: true
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 5000
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 5001
+
+  - it: with container security context root user values, then container security context set
+    set:
+      containerSecurityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        runAsNonRoot: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: false
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 0
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 0
+
+  - it: with only container security context runAsNonRoot false, then no more container security context values are needed
+    set:
+      containerSecurityContext.runAsNonRoot: false
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: false
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 0
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 0
+
+  - it: when only setting container security context runAsNonRoot to true, then no more container security context values are needed
+    set:
+      containerSecurityContext.runAsNonRoot: true
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 185
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 0
+
+  - it: with only custom container security context runAsUser value, then only security context set for runAsUser
+    set:
+      containerSecurityContext.runAsUser: 5000
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 5000
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+
+  - it: with only custom container security context runAsGroup value, then only security context set for runAsGroup
+    set:
+      containerSecurityContext.runAsGroup: 10002
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 10002
+
+  - it: with only custom container security context runAsUser and runAsGroup value, then only security context set for runAsUser and runAsGroup
+    set:
+      containerSecurityContext:
+        runAsUser: 5000
+        runAsGroup: 5001
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 5000
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+          value: 5001
+
+  - it: with additional custom container security context values, then custom container security context set
+    set:
+      containerSecurityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].securityContext
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - exists:
+          path: spec.template.spec.containers[0].securityContext.capabilities
+      - isSubset:
+          path: spec.template.spec.containers[0].securityContext.capabilities
+          content:
+            drop:
+              - ALL
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsGroup
+
+  - it: with container security context runAsNonRoot false, and runAsUser is different than root, then validation fails
+    set:
+      containerSecurityContext:
+        runAsNonRoot: false
+        runAsUser: 185
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)
+
+  - it: with container security context runAsNonRoot true, and runAsUser root, then validation fails
+    set:
+      containerSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 0
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)
+
 
   - it: with pod scheduling values set
     values:

@@ -1,6 +1,6 @@
 package com.hivemq.helmcharts.single;
 
-import com.hivemq.helmcharts.AbstractHelmPodSecurityContextIT;
+import com.hivemq.helmcharts.AbstractHelmContainerSecurityContextIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -10,9 +10,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.concurrent.TimeUnit;
 
-@Tag("PodSecurityContext")
-@Tag("PodSecurityContextUpgradePlatform")
-class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityContextIT {
+@Tag("ContainerSecurityContext")
+@Tag("ContainerSecurityContextUpgradePlatform")
+class HelmContainerSecurityContextUpgradePlatformIT extends AbstractHelmContainerSecurityContextIT {
 
     @Override
     protected boolean installPlatformOperatorChart() {
