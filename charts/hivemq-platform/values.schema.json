@@ -359,6 +359,23 @@
         "annotations" : {
           "type" : "object"
         },
+        "containerSecurityContext" : {
+          "description" : "Configures container security for both HiveMQ Init and HiveMQ main container. Some fields are present in both SecurityContext and PodSecurityContext. When both are set, the values in SecurityContext take precedence.",
+          "properties" : {
+            "runAsGroup" : {
+              "format" : "int64",
+              "type" : "integer"
+            },
+            "runAsNonRoot" : {
+              "type" : "boolean"
+            },
+            "runAsUser" : {
+              "format" : "int64",
+              "type" : "integer"
+            }
+          },
+          "type" : "object"
+        },
         "env" : {
           "items" : {
             "type" : "object"
@@ -383,20 +400,24 @@
           ]
         },
         "podSecurityContext" : {
+          "description" : "Configures pod-level security for the HiveMQ Platform pod. Some fields are also present in container.securityContext. Field values of container.securityContext take precedence over field values of PodSecurityContext.",
           "properties" : {
             "enabled" : {
               "type" : "boolean"
             },
             "fsGroup" : {
+              "format" : "int64",
               "type" : "integer"
             },
             "runAsGroup" : {
+              "format" : "int64",
               "type" : "integer"
             },
             "runAsNonRoot" : {
               "type" : "boolean"
             },
             "runAsUser" : {
+              "format" : "int64",
               "type" : "integer"
             }
           },

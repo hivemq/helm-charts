@@ -2,7 +2,7 @@
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "properties" : {
     "containerSecurityContext" : {
-      "description" : "Holds security configuration for the HiveMQ Platform Operator container. Some fields are present in both SecurityContext and PodSecurityContext. When both are set, the values in SecurityContext take precedence.",
+      "description" : "Configures the security context for the HiveMQ Platform Operator container. Some fields are present in both SecurityContext and PodSecurityContext. When both are set, the values in SecurityContext take precedence.",
       "properties" : {
         "runAsGroup" : {
           "format" : "int64",
@@ -153,7 +153,7 @@
       "type" : "string"
     },
     "podSecurityContext" : {
-      "description" : "Holds pod-level security attributes and common container settings. Some fields are also present in container.securityContext. Field values of container.securityContext take precedence over field values of PodSecurityContext.",
+      "description" : "Configures pod-level security for the HiveMQ Platform Operator pod. Some fields are also present in container.securityContext. Field values of container.securityContext take precedence over field values of PodSecurityContext.",
       "properties" : {
         "enabled" : {
           "type" : "boolean"

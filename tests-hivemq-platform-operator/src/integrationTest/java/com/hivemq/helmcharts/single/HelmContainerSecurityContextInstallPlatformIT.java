@@ -1,6 +1,6 @@
 package com.hivemq.helmcharts.single;
 
-import com.hivemq.helmcharts.AbstractHelmPodSecurityContextIT;
+import com.hivemq.helmcharts.AbstractHelmContainerSecurityContextIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -12,9 +12,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-@Tag("PodSecurityContext")
-@Tag("PodSecurityContextInstallPlatform")
-class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityContextIT {
+@Tag("ContainerSecurityContext")
+@Tag("ContainerSecurityContextInstallPlatform")
+class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContainerSecurityContextIT {
 
     private static final int MIN_UID = 1000660000;
     private static final int MAX_UID = 2147483647;
@@ -53,7 +53,7 @@ class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityCon
         installPlatformOperatorChartAndWaitToBeRunning("-f",
                 operatorChartNonRootUserValuesFile(),
                 "--set",
-                "podSecurityContext.runAsUser=" + operatorUid);
+                "containerSecurityContext.runAsUser=" + operatorUid);
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace, operatorLabels, "hivemq-platform-operator", operatorUid, 0);
 
@@ -61,7 +61,7 @@ class HelmPodSecurityContextInstallPlatformIT extends AbstractHelmPodSecurityCon
         installPlatformChartAndWaitToBeRunning("-f",
                 platformChartNonRootUserValuesFile(),
                 "--set",
-                "nodes.podSecurityContext.runAsUser=" + platformUid);
+                "nodes.containerSecurityContext.runAsUser=" + platformUid);
         final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
         assertUidAndGid(platformNamespace, //
                 platformLabels, //

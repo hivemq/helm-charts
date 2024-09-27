@@ -1,6 +1,6 @@
 package com.hivemq.helmcharts.compose;
 
-import com.hivemq.helmcharts.AbstractHelmPodSecurityContextIT;
+import com.hivemq.helmcharts.AbstractHelmContainerSecurityContextIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-@Tag("PodSecurityContext")
-class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityContextIT {
+@Tag("ContainerSecurityContext")
+class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContainerSecurityContextIT {
 
     @Override
     protected boolean installPlatformOperatorChart() {
@@ -24,12 +24,12 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
 
     @Override
     protected @NotNull String platformChartRootUserValuesFile() {
-        return "/files/platform-pod-security-context-root-user-with-tracing-extension-values.yaml";
+        return "/files/platform-container-security-context-root-user-with-tracing-extension-values.yaml";
     }
 
     @Override
     protected @NotNull String platformChartNonRootUserValuesFile() {
-        return "/files/platform-pod-security-context-non-root-user-with-tracing-extension-values.yaml";
+        return "/files/platform-container-security-context-non-root-user-with-tracing-extension-values.yaml";
     }
 
     @ParameterizedTest(name = "{0}")
@@ -68,7 +68,9 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"),
+                3,
+                TimeUnit.MINUTES);
         await().atMost(ONE_MINUTE).until(configurationUpdatedFuture::isDone);
     }
 }

@@ -95,7 +95,7 @@ tls:
   # The truststore password. Can also be set as "truststore.password" in the Secret.
   truststorePassword: ""
 
-# Holds pod-level security attributes and common container settings.
+# Configures pod-level security for the HiveMQ Platform Operator pod.
 # When enabled, this defaults to non-root user with user ID (UID) "185" and group ID (GID) "0".
 # However, if required, user ID, group ID and filesystem group values can be overwritten.
 # For group ID is always recommended to use group "0". Example:
@@ -108,6 +108,11 @@ tls:
 podSecurityContext:
   enabled: false
   runAsNonRoot: true
+
+# Configures container security for the Operator container.
+# Note that some fields are present in both SecurityContext and PodSecurityContext Kubernetes specification and when both are set,
+# the values in SecurityContext take precedence.
+containerSecurityContext: {}
 
 # Specifies environment variables to be added to the Operator container.
 # Environment variables can be defined as a list of either key-value pairs or
