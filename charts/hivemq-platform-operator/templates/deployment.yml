@@ -24,29 +24,25 @@ spec:
     spec:
       {{- if .Values.podSecurityContext.enabled }}
       {{- $podSecurityContext := .Values.podSecurityContext }}
-      {{- include "hivemq-platform-operator.validate-pod-security-context" (dict "podSecurityContext" $podSecurityContext) }}
+      {{- include "hivemq-platform-operator.validate-run-as-user-security-context" $podSecurityContext }}
       securityContext:
-        runAsNonRoot: {{ $podSecurityContext.runAsNonRoot }}
-        {{- if eq $podSecurityContext.runAsNonRoot false }}
-        runAsUser: 0
-        {{- else if hasKey $podSecurityContext "runAsUser" }}
-        runAsUser: {{ $podSecurityContext.runAsUser }}
-        {{- else }}
-        runAsUser: 185
-        {{- end }}
-        runAsGroup: {{ $podSecurityContext.runAsGroup | default 0 }}
+        {{- include "hivemq-platform-operator.generate-run-as-security-context" (dict "securityContext" $podSecurityContext "indentation" 8) }}
         {{- if hasKey $podSecurityContext "fsGroup" }}
         fsGroup: {{ $podSecurityContext.fsGroup }}
         {{- end }}
         fsGroupChangePolicy: "OnRootMismatch"
+        {{- $filteredPodSecurityContext := omit $podSecurityContext "enabled" "fsGroup" "runAsGroup" "runAsNonRoot" "runAsUser" }}
+        {{- if gt (len $filteredPodSecurityContext) 0 }}
+        {{- toYaml $filteredPodSecurityContext | nindent 8 }}
+        {{- end }}
       {{- end }}
-      {{- if typeIsLike "map[string]interface {}" .Values.podScheduling.affinity }}
+      {{- with .Values.podScheduling.affinity }}
       affinity:
-        {{- .Values.podScheduling.affinity | toYaml | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if typeIsLike "[]interface {}" .Values.podScheduling.tolerations }}
+      {{- with .Values.podScheduling.tolerations }}
       tolerations:
-        {{- .Values.podScheduling.tolerations | toYaml | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: hivemq-platform-operator
@@ -187,6 +183,16 @@ spec:
             - name: tls
               mountPath: /mnt/tls
               readOnly: true
+          {{- end }}
+          {{- with .Values.containerSecurityContext }}
+          {{- $containerSecurityContext := . }}
+          {{- include "hivemq-platform-operator.validate-run-as-user-security-context" $containerSecurityContext }}
+          securityContext:
+            {{- include "hivemq-platform-operator.generate-run-as-security-context" (dict "securityContext" $containerSecurityContext "indentation" 12) }}
+            {{- $filteredContainerSecurityContext := omit $containerSecurityContext "runAsGroup" "runAsNonRoot" "runAsUser" }}
+            {{- if gt (len $filteredContainerSecurityContext) 0 }}
+            {{- toYaml $filteredContainerSecurityContext | nindent 12 }}
+            {{- end }}
           {{- end }}
       {{- if .Values.image.pullSecretName }}
       imagePullSecrets:

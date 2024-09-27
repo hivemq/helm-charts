@@ -1,0 +1,7 @@
+nodes:
+  replicaCount: 1
+  containerSecurityContext:
+    runAsNonRoot: false
+  env:
+    - name: HIVEMQ_NO_ROOT_STEP_DOWN
+      value: "true"

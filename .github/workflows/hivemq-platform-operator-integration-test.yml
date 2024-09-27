@@ -20,6 +20,7 @@ jobs:
         test-plan: [
           Extensions1,
           Extensions2,
+          ContainerSecurityContext,
           PodSecurityContext,
           Upgrade,
           Other
@@ -111,6 +112,8 @@ jobs:
           AdditionalBrokerLicense,
           BrokerLicense,
           Containers,
+          ContainerSecurityContextInstallPlatform,
+          ContainerSecurityContextUpgradePlatform,
           ClusterDomainName,
           CustomLogback,
           CustomValues,
