@@ -1,27 +1,96 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
-  "type" : "object",
   "properties" : {
+    "containerSecurityContext" : {
+      "description" : "Holds security configuration for the HiveMQ Platform Operator container. Some fields are present in both SecurityContext and PodSecurityContext. When both are set, the values in SecurityContext take precedence.",
+      "properties" : {
+        "runAsGroup" : {
+          "format" : "int64",
+          "type" : "integer"
+        },
+        "runAsNonRoot" : {
+          "type" : "boolean"
+        },
+        "runAsUser" : {
+          "format" : "int64",
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
+    },
+    "crd" : {
+      "properties" : {
+        "apply" : {
+          "type" : "boolean"
+        },
+        "waitReady" : {
+          "type" : "boolean"
+        },
+        "waitTimeout" : {
+          "type" : "string",
+          "pattern" : "^P(?:(?:\\d+Y)?(?:\\d+M)?(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?)$"
+        }
+      },
+      "type" : "object"
+    },
+    "env" : {
+      "items" : {
+        "type" : "object"
+      },
+      "type" : "array"
+    },
     "http" : {
-      "type" : "object",
       "properties" : {
         "port" : {
-          "type" : "integer",
-          "minimum" : 1000
+          "minimum" : 1000,
+          "type" : "integer"
         }
-      }
+      },
+      "type" : "object"
     },
     "https" : {
-      "type" : "object",
       "properties" : {
         "port" : {
-          "type" : "integer",
-          "minimum" : 1000
+          "minimum" : 1000,
+          "type" : "integer"
         }
-      }
+      },
+      "type" : "object"
+    },
+    "hivemqPlatformServiceAccount" : {
+      "properties" : {
+        "create" : {
+          "type" : "boolean"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "permissions" : {
+          "properties" : {
+            "create" : {
+              "type" : "boolean"
+            },
+            "validate" : {
+              "type" : "boolean"
+            }
+          },
+          "type" : "object"
+        },
+        "validate" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "hivemqPlatformStatefulSet" : {
+      "properties" : {
+        "rollingRestartOnTemplateMetadataChange" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
     },
     "image" : {
-      "type" : "object",
       "properties" : {
         "initImageName" : {
           "type" : "string"
@@ -30,12 +99,12 @@
           "type" : "string"
         },
         "pullPolicy" : {
-          "type" : "string",
           "enum" : [
             "IfNotPresent",
             "Never",
             "Always"
-          ]
+          ],
+          "type" : "string"
         },
         "pullSecretName" : {
           "type" : "string"
@@ -52,7 +121,8 @@
         "name",
         "tag",
         "initImageName"
-      ]
+      ],
+      "type" : "object"
     },
     "javaOpts" : {
       "type" : "string"
@@ -61,177 +131,126 @@
       "type" : "boolean"
     },
     "logLevel" : {
-      "type" : "string",
       "enum" : [
-        "FATAL",
-        "ERROR",
-        "WARN",
-        "INFO",
         "DEBUG",
-        "TRACE"
-      ]
-    },
-    "networkLogLevel" : {
-      "type" : "string",
-      "enum" : [
-        "FATAL",
         "ERROR",
-        "WARN",
-        "INFO",
-        "DEBUG",
-        "TRACE"
-      ]
-    },
-    "quarkusLogLevel" : {
-      "type" : "string",
-      "enum" : [
         "FATAL",
-        "ERROR",
-        "WARN",
         "INFO",
-        "DEBUG",
-        "TRACE"
-      ]
-    },
-    "skdLogLevel" : {
-      "type" : "string",
-      "enum" : [
-        "FATAL",
-        "ERROR",
-        "WARN",
-        "INFO",
-        "DEBUG",
-        "TRACE"
-      ]
-    },
-    "selector" : {
+        "TRACE",
+        "WARN"
+      ],
       "type" : "string"
     },
-    "resources" : {
-      "type" : "object",
-      "properties" : {
-        "cpu" : {
-          "type" : "string"
-        },
-        "memory" : {
-          "type" : "string"
-        },
-        "ephemeralStorage" : {
-          "type" : "string"
-        },
-        "overrideLimits" : {
-          "type": "object",
-          "additionalProperties": true
-        }
-      }
+    "networkLogLevel" : {
+      "enum" : [
+        "DEBUG",
+        "ERROR",
+        "FATAL",
+        "INFO",
+        "TRACE",
+        "WARN"
+      ],
+      "type" : "string"
     },
     "podSecurityContext" : {
-      "type" : "object",
+      "description" : "Holds pod-level security attributes and common container settings. Some fields are also present in container.securityContext. Field values of container.securityContext take precedence over field values of PodSecurityContext.",
       "properties" : {
         "enabled" : {
           "type" : "boolean"
+        },
+        "fsGroup" : {
+          "format" : "int64",
+          "type" : "integer"
+        },
+        "runAsGroup" : {
+          "format" : "int64",
+          "type" : "integer"
         },
         "runAsNonRoot" : {
           "type" : "boolean"
         },
         "runAsUser" : {
-          "type" : "integer"
-        },
-        "runAsGroup" : {
-          "type" : "integer"
-        },
-        "fsGroup" : {
+          "format" : "int64",
           "type" : "integer"
         }
-      }
+      },
+      "type" : "object"
     },
-    "env" : {
-      "type" : "array",
-      "items" : {
-        "type" : "object",
-        "additionalProperties" : true
-      }
-    },
-    "serviceAccount" : {
-      "type" : "object",
-      "properties" : {
-        "create" : {
-          "type" : "boolean"
-        },
-        "name" : {
-          "type" : "string"
-        }
-      }
-    },
-    "hivemqPlatformServiceAccount" : {
-      "type" : "object",
-      "properties" : {
-        "create" : {
-          "type" : "boolean"
-        },
-        "validate" : {
-          "type" : "boolean"
-        },
-        "name" : {
-          "type" : "string"
-        },
-        "permissions" : {
-          "type" : "object",
-          "properties" : {
-            "create" : {
-              "type" : "boolean"
-            },
-            "validate" : {
-              "type" : "boolean"
-            }
-          }
-        }
-      }
-    },
-    "hivemqPlatformStatefulSet" : {
-      "type" : "object",
-      "properties" : {
-        "rollingRestartOnTemplateMetadataChange" : {
-          "type" : "boolean"
-        }
-      }
+    "quarkusLogLevel" : {
+      "enum" : [
+        "DEBUG",
+        "ERROR",
+        "FATAL",
+        "INFO",
+        "TRACE",
+        "WARN"
+      ],
+      "type" : "string"
     },
     "rbac" : {
-      "type" : "object",
       "properties" : {
         "create" : {
           "type" : "boolean"
         }
       },
-      "tls" : {
-        "type" : "object",
-        "properties" : {
-          "keystorePassword" : {
-            "type" : "string"
-          },
-          "secretName" : {
-            "type" : "string"
-          },
-          "truststorePassword" : {
-            "type" : "string"
-          }
-        }
-      }
+      "type" : "object"
     },
-    "crd" : {
-      "type" : "object",
+    "resources" : {
       "properties" : {
-        "apply" : {
-          "type" : "boolean"
+        "cpu" : {
+          "type" : "string"
         },
-        "waitReady" : {
-          "type" : "boolean"
+        "ephemeralStorage" : {
+          "type" : "string"
         },
-        "waitTimeout" : {
-          "type" : "string",
-          "pattern": "^P(?:(?:\\d+Y)?(?:\\d+M)?(?:\\d+D)?(?:T(?:\\d+H)?(?:\\d+M)?(?:\\d+(?:\\.\\d+)?S)?)?)$"
+        "memory" : {
+          "type" : "string"
+        },
+        "overrideLimits" : {
+          "type" : "object"
         }
-      }
+      },
+      "type" : "object"
+    },
+    "selector" : {
+      "type" : "string"
+    },
+    "serviceAccount" : {
+      "properties" : {
+        "create" : {
+          "type" : "boolean"
+        },
+        "name" : {
+          "type" : "string"
+        }
+      },
+      "type" : "object"
+    },
+    "skdLogLevel" : {
+      "enum" : [
+        "DEBUG",
+        "ERROR",
+        "FATAL",
+        "INFO",
+        "TRACE",
+        "WARN"
+      ],
+      "type" : "string"
+    },
+    "tls" : {
+      "properties" : {
+        "keystorePassword" : {
+          "type" : "string"
+        },
+        "secretName" : {
+          "type" : "string"
+        },
+        "truststorePassword" : {
+          "type" : "string"
+        }
+      },
+      "type" : "object"
     }
-  }
+  },
+  "type" : "object"
 }
