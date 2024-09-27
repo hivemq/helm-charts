@@ -44,21 +44,17 @@ spec:
           {{- end }}
           {{- if .Values.nodes.podSecurityContext.enabled }}
           {{- $podSecurityContext := .Values.nodes.podSecurityContext }}
-          {{- include "hivemq-platform.validate-pod-security-context" (dict "podSecurityContext" $podSecurityContext) }}
+          {{- include "hivemq-platform.validate-run-as-user-security-context" $podSecurityContext }}
           securityContext:
-            runAsNonRoot: {{ $podSecurityContext.runAsNonRoot }}
-            {{- if eq $podSecurityContext.runAsNonRoot false }}
-            runAsUser: 0
-            {{- else if hasKey $podSecurityContext "runAsUser" }}
-            runAsUser: {{ $podSecurityContext.runAsUser }}
-            {{- else }}
-            runAsUser: 10000
-            {{- end }}
-            runAsGroup: {{ $podSecurityContext.runAsGroup | default 0 }}
+            {{- include "hivemq-platform.generate-run-as-security-context" (dict "securityContext" $podSecurityContext "indentation" 12) }}
             {{- if hasKey $podSecurityContext "fsGroup" }}
             fsGroup: {{ $podSecurityContext.fsGroup }}
             {{- end }}
             fsGroupChangePolicy: "OnRootMismatch"
+            {{- $filteredPodSecurityContext := omit $podSecurityContext "enabled" "fsGroup" "runAsGroup" "runAsNonRoot" "runAsUser" }}
+            {{- if gt (len $filteredPodSecurityContext) 0 }}
+            {{- toYaml $filteredPodSecurityContext | nindent 12 }}
+            {{- end }}
           {{- end }}
           {{- $additionalInitContainers := .Values.additionalInitContainers }}
           {{- $overrideInitContainers := .Values.config.overrideInitContainers }}
@@ -193,6 +189,16 @@ spec:
                 {{- if $hasAdditionalVolumeMounts }}
                 {{- include "hivemq-platform.get-additional-volume-mounts" . | indent 16 }}
                 {{- end -}}
+              {{- end }}
+              {{- with .Values.nodes.containerSecurityContext }}
+              {{- $containerSecurityContext := . }}
+              {{- include "hivemq-platform.validate-run-as-user-security-context" $containerSecurityContext }}
+              securityContext:
+                {{- include "hivemq-platform.generate-run-as-security-context" (dict "securityContext" $containerSecurityContext "indentation" 16) }}
+                {{- $filteredContainerSecurityContext := omit $containerSecurityContext "runAsGroup" "runAsNonRoot" "runAsUser" }}
+                {{- if gt (len $filteredContainerSecurityContext) 0 }}
+                {{- toYaml $filteredContainerSecurityContext | nindent 16 }}
+                {{- end }}
               {{- end }}
             {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
