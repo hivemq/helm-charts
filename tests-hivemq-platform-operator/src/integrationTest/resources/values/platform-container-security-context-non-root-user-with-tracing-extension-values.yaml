@@ -1,0 +1,10 @@
+nodes:
+  replicaCount: 1
+  containerSecurityContext:
+    runAsNonRoot: true
+extensions:
+  - name: hivemq-distributed-tracing-extension
+    extensionUri: preinstalled
+    enabled: true
+    supportsHotReload: true
+    configMapName: "distributed-tracing-configuration"
