@@ -124,6 +124,9 @@
         },
         "overrideStatefulSet" : {
           "type" : "string"
+        },
+        "useSecret" : {
+          "type" : "boolean"
         }
       },
       "type" : "object"

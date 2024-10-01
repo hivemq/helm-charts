@@ -1,4 +1,4 @@
-suite: HiveMQ Platform Configuration tests
+suite: HiveMQ Platform ConfigMap tests
 templates:
   - hivemq-configuration.yml
   - hivemq-custom-resource.yml
@@ -8,16 +8,19 @@ release:
 chart:
   version: 0.0.1
   appVersion: 1.0.0
+asserts:
+    - containsDocument:
+      apiVersion: v1
+      kind: ConfigMap
+      name: hivemq-configuration-test-hivemq-platform
+      namespace: test-hivemq-platform-namespace
+      template: hivemq-configuration.yml
 tests:
 
-  - it: with default values, default ConfigMap created
+  - it: with default ConfigMap values, no secretName is added to the custom resource
     asserts:
-      - containsDocument:
-          apiVersion: v1
-          kind: ConfigMap
-          name: hivemq-configuration-test-hivemq-platform
-          namespace: test-hivemq-platform-namespace
-        template: hivemq-configuration.yml
+      - notExists:
+          path: spec.secretName
 
   - it: with default values, default labels created
     asserts:
@@ -1012,25 +1015,39 @@ tests:
               </security>
             </hivemq>
 
-  - it: with create config true
+  - it: with override HiveMQ config, config overwritten
     template: hivemq-configuration.yml
     set:
-      config.create: true
-      config.overrideContent: "content"
+      config.overrideHiveMQConfig: |-
+        <hivemq>
+          <foobar/>
+        </hivemq>
     asserts:
-      - exists:
-          path: data
       - isKind:
           of: ConfigMap
       - equal:
           path: metadata.name
           value: hivemq-configuration-test-hivemq-platform
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <hivemq>
+              <foobar/>
+            </hivemq>
+      - exists:
+          path: spec.configMapName
+        template: hivemq-custom-resource.yml
       - equal:
           path: spec.configMapName
           value: hivemq-configuration-test-hivemq-platform
         template: hivemq-custom-resource.yml
+      - notExists:
+          path: spec.secretName
+        template: hivemq-custom-resource.yml
 
-  - it: with existing configMap, but name not set, then fails
+  - it: with existing ConfigMap, but name not set, then fails
     template: hivemq-custom-resource.yml
     set:
       config.create: false
@@ -1038,10 +1055,28 @@ tests:
       - failedTemplate:
           errorMessage: HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap
 
+  - it: with existing ConfigMap, then reuse existing ConfigMap and no additional ConfigMap is created
+    template: hivemq-custom-resource.yml
+    set:
+      config.create: false
+      config.name: my-custom-config-map
+    asserts:
+      - exists:
+          path: spec.configMapName
+      - equal:
+          path: spec.configMapName
+          value: my-custom-config-map
+      - hasDocuments:
+          count: 0
+        template: hivemq-configuration.yml
+
   - it: with custom tracing.xml
     template: hivemq-configuration.yml
     set:
-      config.customTracingConfig: <tracing/>
+      config.customTracingConfig: |-
+        <tracing>
+          <foobar/>
+        </tracing>
     asserts:
       - exists:
           path: data["config.xml"]
@@ -1051,12 +1086,18 @@ tests:
           path: data["tracing.xml"]
       - equal:
           path: data["tracing.xml"]
-          value: <tracing/>
+          value: |-
+            <tracing>
+              <foobar/>
+            </tracing>
 
   - it: with custom logback.xml
     template: hivemq-configuration.yml
     set:
-      config.customLogbackConfig: <configuration/>
+      config.customLogbackConfig: |-
+        <configuration>
+          <foobar/>
+        </configuration>
     asserts:
       - exists:
           path: data["config.xml"]
@@ -1066,4 +1107,7 @@ tests:
           path: data["logback.xml"]
       - equal:
           path: data["logback.xml"]
-          value: <configuration/>
+          value: |-
+            <configuration>
+              <foobar/>
+            </configuration>

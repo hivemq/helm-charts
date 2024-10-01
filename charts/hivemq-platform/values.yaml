@@ -353,10 +353,10 @@ services:
 # Note: When overriding default configurations, make sure to include required options into your
 #       custom configurations. See the documentation for more.
 config:
-  # Create a default HiveMQ Platform configuration (config.xml) as a Kubernetes ConfigMap.
+  # Creates a default HiveMQ Platform configuration (config.xml) as a Kubernetes ConfigMap by default.
   create: true
-  # Override the default HiveMQ Platform configuration (config.xml) by providing
-  # the name of a Kubernetes ConfigMap that contains the config.xml file (also set create=false).
+  # Overrides the default HiveMQ Platform configuration (config.xml) by providing
+  # the name of a Kubernetes ConfigMap or Kubernetes Secret that contains the config.xml file (also set create=false).
   name: ""
   # Inlines the HiveMQ Platform configuration (config.xml) from a file:
   # --set-file config.overrideHiveMQConfig=your-config.xml
@@ -380,6 +380,9 @@ config:
   # Inlines a custom HiveMQ Platform logging configuration (logback.xml) from a file:
   # --set-file config.customLogbackConfig=your-logback.xml
   customLogbackConfig: ""
+  # Defines whether a Kubernetes Secret object should be created to hold the HiveMQ Platform configuration.
+  # By default, a Kubernetes ConfigMap will be created.
+  useSecret: false
 
 # Custom init containers to be added to the HiveMQ platform StatefulSet
 additionalInitContainers: []
