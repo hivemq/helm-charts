@@ -1,74 +1,113 @@
-suite: test HiveMQ Platform extensions
+suite: HiveMQ Platform extension tests
 templates:
   - hivemq-custom-resource.yml
 tests:
-  - it: with extension enabled for custom resource
+
+  - it: with default values, only allow all extension enabled
+    asserts:
+      - exists:
+          path: spec.extensions
+      - lengthEqual:
+          path: spec.extensions
+          count: 1
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-allow-all-extension
+            enabled: true
+            extensionUri: preinstalled
+            supportsHotReload: false
+
+  - it: with extensions enabled, all extensions set
     values:
       - extensions-values.yaml
     asserts:
-      - equal:
-          path: spec.extensions[0].id
-          value: hivemq-custom-test-extension
-      - equal:
-          path: spec.extensions[0].enabled
-          value: true
-      - equal:
-          path: spec.extensions[0].supportsHotReload
-          value: false
-      - equal:
-          path: spec.extensions[0].configMapName
-          value: custom-extension-configuration
-      - equal:
-          path: spec.extensions[0].requestHeaderSecretName
-          value: custom-extension-auth-secret
-      - equal:
-          path: spec.extensions[0].extensionUri
-          value: http://nginx-service/hivemq-custom-test-extension-1.0.0.zip
-      - equal:
-          path: spec.extensions[0].customizationUri
-          value: http://nginx-service/hivemq-customization.zip
-      - equal:
-          path: spec.extensions[0].extensionPriority
-          value: 1500
-      - equal:
-          path: spec.extensions[0].extensionStartPriority
-          value: 2000
+      - exists:
+          path: spec.extensions
+      - lengthEqual:
+          path: spec.extensions
+          count: 4
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-custom-test-extension
+            enabled: true
+            supportsHotReload: false
+            configMapName: "custom-extension-configuration"
+            requestHeaderSecretName: custom-extension-auth-secret
+            extensionUri: http://nginx-service/hivemq-custom-test-extension-1.0.0.zip
+            customizationUri: http://nginx-service/hivemq-customization.zip
+            extensionPriority: 1500
+            extensionStartPriority: 2000
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+            enabled: true
+            supportsHotReload: true
+            configMapName: "hivemq-kafka-extension-test-configuration"
+            extensionUri: preinstalled
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-google-cloud-pubsub-extension
+            enabled: true
+            supportsHotReload: true
+            extensionUri: preinstalled
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-distributed-tracing-extension
+            enabled: false
+            supportsHotReload: true
+            secretName: "my-tracing-extension-secret-name"
+            extensionUri: preinstalled
 
-      - equal:
-          path: spec.extensions[1].id
-          value: hivemq-kafka-extension
-      - equal:
-          path: spec.extensions[1].enabled
-          value: true
-      - equal:
-          path: spec.extensions[1].supportsHotReload
-          value: true
-      - equal:
-          path: spec.extensions[1].configMapName
-          value: hivemq-kafka-extension-test-configuration
-      - equal:
-          path: spec.extensions[1].extensionUri
-          value: preinstalled
-      - notExists:
-          path: spec.extensions[1].extensionPriority
-      - notExists:
-          path: spec.extensions[1].extensionStartPriority
+  - it: with extension name missing, schema validation fails
+    set:
+      extensions:
+        - enabled: false
+          supportsHotReload: true
+    asserts:
+      - failedTemplate: {}
 
-      - equal:
-          path: spec.extensions[2].id
-          value: hivemq-google-cloud-pubsub-extension
-      - equal:
-          path: spec.extensions[2].enabled
-          value: true
-      - equal:
-          path: spec.extensions[2].supportsHotReload
-          value: true
-      - notExists:
-          path: spec.extensions[2].configMapName
-      - equal:
-          path: spec.extensions[2].extensionUri
-          value: preinstalled
-      - notExists:
-          path: spec.extensions[2].extensionPriority
-      - notExists:
-          path: spec.extensions[2].extensionStartPriority
+  - it: with duplicated and enabled extension, validation fails
+    set:
+      extensions:
+        - name: hivemq-distributed-tracing-extension
+          enabled: false
+          supportsHotReload: true
+          configMapName: "my-tracing-extension-configmap-name"
+        - name: hivemq-distributed-tracing-extension
+          enabled: true
+          supportsHotReload: false
+          secretName: "my-tracing-extension-secret-name"
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated extension name `hivemq-distributed-tracing-extension`
+
+  - it: with extension configMapName and secretName set, validation fails
+    set:
+      extensions:
+        - name: hivemq-distributed-tracing-extension
+          enabled: true
+          supportsHotReload: true
+          configMapName: "my-tracing-extension-configmap-name"
+          secretName: "my-tracing-extension-secret-name"
+    asserts:
+      - failedTemplate:
+          errorMessage: Both `configMapName` and `secretName` values are set for extension `hivemq-distributed-tracing-extension`. Only one can be defined at a time
+
+  - it: with extension configMapName and secretName empty, validation succeeds
+    set:
+      extensions:
+        - name: hivemq-distributed-tracing-extension
+          enabled: true
+          supportsHotReload: true
+          configMapName: ""
+          secretName: ""
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
