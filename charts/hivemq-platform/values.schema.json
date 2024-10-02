@@ -146,6 +146,7 @@
       "items" : {
         "properties" : {
           "configMapName" : {
+            "maxLength" : 253,
             "type" : "string"
           },
           "customizationUri" : {
@@ -164,6 +165,11 @@
             "type" : "integer"
           },
           "requestHeaderSecretName" : {
+            "maxLength" : 253,
+            "type" : "string"
+          },
+          "secretName" : {
+            "maxLength" : 253,
             "type" : "string"
           },
           "startPriority" : {
@@ -173,6 +179,9 @@
             "type" : "boolean"
           }
         },
+        "required" : [
+          "name"
+        ],
         "type" : "object"
       },
       "type" : "array"

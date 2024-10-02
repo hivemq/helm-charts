@@ -279,8 +279,9 @@ spec:
     {{- end }}
   {{- if hasKey .Values "extensions" }}
   extensions:
+    {{- include "hivemq-platform.validate-extensions" . -}}
     {{- range $extension := .Values.extensions }}
-    - id: {{$extension.name}}
+    - id: {{ $extension.name }}
       {{- if hasKey $extension "enabled" }}
       enabled: {{ printf "%t" $extension.enabled | default false }}
       {{- else }}
@@ -306,6 +307,9 @@ spec:
       {{- end }}
       {{- if hasKey $extension "startPriority" }}
       extensionStartPriority: {{ $extension.startPriority | default -1 }}
+      {{- end }}
+      {{- if hasKey $extension "secretName" }}
+      secretName: {{ $extension.secretName | quote }}
       {{- end }}
     {{- end }}
   {{- end }}

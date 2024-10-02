@@ -287,6 +287,46 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 {{- end -}}
 
 {{/*
+Validates all the exposed extensions.
+- No duplicated extension names are defined as part of the `.Values.extensions` values list.
+- No extension contains `configMapName` and `secretName` defined simultaneously.
+Usage: {{ include "hivemq-platform.validate-extensions" . }}
+*/}}
+{{- define "hivemq-platform.validate-extensions" -}}
+{{- include "hivemq-platform.validate-duplicated-extension-names" . -}}
+{{- include "hivemq-platform.validate-configmap-secret-extensions" . -}}
+{{- end -}}
+
+{{/*
+Validates there is no duplicated extension names defined.
+Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
+*/}}
+{{- define "hivemq-platform.validate-duplicated-extension-names" -}}
+{{- $extensions := .Values.extensions }}
+{{- $extensionNamesList := list }}
+{{- range $extension := $extensions }}
+  {{- if (has $extension.name $extensionNamesList) }}
+    {{- fail (printf "Found duplicated extension name `%s`" $extension.name) }}
+  {{- else }}
+    {{- $extensionNamesList = $extension.name | append $extensionNamesList}}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates there is no enabled extension which defines both `configMapName` and `secretName` simultaneously.
+Usage: {{ include "hivemq-platform.validate-configmap-secret-extensions" . }}
+*/}}
+{{- define "hivemq-platform.validate-configmap-secret-extensions" -}}
+{{- $extensions := .Values.extensions }}
+{{- range $extension := $extensions }}
+  {{- if and $extension.configMapName $extension.secretName }}
+    {{- fail (printf "Both `configMapName` and `secretName` values are set for extension `%s`. Only one can be defined at a time" $extension.name) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Validates all the exposed services.
 - No duplicated service names are defined as part of the `.Values.services` values list.
 - No duplicated HiveMQ listener names are defined as part of the `.Values.services` values list.
