@@ -16,3 +16,7 @@ extensions:
     enabled: true
     supportsHotReload: true
     extensionUri: preinstalled
+  - name: hivemq-distributed-tracing-extension
+    enabled: false
+    supportsHotReload: true
+    secretName: "my-tracing-extension-secret-name"
