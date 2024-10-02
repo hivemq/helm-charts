@@ -529,6 +529,8 @@ extensions:
 #    supportsHotReload: false
 #    # The ConfigMap name that contains the extension configuration (mounted into the extension subfolder "conf").
 #    configMapName: ""
+#    # The Secret name that contains the extension configuration (mounted into the extension subfolder "conf").
+#    secretName: ""
 #    # The Secret name that contains request headers for the custom extension download.
 #    requestHeaderSecretName: ""
 #    # The URI to download the custom extension (as .zip distribution).
