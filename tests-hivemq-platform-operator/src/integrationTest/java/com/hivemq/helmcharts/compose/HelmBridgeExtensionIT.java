@@ -4,6 +4,7 @@ import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -14,6 +15,7 @@ import org.testcontainers.hivemq.HiveMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.helmcharts.testcontainer.DockerImageNames.HIVEMQ_DOCKER_IMAGE;
@@ -26,8 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 
     private static final byte @NotNull [] PAYLOAD = "test".getBytes();
-
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmBridgeExtensionIT.class);
+
+    private @NotNull String ipAddress;
 
     @Container
     private final @NotNull HiveMQContainer hivemqContainer = new HiveMQContainer(HIVEMQ_DOCKER_IMAGE) //
@@ -35,23 +38,46 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
             .withNetworkAliases("remote") //
             .withLogLevel(Level.DEBUG);
 
+    @BeforeEach
+    void setUp() {
+        final var hivemqContainerNetwork = hivemqContainer.getContainerInfo()
+                .getNetworkSettings()
+                .getNetworks()
+                .values()
+                .stream()
+                .findFirst()
+                .orElseThrow();
+        ipAddress = Objects.requireNonNull(hivemqContainerNetwork.getIpAddress());
+    }
+
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withBridgeConfiguration_messageBridged() throws Exception {
-        final var hivemqContainerNetwork =
-                hivemqContainer.getContainerInfo().getNetworkSettings().getNetworks().values().stream().findFirst();
-        assertThat(hivemqContainerNetwork).isPresent();
-        final var ipAddress = hivemqContainerNetwork.get().getIpAddress();
-
-        // setup bridge configuration
+        // create bridge extension configuration as a ConfigMap
         final var bridgeConfiguration =
                 readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
         K8sUtil.createConfigMap(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
 
         // deploy chart and wait to be ready
         installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
+        assertMessagesBridged();
+    }
 
-        // forward the port from the service
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void withBridgeSecretConfiguration_messageBridged() throws Exception {
+        // create bridge extension configuration as a Secret
+        final var bridgeConfiguration =
+                readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
+        K8sUtil.createSecret(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
+
+        // deploy chart and wait to be ready
+        installPlatformChartAndWaitToBeRunning("/files/bridge-with-secret-config-values.yaml");
+        assertMessagesBridged();
+    }
+
+    private void assertMessagesBridged() {
+        // assert MQTT messages are bridged
         MqttUtil.execute(client,
                 platformNamespace,
                 DEFAULT_MQTT_SERVICE_NAME,

@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -121,8 +123,9 @@ public class K8sUtil {
      * @param client    the Kubernetes client to use
      * @param namespace the namespace to create the custom resource in
      * @param content   the data content to hold for the provided key param
+     * @return the created Secret instance
      */
-    public static void createSecret(
+    public static @NotNull Secret createSecret(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String name,
@@ -130,6 +133,7 @@ public class K8sUtil {
         final var secret =
                 new SecretBuilder().withNewMetadata().withName(name).endMetadata().addToData(content).build();
         assertThat(client.secrets().inNamespace(namespace).resource(secret).create()).isNotNull();
+        return secret;
     }
 
     /**
@@ -139,9 +143,10 @@ public class K8sUtil {
      * @param namespace the namespace to create the custom resource in
      * @param name      the name of the Secret to create
      * @param key       the key entry for the Secret
-     * @param content   the data content to hold for the provided key param
+     * @param content   the encoded base64 data content to hold for the provided key param
+     * @return the created Secret instance
      */
-    public static void createSecret(
+    public static @NotNull Secret createSecret(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String name,
@@ -150,6 +155,7 @@ public class K8sUtil {
         final var secret =
                 new SecretBuilder().withNewMetadata().withName(name).endMetadata().addToData(key, content).build();
         assertThat(client.secrets().inNamespace(namespace).resource(secret).create()).isNotNull();
+        return secret;
     }
 
     /**
@@ -157,7 +163,7 @@ public class K8sUtil {
      *
      * @param client       the Kubernetes client to use
      * @param namespace    the namespace to create the custom resource in
-     * @param resourceName the name of the resource file to use
+     * @param resourceName the name of the Secret resource file to use
      * @return the created Secret instance
      */
     public static @NotNull Secret createSecret(
@@ -165,6 +171,27 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName) {
         return loadResource(client, namespace, resourceName, Secret.class).create();
+    }
+
+    /**
+     * Creates a {@link Secret} with a {@code config.xml} entry with the given non-encoded configuration.
+     *
+     * @param client        the Kubernetes client to use
+     * @param namespace     the namespace to create the Secret in
+     * @param name          the name of the Secret
+     * @param configuration the non-encoded content of the {@code config.xml} file
+     * @return the created Secret instance
+     */
+    public static @NotNull Secret createSecret(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String name,
+            final @NotNull String configuration) {
+        return createSecret(client,
+                namespace,
+                name,
+                Map.of("config.xml",
+                        Base64.getEncoder().encodeToString(configuration.getBytes(StandardCharsets.UTF_8))));
     }
 
     /**
