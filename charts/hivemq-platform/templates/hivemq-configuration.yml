@@ -26,6 +26,9 @@ data:
         <tls-tcp-listener>
           <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if $service.hivemqListenerName }}
+          <name>{{ $service.hivemqListenerName }}</name>
+          {{- end }}
           {{- if hasKey $service "hivemqProxyProtocol" }}
           <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
           {{- end }}
@@ -50,6 +53,9 @@ data:
         <tcp-listener>
           <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if $service.hivemqListenerName }}
+          <name>{{ $service.hivemqListenerName }}</name>
+          {{- end }}
           {{- if hasKey $service "hivemqProxyProtocol" }}
           <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
           {{- end }}
@@ -60,6 +66,9 @@ data:
         <tls-websocket-listener>
           <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if $service.hivemqListenerName }}
+          <name>{{ $service.hivemqListenerName }}</name>
+          {{- end }}
           {{- if hasKey $service "hivemqProxyProtocol" }}
           <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
           {{- end }}
@@ -85,6 +94,9 @@ data:
         <websocket-listener>
           <port>{{ $service.containerPort }}</port>
           <bind-address>0.0.0.0</bind-address>
+          {{- if $service.hivemqListenerName }}
+          <name>{{ $service.hivemqListenerName }}</name>
+          {{- end }}
           {{- if hasKey $service "hivemqProxyProtocol" }}
           <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
           {{- end }}

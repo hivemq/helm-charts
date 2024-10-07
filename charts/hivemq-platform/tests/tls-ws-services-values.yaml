@@ -20,6 +20,7 @@ services:
     keystoreSecretName: "websocket-secret2"
     keystorePasswordSecretName: "secret-password2"
     hivemqProxyProtocol: true
+    hivemqListenerName: my-custom-ws-listener-8004
   - type: websocket
     exposed: true
     containerPort: 8005
@@ -27,6 +28,7 @@ services:
     keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
     hivemqProxyProtocol: false
+    hivemqListenerName: my-custom-ws-listener-8005
   - type: websocket
     exposed: true
     containerPort: 8006
@@ -34,7 +36,9 @@ services:
     keystorePasswordSecretName: "secret-password4"
     keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
     hivemqProxyProtocol: true
+    hivemqListenerName: my-custom-ws-listener-8006
   - type: websocket
     exposed: true
     containerPort: 8007
     hivemqProxyProtocol: true
+    hivemqListenerName: my-custom-ws-listener-8007
