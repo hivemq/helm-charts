@@ -288,6 +288,7 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 {{/*
 Validates all the exposed services.
 - No duplicated service names are defined as part of the `.Values.services` values list.
+- No duplicated HiveMQ listener names are defined as part of the `.Values.services` values list.
 - No default ports (7979, 8889, 7000) are defined as part of the `containerPort` defined in the `.Values.services` values list.
 - When migration.statefulSet flag is enabled, `.Values.services.legacyPortName` is mandatory.
 Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" $.Release.Name) }}
@@ -296,6 +297,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- $services := .Values.services }}
 {{- $releaseName := .Release.Name }}
 {{- include "hivemq-platform.validate-duplicated-service-names" . -}}
+{{- include "hivemq-platform.validate-duplicated-listener-names" . -}}
 {{- include "hivemq-platform.validate-service-container-ports" . -}}
 {{- include "hivemq-platform.validate-default-service-ports" . -}}
 {{- include "hivemq-platform.validate-proxy-protocol-services" . -}}
@@ -303,7 +305,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- end -}}
 
 {{/*
-Validates there is no duplicated service name defined.
+Validates there is no duplicated service name defined on exposed services.
 Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
 */}}
 {{- define "hivemq-platform.validate-duplicated-service-names" -}}
@@ -323,6 +325,23 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
   {{- else }}
     {{- $serviceNamesDict = set $serviceNamesDict $serviceName $service }}
   {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates there is no duplicated HiveMQ listener name defined on exposed services.
+Usage: {{ include "hivemq-platform.validate-duplicated-listener-names" . }}
+*/}}
+{{- define "hivemq-platform.validate-duplicated-listener-names" -}}
+{{- $services := .Values.services }}
+{{- $listenerNamesList := list }}
+{{- $listenerName := "" }}
+{{- range $service := $services }}
+  {{- $listenerName = $service.hivemqListenerName }}
+  {{- if and $listenerName $service.exposed (has $listenerName $listenerNamesList) }}
+    {{- fail (printf "Found duplicated HiveMQ listener name `%s`" $listenerName) }}
+  {{- end }}
+  {{- $listenerNamesList = $listenerName | append $listenerNamesList}}
 {{- end }}
 {{- end -}}
 

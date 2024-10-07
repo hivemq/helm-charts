@@ -1,0 +1,116 @@
+suite: HiveMQ Platform Configuration - REST API listeners tests
+templates:
+  - hivemq-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with a Rest API service exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<port>8890</port>.*?</rest-api>"
+
+  - it: with a Rest API service not being exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<port>8890</port>.*?</rest-api>"
+
+  - it: with REST API authentication enabled
+    template: hivemq-configuration.yml
+    set:
+      restApi.authEnabled: true
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<auth>.*?<enabled>true</enabled>.*?</auth>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<port>8890</port>.*?</rest-api>"
+
+  - it: with default REST API authentication
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<enabled>true</enabled>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<auth>.*?<enabled>false</enabled>.*?</auth>.*?</rest-api>"
+
+  - it: with duplicated container port in multiple REST API services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          name: my-rest-1
+          exposed: true
+          containerPort: 8890
+        - type: rest-api
+          name: my-rest-2
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
+
+  - it: with a REST API service exposed and a listener name, schema validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          hivemqListenerName: my-custom-rest-api-listener
+    asserts:
+      - failedTemplate: {}
