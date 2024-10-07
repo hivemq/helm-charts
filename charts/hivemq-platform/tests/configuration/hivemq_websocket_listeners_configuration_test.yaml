@@ -1,0 +1,843 @@
+suite: HiveMQ Platform Configuration - WebSocket listeners tests
+templates:
+  - hivemq-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with a WebSocket service exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<name>.*?</name>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and a listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqListenerName: my-custom-websocket-listener
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<name>my-custom-websocket-listener</name>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and an empty listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqListenerName: ""
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<name>.*?</name>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
+
+  - it: with a WebSocket service exposed and a duplicated listener name, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqListenerName: my-custom-ws-listener
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          hivemqListenerName: my-custom-ws-listener
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated HiveMQ listener name `my-custom-ws-listener`
+
+  - it: with non-exposed WebSocket services and duplicated listener name, validation succeeds
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          hivemqListenerName: my-custom-ws-listener
+        - type: websocket
+          exposed: false
+          containerPort: 8001
+          hivemqListenerName: my-custom-ws-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a WebSocket service not exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<name>.*?</name>.*?</websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service enabled, using keystorePassword
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore.jks</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure WebSocket service enabled, using keystorePasswordSecretName
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore.jks</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure WebSocket service disabled, no secure WebSocket service is exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?<tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket services exposed using a custom keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8001</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure WebSocket services exposed reusing the same keystore password and keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          exposed: true
+          containerPort: 8002
+          keystoreSecretName: "websocket-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: websocket
+          exposed: true
+          containerPort: 8003
+          keystoreSecretName: "websocket-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8000</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8001</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8002</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8003</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with several secure and non-secure WebSocket services
+    template: hivemq-configuration.yml
+    values:
+      - ../tls-ws-services-values.yaml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-websocket-listener>
+                  <port>8001</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8002</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8003</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret1/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret1_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8005</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <name>my-custom-ws-listener-8005</name>
+                  <proxy-protocol>false</proxy-protocol>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret3/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret3_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret3_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <tls-websocket-listener>
+                  <port>8006</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <name>my-custom-ws-listener-8006</name>
+                  <proxy-protocol>true</proxy-protocol>
+                  <path>/mqtt</path>
+                  <tls>
+                    <keystore>
+                      <path>/tls-websocket-secret4/keystore</path>
+                      <password>${websocket_test-hivemq-platform_websocket-secret4_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-secret4_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-websocket-listener>
+                <websocket-listener>
+                  <port>8007</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <name>my-custom-ws-listener-8007</name>
+                  <proxy-protocol>true</proxy-protocol>
+                  <path>/mqtt</path>
+                </websocket-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with duplicated container port in multiple WebSocket services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          name: my-custom-ws-1
+          exposed: true
+          containerPort: 8000
+        - type: websocket
+          name: my-custom-ws-2
+          exposed: true
+          containerPort: 8000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>.*?</listeners>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>.*?<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>.*?</listeners>"
+
+  - it: with duplicated container port in multiple secure WebSocket services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          name: my-secure-ws-1
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: websocket
+          name: my-secure-ws-2
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?</listeners>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?</listeners>"
+
+  - it: with a secure WebSocket service and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?<websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?<websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>.*?</listeners>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service and a listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-websocket-listener
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?<websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<name>.*?</name>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>my-custom-secure-websocket-listener</name>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service and an empty listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: ""
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<port>8000</port>.*?<websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?<name>.*?</name>.*?</websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>.*?</listeners>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
+
+  - it: with a secure WebSocket service and a duplicated listener name
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated HiveMQ listener name `my-custom-secure-ws-listener`
+
+  - it: with non-exposed secure WebSocket services and duplicated listener name, validation succeeds
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+        - type: websocket
+          exposed: false
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a non MQTT or WebSocket service exposed and a listener name, schema validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          hivemqListenerName: my-custom-cc-listener
+    asserts:
+      - failedTemplate: {}

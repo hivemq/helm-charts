@@ -1,0 +1,1057 @@
+suite: HiveMQ Platform Configuration - MQTT listeners tests
+templates:
+  - hivemq-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with a MQTT service exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<name>.*?</name>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<name>.*?</name>.*?</tls-tcp-listener>"
+
+  - it: with a MQTT service exposed and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tcp-listener>"
+
+  - it: with a MQTT service exposed and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tcp-listener>"
+
+  - it: with a MQTT service exposed and a listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqListenerName: my-custom-mqtt-listener
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<name>my-custom-mqtt-listener</name>.*?</tcp-listener>"
+
+  - it: with a MQTT service exposed and an empty listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqListenerName: ""
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<name>.*?</name>.*?</tcp-listener>"
+
+  - it: with a MQTT service exposed and a duplicated listener name, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          hivemqListenerName: my-custom-mqtt-listener
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          hivemqListenerName: my-custom-mqtt-listener
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated HiveMQ listener name `my-custom-mqtt-listener`
+
+  - it: with non-exposed MQTT services and duplicated listener name, validation succeeds
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          hivemqListenerName: my-custom-mqtt-listener
+        - type: mqtt
+          exposed: false
+          containerPort: 1885
+          hivemqListenerName: my-custom-mqtt-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a MQTT service not exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<name>.*?</name>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<name>.*?</name>.*?</tls-tcp-listener>"
+
+  - it: with a secure MQTT service exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <client-authentication-mode>OPTIONAL</client-authentication-mode>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            value: key-changeme
+        template: hivemq-custom-resource.yml
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_truststore-secret_truststore_pass
+            value: trust-changeme
+        template: hivemq-custom-resource.yml
+
+  - it: with a secure MQTT services exposed using a custom keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1885</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure MQTT services exposed reusing the same keystore password and keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1886
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1887
+          keystoreSecretName: "mqtt-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1885</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1886</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1887</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with a secure mutual TLS MQTT service exposed, using keystorePassword and truststorePassword
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <truststore>
+                      <path>/tls-truststore-secret/truststore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_truststore-secret_truststore_pass}</password>
+                    </truststore>
+                    <client-authentication-mode>OPTIONAL</client-authentication-mode>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            value: key-changeme
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_truststore-secret_truststore_pass
+            value: trust-changeme
+        template: hivemq-custom-resource.yml
+
+  - it: with a secure mutual TLS MQTT service exposed, using keystorePasswordSecretName and truststorePasswordSecretName
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <truststore>
+                      <path>/tls-truststore-secret/truststore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_truststore-secret_truststore_pass}</password>
+                    </truststore>
+                    <client-authentication-mode>OPTIONAL</client-authentication-mode>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: my-keystore-secret
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_truststore-secret_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                key: truststore.password
+                name: my-truststore-secret
+        template: hivemq-custom-resource.yml
+
+  - it: with a secure mutual TLS MQTT service exposed but missing required keystore password, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+
+  - it: with a secure mutual TLS MQTT service exposed but missing required truststore password, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+    asserts:
+      - failedTemplate:
+          errorMessage: A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)
+
+  - it: with a secure mutual TLS MQTT service not exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          tlsClientAuthenticationMode: "OPTIONAL"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<name>.*?</name>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<name>.*?</name>.*?</tls-tcp-listener>"
+
+  - it: with a secure mutual TLS MQTT service exposed using default values
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                    <truststore>
+                      <path>/tls-truststore-secret/truststore</path>
+                      <password>${mqtt_test-hivemq-platform_truststore-secret_truststore_pass}</password>
+                    </truststore>
+                  </tls>
+                </tls-tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: my-keystore-secret
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_truststore-secret_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                key: truststore.password
+                name: my-truststore-secret
+        template: hivemq-custom-resource.yml
+
+  - it: with a secure mutual TLS MQTT service exposed and PROXY protocol enabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqProxyProtocol: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-tcp-listener>"
+
+  - it: with a secure mutual TLS MQTT service exposed and PROXY protocol disabled
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqProxyProtocol: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tls-tcp-listener>"
+
+  - it: with a secure mutual TLS MQTT service exposed and a listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqListenerName: my-custom-secure-mqtt-listener
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<name>my-custom-secure-mqtt-listener</name>.*?</tls-tcp-listener>"
+
+  - it: with a secure mutual TLS MQTT service exposed and an empty listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqListenerName: ""
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<port>1884</port>.*?</tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tcp-listener>.*?<name>.*?</name>.*?</tcp-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-tcp-listener>.*?<name>.*?</name>.*?</tls-tcp-listener>"
+
+  - it: with a secure mutual TLS MQTT service exposed and a duplicated listener name, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqListenerName: my-custom-secure-mqtt-listener
+        - type: mqtt
+          exposed: true
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqListenerName: my-custom-secure-mqtt-listener
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated HiveMQ listener name `my-custom-secure-mqtt-listener`
+
+  - it: with non-exposed secure MQTT services and duplicated listener name, validation succeeds
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqListenerName: my-custom-secure-mqtt-listener
+        - type: mqtt
+          exposed: false
+          containerPort: 1885
+          keystoreSecretName: "mqtt-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+          hivemqListenerName: my-custom-secure-mqtt-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with several secure and non-secure MQTT services
+    template: hivemq-configuration.yml
+    values:
+      - ../tls-mqtt-services-values.yaml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tls-tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1884</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1885</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <name>my-custom-mqtt-listener-1885</name>
+                  <proxy-protocol>true</proxy-protocol>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1887</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <proxy-protocol>false</proxy-protocol>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret3/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret3_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret3_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tls-tcp-listener>
+                  <port>1888</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <tls>
+                    <keystore>
+                      <path>/tls-mqtt-secret4/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_mqtt-secret4_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret4_keystore_private_pass}</private-key-password>
+                    </keystore>
+                  </tls>
+                </tls-tcp-listener>
+                <tcp-listener>
+                  <port>1889</port>
+                  <bind-address>0.0.0.0</bind-address>
+                  <name>my-custom-mqtt-listener-1889</name>
+                  <proxy-protocol>true</proxy-protocol>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+            </hivemq>
+
+  - it: with duplicated container port in multiple MQTT services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          name: my-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-mqtt-2
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tcp-listener>.*?<port>1883</port>.*?</tcp-listener>.*?</listeners>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tcp-listener>.*?<port>1883</port>.*?</tcp-listener>.*?<tcp-listener>.*?<port>1883</port>.*?</tcp-listener>.*?</listeners>"
+
+  - it: with duplicated container port in multiple secure MQTT services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: mqtt
+          name: my-secure-mqtt-1
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          tlsClientAuthenticationMode: "OPTIONAL"
+        - type: mqtt
+          name: my-secure-mqtt-2
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>.*?</listeners>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<listeners>.*?<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>.*?<tls-tcp-listener>.*?<port>1884</port>.*?</tls-tcp-listener>.*?</listeners>"

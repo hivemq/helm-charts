@@ -1,0 +1,581 @@
+suite: HiveMQ Platform Configuration - Control Center listeners tests
+templates:
+  - hivemq-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with a Control Center service exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<port>8081</port>.*?</control-center>"
+
+  - it: with a Control Center service not exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<port>8081</port>.*?</control-center>"
+
+  - it: with Control Center user and password
+    template: hivemq-configuration.yml
+    set:
+      controlCenter.username: "test-username"
+      controlCenter.password: "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+                <users>
+                  <user>
+                    <name>test-username</name>
+                    <password>c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265</password>
+                  </user>
+                </users>
+              </control-center>
+            </hivemq>
+
+  - it: with default Control Center username and password
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>test-password</password>.*?</user>"
+
+  - it: with a secure Control Center service enabled, using keystorePassword
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore.jks</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with a secure Control Center service enabled, using keystorePasswordSecretName
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore.jks</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with a secure Control Center service disabled, no secure Control Center service is exposed
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "control-center-keystore-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<listeners>.*?</control-center>"
+
+  - it: with a secure Control Center services exposed using a custom keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          exposed: true
+          containerPort: 8444
+          keystoreSecretName: "control-center-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8444</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with a secure Control Center services exposed reusing the same keystore password and keystore private password
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          exposed: true
+          containerPort: 8444
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          exposed: true
+          containerPort: 8445
+          keystoreSecretName: "control-center-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+        - type: control-center
+          exposed: true
+          containerPort: 8446
+          keystoreSecretName: "control-center-secret1"
+          keystorePasswordSecretName: "secret-password1"
+          keystorePasswordSecretKey: "keystore.password1"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8444</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8445</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8446</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with several secure and non-secure Control Center services
+    template: hivemq-configuration.yml
+    values:
+      - ../tls-cc-services-values.yaml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <https>
+                    <port>8443</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8444</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8445</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret1/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8447</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret3/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret3_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret3_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <https>
+                    <port>8448</port>
+                    <bind-address>0.0.0.0</bind-address>
+                    <tls>
+                      <keystore>
+                        <path>/tls-control-center-secret4/keystore</path>
+                        <password>${control-center_test-hivemq-platform_control-center-secret4_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret4_keystore_private_pass}</private-key-password>
+                      </keystore>
+                    </tls>
+                  </https>
+                  <http>
+                    <port>8081</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with duplicated container port in multiple Control Center services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          name: my-cc-1
+          exposed: true
+          containerPort: 8080
+        - type: control-center
+          name: my-cc-2
+          exposed: true
+          containerPort: 8080
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?<port>8080</port>.*?</http>.*?</listeners>.*?</control-center>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?<port>8080</port>.*?</http>.*?<http>.*?<port>8080</port>.*?</http>.*?</listeners>.*?</control-center>"
+
+  - it: with duplicated container port in multiple secure Control Center services, no duplicated listener is created
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: control-center
+          name: my-secure-cc-1
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+        - type: control-center
+          name: my-secure-cc-2
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+
+  - it: with a Control Center service exposed and a listener name, schema validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          hivemqListenerName: my-custom-cc-listener
+    asserts:
+      - failedTemplate: {}
