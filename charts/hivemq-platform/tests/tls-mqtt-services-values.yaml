@@ -15,12 +15,14 @@ services:
     keystoreSecretName: "mqtt-secret1"
     keystorePasswordSecretName: "secret-password1"
     hivemqProxyProtocol: true
+    hivemqListenerName: my-custom-mqtt-listener-1885
   - type: mqtt
     exposed: false
     containerPort: 1886
     keystoreSecretName: "mqtt-secret2"
     keystorePasswordSecretName: "secret-password2"
     hivemqProxyProtocol: true
+    hivemqListenerName: my-custom-mqtt-listener-1886
   - type: mqtt
     exposed: true
     containerPort: 1887
@@ -38,3 +40,4 @@ services:
     exposed: true
     containerPort: 1889
     hivemqProxyProtocol: true
+    hivemqListenerName: my-custom-mqtt-listener-1889

@@ -1,0 +1,1069 @@
+suite: HiveMQ Platform Configuration tests
+templates:
+  - hivemq-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with default values, default ConfigMap created
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: ConfigMap
+          name: hivemq-configuration-test-hivemq-platform
+          namespace: test-hivemq-platform-namespace
+        template: hivemq-configuration.yml
+
+  - it: with default values, default labels created
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-0.0.1
+            app.kubernetes.io/name: hivemq-platform
+            app.kubernetes.io/instance: test-hivemq-platform
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+        template: hivemq-configuration.yml
+
+  - it: with default platform values
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+      - exists:
+          path: data["tracing.xml"]
+      - equal:
+          path: data["tracing.xml"]
+          value: |-
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <tracing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tracing.xsd">
+              <context-propagation>
+                <outbound-context-propagation>
+                  <enabled>false</enabled>
+                </outbound-context-propagation>
+              </context-propagation>
+              <sampling>
+                <publish-sampling>
+                  <enabled>true</enabled>
+                </publish-sampling>
+              </sampling>
+            </tracing>
+      - notExists:
+          path: data["logback.xml"]
+
+  - it: with default platform values and all default hivemqRestrictions config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxConnections: -1
+        incomingBandwidthThrottling: 0
+        noConnectIdleTimeout: 10000
+        maxClientIdLength: 65535
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <restrictions>
+                <max-connections>-1</max-connections>
+                <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
+                <no-connect-idle-timeout>10000</no-connect-idle-timeout>
+                <max-client-id-length>65535</max-client-id-length>
+              </restrictions>
+            </hivemq>
+
+  - it: with default platform values and some default hivemqRestrictions config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        incomingBandwidthThrottling: 0
+        maxClientIdLength: 65535
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <restrictions>
+                <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
+                <max-client-id-length>65535</max-client-id-length>
+              </restrictions>
+            </hivemq>
+
+  - it: with default platform values and empty hivemqRestrictions config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and all default hivemqMqtt config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqtt:
+        sessionExpiryMaxInterval: 4294967295
+        messageExpiryMaxInterval: 4294967296
+        maxPacketSize: 268435460
+        serverReceiveMaximum: 10
+        keepAliveMax: 65535
+        keepAliveAllowUnlimited: true
+        topicAliasEnabled: true
+        topicAliasMaxPerClient: 5
+        subscriptionIdentifier: true
+        wildcardSubscriptions: true
+        sharedSubscriptions: true
+        maxQualityOfService: 2
+        retainedMessages: true
+        queuedMessagesMaxSize: 1000
+        queuedMessagesStrategy: "discard"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <mqtt>
+                <session-expiry>
+                  <max-interval>4294967295</max-interval>
+                </session-expiry>
+                <message-expiry>
+                  <max-interval>4294967296</max-interval>
+                </message-expiry>
+                <packets>
+                  <max-packet-size>268435460</max-packet-size>
+                </packets>
+                <receive-maximum>
+                  <server-receive-maximum>10</server-receive-maximum>
+                </receive-maximum>
+                <keep-alive>
+                  <max-keep-alive>65535</max-keep-alive>
+                  <allow-unlimited>true</allow-unlimited>
+                </keep-alive>
+                <topic-alias>
+                  <enabled>true</enabled>
+                  <max-per-client>5</max-per-client>
+                </topic-alias>
+                <subscription-identifier>
+                  <enabled>true</enabled>
+                </subscription-identifier>
+                <wildcard-subscriptions>
+                  <enabled>true</enabled>
+                </wildcard-subscriptions>
+                <shared-subscriptions>
+                  <enabled>true</enabled>
+                </shared-subscriptions>
+                <quality-of-service>
+                  <max-qos>2</max-qos>
+                </quality-of-service>
+                <retained-messages>
+                  <enabled>true</enabled>
+                </retained-messages>
+                <queued-messages>
+                  <max-queue-size>1000</max-queue-size>
+                  <strategy>discard</strategy>
+                </queued-messages>
+              </mqtt>
+            </hivemq>
+
+  - it: with default platform values and some default hivemqMqtt config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqtt:
+        sessionExpiryMaxInterval: 4294967295
+        maxPacketSize: 268435460
+        keepAliveMax: 65535
+        topicAliasEnabled: true
+        subscriptionIdentifier: true
+        sharedSubscriptions: true
+        retainedMessages: true
+        queuedMessagesStrategy: "discard"
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <mqtt>
+                <session-expiry>
+                  <max-interval>4294967295</max-interval>
+                </session-expiry>
+                <packets>
+                  <max-packet-size>268435460</max-packet-size>
+                </packets>
+                <keep-alive>
+                  <max-keep-alive>65535</max-keep-alive>
+                </keep-alive>
+                <topic-alias>
+                  <enabled>true</enabled>
+                </topic-alias>
+                <subscription-identifier>
+                  <enabled>true</enabled>
+                </subscription-identifier>
+                <shared-subscriptions>
+                  <enabled>true</enabled>
+                </shared-subscriptions>
+                <retained-messages>
+                  <enabled>true</enabled>
+                </retained-messages>
+                <queued-messages>
+                  <strategy>discard</strategy>
+                </queued-messages>
+              </mqtt>
+            </hivemq>
+
+  - it: with default platform values and empty hivemqMqtt config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqtt: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and all default hivemqMqttAddons config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttAddons:
+        expiredMessagesTopic: false
+        droppedMessagesTopic: false
+        deadMessagesTopic: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <mqtt-addons>
+                <expired-messages-topic>
+                  <enabled>false</enabled>
+                </expired-messages-topic>
+                <dropped-messages-topic>
+                  <enabled>false</enabled>
+                </dropped-messages-topic>
+                <dead-messages-topic>
+                  <enabled>false</enabled>
+                </dead-messages-topic>
+              </mqtt-addons>
+            </hivemq>
+
+  - it: with default platform values and some default hivemqMqttAddons config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttAddons:
+        droppedMessagesTopic: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <mqtt-addons>
+                <dropped-messages-topic>
+                  <enabled>false</enabled>
+                </dropped-messages-topic>
+              </mqtt-addons>
+            </hivemq>
+
+  - it: with default platform values and empty hivemqMqttAddons config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttAddons: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and all default hivemqMqttSecurity config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttSecurity:
+        allowEmptyClientId: true
+        payloadFormatValidation: false
+        utf8Validation: true
+        allowRequestProblemInformation: true
+        controlCenterAuditLog: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <security>
+                <allow-empty-client-id>
+                  <enabled>true</enabled>
+                </allow-empty-client-id>
+                <payload-format-validation>
+                  <enabled>false</enabled>
+                </payload-format-validation>
+                <utf8-validation>
+                  <enabled>true</enabled>
+                </utf8-validation>
+                <allow-request-problem-information>
+                  <enabled>true</enabled>
+                </allow-request-problem-information>
+                <control-center-audit-log>
+                  <enabled>true</enabled>
+                </control-center-audit-log>
+              </security>
+            </hivemq>
+
+  - it: with default platform values and some default hivemqMqttSecurity config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttSecurity:
+        allowEmptyClientId: true
+        utf8Validation: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <security>
+                <allow-empty-client-id>
+                  <enabled>true</enabled>
+                </allow-empty-client-id>
+                <utf8-validation>
+                  <enabled>true</enabled>
+                </utf8-validation>
+              </security>
+            </hivemq>
+
+  - it: with default platform values and empty hivemqMqttSecurity config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttSecurity: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and all HiveMQ configuration options set
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxConnections: -1
+        incomingBandwidthThrottling: 0
+        noConnectIdleTimeout: 10000
+        maxClientIdLength: 65535
+      hivemqMqtt:
+        sessionExpiryMaxInterval: 4294967295
+        messageExpiryMaxInterval: 4294967296
+        maxPacketSize: 268435460
+        serverReceiveMaximum: 10
+        keepAliveMax: 65535
+        keepAliveAllowUnlimited: true
+        topicAliasEnabled: true
+        topicAliasMaxPerClient: 5
+        subscriptionIdentifier: true
+        wildcardSubscriptions: true
+        sharedSubscriptions: true
+        maxQualityOfService: 2
+        retainedMessages: true
+        queuedMessagesMaxSize: 1000
+        queuedMessagesStrategy: "discard"
+      hivemqMqttAddons:
+        expiredMessagesTopic: false
+        droppedMessagesTopic: false
+        deadMessagesTopic: false
+      hivemqMqttSecurity:
+        allowEmptyClientId: true
+        payloadFormatValidation: false
+        utf8Validation: true
+        allowRequestProblemInformation: true
+        controlCenterAuditLog: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <restrictions>
+                <max-connections>-1</max-connections>
+                <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
+                <no-connect-idle-timeout>10000</no-connect-idle-timeout>
+                <max-client-id-length>65535</max-client-id-length>
+              </restrictions>
+              <mqtt>
+                <session-expiry>
+                  <max-interval>4294967295</max-interval>
+                </session-expiry>
+                <message-expiry>
+                  <max-interval>4294967296</max-interval>
+                </message-expiry>
+                <packets>
+                  <max-packet-size>268435460</max-packet-size>
+                </packets>
+                <receive-maximum>
+                  <server-receive-maximum>10</server-receive-maximum>
+                </receive-maximum>
+                <keep-alive>
+                  <max-keep-alive>65535</max-keep-alive>
+                  <allow-unlimited>true</allow-unlimited>
+                </keep-alive>
+                <topic-alias>
+                  <enabled>true</enabled>
+                  <max-per-client>5</max-per-client>
+                </topic-alias>
+                <subscription-identifier>
+                  <enabled>true</enabled>
+                </subscription-identifier>
+                <wildcard-subscriptions>
+                  <enabled>true</enabled>
+                </wildcard-subscriptions>
+                <shared-subscriptions>
+                  <enabled>true</enabled>
+                </shared-subscriptions>
+                <quality-of-service>
+                  <max-qos>2</max-qos>
+                </quality-of-service>
+                <retained-messages>
+                  <enabled>true</enabled>
+                </retained-messages>
+                <queued-messages>
+                  <max-queue-size>1000</max-queue-size>
+                  <strategy>discard</strategy>
+                </queued-messages>
+              </mqtt>
+              <mqtt-addons>
+                <expired-messages-topic>
+                  <enabled>false</enabled>
+                </expired-messages-topic>
+                <dropped-messages-topic>
+                  <enabled>false</enabled>
+                </dropped-messages-topic>
+                <dead-messages-topic>
+                  <enabled>false</enabled>
+                </dead-messages-topic>
+              </mqtt-addons>
+              <security>
+                <allow-empty-client-id>
+                  <enabled>true</enabled>
+                </allow-empty-client-id>
+                <payload-format-validation>
+                  <enabled>false</enabled>
+                </payload-format-validation>
+                <utf8-validation>
+                  <enabled>true</enabled>
+                </utf8-validation>
+                <allow-request-problem-information>
+                  <enabled>true</enabled>
+                </allow-request-problem-information>
+                <control-center-audit-log>
+                  <enabled>true</enabled>
+                </control-center-audit-log>
+              </security>
+            </hivemq>
+
+  - it: with create config true
+    template: hivemq-configuration.yml
+    set:
+      config.create: true
+      config.overrideContent: "content"
+    asserts:
+      - exists:
+          path: data
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: hivemq-configuration-test-hivemq-platform
+      - equal:
+          path: spec.configMapName
+          value: hivemq-configuration-test-hivemq-platform
+        template: hivemq-custom-resource.yml
+
+  - it: with existing configMap, but name not set, then fails
+    template: hivemq-custom-resource.yml
+    set:
+      config.create: false
+    asserts:
+      - failedTemplate:
+          errorMessage: HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap
+
+  - it: with custom tracing.xml
+    template: hivemq-configuration.yml
+    set:
+      config.customTracingConfig: <tracing/>
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notExists:
+          path: data["logback.xml"]
+      - exists:
+          path: data["tracing.xml"]
+      - equal:
+          path: data["tracing.xml"]
+          value: <tracing/>
+
+  - it: with custom logback.xml
+    template: hivemq-configuration.yml
+    set:
+      config.customLogbackConfig: <configuration/>
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - exists:
+          path: data["tracing.xml"]
+      - exists:
+          path: data["logback.xml"]
+      - equal:
+          path: data["logback.xml"]
+          value: <configuration/>

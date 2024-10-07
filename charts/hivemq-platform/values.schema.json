@@ -482,6 +482,27 @@
     },
     "services" : {
       "items" : {
+        "if" : {
+          "properties" : {
+            "hivemqListenerName" : {
+              "description" : "Defines the optional custom name for the MQTT and WebSocket listeners",
+              "type" : "string"
+            }
+          },
+          "required" : [
+            "hivemqListenerName"
+          ]
+        },
+        "then" : {
+          "properties" : {
+            "type" : {
+              "enum" : [
+                "mqtt",
+                "websocket"
+              ]
+            }
+          }
+        },
         "properties" : {
           "annotations" : {
             "type" : "object"

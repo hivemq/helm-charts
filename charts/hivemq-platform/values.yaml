@@ -234,6 +234,9 @@ services:
     # Configures the HiveMQ PROXY protocol for a HiveMQ listener. Only applicable to MQTT and WebSocket services.
     # See https://docs.hivemq.com/hivemq/latest/user-guide/proxy-protocol.html
     # hivemqProxyProtocol: false
+    # Configures the HiveMQ listener name for a HiveMQ listener. Only applicable to MQTT and WebSocket services.
+    # See https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html
+    # hivemqListenerName: my-tcp-listener
   # Secure MQTT service configuration
   - type: mqtt
     # The custom name of the Kubernetes service resource. If not set or empty, the default service name will be as follows:
