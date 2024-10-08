@@ -19,7 +19,7 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
 @Tag("Extensions")
-@Tag("Extensions1")
+@Tag("Extensions3")
 class HelmCustomExtensionIT extends AbstractHelmChartIT {
 
     @TempDir
@@ -27,17 +27,50 @@ class HelmCustomExtensionIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenCustomExtensionIsConfigured_thenStartsUpSuccessfully() throws Exception {
+    void platformChart_whenCustomExtensionIsConfigured_withHttp_thenStartsUpSuccessfully() throws Exception {
         final var customExtensionZip = HiveMQExtension.createHiveMQExtensionZip(tmp,
                 "hivemq-custom-test-extension",
                 "HiveMQ Custom Test Extension",
                 "1.0.0",
                 CustomTestExtensionMain.class);
-        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), true);
-        K8sUtil.createSecret(client, platformNamespace, "nginx/nginx-auth-secret.yaml");
-        final var extensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
+        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), false, false);
+        final var extensionStartedFuture =
+                waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
 
         installPlatformChartAndWaitToBeRunning("/files/custom-extension-values.yaml");
+        await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_whenCustomExtensionIsConfigured_withHttpBasicAuth_thenStartsUpSuccessfully() throws Exception {
+        final var customExtensionZip = HiveMQExtension.createHiveMQExtensionZip(tmp,
+                "hivemq-custom-test-extension",
+                "HiveMQ Custom Test Extension",
+                "2.0.0",
+                CustomTestExtensionMain.class);
+        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), false, true);
+        K8sUtil.createSecret(client, platformNamespace, "nginx/nginx-auth-secret.yaml");
+        final var extensionStartedFuture =
+                waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 2.0.0 started successfully.");
+
+        installPlatformChartAndWaitToBeRunning("/files/custom-extension-values-with-request-headers-secret.yaml");
+        await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
+    }
+
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    void platformChart_whenCustomExtensionIsConfigured_withHttps_thenStartsUpSuccessfully() throws Exception {
+        final var customExtensionZip = HiveMQExtension.createHiveMQExtensionZip(tmp,
+                "hivemq-custom-test-extension",
+                "HiveMQ Custom Test Extension",
+                "3.0.0",
+                CustomTestExtensionMain.class);
+        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), true, false);
+        final var extensionStartedFuture =
+                waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 3.0.0 started successfully.");
+
+        installPlatformChartAndWaitToBeRunning("/files/custom-extension-values-with-https.yaml");
         await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
     }
 }

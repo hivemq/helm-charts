@@ -62,6 +62,7 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                 platformNamespace,
                 helmChartContainer,
                 List.of(appendingFooExtension, appendingBarExtension, appendingBazExtension),
+                false,
                 false);
         final var fooExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Foo Extension\" version 1.0.0 started successfully.");
         final var barExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Bar Extension\" version 1.0.0 started successfully.");
