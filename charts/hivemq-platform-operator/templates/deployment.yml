@@ -96,6 +96,10 @@ spec:
               value: "{{ .Values.http.port }}"
             - name: quarkus.http.ssl-port
               value: "{{ .Values.https.port }}"
+            - name: hivemq.platform.operator.skip-https-certificate-validation
+              value: "{{ .Values.https.skipCertificateValidation | default false }}"
+            - name: hivemq.platform.operator.skip-https-hostname-verification
+              value: "{{ .Values.https.skipHostnameVerification | default false }}"
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
             - name: quarkus.http.ssl.certificate.key-store-file-type
