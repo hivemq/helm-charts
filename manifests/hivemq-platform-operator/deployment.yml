@@ -75,6 +75,10 @@ spec:
               value: "8080"
             - name: quarkus.http.ssl-port
               value: "8443"
+            - name: hivemq.platform.operator.skip-https-certificate-validation
+              value: "false"
+            - name: hivemq.platform.operator.skip-https-hostname-verification
+              value: "false"
           image: "docker.io/hivemq/hivemq-platform-operator:1.5.2"
           imagePullPolicy: IfNotPresent
           livenessProbe:

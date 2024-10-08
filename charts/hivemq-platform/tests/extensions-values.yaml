@@ -8,6 +8,8 @@ extensions:
     customizationUri: http://nginx-service/hivemq-customization.zip
     priority: 1500
     startPriority: 2000
+    skipHttpsCertificateValidation: true
+    skipHttpsHostnameVerification: false
   - name: hivemq-kafka-extension
     enabled: true
     supportsHotReload: true
