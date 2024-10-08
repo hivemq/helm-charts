@@ -177,6 +177,14 @@
             "maxLength" : 253,
             "type" : "string"
           },
+          "skipHttpsCertificateValidation" : {
+            "description" : "Configures if certificate validation should be skipped for downloads of custom extensions or extension customizations",
+            "type" : "boolean"
+          },
+          "skipHttpsHostnameVerification" : {
+            "description" : "Configures if hostname verification should be skipped for downloads of custom extensions or extension customizations",
+            "type" : "boolean"
+          },
           "startPriority" : {
             "type" : "integer"
           },

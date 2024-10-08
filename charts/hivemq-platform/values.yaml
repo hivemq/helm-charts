@@ -433,6 +433,9 @@ extensions:
 #    requestHeaderSecretName: ""
 #    # The URI to download a customization for the Kafka extension.
 #    customizationUri: ""
+#    # Configures if certificate validation and hostname verification should be skipped for downloading the customization.
+#    skipHttpsCertificateValidation: false
+#    skipHttpsHostnameVerification: false
 
 # HiveMQ Enterprise Extension for Google Pub/Sub
 #  - name: hivemq-google-cloud-pubsub-extension
@@ -445,6 +448,9 @@ extensions:
 #    requestHeaderSecretName: ""
 #    # The URI to download a customization for the Google Pub/Sub extension.
 #    customizationUri: ""
+#    # Configures if certificate validation and hostname verification should be skipped for downloading the customization.
+#    skipHttpsCertificateValidation: false
+#    skipHttpsHostnameVerification: false
 
 # HiveMQ Enterprise Extension for Amazon Kinesis
 #  - name: hivemq-amazon-kinesis-extension
@@ -457,6 +463,9 @@ extensions:
 #    requestHeaderSecretName: ""
 #    # The URI to download a customization for the Amazon Kinesis extension.
 #    customizationUri: ""
+#    # Configures if certificate validation and hostname verification should be skipped for downloading the customization.
+#    skipHttpsCertificateValidation: false
+#    skipHttpsHostnameVerification: false
 
 # HiveMQ Enterprise Security Extension
 # This extension does not support hot-reload of the configuration.
@@ -539,6 +548,9 @@ extensions:
 #    priority: 1000
 #    # Dynamically configures the extension start-priority value in the "hivemq-extension.xml" file.
 #    startPriority: 1000
+#    # Configures if certificate validation and hostname verification should be skipped for downloading the custom extension.
+#    # skipHttpsCertificateValidation: true
+#    # skipHttpsHostnameVerification: true
 
 # Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim".
 additionalVolumes: []

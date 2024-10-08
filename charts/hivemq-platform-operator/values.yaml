@@ -26,6 +26,10 @@ http:
   port: 8080
 https:
   port: 8443
+  # Configures if certificate validation and hostname verification should be skipped for all managed custom resources.
+  # These settings are used for all Operator related HTTP clients, e.g. for downloading custom extensions and extension customizations.
+  skipCertificateValidation: false
+  skipHostnameVerification: false
 
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"

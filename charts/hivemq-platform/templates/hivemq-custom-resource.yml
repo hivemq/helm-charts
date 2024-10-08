@@ -311,6 +311,12 @@ spec:
       {{- if hasKey $extension "secretName" }}
       secretName: {{ $extension.secretName | quote }}
       {{- end }}
+      {{- if hasKey $extension "skipHttpsCertificateValidation" }}
+      skipHttpsCertificateValidation: {{ $extension.skipHttpsCertificateValidation }}
+      {{- end }}
+      {{- if hasKey $extension "skipHttpsHostnameVerification" }}
+      skipHttpsHostnameVerification: {{ $extension.skipHttpsHostnameVerification }}
+      {{- end }}
     {{- end }}
   {{- end }}
   {{- if $hasStatefulSetMigration }}

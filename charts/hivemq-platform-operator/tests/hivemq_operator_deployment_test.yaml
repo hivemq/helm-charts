@@ -966,3 +966,46 @@ tests:
         waitTimeout: P1S
     asserts:
       - failedTemplate: {}
+
+  - it: with default values, skip HTTPS certificate validation and hostname verification are disabled
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.skip-https-certificate-validation
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.skip-https-hostname-verification
+            value: "false"
+
+  - it: with skip HTTPS certificate validation
+    set:
+      https.skipCertificateValidation: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.skip-https-hostname-verification
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.skip-https-certificate-validation
+            value: "true"
+
+  - it: with skip HTTPS hostname verification
+    set:
+      https.skipHostnameVerification: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.skip-https-hostname-verification
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: hivemq.platform.operator.skip-https-certificate-validation
+            value: "false"
