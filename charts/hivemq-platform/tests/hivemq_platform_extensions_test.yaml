@@ -39,6 +39,8 @@ tests:
             customizationUri: http://nginx-service/hivemq-customization.zip
             extensionPriority: 1500
             extensionStartPriority: 2000
+            skipHttpsCertificateValidation: true
+            skipHttpsHostnameVerification: false
       - contains:
           path: spec.extensions
           content:
@@ -110,4 +112,3 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
-
