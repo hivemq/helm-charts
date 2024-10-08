@@ -4,5 +4,4 @@ extensions:
   - name: hivemq-custom-test-extension
     enabled: true
     supportsHotReload: false
-    requestHeaderSecretName: "custom-extension-auth-secret"
     extensionUri: "http://nginx-service/hivemq-custom-test-extension-1.0.0.zip"
