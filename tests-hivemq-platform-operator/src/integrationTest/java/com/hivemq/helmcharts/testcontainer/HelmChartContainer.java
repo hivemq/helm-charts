@@ -46,6 +46,7 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.hivemq.helmcharts.util.NginxUtil.NGINX_CONTAINER_NAME;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -675,6 +676,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
                 return LEGACY_OPERATOR_CONTAINER_NAME;
             } else if (note.endsWith(container + CONSUL_TEMPLATE_CONTAINER_NAME)) {
                 return CONSUL_TEMPLATE_CONTAINER_NAME;
+            } else if (note.endsWith(container + NGINX_CONTAINER_NAME)) {
+                return NGINX_CONTAINER_NAME;
             }
             return null;
         }
