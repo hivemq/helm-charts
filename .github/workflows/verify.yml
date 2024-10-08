@@ -37,7 +37,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flags: --file './tests/**/*_test.yaml'
-          unittest-version: 0.6.1 # TODO: Remove once the latest Helm unittest plugin is fixed, see https://github.com/helm-unittest/helm-unittest/issues/431
 
       - name: Check manifests are up-to-date
         run: |
