@@ -53,6 +53,14 @@
         "port" : {
           "minimum" : 1000,
           "type" : "integer"
+        },
+        "skipCertificateValidation" : {
+          "description" : "Configures if certificate validation should be skipped for all managed custom resources",
+          "type" : "boolean"
+        },
+        "skipHostnameVerification" : {
+          "description" : "Configures if hostname verification should be skipped for all managed custom resources",
+          "type" : "boolean"
         }
       },
       "type" : "object"
