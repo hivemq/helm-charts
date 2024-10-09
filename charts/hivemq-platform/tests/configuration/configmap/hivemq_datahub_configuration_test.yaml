@@ -1,0 +1,86 @@
+suite: HiveMQ Platform Configuration as ConfigMap - Data Hub tests
+templates:
+  - hivemq-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+set:
+  config.createAs: ConfigMap
+asserts:
+  - containsDocument:
+    apiVersion: v1
+    kind: ConfigMap
+    name: hivemq-configuration-test-hivemq-platform
+    namespace: test-hivemq-platform-namespace
+    template: hivemq-configuration.yml
+tests:
+
+  - it: with Data Hub enabled
+    template: hivemq-configuration.yml
+    set:
+      config.dataHub.dataValidationEnabled: true
+      config.dataHub.behaviorValidationEnabled: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?</data-hub>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
+
+  - it: with Data Hub disabled
+    template: hivemq-configuration.yml
+    set:
+      config.dataHub.dataValidationEnabled: false
+      config.dataHub.behaviorValidationEnabled: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?</data-hub>"
+
+  - it: with Data Hub - Data validation enabled only
+    template: hivemq-configuration.yml
+    set:
+      config.dataHub.dataValidationEnabled: true
+      config.dataHub.behaviorValidationEnabled: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?</data-hub>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
+
+  - it: with Data Hub - Behavior validation enabled only
+    template: hivemq-configuration.yml
+    set:
+      config.dataHub.dataValidationEnabled: false
+      config.dataHub.behaviorValidationEnabled: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?</data-hub>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
+
+  - it: with Data Hub default
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
