@@ -1,4 +1,4 @@
-suite: HiveMQ Platform Configuration - MQTT listeners tests
+suite: HiveMQ Platform Configuration as ConfigMap - MQTT listeners tests
 templates:
   - hivemq-configuration.yml
   - hivemq-custom-resource.yml
@@ -8,6 +8,15 @@ release:
 chart:
   version: 0.0.1
   appVersion: 1.0.0
+set:
+  config.createAs: ConfigMap
+asserts:
+  - containsDocument:
+    apiVersion: v1
+    kind: ConfigMap
+    name: hivemq-configuration-test-hivemq-platform
+    namespace: test-hivemq-platform-namespace
+    template: hivemq-configuration.yml
 tests:
 
   - it: with a MQTT service exposed
@@ -905,7 +914,7 @@ tests:
   - it: with several secure and non-secure MQTT services
     template: hivemq-configuration.yml
     values:
-      - ../tls-mqtt-services-values.yaml
+      - ../../tls-mqtt-services-values.yaml
     asserts:
       - exists:
           path: data["config.xml"]
