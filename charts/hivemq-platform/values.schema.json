@@ -99,6 +99,14 @@
         "create" : {
           "type" : "boolean"
         },
+        "createAs" : {
+          "description" : "Defines how the HiveMQ Platform configuration should be stored into. Either a Kubernetes ConfigMap or a Kubernetes Secret",
+          "enum" : [
+            "ConfigMap",
+            "Secret"
+          ],
+          "type" : "string"
+        },
         "customLogbackConfig" : {
           "type" : "string"
         },
@@ -124,9 +132,6 @@
         },
         "overrideStatefulSet" : {
           "type" : "string"
-        },
-        "useSecret" : {
-          "type" : "boolean"
         }
       },
       "type" : "object"
