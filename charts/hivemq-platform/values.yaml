@@ -355,6 +355,9 @@ services:
 config:
   # Creates a default HiveMQ Platform configuration (config.xml) as a Kubernetes ConfigMap by default.
   create: true
+  # Defines whether the HiveMQ Platform configuration (config.xml) should be stored as a Kubernetes ConfigMap or a Kubernetes Secret.
+  # By default, a Kubernetes ConfigMap will be created.
+  createAs: ConfigMap
   # Overrides the default HiveMQ Platform configuration (config.xml) by providing
   # the name of a Kubernetes ConfigMap or Kubernetes Secret that contains the config.xml file (also set create=false).
   name: ""
@@ -380,9 +383,6 @@ config:
   # Inlines a custom HiveMQ Platform logging configuration (logback.xml) from a file:
   # --set-file config.customLogbackConfig=your-logback.xml
   customLogbackConfig: ""
-  # Defines whether a Kubernetes Secret object should be created to hold the HiveMQ Platform configuration.
-  # By default, a Kubernetes ConfigMap will be created.
-  useSecret: false
 
 # Custom init containers to be added to the HiveMQ platform StatefulSet
 additionalInitContainers: []
