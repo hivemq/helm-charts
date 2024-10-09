@@ -18,7 +18,7 @@ Usage: {{ include "hivemq-platform.configuration-name" . }}
     {{- if .Values.config.name -}}
     {{- printf "%s" .Values.config.name }}
     {{- else }}
-        {{- $kind := ternary "Secret" "ConfigMap" .Values.config.useSecret }}
+        {{- $kind := .Values.config.createAs }}
         {{- fail (printf "HiveMQ configuration %s name cannot be empty when using an existing %s" $kind $kind) }}
     {{- end -}}
 {{- end -}}
@@ -840,7 +840,7 @@ Generates a HiveMQ config.xml content based on whether a ConfigMap or a Secret i
 Usage: {{ include "hivemq-platform.generate-hivemq-configuration" . }}
 */}}
 {{- define "hivemq-platform.generate-hivemq-configuration" -}}
-{{- $isSecret := .Values.config.useSecret -}}
+{{- $isSecret := (eq .Values.config.createAs "Secret") -}}
 {{- if and .Values.config.overrideHiveMQConfig $isSecret -}}
     {{- range (.Values.config.overrideHiveMQConfig | b64enc) | toStrings }}
         {{- . | nindent 3 }}
@@ -857,7 +857,7 @@ Generates a HiveMQ tracing.xml content based on whether a ConfigMap or a Secret 
 Usage: {{ include "hivemq-platform.generate-hivemq-tracing-configuration" . }}
 */}}
 {{- define "hivemq-platform.generate-hivemq-tracing-configuration" -}}
-{{- $isSecret := .Values.config.useSecret -}}
+{{- $isSecret := (eq .Values.config.createAs "Secret") -}}
 {{- if and .Values.config.customTracingConfig $isSecret -}}
     {{- range (.Values.config.customTracingConfig | b64enc) | toStrings }}
         {{- . | nindent 4 }}
@@ -874,7 +874,7 @@ Generates a HiveMQ custom logback.xml content based on whether a ConfigMap or a 
 Usage: {{ include "hivemq-platform.generate-hivemq-logback-configuration" . }}
 */}}
 {{- define "hivemq-platform.generate-hivemq-logback-configuration" -}}
-{{- $isSecret := .Values.config.useSecret -}}
+{{- $isSecret := (eq .Values.config.createAs "Secret") -}}
 {{- if and .Values.config.customLogbackConfig $isSecret -}}
     {{- range (.Values.config.customLogbackConfig | b64enc) | toStrings }}
         {{- . | nindent 4 }}

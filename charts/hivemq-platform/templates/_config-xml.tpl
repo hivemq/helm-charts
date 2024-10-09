@@ -17,6 +17,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <tls-tcp-listener>
       <port>{{ $service.containerPort }}</port>
       <bind-address>0.0.0.0</bind-address>
+      {{- if $service.hivemqListenerName }}
+      <name>{{ $service.hivemqListenerName }}</name>
+      {{- end }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
       {{- end }}
@@ -41,6 +44,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <tcp-listener>
       <port>{{ $service.containerPort }}</port>
       <bind-address>0.0.0.0</bind-address>
+      {{- if $service.hivemqListenerName }}
+      <name>{{ $service.hivemqListenerName }}</name>
+      {{- end }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
       {{- end }}
@@ -51,6 +57,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <tls-websocket-listener>
       <port>{{ $service.containerPort }}</port>
       <bind-address>0.0.0.0</bind-address>
+      {{- if $service.hivemqListenerName }}
+      <name>{{ $service.hivemqListenerName }}</name>
+      {{- end }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
       {{- end }}
@@ -76,6 +85,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <websocket-listener>
       <port>{{ $service.containerPort }}</port>
       <bind-address>0.0.0.0</bind-address>
+      {{- if $service.hivemqListenerName }}
+      <name>{{ $service.hivemqListenerName }}</name>
+      {{- end }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
       {{- end }}

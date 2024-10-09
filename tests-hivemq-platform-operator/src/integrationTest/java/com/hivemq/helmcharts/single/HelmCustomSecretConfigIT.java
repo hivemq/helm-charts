@@ -21,7 +21,7 @@ class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withSecretConfig_hivemqRunning() throws Exception {
         final var secretName = "hivemq-configuration-" + PLATFORM_RELEASE_NAME;
-        installPlatformChartAndWaitToBeRunning("--set", "config.useSecret=true");
+        installPlatformChartAndWaitToBeRunning("--set", "config.createAs=Secret");
         assertSecretConfigMounted(secretName);
     }
 
@@ -39,7 +39,7 @@ class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
                 "--set",
                 "config.name=" + secretName,
                 "--set",
-                "config.useSecret=true");
+                "config.createAs=Secret");
         assertSecretConfigMounted(secretName);
     }
 
