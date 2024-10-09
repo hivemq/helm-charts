@@ -16,7 +16,7 @@ metadata:
     {{- end }}
 spec:
   {{- $configName := include "hivemq-platform.configuration-name" . -}}
-  {{ ternary (printf "secretName: %s" $configName) (printf "configMapName: %s" $configName) .Values.config.useSecret | nindent 2 }}
+  {{ ternary (printf "secretName: %s" $configName) (printf "configMapName: %s" $configName) (eq .Values.config.createAs "Secret") | nindent 2 }}
   logLevel: {{ .Values.nodes.logLevel }}
   operatorRestApiPort: {{ include "hivemq-platform.operator-rest-api-port" . }}
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}

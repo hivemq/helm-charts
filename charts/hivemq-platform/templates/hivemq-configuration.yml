@@ -1,6 +1,6 @@
 {{- if .Values.config.create }}
 apiVersion: v1
-kind: {{ ternary "Secret" "ConfigMap" .Values.config.useSecret }}
+kind: {{ .Values.config.createAs }}
 metadata:
   name: {{ include "hivemq-platform.configuration-name" . }}
   namespace: {{ .Release.Namespace }}
