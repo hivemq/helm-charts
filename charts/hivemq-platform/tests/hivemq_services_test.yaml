@@ -215,6 +215,33 @@ tests:
                   targetPort: mqtt-1884
                   port: 1884
 
+  - it: with a MQTT service disabled, no MQTT service added
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1884
+            containerPort: 1884
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
   - it: with a Control Center service enabled
     set:
       services:
@@ -232,6 +259,34 @@ tests:
       - exists:
           path: spec.services
       - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with a Control Center service disabled, no Control Center service added
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8081
+            containerPort: 8081
+      - exists:
+          path: spec.services
+      - notContains:
           path: spec.services
           content:
             metadata:
@@ -1846,6 +1901,28 @@ tests:
       - hasDocuments:
           count: 1
 
+  - it: with defaults, Metrics service is enabled
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
   - it: with a REST API service enabled
     set:
       services:
@@ -1873,6 +1950,33 @@ tests:
                   targetPort: rest-8890
                   port: 8890
 
+  - it: with a REST API service disabled, no REST API service added
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
   - it: with a WebSocket service enabled
     set:
       services:
@@ -1890,6 +1994,33 @@ tests:
       - exists:
           path: spec.services
       - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8000
+            spec:
+              ports:
+                - name: ws-8000
+                  targetPort: ws-8000
+                  port: 8000
+
+  - it: with a WebSocket service disabled, no WebSocket service added
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8000
+            containerPort: 8000
+      - exists:
+          path: spec.services
+      - notContains:
           path: spec.services
           content:
             metadata:
@@ -2291,3 +2422,373 @@ tests:
                 - name: metrics-9399
                   port: 9399
                   targetPort: metrics-9399
+
+# MQTT services
+  - it: with default MQTT service, then no service session affinity set
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with MQTT service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+              sessionAffinity: ClientIP
+
+  - it: with MQTT service enabled and session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+              sessionAffinity: None
+
+  # CC services
+  - it: with default Control Center service enabled, then service session affinity is `ClientIP`
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8080
+            spec:
+              ports:
+                - name: cc-8080
+                  targetPort: cc-8080
+                  port: 8080
+              sessionAffinity: ClientIP
+
+  - it: with Control Center service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with Control Center service enabled and session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: None
+
+  # REST API services
+  - it: with REST API service enabled with no session affinity, then no service session affinity
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+
+  - it: with REST API service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+              sessionAffinity: ClientIP
+
+  - it: with REST API service enabled session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+              sessionAffinity: None
+
+  # WebSocket services
+  - it: with WebSocket service enabled with no session affinity, then no service session affinity
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+
+  - it: with WebSocket service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+              sessionAffinity: ClientIP
+
+  - it: with WebSocket service enabled and session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+              sessionAffinity: None
+
+  # Metrics services
+  - it: with Metrics service enabled with no session affinity, then no service session affinity
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
+  - it: with Metrics service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+              sessionAffinity: ClientIP
+
+  - it: with Metrics service enabled and session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+              sessionAffinity: None
+
+  - it: with empty session affinity, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with empty session affinity type, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid session affinity type, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with additional session affinity element, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: ClientIP
+            foo: bar
+    asserts:
+      - failedTemplate: {}

@@ -587,6 +587,21 @@
               "NodePort"
             ]
           },
+          "sessionAffinity" : {
+            "additionalProperties" : false,
+            "description": "Used to maintain session affinity. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+            "properties" : {
+              "type" : {
+                "description" : "Session affinity type. Must be ClientIP or None. Defaults to `ClientIP` for `control-services` service type",
+                "enum" : [
+                  "ClientIP",
+                  "None"
+                ],
+                "type" : "string"
+              }
+            },
+            "type": "object"
+          },
           "tlsClientAuthenticationMode" : {
             "enum" : [
               "NONE",
