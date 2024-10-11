@@ -1,0 +1,121 @@
+suite: HiveMQ Platform MQTT services tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+tests:
+
+  - it: with a MQTT service enabled
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1884
+            containerPort: 1884
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with a MQTT service disabled, no MQTT service added
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1884
+            containerPort: 1884
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with default MQTT service, then no service session affinity set
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with MQTT service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+              sessionAffinity: ClientIP
+
+  - it: with MQTT service enabled and session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+              sessionAffinity: None

@@ -1,0 +1,149 @@
+suite: HiveMQ Platform REST API services tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+tests:
+
+  - it: with a REST API service enabled
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a REST API service disabled, no REST API service added
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with REST API service enabled with no session affinity, then no service session affinity
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+
+  - it: with REST API service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+              sessionAffinity: ClientIP
+
+  - it: with REST API service enabled session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+              sessionAffinity: None
+
+  - it: with a REST API service enabled and PROXY protocol enabled, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          hivemqProxyProtocol: true
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type rest-api with container port 8888 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+
+  - it: with a REST API service disabled and PROXY protocol enabled, validation succeeds
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8888
+          hivemqProxyProtocol: true
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

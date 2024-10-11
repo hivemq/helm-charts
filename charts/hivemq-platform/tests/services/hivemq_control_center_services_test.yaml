@@ -1,0 +1,147 @@
+suite: HiveMQ Platform Control Center services tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+tests:
+
+  - it: with a Control Center service enabled
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8081
+            containerPort: 8081
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with a Control Center service disabled, no Control Center service added
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8081
+            containerPort: 8081
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with default Control Center service enabled, then service session affinity is `ClientIP`
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8080
+            spec:
+              ports:
+                - name: cc-8080
+                  targetPort: cc-8080
+                  port: 8080
+              sessionAffinity: ClientIP
+
+  - it: with Control Center service enabled and session affinity `ClientIP`, then service session affinity is `ClientIP`
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: ClientIP
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: ClientIP
+
+  - it: with Control Center service enabled and session affinity `None`, then service session affinity is `None`
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: None
+
+  - it: with a Control Center service enabled and PROXY protocol enabled, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          hivemqProxyProtocol: true
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type control-center with container port 8081 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+
+  - it: with a Control Center service disabled and PROXY protocol enabled, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+          hivemqProxyProtocol: true
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
