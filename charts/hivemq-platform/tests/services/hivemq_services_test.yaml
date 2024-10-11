@@ -1,0 +1,917 @@
+suite: HiveMQ Platform services tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+tests:
+
+  - it: with default values
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8080
+            containerPort: 8080
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8080
+            spec:
+              ports:
+                - name: cc-8080
+                  targetPort: cc-8080
+                  port: 8080
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
+
+  - it: with no mandatory `type` value for service, schema validation fails
+    set:
+      services:
+        - exposed: true
+          containerPort: 1884
+    asserts:
+      - failedTemplate: {}
+
+  - it: with no mandatory `exposed` value for service, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          containerPort: 1884
+    asserts:
+      - failedTemplate: {}
+
+  - it: with no mandatory `containerPort` value for service, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+    asserts:
+      - failedTemplate: {}
+
+  - it: with NodePort
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          serviceType: NodePort
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              type: NodePort
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with additional annotations
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          annotations:
+            annotation-key-1: annotation-value-1
+            annotation-key-2: annotation-value-2
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+              annotations:
+                annotation-key-1: annotation-value-1
+                annotation-key-2: annotation-value-2
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with additional labels
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          labels:
+            label-key-1: label-value-1
+            label-key-2: label-value-2
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+              labels:
+                label-key-1: label-value-1
+                label-key-2: label-value-2
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with additional annotations and labels
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          annotations:
+            annotation-key-1: annotation-value-1
+            annotation-key-2: annotation-value-2
+          labels:
+            label-key-1: label-value-1
+            label-key-2: label-value-2
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+              annotations:
+                annotation-key-1: annotation-value-1
+                annotation-key-2: annotation-value-2
+              labels:
+                label-key-1: label-value-1
+                label-key-2: label-value-2
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+
+  - it: with default container ports in enabled services, then fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7000
+    asserts:
+      - failedTemplate:
+          errorMessage: Container port 7000 in service `mqtt` already exists as part of one of the predefined ports (7979, 8889, 7000)
+
+  - it: with default container ports in disabled services, no error is thrown and only enabled services are created
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: false
+          containerPort: 7000
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            - metadata:
+                name: hivemq-test-hivemq-platform-mqtt-7000
+              spec:
+                ports:
+                  - name: mqtt-7000
+                    targetPort: mqtt-7000
+                    port: 7000
+
+  - it: with custom service names
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with duplicated container ports and different services types, then validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: control-center
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Services with same container port (1883) but different types cannot be set
+
+  - it: with duplicated container ports and different services types but disabled services, only enabled services are created
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: control-center
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            - metadata:
+                name: hivemq-test-hivemq-platform-cc-1883
+              spec:
+                sessionAffinity: ClientIP
+                ports:
+                  - name: cc-1883
+                    targetPort: cc-1883
+                    port: 1883
+
+  - it: with duplicated container ports and different services types but disabled services, then only enabled container ports added to the HiveMQ container
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: control-center
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+          count: 1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+          count: 1
+
+  - it: with duplicated service container port, same type but different custom names, then services are created
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt-1
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt-2
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with duplicated service container port, same type but different custom names, then no duplicated ports added to the HiveMQ container
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+          count: 1
+
+  - it: with duplicated service container port, same type but different custom names in disabled services, then only enabled services are created
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt-1
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: my-custom-mqtt-2
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with duplicated service container port, same type but different custom names in disabled services, then no duplicated ports added to the HiveMQ container
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt-1
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt-2
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+          count: 1
+
+  - it: with duplicated service container port and type, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt-1883
+
+  - it: with duplicated service container port and type in disabled services, then validation fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt-1883 (set as exposed and not exposed)
+
+  - it: with duplicated custom service names and container port, validation fails
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name my-custom-mqtt
+
+  - it: with duplicated service container port and custom name but different type in disabled services, then validation fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          name: my-custom-mqtt
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+
+  - it: with duplicated custom service names and container port but different types in disabled services, then fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: metrics
+          name: my-custom-mqtt
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+
+  - it: with duplicated custom service names and container port and type, validation fails
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Found duplicated service name my-custom-mqtt
+
+  - it: with duplicated service container port, custom name and type in disabled services, then validation fails with ambiguous definition
+    set:
+      services:
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          name: my-custom-mqtt
+          exposed: false
+          containerPort: 1883
+    asserts:
+      - failedTemplate:
+          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+
+  - it: with custom service name longer than 63 characters, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          name: my-so-huge-and-extremely-very-very-long-custom-mqtt-service-name
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - failedTemplate: {}
+
+  - it: with container service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 0
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with container service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65535
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with container service port out of range, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 0
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with service port within range, no schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65535
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with service port out of range, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with all service types, then service names are correct
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "keystore-secret-password"
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "keystore-secret-password"
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "keystore-secret-password"
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  port: 1883
+                  targetPort: mqtt-1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884 # FIXME: Expected secure MQTT service name should be `mqtts`
+            spec:
+              ports:
+                  - name: mqtts-1884
+                    port: 1884
+                    targetPort: mqtts-1884
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8080
+            spec:
+              ports:
+                  - name: cc-8080
+                    port: 8080
+                    targetPort: cc-8080
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              ports:
+                  - name: cc-8081
+                    port: 8081
+                    targetPort: cc-8081
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8000
+            spec:
+              ports:
+                  - name: ws-8000
+                    port: 8000
+                    targetPort: ws-8000
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                  - name: ws-8001
+                    port: 8001
+                    targetPort: ws-8001
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  port: 8888
+                  targetPort: rest-8888
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
+
+  - it: with multiple service listeners defined
+    values:
+      - ../multiple-service-listeners.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1884
+            containerPort: 1884
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8000
+            containerPort: 8000
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: ws-8001
+            containerPort: 8001
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8000
+            spec:
+              ports:
+                - name: ws-8000
+                  targetPort: ws-8000
+                  port: 8000
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-ws-8001
+            spec:
+              ports:
+                - name: ws-8001
+                  targetPort: ws-8001
+                  port: 8001
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
+
+  - it: with default values, then truncated service names
+    release:
+      name: this-is-more-than-32-chars-long-release-name
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports[0]
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1883
+            containerPort: 1883
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: cc-8080
+            containerPort: 8080
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-this-is-more-than-32-chars-long-release-na-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-this-is-more-than-32-chars-long-release-na-cc-8080
+            spec:
+              ports:
+                - name: cc-8080
+                  targetPort: cc-8080
+                  port: 8080
+              sessionAffinity: ClientIP
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-this-is-more-than-32-chars-long-release-na-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  port: 9399
+                  targetPort: metrics-9399
+
+  - it: with empty session affinity, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with empty session affinity type, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid session affinity type, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with additional session affinity element, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          sessionAffinity:
+            type: ClientIP
+            foo: bar
+    asserts:
+      - failedTemplate: {}
