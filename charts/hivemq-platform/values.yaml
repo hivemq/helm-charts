@@ -216,7 +216,8 @@ metrics:
   # Defines the URL path to be used by HiveMQ Prometheus extension.
   path: /
 
-# Configures exposed Services and ports
+# Defines the Service configurations for the HiveMQ platform.
+# Configures the Kubernetes Service objects and the HiveMQ listeners.
 # Possible service types are: "control-center", "rest-api", "mqtt", "websocket" and "metrics"
 services:
   # MQTT service configuration
@@ -237,6 +238,13 @@ services:
     # Configures the HiveMQ listener name for a HiveMQ listener. Only applicable to MQTT and WebSocket services.
     # See https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html
     # hivemqListenerName: my-tcp-listener
+    # Used to maintain Kubernetes session affinity.
+    # See: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies.
+    # sessionAffinity:
+    #  # Session affinity type. Must be `ClientIP` or `None`.
+    #  # Defaults to `ClientIP` for the `control-center` service type.
+    #  type: None
+
   # Secure MQTT service configuration
   - type: mqtt
     # The custom name of the Kubernetes service resource. If not set or empty, the default service name will be as follows:
@@ -275,10 +283,14 @@ services:
     truststorePasswordSecretName: ""
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
+
   # Control Center service configuration
   - type: control-center
     exposed: true
     containerPort: 8080
+    sessionAffinity:
+      type: ClientIP
+
   # Secure Control Center service configuration
   - type: control-center
     exposed: false
@@ -302,14 +314,17 @@ services:
     keystorePasswordSecretKey: ""
     # The optional entry key for the keystore private password in the Kubernetes secret.
     keystorePrivatePasswordSecretKey: ""
+
   # REST API service configuration
   - type: rest-api
     exposed: false
     containerPort: 8888
+
   # WebSocket service configuration
   - type: websocket
     exposed: false
     containerPort: 8001
+
   # Secure WebSocket service configuration
   - type: websocket
     exposed: false

@@ -255,8 +255,10 @@ spec:
         {{- if and $service.serviceType (or (eq $service.serviceType "NodePort") (eq $service.serviceType "LoadBalancer")) }}
         type: {{ $service.serviceType }}
         {{- end }}
-        {{- if eq $service.type "control-center" }}
+        {{- if and (eq $service.type "control-center") (not (hasKey $service "sessionAffinity")) }}
         sessionAffinity: ClientIP
+        {{- else if hasKey $service "sessionAffinity" }}
+        sessionAffinity: {{ $service.sessionAffinity.type }}
         {{- end }}
         ports:
           - name: {{ include "hivemq-platform.service-port-name" . }}
