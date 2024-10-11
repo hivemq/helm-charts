@@ -436,7 +436,7 @@ tests:
 
   - it: with several secure and non-secure MQTT services enabled and reusing keystores
     values:
-      - tls-mqtt-services-values.yaml
+      - ../tls-mqtt-services-values.yaml
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
@@ -681,7 +681,7 @@ tests:
 
   - it: with several secure MQTT services using mTLS
     values:
-      - mtls-mqtt-services-values.yaml
+      - ../mtls-mqtt-services-values.yaml
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.volumes
@@ -1280,7 +1280,7 @@ tests:
 
   - it: with several secure and non-secure Control Center services enabled and reusing keystores
     values:
-      - tls-cc-services-values.yaml
+      - ../tls-cc-services-values.yaml
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
@@ -1970,7 +1970,7 @@ tests:
 
   - it: with several secure and non-secure WebSocket services enabled and reusing keystores
     values:
-      - tls-ws-services-values.yaml
+      - ../tls-ws-services-values.yaml
     asserts:
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
