@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-platform-operator"
     app.kubernetes.io/instance: "my-operator"
-    app.kubernetes.io/version: "1.5.2"
+    app.kubernetes.io/version: "1.6.0"
 spec:
   # The Operator cannot have more than one replica
   replicas: 1
@@ -46,7 +46,7 @@ spec:
             - name: hivemq.platform.operator.crd.wait-until-ready.timeout
               value: "PT10S"
             - name: hivemq.platform.operator.init.image
-              value: "docker.io/hivemq/hivemq-platform-operator-init:1.5.2"
+              value: "docker.io/hivemq/hivemq-platform-operator-init:1.6.0"
             - name: hivemq.platform.operator.image.pull.secret
               value: ""
             - name: hivemq.platform.operator.log.level
@@ -79,7 +79,7 @@ spec:
               value: "false"
             - name: hivemq.platform.operator.skip-https-hostname-verification
               value: "false"
-          image: "docker.io/hivemq/hivemq-platform-operator:1.5.2"
+          image: "docker.io/hivemq/hivemq-platform-operator:1.6.0"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
