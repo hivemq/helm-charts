@@ -1649,6 +1649,29 @@ entries:
   hivemq-platform:
   - apiVersion: v2
     appVersion: 4.33.1
+    created: "2024-10-17T06:52:58.594739163Z"
+    description: HiveMQ Platform Helm Chart (new)
+    digest: a56b0c30c3114088270b9f0d8f2505f4f89df3b4abb64d9899acc995e2e59f15
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform
+    - Broker
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-0.2.26/hivemq-platform-0.2.26.tgz
+    version: 0.2.26
+  - apiVersion: v2
+    appVersion: 4.33.1
     created: "2024-10-16T13:34:25.999733002Z"
     description: HiveMQ Platform Helm Chart (new)
     digest: 86e9c22cb2c6a1a371ecae7510b915966ec3f7017c89149937f563cf3b8ae159
@@ -2239,6 +2262,29 @@ entries:
     version: 0.2.0
   hivemq-platform-operator:
   - apiVersion: v2
+    appVersion: 1.6.0
+    created: "2024-10-17T06:52:58.711414023Z"
+    description: HiveMQ Platform Operator Helm Chart (new)
+    digest: eb683aa4476e69eeabd0024ac7788d7624c422d1d04cd8f5b5f9a461f4fbe0c5
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform Operator
+    - Operator
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-operator-0.2.11/hivemq-platform-operator-0.2.11.tgz
+    version: 0.2.11
+  - apiVersion: v2
     appVersion: 1.5.2
     created: "2024-08-28T11:26:21.732690234Z"
     description: HiveMQ Platform Operator Helm Chart (new)
@@ -2488,6 +2534,28 @@ entries:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-operator-0.2.0/hivemq-platform-operator-0.2.0.tgz
     version: 0.2.0
   hivemq-swarm:
+  - apiVersion: v2
+    appVersion: 4.33.1
+    created: "2024-10-17T06:52:58.808445469Z"
+    description: A Helm chart for HiveMQ Swarm
+    digest: 889df95cb29bcc8e442bce7b46b9e33c66e8b8f4ec12a46ee9a18ce37037d396
+    icon: https://www.hivemq.com/img/svg/icon-hivemq-swarm.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Swarm
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-swarm
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.2.41/hivemq-swarm-0.2.41.tgz
+    version: 0.2.41
   - apiVersion: v2
     appVersion: 4.33.1
     created: "2024-10-16T13:34:26.136395562Z"
@@ -3412,4 +3480,4 @@ entries:
     urls:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.1.0/hivemq-swarm-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-16T13:34:26.136981602Z"
+generated: "2024-10-17T06:52:58.808992053Z"
