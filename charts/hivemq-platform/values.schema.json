@@ -199,6 +199,19 @@
       },
       "type" : "array"
     },
+    "hivemqClientEventHistory" : {
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "lifetime" : {
+          "maximum": 864000,
+          "minimum": 1,
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
+    },
     "hivemqMqtt" : {
       "properties" : {
         "keepAliveAllowUnlimited" : {
