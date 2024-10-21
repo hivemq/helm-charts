@@ -51,64 +51,64 @@ spec:
               value: {{.Values.javaOpts | quote }}
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
-            - name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS__HIVEMQ_CONTROLLER__SELECTOR
               value: operator={{ .Values.selector }}
             {{- end }}
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: hivemq.platform.operator.release.name
+            - name: HIVEMQ_PLATFORM_OPERATOR_RELEASE_NAME
               value: "{{ .Release.Name }}"
-            - name: hivemq.platform.operator.crd.apply
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_APPLY
               value: "{{ .Values.crd.apply }}"
-            - name: hivemq.platform.operator.crd.wait-until-ready
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY
               value: "{{ .Values.crd.waitReady }}"
-            - name: hivemq.platform.operator.crd.wait-until-ready.timeout
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
               value: "{{ .Values.crd.waitTimeout }}"
-            - name: hivemq.platform.operator.init.image
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
               value: "{{ .Values.image.repository}}/{{ .Values.image.initImageName}}:{{.Values.image.tag}}"
-            - name: hivemq.platform.operator.image.pull.secret
+            - name: HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET
               value: "{{ .Values.image.pullSecretName }}"
-            - name: hivemq.platform.operator.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL
               value: "{{ .Values.logLevel }}"
-            - name: hivemq.platform.operator.log.configuration
+            - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
               value: "{{ .Values.logConfiguration | default "false"}}"
-            - name: hivemq.platform.operator.serviceaccount.create
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "{{ .Values.hivemqPlatformServiceAccount.create }}"
-            - name: hivemq.platform.operator.serviceaccount.validate
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
               value: "{{ .Values.hivemqPlatformServiceAccount.validate }}"
-            - name: hivemq.platform.operator.serviceaccount.name
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME
               value: "{{ .Values.hivemqPlatformServiceAccount.name }}"
-            - name: hivemq.platform.operator.serviceaccount.permissions.create
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_CREATE
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.create }}"
-            - name: hivemq.platform.operator.serviceaccount.permissions.validate
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.validate }}"
-            - name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+            - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
               value: "{{ .Values.hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange }}"
-            - name: hivemq.platform.operator.quarkus.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_QUARKUS_LOG_LEVEL
               value: "{{ .Values.quarkusLogLevel | default "INFO" }}"
-            - name: hivemq.platform.operator.sdk.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
               value: "{{ .Values.sdkLogLevel | default "INFO" }}"
-            - name: hivemq.platform.operator.network.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
               value: "{{ .Values.networkLogLevel | default "WARN" }}"
-            - name: quarkus.http.port
-              value: "{{ .Values.http.port }}"
-            - name: quarkus.http.ssl-port
-              value: "{{ .Values.https.port }}"
-            - name: hivemq.platform.operator.skip-https-certificate-validation
+            - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
               value: "{{ .Values.https.skipCertificateValidation | default false }}"
-            - name: hivemq.platform.operator.skip-https-hostname-verification
+            - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
               value: "{{ .Values.https.skipHostnameVerification | default false }}"
+            - name: QUARKUS_HTTP_PORT
+              value: "{{ .Values.http.port }}"
+            - name: QUARKUS_HTTP_SSL_PORT
+              value: "{{ .Values.https.port }}"
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
-            - name: quarkus.http.ssl.certificate.key-store-file-type
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
               value: "JKS"
-            - name: quarkus.http.ssl.certificate.key-store-file
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
               value: "/mnt/tls/keystore.jks"
-            - name: quarkus.http.ssl.certificate.trust-store-file
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
               value: "/mnt/tls/truststore.jks"
-            - name: quarkus.http.ssl.certificate.key-store-password
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
               {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.keystorePassword "nil") (.Values.tls.keystorePassword) }}
               value: "{{ .Values.tls.keystorePassword }}"
@@ -118,7 +118,7 @@ spec:
                   name: {{ .Values.tls.secretName }}
                   key: keystore.password
               {{- end }}
-            - name: quarkus.http.ssl.certificate.trust-store-password
+            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
               {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
               value: "{{ .Values.tls.truststorePassword }}"

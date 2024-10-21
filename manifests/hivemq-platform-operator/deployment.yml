@@ -37,48 +37,48 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: hivemq.platform.operator.release.name
+            - name: HIVEMQ_PLATFORM_OPERATOR_RELEASE_NAME
               value: "my-operator"
-            - name: hivemq.platform.operator.crd.apply
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_APPLY
               value: "true"
-            - name: hivemq.platform.operator.crd.wait-until-ready
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY
               value: "true"
-            - name: hivemq.platform.operator.crd.wait-until-ready.timeout
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
               value: "PT10S"
-            - name: hivemq.platform.operator.init.image
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
               value: "docker.io/hivemq/hivemq-platform-operator-init:1.6.0"
-            - name: hivemq.platform.operator.image.pull.secret
+            - name: HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET
               value: ""
-            - name: hivemq.platform.operator.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL
               value: "INFO"
-            - name: hivemq.platform.operator.log.configuration
+            - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
               value: "false"
-            - name: hivemq.platform.operator.serviceaccount.create
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "true"
-            - name: hivemq.platform.operator.serviceaccount.validate
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
               value: "true"
-            - name: hivemq.platform.operator.serviceaccount.name
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME
               value: ""
-            - name: hivemq.platform.operator.serviceaccount.permissions.create
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_CREATE
               value: "true"
-            - name: hivemq.platform.operator.serviceaccount.permissions.validate
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
               value: "true"
-            - name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+            - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
               value: "false"
-            - name: hivemq.platform.operator.quarkus.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_QUARKUS_LOG_LEVEL
               value: "INFO"
-            - name: hivemq.platform.operator.sdk.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
               value: "INFO"
-            - name: hivemq.platform.operator.network.log.level
+            - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
               value: "WARN"
-            - name: quarkus.http.port
+            - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
+              value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
+              value: "false"
+            - name: QUARKUS_HTTP_PORT
               value: "8080"
-            - name: quarkus.http.ssl-port
+            - name: QUARKUS_HTTP_SSL_PORT
               value: "8443"
-            - name: hivemq.platform.operator.skip-https-certificate-validation
-              value: "false"
-            - name: hivemq.platform.operator.skip-https-hostname-verification
-              value: "false"
           image: "docker.io/hivemq/hivemq-platform-operator:1.6.0"
           imagePullPolicy: IfNotPresent
           livenessProbe:
