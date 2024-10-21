@@ -182,6 +182,12 @@ license:
 #  allowRequestProblemInformation: true
 #  controlCenterAuditLog: true
 
+# Configures HiveMQ Client Event History options.
+# See https://docs.hivemq.com/hivemq/latest/user-guide/event-history.html
+#hivemqClientEventHistory:
+#  enabled: false
+#  lifetime: 604800
+
 # Selector name that is used to match the selector of the managing operator.
 # This selector assigns the HiveMQ Platform to a specific operator.
 operator:
