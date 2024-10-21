@@ -199,6 +199,20 @@
       },
       "type" : "array"
     },
+    "hivemqClientEventHistory" : {
+      "description" : "Configures HiveMQ Client Event History options.",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "lifetime" : {
+          "maximum": 864000,
+          "minimum": 1,
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
+    },
     "hivemqInternalOptions" : {
       "additionalProperties" : false,
       "description" : "HiveMQ Internal Options configuration",
