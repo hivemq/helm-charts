@@ -23,7 +23,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.log.level
+            name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL
             value: "WARN"
       - equal:
           path: spec.template.spec.containers[0].image
@@ -49,12 +49,12 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.init.image
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
             value: "test-repo/test-init-image:test-tag"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.image.pull.secret
+            name: HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET
             value: "test-pull-secret-name"
 
   - it: with custom environment variables for the operator container
@@ -575,27 +575,27 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.create
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.validate
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.name
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME
             value: ""
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.permissions.create
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_CREATE
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.permissions.validate
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
             value: "true"
 
   - it: with platform service account create disabled
@@ -609,7 +609,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.create
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
             value: "false"
 
   - it: with platform service account validate disabled
@@ -623,7 +623,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.validate
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
             value: "false"
 
   - it: with platform service account name set
@@ -637,7 +637,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.name
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME
             value: "my-serviceaccount-name"
 
   - it: with platform service account permissions create disabled
@@ -651,7 +651,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.permissions.create
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_CREATE
             value: "false"
 
   - it: with platform service account permissions validate disabled
@@ -665,7 +665,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.serviceaccount.permissions.validate
+            name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
             value: "false"
 
   - it: with platform statefulset rolling-restart-on-template-metadata-change enabled
@@ -679,7 +679,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+            name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
             value: "true"
 
   - it: with platform statefulset rolling-restart-on-template-metadata-change disabled
@@ -693,7 +693,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.statefulset.rolling-restart-on-template-metadata-change
+            name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
             value: "false"
 
   - it: with default resource requests
@@ -870,7 +870,7 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+            name: QUARKUS_OPERATOR_SDK_CONTROLLERS__HIVEMQ_CONTROLLER__SELECTOR
 
   - it: with nil selector value set, no selector environment variable is set
     set:
@@ -886,7 +886,7 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+            name: QUARKUS_OPERATOR_SDK_CONTROLLERS__HIVEMQ_CONTROLLER__SELECTOR
 
   - it: with custom selector value set, selector environment variable is set
     set:
@@ -902,7 +902,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: quarkus.operator-sdk.controllers.hivemq-controller.selector
+            name: QUARKUS_OPERATOR_SDK_CONTROLLERS__HIVEMQ_CONTROLLER__SELECTOR
             value: "operator=foobar"
 
   - it: with default CRD values
@@ -917,17 +917,17 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.crd.apply
+            name: HIVEMQ_PLATFORM_OPERATOR_CRD_APPLY
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.crd.wait-until-ready
+            name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.crd.wait-until-ready.timeout
+            name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
             value: "PT10S"
 
   - it: with custom CRD values
@@ -947,17 +947,17 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.crd.apply
+            name: HIVEMQ_PLATFORM_OPERATOR_CRD_APPLY
             value: "false"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.crd.wait-until-ready
+            name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY
             value: "false"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.crd.wait-until-ready.timeout
+            name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
             value: "PT2M"
 
   - it: with invalid duration format for CRD wait timeout, then schema validation fails
@@ -972,12 +972,12 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.skip-https-certificate-validation
+            name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
             value: "false"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.skip-https-hostname-verification
+            name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
             value: "false"
 
   - it: with skip HTTPS certificate validation
@@ -987,12 +987,12 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.skip-https-hostname-verification
+            name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
             value: "false"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.skip-https-certificate-validation
+            name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
             value: "true"
 
   - it: with skip HTTPS hostname verification
@@ -1002,10 +1002,10 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.skip-https-hostname-verification
+            name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
             value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: hivemq.platform.operator.skip-https-certificate-validation
+            name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
             value: "false"
