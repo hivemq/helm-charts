@@ -217,6 +217,18 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     {{- end }}
   </internal>
   {{- end }}
+  {{- $clientEventHistoryConfig := .Values.hivemqClientEventHistory }}
+  {{- $hasclientEventHistoryConfig := include "hivemq-platform.has-hivemq-client-event-history-config" (dict "hivemqClientEventHistory" $clientEventHistoryConfig) }}
+  {{- if $hasclientEventHistoryConfig }}
+  <client-event-history>
+    {{- if (hasKey $clientEventHistoryConfig "enabled") }}
+    <enabled>{{ $clientEventHistoryConfig.enabled }}</enabled>
+    {{- end -}}
+    {{- if (hasKey $clientEventHistoryConfig "lifetime") }}
+    <lifetime>{{ $clientEventHistoryConfig.lifetime }}</lifetime>
+    {{- end }}
+  </client-event-history>
+  {{- end }}
   {{- $restrictionsConfig := .Values.hivemqRestrictions }}
   {{- $hasRestrictionsConfig := include "hivemq-platform.has-hivemq-restrictions-config" (dict "hivemqRestrictions" $restrictionsConfig) }}
   {{- if $hasRestrictionsConfig }}

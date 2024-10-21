@@ -686,7 +686,25 @@ Usage: {{ include "hivemq-platform.get-additional-volume-mounts" . }}
 {{- end -}}
 
 {{/*
-Checks if there is any HiveMQ restriction options based on the `.Values.hivemqRestrictions` values
+Checks if there is any HiveMQ Client Event History options set based on the `.Values.hivemqClientEventHistory` values
+Params:
+- hivemqClientEventHistory: The set of values from hivemqClientEventHistory
+Returns:
+- `true` if any of the expected values under the hivemqClientEventHistory top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-hivemq-client-event-history-config" }}
+{{- $clientEventHistoryConfig := .hivemqClientEventHistory }}
+{{- $contains := "" }}
+{{- if or
+    (hasKey $clientEventHistoryConfig "enabled")
+    (hasKey $clientEventHistoryConfig "lifetime") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
+Checks if there is any HiveMQ restriction options set based on the `.Values.hivemqRestrictions` values
 Params:
 - hivemqRestrictions: The set of values from hivemqRestrictions
 Returns:
@@ -706,7 +724,7 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ MQTT options based on the `.Values.hivemqMqtt` values
+Checks if there is any HiveMQ MQTT options set based on the `.Values.hivemqMqtt` values
 Params:
 - hivemqMqtt: The set of values from hivemqMqtt
 Returns:
@@ -737,7 +755,7 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ MQTT Add-on options based on the `.Values.hivemqMqttAddons` values
+Checks if there is any HiveMQ MQTT Add-on options set based on the `.Values.hivemqMqttAddons` values
 Params:
 - hivemqMqttAddons: The set of values from hivemqMqttAddons
 Returns:
@@ -756,7 +774,7 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ MQTT security options based on the `.Values.hivemqMqttSecurity` values
+Checks if there is any HiveMQ MQTT security options set based on the `.Values.hivemqMqttSecurity` values
 Params:
 - hivemqMqttSecurity: The set of values from hivemqMqttSecurity
 Returns:
