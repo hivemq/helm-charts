@@ -1,0 +1,21 @@
+# Kubeconform configuration file
+
+# print results for all resources
+verbose: true
+
+# print a summary at the end
+summary: true
+
+# disallow additional properties not in schema or duplicated keys
+strict: true
+
+# print debug information
+debug: true
+
+# output format - json
+output: json
+
+# use default schema location for K8s resources
+# `default` is an alias for https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json
+schema-location:
+  - default

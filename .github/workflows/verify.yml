@@ -14,23 +14,20 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4
 
-      - name: Add dependency chart repos
+      - name: Add Prometheus dependency Helm chart repo
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
-      - name: Update chart dependencies
+      - name: Update HiveMQ legacy Operator chart dependencies
         run: |
-          helm dependency update ./charts/hivemq-platform
-          helm dependency update ./charts/hivemq-platform-operator
-          helm dependency update ./charts/hivemq-operator
-          helm dependency update ./charts/hivemq-swarm
+          helm dependency update charts/hivemq-operator
 
       - name: Lint
         run: |
-          helm lint ./charts/hivemq-platform
-          helm lint ./charts/hivemq-platform-operator
-          helm lint ./charts/hivemq-operator
-          helm lint ./charts/hivemq-swarm
+          helm lint charts/hivemq-platform
+          helm lint charts/hivemq-platform-operator
+          helm lint charts/hivemq-operator
+          helm lint charts/hivemq-swarm
 
       - name: Unit Test
         uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
@@ -40,8 +37,25 @@ jobs:
 
       - name: Check manifests are up-to-date
         run: |
-          ./manifests/hivemq-operator/manifests.sh
-          ./manifests/hivemq-platform-operator/manifests.sh
-          ./manifests/hivemq-platform/manifests.sh
-          ./manifests/hivemq-swarm/manifests.sh
+          manifests/hivemq-operator/manifests.sh
+          manifests/hivemq-platform-operator/manifests.sh
+          manifests/hivemq-platform/manifests.sh
+          manifests/hivemq-swarm/manifests.sh
           git diff HEAD --exit-code
+
+      - name: Install Kubeconform Helm plugin
+        run: |
+          helm plugin install https://github.com/jtyr/kubeconform-helm
+
+      - name: Parse HiveMQ CRDs from OpenAPI to JSON schema
+        run: |
+          export FILENAME_FORMAT='{kind}.{group}-{version}'
+          .github/openapi2jsonschema.py charts/hivemq-platform-operator/crds/hivemq-platforms.hivemq.com-v1.yml
+          .github/openapi2jsonschema.py charts/hivemq-operator/crds/hivemq-cluster.yaml
+
+      - name: Validate rendered manifests
+        run: |
+          helm kubeconform --config .github/kubeconform.yml charts/hivemq-operator -r hivemq-operator-release -n hivemq-operator-namespace --schema-location hivemqcluster.hivemq-v1.json
+          helm kubeconform --config .github/kubeconform.yml charts/hivemq-platform-operator -r hivemq-platform-operator-release -n hivemq-platform-operator-namespace
+          helm kubeconform --config .github/kubeconform.yml charts/hivemq-platform -r hivemq-platform-release -n hivemq-platform-namespace --schema-location hivemqplatform.hivemq-v1.json
+          helm kubeconform --config .github/kubeconform.yml charts/hivemq-swarm -r hivemq-swarm-release -n hivemq-swarm-namespace
