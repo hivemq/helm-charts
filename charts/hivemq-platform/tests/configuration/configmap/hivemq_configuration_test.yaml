@@ -118,6 +118,180 @@ tests:
       - notExists:
           path: data["logback.xml"]
 
+  - it: with default platform values and custom hivemqInternalOptions config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - key: foo
+          value: bar
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <internal>
+                <option>
+                  <key>foo</key>
+                  <value>bar</value>
+                </option>
+              </internal>
+            </hivemq>
+
+  - it: with default platform values and a list of custom hivemqInternalOptions config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - key: foo
+          value: bar
+        - key: baz
+          value: qux
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <internal>
+                <option>
+                  <key>foo</key>
+                  <value>bar</value>
+                </option>
+                <option>
+                  <key>baz</key>
+                  <value>qux</value>
+                </option>
+              </internal>
+            </hivemq>
+
+  - it: with default platform values and empty hivemqInternalOptions config values, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions: {}
+    asserts:
+      - failedTemplate: {}
+
+  - it: with missing key value for hivemqInternalOptions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - value: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with missing value for hivemqInternalOptions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - key: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with empty key value for hivemqInternalOptions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - key: ""
+          value: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with integer value for hivemqInternalOptions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - key: foobar
+          value: 1.0
+    asserts:
+      - failedTemplate: {}
+
+  - it: with integer as string value for hivemqInternalOptions config, schema validation succeeds
+    template: hivemq-configuration.yml
+    set:
+      hivemqInternalOptions:
+        - key: foobar
+          value: "1.0"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
   - it: with default platform values and all default hivemqRestrictions config values
     template: hivemq-configuration.yml
     set:
@@ -910,6 +1084,9 @@ tests:
         utf8Validation: true
         allowRequestProblemInformation: true
         controlCenterAuditLog: true
+      hivemqInternalOptions:
+        - key: foobar
+          value: "1.0"
     asserts:
       - exists:
           path: data["config.xml"]
@@ -954,6 +1131,12 @@ tests:
                   </http>
                 </listeners>
               </control-center>
+              <internal>
+                <option>
+                  <key>foobar</key>
+                  <value>1.0</value>
+                </option>
+              </internal>
               <restrictions>
                 <max-connections>-1</max-connections>
                 <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
