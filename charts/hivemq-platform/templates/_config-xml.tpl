@@ -206,6 +206,17 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     {{- end }}
   </data-hub>
   {{- end }}
+  {{- $internalOptionsConfig := .Values.hivemqInternalOptions }}
+  {{- if $internalOptionsConfig }}
+  <internal>
+    {{- range $internalOption := $internalOptionsConfig }}
+    <option>
+      <key>{{ $internalOption.key }}</key>
+      <value>{{ $internalOption.value }}</value>
+    </option>
+    {{- end }}
+  </internal>
+  {{- end }}
   {{- $restrictionsConfig := .Values.hivemqRestrictions }}
   {{- $hasRestrictionsConfig := include "hivemq-platform.has-hivemq-restrictions-config" (dict "hivemqRestrictions" $restrictionsConfig) }}
   {{- if $hasRestrictionsConfig }}
