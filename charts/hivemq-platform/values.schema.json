@@ -199,6 +199,27 @@
       },
       "type" : "array"
     },
+    "hivemqInternalOptions" : {
+      "additionalProperties" : false,
+      "description" : "HiveMQ Internal Options configuration",
+      "items" : {
+        "properties" : {
+          "key" : {
+            "minLength": 1,
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "key",
+          "value"
+        ],
+        "type" : "object"
+      },
+      "type": "array"
+    },
     "hivemqMqtt" : {
       "properties" : {
         "keepAliveAllowUnlimited" : {
