@@ -37,6 +37,7 @@ jobs:
 
       - name: Check manifests are up-to-date
         run: |
+          git add manifests/ -v
           manifests/hivemq-operator/manifests.sh
           manifests/hivemq-platform-operator/manifests.sh
           manifests/hivemq-platform/manifests.sh
