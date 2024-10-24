@@ -41,6 +41,7 @@ jobs:
           manifests/hivemq-platform-operator/manifests.sh
           manifests/hivemq-platform/manifests.sh
           manifests/hivemq-swarm/manifests.sh
+          git add manifests/ -v
           git diff HEAD --exit-code
 
       - name: Install Kubeconform Helm plugin
