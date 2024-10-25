@@ -56,7 +56,7 @@ jobs:
 
       - name: Validate rendered manifests
         run: |
-          helm kubeconform --config .github/kubeconform.yml charts/hivemq-operator -r hivemq-operator-release -n hivemq-operator-namespace --schema-location hivemqcluster.hivemq-v1.json
-          helm kubeconform --config .github/kubeconform.yml charts/hivemq-platform-operator -r hivemq-platform-operator-release -n hivemq-platform-operator-namespace
-          helm kubeconform --config .github/kubeconform.yml charts/hivemq-platform -r hivemq-platform-release -n hivemq-platform-namespace --schema-location hivemqplatform.hivemq-v1.json
-          helm kubeconform --config .github/kubeconform.yml charts/hivemq-swarm -r hivemq-swarm-release -n hivemq-swarm-namespace
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-operator -r hivemq-operator-release -n hivemq-operator-namespace --schema-location hivemqcluster.hivemq-v1.json
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-platform-operator -r hivemq-platform-operator-release -n hivemq-platform-operator-namespace
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-platform -r hivemq-platform-release -n hivemq-platform-namespace --schema-location hivemqplatform.hivemq-v1.json
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-swarm -r hivemq-swarm-release -n hivemq-swarm-namespace
