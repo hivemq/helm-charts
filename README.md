@@ -42,6 +42,16 @@ The examples folder contains configuration examples for each of the Helm charts.
 ## Tests
 Integration tests are split into two Gradle submodules. One submodule for the HiveMQ Platform Operator (new): [`tests-hivemq-platform-operator`](./tests-hivemq-platform-operator) and another submodule for the HiveMQ Operator (legacy): [`tests-hivemq-operator`](./tests-hivemq-operator).
 
+## Verifying charts
+We sign the HiveMQ Helm charts with PGP keys during the packaging. These signed charts have a `.prov` file generated alongside the packaged chart, which includes the chart and the signature.
+
+To verify the authenticity of the charts, download the [public PGP key](https://www.hivemq.com/public.pgp) and import the public key into your GPG keyring. Then use `helm verify` or `helm install --verify` command to verify the chart integrity. Check our documentation for more detailed information.
+
+**NOTE** Helm does not support GPG version 2 or higher so you have to convert your GPG keyring to the legacy GPG format:
+```shell
+gpg --export >~/.gnupg/pubring.gpg
+```
+
 ## Contributing
 
 If you want to contribute to HiveMQ Helm Charts, see the [contribution guidelines](CONTRIBUTING.md).
