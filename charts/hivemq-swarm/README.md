@@ -41,6 +41,21 @@ helm uninstall [RELEASE_NAME] -n <namespace>
 
 This removes all Kubernetes components associated with the chart and deletes the release.
 
+## Verify the chart
+
+```console
+curl -L -o public.pgp https://www.hivemq.com/public.pgp
+gpg --import public.pgp
+gpg --export >~/.gnupg/pubring.gpg
+helm verify hivemq-swarm-x.y.z.tgz
+```
+
+**NOTE** Helm does not support GPG version 2 or higher so you have to convert your GPG keyring to the legacy GPG format:
+```shell
+gpg --export >~/.gnupg/pubring.gpg
+```
+_See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#deploy-on-k8s) for more details._
+
 ## Configuration
 
 See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#deploy-on-k8s) on configuration options. To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/blog/master/charts/hivemq-swarm/values.yaml), or run this command:

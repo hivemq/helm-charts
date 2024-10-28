@@ -27,3 +27,18 @@ kubectl apply -f https://raw.githubusercontent.com/hivemq/helm-charts/master/man
 # 2. Deploy the Helm chart, skip CRD deployment
 helm install hivemq-operator hivemq/hivemq-operator --skip-crds
 ```
+
+## Verify the chart
+
+```console
+curl -L -o public.pgp https://www.hivemq.com/public.pgp
+gpg --import public.pgp
+gpg --export >~/.gnupg/pubring.gpg
+helm verify hivemq-operator-x.y.z.tgz
+```
+
+**NOTE** Helm does not support GPG version 2 or higher so you have to convert your GPG keyring to the legacy GPG format:
+```shell
+gpg --export >~/.gnupg/pubring.gpg
+```
+_See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-operator/) for more details._
