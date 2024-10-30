@@ -99,6 +99,15 @@ jobs:
             helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest/*.xml
           retention-days: 5
 
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
+        if: always()
+        with:
+          annotate_only: true
+          detailed_summary: true
+          job_name: integration-test-compose-report
+          report_paths: '**/build/test-results/integrationTest/TEST-*.xml'
+
   platform-integration-test-single:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -203,3 +212,12 @@ jobs:
             helm-charts/tests-hivemq-platform-operator/build/reports/tests/integrationTest/
             helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest/*.xml
           retention-days: 5
+
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
+        if: always()
+        with:
+          annotate_only: true
+          detailed_summary: true
+          job_name: integration-test-single-report
+          report_paths: '**/build/test-results/integrationTest/TEST-*.xml'
