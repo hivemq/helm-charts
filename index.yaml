@@ -1,6 +1,32 @@
 apiVersion: v1
 entries:
   hivemq-operator:
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
+    appVersion: 4.34.0
+    created: "2024-10-30T13:09:27.315068997Z"
+    dependencies:
+    - condition: monitoring.dedicated, monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 30.*
+    description: HiveMQ Operator (legacy)
+    digest: e838cd772f0fd246353f69ef91246be37f06bede478d944920211f1406253ece
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    name: hivemq-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-0.11.45/hivemq-operator-0.11.45.tgz
+    version: 0.11.45
   - apiVersion: v2
     appVersion: 4.33.1
     created: "2024-10-16T13:34:25.866103309Z"
@@ -1647,6 +1673,33 @@ entries:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-0.5.0/hivemq-operator-0.5.0.tgz
     version: 0.5.0
   hivemq-platform:
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
+    appVersion: 4.34.0
+    created: "2024-10-30T13:09:27.423408712Z"
+    description: HiveMQ Platform Helm Chart (new)
+    digest: b1537969cf564de4362230436ca21749f314edebd31739d47b42c5cb66ea47a2
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform
+    - Broker
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-0.2.28/hivemq-platform-0.2.28.tgz
+    version: 0.2.28
   - apiVersion: v2
     appVersion: 4.33.1
     created: "2024-10-17T06:52:58.594739163Z"
@@ -2261,6 +2314,33 @@ entries:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-0.2.0/hivemq-platform-0.2.0.tgz
     version: 0.2.0
   hivemq-platform-operator:
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
+    appVersion: 1.6.0
+    created: "2024-10-30T13:09:27.565835817Z"
+    description: HiveMQ Platform Operator Helm Chart (new)
+    digest: 5a75515fcfb4dfdc190a836bdba1d0dd50c78ab52b190f98275489bc1e37001b
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform Operator
+    - Operator
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-operator-0.2.12/hivemq-platform-operator-0.2.12.tgz
+    version: 0.2.12
   - apiVersion: v2
     appVersion: 1.6.0
     created: "2024-10-17T06:52:58.711414023Z"
@@ -2534,6 +2614,32 @@ entries:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-operator-0.2.0/hivemq-platform-operator-0.2.0.tgz
     version: 0.2.0
   hivemq-swarm:
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
+    appVersion: 4.34.0
+    created: "2024-10-30T13:09:27.664090594Z"
+    description: A Helm chart for HiveMQ Swarm
+    digest: 722a0a3dd079f64d7eca2041fa656522ac3fc1c3a264497a18e11855c7959aa5
+    icon: https://www.hivemq.com/img/svg/icon-hivemq-swarm.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Swarm
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-swarm
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.2.43/hivemq-swarm-0.2.43.tgz
+    version: 0.2.43
   - apiVersion: v2
     appVersion: 4.33.1
     created: "2024-10-17T06:52:58.808445469Z"
@@ -3480,4 +3586,4 @@ entries:
     urls:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.1.0/hivemq-swarm-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-17T06:52:58.808992053Z"
+generated: "2024-10-30T13:09:27.665362836Z"
