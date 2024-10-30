@@ -10,7 +10,7 @@ monitoring:
   enabled: true
 
 hivemq:
-  image: hivemq/hivemq4:k8s-4.33.1
+  image: hivemq/hivemq4:k8s-4.34.0
   imagePullPolicy: Never
   initDnsWaitImage: hivemq/init-dns-wait:snapshot
   logLevel: DEBUG
