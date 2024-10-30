@@ -96,3 +96,12 @@ jobs:
             helm-charts/tests-hivemq-operator/build/reports/tests/integrationTest/
             helm-charts/tests-hivemq-operator/build/test-results/integrationTest/*.xml
           retention-days: 5
+
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
+        if: always()
+        with:
+          annotate_only: true
+          detailed_summary: true
+          job_name: legacy-integration-test-report
+          report_paths: '**/build/test-results/integrationTest/TEST-*.xml'
