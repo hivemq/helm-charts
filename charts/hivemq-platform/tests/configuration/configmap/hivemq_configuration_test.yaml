@@ -484,6 +484,7 @@ tests:
         incomingBandwidthThrottling: 0
         noConnectIdleTimeout: 10000
         maxClientIdLength: 65535
+        maxTopicLength: 65535
     asserts:
       - exists:
           path: data["config.xml"]
@@ -533,6 +534,69 @@ tests:
                 <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
                 <no-connect-idle-timeout>10000</no-connect-idle-timeout>
                 <max-client-id-length>65535</max-client-id-length>
+                <max-topic-length>65535</max-topic-length>
+              </restrictions>
+            </hivemq>
+
+  - it: with default platform values and all custom hivemqRestrictions config values
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxConnections: 1
+        incomingBandwidthThrottling: 2
+        noConnectIdleTimeout: 3
+        maxClientIdLength: 4
+        maxTopicLength: 5
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <restrictions>
+                <max-connections>1</max-connections>
+                <incoming-bandwidth-throttling>2</incoming-bandwidth-throttling>
+                <no-connect-idle-timeout>3</no-connect-idle-timeout>
+                <max-client-id-length>4</max-client-id-length>
+                <max-topic-length>5</max-topic-length>
               </restrictions>
             </hivemq>
 
@@ -641,6 +705,46 @@ tests:
                 </listeners>
               </control-center>
             </hivemq>
+
+  - it: with invalid incomingBandwidthThrottling value for hivemqRestrictions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        incomingBandwidthThrottling: -2
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid maxClientIdLength value for hivemqRestrictions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxClientIdLength: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid maxConnections value for hivemqRestrictions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxConnections: -2
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid maxTopicLength value for hivemqRestrictions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxTopicLength: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid noConnectIdleTimeout value for hivemqRestrictions config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        noConnectIdleTimeout: -1
+    asserts:
+      - failedTemplate: {}
 
   - it: with default platform values and all default hivemqMqtt config values
     template: hivemq-configuration.yml
@@ -1234,7 +1338,7 @@ tests:
               </control-center>
             </hivemq>
 
-  - it: with default platform values and all HiveMQ configuration options set
+  - it: with default platform values and all default HiveMQ configuration options set
     template: hivemq-configuration.yml
     set:
       hivemqRestrictions:
@@ -1242,6 +1346,7 @@ tests:
         incomingBandwidthThrottling: 0
         noConnectIdleTimeout: 10000
         maxClientIdLength: 65535
+        maxTopicLength: 65535
       hivemqMqtt:
         sessionExpiryMaxInterval: 4294967295
         messageExpiryMaxInterval: 4294967296
@@ -1333,6 +1438,7 @@ tests:
                 <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
                 <no-connect-idle-timeout>10000</no-connect-idle-timeout>
                 <max-client-id-length>65535</max-client-id-length>
+                <max-topic-length>65535</max-topic-length>
               </restrictions>
               <mqtt>
                 <session-expiry>
@@ -1401,6 +1507,179 @@ tests:
                 </allow-request-problem-information>
                 <control-center-audit-log>
                   <enabled>true</enabled>
+                </control-center-audit-log>
+              </security>
+            </hivemq>
+
+  - it: with default platform values and all custom HiveMQ configuration options set
+    template: hivemq-configuration.yml
+    set:
+      hivemqRestrictions:
+        maxConnections: 1
+        incomingBandwidthThrottling: 2
+        noConnectIdleTimeout: 3
+        maxClientIdLength: 4
+        maxTopicLength: 5
+      hivemqMqtt:
+        sessionExpiryMaxInterval: 6
+        messageExpiryMaxInterval: 7
+        maxPacketSize: 8
+        serverReceiveMaximum: 9
+        keepAliveMax: 10
+        keepAliveAllowUnlimited: false
+        topicAliasEnabled: false
+        topicAliasMaxPerClient: 11
+        subscriptionIdentifier: false
+        wildcardSubscriptions: false
+        sharedSubscriptions: false
+        maxQualityOfService: 12
+        retainedMessages: false
+        queuedMessagesMaxSize: 13
+        queuedMessagesStrategy: "foobar"
+      hivemqMqttAddons:
+        expiredMessagesTopic: true
+        droppedMessagesTopic: true
+        deadMessagesTopic: true
+      hivemqMqttSecurity:
+        allowEmptyClientId: false
+        payloadFormatValidation: true
+        utf8Validation: false
+        allowRequestProblemInformation: false
+        controlCenterAuditLog: false
+      hivemqInternalOptions:
+        - key: foobar
+          value: "1.0"
+      hivemqClientEventHistory:
+        enabled: false
+        lifetime: 14
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+              <internal>
+                <option>
+                  <key>foobar</key>
+                  <value>1.0</value>
+                </option>
+              </internal>
+              <client-event-history>
+                <enabled>false</enabled>
+                <lifetime>14</lifetime>
+              </client-event-history>
+              <restrictions>
+                <max-connections>1</max-connections>
+                <incoming-bandwidth-throttling>2</incoming-bandwidth-throttling>
+                <no-connect-idle-timeout>3</no-connect-idle-timeout>
+                <max-client-id-length>4</max-client-id-length>
+                <max-topic-length>5</max-topic-length>
+              </restrictions>
+              <mqtt>
+                <session-expiry>
+                  <max-interval>6</max-interval>
+                </session-expiry>
+                <message-expiry>
+                  <max-interval>7</max-interval>
+                </message-expiry>
+                <packets>
+                  <max-packet-size>8</max-packet-size>
+                </packets>
+                <receive-maximum>
+                  <server-receive-maximum>9</server-receive-maximum>
+                </receive-maximum>
+                <keep-alive>
+                  <max-keep-alive>10</max-keep-alive>
+                  <allow-unlimited>false</allow-unlimited>
+                </keep-alive>
+                <topic-alias>
+                  <enabled>false</enabled>
+                  <max-per-client>11</max-per-client>
+                </topic-alias>
+                <subscription-identifier>
+                  <enabled>false</enabled>
+                </subscription-identifier>
+                <wildcard-subscriptions>
+                  <enabled>false</enabled>
+                </wildcard-subscriptions>
+                <shared-subscriptions>
+                  <enabled>false</enabled>
+                </shared-subscriptions>
+                <quality-of-service>
+                  <max-qos>12</max-qos>
+                </quality-of-service>
+                <retained-messages>
+                  <enabled>false</enabled>
+                </retained-messages>
+                <queued-messages>
+                  <max-queue-size>13</max-queue-size>
+                  <strategy>foobar</strategy>
+                </queued-messages>
+              </mqtt>
+              <mqtt-addons>
+                <expired-messages-topic>
+                  <enabled>true</enabled>
+                </expired-messages-topic>
+                <dropped-messages-topic>
+                  <enabled>true</enabled>
+                </dropped-messages-topic>
+                <dead-messages-topic>
+                  <enabled>true</enabled>
+                </dead-messages-topic>
+              </mqtt-addons>
+              <security>
+                <allow-empty-client-id>
+                  <enabled>false</enabled>
+                </allow-empty-client-id>
+                <payload-format-validation>
+                  <enabled>true</enabled>
+                </payload-format-validation>
+                <utf8-validation>
+                  <enabled>false</enabled>
+                </utf8-validation>
+                <allow-request-problem-information>
+                  <enabled>false</enabled>
+                </allow-request-problem-information>
+                <control-center-audit-log>
+                  <enabled>false</enabled>
                 </control-center-audit-log>
               </security>
             </hivemq>
