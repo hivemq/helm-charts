@@ -717,7 +717,8 @@ Returns:
     (hasKey $restrictionsConfig "maxConnections")
     (hasKey $restrictionsConfig "incomingBandwidthThrottling")
     (hasKey $restrictionsConfig "noConnectIdleTimeout")
-    (hasKey $restrictionsConfig "maxClientIdLength") }}
+    (hasKey $restrictionsConfig "maxClientIdLength")
+    (hasKey $restrictionsConfig "maxTopicLength") }}
 {{- $contains = true }}
 {{- end }}
 {{- $contains }}
