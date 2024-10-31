@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 HELM_CHARTS_BASE_FOLDER="$(cd -- "$(dirname -- "$0")/../.." && pwd)"
 . "${HELM_CHARTS_BASE_FOLDER}/manifests/manifests-common.sh"
