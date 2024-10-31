@@ -47,6 +47,8 @@ This removes all Kubernetes components associated with the chart and deletes the
 curl -L -o public.pgp https://www.hivemq.com/public.pgp
 gpg --import public.pgp
 gpg --export >~/.gnupg/pubring.gpg
+curl -L -o hivemq-swarm-x.y.z.prov https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-x.y.z/hivemq-swarm-x.y.z.tgz.prov
+curl -L -o hivemq-swarm-x.y.z.tgz https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-x.y.z/hivemq-swarm-x.y.z.tgz
 helm verify hivemq-swarm-x.y.z.tgz
 ```
 

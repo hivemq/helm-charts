@@ -34,6 +34,8 @@ helm install hivemq-operator hivemq/hivemq-operator --skip-crds
 curl -L -o public.pgp https://www.hivemq.com/public.pgp
 gpg --import public.pgp
 gpg --export >~/.gnupg/pubring.gpg
+curl -L -o hivemq-operator-x.y.z.prov https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-x.y.z/hivemq-operator-x.y.z.tgz.prov
+curl -L -o hivemq-operator-x.y.z.tgz https://github.com/hivemq/helm-charts/releases/download/hivemq-operator-x.y.z/hivemq-operator-x.y.z.tgz
 helm verify hivemq-operator-x.y.z.tgz
 ```
 
