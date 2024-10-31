@@ -244,6 +244,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     {{- end -}}
     {{- if (hasKey $restrictionsConfig "maxClientIdLength") }}
     <max-client-id-length>{{ $restrictionsConfig.maxClientIdLength }}</max-client-id-length>
+    {{- end -}}
+    {{- if (hasKey $restrictionsConfig "maxTopicLength") }}
+    <max-topic-length>{{ $restrictionsConfig.maxTopicLength | int64 }}</max-topic-length>
     {{- end }}
   </restrictions>
   {{- end }}
@@ -255,72 +258,72 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <session-expiry>
       <max-interval>{{ $mqttConfig.sessionExpiryMaxInterval | int64 }}</max-interval>
     </session-expiry>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "messageExpiryMaxInterval") }}
     <message-expiry>
       <max-interval>{{ $mqttConfig.messageExpiryMaxInterval | int64 }}</max-interval>
     </message-expiry>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "maxPacketSize") }}
     <packets>
       <max-packet-size>{{ $mqttConfig.maxPacketSize | int64 }}</max-packet-size>
     </packets>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "serverReceiveMaximum") }}
     <receive-maximum>
       <server-receive-maximum>{{ $mqttConfig.serverReceiveMaximum }}</server-receive-maximum>
     </receive-maximum>
-    {{- end }}
+    {{- end -}}
     {{- if or (hasKey $mqttConfig "keepAliveMax") (hasKey $mqttConfig "keepAliveAllowUnlimited") }}
     <keep-alive>
       {{- if (hasKey $mqttConfig "keepAliveMax") }}
       <max-keep-alive>{{ $mqttConfig.keepAliveMax }}</max-keep-alive>
-      {{- end }}
+      {{- end -}}
       {{- if (hasKey $mqttConfig "keepAliveAllowUnlimited") }}
       <allow-unlimited>{{ printf "%t" $mqttConfig.keepAliveAllowUnlimited }}</allow-unlimited>
       {{- end }}
     </keep-alive>
-    {{- end }}
+    {{- end -}}
     {{- if or (hasKey $mqttConfig "topicAliasEnabled") (hasKey $mqttConfig "topicAliasMaxPerClient") }}
     <topic-alias>
       {{- if (hasKey $mqttConfig "topicAliasEnabled") }}
       <enabled>{{ printf "%t" $mqttConfig.topicAliasEnabled }}</enabled>
-      {{- end }}
+      {{- end -}}
       {{- if (hasKey $mqttConfig "topicAliasMaxPerClient") }}
       <max-per-client>{{ $mqttConfig.topicAliasMaxPerClient }}</max-per-client>
       {{- end }}
     </topic-alias>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "subscriptionIdentifier") }}
     <subscription-identifier>
       <enabled>{{ printf "%t" $mqttConfig.subscriptionIdentifier }}</enabled>
     </subscription-identifier>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "wildcardSubscriptions") }}
     <wildcard-subscriptions>
       <enabled>{{ printf "%t" $mqttConfig.wildcardSubscriptions }}</enabled>
     </wildcard-subscriptions>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "sharedSubscriptions") }}
     <shared-subscriptions>
       <enabled>{{ printf "%t" $mqttConfig.sharedSubscriptions }}</enabled>
     </shared-subscriptions>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "maxQualityOfService") }}
     <quality-of-service>
       <max-qos>{{ $mqttConfig.maxQualityOfService }}</max-qos>
     </quality-of-service>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttConfig "retainedMessages") }}
     <retained-messages>
       <enabled>{{ printf "%t" $mqttConfig.retainedMessages }}</enabled>
     </retained-messages>
-    {{- end }}
+    {{- end -}}
     {{- if or (hasKey $mqttConfig "queuedMessagesMaxSize") (hasKey $mqttConfig "queuedMessagesStrategy") }}
     <queued-messages>
       {{- if (hasKey $mqttConfig "queuedMessagesMaxSize") }}
       <max-queue-size>{{ $mqttConfig.queuedMessagesMaxSize | int64 }}</max-queue-size>
-      {{- end }}
+      {{- end -}}
       {{- if (hasKey $mqttConfig "queuedMessagesStrategy") }}
       <strategy>{{ $mqttConfig.queuedMessagesStrategy }}</strategy>
       {{- end }}
@@ -336,12 +339,12 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <expired-messages-topic>
       <enabled>{{ printf "%t" $mqttAddonsConfig.expiredMessagesTopic }}</enabled>
     </expired-messages-topic>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttAddonsConfig "droppedMessagesTopic") }}
     <dropped-messages-topic>
       <enabled>{{ printf "%t" $mqttAddonsConfig.droppedMessagesTopic }}</enabled>
     </dropped-messages-topic>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $mqttAddonsConfig "deadMessagesTopic") }}
     <dead-messages-topic>
       <enabled>{{ printf "%t" $mqttAddonsConfig.deadMessagesTopic }}</enabled>
@@ -357,22 +360,22 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <allow-empty-client-id>
       <enabled>{{ printf "%t" $securityConfig.allowEmptyClientId }}</enabled>
     </allow-empty-client-id>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $securityConfig "payloadFormatValidation") }}
     <payload-format-validation>
       <enabled>{{ printf "%t" $securityConfig.payloadFormatValidation }}</enabled>
     </payload-format-validation>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $securityConfig "utf8Validation") }}
     <utf8-validation>
       <enabled>{{ printf "%t" $securityConfig.utf8Validation }}</enabled>
     </utf8-validation>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $securityConfig "allowRequestProblemInformation") }}
     <allow-request-problem-information>
       <enabled>{{ printf "%t" $securityConfig.allowRequestProblemInformation }}</enabled>
     </allow-request-problem-information>
-    {{- end }}
+    {{- end -}}
     {{- if (hasKey $securityConfig "controlCenterAuditLog") }}
     <control-center-audit-log>
       <enabled>{{ printf "%t" $securityConfig.controlCenterAuditLog }}</enabled>

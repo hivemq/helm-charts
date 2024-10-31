@@ -100,7 +100,7 @@
           "type" : "boolean"
         },
         "createAs" : {
-          "description" : "Defines how the HiveMQ Platform configuration should be stored into. Either a Kubernetes ConfigMap or a Kubernetes Secret",
+          "description" : "Defines how the HiveMQ Platform configuration should be stored into. Either a Kubernetes ConfigMap or a Kubernetes Secret.",
           "enum" : [
             "ConfigMap",
             "Secret"
@@ -178,11 +178,11 @@
             "type" : "string"
           },
           "skipHttpsCertificateValidation" : {
-            "description" : "Configures if certificate validation should be skipped for downloads of custom extensions or extension customizations",
+            "description" : "Configures if certificate validation should be skipped for downloads of custom extensions or extension customizations.",
             "type" : "boolean"
           },
           "skipHttpsHostnameVerification" : {
-            "description" : "Configures if hostname verification should be skipped for downloads of custom extensions or extension customizations",
+            "description" : "Configures if hostname verification should be skipped for downloads of custom extensions or extension customizations.",
             "type" : "boolean"
           },
           "startPriority" : {
@@ -215,7 +215,7 @@
     },
     "hivemqInternalOptions" : {
       "additionalProperties" : false,
-      "description" : "HiveMQ Internal Options configuration",
+      "description" : "HiveMQ Internal Options configuration.",
       "items" : {
         "properties" : {
           "key" : {
@@ -319,17 +319,33 @@
       "type" : "object"
     },
     "hivemqRestrictions" : {
+      "description" : "Configures the HiveMQ restriction options. See https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html.",
       "properties" : {
         "incomingBandwidthThrottling" : {
+          "description" : "The maximum incoming traffic as bytes per second (b/s).",
+          "minimum": 0,
           "type" : "integer"
         },
         "maxClientIdLength" : {
+          "description" : "The maximum number of characters HiveMQ accepts in an MQTT-client ID.",
+          "maximum": 65535,
+          "minimum": 1,
           "type" : "integer"
         },
         "maxConnections" : {
+          "description" : "The maximum number of concurrent MQTT connections the HiveMQ instance allows.",
+          "minimum": -1,
+          "type" : "integer"
+        },
+        "maxTopicLength" : {
+          "description" : "The maximum number of characters HiveMQ accepts in a topic string.",
+          "maximum": 65535,
+          "minimum": 1,
           "type" : "integer"
         },
         "noConnectIdleTimeout" : {
+          "description" : "The time in milliseconds that HiveMQ waits for a CONNECT message of a client before an open TCP socket is closed.",
+          "minimum": 0,
           "type" : "integer"
         }
       },
@@ -545,7 +561,7 @@
         "if" : {
           "properties" : {
             "hivemqListenerName" : {
-              "description" : "Defines the optional custom name for the MQTT and WebSocket listeners",
+              "description" : "Defines the optional custom name for the MQTT and WebSocket listeners.",
               "type" : "string"
             }
           },
@@ -627,7 +643,7 @@
             "description": "Used to maintain session affinity. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
             "properties" : {
               "type" : {
-                "description" : "Session affinity type. Must be ClientIP or None. Defaults to `ClientIP` for `control-services` service type",
+                "description" : "Session affinity type. Must be ClientIP or None. Defaults to `ClientIP` for `control-services` service type.",
                 "enum" : [
                   "ClientIP",
                   "None"

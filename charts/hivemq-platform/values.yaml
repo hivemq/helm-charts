@@ -142,10 +142,11 @@ license:
 # Configures HiveMQ restriction options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html
 #hivemqRestrictions:
-#  maxConnections: -1
 #  incomingBandwidthThrottling: 0
-#  noConnectIdleTimeout: 10000
 #  maxClientIdLength: 65535
+#  maxConnections: -1
+#  maxTopicLength: 65535
+#  noConnectIdleTimeout: 10000
 
 # Configures HiveMQ MQTT options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config
