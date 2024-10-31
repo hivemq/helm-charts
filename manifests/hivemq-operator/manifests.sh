@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+IS_HELM_INSTALLED=$(which helm >/dev/null 2>&1 || echo "Helm is not installed")
+if [ -n "$IS_HELM_INSTALLED" ]; then
+  echo "$IS_HELM_INSTALLED"
+  exit 1
+fi
+
 PROMETHEUS_HELM_CHARTS_URL=https://prometheus-community.github.io/helm-charts
 
 echo "=================================================="

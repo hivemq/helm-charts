@@ -6,6 +6,10 @@ This directory contains the following folders:
 - `operator`: contains a plain YAML deployment derived from the operator Helm chart, can be applied directly to a `hivemq` namespace to deploy the operator.
 - `patch`: various strategic merge patch files demo-ing some functionality of the operator. Visit [Operator documentation](https://docs.hivemq.com/hivemq-operator/index.html) for more information.
 
+## Prerequisites
+
+- Helm 3.10.x
+
 ## Update manifest files
 
 To create or update the manifest files with the latest changes from the Chart, run the command from the root of the project.
@@ -25,4 +29,4 @@ sh ./manifests/hivemq-operator/manifests.sh
     kubectl apply -f ./manifests/hivemq-operator/*.yaml -n default
     ```
 
-**NOTE**: Please, be aware that these manifest files are using the `default` namespace out of the box, given that the ServiceAccount requires a specific namespace. Change these manifests accordingly if you are planning to install them in a different namespace.
+**NOTE**: These manifest files are using the `default` namespace out of the box, given that the ServiceAccount requires a specific namespace. Change these manifests accordingly if you are planning to install them in a different namespace.

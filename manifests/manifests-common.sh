@@ -9,6 +9,11 @@
 # export HELM_VALUES="${HOME}/custom/values.yaml" # optional
 # . "${HELM_CHARTS_BASE_FOLDER}/manifests/manifests.sh"
 update_manifests() {
+  IS_HELM_INSTALLED=$(which helm >/dev/null 2>&1 || echo "Helm is not installed")
+  if [ -n "$IS_HELM_INSTALLED" ]; then
+    echo "$IS_HELM_INSTALLED"
+    exit 1
+  fi
   if [ -z "${LABEL}" ]; then
     echo "No label set"
     exit 1
@@ -63,7 +68,7 @@ update_manifests() {
   fi
 
   echo "Create ${LABEL} templates"
-  helm template "${RELEASE_NAME}" "${CHART_DIR}" --values "${HELM_VALUES}" --skip-tests --output-dir "${TARGET_FOLDER}" > /dev/null
+  helm template4 "${RELEASE_NAME}" "${CHART_DIR}" --values "${HELM_VALUES}" --skip-tests --output-dir "${TARGET_FOLDER}" > /dev/null
 
   echo "Flatten directory structure"
   find "${TEMPLATES_DIR}" -type f -exec mv {} "${MANIFEST_DIR}" \; > /dev/null
