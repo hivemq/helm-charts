@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Usage:
 # export LABEL="HiveMQ Platform"
@@ -68,7 +69,7 @@ update_manifests() {
   fi
 
   echo "Create ${LABEL} templates"
-  helm template4 "${RELEASE_NAME}" "${CHART_DIR}" --values "${HELM_VALUES}" --skip-tests --output-dir "${TARGET_FOLDER}" > /dev/null
+  helm template "${RELEASE_NAME}" "${CHART_DIR}" --values "${HELM_VALUES}" --skip-tests --output-dir "${TARGET_FOLDER}" > /dev/null
 
   echo "Flatten directory structure"
   find "${TEMPLATES_DIR}" -type f -exec mv {} "${MANIFEST_DIR}" \; > /dev/null

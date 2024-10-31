@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 IS_HELM_INSTALLED=$(which helm >/dev/null 2>&1 || echo "Helm is not installed")
 if [ -n "$IS_HELM_INSTALLED" ]; then
