@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("CustomOperatorConfig")
 @Tag("OperatorSelectors")
 class CustomOperatorSelectorsIT extends AbstractHelmChartIT {
 
