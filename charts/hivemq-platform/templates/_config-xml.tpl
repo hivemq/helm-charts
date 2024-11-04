@@ -380,6 +380,11 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <control-center-audit-log>
       <enabled>{{ printf "%t" $securityConfig.controlCenterAuditLog }}</enabled>
     </control-center-audit-log>
+    {{- end -}}
+    {{- if (hasKey $securityConfig "restApiAuditLog") }}
+    <rest-api-audit-log>
+      <enabled>{{ printf "%t" $securityConfig.controlCenterAuditLog }}</enabled>
+    </rest-api-audit-log>
     {{- end }}
   </security>
   {{- end }}

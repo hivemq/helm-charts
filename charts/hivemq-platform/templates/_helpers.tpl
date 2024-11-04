@@ -789,7 +789,8 @@ Returns:
     (hasKey $mqttSecurityConfig "payloadFormatValidation")
     (hasKey $mqttSecurityConfig "utf8Validation")
     (hasKey $mqttSecurityConfig "allowRequestProblemInformation")
-    (hasKey $mqttSecurityConfig "controlCenterAuditLog") }}
+    (hasKey $mqttSecurityConfig "controlCenterAuditLog")
+    (hasKey $mqttSecurityConfig "restApiAuditLog") }}
 {{- $contains = true }}
 {{- end }}
 {{- $contains }}
