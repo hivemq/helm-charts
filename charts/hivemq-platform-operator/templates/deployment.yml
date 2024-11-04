@@ -49,6 +49,10 @@ spec:
           env:
             - name: JAVA_OPTS
               value: {{.Values.javaOpts | quote }}
+            {{- if .Values.namespaces }}
+            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_NAMESPACES
+              value: {{ .Values.namespaces }}
+            {{- end }}
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
             - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
