@@ -352,6 +352,10 @@
           "description" : "Enables the UTF-8 validation of UTF-8 PUBLISH payloads.",
           "type" : "boolean"
         },
+        "restApiAuditLog" : {
+          "description" : "Defines whether audit logging for the REST API is enabled.",
+          "type": "boolean"
+        },
         "utf8Validation" : {
           "description" : "Enables the UTF-8 validation of topic names and client IDs.",
           "type" : "boolean"
