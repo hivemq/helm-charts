@@ -235,84 +235,125 @@
       "type": "array"
     },
     "hivemqMqtt" : {
+      "description" : "Configures HiveMQ MQTT options. See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config.",
       "properties" : {
         "keepAliveAllowUnlimited" : {
+          "description" : "Defines whether clients can have unlimited keep alive.",
           "type" : "boolean"
         },
         "keepAliveMax" : {
+          "description" : "Defines the maximum keep alive value that a client can set.",
+          "maximum": 65535,
+          "minimum": 1,
           "type" : "integer"
         },
         "maxPacketSize" : {
+          "description" : "Defines the maximum packet size that the broker accepts from clients.",
+          "maximum": 268435460,
+          "minimum": 15,
           "type" : "integer"
         },
         "maxQualityOfService" : {
+          "description" : "Defines the maximum Quality of Service (QoS) level allowed in MQTT PUBLISH messages.",
+          "enum": [0, 1, 2],
           "type" : "integer"
         },
         "messageExpiryMaxInterval" : {
+          "description" : "Defines the maximum message expiry value that clients can set.",
+          "maximum": 4294967296,
+          "minimum": 0,
           "type" : "integer"
         },
         "queuedMessagesMaxSize" : {
+          "description" : "Sets the maximum number of messages the HiveMQ broker can store per client.",
+          "minimum": 1,
           "type" : "integer"
         },
         "queuedMessagesStrategy" : {
+          "description" : "Defines how messages that arrive at the HiveMQ broker when the message queue of the corresponding client is full are handled.",
+          "enum" : ["discard", "discard-oldest"],
           "type" : "string"
         },
         "retainedMessages" : {
+          "description" : "Defines whether retained messages are supported.",
           "type" : "boolean"
         },
         "serverReceiveMaximum" : {
+          "description" : "Defines the maximum number of concurrent publishes the broker accepts from one client.",
+          "maximum": 65535,
+          "minimum": 1,
           "type" : "integer"
         },
         "sharedSubscriptions" : {
+          "description" : "Defines whether clients can use shared subscriptions.",
           "type" : "boolean"
         },
         "sessionExpiryMaxInterval" : {
+          "description" : "Defines the maximum session expiry value that clients can set.",
+          "maximum": 4294967295,
+          "minimum": 0,
           "type" : "integer"
         },
         "subscriptionIdentifier" : {
+          "description" : "Defines whether clients can use subscription identifiers to associate received publishes with their subscriptions.",
           "type" : "boolean"
         },
         "topicAliasEnabled" : {
+          "description" : "Defines whether topic aliases are enabled by the broker.",
           "type" : "boolean"
         },
         "topicAliasMaxPerClient" : {
+          "description" : "The number of topic aliases available per client.",
+          "maximum": 65535,
+          "minimum": 1,
           "type" : "integer"
         },
         "wildcardSubscriptions" : {
+          "description" : "Defines whether clients can use wildcard characters in topic filters.",
           "type" : "boolean"
         }
       },
       "type" : "object"
     },
     "hivemqMqttAddons" : {
+      "description" : "Configures HiveMQ MQTT Add-on options. See https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html.",
       "properties" : {
         "deadMessagesTopic" : {
+          "description" : "Captures all dead messages on the HiveMQ system.",
           "type" : "boolean"
         },
         "droppedMessagesTopic" : {
+          "description" : "Captures all dropped messages on the HiveMQ system.",
           "type" : "boolean"
         },
         "expiredMessagesTopic" : {
+          "description" : "Captures all expired messages on the HiveMQ system.",
           "type" : "boolean"
         }
       },
       "type" : "object"
     },
     "hivemqMqttSecurity" : {
+      "description" : "Configures HiveMQ MQTT security options. See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#security.",
       "properties" : {
         "allowEmptyClientId" : {
+          "description" : "Allows the use of empty client ids. If this is set to true, HiveMQ automatically generates random client ids, when clientId in the CONNECT packet is empty.",
           "type" : "boolean"
         },
         "allowRequestProblemInformation" : {
+          "description" : "Allows the client to request the problem information. When set to false, no reason string or user property values are sent to clients.",
           "type" : "boolean"
         },
         "controlCenterAuditLog" : {
+          "description" : "If audit logging for the control center is enabled.",
           "type" : "boolean"
         },
         "payloadFormatValidation" : {
+          "description" : "Enables the UTF-8 validation of UTF-8 PUBLISH payloads.",
           "type" : "boolean"
         },
         "utf8Validation" : {
+          "description" : "Enables the UTF-8 validation of topic names and client IDs.",
           "type" : "boolean"
         }
       },
