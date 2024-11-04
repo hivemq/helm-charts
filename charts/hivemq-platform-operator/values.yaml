@@ -34,6 +34,8 @@ https:
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
 
+# An optional list of comma-separated namespace names that will be reconciled by this Operator instance.
+namespaces: ""
 # Selector name that is used to match the selector of the managing operator.
 # This selector assigns the HiveMQ Platform to a specific operator.
 # Use "selector" in the hivemq-platform-operator Helm chart to configure a matching label selector for this label.
