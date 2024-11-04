@@ -109,6 +109,15 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
         installPlatformChartAndWaitToBeRunning("/files/custom-platform-env-vars-values.yaml");
 
+        // assert the custom operator configuration
+        final var operatorDeployment =
+                client.apps().deployments().inNamespace(operatorNamespace).withName(OPERATOR_RELEASE_NAME).get();
+        assertThat(operatorDeployment.getSpec().getTemplate().getSpec().getContainers().getFirst().getEnv()) //
+                .anyMatch(envVar -> "QUARKUS_OPERATOR_SDK_NAMESPACES".equals(envVar.getName()) &&
+                        envVar.getValueFrom().getConfigMapKeyRef().getName().equals("operator-config-map") &&
+                        envVar.getValueFrom().getConfigMapKeyRef().getKey().equals("namespace"));
+
+        // assert the custom platform configuration
         final var statefulSet = K8sUtil.getStatefulSet(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertThat(K8sUtil.getHiveMQContainer(statefulSet.getSpec())
                 .getEnv()).anyMatch(envVar -> "MY_CUSTOM_ENV_VAR".equals(envVar.getName()) &&
