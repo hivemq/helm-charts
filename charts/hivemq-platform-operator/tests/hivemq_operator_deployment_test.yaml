@@ -858,6 +858,37 @@ tests:
       - notExists:
           path: spec.template.spec.containers[0].resources.limits
 
+  - it: with default values, no namespace environment variable is set
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_NAMESPACES
+
+  - it: with custom namespace value set, namespace environment variable is set
+    set:
+      namespaces: default,cloud-starter
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_NAMESPACES
+            value: "default,cloud-starter"
+
   - it: with default values, no selector environment variable is set
     asserts:
       - exists:
