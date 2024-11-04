@@ -574,9 +574,11 @@
     "operator" : {
       "properties" : {
         "labels" : {
+          "description" : "Labels to add to the HiveMQ Platform custom resource.",
           "type" : "object"
         },
         "selector" : {
+          "description" : "Selector name to configure which HiveMQ Platform Operator manages this platform.",
           "type" : "string"
         }
       },

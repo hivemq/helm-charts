@@ -150,6 +150,7 @@
       "type" : "string"
     },
     "namespaces" : {
+      "description" : "An optional list of comma-separated namespace names that will be managed by this Operator instance.",
       "type" : "string"
     },
     "networkLogLevel" : {
@@ -224,9 +225,11 @@
       "type" : "object"
     },
     "selector" : {
+      "description" : "Selector name to configure which HiveMQ Platform instances are managed by this Operator.",
       "type" : "string"
     },
     "selectors" : {
+      "description" : "An optional list of comma-separated label selectors that HiveMQ Platform resources must match to be managed by this Operator instance.",
       "type" : "string"
     },
     "serviceAccount" : {
