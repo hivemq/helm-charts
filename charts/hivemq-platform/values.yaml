@@ -190,10 +190,12 @@ license:
 #  enabled: false
 #  lifetime: 604800
 
-# Selector name that is used to match the selector of the managing operator.
-# This selector assigns the HiveMQ Platform to a specific operator.
 operator:
+  # Selector name that is used to match the selector of the managing operator.
+  # This selector assigns the HiveMQ Platform to a specific operator.
   selector: ""
+  # Labels to add to the custom resource.
+  labels: {}
 
 # Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
 podScheduling:
