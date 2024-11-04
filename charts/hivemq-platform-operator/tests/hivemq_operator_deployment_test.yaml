@@ -905,6 +905,23 @@ tests:
             name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
             value: "operator=foobar"
 
+  - it: with custom selectors value set, selector environment variable is set
+    set:
+      selectors: group=cloud-starter,group=cloud-enterprise
+    asserts:
+      - exists:
+          path: spec.template.spec.containers
+      - lengthEqual:
+          path: spec.template.spec.containers
+          count: 1
+      - exists:
+          path: spec.template.spec.containers[0].env
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            value: "group=cloud-starter,group=cloud-enterprise"
+
   - it: with default CRD values
     asserts:
       - exists:

@@ -53,6 +53,9 @@ spec:
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
             - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
               value: operator={{ .Values.selector }}
+            {{- else if .Values.selectors }}
+            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+              value: {{ .Values.selectors }}
             {{- end }}
             - name: KUBERNETES_NAMESPACE
               valueFrom:

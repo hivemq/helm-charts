@@ -34,10 +34,13 @@ https:
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
 
-# An optional label selector value that HiveMQ Platform resources must match to be reconciled by this Operator instance.
-# Use "operator.selector" in the hivemq-platform Helm chart to configure a matching label for this selector.
-# Note: This creates a label selector "operator=<my-selector-value>". Use selectors to define multiple label selectors.
+# Selector name that is used to match the selector of the managing operator.
+# This selector assigns the HiveMQ Platform to a specific operator.
+# Use "selector" in the hivemq-platform-operator Helm chart to configure a matching label selector for this label.
+# Note: This will create a label "operator=<my-selector-value>".
 selector: ""
+# An optional list of comma-separated label selectors that HiveMQ Platform resources must match to be reconciled by this Operator instance.
+selectors: ""
 
 # Configures whether Kubernetes RBAC permissions for the Operator should be created.
 rbac:
