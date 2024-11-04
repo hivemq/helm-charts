@@ -139,10 +139,15 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected void installPlatformChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
+        installPlatformChart(PLATFORM_RELEASE_NAME, commands);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+    }
+
+    protected void installPlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
+            throws Exception {
+        helmChartContainer.installPlatformChart(releaseName,
                 Stream.concat(Arrays.stream(commands), Stream.of("--namespace", platformNamespace))
                         .toArray(String[]::new));
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
     }
 
     /**
