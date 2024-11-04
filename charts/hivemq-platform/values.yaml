@@ -191,10 +191,13 @@ license:
 #  lifetime: 604800
 
 operator:
-  # Selector name that is used to match the selector of the managing operator.
-  # This selector assigns the HiveMQ Platform to a specific operator.
+  # Selector name to configure which HiveMQ Platform Operator manages this platform.
+  # Use "selector" in the hivemq-platform-operator Helm chart to configure a matching label selector.
+  # Note: This will create a label "operator=<my-selector-value>" for the platform.
   selector: ""
   # Labels to add to the custom resource.
+  # Can be used to configure which HiveMQ Platform Operator manages this platform.
+  # Use "selectors" in the hivemq-platform-operator Helm chart to configure matching label selectors.
   labels: {}
 
 # Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
