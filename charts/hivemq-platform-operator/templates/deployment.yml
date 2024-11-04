@@ -51,7 +51,7 @@ spec:
               value: {{.Values.javaOpts | quote }}
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
-            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS__HIVEMQ_CONTROLLER__SELECTOR
+            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
               value: operator={{ .Values.selector }}
             {{- end }}
             - name: KUBERNETES_NAMESPACE
