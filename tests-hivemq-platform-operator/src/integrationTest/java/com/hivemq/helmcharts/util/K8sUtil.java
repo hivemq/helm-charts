@@ -455,8 +455,7 @@ public class K8sUtil {
     }
 
     /**
-     * Returns the {@link Container} container from the given {@link StatefulSetSpec}
-     * instance.
+     * Returns the {@link StatefulSet} instance for the given namespace and name.
      *
      * @param client          the Kubernetes client to use
      * @param namespace       the namespace to use to fetch the statefulSet from
@@ -466,7 +465,25 @@ public class K8sUtil {
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String statefulSetName) {
-        return client.apps().statefulSets().inNamespace(namespace).withName(statefulSetName).get();
+        final var statefulSet = client.apps().statefulSets().inNamespace(namespace).withName(statefulSetName).get();
+        assertThat(statefulSet).isNotNull();
+        return statefulSet;
+    }
+
+    /**
+     * Returns the {@link Deployment} instance for the given namespace and name.
+     *
+     * @param client         the Kubernetes client to use
+     * @param namespace      the namespace to use to fetch the deployment from
+     * @param deploymentName the name of the deployment to fetch
+     */
+    public static @NotNull Deployment getDeployment(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String deploymentName) {
+        final var deployment = client.apps().deployments().inNamespace(namespace).withName(deploymentName).get();
+        assertThat(deployment).isNotNull();
+        return deployment;
     }
 
     /**
