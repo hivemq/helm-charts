@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
@@ -45,9 +44,7 @@ class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContain
                 chartValues.operator().uid(),
                 chartValues.operator().gid());
 
-        final var tracingConfigMap =
-                K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
-        assertThat(tracingConfigMap).isNotNull();
+        K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
 

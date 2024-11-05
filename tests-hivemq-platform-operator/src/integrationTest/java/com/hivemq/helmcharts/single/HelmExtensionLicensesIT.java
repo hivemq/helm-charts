@@ -11,7 +11,6 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @Tag("Licenses")
@@ -21,9 +20,7 @@ class HelmExtensionLicensesIT extends AbstractHelmLicensesIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withExtensionLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
-        final var tracingConfigMap =
-                K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
-        assertThat(tracingConfigMap).isNotNull();
+        K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
 
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
@@ -44,9 +41,7 @@ class HelmExtensionLicensesIT extends AbstractHelmLicensesIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withExistingExtensionLicenseSecret_statefulSetWithLicenseSecretMounted() throws Exception {
-        final var tracingConfigMap =
-                K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
-        assertThat(tracingConfigMap).isNotNull();
+        K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
 
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
