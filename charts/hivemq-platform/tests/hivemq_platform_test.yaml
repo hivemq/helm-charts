@@ -46,6 +46,20 @@ tests:
       - notExists:
           path: metadata.labels.operator
 
+  - it: with custom labels, custom HiveMQPlatform labels set
+    set:
+      operator.labels:
+        group: alpha
+        tier: one
+    asserts:
+      - exists:
+          path: metadata.labels
+      - isSubset:
+          path: metadata.labels
+          content:
+            group: alpha
+            tier: one
+
   - it: with image definition
     set:
       image.repository: test-repo
