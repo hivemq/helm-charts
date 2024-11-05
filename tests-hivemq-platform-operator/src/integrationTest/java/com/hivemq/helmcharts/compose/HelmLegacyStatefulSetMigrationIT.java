@@ -74,7 +74,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace, false);
+        helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace);
     }
 
     @Test
