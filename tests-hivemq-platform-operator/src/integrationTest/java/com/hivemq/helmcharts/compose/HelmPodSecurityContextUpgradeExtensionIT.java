@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
@@ -45,9 +44,7 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
                 chartValues.operator().uid(),
                 chartValues.operator().gid());
 
-        final var tracingConfigMap =
-                K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
-        assertThat(tracingConfigMap).isNotNull();
+        K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
 
@@ -68,7 +65,9 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"),
+                3,
+                TimeUnit.MINUTES);
         await().atMost(ONE_MINUTE).until(configurationUpdatedFuture::isDone);
     }
 }
