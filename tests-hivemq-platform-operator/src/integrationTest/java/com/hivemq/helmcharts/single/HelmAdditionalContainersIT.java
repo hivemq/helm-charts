@@ -18,9 +18,7 @@ class HelmAdditionalContainersIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void whenAdditionalContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
-        K8sUtil.createConfigMap(client,
-                platformNamespace,
-                "consul-template-config-map.yml");
+        K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
         installPlatformChartAndWaitToBeRunning("/files/additional-containers-values.yaml");
 
         await().untilAsserted(() -> {
@@ -39,8 +37,7 @@ class HelmAdditionalContainersIT extends AbstractHelmChartIT {
             final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
             assertThat(volumes).isNotNull();
             assertThat(volumes.stream()) //
-                    .anyMatch(volume -> volume.getName().equals("license-volume") &&
-                            volume.getEmptyDir() != null);
+                    .anyMatch(volume -> volume.getName().equals("license-volume") && volume.getEmptyDir() != null);
         });
         waitForPlatformLog(".*License file license.lic is corrupt.");
     }
