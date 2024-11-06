@@ -42,7 +42,7 @@ namespaces: ""
 # Note: This will create a label selector "operator=<my-selector-value>" for the Operator.
 selector: ""
 # An optional list of comma-separated label selectors that HiveMQ Platform resources must match to be managed by this Operator instance.
-# Use "operator.labels" in the hivemq-platform Helm chart to configure matching labels for these label selectors.
+# Use "operator.labels" in the HiveMQ Platform Helm chart to configure matching labels for these label selectors.
 selectors: ""
 
 # Configures whether Kubernetes RBAC permissions for the Operator should be created.
