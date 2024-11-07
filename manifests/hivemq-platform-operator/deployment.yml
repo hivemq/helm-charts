@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hivemq-my-operator
+  name: hivemq-platform-operator-my-operator
   labels:
     app.kubernetes.io/name: "hivemq-platform-operator"
     app.kubernetes.io/instance: "my-operator"
@@ -110,4 +110,4 @@ spec:
             requests:
               cpu: 1000m
               memory: 1Gi
-      serviceAccountName: hivemq-platform-operator-my-operator
+      serviceAccountName: hivemq-platform-operator-sa-my-operator

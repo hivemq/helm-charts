@@ -1,0 +1,74 @@
+suite: HiveMQ Platform Operator ClusterRoleBinding tests
+templates:
+  - bindings.yml
+release:
+  name: operator
+  namespace: hivemq-platform-operator-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with default values, default ClusterRoleBinding created
+    documentIndex: 1 # FIXME: would be nice to have this value set at the test suite level. See https://github.com/helm-unittest/helm-unittest/issues/480
+    asserts:
+      - containsDocument:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+      - isSubset:
+          path: roleRef
+          content:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: hivemq-platform-operator-role-operator
+      - contains:
+          path: subjects
+          content:
+            kind: ServiceAccount
+            name: hivemq-platform-operator-sa-operator
+            namespace: hivemq-platform-operator-namespace
+
+  - it: with default values, default labels created
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-operator-0.0.1
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+
+  - it: with long Helm release name, ClusterRoleBinding name and ClusterRole ref name truncated
+    release:
+      name: a-very-long-hivemq-platform-operator-release-name
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-platform-operator-role-binding-a-very-long-hivemq-platfo
+      - equal:
+          path: roleRef.name
+          value: hivemq-platform-operator-role-a-very-long-hivemq-platform-opera
+
+  - it: with disabled ServiceAccount creation, no ClusterRoleBinding created
+    set:
+      serviceAccount.create: false
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 0
+
+  - it: with custom ServiceAccount, then custom ServiceAccount used as subject
+    set:
+      serviceAccount.name: foobar
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: subjects
+          content:
+            kind: ServiceAccount
+            name: foobar
+            namespace: hivemq-platform-operator-namespace

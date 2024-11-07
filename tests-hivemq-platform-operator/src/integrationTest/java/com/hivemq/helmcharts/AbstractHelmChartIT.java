@@ -32,6 +32,7 @@ import static org.awaitility.Durations.TWO_SECONDS;
 
 public abstract class AbstractHelmChartIT {
 
+    protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq-platform-operator";
     protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
     protected static final @NotNull String LEGACY_RELEASE_NAME = "test-hivemq-legacy-platform";
@@ -41,7 +42,8 @@ public abstract class AbstractHelmChartIT {
             "hivemq-" + PLATFORM_RELEASE_NAME + "-mqtt-" + DEFAULT_MQTT_SERVICE_PORT;
 
     protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
-    protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX = "hivemq-" + OPERATOR_RELEASE_NAME + "-.*";
+    protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX =
+            String.format("%s-%s-.*", DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(AbstractHelmChartIT.class);
 
@@ -111,7 +113,8 @@ public abstract class AbstractHelmChartIT {
     }
 
     @SuppressWarnings("SameParameterValue")
-    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
+    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
+            throws Exception {
         installLegacyOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
@@ -123,7 +126,8 @@ public abstract class AbstractHelmChartIT {
         K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
     }
 
-    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
+    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
+            throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
@@ -212,6 +216,10 @@ public abstract class AbstractHelmChartIT {
         } catch (final Exception e) {
             throw new AssertionError(String.format("Could not read resource file '%s'", filename), e);
         }
+    }
+
+    protected static @NotNull String getOperatorName() {
+        return String.format("%s-%s", DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
     }
 
     // free disk space in K3s

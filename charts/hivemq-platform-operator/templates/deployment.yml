@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{include "hivemq-platform-operator.name" . }}
+  name: {{ include "hivemq-platform-operator.name" (dict "releaseName" .Release.Name) }}
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
 spec:

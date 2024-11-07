@@ -25,7 +25,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withDeployedOperator_upgradeUsingNewValues() throws Exception {
-        final var operatorName = "hivemq-" + OPERATOR_RELEASE_NAME;
+        final var operatorName = getOperatorName();
         LOG.debug("Operator deployed successfully");
 
         final var deployment = client.apps()
