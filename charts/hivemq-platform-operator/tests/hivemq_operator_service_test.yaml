@@ -13,7 +13,7 @@ tests:
       - containsDocument:
           apiVersion: v1
           kind: Service
-          name: hivemq-platform-operator-operator
+          name: hivemq-platform-operator-service-operator
 
   - it: with default values, default labels created
     asserts:
@@ -65,7 +65,7 @@ tests:
     asserts:
       - equal:
           path: metadata.name
-          value: hivemq-platform-operator-a-very-long-hivemq-platform-operator-r
+          value: hivemq-platform-operator-service-a-very-long-hivemq-platform-op
 
   - it: with long Helm release name, Service target ports truncated
     release:

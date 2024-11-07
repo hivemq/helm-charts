@@ -164,3 +164,15 @@ crd:
   # Waiting timeout for the CustomResourceDefinition to become ready once installed.
   # Format is based on the ISO-8601 Duration format.
   waitTimeout: PT10S
+
+# Monitoring configuration options
+monitoring:
+  # Deploys a ServiceMonitor resource for the Operator along with a Configmap for a Grafana dashboard
+  enabled: false
+  # Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where this chart is deployed to.
+  # dashboardNamespace: monitoring
+  serviceMonitor:
+    # Namespace where the ServiceMonitor will be deployed to. Defaults to use the same namespace where this chart is deployed to.
+    # namespace: monitoring
+    interval: 15s
+    scrapeTimeout: 10s

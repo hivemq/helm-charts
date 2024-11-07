@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: "hivemq-platform-operator-role-{{.Release.Name}}"
+  name: {{ include "hivemq-platform-operator.name" (dict "name" "role" "releaseName" .Release.Name) }}
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
 rules:

@@ -109,7 +109,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
         // assert the custom operator configuration
         final var operatorDeployment =
-                K8sUtil.getDeployment(client, operatorNamespace, "hivemq-" + OPERATOR_RELEASE_NAME);
+                K8sUtil.getDeployment(client, operatorNamespace, getOperatorName());
         assertThat(operatorDeployment.getSpec().getTemplate().getSpec().getContainers().getFirst().getEnv()) //
                 .anyMatch(envVar -> "QUARKUS_OPERATOR_SDK_NAMESPACES".equals(envVar.getName()) &&
                         "operator-config-map".equals(envVar.getValueFrom().getConfigMapKeyRef().getName()) &&

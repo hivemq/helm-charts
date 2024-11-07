@@ -156,7 +156,7 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
         client.apps()
                 .deployments()
                 .inNamespace(operatorNamespace)
-                .withName("hivemq-" + OPERATOR_RELEASE_NAME)
+                .withName(getOperatorName())
                 .waitUntilCondition(d -> d.getStatus() != null && d.getStatus().getAvailableReplicas() == 1,
                         3,
                         TimeUnit.MINUTES);
