@@ -1,13 +1,44 @@
 suite: HiveMQ Platform Operator RBAC tests
 templates:
   - rbac.yml
+release:
+  name: operator
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
 tests:
 
-  - it: with disabled RBAC creation
+  - it: with default values, default ClusterRole created
+    asserts:
+      - containsDocument:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          name: hivemq-platform-operator-role-operator
+
+  - it: with default values, default labels created
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-operator-0.0.1
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+
+  - it: with long Helm release name, ClusterRole name truncated
+    release:
+      name: a-very-long-hivemq-platform-operator-release-name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-platform-operator-role-a-very-long-hivemq-platform-opera
+
+  - it: with disabled RBAC creation, no RBAC created
     set:
       rbac.create: false
     asserts:
-      - notFailedTemplate: { "rbac.yml" }
+      - notFailedTemplate: {}
       - hasDocuments:
           count: 0
 

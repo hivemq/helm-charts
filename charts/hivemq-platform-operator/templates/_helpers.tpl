@@ -1,10 +1,25 @@
 {{/*
-Create a default fully qualified app name.
-If release name contains chart name it will be used as a full name.
+Creates a qualified name, based on the release name.
+Params:
+- name: The custom name to append to the default prefix `hivemq-platform-operator`.
+- releaseName: The .Release.Name value.
+Returns:
+- The resource name based on the custom name argument and on the release name with a default prefix of `hivemq-platform-operator`.
+Format: "hivemq-platform-operator"-<custom-name>-<.Release.Name> | "hivemq-platform-operator"-<.Release.Name>
+Usage: {{ include "hivemq-platform-operator.name" (dict "name" "my-custom-name" "releaseName" .Release.Name) }}
 */}}
 {{- define "hivemq-platform-operator.name" -}}
-{{- printf "%s-%s" "hivemq" .Release.Name }}
-{{- end}}
+{{- $customName := .name }}
+{{- $releaseName := .releaseName }}
+{{- $prefix := "hivemq-platform-operator" }}
+{{- $name := "" }}
+{{- if $customName -}}
+{{- $name = printf "%s-%s-%s" $prefix $customName $releaseName }}
+{{- else -}}
+{{- $name = printf "%s-%s" $prefix $releaseName }}
+{{- end -}}
+{{- printf "%s" $name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
+{{- end -}}
 
 {{/*
 Common labels
@@ -14,7 +29,7 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 {{ include "hivemq-platform-operator.selectorLabels" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Selector labels
@@ -22,7 +37,7 @@ Selector labels
 {{- define "hivemq-platform-operator.selectorLabels" -}}
 app.kubernetes.io/name: "hivemq-platform-operator"
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Create the name of the service account to use for the HiveMQ Platform Operator
@@ -31,9 +46,9 @@ Create the name of the service account to use for the HiveMQ Platform Operator
 {{- if .Values.serviceAccount.name }}
 {{- printf "%s" .Values.serviceAccount.name }}
 {{- else }}
-{{- printf "%s-%s" "hivemq-platform-operator" .Release.Name }}
+{{- include "hivemq-platform-operator.name" (dict "name" "sa" "releaseName" .Release.Name) }}
 {{- end }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Validates `runAsNonRoot` and `runAsUser` has a valid combination for the PodSecurityContext or SecurityContext.

@@ -1,11 +1,6 @@
 suite: HiveMQ Platform Operator deployment tests
 templates:
   - deployment.yml
-release:
-  name: operator
-chart:
-  version: 0.0.1
-  appVersion: 1.0.0
 tests:
 
   - it: with default values, default Deployment created
@@ -13,7 +8,7 @@ tests:
       - containsDocument:
           apiVersion: apps/v1
           kind: Deployment
-          name: hivemq-operator
+          name: hivemq-platform-operator-operator
 
   - it: with default values, default labels created
     asserts:
@@ -73,6 +68,14 @@ tests:
           content:
             foo: bar
             bar: baz
+
+  - it: with long Helm release name, Deployment name truncated
+    release:
+      name: a-very-long-hivemq-platform-operator-release-name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-platform-operator-a-very-long-hivemq-platform-operator-r
 
   - it: with image override
     set:
