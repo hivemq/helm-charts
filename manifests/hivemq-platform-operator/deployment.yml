@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-platform-operator"
     app.kubernetes.io/instance: "my-operator"
-    app.kubernetes.io/version: "1.6.0"
+    app.kubernetes.io/version: "1.6.1"
 spec:
   # The Operator cannot have more than one replica
   replicas: 1
@@ -46,7 +46,7 @@ spec:
             - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
               value: "PT10S"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
-              value: "docker.io/hivemq/hivemq-platform-operator-init:1.6.0"
+              value: "docker.io/hivemq/hivemq-platform-operator-init:1.6.1"
             - name: HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET
               value: ""
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL
@@ -79,7 +79,7 @@ spec:
               value: "8080"
             - name: QUARKUS_HTTP_SSL_PORT
               value: "8443"
-          image: "docker.io/hivemq/hivemq-platform-operator:1.6.0"
+          image: "docker.io/hivemq/hivemq-platform-operator:1.6.1"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
