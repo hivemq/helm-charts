@@ -1,0 +1,11 @@
+[versions]
+jackson = "2.18.1"
+java-semver = "0.10.2"
+jcommander = "1.82"
+jetbrains-annotations = "26.0.1"
+
+[libraries]
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+java-semver = { module = "com.github.zafarkhaja:java-semver", version.ref = "java-semver" }
+jcommander = { module = "com.beust:jcommander", version.ref = "jcommander" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
