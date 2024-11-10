@@ -11,7 +11,7 @@ java {
 }
 
 application {
-    mainClass = "com.hivemq.Main"
+    mainClass = "com.hivemq.release.GitHubReleaseNotesUpdater"
 }
 
 repositories {

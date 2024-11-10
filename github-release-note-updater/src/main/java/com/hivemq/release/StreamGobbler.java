@@ -1,4 +1,4 @@
-package com.hivemq;
+package com.hivemq.release;
 
 import org.jetbrains.annotations.NotNull;
 

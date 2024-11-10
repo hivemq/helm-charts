@@ -1,4 +1,4 @@
-package com.hivemq;
+package com.hivemq.release;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

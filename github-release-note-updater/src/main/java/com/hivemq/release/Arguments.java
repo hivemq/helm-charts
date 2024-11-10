@@ -1,4 +1,4 @@
-package com.hivemq;
+package com.hivemq.release;
 
 import com.beust.jcommander.Parameter;
 import org.jetbrains.annotations.NotNull;
