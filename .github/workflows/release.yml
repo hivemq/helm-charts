@@ -14,9 +14,8 @@ jobs:
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
-      - name: Fetch history
-        run: git fetch --prune --unshallow
+        with:
+          fetch-depth: 0
 
       - name: Configure Git
         run: |
@@ -67,29 +66,10 @@ jobs:
       - name: Set latest release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # get a list of releases with names matching "hivemq-platform-<version>"
-          echo "Searching the latest hivemq-platform release"
-          releases=$(gh release list --repo hivemq/helm-charts --limit 10 | grep -oP '^hivemq-platform-\K[0-9]+\.[0-9]+\.[0-9]+')
-          latest_version=$(echo "$releases" | sort -V | tail -n 1)
-          if [ -z "$latest_version" ]; then
-            echo "No hivemq-platform releases found"
-            exit 1
-          fi
-          # mark the found release as latest
-          latest_release="hivemq-platform-$latest_version"
-          gh release edit "$latest_release" --repo hivemq/helm-charts --latest
-          echo "Marked $latest_release as the latest release"
+        run: bash ./release/set-latest-release.sh
 
       - name: Update GitHub release notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: helm-charts
-        run: |
-          helm repo add hivemq https://hivemq.github.io/helm-charts
-          helm repo update
-          helm search repo hivemq --versions -o json > charts.json
-          gh release list --repo "$REPO" --limit 10 --json name,tagName,publishedAt > releases.json
-          GH_PATH=$(which gh)
-          PWD=$(pwd)
-          ./gradlew :github-release-note-updater:run --args " -g $GH_PATH -p $PWD"
+        run: bash ./release/update-github-release-notes.sh 10
