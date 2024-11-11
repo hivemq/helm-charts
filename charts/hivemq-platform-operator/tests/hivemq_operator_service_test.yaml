@@ -26,6 +26,39 @@ tests:
             app.kubernetes.io/version: 1.0.0
             app.kubernetes.io/managed-by: Helm
 
+  - it: with default values, no annotations created
+    asserts:
+      - notExists:
+          path: metadata.annotations
+
+  - it: with custom service annotations, custom service annotations created
+    set:
+      services.annotations:
+        foo: bar
+        bar: baz
+    asserts:
+      - exists:
+          path: metadata.annotations
+      - isSubset:
+          path: metadata.annotations
+          content:
+            foo: bar
+            bar: baz
+
+  - it: with custom service labels, custom service labels created
+    set:
+      services.labels:
+        foo: bar
+        bar: baz
+    asserts:
+      - exists:
+          path: metadata.labels
+      - isSubset:
+          path: metadata.labels
+          content:
+            foo: bar
+            bar: baz
+
   - it: with long Helm release name, Service name truncated
     release:
       name: a-very-long-hivemq-platform-operator-release-name
