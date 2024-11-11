@@ -1,7 +1,78 @@
 suite: HiveMQ Platform Operator deployment tests
 templates:
   - deployment.yml
+release:
+  name: operator
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
 tests:
+
+  - it: with default values, default Deployment created
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+          name: hivemq-operator
+
+  - it: with default values, default labels created
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-operator-0.0.1
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+
+  - it: with default values, no annotations created
+    asserts:
+      - notExists:
+          path: metadata.annotations
+
+  - it: with default values, default template labels created
+    asserts:
+      - exists:
+          path: spec.template.metadata.labels
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/name: hivemq-platform-operator
+
+  - it: with default values, no template annotations created
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations
+
+  - it: with custom labels, custom template labels created
+    set:
+      labels:
+        foo: bar
+        bar: baz
+    asserts:
+      - exists:
+          path: spec.template.metadata.labels
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            foo: bar
+            bar: baz
+
+  - it: with custom annotations, custom template annotations created
+    set:
+      annotations:
+        foo: bar
+        bar: baz
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            foo: bar
+            bar: baz
 
   - it: with image override
     set:

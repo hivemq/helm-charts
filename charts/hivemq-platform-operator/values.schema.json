@@ -1,6 +1,10 @@
 {
   "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "properties" : {
+    "annotations" : {
+      "description" : "Annotations to add to the HiveMQ Platform Operator Pod.",
+      "type" : "object"
+    },
     "containerSecurityContext" : {
       "description" : "Configures the security context for the HiveMQ Platform Operator container. Some fields are present in both SecurityContext and PodSecurityContext. When both are set, the values in SecurityContext take precedence.",
       "properties" : {
@@ -55,11 +59,11 @@
           "type" : "integer"
         },
         "skipCertificateValidation" : {
-          "description" : "Configures if certificate validation should be skipped for all managed custom resources",
+          "description" : "Configures if certificate validation should be skipped for all managed custom resources.",
           "type" : "boolean"
         },
         "skipHostnameVerification" : {
-          "description" : "Configures if hostname verification should be skipped for all managed custom resources",
+          "description" : "Configures if hostname verification should be skipped for all managed custom resources.",
           "type" : "boolean"
         }
       },
@@ -134,6 +138,10 @@
     },
     "javaOpts" : {
       "type" : "string"
+    },
+    "labels" : {
+      "description" : "Labels to add to the HiveMQ Platform Operator Pod.",
+      "type" : "object"
     },
     "logConfiguration" : {
       "type" : "boolean"
@@ -231,6 +239,20 @@
     "selectors" : {
       "description" : "An optional list of comma-separated label selectors that HiveMQ Platform resources must match to be managed by this Operator instance.",
       "type" : "string"
+    },
+    "services" : {
+      "description" : "Services configuration options for the Operator.",
+      "properties" : {
+        "annotations" : {
+          "description" : "Annotations to add to the Operator Service.",
+          "type": "object"
+        },
+        "labels" : {
+          "description" : "Labels to add to the Operator Service.",
+          "type": "object"
+        }
+      },
+      "type": "object"
     },
     "serviceAccount" : {
       "properties" : {
