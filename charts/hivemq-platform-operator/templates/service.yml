@@ -2,8 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ printf "hivemq-platform-operator-%s" .Release.Name | trimSuffix "-" | trunc 63 | trimSuffix "-" | trim | quote }}
+  {{- with .Values.services.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
+    {{- with .Values.services.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   ports:
     - name: {{ printf "http-%s" .Release.Name }}

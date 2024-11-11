@@ -45,6 +45,11 @@ selector: ""
 # Use "operator.labels" in the HiveMQ Platform Helm chart to configure matching labels for these label selectors.
 selectors: ""
 
+# Annotations to add to the Operator pod.
+annotations: {}
+# Labels to add to the Operator pod.
+labels: {}
+
 # Configures whether Kubernetes RBAC permissions for the Operator should be created.
 rbac:
   create: true
@@ -56,7 +61,7 @@ serviceAccount:
   # The ServiceAccount name that is used. Defaults to "hivemq-<release name>" if not set.
   name: ""
 
-# Configures the ServiceAccount and RBAC permissions (Role, RoleBinding) the Operator creates for the HiveMQ Platform Pods.
+# Configures the ServiceAccount and RBAC permissions (Role, RoleBinding) the Operator creates for the HiveMQ Platform pods.
 hivemqPlatformServiceAccount:
   # Specifies whether a ServiceAccount should be created for all HiveMQ Platforms.
   create: true
@@ -75,12 +80,12 @@ hivemqPlatformServiceAccount:
 # Configures how the Operator reconciles the HiveMQ Platform StatefulSet.
 hivemqPlatformStatefulSet:
   # Specifies whether a change of the StatefulSet template metadata should trigger a rolling restart.
-  # If this is disabled the rollout of updated annotations and labels to the HiveMQ Platform Pods will be delayed until the next rolling restart occurs.
+  # If this is disabled the rollout of updated annotations and labels to the HiveMQ Platform pods will be delayed until the next rolling restart occurs.
   rollingRestartOnTemplateMetadataChange: false
 
-# Configures how the Operator Pod should be scheduled on the Kubernetes cluster nodes.
+# Configures how the Operator pod should be scheduled on the Kubernetes cluster nodes.
 podScheduling:
-  # Configures the affinity for the Operator Pod.
+  # Configures the affinity for the Operator pod.
   affinity:
   # podAffinity:
   #    requiredDuringSchedulingIgnoredDuringExecution:
@@ -92,7 +97,7 @@ podScheduling:
   #                - my-app
   #        topologyKey: "kubernetes.io/hostname"
 
-  # Configures the tolerations for the Operator Pod.
+  # Configures the tolerations for the Operator pod.
   tolerations:
   #  - key: "example-key"
   #    operator: "Exists"
@@ -145,7 +150,7 @@ env: []
   #        key: myconfigmapkey
   #        optional: true
 
-# CustomResourceDefinition configuration options
+# CustomResourceDefinition configuration options.
 crd:
   # Enables the CustomResourceDefinition creation in the Kubernetes cluster by the Operator.
   apply: true
@@ -154,3 +159,10 @@ crd:
   # Waiting timeout for the CustomResourceDefinition to become ready once installed.
   # Format is based on the ISO-8601 Duration format.
   waitTimeout: PT10S
+
+# Services configuration options.
+services:
+  # Annotations to add to the Operator Service.
+  annotations: {}
+  # Labels to add to the Operator Service.
+  labels: {}

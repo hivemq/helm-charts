@@ -19,8 +19,14 @@ spec:
         prometheus.io/path: /q/metrics
         prometheus.io/port: {{ .Values.http.port | quote }}
         prometheus.io/scheme: http
+        {{- with .Values.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "hivemq-platform-operator.selectorLabels" . | nindent 8 }}
+        {{- with .Values.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- if .Values.podSecurityContext.enabled }}
       {{- $podSecurityContext := .Values.podSecurityContext }}
