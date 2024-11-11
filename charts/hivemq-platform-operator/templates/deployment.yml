@@ -14,14 +14,10 @@ spec:
     type: Recreate
   template:
     metadata:
+      {{- with .Values.annotations }}
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: /q/metrics
-        prometheus.io/port: {{ .Values.http.port | quote }}
-        prometheus.io/scheme: http
-        {{- with .Values.annotations }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- end }}
       labels:
         {{- include "hivemq-platform-operator.selectorLabels" . | nindent 8 }}
         {{- with .Values.labels }}
