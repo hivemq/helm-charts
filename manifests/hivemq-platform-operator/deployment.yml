@@ -19,11 +19,6 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: /q/metrics
-        prometheus.io/port: "8080"
-        prometheus.io/scheme: http
       labels:
         app.kubernetes.io/name: "hivemq-platform-operator"
         app.kubernetes.io/instance: "my-operator"
