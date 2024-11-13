@@ -33,7 +33,7 @@ tests:
 
   - it: with custom service annotations, custom service annotations created
     set:
-      services.annotations:
+      serviceAnnotations:
         foo: bar
         bar: baz
     asserts:
@@ -47,7 +47,7 @@ tests:
 
   - it: with custom service labels, custom service labels created
     set:
-      services.labels:
+      serviceLabels:
         foo: bar
         bar: baz
     asserts:
