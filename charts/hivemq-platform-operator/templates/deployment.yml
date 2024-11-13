@@ -14,13 +14,13 @@ spec:
     type: Recreate
   template:
     metadata:
-      {{- with .Values.annotations }}
+      {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "hivemq-platform-operator.selectorLabels" . | nindent 8 }}
-        {{- with .Values.labels }}
+        {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:

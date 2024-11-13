@@ -48,7 +48,7 @@ tests:
 
   - it: with custom labels, custom template labels created
     set:
-      labels:
+      podLabels:
         foo: bar
         bar: baz
     asserts:
@@ -62,7 +62,7 @@ tests:
 
   - it: with custom annotations, custom template annotations created
     set:
-      annotations:
+      podAnnotations:
         foo: bar
         bar: baz
     asserts:
