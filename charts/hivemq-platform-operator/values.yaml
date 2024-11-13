@@ -46,9 +46,14 @@ selector: ""
 selectors: ""
 
 # Annotations to add to the Operator pod.
-annotations: {}
+podAnnotations: {}
 # Labels to add to the Operator pod.
-labels: {}
+podLabels: {}
+
+# Annotations to add to the Operator Service.
+serviceAnnotations: {}
+# Labels to add to the Operator Service.
+serviceLabels: {}
 
 # Configures whether Kubernetes RBAC permissions for the Operator should be created.
 rbac:
@@ -159,10 +164,3 @@ crd:
   # Waiting timeout for the CustomResourceDefinition to become ready once installed.
   # Format is based on the ISO-8601 Duration format.
   waitTimeout: PT10S
-
-# Services configuration options.
-services:
-  # Annotations to add to the Operator Service.
-  annotations: {}
-  # Labels to add to the Operator Service.
-  labels: {}
