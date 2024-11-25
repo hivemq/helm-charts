@@ -1,0 +1,28 @@
+{{- if .Values.monitoring.enabled }}
+{{- include "hivemq-platform-operator.validate-prometheus-monitoring-stack-installed" . -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
+    release: {{ .Values.monitoring.serviceMonitor.releaseName | default .Release.Name }}
+  name: {{ include "hivemq-platform-operator.name" (dict "name" "service-monitor" "releaseName" .Release.Name) }}
+  {{- if .Values.monitoring.serviceMonitor.namespace }}
+  namespace: {{ .Values.monitoring.serviceMonitor.namespace }}
+  {{- else }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "hivemq-platform-operator.selector-labels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: {{ include "hivemq-platform-operator.http-service-port-name" . }}
+      path: /q/metrics
+      interval: {{ .Values.monitoring.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout }}
+  jobLabel: {{ include "hivemq-platform-operator.name" (dict "name" "service-monitor" "releaseName" .Release.Name) }}
+{{- end }}

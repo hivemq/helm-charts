@@ -188,7 +188,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     public final void start() {
         LOG.info("Starting HelmChartContainer...");
         super.start();
-        addHiveMQHelmRepo();
+        addHelmRepo("hivemq", "https://hivemq.github.io/helm-charts");
         final var client = getKubernetesClient();
         watches.put("events", client.events().v1().events().inAnyNamespace().watch(new EventWatcher(client)));
         watches.put("pods", client.pods().inAnyNamespace().watch(new PodWatcher()));
@@ -272,6 +272,32 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         return client;
     }
 
+    public void addHelmRepo(final @NotNull String name, final @NotNull String url) {
+        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo add <name> <url>
+        final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
+                "--kubeconfig",
+                "/etc/rancher/k3s/k3s.yaml",
+                "repo",
+                "add",
+                name,
+                url));
+        LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
+        try {
+            final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
+            assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s",
+                    execResult.getStdout(),
+                    execResult.getStderr()).isEmpty();
+        } catch (final Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public void installChart(
+            final @NotNull String release, final @NotNull String chart, final @NotNull String... additionalCommands)
+            throws Exception {
+        executeHelmCommand("install", release, chart, false, Stream.of(additionalCommands), true);
+    }
+
     public void installLegacyOperatorChart(
             final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
         executeHelmCommand("install",
@@ -295,8 +321,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public void installPlatformOperatorChart(
-            final @NotNull String releaseName,
-            final @NotNull String... additionalCommands) throws Exception {
+            final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
         installPlatformOperatorChart(releaseName, true, additionalCommands);
     }
 
@@ -359,8 +384,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public void upgradePlatformOperatorChart(
-            final @NotNull String releaseName,
-            final @NotNull String... additionalCommands) throws Exception {
+            final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
         upgradePlatformOperatorChart(releaseName, true, additionalCommands);
     }
 
@@ -379,26 +403,6 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     public void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
             throws Exception {
         upgradePlatformChart(releaseName, true, additionalCommands);
-    }
-
-    private void addHiveMQHelmRepo() {
-        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo add hivemq https://hivemq.github.io/helm-charts
-        final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
-                "--kubeconfig",
-                "/etc/rancher/k3s/k3s.yaml",
-                "repo",
-                "add",
-                "hivemq",
-                "https://hivemq.github.io/helm-charts"));
-        LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
-        try {
-            final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
-            assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s",
-                    execResult.getStdout(),
-                    execResult.getStderr()).isEmpty();
-        } catch (final Exception e) {
-            throw new AssertionError(e);
-        }
     }
 
     private @NotNull String executeHelmCommand(
