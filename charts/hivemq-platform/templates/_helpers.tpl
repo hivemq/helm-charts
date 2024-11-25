@@ -341,6 +341,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-duplicated-listener-names" . -}}
 {{- include "hivemq-platform.validate-service-container-ports" . -}}
 {{- include "hivemq-platform.validate-default-service-ports" . -}}
+{{- include "hivemq-platform.validate-metrics-services" . -}}
 {{- include "hivemq-platform.validate-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
@@ -438,6 +439,22 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
   {{- end }}
   {{- if and ($service.exposed) (not $hasStatefulSetMigration) (hasKey $service "legacyPortName") }}
     {{- fail (printf "Service type `%s` with container port `%d` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the metrics services defined:
+- Match their container port with the HiveMQ Prometheus extension port defined in the `metrics.port`.
+Usage: {{ include "hivemq-platform.validate-metrics-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-metrics-services" -}}
+{{- $services := .Values.services }}
+{{- $metricsPort := (include "hivemq-platform.metrics-port" .) }}
+{{- range $service := $services }}
+  {{- if and (eq $service.type "metrics") ($service.exposed) (not (eq (int64 $service.containerPort) (int64 $metricsPort))) }}
+    {{- fail (printf "Service type `metrics` with container port `%d` cannot be different that the metrics port `%d` defined for the HiveMQ Prometheus extension value as `metrics.port`" (int64 $service.containerPort) (int64 $metricsPort)) }}
+    {{- break }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -827,7 +844,6 @@ Usage: {{ include "hivemq-platform.get-additional-volumes" . }}
   {{- end }}
 {{- $volumeList = $volumeKey | append $volumeList}}
 {{- end }}
-
 {{- end -}}
 {{- end -}}
 
