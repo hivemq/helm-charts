@@ -13,14 +13,14 @@ metadata:
     {{- end }}
 spec:
   ports:
-    - name: {{ printf "http-%s" .Release.Name }}
+    - name: {{ include "hivemq-platform-operator.http-service-port-name" . }}
       port: {{ .Values.http.port }}
       protocol: TCP
-      targetPort: {{ printf "http-%s" .Release.Name | lower | trimSuffix "-" | trunc 15 | trimSuffix "-" | trim }}
-    - name: {{ printf "https-%s" .Release.Name }}
+      targetPort: {{ include "hivemq-platform-operator.http-container-port-name" . }}
+    - name: {{ include "hivemq-platform-operator.https-service-port-name" . }}
       port: {{ .Values.https.port }}
       protocol: TCP
-      targetPort: {{ printf "https-%s" .Release.Name | lower | trimSuffix "-" | trunc 15 | trimSuffix "-" | trim }}
+      targetPort: {{ include "hivemq-platform-operator.https-container-port-name" . }}
   selector:
-    {{- include "hivemq-platform-operator.selectorLabels" . | nindent 4 }}
+    {{- include "hivemq-platform-operator.selector-labels" . | nindent 4 }}
   type: ClusterIP

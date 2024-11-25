@@ -1,6 +1,12 @@
-suite: HiveMQ Platform Operator deployment tests
+suite: HiveMQ Platform Operator - Deployment tests
 templates:
   - deployment.yml
+release:
+  name: operator
+  namespace: hivemq-platform-operator-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
 tests:
 
   - it: with default values, default Deployment created

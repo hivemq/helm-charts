@@ -26,7 +26,7 @@ Common labels
 */}}
 {{- define "hivemq-platform-operator.labels" -}}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
-{{ include "hivemq-platform-operator.selectorLabels" . }}
+{{ include "hivemq-platform-operator.selector-labels" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
@@ -34,13 +34,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "hivemq-platform-operator.selectorLabels" -}}
+{{- define "hivemq-platform-operator.selector-labels" -}}
 app.kubernetes.io/name: "hivemq-platform-operator"
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{/*
-Create the name of the service account to use for the HiveMQ Platform Operator
+Creates the name of the service account to use for the HiveMQ Platform Operator
 */}}
 {{- define "hivemq-platform-operator.serviceAccountName" -}}
 {{- if .Values.serviceAccount.name }}
@@ -48,6 +48,38 @@ Create the name of the service account to use for the HiveMQ Platform Operator
 {{- else }}
 {{- include "hivemq-platform-operator.name" (dict "name" "sa" "releaseName" .Release.Name) }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Creates the HiveMQ Platform Operator HTTP service port name.
+Usage: {{ include "hivemq-platform-operator.http-service-port-name" . }}
+*/}}
+{{- define "hivemq-platform-operator.http-service-port-name" -}}
+{{ printf "http-%s" .Release.Name }}
+{{- end -}}
+
+{{/*
+Creates the HiveMQ Platform Operator HTTP container port name.
+Usage: {{ include "hivemq-platform-operator.http-container-port-name" . }}
+*/}}
+{{- define "hivemq-platform-operator.http-container-port-name" -}}
+{{ printf "http-%s" .Release.Name | lower | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
+{{- end -}}
+
+{{/*
+Creates the HiveMQ Platform Operator HTTPs service port name.
+Usage: {{ include "hivemq-platform-operator.https-service-port-name" . }}
+*/}}
+{{- define "hivemq-platform-operator.https-service-port-name" -}}
+{{ printf "https-%s" .Release.Name }}
+{{- end -}}
+
+{{/*
+Creates the HiveMQ Platform Operator HTTPs container port name.
+Usage: {{ include "hivemq-platform-operator.https-container-port-name" . }}
+*/}}
+{{- define "hivemq-platform-operator.https-container-port-name" -}}
+{{ printf "https-%s" .Release.Name | lower | trimAll "-" | trunc 15 | trimSuffix "-" | trim }}
 {{- end -}}
 
 {{/*
@@ -97,3 +129,14 @@ Usage: {{ include "hivemq-platform-operator.generate-run-as-security-context" (d
     {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Validates that the required Prometheus Monitoring CRDs are installed in the Kubernetes cluster.
+If the required CRDs are not present the ServiceMonitor cannot be installed and the installation fails.
+*/}}
+{{- define "hivemq-platform-operator.validate-prometheus-monitoring-stack-installed" -}}
+{{- $isCRDPresent := .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if not $isCRDPresent }}
+    {{- fail (printf "\nThere is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-platform-operator/observability.html#monitoring for more help and guidance.") }}
+{{- end }}
+{{- end }}
