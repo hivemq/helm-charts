@@ -92,10 +92,10 @@ Usage: {{- include "hivemq-platform-operator.validate-run-as-user-security-conte
 {{- $securityContext := . -}}
 {{- if and (hasKey $securityContext "runAsNonRoot") (hasKey $securityContext "runAsUser") }}
     {{- if and (eq $securityContext.runAsNonRoot true) (eq ($securityContext.runAsUser | toString) "0") }}
-        {{- fail (printf "`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)") }}
+        {{- fail (printf "\n`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)") }}
     {{- end }}
     {{- if and (eq $securityContext.runAsNonRoot false) (ne ($securityContext.runAsUser | toString) "0") }}
-        {{- fail (printf "`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)") }}
+        {{- fail (printf "\n`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)") }}
     {{- end }}
 {{- end }}
 {{- end -}}
