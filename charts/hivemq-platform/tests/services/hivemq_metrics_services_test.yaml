@@ -139,65 +139,51 @@ tests:
       - isNullOrEmpty:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
 
-  - it: with custom Metrics service enabled but without default metrics port, then additional default metric service is added
+  - it: with custom Metrics service enabled without matching the default metrics port, validation fails
     set:
       services:
         - type: metrics
           exposed: true
           containerPort: 9499
     asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9399
-      - exists:
-          path: spec.services
-      - contains:
-          path: spec.services
-          content:
-            metadata:
-              name: hivemq-test-hivemq-platform-metrics-9499
-            spec:
-              ports:
-                - name: metrics-9499
-                  targetPort: metrics-9499
-                  port: 9499
-      - contains:
-          path: spec.services
-          content:
-            metadata:
-              name: hivemq-test-hivemq-platform-metrics-9399
-            spec:
-              ports:
-                - name: metrics-9399
-                  targetPort: metrics-9399
-                  port: 9399
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9499` cannot be different that the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
-  - it: with custom Metrics service enabled but without default metrics port, then additional default metrics container port is added to the HiveMQ container
+  - it: with custom Metrics service not enabled without matching the default metrics port, then succeeds
     set:
       services:
         - type: metrics
-          exposed: true
+          exposed: false
           containerPort: 9499
     asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9399
-      - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9499
-            containerPort: 9499
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9399
-            containerPort: 9399
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with custom Metrics service enabled with matching a custom metrics port, validation fails
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9399` cannot be different that the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
+
+  - it: with custom Metrics service not enabled without matching a custom metrics port, then succeeds
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
 
   - it: with custom Metrics service enabled and with default metrics port, then no additional default metric service is added
     set:
@@ -225,6 +211,44 @@ tests:
                   port: 9399
           count: 1
 
+  - it: with custom Metrics service enabled and with custom metrics port, then no additional Metrics service is added
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9499
+            spec:
+              ports:
+                - name: metrics-9499
+                  targetPort: metrics-9499
+                  port: 9499
+          count: 1
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-metrics-9399
+            spec:
+              ports:
+                - name: metrics-9399
+                  targetPort: metrics-9399
+                  port: 9399
+
   - it: with custom Metrics service enabled and with default metrics port, then no additional default metrics container port is added to the HiveMQ container
     set:
       services:
@@ -245,6 +269,34 @@ tests:
             name: metrics-9399
             containerPort: 9399
           count: 1
+
+  - it: with custom Metrics service enabled and with custom metrics port, then no additional Metrics container port is added to the HiveMQ container
+    set:
+      metrics:
+        port: 9499
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9499
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9499
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9499
+            containerPort: 9499
+          count: 1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: metrics-9399
+            containerPort: 9399
 
   - it: with custom Metrics service disabled but without default metrics port, then additional default metric service is added
     set:
@@ -628,7 +680,7 @@ tests:
             name: metrics-9399
             containerPort: 9399
 
-  - it: with custom Metrics service name with non matching metrics port, additional default Metrics service is created
+  - it: with custom Metrics service name without matching the default metrics port, validation fails
     set:
       services:
         - type: metrics
@@ -636,59 +688,8 @@ tests:
           exposed: true
           containerPort: 9499
     asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9399
-      - exists:
-          path: spec.services
-      - contains:
-          path: spec.services
-          content:
-            metadata:
-              name: my-custom-metrics
-            spec:
-              ports:
-                - name: metrics-9499
-                  targetPort: metrics-9499
-                  port: 9499
-      - contains:
-          path: spec.services
-          content:
-            metadata:
-              name: hivemq-test-hivemq-platform-metrics-9399
-            spec:
-              ports:
-                - name: metrics-9399
-                  targetPort: metrics-9399
-                  port: 9399
-
-  - it: with custom Metrics service name with non matching metrics port, additional default metrics port is added to the HiveMQ container
-    set:
-      services:
-        - type: metrics
-          name: my-custom-metrics
-          exposed: true
-          containerPort: 9499
-    asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9399
-      - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9499
-            containerPort: 9499
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9399
-            containerPort: 9399
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9499` cannot be different that the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with multiple Metrics services with default metrics port, then multiple Metrics services are created with no default additional Metrics service
     set:
@@ -766,7 +767,7 @@ tests:
             containerPort: 9399
           count: 1
 
-  - it: with multiple Metrics services with non matching default metrics port, then default metric port is added with no ports are added to the HiveMQ container
+  - it: with multiple Metrics services without matching the default metrics port, validation fails
     set:
       services:
         - type: metrics
@@ -778,25 +779,8 @@ tests:
           exposed: true
           containerPort: 9499
     asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9399
-      - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9399
-            containerPort: 9399
-          count: 1
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9499
-            containerPort: 9499
-          count: 1
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9499` cannot be different that the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with multiple Metrics services with custom metrics port, then multiple Metrics services are created with no default additional Metrics service
     set:
@@ -883,7 +867,7 @@ tests:
             name: metrics-9399
             containerPort: 9399
 
-  - it: with multiple Metrics services with matching and non matching metrics port, then multiple Metrics services are created with no default additional Metrics service
+  - it: with multiple Metrics services with matching and not matching a custom metrics port, validation fails
     set:
       metrics:
         port: 9499
@@ -897,76 +881,8 @@ tests:
           exposed: true
           containerPort: 9499
     asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9499
-      - exists:
-          path: spec.services
-      - contains:
-          path: spec.services
-          content:
-            metadata:
-              name: my-custom-metrics-1
-            spec:
-              ports:
-                - name: metrics-9399
-                  targetPort: metrics-9399
-                  port: 9399
-      - contains:
-          path: spec.services
-          content:
-            metadata:
-              name: my-custom-metrics-2
-            spec:
-              ports:
-                - name: metrics-9499
-                  targetPort: metrics-9499
-                  port: 9499
-      - notContains:
-          path: spec.services
-          content:
-            metadata:
-              name: hivemq-test-hivemq-platform-metrics-9399
-            spec:
-              ports:
-                - name: metrics-9399
-                  targetPort: metrics-9399
-                  port: 9399
-
-  - it: with multiple Metrics services with matching and non matching metrics port, then no default metrics port is added to the HiveMQ container
-    set:
-      metrics:
-        port: 9499
-      services:
-        - type: metrics
-          name: my-custom-metrics-1
-          exposed: true
-          containerPort: 9399
-        - type: metrics
-          name: my-custom-metrics-2
-          exposed: true
-          containerPort: 9499
-    asserts:
-      - exists:
-          path: spec.metricsPort
-      - equal:
-          path: spec.metricsPort
-          value: 9499
-      - exists:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9399
-            containerPort: 9399
-          count: 1
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].ports
-          content:
-            name: metrics-9499
-            containerPort: 9499
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9399` cannot be different that the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with Metrics service enabled with no session affinity, then no service session affinity
     set:

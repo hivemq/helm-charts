@@ -32,6 +32,63 @@ tests:
                   targetPort: metrics-9399
                   port: 9399
 
+  - it: with statefulSet migration and default metrics service enabled, then default metrics service is created
+    set:
+      migration.statefulSet: true
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-legacy
+            spec:
+              ports:
+                - name: legacy
+                  targetPort: legacy
+                  port: 9399
+
+  - it: with statefulSet migration and several metrics services enabled, then validation succeeds
+    set:
+      migration.statefulSet: true
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          legacyPortName: legacy-1
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          legacyPortName: legacy-2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with statefulSet migration and custom metrics service enabled with a non-matching metrics port, validation fails
+    set:
+      migration.statefulSet: true
+      metrics.port: 9499
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          legacyPortName: legacy
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9399` cannot be different that the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
+
   - it: with statefulSet migration, then no default metrics service port is added to the HiveMQ container
     set:
       migration.statefulSet: true
@@ -52,6 +109,28 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
           content:
             name: metrics-9399
+            containerPort: 9399
+
+  - it: with statefulSet migration and default metrics service enabled, then default metrics service port is added to the HiveMQ container
+    set:
+      migration.statefulSet: true
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          legacyPortName: legacy
+    asserts:
+      - exists:
+          path: spec.metricsPort
+      - equal:
+          path: spec.metricsPort
+          value: 9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: legacy
             containerPort: 9399
 
   - it: with duplicated legacy port name and different services types, validation fails
