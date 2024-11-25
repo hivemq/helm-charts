@@ -21,7 +21,7 @@ tests:
       - hasDocuments:
           count: 0
 
-  - it: with monitoring enabled and CRD available in the K8s cluster, ConfigMap created
+  - it: with monitoring enabled and Prometheus Monitoring CRDs installed, ConfigMap created
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
@@ -32,14 +32,16 @@ tests:
       apiVersions:
     asserts:
       - failedTemplate:
-          errorMessage: There is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
+          errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
 
-  - it: kind is ConfigMap and apiVersion is v1
+  - it: with default values, default ConfigMap resource created
+    set:
+      monitoring.enabled: true
     asserts:
-      - isKind:
-          of: ConfigMap
-      - isAPIVersion:
-          of: v1
+      - containsDocument:
+          apiVersion: v1
+          kind: ConfigMap
+          name: swarm-hivemq-swarm-dashboard
 
   - it: with monitoring enabled and default values, ConfigMap metadata created with defaults values
     asserts:
@@ -65,7 +67,6 @@ tests:
       version: 0.1.0
     set:
       monitoring:
-        namespace: custom-namespace
         dashboardNamespace: my-custom-dashboard-namespace
     asserts:
       - isSubset:
