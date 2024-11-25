@@ -1,0 +1,156 @@
+suite: HiveMQ Platform Operator - ServiceMonitor tests
+templates:
+  - service-monitor.yml
+release:
+  name: operator
+  namespace: hivemq-platform-operator-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+capabilities:
+  apiVersions:
+    - monitoring.coreos.com/v1
+tests:
+
+  - it: with default values, default ServiceMonitor not created
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 0
+
+  - it: with ServiceMonitor enabled and Prometheus CRDs present, default ServiceMonitor created
+    set:
+      monitoring.enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+          name: hivemq-platform-operator-service-monitor-operator
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-operator-0.0.1
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+            release: operator
+      - equal:
+          path: metadata.namespace
+          value: hivemq-platform-operator-namespace
+      - isSubset:
+          path: spec.selector
+          content:
+            matchLabels:
+              app.kubernetes.io/name: "hivemq-platform-operator"
+              app.kubernetes.io/instance: "operator"
+      - isSubset:
+          path: spec.namespaceSelector
+          content:
+            matchNames:
+              - hivemq-platform-operator-namespace
+      - contains:
+          path: spec.endpoints
+          content:
+            port: http-operator
+            path: /q/metrics
+            interval: 15s
+            scrapeTimeout: 10s
+      - equal:
+          path: spec.jobLabel
+          value: hivemq-platform-operator-service-monitor-operator
+
+  - it: with long Helm release name, ServiceMonitor name and jobLabel truncated
+    release:
+      name: a-very-long-hivemq-platform-operator-release-name
+    set:
+      monitoring.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value:  hivemq-platform-operator-service-monitor-a-very-long-hivemq-pla
+      - equal:
+          path: spec.jobLabel
+          value:  hivemq-platform-operator-service-monitor-a-very-long-hivemq-pla
+
+  - it: with no Prometheus Monitoring CRDs installed, validation fails
+    capabilities:
+      apiVersions:
+    set:
+      monitoring.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
+
+  - it: with invalid interval format, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid scrape timeout format, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          scrapeTimeout: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid ServiceMonitor namespace, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          namespace: this-is-an-extremely-very-long-hivemq-platform-operator-namespace-name
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom namespace, ServiceMonitor installed on the custom namespace
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          namespace: monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: monitoring
+
+  - it: with custom ServiceMonitor endpoint configuration, ServiceMonitor custom endpoint set
+    release:
+      name: custom-release-name
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 1s
+          scrapeTimeout: 2s
+    asserts:
+      - contains:
+          path: spec.endpoints
+          content:
+            port: http-custom-release-name
+            path: /q/metrics
+            interval: 1s
+            scrapeTimeout: 2s
+
+  - it: with custom ServiceMonitor release name, custom ServiceMonitor release name set
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          releaseName: monitoring-stack
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-operator-0.0.1
+            app.kubernetes.io/name: hivemq-platform-operator
+            app.kubernetes.io/instance: operator
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+            release: monitoring-stack

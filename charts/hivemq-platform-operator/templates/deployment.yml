@@ -9,7 +9,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "hivemq-platform-operator.selectorLabels" . | nindent 6 }}
+      {{- include "hivemq-platform-operator.selector-labels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "hivemq-platform-operator.selectorLabels" . | nindent 8 }}
+        {{- include "hivemq-platform-operator.selector-labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -154,7 +154,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 10
           ports:
-            - name: {{ printf "http-%s" .Release.Name | lower | trunc 15 | trimSuffix "-"  }}
+            - name: {{ printf "http-%s" .Release.Name | lower | trunc 15 | trimSuffix "-" }}
               containerPort: {{ .Values.http.port }}
               protocol: TCP
             - name: {{ printf "https-%s" .Release.Name | lower | trunc 15 | trimSuffix "-" }}

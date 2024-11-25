@@ -167,12 +167,22 @@ crd:
 
 # Monitoring configuration options
 monitoring:
-  # Deploys a ServiceMonitor resource for the Operator along with a Configmap for a Grafana dashboard
+  # When enabled, deploys a ServiceMonitor resource for the Operator along with a Configmap for a Grafana dashboard.
   enabled: false
-  # Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where this chart is deployed to.
-  # dashboardNamespace: monitoring
+  # Dashboard configuration options.
+  # dashboard:
+  #   Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where the HiveMQ Platform Operator Helm chart is deployed to.
+  #   namespace: monitoring
+  # ServiceMonitor configuration options.
   serviceMonitor:
-    # Namespace where the ServiceMonitor will be deployed to. Defaults to use the same namespace where this chart is deployed to.
+    # Namespace where the ServiceMonitor will be deployed to. Defaults to use the same namespace where the HiveMQ Platform Operator Helm chart is deployed to.
     # namespace: monitoring
+    # Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster.
+    # This allows the Prometheus operator to discover the HiveMQ Platform Operator ServiceMonitor. Defaults to the HiveMQ Platform Operator Helm chart release name.
+    # releaseName: monitoring-stack
+    # Defines how often Prometheus should scrape metrics from the endpoints defined in the ServiceMonitor resource.
+    # Format is based on the regular expression `(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)`. For example 1d, 1h30m, 5m, 10s.
     interval: 15s
+    # Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.
+    # Format is based on the regular expression `(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)`. For example 1d, 1h30m, 5m, 10s.
     scrapeTimeout: 10s
