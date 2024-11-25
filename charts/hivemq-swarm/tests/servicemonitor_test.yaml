@@ -32,7 +32,7 @@ tests:
       apiVersions:
     asserts:
       - failedTemplate:
-          errorMessage: There is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
+          errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
 
   - it: kind is ServiceMonitor and apiVersion is monitoring.coreos.com/v1
     asserts:
