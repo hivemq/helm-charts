@@ -71,11 +71,11 @@ Creates the name of the service account to use
 
 {{/*
 Validates that the required Prometheus Monitoring CRDs are installed in the Kubernetes cluster.
-If the CRD is not present the ServiceMonitor cannot be installed and the installation fails.
+If the required CRDs is not present the ServiceMonitor cannot be installed and the installation fails.
 */}}
 {{- define "hivemq-swarm.validate-prometheus-monitoring-stack-installed" -}}
 {{- $isCRDPresent := .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
 {{- if not $isCRDPresent }}
-    {{- fail (printf "There is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#monitor for more help and guidance.") }}
+    {{- fail (printf "\nThere is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#monitor for more help and guidance.") }}
 {{- end }}
 {{- end }}
