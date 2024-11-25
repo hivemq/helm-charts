@@ -12,7 +12,7 @@ WORKFLOW_FILES=(
   "../.github/workflows/hivemq-operator-integration-test.yml"
   "../.github/workflows/hivemq-platform-operator-integration-test.yml"
 )
-MANUAL_CHECKS=("continuous-integration/jenkins/branch" "smoke-test-legacy" "smoke-test-platform" "verify" "verification/cla-signed")
+MANUAL_CHECKS=("continuous-integration/jenkins/branch" "smoke-test-legacy" "smoke-test-platform" "verify")
 
 # check bash version
 if ((BASH_VERSINFO < 4)); then
