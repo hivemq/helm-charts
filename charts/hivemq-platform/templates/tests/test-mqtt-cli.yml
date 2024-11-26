@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
     - name: hivemq-mqtt-cli
-      image: hivemq/mqtt-cli:4.34.0
+      image: hivemq/mqtt-cli:4.35.0
       args: [ "test",
               "-h",
               "{{ printf "hivemq-%s-mqtt-1883" $.Release.Name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}" ]
