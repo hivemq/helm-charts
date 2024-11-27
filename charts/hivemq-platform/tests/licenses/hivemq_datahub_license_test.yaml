@@ -1,4 +1,4 @@
-suite: HiveMQ Data Hub license tests
+suite: HiveMQ Platform - HiveMQ Data Hub license tests
 templates:
   - hivemq-custom-resource.yml
   - hivemq-license.yml
@@ -37,7 +37,7 @@ tests:
       license.dataHub.datahub1.data: ""
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Data Hub 'datahub1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
+          errorPattern: HiveMQ Data Hub 'datahub1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
         template: hivemq-license.yml
 
   - it: with data hub license overrideLicense empty, then validation fails
@@ -46,7 +46,7 @@ tests:
       license.dataHub.datahub1.overrideLicense: ""
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Data Hub 'datahub1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
+          errorPattern: HiveMQ Data Hub 'datahub1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
         template: hivemq-license.yml
 
   - it: with data hub license overrideLicense and data empty, then validation fails
@@ -56,7 +56,7 @@ tests:
       license.dataHub.datahub1.overrideLicense: ""
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Data Hub 'datahub1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
+          errorPattern: HiveMQ Data Hub 'datahub1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
         template: hivemq-license.yml
 
   - it: with data hub license overrideLicense and data set, then validation fails
@@ -66,7 +66,7 @@ tests:
       license.dataHub.datahub1.overrideLicense: datahub1-license-content2
     asserts:
       - failedTemplate:
-          errorMessage: Both `data` and `overrideLicense` values are set for the HiveMQ Data Hub 'datahub1' license content. Please, use only one of them
+          errorPattern: Both `data` and `overrideLicense` values are set for the HiveMQ Data Hub 'datahub1' license content. Please, use only one of them
         template: hivemq-license.yml
 
   - it: with invalid data hub license values, then validation fails
@@ -76,7 +76,7 @@ tests:
       license.dataHub.datahub1.bar: datahub1-license-content2
     asserts:
       - failedTemplate:
-          errorMessage: Invalid values for setting the HiveMQ Data Hub 'datahub1' license content. Only `data` or `overrideLicense` values are allowed
+          errorPattern: Invalid values for setting the HiveMQ Data Hub 'datahub1' license content. Only `data` or `overrideLicense` values are allowed
         template: hivemq-license.yml
 
   - it: with data hub license data, data hub license created

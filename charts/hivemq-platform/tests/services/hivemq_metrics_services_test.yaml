@@ -1,4 +1,4 @@
-suite: HiveMQ Platform Metrics services tests
+suite: HiveMQ Platform - Metrics services tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -147,7 +147,7 @@ tests:
           containerPort: 9499
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9499` cannot be different that the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
+          errorPattern: Service type `metrics` with container port `9499` cannot be different than the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with custom Metrics service not enabled without matching the default metrics port, then succeeds
     set:
@@ -170,7 +170,7 @@ tests:
           containerPort: 9399
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9399` cannot be different that the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
+          errorPattern: Service type `metrics` with container port `9399` cannot be different than the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with custom Metrics service not enabled without matching a custom metrics port, then succeeds
     set:
@@ -689,7 +689,7 @@ tests:
           containerPort: 9499
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9499` cannot be different that the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
+          errorPattern: Service type `metrics` with container port `9499` cannot be different than the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with multiple Metrics services with default metrics port, then multiple Metrics services are created with no default additional Metrics service
     set:
@@ -780,7 +780,7 @@ tests:
           containerPort: 9499
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9499` cannot be different that the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
+          errorPattern: Service type `metrics` with container port `9499` cannot be different than the metrics port `9399` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with multiple Metrics services with custom metrics port, then multiple Metrics services are created with no default additional Metrics service
     set:
@@ -882,7 +882,7 @@ tests:
           containerPort: 9499
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9399` cannot be different that the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
+          errorPattern: Service type `metrics` with container port `9399` cannot be different than the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with Metrics service enabled with no session affinity, then no service session affinity
     set:
@@ -959,7 +959,7 @@ tests:
           hivemqProxyProtocol: true
     asserts:
       - failedTemplate:
-          errorMessage: Service type metrics with container port 9399 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+          errorPattern: Service type metrics with container port 9399 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
 
   - it: with a Metrics service disabled and PROXY protocol enabled, validation succeeds
     set:

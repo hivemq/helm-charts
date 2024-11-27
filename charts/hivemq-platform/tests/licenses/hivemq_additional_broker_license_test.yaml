@@ -1,4 +1,4 @@
-suite: Additional HiveMQ Broker license tests
+suite: HiveMQ Platform - Additional HiveMQ Broker license tests
 templates:
   - hivemq-custom-resource.yml
   - hivemq-license.yml
@@ -37,7 +37,7 @@ tests:
       license.additionalLicenses.broker1.data: ""
     asserts:
       - failedTemplate:
-          errorMessage: Additional HiveMQ Broker 'broker1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
+          errorPattern: Additional HiveMQ Broker 'broker1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
         template: hivemq-license.yml
 
   - it: with additional broker license overrideLicense empty, then validation fails
@@ -46,7 +46,7 @@ tests:
       license.additionalLicenses.broker1.overrideLicense: ""
     asserts:
       - failedTemplate:
-          errorMessage: Additional HiveMQ Broker 'broker1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
+          errorPattern: Additional HiveMQ Broker 'broker1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
         template: hivemq-license.yml
 
   - it: with additional broker license overrideLicense and data empty, then validation fails
@@ -56,7 +56,7 @@ tests:
       license.additionalLicenses.broker1.overrideLicense: ""
     asserts:
       - failedTemplate:
-          errorMessage: Additional HiveMQ Broker 'broker1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
+          errorPattern: Additional HiveMQ Broker 'broker1' license content cannot be empty. Please, use either `data` or `overrideLicense` values
         template: hivemq-license.yml
 
   - it: with additional broker license overrideLicense and data set, then validation fails
@@ -66,7 +66,7 @@ tests:
       license.additionalLicenses.broker1.overrideLicense: broker1-license-content2
     asserts:
       - failedTemplate:
-          errorMessage: Both `data` and `overrideLicense` values are set for the Additional HiveMQ Broker 'broker1' license content. Please, use only one of them
+          errorPattern: Both `data` and `overrideLicense` values are set for the Additional HiveMQ Broker 'broker1' license content. Please, use only one of them
         template: hivemq-license.yml
 
   - it: with invalid additional broker license values, then validation fails
@@ -76,7 +76,7 @@ tests:
       license.additionalLicenses.broker1.bar: broker1-license-content2
     asserts:
       - failedTemplate:
-          errorMessage: Invalid values for setting the Additional HiveMQ Broker 'broker1' license content. Only `data` or `overrideLicense` values are allowed
+          errorPattern: Invalid values for setting the Additional HiveMQ Broker 'broker1' license content. Only `data` or `overrideLicense` values are allowed
         template: hivemq-license.yml
 
   - it: with broker license and duplicated "license.lic" for additional broker license data, then validation fails
@@ -86,7 +86,7 @@ tests:
       license.additionalLicenses.license.data: broker1-license-content
     asserts:
       - failedTemplate:
-          errorMessage: Additional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name
+          errorPattern: Additional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name
         template: hivemq-license.yml
 
   - it: with no broker license and duplicated "license.lic" for additional broker license data, then validation succeeds
@@ -107,7 +107,7 @@ tests:
       license.additionalLicenses.license.overrideLicense: broker1-license-content
     asserts:
       - failedTemplate:
-          errorMessage: Additional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name
+          errorPattern: Additional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name
         template: hivemq-license.yml
 
   - it: with no broker license and duplicated "license.lic" for additional broker license overrideLicense, then validation succeeds

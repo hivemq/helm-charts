@@ -134,7 +134,7 @@ tests:
           hivemqListenerName: my-custom-mqtt-listener
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated HiveMQ listener name `my-custom-mqtt-listener`
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-mqtt-listener`
 
   - it: with non-exposed MQTT services and duplicated listener name, validation succeeds
     template: hivemq-custom-resource.yml
@@ -615,7 +615,7 @@ tests:
           truststorePasswordSecretName: "my-truststore-secret"
     asserts:
       - failedTemplate:
-          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+          errorPattern: A keystore password should be set either as a string \(keystorePassword\) or as a secret name \(keystorePasswordSecretName\)
 
   - it: with a secure mutual TLS MQTT service exposed but missing required truststore password, validation fails
     template: hivemq-custom-resource.yml
@@ -632,7 +632,7 @@ tests:
           truststoreSecretKey: "truststore.jks"
     asserts:
       - failedTemplate:
-          errorMessage: A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)
+          errorPattern: A truststore password should be set either as a string \(truststorePassword\) or as a secret name \(truststorePasswordSecretName\)
 
   - it: with a secure mutual TLS MQTT service not exposed
     template: hivemq-configuration.yml
@@ -884,7 +884,7 @@ tests:
           hivemqListenerName: my-custom-secure-mqtt-listener
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated HiveMQ listener name `my-custom-secure-mqtt-listener`
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-secure-mqtt-listener`
 
   - it: with non-exposed secure MQTT services and duplicated listener name, validation succeeds
     template: hivemq-custom-resource.yml

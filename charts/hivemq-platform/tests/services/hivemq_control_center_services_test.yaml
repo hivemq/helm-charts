@@ -1,4 +1,4 @@
-suite: HiveMQ Platform Control Center services tests
+suite: HiveMQ Platform - Control Center services tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -132,7 +132,7 @@ tests:
           hivemqProxyProtocol: true
     asserts:
       - failedTemplate:
-          errorMessage: Service type control-center with container port 8081 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+          errorPattern: Service type control-center with container port 8081 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
 
   - it: with a Control Center service disabled and PROXY protocol enabled, validation succeeds
     set:

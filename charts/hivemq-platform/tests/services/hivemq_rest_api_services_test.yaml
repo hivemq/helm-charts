@@ -1,4 +1,4 @@
-suite: HiveMQ Platform REST API services tests
+suite: HiveMQ Platform - REST API services tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -134,7 +134,7 @@ tests:
           hivemqProxyProtocol: true
     asserts:
       - failedTemplate:
-          errorMessage: Service type rest-api with container port 8888 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+          errorPattern: Service type rest-api with container port 8888 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
 
   - it: with a REST API service disabled and PROXY protocol enabled, validation succeeds
     set:
