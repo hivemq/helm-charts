@@ -1,4 +1,4 @@
-suite: HiveMQ Platform secure services tests
+suite: HiveMQ Platform - Secure services tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -1922,7 +1922,7 @@ tests:
           keystoreSecretKey: "keystore.jks"
     asserts:
       - failedTemplate:
-          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+          errorPattern: A keystore password should be set either as a string \(keystorePassword\) or as a secret name \(keystorePasswordSecretName\)
 
   - it: with a secure WebSocket service disabled, no secure WebSocket service is exposed
     set:
@@ -2629,4 +2629,4 @@ tests:
           keystoreSecretKey: "keystore.jks"
     asserts:
       - failedTemplate:
-          errorMessage: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+          errorPattern: A keystore password should be set either as a string \(keystorePassword\) or as a secret name \(keystorePasswordSecretName\)

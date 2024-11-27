@@ -1,4 +1,4 @@
-suite: HiveMQ Platform services tests
+suite: HiveMQ Platform - Services tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -196,7 +196,7 @@ tests:
           containerPort: 7000
     asserts:
       - failedTemplate:
-          errorMessage: Container port 7000 in service `mqtt` already exists as part of one of the predefined ports (7979, 8889, 7000)
+          errorPattern: Container port 7000 in service `mqtt` already exists as part of one of the predefined ports \(7979, 8889, 7000\)
 
   - it: with default container ports in disabled services, no error is thrown and only enabled services are created
     set:
@@ -263,7 +263,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Services with same container port (1883) but different types cannot be set
+          errorPattern: Services with same container port \(1883\) but different types cannot be set
 
   - it: with duplicated container ports and different services types but disabled services, only enabled services are created
     set:
@@ -452,7 +452,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt-1883
+          errorPattern: Found duplicated service name hivemq-test-hivemq-platform-mqtt-1883
 
   - it: with duplicated service container port and type in disabled services, then validation fails with ambiguous definition
     set:
@@ -465,7 +465,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt-1883 (set as exposed and not exposed)
+          errorPattern: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt-1883 \(set as exposed and not exposed\)
 
   - it: with duplicated custom service names and container port, validation fails
     set:
@@ -480,7 +480,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated service name my-custom-mqtt
+          errorPattern: Found duplicated service name my-custom-mqtt
 
   - it: with duplicated service container port and custom name but different type in disabled services, then validation fails with ambiguous definition
     set:
@@ -495,7 +495,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+          errorPattern: Ambiguous definition found for service my-custom-mqtt \(set as exposed and not exposed\)
 
   - it: with duplicated custom service names and container port but different types in disabled services, then fails with ambiguous definition
     set:
@@ -510,7 +510,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+          errorPattern: Ambiguous definition found for service my-custom-mqtt \(set as exposed and not exposed\)
 
   - it: with duplicated custom service names and container port and type, validation fails
     set:
@@ -525,7 +525,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated service name my-custom-mqtt
+          errorPattern: Found duplicated service name my-custom-mqtt
 
   - it: with duplicated service container port, custom name and type in disabled services, then validation fails with ambiguous definition
     set:
@@ -540,7 +540,7 @@ tests:
           containerPort: 1883
     asserts:
       - failedTemplate:
-          errorMessage: Ambiguous definition found for service my-custom-mqtt (set as exposed and not exposed)
+          errorPattern: Ambiguous definition found for service my-custom-mqtt \(set as exposed and not exposed\)
 
   - it: with custom service name longer than 63 characters, schema validation fails
     set:

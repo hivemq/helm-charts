@@ -1,4 +1,4 @@
-suite: HiveMQ Platform extension tests
+suite: HiveMQ Platform - Extension tests
 templates:
   - hivemq-custom-resource.yml
 tests:
@@ -86,7 +86,7 @@ tests:
           secretName: "my-tracing-extension-secret-name"
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated extension name `hivemq-distributed-tracing-extension`
+          errorPattern: Found duplicated extension name `hivemq-distributed-tracing-extension`
 
   - it: with extension configMapName and secretName set, validation fails
     set:
@@ -98,7 +98,7 @@ tests:
           secretName: "my-tracing-extension-secret-name"
     asserts:
       - failedTemplate:
-          errorMessage: Both `configMapName` and `secretName` values are set for extension `hivemq-distributed-tracing-extension`. Only one can be defined at a time
+          errorPattern: Both `configMapName` and `secretName` values are set for extension `hivemq-distributed-tracing-extension`. Only one can be defined at a time
 
   - it: with extension configMapName and secretName empty, validation succeeds
     set:

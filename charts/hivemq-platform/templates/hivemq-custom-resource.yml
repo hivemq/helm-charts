@@ -3,6 +3,7 @@
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
+{{- $metricsContainerPortName := ( include "hivemq-platform.metrics-port-name" . ) -}}
 {{- $hasMetricService := ( include "hivemq-platform.has-default-metrics-service" . ) -}}
 {{- $hasStatefulSetMigration := ( include "hivemq-platform.has-legacy-statefulset-migration" . ) -}}
 apiVersion: hivemq.com/v1
@@ -63,7 +64,7 @@ spec:
           {{- $additionalInitContainers := .Values.additionalInitContainers }}
           {{- $overrideInitContainers := .Values.config.overrideInitContainers }}
           {{- if and $overrideInitContainers $additionalInitContainers }}
-              {{- fail ("Only `additionalInitContainers` or `config.overrideInitContainers` can be defined at a time") }}
+              {{- fail ("\nOnly `additionalInitContainers` or `config.overrideInitContainers` can be defined at a time") }}
           {{- end }}
           {{- if or $overrideInitContainers $additionalInitContainers }}
           initContainers:
@@ -98,7 +99,7 @@ spec:
                       name: {{ $service.keystorePasswordSecretName }}
                       key: {{ $service.keystorePasswordSecretKey | default "keystore.password" }}
                   {{- else }}
-                  {{- fail ("A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
+                  {{- fail ("\nA keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
                   {{- end }}
                 {{- if or $service.keystorePrivatePassword (and $service.keystorePasswordSecretName $service.keystorePrivatePasswordSecretKey) }}
                 {{- $envNameKeystorePrivatePassword := include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" $service.type "keystoreSecretName" $service.keystoreSecretName "keystorePrivatePassword" $service.keystorePrivatePassword "keystorePrivatePasswordSecretKey" $service.keystorePrivatePasswordSecretKey) }}
@@ -129,7 +130,7 @@ spec:
                       name: {{ $service.truststorePasswordSecretName }}
                       key: truststore.password
                   {{- else }}
-                  {{- fail ("A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
+                  {{- fail ("\nA truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
                   {{- end }}
                   {{- $envNamesTrustStoreList = $envNameTrustorePassword | append $envNamesTrustStoreList }}
                 {{- end }}
@@ -155,7 +156,6 @@ spec:
                       {{- $containerPortNameList = $containerPortName | append $containerPortNameList }}
                   {{- end }}
                 {{- end }}
-                {{- $metricsContainerPortName := printf "metrics-%s" $metricsPort }}
                 {{- if and (not $hasMetricService) (not (has $metricsContainerPortName $containerPortNameList)) (.Values.metrics.enabled) (not $hasStatefulSetMigration) }}
                 - name: {{ $metricsContainerPortName }}
                   containerPort: {{ printf "%d" (int64 $metricsPort) }}
@@ -278,8 +278,8 @@ spec:
         name: {{ (include "hivemq-platform.range-service-name" (dict "name" "" "releaseName" $.Release.Name "type" "metrics" "port" $metricsPort "containerPort" $metricsPort)) }}
       spec:
         ports:
-          - name: {{ printf "metrics-%s" $metricsPort }}
-            targetPort: {{ printf "metrics-%s" $metricsPort }}
+          - name: {{ $metricsContainerPortName }}
+            targetPort: {{ $metricsContainerPortName }}
             port: {{ printf "%d" (int64 $metricsPort) }}
     {{- end }}
   {{- if hasKey .Values "extensions" }}

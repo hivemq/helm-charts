@@ -1,8 +1,24 @@
 {{/*
-If release name contains chart name it will be used as a full name.
+Creates a qualified name, based on the release name.
+Params:
+- name: The custom name to append to the default prefix `hivemq-platform-operator`.
+- releaseName: The .Release.Name value.
+Returns:
+- The resource name based on the custom name argument and on the release name with a default prefix of `hivemq-platform`.
+Format: "hivemq-platform"-<custom-name>-<.Release.Name> | "hivemq-platform"-<.Release.Name>
+Usage: {{ include "hivemq-platform.name" (dict "name" "my-custom-name" "releaseName" .Release.Name) }}
 */}}
 {{- define "hivemq-platform.name" -}}
-{{- printf "%s-%s" "hivemq" .Release.Name }}
+{{- $customName := .name }}
+{{- $releaseName := .releaseName }}
+{{- $prefix := "hivemq-platform" }}
+{{- $name := "" }}
+{{- if $customName -}}
+{{- $name = printf "%s-%s-%s" $prefix $customName $releaseName }}
+{{- else -}}
+{{- $name = printf "%s-%s" $prefix $releaseName }}
+{{- end -}}
+{{- printf "%s" $name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
 {{- end -}}
 
 {{/*
@@ -19,7 +35,7 @@ Usage: {{ include "hivemq-platform.configuration-name" . }}
     {{- printf "%s" .Values.config.name }}
     {{- else }}
         {{- $kind := .Values.config.createAs }}
-        {{- fail (printf "HiveMQ configuration %s name cannot be empty when using an existing %s" $kind $kind) }}
+        {{- fail (printf "\nHiveMQ configuration %s name cannot be empty when using an existing %s" $kind $kind) }}
     {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -306,7 +322,7 @@ Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
 {{- $extensionNamesList := list }}
 {{- range $extension := $extensions }}
   {{- if (has $extension.name $extensionNamesList) }}
-    {{- fail (printf "Found duplicated extension name `%s`" $extension.name) }}
+    {{- fail (printf "\nFound duplicated extension name `%s`" $extension.name) }}
   {{- else }}
     {{- $extensionNamesList = $extension.name | append $extensionNamesList}}
   {{- end }}
@@ -321,7 +337,7 @@ Usage: {{ include "hivemq-platform.validate-configmap-secret-extensions" . }}
 {{- $extensions := .Values.extensions }}
 {{- range $extension := $extensions }}
   {{- if and $extension.configMapName $extension.secretName }}
-    {{- fail (printf "Both `configMapName` and `secretName` values are set for extension `%s`. Only one can be defined at a time" $extension.name) }}
+    {{- fail (printf "\nBoth `configMapName` and `secretName` values are set for extension `%s`. Only one can be defined at a time" $extension.name) }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -360,9 +376,9 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
   {{- if (hasKey $serviceNamesDict $serviceName) }}
     {{- $matchingService := get $serviceNamesDict $serviceName }}
     {{- if not (eq $matchingService.exposed $service.exposed) }}
-        {{- fail (printf "Ambiguous definition found for service %s (set as exposed and not exposed)" $serviceName) }}
+        {{- fail (printf "\nAmbiguous definition found for service %s (set as exposed and not exposed)" $serviceName) }}
     {{- else }}
-        {{- fail (printf "Found duplicated service name %s" $serviceName) }}
+        {{- fail (printf "\nFound duplicated service name %s" $serviceName) }}
     {{- end }}
   {{- else }}
     {{- $serviceNamesDict = set $serviceNamesDict $serviceName $service }}
@@ -381,7 +397,7 @@ Usage: {{ include "hivemq-platform.validate-duplicated-listener-names" . }}
 {{- range $service := $services }}
   {{- $listenerName = $service.hivemqListenerName }}
   {{- if and $listenerName $service.exposed (has $listenerName $listenerNamesList) }}
-    {{- fail (printf "Found duplicated HiveMQ listener name `%s`" $listenerName) }}
+    {{- fail (printf "\nFound duplicated HiveMQ listener name `%s`" $listenerName) }}
   {{- end }}
   {{- $listenerNamesList = $listenerName | append $listenerNamesList}}
 {{- end }}
@@ -399,7 +415,7 @@ Usage: {{ include "hivemq-platform.validate-service-container-ports" . }}
   {{- if (hasKey $servicesDict $containerPort) }}
     {{- $matchingServiceContainerPort := get $servicesDict $containerPort }}
     {{- if and ($service.exposed) (not (eq $matchingServiceContainerPort.type $service.type)) }}
-        {{- fail (printf "Services with same container port (%s) but different types cannot be set" $containerPort) }}
+        {{- fail (printf "\nServices with same container port (%s) but different types cannot be set" $containerPort) }}
     {{- end }}
   {{- else if $service.exposed }}
     {{- $servicesDict = set $servicesDict $containerPort $service }}
@@ -419,7 +435,7 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 {{- $defaultPortsList = ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
-    {{- fail (printf "Container port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
+    {{- fail (printf "\nContainer port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -435,10 +451,10 @@ Usage: {{ include "hivemq-platform.validate-duplicated-service-ports" . }}
 {{- $hasStatefulSetMigration := ( include "hivemq-platform.has-legacy-statefulset-migration" . ) }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) ($hasStatefulSetMigration) (hasKey $service "port") }}
-    {{- fail (printf "Service type `%s` with container port `%d` cannot use `port` value as `migration.statefulSet` value is enabled" $service.type (int64 $service.containerPort)) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` cannot use `port` value as `migration.statefulSet` value is enabled" $service.type (int64 $service.containerPort)) }}
   {{- end }}
   {{- if and ($service.exposed) (not $hasStatefulSetMigration) (hasKey $service "legacyPortName") }}
-    {{- fail (printf "Service type `%s` with container port `%d` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled" $service.type (int64 $service.containerPort)) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -453,7 +469,7 @@ Usage: {{ include "hivemq-platform.validate-metrics-services" . }}
 {{- $metricsPort := (include "hivemq-platform.metrics-port" .) }}
 {{- range $service := $services }}
   {{- if and (eq $service.type "metrics") ($service.exposed) (not (eq (int64 $service.containerPort) (int64 $metricsPort))) }}
-    {{- fail (printf "Service type `metrics` with container port `%d` cannot be different that the metrics port `%d` defined for the HiveMQ Prometheus extension value as `metrics.port`" (int64 $service.containerPort) (int64 $metricsPort)) }}
+    {{- fail (printf "\nService type `metrics` with container port `%d` cannot be different than the metrics port `%d` defined for the HiveMQ Prometheus extension value as `metrics.port`" (int64 $service.containerPort) (int64 $metricsPort)) }}
     {{- break }}
   {{- end }}
 {{- end }}
@@ -467,7 +483,7 @@ Usage: {{ include "hivemq-platform.validate-proxy-protocol-services" . }}
 {{- $services := .Values.services }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "hivemqProxyProtocol") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
-    {{- fail (printf "Service type %s with container port %d is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+    {{- fail (printf "\nService type %s with container port %d is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -482,10 +498,10 @@ Usage: {{- include "hivemq-platform.validate-run-as-user-security-context" .Valu
 {{- $securityContext := . -}}
 {{- if and (hasKey $securityContext "runAsNonRoot") (hasKey $securityContext "runAsUser") }}
     {{- if and (eq $securityContext.runAsNonRoot true) (eq ($securityContext.runAsUser | toString) "0") }}
-        {{- fail (printf "`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)") }}
+        {{- fail (printf "\n`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)") }}
     {{- end }}
     {{- if and (eq $securityContext.runAsNonRoot false) (ne ($securityContext.runAsUser | toString) "0") }}
-        {{- fail (printf "`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)") }}
+        {{- fail (printf "\n`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)") }}
     {{- end }}
 {{- end }}
 {{- end -}}
@@ -532,16 +548,16 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- $volumeMountList := list }}
 {{- range $additionalVolume := $additionalVolumes }}
     {{- if not (hasKey $additionalVolume "type") }}
-        {{- fail (printf "`type` value is mandatory for all of the `additionalVolumes` defined") }}
+        {{- fail (printf "\n`type` value is mandatory for all of the `additionalVolumes` defined") }}
     {{- end -}}
     {{- if and (not (hasKey $additionalVolume "path")) (or (eq $additionalVolume.containerName "hivemq") (not (hasKey $additionalVolume "containerName"))) }}
-        {{- fail (printf "`path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container") }}
+        {{- fail (printf "\n`path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container") }}
     {{- end -}}
     {{- if and (not (hasKey $additionalVolume "name")) (not (hasKey $additionalVolume "mountName")) }}
-        {{- fail (printf "At least one of `name` or `mountName` values must be defined") }}
+        {{- fail (printf "\nAt least one of `name` or `mountName` values must be defined") }}
     {{- end -}}
     {{- if and (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "persistentVolumeClaim")) (not (hasKey $additionalVolume "name")) }}
-        {{- fail (printf "`name` value is required for types \"configMap\", \"secret\" and \"persistentVolumeClaim\"") }}
+        {{- fail (printf "\n`name` value is required for types \"configMap\", \"secret\" and \"persistentVolumeClaim\"") }}
     {{- end -}}
 
     {{- $volumeName := "" }}
@@ -555,7 +571,7 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{/* Check for duplicates volume mounts within the same container */}}
     {{- $volumeMountKey := printf "%s-%s" $volumeName $containerName }}
     {{- if has $volumeMountKey $volumeMountList }}
-        {{- fail (printf "VolumeMount `%s` is duplicated for container `%s`" $volumeName $containerName) }}
+        {{- fail (printf "\nVolumeMount `%s` is duplicated for container `%s`" $volumeName $containerName) }}
     {{- else }}
         {{- $volumeMountList = $volumeMountKey | append $volumeMountList}}
     {{- end }}
@@ -563,7 +579,7 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{/* Volumes can only be defined with same name and same type */}}
     {{- range $volume := $additionalVolumes }}
     {{- if and (or (eq $volume.mountName $volumeName) (eq $volume.name $volumeName)) (not (eq $volume.type $additionalVolume.type)) }}
-        {{- fail (printf "Volume `%s` is defined more than once but with different types" $volumeName) }}
+        {{- fail (printf "\nVolume `%s` is defined more than once but with different types" $volumeName) }}
     {{- end }}
     {{- end -}}
 
@@ -584,10 +600,10 @@ Usage: {{ include "hivemq-platform.validate-licenses" . }}
     {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.extensions "licenseLabel" "HiveMQ Enterprise Extension") -}}
     {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.dataHub "licenseLabel" "HiveMQ Data Hub") -}}
     {{- if and (not .Values.license.overrideLicense) (not .Values.license.data) (not .Values.license.additionalLicenses) (not .Values.license.extensions) (not .Values.license.dataHub) -}}
-        {{- fail (printf "HiveMQ Platform license content cannot be empty") -}}
+        {{- fail (printf "\nHiveMQ Platform license content cannot be empty") -}}
     {{- end -}}
     {{- if and .Values.license.data .Values.license.overrideLicense -}}
-        {{- fail (printf "Both `data` and `overrideLicense` values are set for the HiveMQ Broker license content. Please, use only one of them") -}}
+        {{- fail (printf "\nBoth `data` and `overrideLicense` values are set for the HiveMQ Broker license content. Please, use only one of them") -}}
     {{- end -}}
     {{- include "hivemq-platform.validate-duplicated-additional-broker-license" . -}}
 {{- end -}}
@@ -603,11 +619,11 @@ Usage: {{ include "hivemq-platform.validate-license-content" (dict "licenses" .l
 {{- $label := .licenseLabel -}}
 {{- range $licenseName, $license := .licenses -}}
     {{- if and (not (hasKey $license "data")) (not (hasKey $license "overrideLicense")) -}}
-        {{- fail (printf "Invalid values for setting the %s '%s' license content. Only `data` or `overrideLicense` values are allowed" $label $licenseName) }}
+        {{- fail (printf "\nInvalid values for setting the %s '%s' license content. Only `data` or `overrideLicense` values are allowed" $label $licenseName) }}
     {{- else if and (not $license.data) (not $license.overrideLicense) -}}
-        {{- fail (printf "%s '%s' license content cannot be empty. Please, use either `data` or `overrideLicense` values" $label $licenseName) }}
+        {{- fail (printf "\n%s '%s' license content cannot be empty. Please, use either `data` or `overrideLicense` values" $label $licenseName) }}
     {{- else if and $license.data $license.overrideLicense -}}
-        {{- fail (printf "Both `data` and `overrideLicense` values are set for the %s '%s' license content. Please, use only one of them" $label $licenseName) }}
+        {{- fail (printf "\nBoth `data` and `overrideLicense` values are set for the %s '%s' license content. Please, use only one of them" $label $licenseName) }}
     {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -620,7 +636,7 @@ Usage: {{ include "hivemq-platform.validate-duplicated-additional-broker-license
 {{- if or .Values.license.data .Values.license.overrideLicense -}}
     {{- range $licenseName, $license := .Values.license.additionalLicenses -}}
       {{- if eq $licenseName "license" -}}
-        {{- fail (printf "Additional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name") -}}
+        {{- fail (printf "\nAdditional HiveMQ Broker license 'license' is already defined for the default broker license. Please, use a different license name") -}}
       {{- end -}}
     {{- end -}}
 {{- end -}}
@@ -919,3 +935,55 @@ Usage: {{ include "hivemq-platform.generate-hivemq-logback-configuration" . }}
     {{- .Values.config.customLogbackConfig | nindent 4 }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Validates that the required Prometheus Monitoring CRDs are installed in the Kubernetes cluster.
+If the required CRDs are not present the ServiceMonitor cannot be installed and the installation fails.
+Usage: {{- include "hivemq-platform.validate-prometheus-monitoring-stack-installed" . -}}
+*/}}
+{{- define "hivemq-platform.validate-prometheus-monitoring-stack-installed" -}}
+{{- $isCRDPresent := .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+{{- if not $isCRDPresent }}
+    {{- fail (printf "\nThere is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-platform-operator/observability.html#monitoring for more help and guidance.") }}
+{{- end }}
+{{- end }}
+
+{{/*
+Validates that the HiveMQ Prometheus extension is enabled. Fails, otherwise.
+Usage: {{- include "hivemq-platform.validate-metrics-is-enabled" . -}}
+*/}}
+{{- define "hivemq-platform.validate-metrics-is-enabled" -}}
+{{- if not .Values.metrics.enabled }}
+    {{- fail (printf "\nHiveMQ Prometheus extension is disabled. Please, use `.metrics.enabled=true` to create a ServiceMonitor resource for the HiveMQ Platform.") }}
+{{- end }}
+{{- end }}
+
+{{/*
+Gets the default metrics port name based on the metrics port.
+Usage: {{- include "hivemq-platform.metrics-port-name" . -}}
+*/}}
+{{- define "hivemq-platform.metrics-port-name" -}}
+{{- printf "metrics-%s" ( include "hivemq-platform.metrics-port" . ) }}
+{{- end }}
+
+{{/*
+Gets the metrics container port name based on the metrics port, or from the `legacyPortName` services value if
+legacy StatefulSet migration is enabled.
+Usage: {{- include "hivemq-platform.metrics-container-port-name" . -}}
+*/}}
+{{- define "hivemq-platform.metrics-container-port-name" -}}
+{{- $metricsPortName := "" }}
+{{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
+{{- $hasStatefulSetMigration := ( include "hivemq-platform.has-legacy-statefulset-migration" . ) -}}
+{{- if not $hasStatefulSetMigration -}}
+    {{- $metricsPortName = ( include "hivemq-platform.metrics-port-name" . ) }}
+{{- else -}}
+    {{- range $service := .Values.services }}
+      {{- if and (eq $service.type "metrics") (eq (int64 $service.containerPort) (int64 $metricsPort)) }}
+        {{- $metricsPortName = printf "%s" $service.legacyPortName }}
+        {{- break }}
+      {{- end }}
+    {{- end }}
+{{- end -}}
+{{- $metricsPortName -}}
+{{- end }}

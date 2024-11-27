@@ -1,4 +1,4 @@
-suite: HiveMQ Platform CustomResource - Pod and Container Security Context tests
+suite: HiveMQ Platform - Pod and Container Security Context tests
 templates:
   - hivemq-custom-resource.yml
 tests:
@@ -197,8 +197,8 @@ tests:
           runAsUser: 10000
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)
+          errorPattern: |-
+            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
 
   - it: with security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
@@ -209,8 +209,8 @@ tests:
           runAsUser: 0
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)
+          errorPattern: |- 
+            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
 
   - it: with defaults, no container security context set
     asserts:
@@ -450,8 +450,8 @@ tests:
           runAsUser: 10000
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` (root)
+          errorPattern: |- 
+            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
 
   - it: with container security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
@@ -461,5 +461,5 @@ tests:
           runAsUser: 0
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` (root)
+          errorPattern: |- 
+            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)

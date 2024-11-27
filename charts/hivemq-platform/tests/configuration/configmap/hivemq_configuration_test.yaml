@@ -1,4 +1,4 @@
-suite: HiveMQ Platform Configuration as ConfigMap tests
+suite: HiveMQ Platform Configuration as ConfigMap - Configuration tests
 templates:
   - hivemq-configuration.yml
   - hivemq-custom-resource.yml
@@ -1974,7 +1974,7 @@ tests:
       config.create: false
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap
+          errorPattern: HiveMQ configuration ConfigMap name cannot be empty when using an existing ConfigMap
 
   - it: with existing ConfigMap, then reuse existing ConfigMap and no additional ConfigMap is created
     template: hivemq-custom-resource.yml

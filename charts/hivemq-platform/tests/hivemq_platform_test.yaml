@@ -1,4 +1,4 @@
-suite: HiveMQ Platform custom resource tests
+suite: HiveMQ Platform - CustomResource tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -150,8 +150,7 @@ tests:
           image: busybox
     asserts:
     - failedTemplate:
-        errorMessage: |-
-          Only `additionalInitContainers` or `config.overrideInitContainers` can be defined at a time
+        errorPattern: Only `additionalInitContainers` or `config.overrideInitContainers` can be defined at a time
 
   - it: with default service account
     asserts:
@@ -599,8 +598,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
+          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
 
   - it: with duplicated additionalVolumes `mountName` value in same `foobar` container, then fails
     set:
@@ -617,8 +615,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
+          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
 
   - it: with duplicated additionalVolumes `mountName` value but different containers, then success
     set:
@@ -667,8 +664,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
+          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
 
   - it: with duplicated additionalVolumes `name` value in same `foobar` container, then fails
     set:
@@ -683,8 +679,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
+          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
 
   - it: with duplicated additionalVolumes `name` value but different containers, then success
     set:
@@ -767,8 +762,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            Volume `foobar-mount-volume` is defined more than once but with different types
+          errorPattern: Volume `foobar-mount-volume` is defined more than once but with different types
 
   - it: with invalid additional volume `type`, then schema validation fails
     set:
@@ -786,7 +780,7 @@ tests:
           path: /fake-volume-path
     asserts:
       - failedTemplate:
-          errorMessage: |-
+          errorPattern: |- 
             `type` value is mandatory for all of the `additionalVolumes` defined
 
   - it: with missing mandatory additional volume `type` for `foobar` container, then fails
@@ -797,7 +791,7 @@ tests:
           containerName: foobar
     asserts:
       - failedTemplate:
-          errorMessage: |-
+          errorPattern: |-
             `type` value is mandatory for all of the `additionalVolumes` defined
 
   - it: with missing mandatory additional volume `path` for `hivemq` container, then fails
@@ -807,7 +801,7 @@ tests:
           type: configMap
     asserts:
       - failedTemplate:
-          errorMessage: |-
+          errorPattern: |-
             `path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container
 
   - it: with missing mandatory additional volume `path` for `foobar` container, then success
@@ -834,8 +828,7 @@ tests:
           path: /fake-volume-path
     asserts:
       - failedTemplate:
-          errorMessage: |-
-            At least one of `name` or `mountName` values must be defined
+          errorPattern: At least one of `name` or `mountName` values must be defined
 
   - it: with additional volume type `configMap` but missing `name`, then fails
     set:
@@ -845,7 +838,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorMessage: |-
+          errorPattern: |-
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
   - it: with additional volume type `secret` but missing `name`, then fails
@@ -856,7 +849,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorMessage: |-
+          errorPattern: |- 
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
   - it: with additional volume type `persistentVolumeClaim` but missing `name`, then fails
@@ -867,7 +860,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorMessage: |-
+          errorPattern: |-
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
   - it: with additional volume type `emptyDir` but missing `name`, then success

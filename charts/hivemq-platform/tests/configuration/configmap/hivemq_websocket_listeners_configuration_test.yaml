@@ -158,7 +158,7 @@ tests:
           hivemqListenerName: my-custom-ws-listener
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated HiveMQ listener name `my-custom-ws-listener`
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-ws-listener`
 
   - it: with non-exposed WebSocket services and duplicated listener name, validation succeeds
     template: hivemq-custom-resource.yml
@@ -815,7 +815,7 @@ tests:
           hivemqListenerName: my-custom-secure-ws-listener
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated HiveMQ listener name `my-custom-secure-ws-listener`
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-secure-ws-listener`
 
   - it: with non-exposed secure WebSocket services and duplicated listener name, validation succeeds
     template: hivemq-custom-resource.yml
