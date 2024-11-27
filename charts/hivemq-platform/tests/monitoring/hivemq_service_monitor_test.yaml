@@ -1,0 +1,202 @@
+suite: HiveMQ Platform - ServiceMonitor tests
+templates:
+  - hivemq-service-monitor.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+capabilities:
+  apiVersions:
+    - monitoring.coreos.com/v1
+tests:
+
+  - it: with default values, default ServiceMonitor not created
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 0
+
+  - it: with ServiceMonitor enabled and Prometheus CRDs present, default ServiceMonitor created
+    set:
+      monitoring.enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+          name: hivemq-platform-service-monitor-test-hivemq-platform
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-0.0.1
+            app.kubernetes.io/name: hivemq-platform
+            app.kubernetes.io/instance: test-hivemq-platform
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+            release: test-hivemq-platform
+      - equal:
+          path: metadata.namespace
+          value: test-hivemq-platform-namespace
+      - isSubset:
+          path: spec.selector
+          content:
+            matchLabels:
+              app.kubernetes.io/name: "hivemq-platform"
+              app.kubernetes.io/instance: "test-hivemq-platform"
+      - isSubset:
+          path: spec.namespaceSelector
+          content:
+            matchNames:
+              - test-hivemq-platform-namespace
+      - contains:
+          path: spec.endpoints
+          content:
+            port: metrics-9399
+            path: /
+            interval: 15s
+            scrapeTimeout: 10s
+      - equal:
+          path: spec.jobLabel
+          value: hivemq-platform-service-monitor-test-hivemq-platform
+
+  - it: with long Helm release name, ServiceMonitor name and jobLabel truncated
+    release:
+      name: a-very-long-hivemq-platform-release-name
+    set:
+      monitoring.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-platform-service-monitor-a-very-long-hivemq-platform-rel
+      - equal:
+          path: spec.jobLabel
+          value: hivemq-platform-service-monitor-a-very-long-hivemq-platform-rel
+
+  - it: with no Prometheus Monitoring CRDs installed, validation fails
+    capabilities:
+      apiVersions:
+    set:
+      monitoring.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
+
+  - it: with metrics disabled, validation fails
+    set:
+      metrics.enabled: false
+      monitoring.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: HiveMQ Prometheus extension is disabled. Please, use `.metrics.enabled=true` to create a ServiceMonitor resource for the HiveMQ Platform.
+
+  - it: with invalid metrics service, validation fails
+    set:
+      monitoring.enabled: true
+      metrics.port: 9499
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `metrics` with container port `9399` cannot be different than the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
+
+  - it: with invalid interval format, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 123a
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid scrape timeout format, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          scrapeTimeout: 123a
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid ServiceMonitor namespace, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          namespace: this-is-an-extremely-very-long-hivemq-platform-operator-namespace-name
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom namespace, ServiceMonitor installed on the custom namespace
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          namespace: monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: monitoring
+
+  - it: with custom ServiceMonitor endpoint configuration, ServiceMonitor custom endpoint set
+    set:
+      metrics:
+        path: /metrics
+        port: 9499
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 1s
+          scrapeTimeout: 2s
+    asserts:
+      - contains:
+          path: spec.endpoints
+          content:
+            port: metrics-9499
+            path: /metrics
+            interval: 1s
+            scrapeTimeout: 2s
+
+  - it: with custom ServiceMonitor endpoint configuration and a metrics legacy service, ServiceMonitor custom endpoint set
+    set:
+      migration.statefulSet: true
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9499
+          legacyPortName: legacy-metrics-port-name
+      metrics:
+        path: /legacy-metrics
+        port: 9499
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 1s
+          scrapeTimeout: 2s
+    asserts:
+      - contains:
+          path: spec.endpoints
+          content:
+            port: legacy-metrics-port-name
+            path: /legacy-metrics
+            interval: 1s
+            scrapeTimeout: 2s
+
+  - it: with custom ServiceMonitor release name, custom ServiceMonitor release name set
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          releaseName: monitoring-stack
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-0.0.1
+            app.kubernetes.io/name: hivemq-platform
+            app.kubernetes.io/instance: test-hivemq-platform
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+            release: monitoring-stack

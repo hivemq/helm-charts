@@ -1,4 +1,4 @@
-suite: HiveMQ Platform Legacy services tests
+suite: HiveMQ Platform - Legacy services tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -87,7 +87,7 @@ tests:
           legacyPortName: legacy
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9399` cannot be different that the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
+          errorPattern: Service type `metrics` with container port `9399` cannot be different than the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with statefulSet migration, then no default metrics service port is added to the HiveMQ container
     set:
@@ -147,7 +147,7 @@ tests:
           legacyPortName: mqtt
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt
+          errorPattern: Found duplicated service name hivemq-test-hivemq-platform-mqtt
 
   - it: with duplicated legacy port names, validation fails
     set:
@@ -163,7 +163,7 @@ tests:
           legacyPortName: mqtt
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated service name hivemq-test-hivemq-platform-mqtt
+          errorPattern: Found duplicated service name hivemq-test-hivemq-platform-mqtt
 
   - it: with different legacy port names but duplicated ports, validation succeeds
     set:
@@ -196,7 +196,7 @@ tests:
           legacyPortName: mqtt
     asserts:
       - failedTemplate:
-          errorMessage: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt (set as exposed and not exposed)
+          errorPattern: Ambiguous definition found for service hivemq-test-hivemq-platform-mqtt \(set as exposed and not exposed\)
 
   - it: with duplicated custom legacy service names, then validation fails
     set:
@@ -214,7 +214,7 @@ tests:
           legacyPortName: mqtt2
     asserts:
       - failedTemplate:
-          errorMessage: Found duplicated service name my-custom-mqtt
+          errorPattern: Found duplicated service name my-custom-mqtt
 
   - it: with statefulSet migration and `port` value set, then validation fails
     set:
@@ -231,7 +231,7 @@ tests:
           legacyPortName: mqtt2
     asserts:
       - failedTemplate:
-          errorMessage: Service type `mqtt` with container port `1884` cannot use `port` value as `migration.statefulSet` value is enabled
+          errorPattern: Service type `mqtt` with container port `1884` cannot use `port` value as `migration.statefulSet` value is enabled
 
   - it: with statefulSet migration and `port` value set in not exposed services, then validation succeeds
     set:
@@ -264,7 +264,7 @@ tests:
           legacyPortName: mqtt2
     asserts:
       - failedTemplate:
-          errorMessage: Service type `mqtt` with container port `1884` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled
+          errorPattern: Service type `mqtt` with container port `1884` cannot use `legacyPortName` value as `migration.statefulSet` value is disabled
 
   - it: with statefulSet migration disabled and `legacyPortName` value set in not exposed services, then validation succeeds
     set:

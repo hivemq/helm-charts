@@ -1,4 +1,4 @@
-suite: HiveMQ Broker license tests
+suite: HiveMQ Platform - HiveMQ Broker license tests
 templates:
   - hivemq-custom-resource.yml
   - hivemq-license.yml
@@ -131,7 +131,7 @@ tests:
       license.create: true
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Platform license content cannot be empty
+          errorPattern: HiveMQ Platform license content cannot be empty
         template: hivemq-license.yml
 
   - it: with broker license only, no additional license added
@@ -154,7 +154,7 @@ tests:
       license.data: ""
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Platform license content cannot be empty
+          errorPattern: HiveMQ Platform license content cannot be empty
         template: hivemq-license.yml
 
   - it: with broker license overrideLicense empty, then validation fails
@@ -163,7 +163,7 @@ tests:
       license.overrideLicense: ""
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Platform license content cannot be empty
+          errorPattern: HiveMQ Platform license content cannot be empty
         template: hivemq-license.yml
 
   - it: with broker license overrideLicense and data empty, then validation fails
@@ -173,7 +173,7 @@ tests:
       license.overrideLicense: ""
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Platform license content cannot be empty
+          errorPattern: HiveMQ Platform license content cannot be empty
         template: hivemq-license.yml
 
   - it: with broker license overrideLicense and data set, then validation fails
@@ -183,7 +183,7 @@ tests:
       license.overrideLicense: broker-license-content2
     asserts:
       - failedTemplate:
-          errorMessage: Both `data` and `overrideLicense` values are set for the HiveMQ Broker license content. Please, use only one of them
+          errorPattern: Both `data` and `overrideLicense` values are set for the HiveMQ Broker license content. Please, use only one of them
         template: hivemq-license.yml
 
   - it: with invalid broker license values, then validation fails
@@ -193,7 +193,7 @@ tests:
       license.bar: kafka-extension-license-content2
     asserts:
       - failedTemplate:
-          errorMessage: HiveMQ Platform license content cannot be empty
+          errorPattern: HiveMQ Platform license content cannot be empty
         template: hivemq-license.yml
 
   - it: with all licenses set with overrideLicense value, all licenses created
