@@ -32,7 +32,7 @@ import static org.awaitility.Durations.TWO_SECONDS;
 
 public abstract class AbstractHelmChartIT {
 
-    protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq-platform-operator";
+    protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq";
     protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
     protected static final @NotNull String LEGACY_RELEASE_NAME = "test-hivemq-legacy-platform";

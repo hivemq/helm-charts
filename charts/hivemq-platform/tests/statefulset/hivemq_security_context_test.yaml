@@ -197,7 +197,7 @@ tests:
           runAsUser: 10000
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
 
   - it: with security context runAsNonRoot true, and runAsUser root, then validation fails
@@ -209,7 +209,7 @@ tests:
           runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |- 
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
 
   - it: with defaults, no container security context set
@@ -450,7 +450,7 @@ tests:
           runAsUser: 10000
     asserts:
       - failedTemplate:
-          errorPattern: |- 
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
 
   - it: with container security context runAsNonRoot true, and runAsUser root, then validation fails
@@ -461,5 +461,5 @@ tests:
           runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |- 
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)

@@ -14,7 +14,7 @@ tests:
       - containsDocument:
           apiVersion: apps/v1
           kind: Deployment
-          name: hivemq-platform-operator-operator
+          name: hivemq-operator
 
   - it: with default values, default labels created
     asserts:
@@ -75,13 +75,13 @@ tests:
             foo: bar
             bar: baz
 
-  - it: with long Helm release name, Deployment name truncated
+  - it: with max of 53 chars for Helm release name, Deployment name not truncated
     release:
-      name: a-very-long-hivemq-platform-operator-release-name
+      name: a-very-looooong-hivemq-platform-operator-release-name
     asserts:
       - equal:
           path: metadata.name
-          value: hivemq-platform-operator-a-very-long-hivemq-platform-operator-r
+          value: hivemq-a-very-looooong-hivemq-platform-operator-release-name
 
   - it: with image override
     set:
@@ -358,7 +358,7 @@ tests:
         runAsUser: 185
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499 
             `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
 
   - it: with pod security context runAsNonRoot true, and runAsUser root, then validation fails
@@ -369,7 +369,7 @@ tests:
         runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
 
   - it: with defaults, no container security context set
@@ -605,7 +605,7 @@ tests:
         runAsUser: 185
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
 
   - it: with container security context runAsNonRoot true, and runAsUser root, then validation fails
@@ -615,7 +615,7 @@ tests:
         runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
 
 

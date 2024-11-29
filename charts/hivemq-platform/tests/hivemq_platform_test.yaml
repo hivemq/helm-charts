@@ -780,7 +780,7 @@ tests:
           path: /fake-volume-path
     asserts:
       - failedTemplate:
-          errorPattern: |- 
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `type` value is mandatory for all of the `additionalVolumes` defined
 
   - it: with missing mandatory additional volume `type` for `foobar` container, then fails
@@ -791,7 +791,7 @@ tests:
           containerName: foobar
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `type` value is mandatory for all of the `additionalVolumes` defined
 
   - it: with missing mandatory additional volume `path` for `hivemq` container, then fails
@@ -801,7 +801,7 @@ tests:
           type: configMap
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container
 
   - it: with missing mandatory additional volume `path` for `foobar` container, then success
@@ -838,7 +838,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
   - it: with additional volume type `secret` but missing `name`, then fails
@@ -849,7 +849,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |- 
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
   - it: with additional volume type `persistentVolumeClaim` but missing `name`, then fails
@@ -860,7 +860,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |-
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
   - it: with additional volume type `emptyDir` but missing `name`, then success

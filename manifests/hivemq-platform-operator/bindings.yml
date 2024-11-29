@@ -14,7 +14,7 @@ roleRef:
   name: hivemq-platform-operator-role-my-operator
 subjects:
   - kind: ServiceAccount
-    name: hivemq-platform-operator-sa-my-operator
+    name: hivemq-platform-operator-my-operator
     namespace: default
 ---
 # Source: hivemq-platform-operator/templates/bindings.yml
@@ -32,5 +32,5 @@ roleRef:
   name: view
 subjects:
   - kind: ServiceAccount
-    name: hivemq-platform-operator-sa-my-operator
+    name: hivemq-platform-operator-my-operator
     namespace: default
