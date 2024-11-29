@@ -159,9 +159,22 @@
         "dashboard" : {
           "description" : "Dashboard configuration options.",
           "properties" : {
-            "namespace" : {
-              "description" : "Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where the HiveMQ Platform Operator chart is deployed to.",
+            "create" : {
+              "description" : "Creates a default HiveMQ Platform Operator Grafana dashboard ConfigMap.",
+              "type": "boolean"
+            },
+            "name" : {
+              "description" : "Overrides the default HiveMQ Platform Operator Grafana dashboard by providing the name of a Kubernetes ConfigMap that contains the Grafana dashboard.",
               "maxLength": 63,
+              "type": "string"
+            },
+            "namespace" : {
+              "description" : "Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where the HiveMQ Platform chart is deployed to.",
+              "maxLength": 63,
+              "type": "string"
+            },
+            "overrideDashboard" : {
+              "description" : "Overrides the default HiveMQ Platform Operator Grafana dashboard content via file using --set-file grafana-dashboard.json.",
               "type": "string"
             }
           },
