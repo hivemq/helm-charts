@@ -1,4 +1,4 @@
-{{- if .Values.monitoring.enabled }}
+{{- if and .Values.monitoring.enabled .Values.monitoring.dashboard.create }}
 {{- include "hivemq-platform.validate-prometheus-monitoring-stack-installed" . -}}
 apiVersion: v1
 kind: ConfigMap
@@ -13,6 +13,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
 data:
+  {{- if .Values.monitoring.dashboard.overrideDashboard }}
+  hivemq-dashboard.json: |
+    {{- range .Values.monitoring.dashboard.overrideDashboard | toStrings }}
+    {{ . | nindent 4 }}
+    {{- end }}
+  {{- else }}
   hivemq-dashboard.json: |
     {{- .Files.Get "files/grafana-dashboard.json" | nindent 4 }}
+  {{- end }}
 {{- end }}

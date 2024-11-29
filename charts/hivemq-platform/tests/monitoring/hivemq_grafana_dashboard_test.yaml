@@ -26,6 +26,27 @@ tests:
       - hasDocuments:
           count: 1
 
+  - it: with monitoring enabled and create disabled, ConfigMap not created
+    set:
+      monitoring:
+        enabled: true
+        dashboard:
+          create: false
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 0
+
+  - it: with monitoring enabled, create disabled and invalid ConfigMap name, schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        dashboard:
+          create: false
+          name: this-is-a-very-long-hivemq-platform-operator-grafana-dashboard-configmap-name
+    asserts:
+      - failedTemplate: {}
+
   - it: with long Helm release name, ConfigMap name truncated
     release:
       name: a-very-long-hivemq-platform-release-name
@@ -45,7 +66,7 @@ tests:
       - failedTemplate:
           errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
 
-  - it: with invalid Dashboard namespace, then schema validation fails
+  - it: with invalid Dashboard namespace, schema validation fails
     set:
       monitoring:
         enabled: true
@@ -105,6 +126,25 @@ tests:
               grafana_dashboard: "1"
             name: hivemq-platform-dashboard-custom-release-name
             namespace: my-custom-dashboard-namespace
+
+  - it: with monitoring enabled and overrideDashboard set, custom ConfigMap spec created with custom values
+    set:
+      monitoring:
+        enabled: true
+        dashboard:
+          overrideDashboard: |-
+            {
+              "my-custom-grafana-title": "foobar"
+            }
+    asserts:
+      - exists:
+          path: data["hivemq-dashboard.json"]
+      - equal:
+          path: data["hivemq-dashboard.json"]
+          value: |
+            {
+              "my-custom-grafana-title": "foobar"
+            }
 
   - it: with monitoring enabled and default values, ConfigMap spec created with defaults values
     set:

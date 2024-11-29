@@ -170,19 +170,26 @@ monitoring:
   # When enabled, deploys a ServiceMonitor resource for the Operator along with a Configmap for a Grafana dashboard.
   enabled: false
   # Dashboard configuration options.
-  # dashboard:
-  #   Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where the HiveMQ Platform Operator Helm chart is deployed to.
-  #   namespace: monitoring
-  # ServiceMonitor configuration options.
+  dashboard:
+    # Creates a default HiveMQ Platform Operator Grafana dashboard ConfigMap.
+    create: true
+    # Namespace where to deploy the Grafana dashboard ConfigMap. Defaults to the namespace of the HiveMQ Platform Operator.
+    # namespace: monitoring
+    # The name of a Kubernetes ConfigMap with a custom HiveMQ Platform Operator Grafana dashboard to override the default dashboard.
+    # (also set create=false).
+    # Grafana dashboard ConfigMap content must be in JSON format along with the label `grafana_dashboard: "1"`
+    name: ""
+    # Overrides the default HiveMQ Platform Grafana Operator dashboard content via file using --set-file grafana-dashboard.json.
+    overrideDashboard: ""
   serviceMonitor:
-    # Namespace where the ServiceMonitor will be deployed to. Defaults to use the same namespace where the HiveMQ Platform Operator Helm chart is deployed to.
+    # Namespace where to deploy the ServiceMonitor. Defaults to the namespace of the HiveMQ Platform Operator.
     # namespace: monitoring
     # Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster.
-    # This allows the Prometheus operator to discover the HiveMQ Platform Operator ServiceMonitor. Defaults to the HiveMQ Platform Operator Helm chart release name.
+    # The release name allows the Prometheus operator to discover the HiveMQ Platform Operator ServiceMonitor. Defaults to the HiveMQ Platform Operator Helm chart release name.
     # releaseName: monitoring-stack
     # Defines how often Prometheus should scrape metrics from the endpoints defined in the ServiceMonitor resource.
-    # Format is based on the regular expression `(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)`. For example 1d, 1h30m, 5m, 10s.
+    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`.
     interval: 15s
     # Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.
-    # Format is based on the regular expression `(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)`. For example 1d, 1h30m, 5m, 10s.
+    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`.
     scrapeTimeout: 10s
