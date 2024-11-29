@@ -213,6 +213,24 @@
       },
       "type" : "object"
     },
+    "hivemqOverloadProtection" : {
+      "description" : "Configures HiveMQ Cluster overload protection.",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "hivemqClusterReplication" : {
+      "description" : "Configures HiveMQ Cluster replication.",
+      "properties" : {
+        "replicaCount" : {
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
+    },
     "hivemqInternalOptions" : {
       "additionalProperties" : false,
       "description" : "HiveMQ Internal Options configuration.",

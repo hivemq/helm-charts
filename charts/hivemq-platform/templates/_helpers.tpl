@@ -737,6 +737,38 @@ Returns:
 {{- end }}
 
 {{/*
+Checks if there is any HiveMQ Overload Protection options set based on the `.Values.hivemqOverloadProtection` values
+Params:
+- hivemqOverloadProtection: The set of values from hivemqOverloadProtection
+Returns:
+- `true` if any of the expected values under the hivemqOverloadProtection top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-overload-protection-config" }}
+{{- $overloadProtectionConfig := .hivemqOverloadProtection }}
+{{- $contains := "" }}
+{{- if (hasKey $overloadProtectionConfig "enabled") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
+Checks if there is any HiveMQ Replication options set based on the `.Values.hivemqClusterReplication` values
+Params:
+- hivemqClusterReplication: The set of values from hivemqClusterReplication
+Returns:
+- `true` if any of the expected values under the hivemqClusterReplication top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-cluster-replication-config" }}
+{{- $repliationConfig := .hivemqClusterReplication }}
+{{- $contains := "" }}
+{{- if (hasKey $repliationConfig "replicaCount") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
 Checks if there is any HiveMQ restriction options set based on the `.Values.hivemqRestrictions` values
 Params:
 - hivemqRestrictions: The set of values from hivemqRestrictions
