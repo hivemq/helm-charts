@@ -190,6 +190,16 @@ license:
 #  enabled: false
 #  lifetime: 604800
 
+# Configures HiveMQ Cluster overload protection
+# See https://docs.hivemq.com/hivemq/latest/user-guide/overload-protection.html
+#hivemqOverloadProtection:
+#  enabled: true
+
+# Configures HiveMQ Cluster replication
+# See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
+#hivemqClusterReplication:
+#  replicaCount: 2
+
 operator:
   # Selector name to configure which HiveMQ Platform Operator manages this platform.
   # Use the "selector" value in the HiveMQ Platform Operator Helm chart to configure a matching label selector.
