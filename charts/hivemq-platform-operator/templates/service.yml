@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "hivemq-platform-operator.name" (dict "name" "service" "releaseName" .Release.Name) }}
+  name: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "releaseName" .Release.Name) }}
   {{- with .Values.serviceAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

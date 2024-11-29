@@ -6,7 +6,7 @@ metadata:
   labels:
     grafana_dashboard: "1"
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
-  name: {{ include "hivemq-platform-operator.name" (dict "name" "dashboard" "releaseName" .Release.Name) }}
+  name: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "dashboard" "releaseName" .Release.Name) }}
   {{- if and (hasKey .Values.monitoring "dashboard") (hasKey .Values.monitoring.dashboard "namespace") }}
   namespace: {{ .Values.monitoring.dashboard.namespace }}
   {{- else }}

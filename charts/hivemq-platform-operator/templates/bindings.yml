@@ -3,7 +3,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "hivemq-platform-operator.name" (dict "name" "view-binding" "releaseName" .Release.Name) }}
+  name: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "view-binding" "releaseName" .Release.Name) }}
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
 roleRef:
@@ -18,13 +18,13 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "hivemq-platform-operator.name" (dict "name" "role-binding" "releaseName" .Release.Name) }}
+  name: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role-binding" "releaseName" .Release.Name) }}
   labels:
     {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "hivemq-platform-operator.name" (dict "name" "role" "releaseName" .Release.Name) }}
+  name: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
 subjects:
   - kind: ServiceAccount
     name: {{ include "hivemq-platform-operator.serviceAccountName" . }}

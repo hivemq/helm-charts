@@ -26,7 +26,7 @@ tests:
           path: subjects
           content:
             kind: ServiceAccount
-            name: hivemq-platform-operator-sa-operator
+            name: hivemq-platform-operator-operator
             namespace: hivemq-platform-operator-namespace
 
   - it: with default values, default labels created
