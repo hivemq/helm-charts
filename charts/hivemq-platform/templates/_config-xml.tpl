@@ -113,6 +113,15 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <discovery>
       <extension/>
     </discovery>
+    {{- $clusterReplicationConfig := .Values.hivemqClusterReplication }}
+    {{- $hasclusterReplicationConfig := include "hivemq-platform.has-cluster-replication-config" (dict "hivemqClusterReplication" $clusterReplicationConfig) }}
+    {{- if $hasclusterReplicationConfig }}
+    <replication>
+      {{- if (hasKey $clusterReplicationConfig "replicaCount") }}
+      <replica-count>{{ $clusterReplicationConfig.replicaCount }}</replica-count>
+      {{- end }}
+    </replication>
+    {{- end }}
   </cluster>
   <!-- required and should not be configured different -->
   <health-api>
@@ -228,6 +237,15 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <lifetime>{{ $clientEventHistoryConfig.lifetime }}</lifetime>
     {{- end }}
   </client-event-history>
+  {{- end }}
+  {{- $overloadProtectionConfig := .Values.hivemqOverloadProtection }}
+  {{- $hasoverloadProtectionConfig := include "hivemq-platform.has-overload-protection-config" (dict "hivemqOverloadProtection" $overloadProtectionConfig) }}
+  {{- if $hasoverloadProtectionConfig }}
+  <overload-protection>
+    {{- if (hasKey $overloadProtectionConfig "enabled") }}
+    <enabled>{{ $overloadProtectionConfig.enabled }}</enabled>
+    {{- end }}
+  </overload-protection>
   {{- end }}
   {{- $restrictionsConfig := .Values.hivemqRestrictions }}
   {{- $hasRestrictionsConfig := include "hivemq-platform.has-hivemq-restrictions-config" (dict "hivemqRestrictions" $restrictionsConfig) }}
