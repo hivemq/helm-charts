@@ -1,22 +1,24 @@
 {{/*
 Creates a qualified name, based on the release name.
 Params:
-- name: The custom name to append to the default prefix `hivemq-platform-operator`.
-- releaseName: The .Release.Name value.
+- prefix:       The custom prefix to prepend to the name. Otherwise, defaults to `hivemq`.
+- name:         The custom name to append to the default prefix `hivemq-platform-operator`.
+- releaseName:  The .Release.Name value.
 Returns:
-- The resource name based on the custom name argument and on the release name with a default prefix of `hivemq-platform-operator`.
-Format: "hivemq-platform-operator"-<custom-name>-<.Release.Name> | "hivemq-platform-operator"-<.Release.Name>
-Usage: {{ include "hivemq-platform-operator.name" (dict "name" "my-custom-name" "releaseName" .Release.Name) }}
+- The resource name based on the custom prefix, custom name and on the release name with a default prefix of `hivemq`.
+Format: <custom-prefix>-<custom-name>-<.Release.Name> | "hivemq-"-<.Release.Name>
+Usage: {{ include "hivemq-platform-operator.name" (dict "prefix" "my-custom-prefix" "name" "my-custom-name" "releaseName" .Release.Name) }}
 */}}
 {{- define "hivemq-platform-operator.name" -}}
+{{- $customPrefix := .prefix }}
 {{- $customName := .name }}
 {{- $releaseName := .releaseName }}
-{{- $prefix := "hivemq-platform-operator" }}
+{{- $prefix := "hivemq" }}
 {{- $name := "" }}
 {{- if $customName -}}
-{{- $name = printf "%s-%s-%s" $prefix $customName $releaseName }}
+{{- $name = printf "%s-%s-%s" ($customPrefix | default $prefix) $customName $releaseName }}
 {{- else -}}
-{{- $name = printf "%s-%s" $prefix $releaseName }}
+{{- $name = printf "%s-%s" ($customPrefix | default $prefix) $releaseName }}
 {{- end -}}
 {{- printf "%s" $name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}
 {{- end -}}
@@ -46,7 +48,7 @@ Creates the name of the service account to use for the HiveMQ Platform Operator
 {{- if .Values.serviceAccount.name }}
 {{- printf "%s" .Values.serviceAccount.name }}
 {{- else }}
-{{- include "hivemq-platform-operator.name" (dict "name" "sa" "releaseName" .Release.Name) }}
+{{- include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "releaseName" .Release.Name) }}
 {{- end }}
 {{- end -}}
 
