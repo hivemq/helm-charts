@@ -267,6 +267,11 @@ services:
     #  # Session affinity type. Must be `ClientIP` or `None`.
     #  # Defaults to `ClientIP` for the `control-center` service type.
     #  type: None
+    # Configures whether this Service routes external traffic to node-local or cluster-wide endpoints.
+    # Affects the network traffic routing behavior, client source IP preservation, and load balancing across Kubernetes nodes.
+    # Only applicable to LoadBalancer or NodePort service types. Possible values are `Cluster` or `Local`.
+    # See: https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy
+    # externalTrafficPolicy: Cluster
 
   # Secure MQTT service configuration
   - type: mqtt

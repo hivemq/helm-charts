@@ -360,6 +360,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-metrics-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
+{{- include "hivemq-platform.validate-external-traffic-policy" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
 
@@ -498,6 +499,23 @@ Usage: {{ include "hivemq-platform.validate-hivemq-listener-name-services" . }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
     {{- fail (printf "Service type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that external traffic policy value is only present when the service type value is set to either NodePort or LoadBalancer
+and the service is exposed.
+Usage: {{ include "hivemq-platform.validate-external-traffic-policy" . }}
+*/}}
+{{- define "hivemq-platform.validate-external-traffic-policy" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "externalTrafficPolicy") (not (hasKey $service "serviceType")) }}
+    {{- fail (printf "Service type `%s` with container port `%d` is using `externalTrafficPolicy` value but `serviceType` value is not defined. Service type value is mandatory when using external traffic policy" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+  {{- if and ($service.exposed) (hasKey $service "externalTrafficPolicy") (hasKey $service "serviceType") (and (not (eq $service.serviceType "NodePort")) (not (eq $service.serviceType "LoadBalancer")) )  }}
+    {{- fail (printf "Service type `%s` with container port `%d` is using `externalTrafficPolicy` value. External traffic policy is only supported by NodePort and LoadBalancer service types" $service.serviceType (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
