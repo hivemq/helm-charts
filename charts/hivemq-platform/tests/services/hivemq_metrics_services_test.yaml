@@ -959,7 +959,7 @@ tests:
           hivemqProxyProtocol: true
     asserts:
       - failedTemplate:
-          errorPattern: Service type metrics with container port 9399 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+          errorPattern: Service type `metrics` with container port `9399` is using `hivemqProxyProtocol` value. HiveMQ PROXY protocol is only supported by MQTT and WebSocket services
 
   - it: with a Metrics service disabled and PROXY protocol enabled, validation succeeds
     set:
@@ -968,6 +968,29 @@ tests:
           exposed: false
           containerPort: 9399
           hivemqProxyProtocol: true
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a Metrics service enabled and HiveMQ listener name enabled, validation fails
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          hivemqListenerName: foobar
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type `metrics` with container port `9399` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
+
+  - it: with a Metrics service disabled and HiveMQ listener name enabled, validation succeeds
+    set:
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+          hivemqListenerName: foobar
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:

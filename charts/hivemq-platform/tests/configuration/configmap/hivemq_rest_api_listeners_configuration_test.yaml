@@ -112,14 +112,3 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
-
-  - it: with a REST API service exposed and a listener name, schema validation fails
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: rest-api
-          exposed: true
-          containerPort: 8890
-          hivemqListenerName: my-custom-rest-api-listener
-    asserts:
-      - failedTemplate: {}

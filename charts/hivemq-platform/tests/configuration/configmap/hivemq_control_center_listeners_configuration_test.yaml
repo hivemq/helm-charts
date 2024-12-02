@@ -577,14 +577,3 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
-
-  - it: with a Control Center service exposed and a listener name, schema validation fails
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: control-center
-          exposed: true
-          containerPort: 8081
-          hivemqListenerName: my-custom-cc-listener
-    asserts:
-      - failedTemplate: {}
