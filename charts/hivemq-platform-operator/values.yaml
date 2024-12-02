@@ -175,10 +175,6 @@ monitoring:
     create: true
     # Namespace where to deploy the Grafana dashboard ConfigMap. Defaults to the namespace of the HiveMQ Platform Operator.
     # namespace: monitoring
-    # The name of a Kubernetes ConfigMap with a custom HiveMQ Platform Operator Grafana dashboard to override the default dashboard.
-    # (also set create=false).
-    # Grafana dashboard ConfigMap content must be in JSON format along with the label `grafana_dashboard: "1"`
-    name: ""
     # Overrides the default HiveMQ Platform Grafana Operator dashboard content via file using --set-file grafana-dashboard.json.
     overrideDashboard: ""
   serviceMonitor:
