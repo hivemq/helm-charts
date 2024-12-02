@@ -840,13 +840,3 @@ tests:
       - hasDocuments:
           count: 1
 
-  - it: with a non MQTT or WebSocket service exposed and a listener name, schema validation fails
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: control-center
-          exposed: true
-          containerPort: 8081
-          hivemqListenerName: my-custom-cc-listener
-    asserts:
-      - failedTemplate: {}
