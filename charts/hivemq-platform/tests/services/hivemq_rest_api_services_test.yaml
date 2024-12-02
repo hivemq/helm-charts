@@ -157,7 +157,7 @@ tests:
           hivemqListenerName: foobar
     asserts:
       - failedTemplate:
-          errorMessage: Service type `rest-api` with container port `8888` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
+          errorPattern: Service type `rest-api` with container port `8888` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
 
   - it: with a REST API service disabled and HiveMQ listener name enabled, validation succeeds
     set:
