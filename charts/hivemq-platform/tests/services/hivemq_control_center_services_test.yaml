@@ -132,7 +132,7 @@ tests:
           hivemqProxyProtocol: true
     asserts:
       - failedTemplate:
-          errorPattern: Service type control-center with container port 8081 is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services
+          errorPattern: Service type `control-center` with container port `8081` is using `hivemqProxyProtocol` value. HiveMQ PROXY protocol is only supported by MQTT and WebSocket services
 
   - it: with a Control Center service disabled and PROXY protocol enabled, validation succeeds
     set:
@@ -141,6 +141,29 @@ tests:
           exposed: false
           containerPort: 8081
           hivemqProxyProtocol: true
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a Control Center service enabled and HiveMQ listener name enabled, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          hivemqListenerName: foobar
+    asserts:
+      - failedTemplate:
+          errorMessage: Service type `control-center` with container port `8081` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
+
+  - it: with a Control Center service disabled and HiveMQ listener name enabled, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+          hivemqListenerName: foobar
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:

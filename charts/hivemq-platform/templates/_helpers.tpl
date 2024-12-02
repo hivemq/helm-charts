@@ -358,7 +358,8 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-service-container-ports" . -}}
 {{- include "hivemq-platform.validate-default-service-ports" . -}}
 {{- include "hivemq-platform.validate-metrics-services" . -}}
-{{- include "hivemq-platform.validate-proxy-protocol-services" . -}}
+{{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
+{{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
 
@@ -476,14 +477,27 @@ Usage: {{ include "hivemq-platform.validate-metrics-services" . }}
 {{- end -}}
 
 {{/*
-Validates that proxy protocol value is only used by either MQTT or WebSocket services.
-Usage: {{ include "hivemq-platform.validate-proxy-protocol-services" . }}
+Validates that proxy protocol value is only used by either MQTT or WebSocket services and the service is exposed.
+Usage: {{ include "hivemq-platform.validate-hivemq-proxy-protocol-services" . }}
 */}}
-{{- define "hivemq-platform.validate-proxy-protocol-services" -}}
+{{- define "hivemq-platform.validate-hivemq-proxy-protocol-services" -}}
 {{- $services := .Values.services }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "hivemqProxyProtocol") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
-    {{- fail (printf "\nService type %s with container port %d is using PROXY protocol value. PROXY protocol is only supported for MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqProxyProtocol` value. HiveMQ PROXY protocol is only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that HiveMQ listener name value is only used by either MQTT or WebSocket services and the service is exposed.
+Usage: {{ include "hivemq-platform.validate-hivemq-listener-name-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-hivemq-listener-name-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
+    {{- fail (printf "Service type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}

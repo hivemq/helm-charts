@@ -683,27 +683,6 @@
     },
     "services" : {
       "items" : {
-        "if" : {
-          "properties" : {
-            "hivemqListenerName" : {
-              "description" : "Defines the optional custom name for the MQTT and WebSocket listeners.",
-              "type" : "string"
-            }
-          },
-          "required" : [
-            "hivemqListenerName"
-          ]
-        },
-        "then" : {
-          "properties" : {
-            "type" : {
-              "enum" : [
-                "mqtt",
-                "websocket"
-              ]
-            }
-          }
-        },
         "properties" : {
           "annotations" : {
             "type" : "object"
@@ -756,12 +735,12 @@
             "type" : "integer"
           },
           "serviceType" : {
-            "type" : "string",
             "enum" : [
               "ClusterIP",
               "LoadBalancer",
               "NodePort"
-            ]
+            ],
+            "type" : "string"
           },
           "sessionAffinity" : {
             "additionalProperties" : false,
