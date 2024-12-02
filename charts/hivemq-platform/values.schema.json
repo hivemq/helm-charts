@@ -695,6 +695,18 @@
           "exposed" : {
             "type" : "boolean"
           },
+          "externalTrafficPolicy" : {
+            "description" : "Describes if the Service routes external traffic to node-local or cluster-wide endpoints. See https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy.",
+            "enum" : [
+              "Cluster",
+              "Local"
+            ],
+            "type": "string"
+          },
+          "hivemqListenerName" : {
+            "description" : "Defines the optional custom name for the MQTT and WebSocket listeners.",
+            "type" : "string"
+          },
           "hivemqProxyProtocol" : {
             "type" : "boolean"
           },
