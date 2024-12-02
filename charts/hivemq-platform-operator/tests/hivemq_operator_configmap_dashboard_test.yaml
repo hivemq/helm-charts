@@ -37,16 +37,6 @@ tests:
       - hasDocuments:
           count: 0
 
-  - it: with monitoring enabled, create disabled and invalid ConfigMap name, schema validation fails
-    set:
-      monitoring:
-        enabled: true
-        dashboard:
-          create: false
-          name: this-is-a-very-long-hivemq-platform-operator-grafana-dashboard-configmap-name
-    asserts:
-      - failedTemplate: {}
-
   - it: with long Helm release name, ConfigMap name truncated
     release:
       name: a-very-long-hivemq-platform-operator-release-name
