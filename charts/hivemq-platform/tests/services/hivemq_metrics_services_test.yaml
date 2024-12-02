@@ -982,7 +982,7 @@ tests:
           hivemqListenerName: foobar
     asserts:
       - failedTemplate:
-          errorMessage: Service type `metrics` with container port `9399` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
+          errorPattern: Service type `metrics` with container port `9399` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
 
   - it: with a Metrics service disabled and HiveMQ listener name enabled, validation succeeds
     set:
