@@ -217,6 +217,7 @@
       "description" : "Configures HiveMQ Cluster overload protection. See https://docs.hivemq.com/hivemq/latest/user-guide/overload-protection.html.",
       "properties" : {
         "enabled" : {
+          "description" : "Enables the HiveMQ Cluster overload protection."
           "type" : "boolean"
         }
       },
