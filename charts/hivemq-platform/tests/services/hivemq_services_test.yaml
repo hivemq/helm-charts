@@ -915,3 +915,130 @@ tests:
             foo: bar
     asserts:
       - failedTemplate: {}
+
+  - it: with invalid external traffic policy set, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          serviceType: NodePort
+          externalTrafficPolicy: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with default service values, external traffic policy not set
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with external traffic policy value set to Cluster, external traffic policy service specification set to Cluster
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          serviceType: LoadBalancer
+          externalTrafficPolicy: Cluster
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              externalTrafficPolicy: Cluster
+              type: LoadBalancer
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with external traffic policy value set to Local, external traffic policy service specification set to Local
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          serviceType: LoadBalancer
+          externalTrafficPolicy: Local
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1883
+            spec:
+              externalTrafficPolicy: Local
+              type: LoadBalancer
+              ports:
+                - name: mqtt-1883
+                  targetPort: mqtt-1883
+                  port: 1883
+
+  - it: with external traffic policy value set but service type not set, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          externalTrafficPolicy: Cluster
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1883` is using `externalTrafficPolicy` value but `serviceType` value is not defined. Service type value is mandatory when using external traffic policy
+
+  - it: with external traffic policy value set and service type not set but service not exposed, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1883
+          externalTrafficPolicy: Cluster
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with external traffic policy value set and service type ClusterIP, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          serviceType: ClusterIP
+          externalTrafficPolicy: Cluster
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `ClusterIP` with container port `1883` is using `externalTrafficPolicy` value. External traffic policy is only supported by NodePort and LoadBalancer service types
+
+  - it: with external traffic policy value set and service type ClusterIP but service not exposed, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1883
+          serviceType: ClusterIP
+          externalTrafficPolicy: Cluster
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

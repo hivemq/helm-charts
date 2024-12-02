@@ -258,6 +258,9 @@ spec:
         {{- if and $service.serviceType (or (eq $service.serviceType "NodePort") (eq $service.serviceType "LoadBalancer")) }}
         type: {{ $service.serviceType }}
         {{- end }}
+        {{- if $service.externalTrafficPolicy }}
+        externalTrafficPolicy: {{ $service.externalTrafficPolicy }}
+        {{- end }}
         {{- if and (eq $service.type "control-center") (not (hasKey $service "sessionAffinity")) }}
         sessionAffinity: ClientIP
         {{- else if hasKey $service "sessionAffinity" }}
