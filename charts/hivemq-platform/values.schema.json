@@ -224,7 +224,7 @@
       "type" : "object"
     },
     "hivemqClusterReplication" : {
-      "description" : "Configures HiveMQ Cluster replication.",
+      "description" : "Configures HiveMQ Cluster replication. See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication.",
       "properties" : {
         "replicaCount" : {
           "type" : "integer"
