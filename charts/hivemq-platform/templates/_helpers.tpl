@@ -760,7 +760,7 @@ Returns:
 - `true` if any of the expected values under the hivemqClusterReplication top level root value is present, empty string otherwise.
 */}}
 {{- define "hivemq-platform.has-cluster-replication-config" }}
-{{- $repliationConfig := .hivemqClusterReplication }}
+{{- $replicationConfig := .hivemqClusterReplication }}
 {{- $contains := "" }}
 {{- if (hasKey $repliationConfig "replicaCount") }}
 {{- $contains = true }}
