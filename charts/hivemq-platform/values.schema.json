@@ -213,20 +213,12 @@
       },
       "type" : "object"
     },
-    "hivemqOverloadProtection" : {
-      "description" : "Configures HiveMQ Cluster overload protection. See https://docs.hivemq.com/hivemq/latest/user-guide/overload-protection.html.",
-      "properties" : {
-        "enabled" : {
-          "description" : "Enables the HiveMQ Cluster overload protection."
-          "type" : "boolean"
-        }
-      },
-      "type" : "object"
-    },
     "hivemqClusterReplication" : {
       "description" : "Configures HiveMQ Cluster replication. See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication.",
       "properties" : {
         "replicaCount" : {
+          "description" : "Number of replicas to be persisted across cluster nodes.",
+          "minimum": 1,
           "type" : "integer"
         }
       },
@@ -377,6 +369,16 @@
         },
         "utf8Validation" : {
           "description" : "Enables the UTF-8 validation of topic names and client IDs.",
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "hivemqOverloadProtection" : {
+      "description" : "Configures HiveMQ Cluster overload protection. See https://docs.hivemq.com/hivemq/latest/user-guide/overload-protection.html.",
+      "properties" : {
+        "enabled" : {
+          "description" : "Enables the HiveMQ Cluster overload protection.",
           "type" : "boolean"
         }
       },
