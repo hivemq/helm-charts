@@ -762,7 +762,7 @@ Returns:
 {{- define "hivemq-platform.has-cluster-replication-config" }}
 {{- $replicationConfig := .hivemqClusterReplication }}
 {{- $contains := "" }}
-{{- if (hasKey $repliationConfig "replicaCount") }}
+{{- if (hasKey $replicationConfig "replicaCount") }}
 {{- $contains = true }}
 {{- end }}
 {{- $contains }}
