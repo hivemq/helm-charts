@@ -1,132 +1,166 @@
-suite: HiveMQ Swarm ServiceMonitor
+suite: HiveMQ Swarm - ServiceMonitor
 templates:
   - servicemonitor.yaml
 release:
   name: swarm
-  namespace: swarm
+  namespace: swarm-namespace
 chart:
-  appVersion: 4.31.0
-  version: 0.2.37
+  version: 0.0.1
+  appVersion: 1.0.0
 capabilities:
   apiVersions:
     - monitoring.coreos.com/v1
-set:
-  monitoring.enabled: true
 tests:
 
-  - it: with default values, no ServiceMonitor is created
-    set:
-      monitoring.enabled: false
-    asserts:
-      - hasDocuments:
-          count: 0
-
-  - it: with monitoring enabled and CRD available in the K8s cluster, ServiceMonitor created
+  - it: with default values, default ServiceMonitor not created
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
-          count: 1
+          count: 0
+
+  - it: with ServiceMonitor enabled and Prometheus CRDs present, default ServiceMonitor created
+    set:
+      monitoring.enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+          name: swarm-hivemq-swarm
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-swarm-0.0.1
+            app.kubernetes.io/name: hivemq-swarm
+            app.kubernetes.io/instance: swarm
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+            release: swarm
+      - equal:
+          path: metadata.namespace
+          value: swarm-namespace
+      - isSubset:
+          path: spec.selector
+          content:
+            matchLabels:
+              app.kubernetes.io/name: "hivemq-swarm"
+              app.kubernetes.io/instance: "swarm"
+      - isSubset:
+          path: spec.namespaceSelector
+          content:
+            matchNames:
+              - swarm-namespace
+      - contains:
+          path: spec.endpoints
+          content:
+            port: api
+            interval: 15s
+            scrapeTimeout: 10s
+      - contains:
+          path: spec.endpoints
+          content:
+            port: metrics
+            interval: 15s
+            scrapeTimeout: 10s
+      - equal:
+          path: spec.jobLabel
+          value: swarm-hivemq-swarm
+
+  - it: with max length Helm release name, ServiceMonitor name and jobLabel not truncated
+    release:
+      name: extremely-looong-hivemq-swarm-helm-chart-release-name
+    set:
+      monitoring.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: extremely-looong-hivemq-swarm-helm-chart-release-name
+      - equal:
+          path: spec.jobLabel
+          value: extremely-looong-hivemq-swarm-helm-chart-release-name
 
   - it: with no Prometheus Monitoring CRDs installed, validation fails
     capabilities:
       apiVersions:
+    set:
+      monitoring.enabled: true
     asserts:
       - failedTemplate:
           errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
 
-  - it: kind is ServiceMonitor and apiVersion is monitoring.coreos.com/v1
-    asserts:
-      - isKind:
-          of: ServiceMonitor
-      - isAPIVersion:
-          of: monitoring.coreos.com/v1
-
-  - it: with monitoring enabled and default values, ServiceMonitor metadata created with defaults values
-    asserts:
-      - isSubset:
-          path: metadata
-          content:
-            labels:
-              release: swarm
-              helm.sh/chart: hivemq-swarm-0.2.37
-              app.kubernetes.io/name: hivemq-swarm
-              app.kubernetes.io/instance: swarm
-              app.kubernetes.io/version: "4.31.0"
-              app.kubernetes.io/managed-by: Helm
-            name: swarm-hivemq-swarm
-            namespace: swarm
-
-  - it: with monitoring enabled and custom metadata values, ServiceMonitor metadata created with custom values
-    release:
-      name: custom-release-name
-      namespace: custom-release-namespace
-    chart:
-      appVersion: 1.0.0
-      version: 0.1.0
+  - it: with invalid interval format, then schema validation fails
     set:
       monitoring:
-        namespace: custom-namespace
-    asserts:
-      - isSubset:
-          path: metadata
-          content:
-            labels:
-              app.kubernetes.io/instance: custom-release-name
-              app.kubernetes.io/managed-by: Helm
-              app.kubernetes.io/name: hivemq-swarm
-              app.kubernetes.io/version: 1.0.0
-              helm.sh/chart: hivemq-swarm-0.1.0
-              release: custom-release-name
-            name: custom-release-name-hivemq-swarm
-            namespace: custom-release-namespace
-
-  - it: with monitoring enabled and default values, ServiceMonitor spec created with defaults values
-    asserts:
-      - isSubset:
-          path: spec
-          content:
-            endpoints:
-              - interval: 15s
-                scrapeTimeout: 10s
-                port: api
-              - interval: 15s
-                scrapeTimeout: 10s
-                port: metrics
-            jobLabel: swarm-hivemq-swarm
-            selector:
-              matchLabels:
-                app.kubernetes.io/name: hivemq-swarm
-                app.kubernetes.io/instance: swarm
-            namespaceSelector:
-              matchNames:
-                - swarm
-
-  - it: with monitoring enabled and custom spec values, ServiceMonitor spec created with custom values
-    release:
-      name: custom-release-name
-      namespace: custom-release-namespace
-    set:
-      monitoring:
+        enabled: true
         serviceMonitor:
-          interval: 20s
-          scrapeTimeout: 5s
-      nameOverride: custom-hivemq-swarm
+          interval: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid scrape timeout format, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          scrapeTimeout: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid ServiceMonitor namespace, then schema validation fails
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          namespace: this-is-an-extremely-very-long-hivemq-swarm-helm-chart-namespace-name
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom namespace, ServiceMonitor installed on the custom namespace
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          namespace: monitoring
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: monitoring
+
+  - it: with custom ServiceMonitor endpoint configuration, ServiceMonitor custom endpoint set
+    release:
+      name: custom-release-name
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          interval: 1s
+          scrapeTimeout: 2s
+    asserts:
+      - contains:
+          path: spec.endpoints
+          content:
+            port: api
+            interval: 1s
+            scrapeTimeout: 2s
+      - contains:
+          path: spec.endpoints
+          content:
+            port: metrics
+            interval: 1s
+            scrapeTimeout: 2s
+
+  - it: with custom ServiceMonitor release name, custom ServiceMonitor release name set
+    set:
+      monitoring:
+        enabled: true
+        serviceMonitor:
+          releaseName: monitoring-stack
     asserts:
       - isSubset:
-          path: spec
+          path: metadata.labels
           content:
-            endpoints:
-              - interval: 20s
-                port: api
-                scrapeTimeout: 5s
-              - interval: 20s
-                port: metrics
-                scrapeTimeout: 5s
-            jobLabel: custom-release-name-custom-hivemq-swarm
-            namespaceSelector:
-              matchNames:
-                - custom-release-namespace
-            selector:
-              matchLabels:
-                app.kubernetes.io/instance: custom-release-name
-                app.kubernetes.io/name: custom-hivemq-swarm
+            helm.sh/chart: hivemq-swarm-0.0.1
+            app.kubernetes.io/name: hivemq-swarm
+            app.kubernetes.io/instance: swarm
+            app.kubernetes.io/version: 1.0.0
+            app.kubernetes.io/managed-by: Helm
+            release: monitoring-stack
