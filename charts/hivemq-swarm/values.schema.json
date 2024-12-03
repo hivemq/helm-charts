@@ -204,23 +204,38 @@
       "type" : "string"
     },
     "monitoring" : {
+      "description" : "Monitoring configuration options.",
       "properties" : {
         "enabled" : {
+          "description" : "When enabled, deploys a ServiceMonitor resource for the HiveMQ Swarm along with a Configmap for a Grafana dashboard.",
           "type" : "boolean"
         },
         "dashboardNamespace" : {
-          "type" : "string"
+          "description" : "Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where the HiveMQ Swarm chart is deployed to.",
+          "maxLength": 63,
+          "type": "string"
         },
         "serviceMonitor" : {
+          "description" : "ServiceMonitor configuration options.",
           "properties" : {
             "interval" : {
-              "type" : "string"
+              "description" : "Defines how often Prometheus should scrape metrics from the endpoints defined in the ServiceMonitor resource.",
+              "pattern": "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
+              "type": "string"
             },
             "namespace" : {
+              "description" : "Namespace where the ServiceMonitor will be deployed to. Defaults to use the same namespace where the HiveMQ Platform chart is deployed to.",
+              "maxLength": 63,
               "type" : "string"
             },
+            "releaseName" : {
+              "description" : "Release name of the Prometheus Monitoring stack available in the Kubernetes cluster. Defaults to the HiveMQ Platform release name.",
+              "type": "string"
+            },
             "scrapeTimeout" : {
-              "type" : "string"
+              "description" : "Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.",
+              "pattern": "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
+              "type": "string"
             }
           },
           "type" : "object"

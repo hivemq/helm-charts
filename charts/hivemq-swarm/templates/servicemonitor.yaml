@@ -4,8 +4,8 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    release: {{ .Release.Name }}
     {{- include "hivemq-swarm.labels" . | nindent 4 }}
+    release: {{ .Values.monitoring.serviceMonitor.releaseName | default .Release.Name }}
   name: {{ include "hivemq-swarm.fullname" . }}
   {{- if .Values.monitoring.serviceMonitor.namespace }}
   namespace: {{ .Values.monitoring.serviceMonitor.namespace }}
