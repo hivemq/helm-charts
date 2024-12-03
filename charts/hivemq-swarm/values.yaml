@@ -129,6 +129,9 @@ monitoring:
   serviceMonitor:
     # Namespace where the ServiceMonitor will be deployed to. Defaults to use the namespace this chart is deployed to.
     # namespace: monitoring
+    # Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster.
+    # The release name allows the Prometheus operator to discover the HiveMQ Swarm ServiceMonitor. Defaults to the HiveMQ Swarm Helm chart release name.
+    # releaseName: monitoring-stack
     interval: 15s
     scrapeTimeout: 10s
 ## Configures the ServiceAccount for HiveMQ Swarm
