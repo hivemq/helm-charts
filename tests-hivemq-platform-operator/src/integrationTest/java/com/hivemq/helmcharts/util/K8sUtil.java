@@ -614,11 +614,17 @@ public class K8sUtil {
                 .inNamespace(namespace)
                 .withLabels(labels)
                 .waitUntilCondition(pod -> pod != null &&
-                        pod.getStatus()
-                                .getContainerStatuses()
-                                .stream()
-                                .allMatch(containerStatus -> containerStatus.getReady() &&
-                                        containerStatus.getStarted()), 3, TimeUnit.MINUTES);
+                        pod.getStatus().getContainerStatuses().stream().allMatch(containerStatus -> {
+                            final var ready = containerStatus.getReady() && containerStatus.getStarted();
+                            if (ready) {
+                                LOG.info("Pod '{}' is ready", pod.getMetadata().getName());
+                            } else {
+                                LOG.debug("Waiting for Pod '{}' to be ready: {}",
+                                        pod.getMetadata().getName(),
+                                        containerStatus);
+                            }
+                            return ready;
+                        }), 3, TimeUnit.MINUTES);
     }
 
     private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
