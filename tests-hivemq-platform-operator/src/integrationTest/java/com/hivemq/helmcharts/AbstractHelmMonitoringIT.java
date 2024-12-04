@@ -31,6 +31,8 @@ public class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
         helmChartContainer.addHelmRepo("prometheus-community", "https://prometheus-community.github.io/helm-charts");
         helmChartContainer.installChart(MONITORING_RELEASE,
                 "prometheus-community/kube-prometheus-stack",
+                "--set",
+                "prometheus-node-exporter.hostRootFsMount.enabled=false",
                 "-n",
                 MONITORING_NAMESPACE,
                 "--create-namespace");
