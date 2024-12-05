@@ -150,21 +150,21 @@
       "type" : "string"
     },
     "monitoring" : {
-      "description" : "Monitoring configuration options.",
+      "description" : "Enables the ServiceMonitor resource and Grafana dashboard creation for the operator.",
       "properties" : {
         "enabled" : {
-          "description" : "When enabled, deploys a ServiceMonitor resource for the Operator along with a Configmap for a Grafana dashboard.",
+          "description" : "Defines whether the monitoring configuration for the HiveMQ Platform Operator is enabled. The default setting is `false`.",
           "type": "boolean"
         },
         "dashboard" : {
           "description" : "Dashboard configuration options.",
           "properties" : {
             "create" : {
-              "description" : "Creates a default HiveMQ Platform Operator Grafana dashboard ConfigMap.",
+              "description" : "Boolean value that configures whether to use the default HiveMQ Platform Operator Grafana dashboard ConfigMap. The default setting is `true`.",
               "type": "boolean"
             },
             "namespace" : {
-              "description" : "Namespace where the Grafana dashboard ConfigMap will be deployed to. Defaults to use the same namespace where the HiveMQ Platform chart is deployed to.",
+              "description" : "Namespace where to deploy the Grafana dashboard ConfigMap. Defaults to the namespace of the HiveMQ Platform Operator.",
               "maxLength": 63,
               "type": "string"
             },
@@ -176,24 +176,24 @@
           "type": "object"
         },
         "serviceMonitor" : {
-          "description" : "ServiceMonitor configuration options.",
+          "description" : "Prometheus ServiceMonitor configuration options.",
           "properties" : {
             "interval" : {
-              "description" : "Defines how often Prometheus should scrape metrics from the endpoints defined in the ServiceMonitor resource.",
+              "description" : "Defines how often Prometheus scrapes metrics from the operator endpoints. Example of a valid format are `1d`, `1h30m`, `5m`, `10s`. Defaults to 15 seconds.",
               "pattern": "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
               "type": "string"
             },
             "namespace" : {
-              "description" : "Namespace where the ServiceMonitor will be deployed to. Defaults to use the same namespace where the HiveMQ Platform Operator chart is deployed to.",
+              "description" : "Namespace where to deploy the ServiceMonitor. Defaults to the namespace of the HiveMQ Platform Operator.",
               "maxLength": 63,
               "type": "string"
             },
             "releaseName" : {
-              "description" : "Release name of the Prometheus Monitoring stack available in the Kubernetes cluster. Defaults to the HiveMQ Platform Operator release name.",
+              "description" : "Helm chart release name of the Prometheus Monitoring stack installed. Defaults to the HiveMQ Platform Operator Helm chart release name.",
               "type": "string"
             },
             "scrapeTimeout" : {
-              "description" : "Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.",
+              "description" : "Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource. Example of a valid format are `1d`, `1h30m`, `5m`, `10s`. Defaults to 10 seconds.",
               "pattern": "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
               "type": "string"
             }
