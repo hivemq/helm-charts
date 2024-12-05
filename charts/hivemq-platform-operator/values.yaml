@@ -165,27 +165,27 @@ crd:
   # Format is based on the ISO-8601 Duration format.
   waitTimeout: PT10S
 
-# Monitoring configuration options
+# Enables the ServiceMonitor resource and Grafana dashboard creation for the operator.
 monitoring:
-  # When enabled, deploys a ServiceMonitor resource for the Operator along with a Configmap for a Grafana dashboard.
+  # Defines whether the monitoring configuration for the HiveMQ Platform Operator is enabled. The default setting is `false`.
   enabled: false
   # Dashboard configuration options.
   dashboard:
-    # Creates a default HiveMQ Platform Operator Grafana dashboard ConfigMap.
+    # Boolean value that configures whether to use the default HiveMQ Platform Operator Grafana dashboard ConfigMap. The default setting is `true`.
     create: true
     # Namespace where to deploy the Grafana dashboard ConfigMap. Defaults to the namespace of the HiveMQ Platform Operator.
     # namespace: monitoring
-    # Overrides the default HiveMQ Platform Grafana Operator dashboard content via file using --set-file grafana-dashboard.json.
+    # Sets the Grafana dashboard content for the HiveMQ Platform Operator Grafana dashboard ConfigMap with your own JSON file from a specified path.
     overrideDashboard: ""
+  # Prometheus ServiceMonitor configuration options.
   serviceMonitor:
     # Namespace where to deploy the ServiceMonitor. Defaults to the namespace of the HiveMQ Platform Operator.
     # namespace: monitoring
-    # Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster.
-    # The release name allows the Prometheus operator to discover the HiveMQ Platform Operator ServiceMonitor. Defaults to the HiveMQ Platform Operator Helm chart release name.
+    # Helm chart release name of the Prometheus Monitoring stack installed. Defaults to the HiveMQ Platform Operator Helm chart release name.
     # releaseName: monitoring-stack
-    # Defines how often Prometheus should scrape metrics from the endpoints defined in the ServiceMonitor resource.
-    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`.
+    # Defines how often Prometheus scrapes metrics from the operator endpoints.
+    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`. Defaults to 15 seconds.
     interval: 15s
     # Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.
-    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`.
+    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`. Defaults to 10 seconds.
     scrapeTimeout: 10s

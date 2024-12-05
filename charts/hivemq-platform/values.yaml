@@ -267,9 +267,8 @@ services:
     #  # Session affinity type. Must be `ClientIP` or `None`.
     #  # Defaults to `ClientIP` for the `control-center` service type.
     #  type: None
-    # Configures whether this Service routes external traffic to node-local or cluster-wide endpoints.
-    # Affects the network traffic routing behavior, client source IP preservation, and load balancing across Kubernetes nodes.
-    # Only applicable to LoadBalancer or NodePort service types. Possible values are `Cluster` or `Local`.
+    # Configures whether the service routes incoming external traffic to node-local or cluster-wide endpoints.
+    # This setting applies only to `NodePort` and `LoadBalancer` service types. Possible values are: `Cluster` or `Local`.
     # See: https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy
     # externalTrafficPolicy: Cluster
 
@@ -637,28 +636,27 @@ volumeClaimTemplates: []
 #         storage: 100Gi
 #     volumeMode: Filesystem
 
-# Monitoring configuration options
+# Enables the ServiceMonitor resource and Grafana dashboard creation for the platform.
 monitoring:
-  # When enabled, deploys a ServiceMonitor resource for the HiveMQ Platform along with a Configmap for a Grafana dashboard.
+  # Defines whether the monitoring configuration for the HiveMQ Platform is enabled. The default setting is `false`.
   enabled: false
-  # Dashboard configuration options.
+  # Grafana dashboard configuration options.
   dashboard:
-    # Creates a default HiveMQ Platform Grafana dashboard ConfigMap.
+    # Boolean value that configures whether to use the default HiveMQ Platform Grafana dashboard ConfigMap. The default setting is `true`.
     create: true
     # Namespace where to deploy the Grafana dashboard ConfigMap. Defaults to the namespace of the HiveMQ Platform.
     # namespace: monitoring
-    # Overrides the default HiveMQ Platform Grafana dashboard content via file using --set-file grafana-dashboard.json.
+    # Sets the Grafana dashboard content for the HiveMQ Platform Grafana dashboard ConfigMap with your own JSON file from a specified path.
     overrideDashboard: ""
-  # ServiceMonitor configuration options.
+  # Prometheus ServiceMonitor configuration options.
   serviceMonitor:
     # Namespace where to deploy the ServiceMonitor. Defaults to the namespace of the HiveMQ Platform.
     # namespace: monitoring
-    # Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster.
-    # The release name allows the Prometheus operator to discover the HiveMQ Platform ServiceMonitor. Defaults to the HiveMQ Platform Helm chart release name.
+    # Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster. Defaults to the HiveMQ Platform Helm chart release name.
     # releaseName: monitoring-stack
-    # Defines how often Prometheus should scrape metrics from the endpoints defined in the ServiceMonitor resource.
-    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`.
+    # Defines how often Prometheus scrapes metrics from the operator endpoints.
+    # Valid formats include `1d`, `1h30m`, `5m`, and `10s`. Defaults to 15 seconds.
     interval: 15s
     # Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.
-    # Example of a valid format are `1d`, `1h30m`, `5m`, `10s`.
+    # Valid formats include `1d`, `1h30m`, `5m`, and `10s`. Defaults to 10 seconds.
     scrapeTimeout: 10s
