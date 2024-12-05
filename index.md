@@ -1,7 +1,7 @@
 # HiveMQ Helm Repository
 
 HiveMQ is a world-class, enterprise-ready MQTT platform that provides fast, efficient, and reliable movement of data to and from connected IoT devices.
-For more information, visit [HiveMQ](https://www.hivemq.com)
+For more information, visit [HiveMQ](https://www.hivemq.com).
 
 ## Add the HiveMQ Helm repository
 
@@ -24,7 +24,7 @@ helm upgrade --install hivemq-platform-operator hivemq/hivemq-platform-operator
 ```
 
 For more information on configuring a HiveMQ Platform Operator and advanced usage, visit
-the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/hivemq-platform-operator/index.html)
+the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/hivemq-platform-operator/index.html).
 
 ## Install the HiveMQ Platform
 
@@ -35,7 +35,7 @@ helm upgrade --install hivemq-platform hivemq/hivemq-platform
 ```
 
 For more information on configuring a HiveMQ Platform and advanced usage, visit
-the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/hivemq-platform-operator/index.html)
+the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/hivemq-platform-operator/index.html).
 
 ## Install the HiveMQ Operator (legacy)
 
