@@ -3,5 +3,9 @@
 
 @import "{{ site.theme }}";
 #header {
-  display: none;
+  visibility: hidden;
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
