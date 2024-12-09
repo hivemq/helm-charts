@@ -86,17 +86,19 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
     private @Nullable KubernetesClient client;
     private boolean withLocalImages = true;
-    private boolean withK3sDebugging = false;
 
-    public HelmChartContainer() {
-        this(List.of(), K3s.LATEST);
+    public HelmChartContainer(final boolean withK3sDebugging) {
+        this(withK3sDebugging, List.of(), K3s.LATEST);
     }
 
-    public HelmChartContainer(final @NotNull List<String> additionalCommands) {
-        this(additionalCommands, K3s.LATEST);
+    public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
+        this(withK3sDebugging, additionalCommands, K3s.LATEST);
     }
 
-    public HelmChartContainer(final @NotNull List<String> additionalCommands, final @NotNull K3s k3s) {
+    public HelmChartContainer(
+            final boolean withK3sDebugging,
+            final @NotNull List<String> additionalCommands,
+            final @NotNull K3s k3s) {
         super(getAdHocImageName(k3s));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
@@ -130,7 +132,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
             LOG.debug("Starting K3s container with --debug");
             k3sCommands.add("--debug");
             k3sCommands.add("-v");
-            k3sCommands.add("10");
+            k3sCommands.add("4");
         }
         super.withCommand(k3sCommands.toArray(new String[0]));
     }
@@ -224,12 +226,6 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         stop();
     }
 
-    @SuppressWarnings("unused")
-    public @NotNull HelmChartContainer withK3sDebugging() {
-        withK3sDebugging = true;
-        return this;
-    }
-
     public @NotNull HelmChartContainer withNetwork(final @NotNull Network network) {
         super.withNetwork(network);
         return this;
@@ -293,13 +289,15 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public void installChart(
-            final @NotNull String release, final @NotNull String chart, final @NotNull String... additionalCommands)
-            throws Exception {
+            final @NotNull String release,
+            final @NotNull String chart,
+            final @NotNull String... additionalCommands) throws Exception {
         executeHelmCommand("install", release, chart, false, Stream.of(additionalCommands), true);
     }
 
     public void installLegacyOperatorChart(
-            final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
+            final @NotNull String releaseName,
+            final @NotNull String... additionalCommands) throws Exception {
         executeHelmCommand("install",
                 releaseName,
                 resolveChartLocation(LEGACY_OPERATOR_CHART, true),
@@ -321,7 +319,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public void installPlatformOperatorChart(
-            final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
+            final @NotNull String releaseName,
+            final @NotNull String... additionalCommands) throws Exception {
         installPlatformOperatorChart(releaseName, true, additionalCommands);
     }
 
@@ -384,7 +383,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public void upgradePlatformOperatorChart(
-            final @NotNull String releaseName, final @NotNull String... additionalCommands) throws Exception {
+            final @NotNull String releaseName,
+            final @NotNull String... additionalCommands) throws Exception {
         upgradePlatformOperatorChart(releaseName, true, additionalCommands);
     }
 
@@ -447,7 +447,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
     @SuppressWarnings("SameParameterValue")
     private @NotNull String executeHelmSearchCommand(
-            final @NotNull String chartName, final @NotNull Stream<String> additionalCommands) throws Exception {
+            final @NotNull String chartName,
+            final @NotNull Stream<String> additionalCommands) throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml search repo <repo|chart>
         final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
                 "--kubeconfig",
@@ -658,7 +659,9 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         }
 
         private void removeAndCloseLogWatcher(
-                final @NotNull String containerName, final @NotNull String podName, final @NotNull String podUid) {
+                final @NotNull String containerName,
+                final @NotNull String podName,
+                final @NotNull String podUid) {
             final var logWatch = logWatches.remove(podUid + "-" + podName + "-" + containerName);
             if (logWatch != null) {
                 logWatch.close();
@@ -718,7 +721,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
         @Override
         public @NotNull StartupStatus checkStartupState(
-                final @NotNull DockerClient dockerClient, final @NotNull String containerId) {
+                final @NotNull DockerClient dockerClient,
+                final @NotNull String containerId) {
             try {
                 await().until(() -> container.getLogs(STDERR).matches("(?s).*Node controller sync successful.*"));
                 // we need this to have the yaml read from the container
