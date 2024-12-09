@@ -21,6 +21,12 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
     private final @NotNull AtomicReference<HelmChartContainer> helmChartContainerRef = new AtomicReference<>();
     private final @NotNull AtomicReference<Network> networkRef = new AtomicReference<>();
 
+    private final boolean withK3sDebugging;
+
+    public HelmChartContainerExtension(final boolean withK3sDebugging) {
+        this.withK3sDebugging = withK3sDebugging;
+    }
+
     @Override
     public void beforeAll(final @NotNull ExtensionContext context) {
         final var additionalK3sCommands = getAdditionalK3sCommands(context);
@@ -31,7 +37,7 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
             networkRef.set((Network) store.getOrComputeIfAbsent("network", key -> Network.newNetwork()));
             helmChartContainerRef.set((HelmChartContainer) store.getOrComputeIfAbsent("helmChartContainer", key -> {
                 LOG.info("Creating cached HelmChartContainer instance");
-                final var container = new HelmChartContainer().withNetwork(networkRef.get());
+                final var container = new HelmChartContainer(withK3sDebugging).withNetwork(networkRef.get());
                 container.start();
                 return container;
             }));
@@ -40,7 +46,7 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
         // spin up a new network and container with the additional commands
         LOG.info("Using HelmChartContainer instance with additional commands");
         final var network = Network.newNetwork();
-        final var container = new HelmChartContainer(additionalK3sCommands).withNetwork(network);
+        final var container = new HelmChartContainer(withK3sDebugging, additionalK3sCommands).withNetwork(network);
         container.start();
         stopInstances.set(true);
         helmChartContainerRef.set(container);
