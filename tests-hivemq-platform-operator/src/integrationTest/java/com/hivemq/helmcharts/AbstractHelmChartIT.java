@@ -49,7 +49,7 @@ public abstract class AbstractHelmChartIT {
 
     @RegisterExtension
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
-            new HelmChartContainerExtension();
+            new HelmChartContainerExtension(false);
 
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull HelmChartContainer helmChartContainer;
