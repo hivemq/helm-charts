@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.helmcharts.util.RestAPIUtil.assertAuth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("Services")
@@ -49,7 +48,7 @@ class HelmRestApiIT extends AbstractHelmChartIT {
                 "user",
                 "wrong-password",
                 HttpStatus.SC_UNAUTHORIZED);
-        assertAuth(client,
+        RestAPIUtil.assertAuth(client,
                 platformNamespace,
                 REST_API_SERVICE_NAME,
                 REST_API_SERVICE_PORT,
