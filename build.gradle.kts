@@ -129,26 +129,26 @@ val updateAllManifestFiles by tasks.registering {
     group = "version"
     description = "Updates all manifest files."
     doLast {
-        exec {
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-edge/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-platform/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-platform-operator/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-swarm/manifests.sh")
-        }
+        }.result.get()
     }
 }
 
