@@ -97,22 +97,22 @@ val updateAllManifestFiles by tasks.registering {
     group = "version"
     description = "Updates all manifest files."
     doLast {
-        exec {
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-platform/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-platform-operator/manifests.sh")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-swarm/manifests.sh")
-        }
+        }.result.get()
     }
 }
 
@@ -120,22 +120,22 @@ val test by tasks.registering {
     group = "test"
     description = "Executes all Helm unit tests."
     doLast {
-        exec {
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-operator", "-f", "./tests/**/*_test.yaml")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-platform", "-f", "./tests/**/*_test.yaml")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-platform-operator", "-f", "./tests/**/*_test.yaml")
-        }
-        exec {
+        }.result.get()
+        providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-swarm", "-f", "./tests/**/*_test.yaml")
-        }
+        }.result.get()
     }
 }
 
