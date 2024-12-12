@@ -132,7 +132,7 @@ val listIntegrationTests by tasks.registering(JavaExec::class) {
 val savePlatformOperatorDockerImage by tasks.registering(Exec::class) {
     group = "container"
     description = "Save HiveMQ Platform Operator Docker image"
-    dependsOn(gradle.includedBuild("hivemq-platform-operator").task(":quarkusBuild"))
+    dependsOn(gradle.includedBuild("hivemq-platform-operator").task(":docker"))
     workingDir(layout.buildDirectory)
     commandLine("docker", "save", "-o", "hivemq-platform-operator.tar", "hivemq/hivemq-platform-operator-test:snapshot")
 }
