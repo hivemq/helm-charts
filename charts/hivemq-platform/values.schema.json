@@ -95,8 +95,14 @@
       "type" : "array"
     },
     "config" : {
+      "description" : "Defines how the HiveMQ Platform configuration is deployed as a Kubernetes object.",
       "properties" : {
+        "annotations" : {
+          "description" : "Defines specific annotations to be applied to the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.",
+          "type" : "object"
+        },
         "create" : {
+          "description" : "Boolean value, that configures whether to use a default HiveMQ configuration.",
           "type" : "boolean"
         },
         "createAs" : {
@@ -108,29 +114,41 @@
           "type" : "string"
         },
         "customLogbackConfig" : {
+          "description" : "Optional setting to provide a custom HiveMQ Platform logging configuration (logback.xml) from a file using --set-file config.customLogbackConfig=your-logback-config.xml.",
           "type" : "string"
         },
         "customTracingConfig" : {
+          "description" : "Optional setting to provide a custom HiveMQ Platform tracing configuration (tracing.xml) from a file using --set-file config.customTracingConfig=your-tracing-config.xml.",
           "type" : "string"
         },
         "dataHub" : {
+          "description" : "Optional setting to enable HiveMQ Data Hub functionality.",
           "properties" : {
             "behaviorValidationEnabled" : {
+              "description" : "Optional setting to enable data validation.",
               "type" : "boolean"
             },
             "dataValidationEnabled" : {
+              "description" : "Optional setting to enable behavior validation.",
               "type" : "boolean"
             }
           },
           "type" : "object"
         },
+        "labels" : {
+          "description" : "Defines specific labels to be applied to the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.",
+          "type" : "object"
+        },
         "name" : {
+          "description" : "The name of an existing Kubernetes ConfigMap or Secret with a valid HiveMQ configuration.",
           "type" : "string"
         },
         "overrideHiveMQConfig" : {
+          "description" : "Optional setting to provide the HiveMQ configuration from a file using --set-file config.overrideHiveMQConfig=your-hivemq-config.xml.",
           "type" : "string"
         },
         "overrideStatefulSet" : {
+          "description" : "Optional setting to provide the StatefulSetSpec configuration from a file using --set-file config.overrideStateFulSet=your-statefulsetspec.yml.",
           "type" : "string"
         }
       },
@@ -447,26 +465,42 @@
       "type" : "object"
     },
     "license" : {
+      "description" : "Defines all HiveMQ licenses to be used for the HiveMQ Platform.",
       "properties" : {
         "additionalLicenses" : {
+          "description" : "Adds additional main HiveMQ licenses to the Kubernetes Secret as .lic files, if needed.",
+          "type" : "object"
+        },
+        "annotations" : {
+          "description" : "Defines specific annotations to be applied to the Kubernetes Secret that contains the HiveMQ licenses.",
           "type" : "object"
         },
         "create" : {
+          "description" : "Creates a Kubernetes Secret for all configured HiveMQ licenses.",
           "type" : "boolean"
         },
         "data" : {
+          "description" : "The main HiveMQ license in an encoded 64-byte string.",
           "type" : "string"
         },
         "dataHub" : {
+          "description" : "Configures a list of HiveMQ Data Hub licenses to include as part of the Kubernetes Secret.",
           "type" : "object"
         },
         "extensions" : {
+          "description" : "Defines a list of HiveMQ Enterprise Extension licenses to include as part of the Kubernetes Secret.",
+          "type" : "object"
+        },
+        "labels" : {
+          "description" : "Defines specific labels to be applied to the Kubernetes Secret that contains the HiveMQ licenses.",
           "type" : "object"
         },
         "name" : {
+          "description" : "Defines the name of the Kubernetes Secret that contains the HiveMQ licenses.",
           "type" : "string"
         },
         "overrideLicense" : {
+          "description" : "Sets the main HiveMQ license with your own file from a specified license path.",
           "type" : "string"
         }
       },
@@ -647,7 +681,12 @@
       "type" : "object"
     },
     "operator" : {
+      "description" : "Provides the selection criteria to identify which operator manages the selected HiveMQ Platform custom resource.",
       "properties" : {
+        "annotations" : {
+          "description" : "Annotations to add to the HiveMQ Platform custom resource.",
+          "type" : "object"
+        },
         "labels" : {
           "description" : "Labels to add to the HiveMQ Platform custom resource.",
           "type" : "object"
