@@ -15,7 +15,7 @@ tests:
           kind: HiveMQPlatform
           name: test-hivemq-platform
 
-  - it: with default values, default labels created
+  - it: with default values, only default labels created
     asserts:
       - isSubset:
           path: metadata.labels
@@ -25,6 +25,8 @@ tests:
             app.kubernetes.io/instance: test-hivemq-platform
             app.kubernetes.io/version: 1.0.0
             app.kubernetes.io/managed-by: Helm
+      - notExists:
+          path: metadata.annotations
 
   - it: with a custom operator selector
     set:
@@ -59,6 +61,34 @@ tests:
           content:
             group: alpha
             tier: one
+      - notExists:
+          path: metadata.annotations
+
+  - it: with invalid custom invalid labels, schema validation fails
+    set:
+      operator.labels: "invalid-label"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom annotations, custom annotations set
+    set:
+      operator.annotations:
+        annotation-1: annotation-1
+        annotation-2: annotation-2
+    asserts:
+      - exists:
+          path: metadata.annotations
+      - isSubset:
+          path: metadata.annotations
+          content:
+            annotation-1: annotation-1
+            annotation-2: annotation-2
+
+  - it: with invalid custom annotations, schema validation fails
+    set:
+      operator.annotations: "invalid-annotation"
+    asserts:
+      - failedTemplate: {}
 
   - it: with image definition
     set:
