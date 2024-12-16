@@ -4,8 +4,15 @@ kind: {{ .Values.config.createAs }}
 metadata:
   name: {{ include "hivemq-platform.configuration-name" . }}
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.config.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "hivemq-platform.labels" . | nindent 4 }}
+    {{- with .Values.config.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
   # noinspection XmlPathReference
   config.xml: |-
