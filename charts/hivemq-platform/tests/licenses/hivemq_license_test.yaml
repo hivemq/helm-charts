@@ -26,6 +26,12 @@ tests:
       - isKind:
           of: Secret
         template: hivemq-license.yml
+      - notExists:
+          path: metadata.annotations
+        template: hivemq-license.yml
+      - notExists:
+          path: metadata.labels
+        template: hivemq-license.yml
       - exists:
           path: data
         template: hivemq-license.yml
@@ -56,6 +62,62 @@ tests:
             secret:
                 secretName: hivemq-license-test-hivemq-platform
         template: hivemq-custom-resource.yml
+
+  - it: with broker license data and custom annotations, then broker license created with custom annotations
+    set:
+      license.create: true
+      license.annotations:
+        annotation-1: annotation-1
+        annotation-2: annotation-2
+      license.data: broker-license-content
+    template: hivemq-license.yml
+    asserts:
+      - exists:
+          path: metadata.annotations
+      - isSubset:
+          path: metadata.annotations
+          content:
+            annotation-1: annotation-1
+            annotation-2: annotation-2
+      - notExists:
+          path: metadata.labels
+
+  - it: with broker license data and invalid custom annotations, schema validation fails
+    set:
+      license.create: true
+      license.annotations: "invalid-annotation"
+      license.data: broker-license-content
+    template: hivemq-license.yml
+    asserts:
+      - failedTemplate: {}
+
+  - it: with broker license data and custom labels, then broker license created with custom labels
+    set:
+      license.create: true
+      license.labels:
+        label-1: label-1
+        label-2: label-2
+      license.data: broker-license-content
+    template: hivemq-license.yml
+    asserts:
+      - exists:
+          path: metadata.labels
+      - isSubset:
+          path: metadata.labels
+          content:
+            label-1: label-1
+            label-2: label-2
+      - notExists:
+          path: metadata.annotations
+
+  - it: with broker license data and invalid custom labels, schema validation fails
+    set:
+      license.create: true
+      license.labels: "invalid-label"
+      license.data: broker-license-content
+    template: hivemq-license.yml
+    asserts:
+      - failedTemplate: {}
 
   - it: with broker license overrideLicense, then broker license created
     set:
