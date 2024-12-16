@@ -101,6 +101,10 @@ license:
   # The name of the Kubernetes Secret with all HiveMQ licenses.
   # To create a new Kubernetes Secret with licenses, set create=true. Otherwise, false to reuse an existing Secret.
   name: ""
+  # Defines specific annotations to be applied to the Kubernetes Secret that contains the HiveMQ licenses.
+  annotations: {}
+  # Defines specific labels to be applied to the Kubernetes Secret that contains the HiveMQ licenses.
+  labels: {}
   # Inlines the main HiveMQ license as an encoded 64-bytes string.
   data: ""
   # Overrides the main HiveMQ license via file using --set-file license.lic.
@@ -209,6 +213,8 @@ operator:
   # Labels can be used to configure which HiveMQ Platform Operator manages this platform.
   # Use the "selectors" value in the HiveMQ Platform Operator Helm chart to configure matching label selectors.
   labels: {}
+  # Annotations to add to the HiveMQ Platform custom resource.
+  annotations: {}
 
 # Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
 podScheduling:
@@ -403,6 +409,10 @@ config:
   # Overrides the default HiveMQ Platform configuration (config.xml) by providing
   # the name of a Kubernetes ConfigMap or Kubernetes Secret that contains the config.xml file (also set create=false).
   name: ""
+  # Defines specific annotations to be applied to the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.
+  annotations: {}
+  # Defines specific labels to be applied to the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.
+  labels: {}
   # Inlines the HiveMQ Platform configuration (config.xml) from a file:
   # --set-file config.overrideHiveMQConfig=your-config.xml
   # WARNING: When this configuration option is used, all other configuration options for the HiveMQ Platform configuration are ignored.

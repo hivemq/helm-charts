@@ -10,6 +10,10 @@ apiVersion: hivemq.com/v1
 kind: HiveMQPlatform
 metadata:
   name: "{{ .Release.Name }}"
+  {{- with .Values.operator.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "hivemq-platform.labels" . | nindent 4 }}
     {{- with .Values.operator.labels }}
