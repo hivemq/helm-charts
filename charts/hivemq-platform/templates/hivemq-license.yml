@@ -4,6 +4,14 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ .Values.license.name | default (include "hivemq-platform.default-license-name" .) }}
+  {{- with .Values.license.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.license.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 data:
   {{- if .Values.license.data }}
   license.lic: {{ .Values.license.data }}
