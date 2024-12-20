@@ -95,8 +95,6 @@ spec:
               value: "{{ .Values.hivemqPlatformServiceAccount.permissions.validate }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
               value: "{{ .Values.hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange }}"
-            - name: HIVEMQ_PLATFORM_OPERATOR_QUARKUS_LOG_LEVEL
-              value: "{{ .Values.quarkusLogLevel | default "INFO" }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
               value: "{{ .Values.sdkLogLevel | default "INFO" }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
