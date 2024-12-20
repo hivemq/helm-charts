@@ -250,17 +250,6 @@
       },
       "type" : "object"
     },
-    "quarkusLogLevel" : {
-      "enum" : [
-        "DEBUG",
-        "ERROR",
-        "FATAL",
-        "INFO",
-        "TRACE",
-        "WARN"
-      ],
-      "type" : "string"
-    },
     "rbac" : {
       "properties" : {
         "create" : {
