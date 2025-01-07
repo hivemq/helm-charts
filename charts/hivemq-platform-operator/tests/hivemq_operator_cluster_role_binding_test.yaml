@@ -10,7 +10,7 @@ chart:
 tests:
 
   - it: with default values, default ClusterRoleBinding created
-    documentIndex: 1 # FIXME: would be nice to have this value set at the test suite level. See https://github.com/helm-unittest/helm-unittest/issues/480
+    documentIndex: 1
     asserts:
       - containsDocument:
           apiVersion: rbac.authorization.k8s.io/v1
