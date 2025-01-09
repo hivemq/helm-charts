@@ -68,16 +68,16 @@ spec:
               value: "false"
             - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
               value: "false"
-            - name: QUARKUS_HTTP_PORT
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_PORT
               value: "8080"
-            - name: QUARKUS_HTTP_SSL_PORT
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_PORT
               value: "8443"
           image: "docker.io/hivemq/hivemq-platform-operator:1.6.2"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/live
+              path: /health/liveness
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 5
@@ -94,7 +94,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/ready
+              path: /health/readiness
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 5
