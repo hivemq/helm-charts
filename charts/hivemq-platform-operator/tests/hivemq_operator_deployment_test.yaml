@@ -950,7 +950,7 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_NAMESPACES
+            name: HIVEMQ_PLATFORM_OPERATOR_NAMESPACES
 
   - it: with custom namespace value set, namespace environment variable is set
     set:
@@ -966,7 +966,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_NAMESPACES
+            name: HIVEMQ_PLATFORM_OPERATOR_NAMESPACES
             value: "default,cloud-starter"
 
   - it: with default values, no selector environment variable is set
@@ -981,7 +981,7 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
 
   - it: with nil selector value set, no selector environment variable is set
     set:
@@ -997,7 +997,7 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
 
   - it: with custom selector value set, selector environment variable is set
     set:
@@ -1013,7 +1013,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
             value: "operator=foobar"
 
   - it: with custom selectors value set, selector environment variable is set
@@ -1030,7 +1030,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
             value: "group=cloud-starter,group=cloud-enterprise"
 
   - it: with default CRD values
