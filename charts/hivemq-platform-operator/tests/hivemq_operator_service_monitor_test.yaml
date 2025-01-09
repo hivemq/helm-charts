@@ -53,7 +53,7 @@ tests:
           path: spec.endpoints
           content:
             port: http-operator
-            path: /q/metrics
+            path: /metrics
             interval: 15s
             scrapeTimeout: 10s
       - equal:
@@ -134,7 +134,7 @@ tests:
           path: spec.endpoints
           content:
             port: http-custom-release-name
-            path: /q/metrics
+            path: /metrics
             interval: 1s
             scrapeTimeout: 2s
 
