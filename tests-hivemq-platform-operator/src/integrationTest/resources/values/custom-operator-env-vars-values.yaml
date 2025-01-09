@@ -1,5 +1,5 @@
 env:
-  - name: QUARKUS_OPERATOR_SDK_NAMESPACES
+  - name: HIVEMQ_PLATFORM_OPERATOR_NAMESPACES
     valueFrom:
       configMapKeyRef:
         name: operator-config-map
