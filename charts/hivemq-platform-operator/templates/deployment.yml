@@ -52,15 +52,15 @@ spec:
             - name: JAVA_OPTS
               value: {{.Values.javaOpts | quote }}
             {{- if .Values.namespaces }}
-            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_NAMESPACES
+            - name: HIVEMQ_PLATFORM_OPERATOR_NAMESPACES
               value: {{ .Values.namespaces }}
             {{- end }}
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
-            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            - name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
               value: operator={{ .Values.selector }}
             {{- else if .Values.selectors }}
-            - name: QUARKUS_OPERATOR_SDK_CONTROLLERS_HIVEMQ_CONTROLLER_SELECTOR
+            - name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
               value: {{ .Values.selectors }}
             {{- end }}
             - name: KUBERNETES_NAMESPACE
@@ -103,19 +103,19 @@ spec:
               value: "{{ .Values.https.skipCertificateValidation | default false }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
               value: "{{ .Values.https.skipHostnameVerification | default false }}"
-            - name: QUARKUS_HTTP_PORT
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_PORT
               value: "{{ .Values.http.port }}"
-            - name: QUARKUS_HTTP_SSL_PORT
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_PORT
               value: "{{ .Values.https.port }}"
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
               value: "JKS"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
               value: "/mnt/tls/keystore.jks"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
               value: "/mnt/tls/truststore.jks"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
               {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.keystorePassword "nil") (.Values.tls.keystorePassword) }}
               value: "{{ .Values.tls.keystorePassword }}"
@@ -125,7 +125,7 @@ spec:
                   name: {{ .Values.tls.secretName }}
                   key: keystore.password
               {{- end }}
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
               {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
               value: "{{ .Values.tls.truststorePassword }}"
@@ -144,7 +144,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/live
+              path: /health/liveness
               port: {{ .Values.http.port }}
               scheme: HTTP
             initialDelaySeconds: 5
@@ -161,7 +161,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /q/health/ready
+              path: /health/readiness
               port: {{ .Values.http.port }}
               scheme: HTTP
             initialDelaySeconds: 5

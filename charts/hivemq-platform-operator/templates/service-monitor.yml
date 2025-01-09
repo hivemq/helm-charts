@@ -21,7 +21,7 @@ spec:
       - {{ .Release.Namespace }}
   endpoints:
     - port: {{ include "hivemq-platform-operator.http-service-port-name" . }}
-      path: /q/metrics
+      path: /metrics
       interval: {{ .Values.monitoring.serviceMonitor.interval }}
       scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout }}
   jobLabel: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "service-monitor" "releaseName" .Release.Name) }}
