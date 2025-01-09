@@ -15,20 +15,20 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
               value: "JKS"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
               value: "/mnt/tls/keystore.jks"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
               value: "/mnt/tls/truststore.jks"
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
       - notExists:
           path: spec.template.spec.containers[0].volumeMounts
       - notExists:
@@ -51,20 +51,20 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
               value: "JKS"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
               value: "/mnt/tls/keystore.jks"
-            - name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
               value: "/mnt/tls/truststore.jks"
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
       - notExists:
           path: spec.template.spec.containers[0].volumeMounts
       - notExists:
@@ -86,22 +86,22 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
             value: "JKS"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
             value: "/mnt/tls/keystore.jks"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
             value: "/mnt/tls/truststore.jks"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: my-tls-secret
@@ -109,7 +109,7 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: my-tls-secret
@@ -149,27 +149,27 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE
             value: "JKS"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE
             value: "/mnt/tls/keystore.jks"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE
             value: "/mnt/tls/truststore.jks"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
             value: "my-keystore-password"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: QUARKUS_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
             value: "my-truststore-password"
       - exists:
           path: spec.template.spec.containers[0].volumeMounts
