@@ -628,9 +628,9 @@ Usage: {{ include "hivemq-platform.validate-licenses" . }}
 {{- define "hivemq-platform.validate-licenses" -}}
 {{- $licenseContentExists := "" -}}
 {{- if .Values.license.create -}}
-    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.additionalLicenses "licenseLabel" "Additional HiveMQ Broker") -}}
-    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.extensions "licenseLabel" "HiveMQ Enterprise Extension") -}}
-    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.dataHub "licenseLabel" "HiveMQ Data Hub") -}}
+    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.additionalLicenses "licenseLabel" "Additional HiveMQ Broker" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) -}}
+    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.extensions "licenseLabel" "HiveMQ Enterprise Extension" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) -}}
+    {{- include "hivemq-platform.validate-license-content" (dict "licenses" .Values.license.dataHub "licenseLabel" "HiveMQ Data Hub" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) -}}
     {{- if and (not .Values.license.overrideLicense) (not .Values.license.data) (not .Values.license.additionalLicenses) (not .Values.license.extensions) (not .Values.license.dataHub) -}}
         {{- fail (printf "\nHiveMQ Platform license content cannot be empty") -}}
     {{- end -}}
@@ -638,6 +638,7 @@ Usage: {{ include "hivemq-platform.validate-licenses" . }}
         {{- fail (printf "\nBoth `data` and `overrideLicense` values are set for the HiveMQ Broker license content. Please, use only one of them") -}}
     {{- end -}}
     {{- include "hivemq-platform.validate-duplicated-additional-broker-license" . -}}
+    {{- include "hivemq-platform.validate-base64-encoded-license-data" (dict "data" .Values.license.data "label" "HiveMQ Broker" "licenseName" "license.lic" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) -}}
 {{- end -}}
 {{- end -}}
 
@@ -645,10 +646,12 @@ Usage: {{ include "hivemq-platform.validate-licenses" . }}
 Validates the licenses content within a range function:
  - At least either `data` or `overrideLicense` is not empty.
  - Only one of `data` or `overrideLicense` are set, and not both.
-Usage: {{ include "hivemq-platform.validate-license-content" (dict "licenses" .licenses "licenseLabel" "HiveMQ Enterprise Extension") }}
+ - When `isLicenseBase64Encoded` is set to `true`, `data` is Base64 encoded.
+Usage: {{ include "hivemq-platform.validate-license-content" (dict "licenses" .licenses "licenseLabel" "HiveMQ Enterprise Extension" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
 */}}
 {{- define "hivemq-platform.validate-license-content" -}}
 {{- $label := .licenseLabel -}}
+{{- $isLicenseBase64Encoded := .isLicenseBase64Encoded -}}
 {{- range $licenseName, $license := .licenses -}}
     {{- if and (not (hasKey $license "data")) (not (hasKey $license "overrideLicense")) -}}
         {{- fail (printf "\nInvalid values for setting the %s '%s' license content. Only `data` or `overrideLicense` values are allowed" $label $licenseName) }}
@@ -657,6 +660,7 @@ Usage: {{ include "hivemq-platform.validate-license-content" (dict "licenses" .l
     {{- else if and $license.data $license.overrideLicense -}}
         {{- fail (printf "\nBoth `data` and `overrideLicense` values are set for the %s '%s' license content. Please, use only one of them" $label $licenseName) }}
     {{- end -}}
+    {{- include "hivemq-platform.validate-base64-encoded-license-data" (dict "data" $license.data "label" $label "licenseName" $licenseName "isLicenseBase64Encoded" $isLicenseBase64Encoded) -}}
 {{- end -}}
 {{- end -}}
 
@@ -675,19 +679,40 @@ Usage: {{ include "hivemq-platform.validate-duplicated-additional-broker-license
 {{- end -}}
 
 {{/*
+Validates the data passed as parameter is a valid Base64 encoded string.
+Usage: {{ include "hivemq-platform.validate-base64-encoded-license-data" (dict "data" .Values.license.data "label" "HiveMQ Enterprise Extension" "licenseName" "Kafka" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
+*/}}
+{{- define "hivemq-platform.validate-base64-encoded-license-data" -}}
+{{- if and .data .isLicenseBase64Encoded -}}
+    {{- $original := .data -}}
+    {{- $reencoded := $original | b64dec | b64enc -}}
+    {{- if not (eq $original $reencoded) -}}
+        {{- fail (printf "\n%s '%s' license data content is not a Base64 encoded string" .label .licenseName) }}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Generates the Secret entry for each of the licenses defined in the license value list passed as argument.
-Usage: {{ include "hivemq-platform.generate-licenses-content" (dict "licenses" .licenses "licenseExtension" ".lic") }}
+Usage: {{ include "hivemq-platform.generate-licenses-content" (dict "licenses" .licenses "licenseExtension" ".lic" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
 */}}
 {{- define "hivemq-platform.generate-licenses-content" -}}
 {{- $extension := .licenseExtension -}}
+{{- $isLicenseBase64Encoded := .isLicenseBase64Encoded -}}
 {{- range $licenseName, $license := .licenses -}}
     {{- if $license.data -}}
         {{- printf "%s%s: %s" $licenseName $extension $license.data | nindent 2 -}}
     {{- else if $license.overrideLicense -}}
         {{- printf "%s%s: |-" $licenseName $extension | nindent 2 -}}
-        {{ range ($license.overrideLicense | b64enc) | toStrings -}}
-            {{ . | nindent 4 -}}
-        {{ end -}}
+        {{- if $isLicenseBase64Encoded -}}
+            {{ range ($license.overrideLicense | b64enc) | toStrings -}}
+                {{ . | nindent 4 -}}
+            {{ end -}}
+        {{- else -}}
+            {{ range $license.overrideLicense | toStrings -}}
+                {{ . | nindent 4 -}}
+            {{ end -}}
+        {{- end -}}
     {{- end -}}
 {{- end -}}
 {{- end -}}
