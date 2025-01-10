@@ -480,7 +480,7 @@
           "type" : "boolean"
         },
         "data" : {
-          "description" : "The main HiveMQ license in an encoded 64-byte string.",
+          "description" : "The main HiveMQ license as a string. By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.",
           "type" : "string"
         },
         "dataHub" : {
@@ -502,6 +502,10 @@
         "overrideLicense" : {
           "description" : "Sets the main HiveMQ license with your own file from a specified license path.",
           "type" : "string"
+        },
+        "isLicenseBase64Encoded" : {
+          "description" : "Configures whether to use a Base64 encoded string (data) or clear string (stringData) for the Kubernetes Secret. The default setting is `true`.",
+          "type": "boolean"
         }
       },
       "type" : "object"
