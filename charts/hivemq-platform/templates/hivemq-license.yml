@@ -12,16 +12,22 @@ metadata:
   labels:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-data:
+{{ ternary (println "data:") (println "stringData:") (.Values.license.isLicenseBase64Encoded) }}
   {{- if .Values.license.data }}
   license.lic: {{ .Values.license.data }}
   {{- else if .Values.license.overrideLicense }}
   license.lic: |-
-    {{ range (.Values.license.overrideLicense | b64enc) | toStrings }}
-    {{ . | nindent 4 }}
-    {{ end }}
+    {{- if .Values.license.isLicenseBase64Encoded -}}
+      {{- range .Values.license.overrideLicense | b64enc | toStrings -}}
+      {{ . | nindent 6 }}
+      {{ end }}
+    {{- else -}}
+      {{- range .Values.license.overrideLicense | toStrings -}}
+      {{ . | nindent 6 }}
+      {{ end }}
+    {{- end }}
   {{- end }}
-  {{- include "hivemq-platform.generate-licenses-content" (dict "licenses" .Values.license.additionalLicenses "licenseExtension" ".lic") }}
-  {{- include "hivemq-platform.generate-licenses-content" (dict "licenses" .Values.license.extensions "licenseExtension" ".elic") }}
-  {{- include "hivemq-platform.generate-licenses-content" (dict "licenses" .Values.license.dataHub "licenseExtension" ".plic") }}
+  {{- include "hivemq-platform.generate-licenses-content" (dict "licenses" .Values.license.additionalLicenses "licenseExtension" ".lic" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
+  {{- include "hivemq-platform.generate-licenses-content" (dict "licenses" .Values.license.extensions "licenseExtension" ".elic" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
+  {{- include "hivemq-platform.generate-licenses-content" (dict "licenses" .Values.license.dataHub "licenseExtension" ".plic" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
 {{- end }}
