@@ -129,7 +129,7 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <listeners>
       <http>
         <port>{{- include "hivemq-platform.health-api-port" . -}}</port>
-        <bind-address>0.0.0.0</bind-address>
+        <bind-address>localhost</bind-address>
       </http>
     </listeners>
   </health-api>
