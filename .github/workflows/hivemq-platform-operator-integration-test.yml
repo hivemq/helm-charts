@@ -96,7 +96,7 @@ jobs:
 
       - name: Upload HiveMQ Platform Operator test results
         if: always()
-        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: Test results HiveMQ Platform Operator - Compose ${{ matrix.test-plan }}
           path: |
@@ -215,7 +215,7 @@ jobs:
 
       - name: Upload HiveMQ Platform Operator test results
         if: always()
-        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: Test results HiveMQ Platform Operator - Single ${{ matrix.test-plan }}
           path: |
