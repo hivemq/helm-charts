@@ -40,9 +40,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -67,12 +69,10 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
+    private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS =
+            Set.of("hivemq", "hivemq-platform-operator", "operator", "consul-template", NGINX_CONTAINER_NAME);
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
-    private static final @NotNull String PLATFORM_OPERATOR_CONTAINER_NAME = "hivemq-platform-operator";
-    private static final @NotNull String LEGACY_OPERATOR_CONTAINER_NAME = "operator";
-    private static final @NotNull String PLATFORM_CONTAINER_NAME = "hivemq";
-    private static final @NotNull String CONSUL_TEMPLATE_CONTAINER_NAME = "consul-template";
     private static final @NotNull String POD_CPU_LIMIT = "512m";
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartContainer.class);
@@ -448,7 +448,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     @SuppressWarnings("SameParameterValue")
     private @NotNull String executeHelmSearchCommand(
             final @NotNull String chartName,
-            final @NotNull Stream<String> additionalCommands) throws Exception {
+            final @NotNull Stream<String> additionalCommands)
+            throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml search repo <repo|chart>
         final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
                 "--kubeconfig",
@@ -597,10 +598,22 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
             LOG.info("[{}] {}", LOG_PREFIX_EVENT, eventLog);
             logWaiter.accept(LOG_PREFIX_EVENT, eventLog);
 
-            final var containerName = getContainerNameFromEventNote(note);
+            // extract and check container name
+            if (!eventRegarding.getKind().equals("Pod")) {
+                return;
+            }
+            final var fieldPath = eventRegarding.getFieldPath();
+            if (fieldPath == null) {
+                return;
+            }
+            final var containerName = LOG_WATCHER_CONTAINERS.stream()
+                    .filter(c -> fieldPath.contains("{" + c + "}"))
+                    .findFirst()
+                    .orElse(null);
             if (containerName == null) {
                 return;
             }
+            LOG.info("Received {} event for container {} in pod {} [{}]", reason, containerName, podName, podUid);
             try {
                 if (reason.equals("Created")) {
                     logWatches.computeIfAbsent(podUid + "-" + podName + "-" + containerName, key -> {
@@ -609,6 +622,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
                                 .inNamespace(namespace)
                                 .withName(podName)
                                 .inContainer(containerName)
+                                .withReadyWaitTimeout((int) TimeUnit.SECONDS.toMillis(10))
                                 .watchLog();
                         final var logPodName = getLogPodName(podName);
                         executorService.submit(() -> {
@@ -671,22 +685,6 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
         @Override
         public void onClose(final @NotNull WatcherException cause) {
-        }
-
-        private @Nullable String getContainerNameFromEventNote(final @NotNull String note) {
-            final var container = "container ";
-            if (note.endsWith(container + PLATFORM_CONTAINER_NAME)) {
-                return PLATFORM_CONTAINER_NAME;
-            } else if (note.endsWith(container + PLATFORM_OPERATOR_CONTAINER_NAME)) {
-                return PLATFORM_OPERATOR_CONTAINER_NAME;
-            } else if (note.endsWith(container + LEGACY_OPERATOR_CONTAINER_NAME)) {
-                return LEGACY_OPERATOR_CONTAINER_NAME;
-            } else if (note.endsWith(container + CONSUL_TEMPLATE_CONTAINER_NAME)) {
-                return CONSUL_TEMPLATE_CONTAINER_NAME;
-            } else if (note.endsWith(container + NGINX_CONTAINER_NAME)) {
-                return NGINX_CONTAINER_NAME;
-            }
-            return null;
         }
     }
 
