@@ -24,7 +24,6 @@ import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -48,15 +48,15 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
  * Container that includes the helm binary to be able to install the HiveMQ helm charts
  */
 public class OperatorHelmChartContainer extends K3sContainer {
+
     public final static int MQTT_PORT = 1883;
 
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
+    private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS = Set.of("hivemq", "operator");
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
-    private static final @NotNull String HIVEMQ_OPERATOR_CONTAINER_NAME = "operator";
-    private static final @NotNull String HIVEMQ_CONTAINER_NAME = "hivemq";
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(OperatorHelmChartContainer.class);
 
@@ -192,7 +192,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         @Override
         public @NotNull StartupStatus checkStartupState(
-                final @NotNull DockerClient dockerClient, final @NotNull String containerId) {
+                final @NotNull DockerClient dockerClient,
+                final @NotNull String containerId) {
             try {
                 await().until(() -> container.getLogs(STDERR).matches("(?s).*Node controller sync successful.*"));
                 // we need this to have the yaml read from the container
@@ -264,10 +265,22 @@ public class OperatorHelmChartContainer extends K3sContainer {
             LOG.info("[{}] {}", LOG_PREFIX_EVENT, eventLog);
             logWaiter.accept(LOG_PREFIX_EVENT, eventLog);
 
-            final var containerName = getContainerNameFromEventNote(note);
+            // extract and check container name
+            if (!eventRegarding.getKind().equals("Pod")) {
+                return;
+            }
+            final var fieldPath = eventRegarding.getFieldPath();
+            if (fieldPath == null) {
+                return;
+            }
+            final var containerName = LOG_WATCHER_CONTAINERS.stream()
+                    .filter(c -> fieldPath.contains("{" + c + "}"))
+                    .findFirst()
+                    .orElse(null);
             if (containerName == null) {
                 return;
             }
+            LOG.info("Received {} event for container {} in pod {} [{}]", reason, containerName, podName, podUid);
             try {
                 if (reason.equals("Created")) {
                     logWatches.computeIfAbsent(podUid + "-" + podName + "-" + containerName, key -> {
@@ -321,7 +334,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
         }
 
         private void removeAndCloseLogWatcher(
-                final @NotNull String containerName, final @NotNull String podName, final @NotNull String podUid) {
+                final @NotNull String containerName,
+                final @NotNull String podName,
+                final @NotNull String podUid) {
             final var logWatch = logWatches.remove(podUid + "-" + podName + "-" + containerName);
             if (logWatch != null) {
                 logWatch.close();
@@ -331,16 +346,6 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         @Override
         public void onClose(final @NotNull WatcherException cause) {
-        }
-
-        private @Nullable String getContainerNameFromEventNote(final @NotNull String note) {
-            if (note.endsWith("container " + HIVEMQ_CONTAINER_NAME)) {
-                return HIVEMQ_CONTAINER_NAME;
-            }
-            if (note.endsWith("container " + HIVEMQ_OPERATOR_CONTAINER_NAME)) {
-                return HIVEMQ_OPERATOR_CONTAINER_NAME;
-            }
-            return null;
         }
     }
 
