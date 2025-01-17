@@ -1,0 +1,46 @@
+name: Sync Branch with HiveMQ Platform Operator
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  sync-branch:
+    permissions:
+      contents: read
+      packages: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout HiveMQ Platform Operator on the default branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: hivemq/hivemq-platform-operator
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Check if same branch exists
+        id: check-branch
+        run: |
+          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+          if [[ -n "${BRANCH}" ]]; then
+            echo "Same branch exists on hivemq-platform-operator"
+            echo "branch_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Same branch does not exists on hivemq-platform-operator"
+            echo "branch_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create new branch based on develop
+        if: steps.check-branch.outputs.branch_exists == 'false'
+        run: |
+          BRANCH=${{ github.event.pull_request.head.ref }}
+          git checkout -b $BRANCH
+          git push origin $BRANCH
