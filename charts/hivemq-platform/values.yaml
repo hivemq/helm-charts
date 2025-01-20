@@ -101,15 +101,15 @@ license:
   # The name of the Kubernetes Secret with all HiveMQ licenses.
   # To create a new Kubernetes Secret with licenses, set create=true. Otherwise, false to reuse an existing Secret.
   name: ""
-  # Defines specific annotations to be applied to the Kubernetes Secret that contains the HiveMQ licenses.
+  # Defines custom annotations for the Kubernetes Secret that contains the HiveMQ licenses.
   annotations: {}
-  # Defines specific labels to be applied to the Kubernetes Secret that contains the HiveMQ licenses.
+  # Defines custom labels for the Kubernetes Secret that contains the HiveMQ licenses.
   labels: {}
-  # Configures whether to use a Base64 encoded string (data) or clear content (stringData) for the rendered Kubernetes Secret.
-  # This is useful when using some third party tools to handle the license content through placeholders, such as the ArgoCD Vault plugin.
+  # Indicates whether the license data is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret.
+  # This is useful for third party tools that handle license content through placeholders, such as the ArgoCD Vault plugin.
   # For example, the following Helm command:
   #   `helm template platform hivemq/hivemq-platform --set license.create=true --set license.isLicenseBase64Encoded=false --set license.data=<hivemq-license-placeholder>`
-  # will render the following Kubernetes Secret:
+  # renders the the following Kubernetes Secret:
   #   apiVersion: v1
   #   kind: Secret
   #   metadata:
@@ -118,7 +118,7 @@ license:
   #     license.lic: <hivemq-license-placeholder>
   isLicenseBase64Encoded: true
   # Inlines the main HiveMQ license as a string.
-  # By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.
+  # By default, this data is expected as Base64 encoded string. Set "isLicenseBase64Encoded=false" to provide a plain string.
   data: ""
   # Overrides the main HiveMQ license via file using --set-file license.lic.
   overrideLicense: ""
@@ -128,7 +128,7 @@ license:
     ## Defines the name of the additional main HiveMQ license (the .lic suffix will be added automatically).
     #license-name:
     #  # Inlines the additional main HiveMQ license as a string.
-    #  # By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.
+    #  # By default, this data is expected as Base64 encoded string. Set "isLicenseBase64Encoded=false" to provide a plain string.
     #  data: ""
     #  # Overrides the additional main HiveMQ license via file using --set-file additional-license.lic.
     #  overrideLicense: ""
@@ -138,7 +138,7 @@ license:
     ## Defines the name of the HiveMQ Enterprise Extension license in the Kubernetes Secret (the .elic suffix will be added automatically).
     #extension-license-name:
     #  # Inlines the HiveMQ Enterprise Extension license as a string.
-    #  # By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.
+    #  # By default, this data is expected as Base64 encoded string. Set "isLicenseBase64Encoded=false" to provide a plain string.
     #  data: ""
     #  # Overrides the HiveMQ Enterprise Extension license via file using --set-file license.elic.
     #  overrideLicense: ""
@@ -154,7 +154,7 @@ license:
     ## Defines the name of the HiveMQ Data Hub license in the Kubernetes Secret (the .plic suffix will be added automatically).
     #data-hub-license-name:
     #  # Inlines the HiveMQ Data Hub license as a string.
-    #  # By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.
+    #  # By default, this data is expected as Base64 encoded string. Set "isLicenseBase64Encoded=false" to provide a plain string.
     #  data: ""
     #  # Overrides the HiveMQ Data Hub license via file using --set-file license.plic.
     #  overrideLicense: ""
@@ -425,9 +425,9 @@ config:
   # Overrides the default HiveMQ Platform configuration (config.xml) by providing
   # the name of a Kubernetes ConfigMap or Kubernetes Secret that contains the config.xml file (also set create=false).
   name: ""
-  # Defines specific annotations to be applied to the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.
+  # Defines custom annotations for the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.
   annotations: {}
-  # Defines specific labels to be applied to the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.
+  # Defines custom labels for the Kubernetes ConfigMap or Kubernetes Secret that contains the HiveMQ Platform configuration.
   labels: {}
   # Inlines the HiveMQ Platform configuration (config.xml) from a file:
   # --set-file config.overrideHiveMQConfig=your-config.xml
