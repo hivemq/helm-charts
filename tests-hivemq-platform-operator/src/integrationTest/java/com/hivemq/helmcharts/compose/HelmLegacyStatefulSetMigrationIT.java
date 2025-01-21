@@ -130,7 +130,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 legacyLabels,
                 true,
                 true);
-        final var hiveMQVersion = System.getProperty("hivemq.version", "latest");
+        final var hiveMQVersion = System.getProperty("hivemq.tag", "latest");
         final var legacyStatefulSetLabels = new HashMap<>(Map.of("app.kubernetes.io/instance",
                 LEGACY_RELEASE_NAME,
                 "app.kubernetes.io/managed-by",
