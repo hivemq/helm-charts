@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.dataformat.toml.TomlMapper
+
 plugins {
     java
 }
@@ -14,6 +16,15 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.jackson.dataformat.toml)
+    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -85,14 +96,19 @@ testing {
                         junitXml.isOutputPerTestCase = true
                     }
                     maxHeapSize = "3g"
-
-                    // sets docker images versions for the tests
-                    systemProperties(
-                        "hivemq.version" to libs.versions.hivemq.platform.get(),
-                        "selenium.version" to libs.versions.selenium.get(),
-                        "nginx.version" to libs.versions.nginx.container.get()
-                    )
-
+                    doFirst {
+                        // sets Docker image tags for the tests
+                        val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
+                        val toml = TomlMapper().readTree(tomlFile)
+                        toml.path("docker").fields().forEach { (key, value) ->
+                            val tag = value.path("tag").asText()
+                            if (tag.isNotEmpty()) {
+                                println("Configuring test Docker image $key:$tag")
+                                systemProperty("$key.tag", tag)
+                            }
+                        }
+                        systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
+                    }
                     dependsOn(saveDockerImages)
                     inputs.files(
                         layout.buildDirectory.file("hivemq-dns-init-wait.tar"),

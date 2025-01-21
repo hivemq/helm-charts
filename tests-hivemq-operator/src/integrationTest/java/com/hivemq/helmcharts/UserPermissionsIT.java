@@ -3,7 +3,6 @@ package com.hivemq.helmcharts;
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.helmcharts.testcontainer.DockerImageNames;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -24,9 +23,8 @@ class UserPermissionsIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer container =
-            new OperatorHelmChartContainer(DockerImageNames.K3s.DEFAULT,
-                    "values/permissions-values.yaml",
-                    "local-hivemq").withLocalImages("hivemq-k8s-test-rootless.tar");
+            new OperatorHelmChartContainer("values/permissions-values.yaml", "local-hivemq").withLocalImages(
+                    "hivemq-k8s-test-rootless.tar");
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
