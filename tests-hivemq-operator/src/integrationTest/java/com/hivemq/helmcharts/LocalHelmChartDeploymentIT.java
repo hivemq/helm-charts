@@ -3,7 +3,6 @@ package com.hivemq.helmcharts;
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.helmcharts.testcontainer.DockerImageNames;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -27,9 +26,7 @@ class LocalHelmChartDeploymentIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer container =
-            new OperatorHelmChartContainer(DockerImageNames.K3s.DEFAULT,
-                    "values/test-values.yaml",
-                    "local-hivemq").withLocalImages();
+            new OperatorHelmChartContainer("values/test-values.yaml", "local-hivemq").withLocalImages();
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
