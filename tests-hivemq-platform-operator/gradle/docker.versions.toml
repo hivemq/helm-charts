@@ -1,0 +1,5 @@
+[docker]
+# https://hub.docker.com/_/nginx/tags?page=&page_size=&ordering=&name=1.27
+nginx = { image = "nginx", version = "1.27.3" }
+# https://hub.docker.com/r/selenium/standalone-chrome/tags?name=4.
+selenium = { image = "selenium/standalone-chrome", version = "4.27.0" }

@@ -1,3 +1,5 @@
+import com.moandjiezana.toml.Toml
+
 plugins {
     java
 }
@@ -14,6 +16,15 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.toml)
+    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -86,11 +97,14 @@ testing {
                     }
                     maxHeapSize = "3g"
 
+                    val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
+                    val toml = Toml().read(tomlFile)
+
                     // sets docker images versions for the tests
                     systemProperties(
                         "hivemq.version" to libs.versions.hivemq.platform.get(),
-                        "selenium.version" to libs.versions.selenium.get(),
-                        "nginx.version" to libs.versions.nginx.container.get()
+                        "nginx.version" to toml.getString("docker.nginx.version"),
+                        "selenium.version" to toml.getString("docker.selenium.version"),
                     )
 
                     dependsOn(saveDockerImages)
