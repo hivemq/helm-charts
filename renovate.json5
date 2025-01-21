@@ -12,4 +12,18 @@
     addLabels: [
         "tooling-and-extensions-coordination",
     ],
+    "customManagers": [
+        {
+            customType: "regex",
+            datasourceTemplate: "docker",
+            description: "Custom Manager for Docker images",
+            fileMatch: [
+                "(^|/)docker.versions.toml$"
+            ],
+            matchStrings: [
+                ".* = \\{ image = \"(?<packageName>.+)\", version = \"(?<currentValue>.+)\" \\}"
+            ],
+            versioningTemplate: "docker",
+        }
+    ],
 }
