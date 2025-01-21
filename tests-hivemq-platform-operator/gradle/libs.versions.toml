@@ -10,13 +10,12 @@ junit-jupiter = "5.11.4"
 junit-platform = "1.11.4"
 logback = "1.5.16"
 netty = "4.1.117.Final"
-# https://hub.docker.com/_/nginx/tags?page=&page_size=&ordering=&name=1.27
-nginx-container = "1.27.3"
 rest-assured = "5.5.0"
 selenium = "4.28.0"
 shrinkwrap = "1.2.6"
 slf4j = "2.0.16"
 testcontainers = "1.20.4"
+toml = "0.7.2"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
@@ -28,7 +27,7 @@ hivemq-extensionSdk = { module = "com.hivemq:hivemq-extension-sdk", version.ref 
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform"}
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
 rest-assured = { module = "io.rest-assured:rest-assured", version.ref = "rest-assured" }
@@ -42,3 +41,4 @@ testcontainers-hivemq = { module = "org.testcontainers:hivemq", version.ref = "t
 testcontainers-junitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
 testcontainers-k3s = { module = "org.testcontainers:k3s", version.ref = "testcontainers" }
 testcontainers-selenium = { module = "org.testcontainers:selenium", version.ref = "testcontainers" }
+toml = { module = "com.moandjiezana.toml:toml4j", version.ref = "toml" }

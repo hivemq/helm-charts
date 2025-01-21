@@ -23,9 +23,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.hivemq.helmcharts.testcontainer.DockerImageNames.K3S_DOCKER_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
@@ -72,11 +70,8 @@ public class OperatorHelmChartContainer extends K3sContainer {
     private @Nullable KubernetesClient kubernetesClient;
     private boolean withCustomImages = false;
 
-    public OperatorHelmChartContainer(
-            final @NotNull DockerImageNames.K3s k3s,
-            final @NotNull String customValuesFile,
-            final @NotNull String chartName) {
-        super(getAdHocImageName(k3s));
+    public OperatorHelmChartContainer(final @NotNull String customValuesFile, final @NotNull String chartName) {
+        super(getAdHocImageName());
         super.addExposedPort(MQTT_PORT);
         // mount all values for updates of the chart
         super.withClasspathResourceMapping("values", "/values/", BindMode.READ_ONLY);
@@ -85,26 +80,16 @@ public class OperatorHelmChartContainer extends K3sContainer {
         super.withStartupCheckStrategy(new DeploymentStatusStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
-        if (k3s.ordinal() > DockerImageNames.K3s.V1_24.ordinal()) {
-            super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
-        }
+        super.withCommand("server", "--disable=traefik", "--tls-san=" + getHost());
         this.chartName = chartName;
     }
 
-    private static @NotNull DockerImageName getAdHocImageName(final @NotNull DockerImageNames.K3s k3s) {
+    private static @NotNull DockerImageName getAdHocImageName() {
         final var dockerfile = Path.of(MountableFile.forClasspathResource("k3s.dockerfile").getFilesystemPath());
-        // fix pre-emptively checking local images by replacing the build args in the Dockerfile
-        // see https://github.com/testcontainers/testcontainers-java/issues/3238
-        try {
-            final var dockerfileString = Files.readString(dockerfile, UTF_8);
-            Files.writeString(dockerfile, dockerfileString.replace("${K3S_VERSION}", k3s.getVersion()), UTF_8);
-        } catch (IOException e) {
-            LOG.warn("Could not replace build args in Dockerfile", e);
-        }
         final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile)
-                .withBuildArg("K3S_VERSION", k3s.getVersion())
+                .withBuildArg("K3S_VERSION", K3S_DOCKER_IMAGE.getVersionPart())
                 .get();
-        return DockerImageName.parse(imageName).asCompatibleSubstituteFor("rancher/k3s");
+        return DockerImageName.parse(imageName).asCompatibleSubstituteFor(K3S_DOCKER_IMAGE.getUnversionedPart());
     }
 
     /**

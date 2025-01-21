@@ -1,6 +1,5 @@
 package com.hivemq.helmcharts;
 
-import com.hivemq.helmcharts.testcontainer.DockerImageNames;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
@@ -20,9 +19,7 @@ class ExtensionInstallationIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer container =
-            new OperatorHelmChartContainer(DockerImageNames.K3s.DEFAULT,
-                    "values/test-values.yaml",
-                    CHART_NAME).withLocalImages();
+            new OperatorHelmChartContainer("values/test-values.yaml", CHART_NAME).withLocalImages();
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.MINUTES)

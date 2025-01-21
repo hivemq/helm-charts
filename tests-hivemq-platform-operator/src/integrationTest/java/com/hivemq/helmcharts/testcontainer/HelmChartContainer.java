@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.hivemq.helmcharts.Chart;
-import com.hivemq.helmcharts.testcontainer.DockerImageNames.K3s;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
@@ -48,8 +47,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.hivemq.helmcharts.testcontainer.DockerImageNames.K3S_DOCKER_IMAGE;
 import static com.hivemq.helmcharts.util.NginxUtil.NGINX_CONTAINER_NAME;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.FIVE_MINUTES;
@@ -88,18 +87,11 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     private boolean withLocalImages = true;
 
     public HelmChartContainer(final boolean withK3sDebugging) {
-        this(withK3sDebugging, List.of(), K3s.LATEST);
+        this(withK3sDebugging, List.of());
     }
 
     public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
-        this(withK3sDebugging, additionalCommands, K3s.LATEST);
-    }
-
-    public HelmChartContainer(
-            final boolean withK3sDebugging,
-            final @NotNull List<String> additionalCommands,
-            final @NotNull K3s k3s) {
-        super(getAdHocImageName(k3s));
+        super(getAdHocImageName());
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
                 "/charts/" + LEGACY_OPERATOR_CHART);
@@ -122,7 +114,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
                 "--etcd-arg=auto-compaction-mode=revision",
                 "--etcd-arg=auto-compaction-retention=1000000",
                 "--kube-apiserver-arg=etcd-compaction-interval=0s",
-                k3s.ordinal() > K3s.V1_24.ordinal() ? "--disable=traefik" : "--no-deploy=traefik",
+                "--disable=traefik",
                 "--tls-san=" + getHost()));
         if (!additionalCommands.isEmpty()) {
             LOG.debug("Starting K3s container with additional commands: {}", additionalCommands);
@@ -501,20 +493,12 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         }
     }
 
-    private static @NotNull DockerImageName getAdHocImageName(final @NotNull K3s k3s) {
-        final var dockerfile = Path.of(MountableFile.forClasspathResource("helm.dockerfile").getFilesystemPath());
-        // fix pre-emptively checking local images by replacing the build args in the Dockerfile
-        // see https://github.com/testcontainers/testcontainers-java/issues/3238
-        try {
-            final var dockerfileString = Files.readString(dockerfile, UTF_8);
-            Files.writeString(dockerfile, dockerfileString.replace("${K3S_VERSION}", k3s.getVersion()), UTF_8);
-        } catch (IOException e) {
-            LOG.warn("Could not replace build args in Dockerfile", e);
-        }
+    private static @NotNull DockerImageName getAdHocImageName() {
+        final var dockerfile = Path.of(MountableFile.forClasspathResource("k3s.dockerfile").getFilesystemPath());
         final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile)
-                .withBuildArg("K3S_VERSION", k3s.getVersion())
+                .withBuildArg("K3S_VERSION", K3S_DOCKER_IMAGE.getVersionPart())
                 .get();
-        return DockerImageName.parse(imageName).asCompatibleSubstituteFor("rancher/k3s");
+        return DockerImageName.parse(imageName).asCompatibleSubstituteFor(K3S_DOCKER_IMAGE.getUnversionedPart());
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
