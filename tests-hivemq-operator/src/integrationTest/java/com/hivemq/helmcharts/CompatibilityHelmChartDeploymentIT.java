@@ -3,13 +3,10 @@ package com.hivemq.helmcharts;
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.helmcharts.testcontainer.DockerImageNames;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
@@ -22,15 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Tag("K8sVersionCompatibility")
 @Testcontainers
-@SuppressWarnings("DuplicatedCode")
 class CompatibilityHelmChartDeploymentIT {
 
-    @ParameterizedTest
-    @EnumSource(value = DockerImageNames.K3s.class, names = {"MINIMUM", "LATEST"})
+    @Test
     @Timeout(value = 10, unit = TimeUnit.MINUTES)
-    void withHelmLocalVersionDeployment_mqttMessagePublishedReceived(final @NotNull DockerImageNames.K3s k3s)
-            throws Exception {
-        try (final var container = new OperatorHelmChartContainer(k3s, "values/test-values.yaml", "test-hivemq")) {
+    void withHelmLocalVersionDeployment_mqttMessagePublishedReceived() throws Exception {
+        try (final var container = new OperatorHelmChartContainer("values/test-values.yaml", "test-hivemq")) {
             container.withLocalImages();
             container.start();
             final var client = Mqtt5Client.builder()
