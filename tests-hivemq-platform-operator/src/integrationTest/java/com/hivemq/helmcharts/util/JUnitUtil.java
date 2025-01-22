@@ -50,7 +50,7 @@ public class JUnitUtil {
                 .stream()
                 .filter(testIdentifier -> !searchIntegrationTests || testIdentifier.getDisplayName().endsWith("IT"))
                 .toList();
-        System.out.printf("Found %s %s:%n", tests.size(), searchIntegrationTests ? "integration tests": "tests");
+        System.out.printf("Found %s %s:%n", tests.size(), searchIntegrationTests ? "integration tests" : "tests");
         tests.forEach(testIdentifier -> {
             if (testIdentifier.getSource().isEmpty()) {
                 throw new IllegalStateException("Test '" + testIdentifier.getDisplayName() + "' has no source");
