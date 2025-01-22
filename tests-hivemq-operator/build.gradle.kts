@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.dataformat.toml.TomlMapper
+
 plugins {
     java
 }
@@ -14,6 +16,15 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.jackson.dataformat.toml)
+    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -65,7 +76,25 @@ testing {
                         junitXml.isOutputPerTestCase = true
                     }
                     maxHeapSize = "3g"
-
+                    doFirst {
+                        // sets Docker image tags for the tests
+                        val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
+                        val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
+                        tomlDocker.fields().forEach { (key, value) ->
+                            val tag = value.path("tag").asText()
+                            if (tag.isNotEmpty()) {
+                                println("Configuring test Docker image $key:$tag")
+                                systemProperty("$key.tag", tag)
+                            }
+                        }
+                        systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
+                        val k8sVersionType = environment["K8S_VERSION_TYPE"] ?: "LATEST"
+                        val key = if (k8sVersionType == "MINIMUM") "k3s-minimum" else "k3s-latest"
+                        val tag = tomlDocker.path(key).path("tag").asText()
+                        println("Configuring test Docker image k3s:$tag ($k8sVersionType)")
+                        systemProperty("k3s.tag", tag)
+                        systemProperty("k3s.version.type", k8sVersionType)
+                    }
                     dependsOn(saveDockerImages)
                     inputs.files(
                         layout.buildDirectory.file("hivemq-dns-init-wait.tar"),
@@ -115,7 +144,15 @@ val buildRootlessK8sImage by tasks.registering(Exec::class) {
     inputs.property("dockerImageName", containerName)
     inputs.dir(createRootlessK8sImageContext.map { it.destinationDir })
     workingDir(createRootlessK8sImageContext.map { it.destinationDir })
-    commandLine("docker", "build", "-f", "example_nonroot_k8s.dockerfile", "-t", "${containerName}-rootless:${containerTag}", ".")
+    commandLine(
+        "docker",
+        "build",
+        "-f",
+        "example_nonroot_k8s.dockerfile",
+        "-t",
+        "${containerName}-rootless:${containerTag}",
+        "."
+    )
 }
 
 val saveRootlessK8sImage by tasks.registering(Exec::class) {
@@ -179,7 +216,7 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.sh")
                 include("**/*.toml")
                 include("**/*.java")
-            }.plus(fileTree("../examples/hivemq-operator").matching{
+            }.plus(fileTree("../examples/hivemq-operator").matching {
                 include("**/*.yml")
                 include("**/*.yaml")
                 // include test hivemq/mqtt-cli image to update, which is part of the hivemq-operator chart

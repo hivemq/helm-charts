@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -26,6 +27,9 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 8, unit = TimeUnit.MINUTES)
+    @EnabledIfSystemProperty(named = "k3s.version.type",
+                             matches = "LATEST",
+                             disabledReason = "there are various PVC related bugfixes in K8s that probably cause issues with older versions")
     void platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()
             throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/volumes-claim-templates-values.yaml");
