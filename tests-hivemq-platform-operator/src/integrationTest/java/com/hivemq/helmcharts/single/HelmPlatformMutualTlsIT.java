@@ -118,7 +118,9 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     }
 
     private void assertMqttListener(
-            final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
+            final @NotNull String serviceName,
+            final int servicePort,
+            final @Nullable MqttClientSslConfig sslConfig) {
         MqttUtil.assertMessages(client,
                 platformNamespace,
                 serviceName,

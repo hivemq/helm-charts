@@ -28,12 +28,14 @@ class K3sLogConsumer implements Consumer<OutputFrame> {
     }
 
     @SuppressWarnings("SameParameterValue")
-    @NotNull K3sLogConsumer withPrefix(final @NotNull String prefix) {
+    @NotNull
+    K3sLogConsumer withPrefix(final @NotNull String prefix) {
         this.prefix = "[" + prefix + "] ";
         return this;
     }
 
-    @NotNull K3sLogConsumer withDebugging(final boolean withDebugging) {
+    @NotNull
+    K3sLogConsumer withDebugging(final boolean withDebugging) {
         this.withDebugging = withDebugging;
         return this;
     }

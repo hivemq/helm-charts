@@ -268,7 +268,8 @@ public class K8sUtil {
      * @return the container
      */
     public static @NotNull Container getContainer(
-            final @NotNull StatefulSetSpec statefulSetSpec, final @NotNull String containerName) {
+            final @NotNull StatefulSetSpec statefulSetSpec,
+            final @NotNull String containerName) {
         return statefulSetSpec.getTemplate()
                 .getSpec()
                 .getContainers()
@@ -312,7 +313,9 @@ public class K8sUtil {
      * @return the HiveMQ platform {@link Resource<GenericKubernetesResource>}
      */
     public static @NotNull Resource<GenericKubernetesResource> getHiveMQPlatform(
-            final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String name) {
         final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
                 .withKind("HiveMQPlatform")
                 .withVersion("v1")
@@ -360,7 +363,8 @@ public class K8sUtil {
      * @return the container
      */
     public static @NotNull Container getInitContainer(
-            final @NotNull StatefulSetSpec statefulSetSpec, final @NotNull String initContainerName) {
+            final @NotNull StatefulSetSpec statefulSetSpec,
+            final @NotNull String initContainerName) {
         return statefulSetSpec.getTemplate()
                 .getSpec()
                 .getInitContainers()
@@ -402,7 +406,9 @@ public class K8sUtil {
      * @return the HiveMQ platform {@link Resource<GenericKubernetesResource>}
      */
     public static @NotNull Resource<GenericKubernetesResource> getLegacyHiveMQPlatform(
-            final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String name) {
         final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
                 .withKind("HiveMQCluster")
                 .withVersion("v1")
