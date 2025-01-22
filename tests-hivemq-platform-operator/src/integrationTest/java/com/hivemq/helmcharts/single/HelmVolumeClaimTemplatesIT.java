@@ -153,7 +153,8 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
     }
 
     private static void assertPersistentVolumeClaim(
-            final @NotNull PersistentVolumeClaim pvc, final @NotNull String expectedPvcName) {
+            final @NotNull PersistentVolumeClaim pvc,
+            final @NotNull String expectedPvcName) {
         assertThat(pvc).isNotNull();
         assertThat(pvc.getMetadata().getName()).isEqualTo(expectedPvcName);
         final var pvcSpec = pvc.getSpec();
