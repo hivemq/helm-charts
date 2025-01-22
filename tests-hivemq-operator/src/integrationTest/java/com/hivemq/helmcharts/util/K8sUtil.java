@@ -22,7 +22,9 @@ public class K8sUtil {
     }
 
     public static @NotNull Resource<GenericKubernetesResource> getHiveMQCluster(
-            final @NotNull KubernetesClient client, final @NotNull String namespace, final @NotNull String name) {
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String name) {
         final var context = new ResourceDefinitionContext.Builder().withGroup("hivemq.com")
                 .withKind("HiveMQCluster")
                 .withVersion("v1")
