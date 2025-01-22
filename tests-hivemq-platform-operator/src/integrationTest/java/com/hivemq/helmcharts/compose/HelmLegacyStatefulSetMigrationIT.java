@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -79,6 +80,9 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @EnabledIfSystemProperty(named = "k3s.version.type",
+                             matches = "LATEST",
+                             disabledReason = "there are various PVC related bugfixes in K8s that probably cause issues with older versions")
     void migrateToCurrentPlatformOperator() throws Exception {
         K8sUtil.createConfigMap(client, operatorNamespace, "ese-legacy-config-map.yml");
         K8sUtil.createConfigMap(client, operatorNamespace, "ese-file-realm-config-map.yml");

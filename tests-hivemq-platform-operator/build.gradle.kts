@@ -6,7 +6,8 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val testPlanOtherExcludeTags = "Containers,ContainerSecurityContext,CustomConfig,CustomOperatorConfig,Extensions,Licenses,Monitoring,Platform,PodSecurityContext,ServiceAccount,Services,Upgrade,Volumes"
+val testPlanOtherExcludeTags =
+    "Containers,ContainerSecurityContext,CustomConfig,CustomOperatorConfig,Extensions,Licenses,Monitoring,Platform,PodSecurityContext,ServiceAccount,Services,Upgrade,Volumes"
 
 java {
     toolchain {
@@ -99,8 +100,8 @@ testing {
                     doFirst {
                         // sets Docker image tags for the tests
                         val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
-                        val toml = TomlMapper().readTree(tomlFile)
-                        toml.path("docker").fields().forEach { (key, value) ->
+                        val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
+                        tomlDocker.fields().forEach { (key, value) ->
                             val tag = value.path("tag").asText()
                             if (tag.isNotEmpty()) {
                                 println("Configuring test Docker image $key:$tag")
@@ -108,6 +109,12 @@ testing {
                             }
                         }
                         systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
+                        val k8sVersionType = environment["K8S_VERSION_TYPE"] ?: "LATEST"
+                        val key = if (k8sVersionType == "MINIMUM") "k3s-minimum" else "k3s-latest"
+                        val tag = tomlDocker.path(key).path("tag").asText()
+                        println("Configuring test Docker image k3s:$tag ($k8sVersionType)")
+                        systemProperty("k3s.tag", tag)
+                        systemProperty("k3s.version.type", k8sVersionType)
                     }
                     dependsOn(saveDockerImages)
                     inputs.files(
