@@ -31,10 +31,14 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
                 platformNamespace);
 
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SCALING"), 2, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SCALING"),
+                2,
+                TimeUnit.MINUTES);
         LOG.debug("Platform scaling");
 
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 2, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"),
+                2,
+                TimeUnit.MINUTES);
         LOG.debug("Platform upgraded");
 
         final var upgradedStatefulSet =
