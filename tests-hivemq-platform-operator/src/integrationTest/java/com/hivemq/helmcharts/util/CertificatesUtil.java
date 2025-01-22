@@ -41,8 +41,8 @@ public class CertificatesUtil {
     }
 
     public static void generateCertificates(
-            final @NotNull File path, final @NotNull Map<String, String> environmentVariables)
-            throws IOException, InterruptedException {
+            final @NotNull File path,
+            final @NotNull Map<String, String> environmentVariables) throws IOException, InterruptedException {
         final var processBuilder = new ProcessBuilder("bash",
                 "-c",
                 "source ./build/resources/integrationTest/scripts/generate-certificates.sh " + path.getAbsolutePath());

@@ -62,7 +62,9 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     3,
                     TimeUnit.MINUTES);
         }
-        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 3, TimeUnit.MINUTES);
+        hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"),
+                3,
+                TimeUnit.MINUTES);
         final var updatedPodResourceVersion = client.pods()
                 .inNamespace(platformNamespace)
                 .withName(PLATFORM_RELEASE_NAME + "-0")

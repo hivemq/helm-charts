@@ -41,6 +41,9 @@ class HelmMetricsServiceIT extends AbstractHelmChartIT {
     void platformChart_withCustomServiceName_thenMetricsAvailable() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
         MqttUtil.assertMessages(client, platformNamespace, CUSTOM_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT);
-        MonitoringUtil.assertSubscribesPublishesMetrics(client, platformNamespace, METRICS_CUSTOM_SERVICE_NAME, METRICS_SERVICE_PORT_9399);
+        MonitoringUtil.assertSubscribesPublishesMetrics(client,
+                platformNamespace,
+                METRICS_CUSTOM_SERVICE_NAME,
+                METRICS_SERVICE_PORT_9399);
     }
 }
