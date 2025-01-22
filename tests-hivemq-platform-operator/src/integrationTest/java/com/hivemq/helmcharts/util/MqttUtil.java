@@ -231,12 +231,15 @@ public class MqttUtil {
     }
 
     public static @NotNull Mqtt5BlockingClient getBlockingClient(
-            final @NotNull LocalPortForward portForward, final @NotNull String identifier) {
+            final @NotNull LocalPortForward portForward,
+            final @NotNull String identifier) {
         return getBlockingClient(portForward, identifier, Function.identity());
     }
 
     public static @NotNull Mqtt5BlockingClient getBlockingClient(
-            final @NotNull String hostname, final int port, final @NotNull String identifier) {
+            final @NotNull String hostname,
+            final int port,
+            final @NotNull String identifier) {
         return getBlockingClient(hostname, port, identifier, Function.identity());
     }
 
@@ -281,8 +284,7 @@ public class MqttUtil {
 
     public interface MqttSubscribeRunnable {
 
-        void run(
-                final @NotNull Mqtt5BlockingClient subscribeClient, final @NotNull Mqtt5Publishes publishes)
+        void run(final @NotNull Mqtt5BlockingClient subscribeClient, final @NotNull Mqtt5Publishes publishes)
                 throws Exception;
     }
 
