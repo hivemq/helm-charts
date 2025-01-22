@@ -33,19 +33,16 @@ class HelmMonitoringOperatorIT extends AbstractHelmMonitoringIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withOperatorMonitoringEnabled_metricsAndDashboardAvailable() throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning("/files/operator-monitoring-enabled-values.yaml");
-        assertPrometheusMetrics("hivemq_platform_operator_custom_resource_count", response ->
-                assertThat(response.data().result())
-                        .hasSize(1)
-                        .extracting(
-                                result -> result.metric().get("__name__"),
+        assertPrometheusMetrics("hivemq_platform_operator_custom_resource_count",
+                response -> assertThat(response.data().result()).hasSize(1)
+                        .extracting(result -> result.metric().get("__name__"),
                                 result -> result.metric().get("container"),
                                 result -> result.metric().get("controller"),
-                                result -> result.value().get(1)
-                        )
-                        .containsExactlyInAnyOrder(
-                                tuple("hivemq_platform_operator_custom_resource_count", "hivemq-platform-operator", "hivemq-controller", "0")
-                        )
-        );
+                                result -> result.value().get(1))
+                        .containsExactlyInAnyOrder(tuple("hivemq_platform_operator_custom_resource_count",
+                                "hivemq-platform-operator",
+                                "hivemq-controller",
+                                "0")));
         assertGrafanaDashboard("HiveMQ Platform Operator (Prometheus)");
     }
 }
