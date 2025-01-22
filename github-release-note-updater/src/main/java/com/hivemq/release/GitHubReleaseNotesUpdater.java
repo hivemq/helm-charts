@@ -29,6 +29,11 @@ public class GitHubReleaseNotesUpdater {
             
             [Updated to HiveMQ Platform Operator %s](%s)
             """;
+    private static final @NotNull String EDGE_RELEASE_NOTE_TEMPLATE = """
+            %s
+            
+            [Updated to HiveMQ Edge %s](%s)
+            """;
 
     private static final @NotNull String PLATFORM_MAINTENANCE_RELEASE_URL =
             "https://www.hivemq.com/changelog/hivemq-%s-%s-%s-released/";
@@ -36,6 +41,8 @@ public class GitHubReleaseNotesUpdater {
             "https://www.hivemq.com/changelog/whats-new-in-hivemq-%s-%s/";
     private static final @NotNull String OPERATOR_RELEASE_URL =
             "https://www.hivemq.com/changelog/hivemq-platform-operator-%s-%s-%s-release/";
+    private static final @NotNull String EDGE_RELEASE_URL =
+            "https://www.hivemq.com/changelog/hivemq-edge-%s-%s-released/";
 
     private static final @NotNull Pattern PLATFORM_RELEASE_PATTERN =
             Pattern.compile("^hivemq-platform-(\\d+\\.\\d+\\.\\d+)$");
@@ -75,6 +82,7 @@ public class GitHubReleaseNotesUpdater {
         final var legacyOperatorCharts =
                 charts.stream().filter(chart -> chart.name().equals("hivemq-operator")).sorted().toList();
         final var swarmCharts = charts.stream().filter(chart -> chart.name().equals("hivemq-swarm")).sorted().toList();
+        final var edgeCharts = charts.stream().filter(chart -> chart.name().equals("hivemq-edge")).sorted().toList();
 
         // prepare the release notes
         final var releaseNotes = new HashMap<String, String>();
@@ -114,6 +122,10 @@ public class GitHubReleaseNotesUpdater {
                 platformCharts,
                 PLATFORM_RELEASE_NOTE_TEMPLATE,
                 GitHubReleaseNotesUpdater::getPlatformReleaseUrl);
+        setReleaseNotes(releaseNotes,
+                edgeCharts,
+                EDGE_RELEASE_NOTE_TEMPLATE,
+                GitHubReleaseNotesUpdater::getEdgeReleaseUrl);
 
         // update the GitHub release notes
         try (var executorService = Executors.newSingleThreadExecutor()) {
@@ -188,6 +200,28 @@ public class GitHubReleaseNotesUpdater {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
+    private static void setReleaseNotes(
+            final @NotNull Map<String, String> releaseNotes,
+            final @NotNull List<Chart> charts,
+            final @NotNull String releaseNoteTemplate,
+            final @NotNull Function<Version, String> releaseUrlFunction) {
+        for (int i = 0; i < charts.size(); i++) {
+            // we get the previous chart and check if the appVersion has changed in the current chart
+            final var chart = charts.get(i);
+            final var previousChart = i == 0 ? null : charts.get(i - 1);
+            final var wasChartUpdated = previousChart == null || !previousChart.appVersion().equals(chart.appVersion());
+            if (wasChartUpdated) {
+                final var releaseTag = String.format("%s-%s", chart.name(), chart.version());
+                final var releaseNote = String.format(releaseNoteTemplate,
+                        chart.description(),
+                        chart.appVersion(),
+                        releaseUrlFunction.apply(chart.appVersion()));
+                releaseNotes.put(releaseTag, releaseNote);
+            }
+        }
+    }
+
     private static @NotNull Optional<Release> getMatchingRelease(
             final @NotNull List<Release> releases,
             final @NotNull String releaseTag,
@@ -216,6 +250,10 @@ public class GitHubReleaseNotesUpdater {
                 version.majorVersion(),
                 version.minorVersion(),
                 version.patchVersion());
+    }
+
+    private static @NotNull String getEdgeReleaseUrl(final @NotNull Version version) {
+        return String.format(EDGE_RELEASE_URL, version.majorVersion(), version.minorVersion());
     }
 
     private static int execute(final @NotNull ExecutorService executorService, final @NotNull String... command)
