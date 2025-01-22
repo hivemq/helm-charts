@@ -64,9 +64,12 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                 List.of(appendingFooExtension, appendingBarExtension, appendingBazExtension),
                 false,
                 false);
-        final var fooExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Foo Extension\" version 1.0.0 started successfully.");
-        final var barExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Bar Extension\" version 1.0.0 started successfully.");
-        final var bazExtensionStartedFuture = waitForPlatformLog(".*Extension \"HiveMQ Appending Baz Extension\" version 1.0.0 started successfully.");
+        final var fooExtensionStartedFuture =
+                waitForPlatformLog(".*Extension \"HiveMQ Appending Foo Extension\" version 1.0.0 started successfully.");
+        final var barExtensionStartedFuture =
+                waitForPlatformLog(".*Extension \"HiveMQ Appending Bar Extension\" version 1.0.0 started successfully.");
+        final var bazExtensionStartedFuture =
+                waitForPlatformLog(".*Extension \"HiveMQ Appending Baz Extension\" version 1.0.0 started successfully.");
 
         installPlatformChartAndWaitToBeRunning("/files/extension-priority-values.yaml");
 
@@ -114,7 +117,9 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
     }
 
     private void assertThatExtensionXmlContains(
-            final @NotNull Pod pod, final @NotNull String extensionId, final @NotNull String... values) {
+            final @NotNull Pod pod,
+            final @NotNull String extensionId,
+            final @NotNull String... values) {
         try {
             final var extensionXml = tmp.resolve(extensionId).resolve("hivemq-extension.xml");
             Files.createDirectories(extensionXml.getParent());

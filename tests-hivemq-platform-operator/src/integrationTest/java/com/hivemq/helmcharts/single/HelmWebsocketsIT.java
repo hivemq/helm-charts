@@ -145,7 +145,9 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
     }
 
     private void assertWebSocketListener(
-            final @NotNull String serviceName, final int servicePort, final @Nullable MqttClientSslConfig sslConfig) {
+            final @NotNull String serviceName,
+            final int servicePort,
+            final @Nullable MqttClientSslConfig sslConfig) {
         MqttUtil.assertMessages(client,
                 platformNamespace,
                 serviceName,
