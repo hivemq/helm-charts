@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -55,6 +56,9 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @EnabledIfSystemProperty(named = "k3s.version.type",
+                             matches = "LATEST",
+                             disabledReason = "spec.templates.spec.initContainers[].restartPolicy was added in K8s 1.28")
     void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
         K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
         installPlatformChartAndWaitToBeRunning("/files/additional-init-containers-values.yaml");
