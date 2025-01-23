@@ -1,137 +1,33 @@
 {{- if .Values.rbac.create -}}
+{{- $roleName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
+{{- $labels := include "hivemq-platform-operator.labels" . }}
+{{- $clusterRules := include "hivemq-platform-operator.rbac.rules.cluster" (dict "platformServiceAccountPermissionsValidate" .Values.hivemqPlatformServiceAccount.permissions.validate) }}
+{{- $namespaceRules := include "hivemq-platform-operator.rbac.rules.namespace" (dict "platformServiceAccountCreate" .Values.hivemqPlatformServiceAccount.create "platformServiceAccountValidate" .Values.hivemqPlatformServiceAccount.validate "platformServiceAccountPermissionsCreate" .Values.hivemqPlatformServiceAccount.permissions.create "platformServiceAccountPermissionsValidate" .Values.hivemqPlatformServiceAccount.permissions.validate) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
+  name: {{ $roleName }}
   labels:
-    {{- include "hivemq-platform-operator.labels" . | nindent 4 }}
+    {{- $labels | nindent 4 }}
 rules:
-  - apiGroups:
-      - hivemq.com
-    resources:
-      - hivemq-platforms
-      - hivemq-platforms/status
-      - hivemq-platforms/finalizers
-    verbs:
-      - get
-      - list
-      - watch
-      - patch
-      - update
-      - create
-      - delete
-  - apiGroups:
-      - ""
-    resources:
-      - services
-      - events
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - patch
-      - update
-      - delete
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-      - secrets
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - patch
-      - update
-      - delete
-  - apiGroups:
-      - apps
-    resources:
-      - statefulsets
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - patch
-      - update
-      - delete
-  - apiGroups:
-      - ""
-    resources:
-      - pods
-    verbs:
-      - get
-      - watch
-      - list
-      - create
-      - patch
-      - update
-      - delete
-  - apiGroups:
-      - ""
-    resources:
-      - pods/exec
-    verbs:
-      - create
-      - watch
-      - get
-  - apiGroups:
-      - apiextensions.k8s.io
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - patch
-      - update
-  {{- if or .Values.hivemqPlatformServiceAccount.create .Values.hivemqPlatformServiceAccount.validate }}
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts
-    verbs:
-      - get
-      - list
-      - watch
-      {{- if .Values.hivemqPlatformServiceAccount.create }}
-      - create
-      - patch
-      - update
-      - delete
-      {{- end }}
-  {{- end }}
-  {{- if or .Values.hivemqPlatformServiceAccount.permissions.create .Values.hivemqPlatformServiceAccount.permissions.validate }}
-  - apiGroups:
-      - rbac.authorization.k8s.io
-    resources:
-      - roles
-      - rolebindings
-    verbs:
-      - get
-      - list
-      - watch
-      {{- if .Values.hivemqPlatformServiceAccount.permissions.create }}
-      - create
-      - patch
-      - update
-      - delete
-      {{- end }}
-  {{- end }}
-  {{- if .Values.hivemqPlatformServiceAccount.permissions.validate }}
-  - apiGroups:
-      - rbac.authorization.k8s.io
-    resources:
-      - clusterroles
-      - clusterrolebindings
-    verbs:
-      - get
-      - list
-      - watch
+  {{- $clusterRules }}
+  {{- if not .Values.namespaces }}
+  {{- $namespaceRules }}
   {{- end }}
 ---
+{{- if .Values.namespaces }}
+{{- $namespaces := split "," .Values.namespaces }}
+{{- range $namespace := $namespaces }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ $namespace | trim }}
+  name: {{ $roleName }}
+  labels:
+    {{- $labels | nindent 4 }}
+rules:
+  {{- $namespaceRules }}
+---
+{{- end }}
+{{- end }}
 {{- end }}

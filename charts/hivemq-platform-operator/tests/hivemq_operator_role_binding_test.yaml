@@ -12,6 +12,8 @@ tests:
   - it: with default values, default RoleBinding created
     documentIndex: 0
     asserts:
+      - hasDocuments:
+          count: 2
       - containsDocument:
           apiVersion: rbac.authorization.k8s.io/v1
           kind: RoleBinding
@@ -28,6 +30,80 @@ tests:
             kind: ServiceAccount
             name: hivemq-platform-operator-operator
             namespace: hivemq-platform-operator-namespace
+
+  - it: with default values, default ClusterRoleBinding created
+    documentIndex: 1
+    asserts:
+      - hasDocuments:
+          count: 2
+      - containsDocument:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+      - isSubset:
+          path: roleRef
+          content:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: hivemq-platform-operator-role-operator
+      - contains:
+          path: subjects
+          content:
+            kind: ServiceAccount
+            name: hivemq-platform-operator-operator
+            namespace: hivemq-platform-operator-namespace
+
+  - it: with single namespace, default RoleBindings and ClusterRoleBinding created
+    set:
+      namespaces: platform-one
+    asserts:
+      - hasDocuments:
+          count: 3
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          name: hivemq-platform-operator-view-binding-operator
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+          namespace: platform-one
+
+  - it: with multiple namespace, default RoleBindings and ClusterRoleBinding created
+    set:
+      namespaces: platform-one, platform-two
+    asserts:
+      - hasDocuments:
+          count: 4
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          name: hivemq-platform-operator-view-binding-operator
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+          namespace: platform-one
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          name: hivemq-platform-operator-role-binding-operator
+          namespace: platform-two
 
   - it: with default values, default labels created
     documentIndex: 0
@@ -50,9 +126,9 @@ tests:
           path: metadata.name
           value: hivemq-platform-operator-view-binding-a-very-long-hivemq-platfo
 
-  - it: with disabled ServiceAccount creation, no RoleBinding created
+  - it: with disabled RBAC creation, no RoleBinding created
     set:
-      serviceAccount.create: false
+      rbac.create: false
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
@@ -69,3 +145,19 @@ tests:
             kind: ServiceAccount
             name: foobar
             namespace: hivemq-platform-operator-namespace
+
+  - it: with default values
+    asserts:
+      - matchSnapshot:
+          path: roleRef
+      - matchSnapshot:
+          path: subjects
+
+  - it: with namespaces
+    set:
+      namespaces: platform-one, platform-two
+    asserts:
+      - matchSnapshot:
+          path: roleRef
+      - matchSnapshot:
+          path: subjects
