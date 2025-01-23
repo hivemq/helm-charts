@@ -1,0 +1,50 @@
+with default values:
+  1: |
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: view
+  2: |
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: hivemq-platform-operator-role-operator
+  3: |
+    - kind: ServiceAccount
+      name: hivemq-platform-operator-operator
+      namespace: hivemq-platform-operator-namespace
+  4: |
+    - kind: ServiceAccount
+      name: hivemq-platform-operator-operator
+      namespace: hivemq-platform-operator-namespace
+with namespaces:
+  1: |
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: view
+  2: |
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: hivemq-platform-operator-role-operator
+  3: |
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: hivemq-platform-operator-role-operator
+  4: |
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: hivemq-platform-operator-role-operator
+  5: |
+    - kind: ServiceAccount
+      name: hivemq-platform-operator-operator
+      namespace: hivemq-platform-operator-namespace
+  6: |
+    - kind: ServiceAccount
+      name: hivemq-platform-operator-operator
+      namespace: hivemq-platform-operator-namespace
+  7: |
+    - kind: ServiceAccount
+      name: hivemq-platform-operator-operator
+      namespace: hivemq-platform-operator-namespace
+  8: |
+    - kind: ServiceAccount
+      name: hivemq-platform-operator-operator
+      namespace: hivemq-platform-operator-namespace
