@@ -10,10 +10,54 @@ tests:
 
   - it: with default values, default ClusterRole created
     asserts:
+      - hasDocuments:
+          count: 1
       - containsDocument:
           apiVersion: rbac.authorization.k8s.io/v1
           kind: ClusterRole
           name: hivemq-platform-operator-role-operator
+
+  - it: with single namespace, default ClusterRole and Role created
+    set:
+      namespaces: platform-one
+    asserts:
+      - hasDocuments:
+          count: 2
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          name: hivemq-platform-operator-role-operator
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: Role
+          name: hivemq-platform-operator-role-operator
+          namespace: platform-one
+
+  - it: with multiple namespaces, default ClusterRole and Roles created
+    set:
+      namespaces: platform-one, platform-two
+    asserts:
+      - hasDocuments:
+          count: 3
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          name: hivemq-platform-operator-role-operator
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: Role
+          name: hivemq-platform-operator-role-operator
+          namespace: platform-one
+      - containsDocument:
+          any: true
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: Role
+          name: hivemq-platform-operator-role-operator
+          namespace: platform-two
 
   - it: with default values, default labels created
     asserts:
@@ -38,11 +82,12 @@ tests:
     set:
       rbac.create: false
     asserts:
-      - notFailedTemplate: {}
+      - notFailedTemplate: { }
       - hasDocuments:
           count: 0
 
   - it: with default platform service account settings
+    documentIndex: 0
     asserts:
       - exists:
           path: rules
@@ -81,6 +126,7 @@ tests:
     set:
       hivemqPlatformServiceAccount.create: false
       hivemqPlatformServiceAccount.validate: true
+    documentIndex: 0
     asserts:
       - contains:
           path: rules
@@ -93,6 +139,7 @@ tests:
     set:
       hivemqPlatformServiceAccount.create: true
       hivemqPlatformServiceAccount.validate: false
+    documentIndex: 0
     asserts:
       - contains:
           path: rules
@@ -105,6 +152,7 @@ tests:
     set:
       hivemqPlatformServiceAccount.create: false
       hivemqPlatformServiceAccount.validate: false
+    documentIndex: 0
     asserts:
       - notContains:
           path: rules
@@ -123,24 +171,26 @@ tests:
     set:
       hivemqPlatformServiceAccount.permissions.create: true
       hivemqPlatformServiceAccount.permissions.validate: true
+    documentIndex: 0
     asserts:
-        - contains:
-            path: rules
-            content:
-              apiGroups: [ "rbac.authorization.k8s.io" ]
-              resources: [ "roles", "rolebindings" ]
-              verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
-        - contains:
-            path: rules
-            content:
-              apiGroups: [ "rbac.authorization.k8s.io" ]
-              resources: [ "clusterroles", "clusterrolebindings" ]
-              verbs: [ "get", "list", "watch" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "roles", "rolebindings" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "rbac.authorization.k8s.io" ]
+            resources: [ "clusterroles", "clusterrolebindings" ]
+            verbs: [ "get", "list", "watch" ]
 
   - it: with platform service account permissions create disabled
     set:
       hivemqPlatformServiceAccount.permissions.create: false
       hivemqPlatformServiceAccount.permissions.validate: true
+    documentIndex: 0
     asserts:
       - contains:
           path: rules
@@ -159,6 +209,7 @@ tests:
     set:
       hivemqPlatformServiceAccount.permissions.create: true
       hivemqPlatformServiceAccount.permissions.validate: false
+    documentIndex: 0
     asserts:
       - contains:
           path: rules
@@ -177,6 +228,7 @@ tests:
     set:
       hivemqPlatformServiceAccount.permissions.create: false
       hivemqPlatformServiceAccount.permissions.validate: false
+    documentIndex: 0
     asserts:
       - notContains:
           path: rules
@@ -196,3 +248,15 @@ tests:
             apiGroups: [ "rbac.authorization.k8s.io" ]
             resources: [ "clusterroles", "clusterrolebindings" ]
             verbs: [ "get", "list", "watch" ]
+
+  - it: with default values
+    asserts:
+      - matchSnapshot:
+          path: rules
+
+  - it: with namespaces
+    set:
+      namespaces: platform-one, platform-two
+    asserts:
+      - matchSnapshot:
+          path: rules

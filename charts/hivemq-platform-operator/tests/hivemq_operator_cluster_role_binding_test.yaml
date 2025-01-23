@@ -53,9 +53,9 @@ tests:
           path: roleRef.name
           value: hivemq-platform-operator-role-a-very-long-hivemq-platform-opera
 
-  - it: with disabled ServiceAccount creation, no ClusterRoleBinding created
+  - it: with disabled RBAC creation, no ClusterRoleBinding created
     set:
-      serviceAccount.create: false
+      rbac.create: false
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
