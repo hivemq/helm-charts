@@ -41,12 +41,15 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     private static final int MQTT_SERVICE_PORT_1885 = 1885;
     private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
 
+    @TempDir
+    private @NotNull Path tempDir;
+
     private @NotNull Path brokerCertificateStore;
     private @NotNull Path clientCertificateStore;
 
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void setup(@TempDir final @NotNull Path tempDir) throws Exception {
+    void setup() throws Exception {
         CertificatesUtil.generateCertificates(tempDir.toFile());
         final var encoder = Base64.getEncoder();
 
