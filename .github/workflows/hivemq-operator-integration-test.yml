@@ -103,7 +103,7 @@ jobs:
           retention-days: 5
 
       - name: Publish test report
-        uses: mikepenz/action-junit-report@62516aa379bff6370c95fd5894d5a27fb6619d9b # v5
+        uses: mikepenz/action-junit-report@ee6b445351cd81e2f73a16a0e52d598aeac2197f # v5
         if: always()
         with:
           annotate_only: true
