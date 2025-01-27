@@ -20,29 +20,92 @@
       }
     },
     "license" : {
+      "description": "License configuration.",
       "enabled" : {
         "type" : "boolean"
       },
       "volume" : {
+        "description": "Volume containing the license.",
         "type" : "object"
       }
     },
     "persistence" : {
+      "description": "Location of the edge persistence.",
       "enabled" : {
         "type" : "boolean"
       },
       "volume" : {
+        "description": "Volume to be used for persistence.",
         "type" : "object"
       }
     },
     "mqttsn" : {
       "enabled" : {
+        "description": "Enable the mqtt sn listener.",
+        "type" : "boolean"
+      }
+    },
+    "mqtt" : {
+      "enabled" : {
+        "description": "Enable the unencrypted mqtt listener.",
         "type" : "boolean"
       }
     },
     "mqtts" : {
       "enabled" : {
+        "description": "Enable the TLS protected MQTT endpoint.",
         "type" : "boolean"
+      },
+      "preferServerCipherSuites" : {
+        "description": "Server cipher suite is preferred over the client one.",
+        "type" : "boolean"
+      },
+      "keystore": {
+        "path" : {
+          "description": "Location of the JKS keystore on the filesystem.",
+          "type" : "string"
+        },
+        "passwordSecretName" : {
+          "description": "Name of the secret where the keystore password is stored.",
+          "type" : "string"
+        },
+        "passwordSecretKey" : {
+          "description": "Name of the key inside the secrete which contains the password for the keystore.",
+          "type" : "string"
+        },
+        "privateKeyPasswordSecretName" : {
+          "description": "Name of the secret where the private key password is stored.",
+          "type" : "string"
+        },
+        "privateKeyPasswordSecretKey" : {
+          "description": "Name of key in the secret where the private key password is stored.",
+          "type" : "string"
+        }
+      }
+    },
+    "mqttsClientauth" : {
+      "clientAuthenticationMode" : {
+        "description": "Select whether client auth is enabled and if it is required.",
+        "enum" : [
+          "NONE",
+          "OPTIONAL",
+          "REQUIRED"
+        ],
+        "type" : "string"
+      },
+      "truststore": {
+        "path" : {
+          "description": "Location of the JKS keystore containing the certificates.",
+          "type" : "string"
+        },
+        "passwordSecretName" : {
+          "description": "Name of the secret which contains the password for the keystore.",
+          "type" : "string"
+        },
+        "passwordSecretKey" : {
+          "description": "Key inside the secret which contains the password for the keystore.",
+          "type" : "string"
+        }
       }
     },
     "resources" : {
@@ -86,6 +149,7 @@
       "type" : "object"
     },
     "env" : {
+      "description" : "Environment variables to be added to the container.",
       "items" : {
         "type" : "object"
       },
@@ -94,6 +158,13 @@
     "refresh" : {
       "description" : "Refresh interval for filechecks",
       "type" : "integer"
+    },
+    "volumes" : {
+      "description" : "Additional volumes.",
+      "items" : {
+        "type" : "object"
+      },
+      "type" : "array"
     }
   },
   "type" : "object"

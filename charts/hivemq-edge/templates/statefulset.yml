@@ -53,6 +53,39 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
+            {{- if eq .Values.mqtt.enable true }}
+            - name: HIVEMQ_MQTT_ENABLED
+              value: "true"
+            {{- end }}
+            {{- if (eq .Values.mqtts.enable true) }}
+            - name: HIVEMQ_MQTTS_ENABLED
+              value: "true"
+            - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
+              value: "{{ .Values.mqtts.mqttsClientauth.clientAuthenticationMode }}"
+            - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
+              value: "{{ .Values.mqtts.preferServerCipherSuites }}"
+            - name: HIVEMQ_MQTTS_KEYSTORE_PATH
+              value: "{{ .Values.mqtts.keystore.path }}"
+            - name: HIVEMQ_MQTTS_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.mqtts.keystore.passwordSecretName }}"
+                  key: "{{ .Values.mqtts.keystore.passwordSecretKey }}"
+            - name: HIVEMQ_MQTTS_PRIVATE_KEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.mqtts.keystore.privateKeyPasswordSecretName }}"
+                  key: "{{ .Values.mqtts.keystore.privateKeyPasswordSecretKey }}"
+            {{- end }}
+            {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
+            - name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
+              value: "{{ .Values.mqttsClientauth.truststore.path }}"
+            - name: HIVEMQ_MQTTS_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.mqttsClientauth.truststore.passwordSecretName }}"
+                  key: "{{ .Values.mqttsClientauth.truststore.passwordSecretKey }}"
+            {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

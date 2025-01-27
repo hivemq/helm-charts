@@ -30,8 +30,27 @@ persistence:
 
 mqttsn:
   enable: false
+
+mqtt:
+  enable: true
+
 mqtts:
   enable: false
+  preferServerCipherSuites: false
+  keystore:
+    path: /mqtts.jks
+    passwordSecretName: hivemq-keystore-secret
+    passwordSecretKey: keystore-password
+    privateKeyPasswordSecretName: hivemq-keystore-secret
+    privateKeyPasswordSecretKey: secret-key-password
+    #PROVIDE A DEFAULT SECRET!!!!
+
+mqttsClientauth:
+  clientAuthenticationMode: NONE
+  truststore:
+    path: /mqtts-client.jks
+    passwordSecretName: hivemq-truststore-secret
+    passwordSecretKey: truststore-password
 
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
@@ -88,3 +107,18 @@ env: []
   #        key: myconfigmapkey
   #        optional: true
 
+volumes: []
+  # - name: <ENV_VAR_NAME1>
+  #   value: <value>
+  # - name: <ENV_VAR_NAME2>
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: mysecretkey
+  #       optional: false
+  #  - name: <ENV_VAR_NAME3>
+  #    valueFrom:
+  #      configMapKeyRef:
+  #        name: myconfigmap
+  #        key: myconfigmapkey
+#        optional: true

@@ -15,12 +15,13 @@ spec:
   ports:
     - port: 8080
       name: web
+    {{- if eq .Values.mqtt.enable true }}
+    - port: 1883
+      name: mqtt
+    {{- end }}
     {{- if eq .Values.mqtts.enable true }}
     - port: 8883
       name: mqtts
-    {{- else }}
-    - port: 1883
-      name: mqtt
     {{- end }}
     {{- if eq .Values.mqttsn.enable true }}
     - port: 2442
