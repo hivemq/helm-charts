@@ -1,0 +1,100 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "properties" : {
+    "image" : {
+      "properties" : {
+        "pullPolicy" : {
+          "enum" : [
+            "IfNotPresent",
+            "Never",
+            "Always"
+          ],
+          "type" : "string"
+        },
+        "repository" : {
+          "type" : "string"
+        },
+        "tag" : {
+          "type" : "string"
+        }
+      }
+    },
+    "license" : {
+      "enabled" : {
+        "type" : "boolean"
+      },
+      "volume" : {
+        "type" : "object"
+      }
+    },
+    "persistence" : {
+      "enabled" : {
+        "type" : "boolean"
+      },
+      "volume" : {
+        "type" : "object"
+      }
+    },
+    "mqttsn" : {
+      "enabled" : {
+        "type" : "boolean"
+      }
+    },
+    "mqtts" : {
+      "enabled" : {
+        "type" : "boolean"
+      }
+    },
+    "resources" : {
+      "properties" : {
+        "cpu" : {
+          "type" : "string"
+        },
+        "memory" : {
+          "type" : "string"
+        }
+      }
+    },
+    "logLevel" : {
+      "enum" : [
+        "DEBUG",
+        "ERROR",
+        "FATAL",
+        "INFO",
+        "TRACE",
+        "WARN"
+      ],
+      "type" : "string"
+    },
+    "javaOpts" : {
+      "type" : "string"
+    },
+    "podAnnotations" : {
+      "description" : "Annotations to add to the HiveMQ Platform Operator Pod.",
+      "type" : "object"
+    },
+    "podLabels" : {
+      "description" : "Labels to add to the HiveMQ Platform Operator Pod.",
+      "type" : "object"
+    },
+    "serviceAnnotations" : {
+      "description" : "Annotations to add to the HiveMQ Platform Operator Pod.",
+      "type" : "object"
+    },
+    "serviceLabels" : {
+      "description" : "Labels to add to the HiveMQ Platform Operator Pod.",
+      "type" : "object"
+    },
+    "env" : {
+      "items" : {
+        "type" : "object"
+      },
+      "type" : "array"
+    },
+    "refresh" : {
+      "description" : "Refresh interval for filechecks",
+      "type" : "integer"
+    }
+  },
+  "type" : "object"
+}

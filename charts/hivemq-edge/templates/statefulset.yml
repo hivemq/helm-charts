@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hivemq-edge.name" (dict "releaseName" .Release.Name) }}
+  labels:
+      {{- include "hivemq-edge.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "hivemq-edge.selector-labels" . | nindent 6 }}
+  serviceName: "hivemq-edge"
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hivemq-edge.selector-labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: hivemq-edge
+          image: "{{ .Values.image.repository }}:{{.Values.image.tag}}"
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+              name: web
+            {{- if eq .Values.mqtts.enable true -}}
+            - containerPort: 8883
+              name: mqtts
+            {{- else }}
+            - containerPort: 1883
+              name: mqtt
+            {{- end }}
+            {{- if eq .Values.mqttsn.enable true }}
+            - containerPort: 2442
+              name: mqtt-sn
+            {{- end }}
+          env:
+            - name: HIVEMQ_LOG_LEVEL
+              value: "{{ .Values.logLevel }}"
+            - name: JAVA_OPTS
+              value: "{{ .Values.javaOptions }}"
+            - name: HIVEMQ_LICENSE_FOLDER
+              value: "/license"
+            - name: HIVEMQ_DATA_FOLDER
+              value: "/persistence"
+            - name: HIVEMQ_CONFIG_FOLDER
+              value: "/opt/hivemq/conf-k8s"
+            - name: HIVEMQ_CONFIG_REFRESHINTERVAL
+              value: "{{ .Values.refresh }}"
+            {{- with .Values.env }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            limits:
+              memory: "{{ .Values.resources.memory }}"
+              cpu: "{{ .Values.resources.cpu }}"
+            requests:
+              memory: "{{ .Values.resources.memory }}"
+              cpu: "{{ .Values.resources.cpu }}"
+          volumeMounts:
+          - name: fragment
+            mountPath: /fragment
+          {{- if eq .Values.license.enabled true }}
+          - mountPath: /license
+            name: license
+          {{- end }}
+          {{- if eq .Values.persistence.enabled true }}
+          - mountPath: /persistence
+            name: persistence
+          {{- end }}
+      {{- with .Values.podScheduling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podScheduling.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: fragment
+          configMap:
+            name: hivemq-edge-config-edge
+      {{- if eq .Values.license.enabled true -}}
+        {{ toYaml .Values.license.volume | nindent 8}}
+      {{- end -}}
+      {{- if eq .Values.persistence.enabled true -}}
+        {{ toYaml .Values.persistence.volume | nindent 8}}
+      {{- end -}}

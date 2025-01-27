@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "releaseName" .Release.Name) }}
+  {{- with .Values.serviceAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "hivemq-edge.labels" . | nindent 4 }}
+    {{- with .Values.serviceLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+    - port: 8080
+      name: web
+    {{- if eq .Values.mqtts.enable true }}
+    - port: 8883
+      name: mqtts
+    {{- else }}
+    - port: 1883
+      name: mqtt
+    {{- end }}
+    {{- if eq .Values.mqttsn.enable true }}
+    - port: 2442
+      name: mqttsn
+    {{- end }}
+  clusterIP: None
+  selector:
+    {{- include "hivemq-edge.selector-labels" . | nindent 4 }}

@@ -1,0 +1,90 @@
+# HiveMQ Platform Operator Helm Chart default values
+# See documentation for more information: https://docs.hivemq.com/hivemq-platform-operator/configuration.html#install-operator-with-helm
+
+# Container image configuration
+image:
+  repository: hivemq/hivemq-edge
+  pullPolicy: IfNotPresent
+  tag: snapshot #"2024.9"
+
+refresh: 1000
+
+# Resources, limits and requests are set to equal values.
+resources:
+  cpu: 1000m
+  memory: 1Gi
+
+# License: a volume containing the actual license file
+license:
+  enabled: false
+  volume:
+    - emptyDir: { }
+      name: license
+
+# Persistence: a volume for persistent state, e.g. rocksdb files
+persistence:
+  enabled: false
+  volume:
+    - emptyDir: { }
+      name: persistence
+
+mqttsn:
+  enable: false
+mqtts:
+  enable: false
+
+# Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
+logLevel: INFO
+
+# Configures the Java JVM runtime options for the process.
+javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+
+# Annotations to add to the edge pod.
+podAnnotations: {}
+# Labels to add to the edge pod.
+podLabels: {}
+
+# Annotations to add to the edge Service.
+serviceAnnotations: {}
+# Labels to add to the edge Service.
+serviceLabels: {}
+
+# Configures how the edge pod should be scheduled on the Kubernetes cluster nodes.
+podScheduling:
+  # Configures the affinity for the Operator pod.
+  affinity:
+  # podAffinity:
+  #    requiredDuringSchedulingIgnoredDuringExecution:
+  #      - labelSelector:
+  #          matchExpressions:
+  #            - key: app
+  #              operator: In
+  #              values:
+  #                - my-app
+  #        topologyKey: "kubernetes.io/hostname"
+
+  # Configures the tolerations for the Operator pod.
+  tolerations:
+  #  - key: "example-key"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+
+# Specifies environment variables to be added to the Operator container.
+# Environment variables can be defined as a list of either key-value pairs or
+# using valueFrom to reference a Secret or ConfigMap.
+env: []
+  # - name: <ENV_VAR_NAME1>
+  #   value: <value>
+  # - name: <ENV_VAR_NAME2>
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: mysecretkey
+  #       optional: false
+  #  - name: <ENV_VAR_NAME3>
+  #    valueFrom:
+  #      configMapKeyRef:
+  #        name: myconfigmap
+  #        key: myconfigmapkey
+  #        optional: true
+

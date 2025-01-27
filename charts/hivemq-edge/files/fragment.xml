@@ -1,0 +1,26 @@
+<mqtt-bridges>
+</mqtt-bridges>
+<protocol-adapters>
+    <protocol-adapter>
+        <adapterId>simulation-3</adapterId>
+        <protocolId>simulation</protocolId>
+        <config>
+            <simulationToMqtt>
+                <pollingIntervalMillis>100</pollingIntervalMillis>
+                <maxPollingErrorsBeforeRemoval>-1</maxPollingErrorsBeforeRemoval>
+            </simulationToMqtt>
+        </config>
+        <northboundMappings>
+            <northboundMapping>
+                <topic>test</topic>
+                <tagName>t2</tagName>
+                <mqttUserProperties>
+                    <mqttUserProperty>
+                        <name>simulation</name>
+                        <value>2</value>
+                    </mqttUserProperty>
+                </mqttUserProperties>
+            </northboundMapping>
+        </northboundMappings>
+    </protocol-adapter>
+</protocol-adapters>

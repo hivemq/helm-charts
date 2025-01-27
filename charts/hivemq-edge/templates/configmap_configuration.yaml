@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "hivemq-edge.labels" . | nindent 4 }}
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "config" "releaseName" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+data:
+  config: |
+    {{- .Files.Get "files/fragment.xml" | nindent 4 }}
