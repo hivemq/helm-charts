@@ -8,7 +8,7 @@ concurrency:
   group: hivemq-operator-platform-integration-test-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  platform-integration-test-compose:
+  platform-integration-test:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
@@ -25,108 +25,6 @@ jobs:
           MonitoringPlatform,
           PodSecurityContext,
           Upgrade,
-          Other
-        ]
-        k8s-version-type: [
-          MINIMUM,
-          LATEST
-        ]
-    steps:
-      - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          path: helm-charts
-          ref: ${{ github.base_ref }}
-
-      - name: Set up Docker QEMU
-        uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Checkout HiveMQ Platform Operator
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          repository: hivemq/hivemq-platform-operator
-          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
-          path: hivemq-platform-operator
-          ref: ${{ github.base_ref }}
-
-      - name: Checkout HiveMQ Platform Operator on the same or target branch
-        working-directory: ${{ github.workspace }}/hivemq-platform-operator
-        run: |
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_HEAD_REF}
-            exit
-          fi
-          if [[ "${GITHUB_BASE_REF}" == "master" ]]; then
-            exit
-          fi
-          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out target branch"
-            git fetch --all
-            git checkout origin/${GITHUB_BASE_REF}
-          fi
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@0bdd871935719febd78681f197cd39af5b6e16a6 # v4
-        with:
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-
-      - name: Run HiveMQ Platform Operator integration tests
-        env:
-          TEST_PLAN: ${{ matrix.test-plan }}
-          K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
-        working-directory: helm-charts
-        run: ./gradlew :tests-hivemq-platform-operator:integrationTest --tests "*.compose.*"
-
-      - name: Upload HiveMQ Platform Operator test results
-        if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
-        with:
-          name: Test results HiveMQ Platform Operator - Compose ${{ matrix.test-plan }} ${{ matrix.k8s-version-type }}
-          path: |
-            helm-charts/tests-hivemq-platform-operator/build/reports/tests/integrationTest/
-            helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest/*.xml
-          retention-days: 5
-
-      - name: Publish test report
-        uses: mikepenz/action-junit-report@ee6b445351cd81e2f73a16a0e52d598aeac2197f # v5
-        if: always()
-        with:
-          annotate_only: true
-          detailed_summary: true
-          job_name: integration-test-compose-report
-          report_paths: '**/build/test-results/integrationTest/TEST-*.xml'
-
-  platform-integration-test-single:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      fail-fast: false
-      matrix:
-        test-plan: [
           AdditionalBrokerLicense,
           BrokerLicense,
           Containers,
@@ -200,7 +98,7 @@ jobs:
             git checkout origin/${GITHUB_BASE_REF}
           fi
 
-      - name: Set up JDK 11
+      - name: Set up JDK 21
         uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4
         with:
           java-version: '21'
@@ -219,13 +117,13 @@ jobs:
           TEST_PLAN: ${{ matrix.test-plan }}
           K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
         working-directory: helm-charts
-        run: ./gradlew :tests-hivemq-platform-operator:integrationTest --tests "*.single.*"
+        run: ./gradlew :tests-hivemq-platform-operator:integrationTest
 
       - name: Upload HiveMQ Platform Operator test results
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
-          name: Test results HiveMQ Platform Operator - Single ${{ matrix.test-plan }} ${{ matrix.k8s-version-type }}
+          name: Test results HiveMQ Platform Operator - ${{ matrix.test-plan }} ${{ matrix.k8s-version-type }}
           path: |
             helm-charts/tests-hivemq-platform-operator/build/reports/tests/integrationTest/
             helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest/*.xml
@@ -237,5 +135,5 @@ jobs:
         with:
           annotate_only: true
           detailed_summary: true
-          job_name: integration-test-single-report
+          job_name: platform-integration-test-report
           report_paths: '**/build/test-results/integrationTest/TEST-*.xml'
