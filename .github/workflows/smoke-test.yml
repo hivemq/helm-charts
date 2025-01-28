@@ -162,13 +162,12 @@ jobs:
           path: helm-charts
           ref: ${{ github.base_ref }}
 
-      - name: Checkout HiveMQ Operator (legacy)
+      - name: Checkout HiveMQ Operator (legacy) on the default branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-operator
-          ref: ${{ github.base_ref }}
 
       - name: Checkout HiveMQ Operator (legacy) on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-operator

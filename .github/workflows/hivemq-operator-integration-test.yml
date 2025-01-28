@@ -45,7 +45,6 @@ jobs:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-operator
-          ref: ${{ github.base_ref }}
 
       - name: Checkout HiveMQ Operator (legacy) on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-operator
