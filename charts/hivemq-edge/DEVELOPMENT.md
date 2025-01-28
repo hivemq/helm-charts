@@ -36,7 +36,7 @@ sudo cloud-provider-kind
 
 Create a file `service.yaml` with the following content:
 
-```
+```yaml
 kind: Service
 apiVersion: v1
 metadata:
