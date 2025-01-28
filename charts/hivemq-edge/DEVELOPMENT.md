@@ -53,6 +53,9 @@ spec:
   - port: 5679
     targetPort: 1883
     name: mqtt
+  - port: 5680
+    targetPort: 8883
+    name: mqtts
 ```
 
 Get the local ip address:

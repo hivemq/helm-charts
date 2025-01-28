@@ -29,7 +29,7 @@ spec:
           ports:
             - containerPort: 8080
               name: web
-            {{- if eq .Values.mqtts.enable true -}}
+            {{- if eq .Values.mqtts.enable true }}
             - containerPort: 8883
               name: mqtts
             {{- else }}
@@ -61,17 +61,17 @@ spec:
             - name: HIVEMQ_MQTTS_ENABLED
               value: "true"
             - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
-              value: "{{ .Values.mqtts.mqttsClientauth.clientAuthenticationMode }}"
+              value: "{{ .Values.mqttsClientauth.clientAuthenticationMode }}"
             - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
               value: "{{ .Values.mqtts.preferServerCipherSuites }}"
             - name: HIVEMQ_MQTTS_KEYSTORE_PATH
-              value: "{{ .Values.mqtts.keystore.path }}"
-            - name: HIVEMQ_MQTTS_KEYSTORE_PASSWORD
+              value: /mqtts/mqtts.jks
+            - name: HIVEMQ_MQTTS_SECRET_KEYSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.mqtts.keystore.passwordSecretName }}"
                   key: "{{ .Values.mqtts.keystore.passwordSecretKey }}"
-            - name: HIVEMQ_MQTTS_PRIVATE_KEY_PASSWORD
+            - name: HIVEMQ_MQTTS_SECRET_PRIVATE_KEY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.mqtts.keystore.privateKeyPasswordSecretName }}"
@@ -80,7 +80,7 @@ spec:
             {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
             - name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
               value: "{{ .Values.mqttsClientauth.truststore.path }}"
-            - name: HIVEMQ_MQTTS_TRUSTSTORE_PASSWORD
+            - name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: "{{ .Values.mqttsClientauth.truststore.passwordSecretName }}"
@@ -99,6 +99,11 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          {{- if (eq .Values.mqtts.enable true) }}
+          - mountPath: /mqtts/mqtts.jks
+            name: mqtts-jks
+            subPath: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
+          {{- end }}
           {{- if eq .Values.license.enabled true }}
           - mountPath: /license
             name: license
@@ -119,6 +124,14 @@ spec:
         - name: fragment
           configMap:
             name: hivemq-edge-config-edge
+      {{- if (eq .Values.mqtts.enable true) }}
+        - name: mqtts-jks
+          secret:
+            secretName: "{{ .Values.mqtts.keystore.keystoreSecretName }}"
+            items:
+              - key: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
+                path: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
+      {{- end -}}
       {{- if eq .Values.license.enabled true -}}
         {{ toYaml .Values.license.volume | nindent 8}}
       {{- end -}}

@@ -38,11 +38,12 @@ mqtts:
   enable: false
   preferServerCipherSuites: false
   keystore:
-    path: /mqtts.jks
     passwordSecretName: hivemq-keystore-secret
     passwordSecretKey: keystore-password
     privateKeyPasswordSecretName: hivemq-keystore-secret
     privateKeyPasswordSecretKey: secret-key-password
+    keystoreSecretName: hivemq-keystore-secret
+    keystoreSecretKey: keystore.jks
     #PROVIDE A DEFAULT SECRET!!!!
 
 mqttsClientauth:
