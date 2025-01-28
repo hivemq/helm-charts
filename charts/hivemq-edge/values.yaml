@@ -44,14 +44,14 @@ mqtts:
     privateKeyPasswordSecretKey: secret-key-password
     keystoreSecretName: hivemq-keystore-secret
     keystoreSecretKey: keystore.jks
-    #PROVIDE A DEFAULT SECRET!!!!
 
 mqttsClientauth:
   clientAuthenticationMode: NONE
   truststore:
-    path: /mqtts-client.jks
     passwordSecretName: hivemq-truststore-secret
     passwordSecretKey: truststore-password
+    truststoreSecretName: hivemq-truststore-secret
+    truststoreSecretKey: truststore.jks
 
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO

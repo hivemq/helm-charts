@@ -61,10 +61,6 @@
         "type" : "boolean"
       },
       "keystore": {
-        "path" : {
-          "description": "Location of the JKS keystore on the filesystem.",
-          "type" : "string"
-        },
         "passwordSecretName" : {
           "description": "Name of the secret where the keystore password is stored.",
           "type" : "string"
@@ -94,16 +90,20 @@
         "type" : "string"
       },
       "truststore": {
-        "path" : {
-          "description": "Location of the JKS keystore containing the certificates.",
-          "type" : "string"
-        },
         "passwordSecretName" : {
           "description": "Name of the secret which contains the password for the keystore.",
           "type" : "string"
         },
         "passwordSecretKey" : {
           "description": "Key inside the secret which contains the password for the keystore.",
+          "type" : "string"
+        },
+        "truststoreSecretName" : {
+          "description": "Name of the secret which contains the truststore.",
+          "type" : "string"
+        },
+        "truststoreSecretKey" : {
+          "description": "Key inside the secret which contains the truststore.",
           "type" : "string"
         }
       }

@@ -79,7 +79,7 @@ spec:
             {{- end }}
             {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
             - name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
-              value: "{{ .Values.mqttsClientauth.truststore.path }}"
+              value: /mqtts/truststore.jks
             - name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -103,6 +103,11 @@ spec:
           - mountPath: /mqtts/mqtts.jks
             name: mqtts-jks
             subPath: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
+          {{- end }}
+          {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
+          - mountPath: /mqtts/truststore.jks
+            name: mqtts-truststore-jks
+            subPath: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
           {{- end }}
           {{- if eq .Values.license.enabled true }}
           - mountPath: /license
@@ -131,6 +136,14 @@ spec:
             items:
               - key: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
                 path: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
+      {{- end -}}
+      {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
+        - name: mqtts-truststore-jks
+          secret:
+            secretName: "{{ .Values.mqttsClientauth.truststore.truststoreSecretName }}"
+            items:
+              - key: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
+                path: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
       {{- end -}}
       {{- if eq .Values.license.enabled true -}}
         {{ toYaml .Values.license.volume | nindent 8}}
