@@ -1,4 +1,4 @@
-# HiveMQ Platform Operator (new)
+# HiveMQ Edge
 
 This Helm chart bootstraps HiveMQ Edge deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. 
 
