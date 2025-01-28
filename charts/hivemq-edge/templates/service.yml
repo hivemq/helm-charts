@@ -21,7 +21,7 @@ spec:
     - port: 8443
       name: https
     {{- end }}
-    {{- if eq .Values.mqtt.enable true }}
+    {{- if .Values.mqtt.enable }}
     - port: 1883
       name: mqtt
     {{- end }}
