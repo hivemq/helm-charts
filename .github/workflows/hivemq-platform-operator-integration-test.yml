@@ -32,6 +32,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: helm-charts
+          ref: ${{ github.base_ref }}
 
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
@@ -42,12 +43,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Checkout HiveMQ Platform Operator on the default branch
+      - name: Checkout HiveMQ Platform Operator
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-platform-operator
+          ref: ${{ github.base_ref }}
 
       - name: Checkout HiveMQ Platform Operator on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-platform-operator
@@ -148,6 +150,8 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: helm-charts
+          ref: ${{ github.base_ref }}
+
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
 
@@ -157,12 +161,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Checkout HiveMQ Platform Operator on the default branch
+      - name: Checkout HiveMQ Platform Operator
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-platform-operator
+          ref: ${{ github.base_ref }}
 
       - name: Checkout HiveMQ Platform Operator on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-platform-operator
