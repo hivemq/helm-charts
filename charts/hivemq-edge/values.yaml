@@ -81,7 +81,7 @@ serviceLabels: {}
 
 # Configures how the edge pod should be scheduled on the Kubernetes cluster nodes.
 podScheduling:
-  # Configures the affinity for the Operator pod.
+  # Configures the affinity for the Edge pod.
   affinity:
   # podAffinity:
   #    requiredDuringSchedulingIgnoredDuringExecution:
