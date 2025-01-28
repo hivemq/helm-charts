@@ -52,7 +52,7 @@ spec:
             - name: HIVEMQ_LOG_LEVEL
               value: "{{ .Values.logLevel }}"
             - name: JAVA_OPTS
-              value: "{{ .Values.javaOptions }}"
+              value: "{{ .Values.javaOpts }}"
             - name: HIVEMQ_LICENSE_FOLDER
               value: "/license"
             - name: HIVEMQ_DATA_FOLDER
@@ -123,6 +123,12 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          {{- range .Values.volumes }}
+          {{- with (index .definition 0) }}
+          - name: {{ .name }}
+          {{- end }}
+            mountPath: {{ .mount }}
+          {{- end }}
           {{- if .Values.mqtts.enable }}
           - mountPath: /mqtts/mqtts.jks
             name: mqtts-jks
@@ -158,6 +164,9 @@ spec:
         - name: fragment
           configMap:
             name: hivemq-edge-config-edge
+      {{- range .Values.volumes }}
+        {{- toYaml .definition | nindent 8 }}
+      {{- end }}
       {{- if .Values.mqtts.enable }}
         - name: mqtts-jks
           secret:

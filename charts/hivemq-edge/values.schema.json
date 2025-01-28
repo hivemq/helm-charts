@@ -185,10 +185,24 @@
     },
     "volumes" : {
       "description" : "Additional volumes.",
-      "items" : {
-        "type" : "object"
-      },
-      "type" : "array"
+      "type" : "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mount": {
+            "type": "string"
+          },
+          "definition": {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          }
+        },
+        "required": [
+          "mount", "definition"
+        ]
+      }
     }
   },
   "type" : "object"

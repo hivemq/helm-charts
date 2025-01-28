@@ -103,8 +103,6 @@ podScheduling:
 # Environment variables can be defined as a list of either key-value pairs or
 # using valueFrom to reference a Secret or ConfigMap.
 env: []
-  # - name: <ENV_VAR_NAME1>
-  #   value: <value>
   # - name: <ENV_VAR_NAME2>
   #   valueFrom:
   #     secretKeyRef:
@@ -118,18 +116,11 @@ env: []
   #        key: myconfigmapkey
   #        optional: true
 
+# Mostly used to reference secrets from protocol adapter definitions
+# Whenever you need a file, e.g a keystore, inside a protocol adapter define
+# it here and use the directory to load it
 volumes: []
-  # - name: <ENV_VAR_NAME1>
-  #   value: <value>
-  # - name: <ENV_VAR_NAME2>
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: mysecret
-  #       key: mysecretkey
-  #       optional: false
-  #  - name: <ENV_VAR_NAME3>
-  #    valueFrom:
-  #      configMapKeyRef:
-  #        name: myconfigmap
-  #        key: myconfigmapkey
-#        optional: true
+#  - mount: /test
+#    definition:
+#      - name: data
+#        emptyDir: { }
