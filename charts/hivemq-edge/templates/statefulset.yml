@@ -26,6 +26,12 @@ spec:
         - name: hivemq-edge
           image: "{{ .Values.image.repository }}:{{.Values.image.tag}}"
           imagePullPolicy: Never
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/liveness
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
           ports:
             - containerPort: 8080
               name: web
