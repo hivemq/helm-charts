@@ -44,7 +44,7 @@ gpg --import public.pgp
 gpg --export >~/.gnupg/pubring.gpg
 curl -L -o hivemq-edge-x.y.z.prov https://github.com/hivemq/helm-charts/releases/download/hivemq-edge-x.y.z/hivemq-edge-x.y.z.tgz.prov
 curl -L -o hivemq-edge-x.y.z.tgz https://github.com/hivemq/helm-charts/releases/download/hivemq-edge-x.y.z/hivemq-edge-x.y.z.tgz
-helm verify hivemq-platform-operator-x.y.z.tgz
+helm verify hivemq-edge-x.y.z.tgz
 ```
 
 **NOTE** Helm does not support GPG version 2 or higher so you have to convert your GPG keyring to the legacy GPG format:
