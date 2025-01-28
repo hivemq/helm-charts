@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Tag("Volumes")
 class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
 
     private static final @NotNull String PVC_NAME = "hivemq-pvc-data";

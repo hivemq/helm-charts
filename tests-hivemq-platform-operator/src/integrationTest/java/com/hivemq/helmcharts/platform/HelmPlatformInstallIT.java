@@ -1,13 +1,11 @@
 package com.hivemq.helmcharts.platform;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.TimeUnit;
 
-@Tag("Platform")
 class HelmPlatformInstallIT extends AbstractHelmChartIT {
 
     @Test

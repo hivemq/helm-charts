@@ -6,9 +6,6 @@ plugins {
 
 group = "com.hivemq.helmcharts"
 
-val testPlanOtherExcludeTags =
-    "Containers,ContainerSecurityContext,CustomConfig,CustomOperatorConfig,Extensions,Licenses,Monitoring,Platform,PodSecurityContext,ServiceAccount,Services,Upgrade,Volumes"
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -66,29 +63,6 @@ testing {
             }
             targets.configureEach {
                 testTask {
-                    if (environment["TEST_PLAN"] != null) {
-                        val testPlan = environment["TEST_PLAN"].toString()
-                        if (testPlan == "Other") {
-                            systemProperty(
-                                "excludeTags",
-                                testPlanOtherExcludeTags,
-                            )
-                        } else {
-                            systemProperty("includeTags", testPlan)
-                        }
-                    }
-                    useJUnitPlatform {
-                        if (systemProperties["includeTags"] != null) {
-                            val includeTags = systemProperties["includeTags"].toString().split(",")
-                            println("JUnit includeTags: $includeTags")
-                            includeTags(*includeTags.toTypedArray())
-                        }
-                        if (systemProperties["excludeTags"] != null) {
-                            val excludeTags = systemProperties["excludeTags"].toString().split(",")
-                            println("JUnit excludeTags: $excludeTags")
-                            excludeTags(*excludeTags.toTypedArray())
-                        }
-                    }
                     testLogging {
                         events("started", "passed", "skipped", "failed")
                         showStandardStreams = true
@@ -128,25 +102,6 @@ testing {
                 }
             }
         }
-    }
-}
-
-val listIntegrationTests by tasks.registering(JavaExec::class) {
-    val usage = "Usage: ./gradlew listIntegrationTests -PtestPlan=xxx" +
-            "\n\t\t- 'testPlan': The test plan from the GitHub action. Mandatory."
-    group = "help"
-    description = "Lists all integration tests from the given test plan.\n\t$usage"
-    classpath = sourceSets["integrationTest"].runtimeClasspath
-    mainClass = "com.hivemq.helmcharts.util.JUnitUtil"
-    doFirst {
-        val testPlan: String = (project.properties["testPlan"] ?: error("`testPlan` must be set\n\n$usage")).toString()
-        var includeTags = testPlan
-        var excludeTags = ""
-        if (testPlan == "Other") {
-            includeTags = ""
-            excludeTags = testPlanOtherExcludeTags
-        }
-        args = listOf("com.hivemq.helmcharts", includeTags, excludeTags, "true")
     }
 }
 

@@ -53,24 +53,29 @@ fi
 EXPECTED_CHECKS=("${MANUAL_CHECKS[@]}")
 for WORKFLOW_FILE in "${WORKFLOW_FILES[@]}"; do
   echo "Analyzing $WORKFLOW_FILE..."
+
+  CHECK_PREFIX=$(yq eval ".env.check-prefix" "$WORKFLOW_FILE" 2>/dev/null)
+  SPLIT_TOTAL=$(yq eval ".env.split-total" "$WORKFLOW_FILE" 2>/dev/null)
+  echo "Found $SPLIT_TOTAL test splits"
+
   # parse each job's name and its specific test-plan matrix
-  declare -A JOB_TEST_PLANS=()
   declare -A JOB_K8S_VERSION_TYPES=()
-  while IFS= read -r job_name; do
-    test_plans=$(yq eval ".jobs[\"$job_name\"].strategy.matrix.test-plan[]" "$WORKFLOW_FILE" 2>/dev/null)
-    JOB_TEST_PLANS["$job_name"]="$test_plans"
-    k8s_version_types=$(yq eval ".jobs[\"$job_name\"].strategy.matrix.k8s-version-type[]" "$WORKFLOW_FILE" 2>/dev/null)
-    JOB_K8S_VERSION_TYPES["$job_name"]="$k8s_version_types"
+  while IFS= read -r JOB_NAME; do
+    K8S_VERSION_TYPES=$(yq eval ".jobs[\"$JOB_NAME\"].strategy.matrix.k8s-version-type[]" "$WORKFLOW_FILE" 2>/dev/null)
+    if [ -n "$K8S_VERSION_TYPES" ]; then
+      echo "Found K8s version types for job '$JOB_NAME'"
+      JOB_K8S_VERSION_TYPES["$JOB_NAME"]="$K8S_VERSION_TYPES"
+    fi
   done < <(yq eval '.jobs | keys | .[]' "$WORKFLOW_FILE" 2>/dev/null)
 
   # generate expected check names based on each job and its test plans
-  for job_name in "${!JOB_TEST_PLANS[@]}"; do
-    while IFS= read -r test_plan; do
-      while IFS= read -r k8s_version_type; do
-        echo "Found test: $job_name ($test_plan, $k8s_version_type)"
-        EXPECTED_CHECKS+=("$job_name ($test_plan, $k8s_version_type)")
-      done <<< "${JOB_K8S_VERSION_TYPES[$job_name]}"
-    done <<< "${JOB_TEST_PLANS[$job_name]}"
+  for JOB_NAME in "${!JOB_K8S_VERSION_TYPES[@]}"; do
+    for ((SPLIT_INDEX=0; SPLIT_INDEX < SPLIT_TOTAL; SPLIT_INDEX++)); do
+      while IFS= read -r K8S_VERSION_TYPE; do
+        echo "Found test: $CHECK_PREFIX$SPLIT_INDEX ($K8S_VERSION_TYPE)"
+        EXPECTED_CHECKS+=("$CHECK_PREFIX$SPLIT_INDEX ($K8S_VERSION_TYPE)")
+      done <<< "${JOB_K8S_VERSION_TYPES[$JOB_NAME]}"
+    done
   done
 done
 echo

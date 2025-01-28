@@ -6,7 +6,6 @@ import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.PodUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -14,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Tag("Services")
-@Tag("ClusterDomainName")
 @AdditionalK3sCommands(commands = {"--cluster-domain=hivemq.com"})
 class CustomClusterDomainNameIT extends AbstractHelmChartIT {
 
