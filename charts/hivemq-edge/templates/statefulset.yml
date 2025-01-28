@@ -68,18 +68,6 @@ spec:
             {{- if .Values.mqtt.enable }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
-            - name: HIVEMQ_HTTPS_KEYSTORE_PATH
-              value: /https/keystore.jks
-            - name: HIVEMQ_HTTPS_KEYSTORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ .Values.https.keystore.passwordSecretName }}"
-                  key: "{{ .Values.https.keystore.passwordSecretKey }}"
-            - name: HIVEMQ_HTTPS_PRIVATE_KEY_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ .Values.https.keystore.privateKeyPasswordSecretName }}"
-                  key: "{{ .Values.https.keystore.privateKeyPasswordSecretKey }}"
             {{- end }}
             {{- if .Values.mqtts.enable }}
             - name: HIVEMQ_MQTTS_ENABLED
