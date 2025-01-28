@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-platform"
     app.kubernetes.io/instance: "my-platform"
-    app.kubernetes.io/version: "4.35.0"
+    app.kubernetes.io/version: "4.36.0"
 spec:
   configMapName: hivemq-configuration-my-platform
   logLevel: INFO
@@ -25,7 +25,7 @@ spec:
               env:
                 - name: JAVA_OPTS
                   value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
-              image: "docker.io/hivemq/hivemq4:4.35.0"
+              image: "docker.io/hivemq/hivemq4:4.36.0"
               imagePullPolicy: IfNotPresent
               ports:
                 - name: mqtt-1883
