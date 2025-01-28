@@ -99,7 +99,7 @@ podScheduling:
   #    operator: "Exists"
   #    effect: "NoSchedule"
 
-# Specifies environment variables to be added to the Operator container.
+# Specifies environment variables to be added to the Edge container.
 # Environment variables can be defined as a list of either key-value pairs or
 # using valueFrom to reference a Secret or ConfigMap.
 env: []
