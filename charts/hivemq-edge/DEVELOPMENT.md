@@ -20,7 +20,7 @@ Install cloud-provider-kind to get a load balancer in Kind:
 go install sigs.k8s.io/cloud-provider-kind@latest
 ```
 
-Apply helm:
+Apply Helm:
 
 ```bash
 kind create cluster
