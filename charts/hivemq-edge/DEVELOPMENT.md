@@ -76,9 +76,9 @@ Load the image into Kind using this `kind load docker-image hivemq/hivemq-edge:s
 
 **IMPORTANT:**
 
-Make sure that in the statefulset you have `imagePullPolicy: Never`.
+Make sure that in the StatefulSet you have `imagePullPolicy: Never`.
 
-This ensures Kind will only use the images it alreasdy has and not try to pull a new version from somewhere else.
+This ensures Kind will only use the images it already has and not try to pull a new version from somewhere else.
 
 ### Unit tests
 To run unit tests, the Helm [helm-unittest](https://github.com/helm-unittest/helm-unittest?tab=readme-ov-file#helm-unittest) plugin is required to be installed as part of your Helm installation.
