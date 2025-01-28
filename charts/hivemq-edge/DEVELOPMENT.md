@@ -11,7 +11,7 @@ Simulate without deploying into the K8s cluster to check the correctness of the 
 
 
 ```bash
-helm install edge ./charts/hivemq-edge --dry-run
+helm install edge ./charts/hivemq-edge 
 ```
 
 ### Local testing KIND
