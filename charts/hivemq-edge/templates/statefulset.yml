@@ -29,14 +29,14 @@ spec:
           ports:
             - containerPort: 8080
               name: web
-            {{- if eq .Values.mqtts.enable true }}
+            {{- if .Values.mqtts.enable }}
             - containerPort: 8883
               name: mqtts
             {{- else }}
             - containerPort: 1883
               name: mqtt
             {{- end }}
-            {{- if eq .Values.mqttsn.enable true }}
+            {{- if .Values.mqttsn.enable }}
             - containerPort: 2442
               name: mqtt-sn
             {{- end }}
@@ -53,11 +53,11 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
-            {{- if eq .Values.https.enable true }}
+            {{- if .Values.https.enable }}
             - name: HIVEMQ_HTTPS_ENABLED
               value: "true"
             {{- end }}
-            {{- if eq .Values.mqtt.enable true }}
+            {{- if .Values.mqtt.enable }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
             - name: HIVEMQ_HTTPS_KEYSTORE_PATH
@@ -73,7 +73,7 @@ spec:
                   name: "{{ .Values.https.keystore.privateKeyPasswordSecretName }}"
                   key: "{{ .Values.https.keystore.privateKeyPasswordSecretKey }}"
             {{- end }}
-            {{- if (eq .Values.mqtts.enable true) }}
+            {{- if .Values.mqtts.enable }}
             - name: HIVEMQ_MQTTS_ENABLED
               value: "true"
             - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
@@ -115,12 +115,12 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
-          {{- if (eq .Values.mqtts.enable true) }}
+          {{- if .Values.mqtts.enable }}
           - mountPath: /mqtts/mqtts.jks
             name: mqtts-jks
             subPath: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
           {{- end }}
-          {{- if (eq .Values.https.enable true) }}
+          {{- if .Values.https.enable }}
           - mountPath: /https/keystore.jks
             name: https-jks
             subPath: "{{ .Values.https.keystore.keystoreSecretKey }}"
@@ -130,11 +130,11 @@ spec:
             name: mqtts-truststore-jks
             subPath: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
           {{- end }}
-          {{- if eq .Values.license.enabled true }}
+          {{- if .Values.license.enabled }}
           - mountPath: /license
             name: license
           {{- end }}
-          {{- if eq .Values.persistence.enabled true }}
+          {{- if .Values.persistence.enabled }}
           - mountPath: /persistence
             name: persistence
           {{- end }}
@@ -150,7 +150,7 @@ spec:
         - name: fragment
           configMap:
             name: hivemq-edge-config-edge
-      {{- if (eq .Values.mqtts.enable true) }}
+      {{- if .Values.mqtts.enable }}
         - name: mqtts-jks
           secret:
             secretName: "{{ .Values.mqtts.keystore.keystoreSecretName }}"
@@ -158,7 +158,7 @@ spec:
               - key: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
                 path: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
       {{- end -}}
-      {{- if (eq .Values.https.enable true) }}
+      {{- if .Values.https.enable }}
         - name: https-jks
           secret:
             secretName: "{{ .Values.https.keystore.keystoreSecretName }}"
@@ -174,9 +174,9 @@ spec:
               - key: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
                 path: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
       {{- end -}}
-      {{- if eq .Values.license.enabled true -}}
+      {{- if .Values.license.enabled -}}
         {{ toYaml .Values.license.volume | nindent 8}}
       {{- end -}}
-      {{- if eq .Values.persistence.enabled true -}}
+      {{- if .Values.persistence.enabled -}}
         {{ toYaml .Values.persistence.volume | nindent 8}}
       {{- end -}}

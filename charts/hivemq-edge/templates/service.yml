@@ -17,7 +17,7 @@ spec:
     - port: 8080
       name: http
     {{- end }}
-    {{- if eq .Values.https.enable true }}
+    {{- if .Values.https.enable }}
     - port: 8443
       name: https
     {{- end }}
@@ -25,11 +25,11 @@ spec:
     - port: 1883
       name: mqtt
     {{- end }}
-    {{- if eq .Values.mqtts.enable true }}
+    {{- if .Values.mqtts.enable }}
     - port: 8883
       name: mqtts
     {{- end }}
-    {{- if eq .Values.mqttsn.enable true }}
+    {{- if .Values.mqttsn.enable }}
     - port: 2442
       name: mqttsn
     {{- end }}
