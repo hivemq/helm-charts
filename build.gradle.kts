@@ -120,18 +120,22 @@ val test by tasks.registering {
     group = "test"
     description = "Executes all Helm unit tests."
     doLast {
+        println("helm unittest ./charts/hivemq-operator -f ./tests/**/*_test.yaml")
         providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-operator", "-f", "./tests/**/*_test.yaml")
         }.result.get()
+        println("helm unittest ./charts/hivemq-platform -f ./tests/**/*_test.yaml")
         providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-platform", "-f", "./tests/**/*_test.yaml")
         }.result.get()
+        println("helm unittest ./charts/hivemq-platform-operator -f ./tests/**/*_test.yaml")
         providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-platform-operator", "-f", "./tests/**/*_test.yaml")
         }.result.get()
+        println("helm unittest ./charts/hivemq-swarm -f ./tests/**/*_test.yaml")
         providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("helm", "unittest", "./charts/hivemq-swarm", "-f", "./tests/**/*_test.yaml")
