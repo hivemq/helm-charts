@@ -13,8 +13,14 @@ metadata:
     {{- end }}
 spec:
   ports:
+    {{- if eq .Values.https.enable false }}
     - port: 8080
-      name: web
+      name: http
+    {{- end }}
+    {{- if eq .Values.https.enable true }}
+    - port: 8443
+      name: https
+    {{- end }}
     {{- if eq .Values.mqtt.enable true }}
     - port: 1883
       name: mqtt

@@ -28,6 +28,16 @@ persistence:
     - emptyDir: { }
       name: persistence
 
+https:
+  enable: false
+  keystore:
+    passwordSecretName: hivemq-keystore-secret
+    passwordSecretKey: keystore-password
+    privateKeyPasswordSecretName: hivemq-keystore-secret
+    privateKeyPasswordSecretKey: secret-key-password
+    keystoreSecretName: hivemq-keystore-secret
+    keystoreSecretKey: keystore.jks
+
 mqttsn:
   enable: false
 

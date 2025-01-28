@@ -53,9 +53,25 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
+            {{- if eq .Values.https.enable true }}
+            - name: HIVEMQ_HTTPS_ENABLED
+              value: "true"
+            {{- end }}
             {{- if eq .Values.mqtt.enable true }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
+            - name: HIVEMQ_HTTPS_KEYSTORE_PATH
+              value: /https/keystore.jks
+            - name: HIVEMQ_HTTPS_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.https.keystore.passwordSecretName }}"
+                  key: "{{ .Values.https.keystore.passwordSecretKey }}"
+            - name: HIVEMQ_HTTPS_PRIVATE_KEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.https.keystore.privateKeyPasswordSecretName }}"
+                  key: "{{ .Values.https.keystore.privateKeyPasswordSecretKey }}"
             {{- end }}
             {{- if (eq .Values.mqtts.enable true) }}
             - name: HIVEMQ_MQTTS_ENABLED
@@ -104,6 +120,11 @@ spec:
             name: mqtts-jks
             subPath: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
           {{- end }}
+          {{- if (eq .Values.https.enable true) }}
+          - mountPath: /https/keystore.jks
+            name: https-jks
+            subPath: "{{ .Values.https.keystore.keystoreSecretKey }}"
+          {{- end }}
           {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
           - mountPath: /mqtts/truststore.jks
             name: mqtts-truststore-jks
@@ -136,6 +157,14 @@ spec:
             items:
               - key: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
                 path: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
+      {{- end -}}
+      {{- if (eq .Values.https.enable true) }}
+        - name: https-jks
+          secret:
+            secretName: "{{ .Values.https.keystore.keystoreSecretName }}"
+            items:
+              - key: "{{ .Values.https.keystore.keystoreSecretKey }}"
+                path: "{{ .Values.https.keystore.keystoreSecretKey }}"
       {{- end -}}
       {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
         - name: mqtts-truststore-jks

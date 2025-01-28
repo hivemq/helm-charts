@@ -34,7 +34,7 @@ Start the cloud provider to enable load balancing:
 sudo cloud-provider-kind
 ```
 
-Apply the following service to kind to expose the ports for testing:
+Create a file `service.yaml` with the following content:
 
 ```
 kind: Service
@@ -49,13 +49,17 @@ spec:
   ports:
   - port: 5678
     targetPort: 8080
-    name: web
+    name: http
   - port: 5679
     targetPort: 1883
     name: mqtt
   - port: 5680
     targetPort: 8883
     name: mqtts
+```
+
+```
+kubectl apply -f service.yaml
 ```
 
 Get the local ip address:
