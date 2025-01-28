@@ -70,7 +70,7 @@ kubectl get svc/hivemq-edge-lb -o=jsonpath='{.status.loadBalancer.ingress[0].ip}
 ### Testing with local images
 
 Checkout the hivemq-edge repository, cd to hivemq-edge/hivemq-edge and run `docker/build.sh`.
-After this you now have an image named `hivemq/hivemq-edge:snapshot` in your local docker env.
+After this you now have an image named `hivemq/hivemq-edge:snapshot` in your local Docker environment.
 
 Load the image into Kind using this `kind load docker-image hivemq/hivemq-edge:snapshot`.
 
