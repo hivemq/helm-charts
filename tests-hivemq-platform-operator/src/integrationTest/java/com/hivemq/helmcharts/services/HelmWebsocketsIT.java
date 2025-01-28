@@ -7,7 +7,6 @@ import com.hivemq.helmcharts.util.CertificatesUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
@@ -29,9 +28,6 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PA
 import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_TRUSTSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
-@Tag("Services")
-@Tag("Services3")
-@SuppressWarnings("DuplicatedCode")
 class HelmWebsocketsIT extends AbstractHelmChartIT {
 
     private static final @NotNull String WEBSOCKET_SERVICE_NAME_PORT_8002 = "hivemq-test-hivemq-platform-ws-8002";

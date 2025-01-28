@@ -2,7 +2,6 @@ package com.hivemq.helmcharts.securitycontext;
 
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,8 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-@Tag("ContainerSecurityContext")
-@Tag("ContainerSecurityContextInstallPlatform")
 class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContainerSecurityContextIT {
 
     private static final int MIN_UID = 1000660000;

@@ -7,7 +7,6 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,10 +32,7 @@ import static com.hivemq.helmcharts.util.ControlCenterUtil.assertLogin;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Tag("Platform")
-@Tag("Tls")
 @Testcontainers
-@SuppressWarnings("DuplicatedCode")
 class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
     private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
