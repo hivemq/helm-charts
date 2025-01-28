@@ -30,7 +30,7 @@ helm install edge ./charts/hivemq-edge --dry-run
 
 Start the cloud provider to enable load balancing:
 
-```
+```bash
 sudo cloud-provider-kind
 ```
 
