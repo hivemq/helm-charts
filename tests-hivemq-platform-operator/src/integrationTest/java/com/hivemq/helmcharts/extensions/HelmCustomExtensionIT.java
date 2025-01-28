@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-@Tag("Extensions")
-@Tag("Extensions3")
 class HelmCustomExtensionIT extends AbstractHelmChartIT {
 
     @TempDir

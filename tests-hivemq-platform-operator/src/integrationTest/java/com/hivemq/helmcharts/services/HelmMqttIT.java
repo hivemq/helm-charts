@@ -6,7 +6,6 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -17,8 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-@Tag("Services")
-@Tag("Services1")
 class HelmMqttIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT_1883 = 1883;
