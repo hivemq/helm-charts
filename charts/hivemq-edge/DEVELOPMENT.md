@@ -15,7 +15,7 @@ helm install edge ./charts/hivemq-edge --dry-run
 
 ### Local testing KIND
 
-Install cloud-provider-kind to get a loadbalancer in kind:
+Install cloud-provider-kind to get a load balancer in Kind:
 ```
 go install sigs.k8s.io/cloud-provider-kind@latest
 ```
