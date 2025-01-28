@@ -2,7 +2,6 @@ package com.hivemq.helmcharts.securitycontext;
 
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-@Tag("ContainerSecurityContext")
 class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContainerSecurityContextIT {
 
     @Override

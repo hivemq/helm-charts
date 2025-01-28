@@ -5,7 +5,6 @@ import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -13,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Tag("CustomOperatorConfig")
-@Tag("OperatorNamespaces")
 class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
 
     private static final @NotNull String PLATFORM_NAME_ALPHA = PLATFORM_RELEASE_NAME + "-alpha";

@@ -10,7 +10,6 @@ import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -44,7 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *  <li>Install the HiveMQ Platform Helm chart with same release name as Legacy HiveMQ Operator chart</li>
  * </ol>
  */
-@Tag("Migration")
 @Testcontainers
 class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 

@@ -4,7 +4,6 @@ import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
 import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.testcontainers.junit.jupiter.Container;
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Tag("Extensions")
 @Testcontainers
 class EseExtensionInstallationIT {
 

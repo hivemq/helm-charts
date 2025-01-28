@@ -5,7 +5,6 @@ import com.hivemq.helmcharts.AbstractHelmChartIT;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -20,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-@Tag("ApplyCrd")
 class HelmApplyCrdIT extends AbstractHelmChartIT {
 
     private static final @NotNull String CRD_NAME = "hivemq-platforms.hivemq.com";

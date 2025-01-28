@@ -2,7 +2,6 @@ package com.hivemq.helmcharts.operator;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Tag("Upgrade")
 class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmUpgradeOperatorIT.class);

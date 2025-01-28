@@ -5,7 +5,6 @@ import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -13,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Tag("Services")
-@Tag("Services3")
 class HelmRestApiIT extends AbstractHelmChartIT {
 
     private static final int REST_API_SERVICE_PORT = 8890;
