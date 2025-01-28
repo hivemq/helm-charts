@@ -72,4 +72,4 @@ jobs:
       - name: Update GitHub release notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ./release/update-github-release-notes.sh 10
+        run: bash ./release/update-github-release-notes.sh 20
