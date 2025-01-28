@@ -47,6 +47,8 @@ spec:
               name: mqtt-sn
             {{- end }}
           env:
+            - name: HIVEMQ_CONFIG_WRITEABLE
+              value: "false"
             - name: HIVEMQ_LOG_LEVEL
               value: "{{ .Values.logLevel }}"
             - name: JAVA_OPTS
