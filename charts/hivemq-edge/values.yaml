@@ -93,7 +93,7 @@ podScheduling:
   #                - my-app
   #        topologyKey: "kubernetes.io/hostname"
 
-  # Configures the tolerations for the Operator pod.
+  # Configures the tolerations for the Edge pod.
   tolerations:
   #  - key: "example-key"
   #    operator: "Exists"
