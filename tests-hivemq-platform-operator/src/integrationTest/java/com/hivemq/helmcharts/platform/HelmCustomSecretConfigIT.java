@@ -3,7 +3,6 @@ package com.hivemq.helmcharts.platform;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -13,8 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-@Tag("CustomConfig")
-@Tag("CustomSecretConfig")
 class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
 
     @Test
