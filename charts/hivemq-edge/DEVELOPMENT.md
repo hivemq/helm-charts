@@ -4,6 +4,7 @@ Generate templates with custom values
 
 ```bash
 helm template edge ./charts/hivemq-edge -f my-edge-values.yaml
+helm upgrade edge ./charts/hivemq-edge -f my-edge-values.yaml
 ```
 
 Simulate without deploying into the K8s cluster to check the correctness of the templates.
