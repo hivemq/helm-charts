@@ -63,7 +63,7 @@ kubectl apply -f service.yaml
 ```
 
 Get the local ip address:
-```
+```bash
 kubectl get svc/hivemq-edge-lb -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
