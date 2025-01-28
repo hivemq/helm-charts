@@ -95,7 +95,7 @@ helm unittest ./charts/hivemq-edge -f './tests/**/*_test.yaml'
 
 ### Integration tests
 
-By default, the integration tests will build and load both HiveMQ Platform Operator and HiveMQ Platform Operator Init images from the checked out branch you are currently running the tests. The HiveMQ Platform image will be pulled from Docker Hub, unless specify otherwise.
+By default, the integration tests will build and load HiveMQ Edge image from the checked out branch you are currently running the tests.
 In order to run them, just simply execute the following Gradle command:
 
 ```bash
