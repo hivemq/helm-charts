@@ -1,4 +1,4 @@
-name: HiveMQ Operator (Legacy) Integration Tests
+name: HiveMQ Legacy Operator Integration Tests
 on:
   pull_request:
     branches:
@@ -28,25 +28,15 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: helm-charts
-          ref: ${{ github.base_ref }}
 
-      - name: Set up Docker QEMU
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Checkout HiveMQ Operator (legacy) on the default branch
+      - name: Checkout HiveMQ Legacy Operator on the default branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-operator
 
-      - name: Checkout HiveMQ Operator (legacy) on the same or target branch
+      - name: Checkout HiveMQ Legacy Operator on the same or target branch
         working-directory: ${{ github.workspace }}/hivemq-operator
         run: |
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-operator"
@@ -68,11 +58,20 @@ jobs:
             git checkout origin/${GITHUB_BASE_REF}
           fi
 
+      - name: Set up Docker QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Set up JDK 21
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: 21
+          distribution: temurin
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@cc4fc85e6b35bafd578d5ffbc76a5518407e1af0 # v4
@@ -82,17 +81,17 @@ jobs:
             notifications
             jdks
 
-      - name: Run HiveMQ Operator (legacy) integration tests
+      - name: Run HiveMQ Legacy Operator integration tests
         env:
           TEST_PLAN: ${{ matrix.test-plan }}
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-operator:integrationTest
 
-      - name: Upload HiveMQ Operator (legacy) test results
+      - name: Upload HiveMQ Legacy Operator test results
         if: always()
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
-          name: Test results HiveMQ Operator (legacy) ${{ matrix.test-plan }}
+          name: Test results HiveMQ Legacy Operator ${{ matrix.test-plan }}
           path: |
             helm-charts/tests-hivemq-operator/build/reports/tests/integrationTest/
             helm-charts/tests-hivemq-operator/build/test-results/integrationTest/*.xml
