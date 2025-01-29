@@ -12,9 +12,6 @@ env:
 jobs:
   smoke-test-platform:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}
     permissions:
       contents: read
       packages: write
@@ -24,31 +21,20 @@ jobs:
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
           curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.18.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
 
-      - name: Set up Docker QEMU
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: helm-charts
-          ref: ${{ github.base_ref }}
 
-      - name: Checkout HiveMQ Platform Operator
+      - name: Checkout HiveMQ Platform Operator on the default branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-platform-operator
-          ref: ${{ github.base_ref }}
 
       - name: Checkout HiveMQ Platform Operator on the same or target branch
-        working-directory: ${{ github.workspace }}/hivemq-platform-operator
+        working-directory: hivemq-platform-operator
         run: |
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
           BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
@@ -58,7 +44,7 @@ jobs:
             git checkout origin/${GITHUB_HEAD_REF}
             exit
           fi
-          if [[ "${GITHUB_BASE_REF}" == "master" ]]; then
+          if [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
             exit
           fi
           echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
@@ -69,11 +55,20 @@ jobs:
             git checkout origin/${GITHUB_BASE_REF}
           fi
 
+      - name: Set up Docker QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Set up JDK 21
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: 21
+          distribution: temurin
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@cc4fc85e6b35bafd578d5ffbc76a5518407e1af0 # v4
@@ -88,7 +83,7 @@ jobs:
         run: ./gradlew :tests-hivemq-platform-operator:build :tests-hivemq-platform-operator:saveDockerImages
 
       - name: Start up KinD cluster with local images
-        working-directory: ${{ github.workspace }}/helm-charts
+        working-directory: helm-charts
         run: |
           kind create cluster
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator-init.tar
@@ -96,11 +91,11 @@ jobs:
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform.tar
 
       - name: Install HiveMQ Platform Operator
-        working-directory: ${{ github.workspace }}/helm-charts
+        working-directory: helm-charts
         run: helm install operator-test --set image.name=hivemq-platform-operator-test --set image.initImageName=hivemq-platform-operator-init-test --set image.tag=snapshot ./charts/hivemq-platform-operator --wait
 
       - name: Install HiveMQ Platform
-        working-directory: ${{ github.workspace }}/helm-charts
+        working-directory: helm-charts
         run: helm install $RELEASE_NAME --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --create-namespace -n test
 
       - name: Test HiveMQ Platform
@@ -135,9 +130,6 @@ jobs:
 
   smoke-test-legacy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}
     permissions:
       contents: read
       packages: write
@@ -147,30 +139,20 @@ jobs:
           curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
           curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.18.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
 
-      - name: Set up Docker QEMU
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: helm-charts
-          ref: ${{ github.base_ref }}
 
-      - name: Checkout HiveMQ Operator (legacy) on the default branch
+      - name: Checkout HiveMQ Legacy Operator on the default branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: hivemq/hivemq-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
           path: hivemq-operator
 
-      - name: Checkout HiveMQ Operator (legacy) on the same or target branch
-        working-directory: ${{ github.workspace }}/hivemq-operator
+      - name: Checkout HiveMQ Legacy Operator on the same or target branch
+        working-directory: hivemq-operator
         run: |
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-operator"
           BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
@@ -191,11 +173,20 @@ jobs:
             git checkout origin/${GITHUB_BASE_REF}
           fi
 
+      - name: Set up Docker QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Set up JDK 21
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: 21
+          distribution: temurin
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@cc4fc85e6b35bafd578d5ffbc76a5518407e1af0 # v4
@@ -205,20 +196,20 @@ jobs:
             notifications
             jdks
 
-      - name: Build HiveMQ Operator (legacy) images
+      - name: Build HiveMQ Legacy Operator images
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-operator:build :tests-hivemq-operator:saveDockerImages
 
       - name: Start up KinD cluster with local images
-        working-directory: ${{ github.workspace }}/helm-charts
+        working-directory: helm-charts
         run: |
           kind create cluster
           kind load image-archive ./tests-hivemq-operator/build/hivemq-dns-init-wait.tar
           kind load image-archive ./tests-hivemq-operator/build/hivemq-k8s.tar
           kind load image-archive ./tests-hivemq-operator/build/hivemq-operator.tar
 
-      - name: Install HiveMQ Operator (legacy)
-        working-directory: ${{ github.workspace }}/helm-charts
+      - name: Install HiveMQ Legacy Operator
+        working-directory: helm-charts
         run: |
           helm repo add prometheus https://prometheus-community.github.io/helm-charts
           helm dependency build ./charts/hivemq-operator
@@ -232,14 +223,14 @@ jobs:
           kubectl wait --for=condition=ready pod -l hivemq-cluster=$RELEASE_NAME --timeout=5m -n test
           helm test $RELEASE_NAME -n test
 
-      - name: Capture HiveMQ Operator (legacy) Pods logs on failure
+      - name: Capture HiveMQ Legacy Operator Pods logs on failure
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/operator-pod.log
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test > ${{ runner.temp }}/logs/platform-pod.log
 
-      - name: Upload HiveMQ Operator (legacy) Pods logs on failure
+      - name: Upload HiveMQ Legacy Operator Pods logs on failure
         if: failure()
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
@@ -247,7 +238,7 @@ jobs:
           path: ${{ runner.temp }}/logs/*.log
           retention-days: 5
 
-      - name: Uninstall HiveMQ Operator (legacy) charts
+      - name: Uninstall HiveMQ Legacy Operator charts
         if: always()
         run: |
           helm uninstall $RELEASE_NAME --wait -n test
