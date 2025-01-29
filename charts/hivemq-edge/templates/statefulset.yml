@@ -151,7 +151,7 @@ spec:
       volumes:
         - name: fragment
           configMap:
-            name: hivemq-edge-config-edge
+            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "config" "releaseName" .Release.Name) }}
       {{- range .Values.volumes }}
         {{- toYaml .definition | nindent 8 }}
       {{- end }}
