@@ -54,7 +54,7 @@ spec:
             - name: JAVA_OPTS
               value: "{{ .Values.javaOpts }}"
             - name: HIVEMQ_LICENSE_FOLDER
-              value: "/license"
+              value: "/license.edgelic"
             - name: HIVEMQ_DATA_FOLDER
               value: "/persistence"
             - name: HIVEMQ_CONFIG_FOLDER
@@ -133,7 +133,7 @@ spec:
             subPath: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
           {{- end }}
           {{- if .Values.license.enabled }}
-          - mountPath: /license
+          - mountPath: /license.edgelic
             name: license
           {{- end }}
           {{- if .Values.persistence.enabled }}
