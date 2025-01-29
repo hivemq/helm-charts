@@ -33,8 +33,10 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 3
           ports:
+            {{- if .Values.http.enable }}
             - containerPort: 8080
               name: web
+            {{- end }}
             {{- if .Values.mqtts.enable }}
             - containerPort: 8883
               name: mqtts
@@ -61,10 +63,6 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
-            {{- if .Values.https.enable }}
-            - name: HIVEMQ_HTTPS_ENABLED
-              value: "true"
-            {{- end }}
             {{- if .Values.mqtt.enable }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
@@ -77,7 +75,7 @@ spec:
             - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
               value: "{{ .Values.mqtts.preferServerCipherSuites }}"
             - name: HIVEMQ_MQTTS_KEYSTORE_PATH
-              value: /mqtts/mqtts.jks
+              value: /mqtts/{{ .Values.mqtts.keystore.keystoreSecretKey }}
             - name: HIVEMQ_MQTTS_SECRET_KEYSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -91,7 +89,7 @@ spec:
             {{- end }}
             {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
             - name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
-              value: /mqtts/truststore.jks
+              value: /mqtts-trust/{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}
             - name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -118,19 +116,12 @@ spec:
             mountPath: {{ .mount }}
           {{- end }}
           {{- if .Values.mqtts.enable }}
-          - mountPath: /mqtts/mqtts.jks
+          - mountPath: /mqtts
             name: mqtts-jks
-            subPath: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
-          {{- end }}
-          {{- if .Values.https.enable }}
-          - mountPath: /https/keystore.jks
-            name: https-jks
-            subPath: "{{ .Values.https.keystore.keystoreSecretKey }}"
           {{- end }}
           {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
-          - mountPath: /mqtts/truststore.jks
+          - mountPath: /mqtts-trust
             name: mqtts-truststore-jks
-            subPath: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
           {{- end }}
           {{- if .Values.license.enabled }}
           - mountPath: /license.edgelic
@@ -162,14 +153,6 @@ spec:
             items:
               - key: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
                 path: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
-      {{- end -}}
-      {{- if .Values.https.enable }}
-        - name: https-jks
-          secret:
-            secretName: "{{ .Values.https.keystore.keystoreSecretName }}"
-            items:
-              - key: "{{ .Values.https.keystore.keystoreSecretKey }}"
-                path: "{{ .Values.https.keystore.keystoreSecretKey }}"
       {{- end -}}
       {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
         - name: mqtts-truststore-jks

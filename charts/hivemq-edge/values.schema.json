@@ -51,28 +51,10 @@
         "type" : "boolean"
       }
     },
-    "https" : {
+    "http" : {
       "enabled" : {
-        "description": "Enable the TLS protected HTTP API.",
+        "description": "Enable the unencrypted http listener for the REST API and the UI.",
         "type" : "boolean"
-      },
-      "keystore": {
-        "passwordSecretName" : {
-          "description": "Name of the secret where the keystore password is stored.",
-          "type" : "string"
-        },
-        "passwordSecretKey" : {
-          "description": "Name of the key inside the secrete which contains the password for the keystore.",
-          "type" : "string"
-        },
-        "privateKeyPasswordSecretName" : {
-          "description": "Name of the secret where the private key password is stored.",
-          "type" : "string"
-        },
-        "privateKeyPasswordSecretKey" : {
-          "description": "Name of key in the secret where the private key password is stored.",
-          "type" : "string"
-        }
       }
     },
     "mqtts" : {

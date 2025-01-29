@@ -13,13 +13,9 @@ metadata:
     {{- end }}
 spec:
   ports:
-    {{- if eq .Values.https.enable false }}
+    {{- if .Values.http.enable }}
     - port: 8080
       name: http
-    {{- end }}
-    {{- if .Values.https.enable }}
-    - port: 8443
-      name: https
     {{- end }}
     {{- if .Values.mqtt.enable }}
     - port: 1883
