@@ -1,4 +1,27 @@
+import java.io.ByteArrayOutputStream
+
 /* ******************** update versions ******************** */
+
+val updateEdgeChartVersion by tasks.registering(Exec::class) {
+    group = "version"
+    description =
+        "Bumps HiveMQ Edge versions." +
+                "\n\tUsage: ./gradlew updateEdgeChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
+                "\n\t\t- 'chartVersion': Edge chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
+                "\n\t\t- 'appVersion': Edge version. Optional."
+    doFirst {
+        updateChartAndValueFilesWithVersion(
+            arrayOf(
+                "charts/hivemq-edge/Chart.yaml",
+                "charts/hivemq-edge/values.yaml"
+            ),
+            """(tag:\s*)(\S+)""",
+            true
+        )
+    }
+    workingDir(layout.projectDirectory)
+    commandLine("sh", "./manifests/hivemq-edge/manifests.sh")
+}
 
 val updateOperatorChartVersion by tasks.registering(Exec::class) {
     group = "version"
@@ -12,7 +35,9 @@ val updateOperatorChartVersion by tasks.registering(Exec::class) {
             arrayOf(
                 "charts/hivemq-operator/Chart.yaml",
                 "charts/hivemq-operator/values.yaml"
-            ), """(image:\s+[^:]+:\w+-)(\S+)"""
+            ),
+            """(image:\s+[^:]+:\w+-)(\S+)""",
+            false
         )
     }
     dependsOn(gradle.includedBuild("tests-hivemq-operator").task(":updatePlatformVersion"))
@@ -32,7 +57,9 @@ val updateSwarmChartVersion by tasks.registering(Exec::class) {
             arrayOf(
                 "charts/hivemq-swarm/Chart.yaml",
                 "charts/hivemq-swarm/values.yaml"
-            ), """(tag:\s*)(\S+)"""
+            ),
+            """(tag:\s*)(\S+)""",
+            false
         )
     }
     workingDir(layout.projectDirectory)
@@ -51,7 +78,9 @@ val updatePlatformOperatorChartVersion by tasks.registering(Exec::class) {
             arrayOf(
                 "charts/hivemq-platform-operator/Chart.yaml",
                 "charts/hivemq-platform-operator/values.yaml"
-            ), """(tag:\s*)(\S+)"""
+            ),
+            """(tag:\s*)(\S+)""",
+            false
         )
     }
     workingDir(layout.projectDirectory)
@@ -70,7 +99,9 @@ val updatePlatformChartVersion by tasks.registering(Exec::class) {
             arrayOf(
                 "charts/hivemq-platform/Chart.yaml",
                 "charts/hivemq-platform/values.yaml"
-            ), """(tag:\s*)(\S+)"""
+            ),
+            """(tag:\s*)(\S+)""",
+            false
         )
     }
     dependsOn(gradle.includedBuild("tests-hivemq-platform-operator").task(":updatePlatformVersion"))
@@ -85,7 +116,8 @@ val updateAllPlatformChartVersions by tasks.registering {
     val usage = "Usage: ./gradlew updateAllPlatformChartVersions -PappVersion=x.y.z" +
             "\n\t\t- 'appVersion': Platform release version. Mandatory."
     group = "version"
-    description = "Bumps all Platform Charts and Platform versions except HiveMQ Platform Operator chart.\n\t$usage"
+    description =
+        "Bumps all Platform Charts and Platform versions except the HiveMQ Platform Operator and HiveMQ Edge charts.\n\t$usage"
     checkAppVersion = true
     checkAppVersionUsage = usage
     dependsOn(updateOperatorChartVersion)
@@ -97,6 +129,10 @@ val updateAllManifestFiles by tasks.registering {
     group = "version"
     description = "Updates all manifest files."
     doLast {
+        exec {
+            workingDir(layout.projectDirectory)
+            commandLine("sh", "./manifests/hivemq-edge/manifests.sh")
+        }
         exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
@@ -119,27 +155,46 @@ val updateAllManifestFiles by tasks.registering {
 val test by tasks.registering {
     group = "test"
     description = "Executes all Helm unit tests."
+    val charts = listOf(
+        "hivemq-edge",
+        "hivemq-operator",
+        "hivemq-platform",
+        "hivemq-platform-operator",
+        "hivemq-swarm"
+    )
     doLast {
-        exec {
-            workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-operator", "-f", "./tests/**/*_test.yaml")
-        }
-        exec {
-            workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-platform", "-f", "./tests/**/*_test.yaml")
-        }
-        exec {
-            workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-platform-operator", "-f", "./tests/**/*_test.yaml")
-        }
-        exec {
-            workingDir(layout.projectDirectory)
-            commandLine("helm", "unittest", "./charts/hivemq-swarm", "-f", "./tests/**/*_test.yaml")
+        charts.forEach { chart ->
+            val stdout = ByteArrayOutputStream()
+            val stderr = ByteArrayOutputStream()
+            try {
+                println("\nhelm unittest ./charts/$chart -f ./tests/**/*_test.yaml")
+                exec {
+                    workingDir(layout.projectDirectory)
+                    commandLine("helm", "unittest", "./charts/$chart", "-f", "./tests/**/*_test.yaml")
+                    isIgnoreExitValue = true
+                    standardOutput = stdout
+                    errorOutput = stderr
+                }
+                val errorString = stderr.toString().trim()
+                if (errorString.isNotEmpty()) {
+                    println("Helm unit tests failed for chart: $chart")
+                    println("Error output:\n$errorString")
+                    throw GradleException("Helm unit tests failed for $chart. See above for details.")
+                } else {
+                    val outputString = stdout.toString().trim()
+                    println("Helm unit tests passed for chart: $chart")
+                    if (outputString.isNotEmpty()) {
+                        println("Output:\n$outputString")
+                    }
+                }
+            } catch (e: Exception) {
+                throw GradleException("Error while running Helm unit tests for chart: $chart", e)
+            }
         }
     }
 }
 
-fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String) {
+fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String, quote: Boolean) {
     val appVersion = project.properties["appVersion"]
     if (checkAppVersion && appVersion == null) {
         error("`appVersion` must be set\n\n$checkAppVersionUsage")
@@ -170,8 +225,9 @@ fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, val
     if (appVersion != null) {
         filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach { file ->
             val text = file.readText()
+            val value = if (quote) "\"$appVersion\"" else "$appVersion"
             file.writeText(text.replace(valuesRegex.toRegex()) {
-                "${it.groupValues[1]}${appVersion}"
+                "${it.groupValues[1]}${value}"
             })
         }
     }
