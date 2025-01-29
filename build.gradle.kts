@@ -194,7 +194,11 @@ val test by tasks.registering {
     }
 }
 
-fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, valuesRegex: String, quote: Boolean) {
+fun updateChartAndValueFilesWithVersion(
+    versionFilesToUpdate: Array<String>,
+    valuesRegex: String,
+    shouldQuoteAppVersion: Boolean
+) {
     val appVersion = project.properties["appVersion"]
     if (checkAppVersion && appVersion == null) {
         error("`appVersion` must be set\n\n$checkAppVersionUsage")
@@ -216,7 +220,8 @@ fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, val
             require(it != text) { error("Failed to replace version with $chartVersion in $file") }
         }
         if (appVersion != null) {
-            text = text.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $appVersion").also {
+            val quotedAppVersion = if (shouldQuoteAppVersion) "\"$appVersion\"" else "$appVersion"
+            text = text.replace("""(?m)^appVersion:\s*\S+$""".toRegex(), "appVersion: $quotedAppVersion").also {
                 require(it != text) { error("Failed to replace appVersion with $appVersion in $file") }
             }
         }
@@ -225,9 +230,9 @@ fun updateChartAndValueFilesWithVersion(versionFilesToUpdate: Array<String>, val
     if (appVersion != null) {
         filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach { file ->
             val text = file.readText()
-            val value = if (quote) "\"$appVersion\"" else "$appVersion"
+            val quotedAppVersion = if (shouldQuoteAppVersion) "\"$appVersion\"" else "$appVersion"
             file.writeText(text.replace(valuesRegex.toRegex()) {
-                "${it.groupValues[1]}${value}"
+                "${it.groupValues[1]}${quotedAppVersion}"
             })
         }
     }

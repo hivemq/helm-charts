@@ -27,9 +27,10 @@ jobs:
 
       - name: Lint
         run: |
+          helm lint charts/hivemq-edge
+          helm lint charts/hivemq-operator
           helm lint charts/hivemq-platform
           helm lint charts/hivemq-platform-operator
-          helm lint charts/hivemq-operator
           helm lint charts/hivemq-swarm
 
       - name: Unit Test
@@ -40,9 +41,10 @@ jobs:
 
       - name: Check manifests are up-to-date
         run: |
+          manifests/hivemq-edge/manifests.sh
           manifests/hivemq-operator/manifests.sh
-          manifests/hivemq-platform-operator/manifests.sh
           manifests/hivemq-platform/manifests.sh
+          manifests/hivemq-platform-operator/manifests.sh
           manifests/hivemq-swarm/manifests.sh
           git add manifests/ -v
           git diff HEAD --exit-code
@@ -54,14 +56,15 @@ jobs:
       - name: Parse HiveMQ CRDs from OpenAPI to JSON schema
         run: |
           export FILENAME_FORMAT='{kind}.{group}-{version}'
-          .github/openapi2jsonschema.py charts/hivemq-platform-operator/crds/hivemq-platforms.hivemq.com-v1.yml
           .github/openapi2jsonschema.py charts/hivemq-operator/crds/hivemq-cluster.yaml
+          .github/openapi2jsonschema.py charts/hivemq-platform-operator/crds/hivemq-platforms.hivemq.com-v1.yml
 
       - name: Validate rendered manifests
         run: |
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-edge -r hivemq-edge-release -n hivemq-edge-namespace
           helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-operator -r hivemq-operator-release -n hivemq-operator-namespace --schema-location hivemqcluster.hivemq-v1.json
-          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-platform-operator -r hivemq-platform-operator-release -n hivemq-platform-operator-namespace
           helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-platform -r hivemq-platform-release -n hivemq-platform-namespace --schema-location hivemqplatform.hivemq-v1.json
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-platform-operator -r hivemq-platform-operator-release -n hivemq-platform-operator-namespace
           helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-swarm -r hivemq-swarm-release -n hivemq-swarm-namespace
 
       - name: Validate branch protection
