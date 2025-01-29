@@ -24,7 +24,7 @@ spec:
       containers:
         - name: hivemq-edge
           image: "hivemq/hivemq-edge:snapshot"
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /api/v1/health/liveness
@@ -66,4 +66,4 @@ spec:
       volumes:
         - name: fragment
           configMap:
-            name: hivemq-edge-config-edge
+            name: hivemq-edge-config-my-platform
