@@ -25,7 +25,7 @@ spec:
       containers:
         - name: hivemq-edge
           image: "{{ .Values.image.repository }}:{{.Values.image.tag}}"
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           livenessProbe:
             httpGet:
               path: /api/v1/health/liveness
