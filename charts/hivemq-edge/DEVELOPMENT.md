@@ -16,7 +16,12 @@ helm install edge ./charts/hivemq-edge
 
 ### Local testing KIND
 
-Install cloud-provider-kind to get a load balancer in Kind:
+First install Kind (Kubernetes in Docker), see their [userguid](https://kind.sigs.k8s.io/docs/user/quick-start#installation).
+
+Install cloud-provider-kind to get a load balancer in Kind, follow the [docs](https://kind.sigs.k8s.io/docs/user/loadbalancer).
+
+Fastest way is going through go directly (don't forget to then open a new shell to actually use it)
+
 ```
 go install sigs.k8s.io/cloud-provider-kind@latest
 ```
@@ -26,7 +31,7 @@ Apply Helm:
 ```bash
 kind create cluster
 kubectl cluster-info --context kind-kind
-helm install edge ./charts/hivemq-edge --dry-run 
+helm install edge ./charts/hivemq-edge 
 ```
 
 Start the cloud provider to enable load balancing:
@@ -80,6 +85,37 @@ Load the image into Kind using this `kind load docker-image hivemq/hivemq-edge:s
 Make sure that in the StatefulSet you have `imagePullPolicy: Never`.
 
 This ensures Kind will only use the images it already has and not try to pull a new version from somewhere else.
+
+### Testing commercial features
+
+The file `charts/hivemq-edge/tests/secret-license.yml` contains an example for a license secret.
+
+First encode the license-file (named **hivemq-edge.edgelic** for this example) you got to base64:
+```bash
+base64 -i hivemq-edge.edgelic
+```
+
+Replace `<BASE64-ENCODED LICENSE GOES HERE>` in secret-license.yaml with the encoded string.
+
+Then apply the secret using:
+
+```
+kubectl apply -f secret-license.yml 
+```
+
+In yor values.yaml now add the following entry (mind the indentation!!):
+
+```yaml
+license:
+  enabled: true
+  volume:
+    - name: license
+      secret:
+        secretName: "hivemq-license-secret"
+        items:
+          - key: "license.edgelic"
+            path: "license.edgelic"
+```
 
 ### Unit tests
 To run unit tests, the Helm [helm-unittest](https://github.com/helm-unittest/helm-unittest?tab=readme-ov-file#helm-unittest) plugin is required to be installed as part of your Helm installation.

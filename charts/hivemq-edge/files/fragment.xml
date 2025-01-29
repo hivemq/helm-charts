@@ -2,25 +2,68 @@
 </mqtt-bridges>
 <protocol-adapters>
     <protocol-adapter>
-        <adapterId>simulation-3</adapterId>
-        <protocolId>simulation</protocolId>
+        <protocolId>modbus</protocolId>
+        <adapterId>test-modbus</adapterId>
         <config>
-            <simulationToMqtt>
-                <pollingIntervalMillis>100</pollingIntervalMillis>
+            <host>172.16.10.12</host>
+            <port>502</port>
+            <modbusToMqtt>
                 <maxPollingErrorsBeforeRemoval>-1</maxPollingErrorsBeforeRemoval>
-            </simulationToMqtt>
+                <pollingIntervalMillis>5000</pollingIntervalMillis>
+                <publishChangedDataOnly>false</publishChangedDataOnly>
+            </modbusToMqtt>
         </config>
         <northboundMappings>
             <northboundMapping>
-                <topic>test</topic>
-                <tagName>t2</tagName>
+                <topic>topic</topic>
+                <maxQos>1</maxQos>
+                <includeTagNames>false</includeTagNames>
+                <includeTimestamp>true</includeTimestamp>
+                <messageHandlingOptions>MQTTMessagePerTag</messageHandlingOptions>
                 <mqttUserProperties>
                     <mqttUserProperty>
-                        <name>simulation</name>
+                        <name>coil</name>
+                        <value>1</value>
+                    </mqttUserProperty>
+                </mqttUserProperties>
+                <tagName>tag1</tagName>
+            </northboundMapping>
+            <northboundMapping>
+                <topic>topic</topic>
+                <maxQos>1</maxQos>
+                <includeTagNames>false</includeTagNames>
+                <includeTimestamp>true</includeTimestamp>
+                <messageHandlingOptions>MQTTMessagePerTag</messageHandlingOptions>
+                <mqttUserProperties>
+                    <mqttUserProperty>
+                        <name>coil</name>
                         <value>2</value>
                     </mqttUserProperty>
                 </mqttUserProperties>
+                <tagName>tag2</tagName>
             </northboundMapping>
         </northboundMappings>
+        <tags>
+            <tag>
+                <name>tag1</name>
+                <description>tag1</description>
+                <definition>
+                    <dataType>BOOL</dataType>
+                    <startIdx>0</startIdx>
+                    <unitId>12</unitId>
+                    <readType>COILS</readType>
+                </definition>
+            </tag>
+            <tag>
+                <name>tag2</name>
+                <description>tag2</description>
+                <definition>
+                    <dataType>BOOL</dataType>
+                    <startIdx>1</startIdx>
+                    <unitId>12</unitId>
+                    <readType>COILS</readType>
+                </definition>
+            </tag>
+        </tags>
     </protocol-adapter>
 </protocol-adapters>

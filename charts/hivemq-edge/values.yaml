@@ -17,9 +17,13 @@ resources:
 # License: a volume containing the actual license file
 license:
   enabled: false
-  volume:
-    - emptyDir: { }
-      name: license
+#  volume:
+#    - name: license
+#      secret:
+#        secretName: "hivemq-license-secret"
+#        items:
+#          - key: "license.edgelic"
+#            path: "license.edgelic"
 
 # Persistence: a volume for persistent state, e.g. rocksdb files
 persistence:
