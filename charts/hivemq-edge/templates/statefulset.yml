@@ -33,18 +33,18 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 3
           ports:
-            {{- if .Values.http.enable }}
+            {{- if .Values.http.enabled }}
             - containerPort: 8080
               name: web
             {{- end }}
-            {{- if .Values.mqtts.enable }}
+            {{- if .Values.mqtts.enabled }}
             - containerPort: 8883
               name: mqtts
             {{- else }}
             - containerPort: 1883
               name: mqtt
             {{- end }}
-            {{- if .Values.mqttsn.enable }}
+            {{- if .Values.mqttsn.enabled }}
             - containerPort: 2442
               name: mqtt-sn
             {{- end }}
@@ -65,11 +65,11 @@ spec:
               value: "{{ .Values.refresh }}"
             - name: HIVEMQ_PERSISTENCE_MODE
               value: "{{ .Values.persistenceMode }}"
-            {{- if .Values.mqtt.enable }}
+            {{- if .Values.mqtt.enabled }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
             {{- end }}
-            {{- if .Values.mqtts.enable }}
+            {{- if and (.Values.mqtts.enabled) (eq .Values.mqtts.create.enabled false) }}
             - name: HIVEMQ_MQTTS_ENABLED
               value: "true"
             - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
@@ -89,7 +89,27 @@ spec:
                   name: "{{ .Values.mqtts.keystore.privateKeyPasswordSecretName }}"
                   key: "{{ .Values.mqtts.keystore.privateKeyPasswordSecretKey }}"
             {{- end }}
-            {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
+            {{- if and (.Values.mqtts.enabled) (.Values.mqtts.create.enabled) }}
+            - name: HIVEMQ_MQTTS_ENABLED
+              value: "true"
+            - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
+              value: "{{ .Values.mqttsClientauth.clientAuthenticationMode }}"
+            - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
+              value: "{{ .Values.mqtts.preferServerCipherSuites }}"
+            - name: HIVEMQ_MQTTS_KEYSTORE_PATH
+              value: /mqtts/kestore.jks
+            - name: HIVEMQ_MQTTS_SECRET_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "mqtts" "releaseName" .Release.Name) }}"
+                  key: keystore-password
+            - name: HIVEMQ_MQTTS_SECRET_PRIVATE_KEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "mqtts" "releaseName" .Release.Name) }}"
+                  key: secret-key-password
+            {{- end }}
+            {{- if and (ne .Values.mqttsClientauth.clientAuthenticationMode "NONE") (ne .Values.mqttsClientauth.create.enabled true) }}
             - name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
               value: /mqtts-trust/{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}
             - name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
@@ -97,6 +117,15 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.mqttsClientauth.truststore.passwordSecretName }}"
                   key: "{{ .Values.mqttsClientauth.truststore.passwordSecretKey }}"
+            {{- end }}
+            {{- if and (ne .Values.mqttsClientauth.clientAuthenticationMode "NONE") (.Values.mqttsClientauth.create.enabled) }}
+            - name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
+              value: /mqtts-trust/truststore.jks
+            - name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
+                  key: truststore-password
             {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
@@ -117,7 +146,7 @@ spec:
           {{- end }}
             mountPath: {{ .mount }}
           {{- end }}
-          {{- if .Values.mqtts.enable }}
+          {{- if .Values.mqtts.enabled }}
           - mountPath: /mqtts
             name: mqtts-jks
           {{- end }}
@@ -148,7 +177,7 @@ spec:
       {{- range .Values.volumes }}
         {{- toYaml .definition | nindent 8 }}
       {{- end }}
-      {{- if .Values.mqtts.enable }}
+      {{- if and (.Values.mqtts.enabled) (eq .Values.mqtts.create.enabled false) }}
         - name: mqtts-jks
           secret:
             secretName: "{{ .Values.mqtts.keystore.keystoreSecretName }}"
@@ -156,7 +185,15 @@ spec:
               - key: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
                 path: "{{ .Values.mqtts.keystore.keystoreSecretKey }}"
       {{- end -}}
-      {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
+      {{- if and (.Values.mqtts.enabled) (.Values.mqtts.create.enabled) }}
+        - name: mqtts-jks
+          secret:
+            secretName: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "mqtts" "releaseName" .Release.Name) }}"
+            items:
+              - key: keystore.jks
+                path: keystore.jks
+      {{- end -}}
+      {{- if and (ne .Values.mqttsClientauth.clientAuthenticationMode "NONE") (ne .Values.mqttsClientauth.create.enabled true) }}
         - name: mqtts-truststore-jks
           secret:
             secretName: "{{ .Values.mqttsClientauth.truststore.truststoreSecretName }}"
@@ -164,10 +201,18 @@ spec:
               - key: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
                 path: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
       {{- end -}}
-      {{- if and (.Values.license.enabled) (eq .Values.license.create.enabled false) -}}
+      {{- if and (ne .Values.mqttsClientauth.clientAuthenticationMode "NONE") (.Values.mqttsClientauth.create.enabled) }}
+        - name: mqtts-truststore-jks
+          secret:
+            secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
+      {{- end -}}
+      {{- if and (.Values.license.enabled) (eq .Values.license.create false) -}}
         {{ toYaml .Values.license.volume | nindent 8}}
       {{- end -}}
-      {{- if and (.Values.license.enabled) (.Values.license.create.enabled) }}
+      {{- if and (.Values.license.enabled) (.Values.license.create) }}
         - name: license
           secret:
             secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "license" "releaseName" .Release.Name) }}

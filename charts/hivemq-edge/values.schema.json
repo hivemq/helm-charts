@@ -30,13 +30,7 @@
       },
       "create" : {
         "description": "Create the secret for the license.",
-        "enabled" : {
-          "type" : "boolean"
-        },
-        "file" : {
-          "description": "Filename of the license in the files folder.",
-          "type" : "object"
-        }
+        "type" : "boolean"
       }
     },
     "persistence" : {
@@ -92,6 +86,20 @@
         "privateKeyPasswordSecretKey" : {
           "description": "Name of key in the secret where the private key password is stored.",
           "type" : "string"
+        }
+      },
+      "create" : {
+        "description": "Create the secret for the keystore and its passwords.",
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "privateKeyPassword" : {
+          "description": "Password for the private key in the keystore.",
+          "type" : "object"
+        },
+        "keystorePassword" : {
+          "description": "Password for the keystore itself.",
+          "type" : "object"
         }
       }
     },

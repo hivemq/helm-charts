@@ -24,9 +24,7 @@ license:
 #        items:
 #          - key: "license.edgelic"
 #            path: "license.edgelic"
-  create:
-    enabled: false
-    file: license.edgelic
+  create: false
 
 # Persistence: a volume for persistent state, e.g. rocksdb files
 persistence:
@@ -38,16 +36,16 @@ persistence:
 persistenceMode: in-memory
 
 mqttsn:
-  enable: false
+  enabled: false
 
 mqtt:
-  enable: true
+  enabled: true
 
 http:
-  enable: true
+  enabled: true
 
 mqtts:
-  enable: false
+  enabled: false
   preferServerCipherSuites: false
   keystore:
     passwordSecretName: hivemq-keystore-secret
@@ -56,11 +54,10 @@ mqtts:
     privateKeyPasswordSecretKey: secret-key-password
     keystoreSecretName: hivemq-keystore-secret
     keystoreSecretKey: keystore.jks
-#  createSecret:
-#    enable: false
-#    password:
-#    privateKeyPassword:
-#    keystore: keystore.jks
+  create:
+    enabled: false
+    keystorePassword: changeit
+    privateKeyPassword: changeit
 
 mqttsClientauth:
   clientAuthenticationMode: NONE
@@ -69,6 +66,9 @@ mqttsClientauth:
     passwordSecretKey: truststore-password
     truststoreSecretName: hivemq-truststore-secret
     truststoreSecretKey: truststore.jks
+  create:
+    enabled: false
+    truststorePassword: changeit
 
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
