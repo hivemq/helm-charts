@@ -106,19 +106,6 @@ helm template edge ./charts/hivemq-edge -f values.yaml --set-file config=fragmen
 
 Download the licenses as a file, e.g. **license.edgelic**.
 
-File must be base64 encoded:
-
-```bash
-base64 -i license.edgelic | tr -d '\n' > license.edgelic_b64
-```
-
-In your values.yaml add:
-```yaml
-license:
-  enabled: true
-  file: <FULL BASE64 ENCODED CONTENT>
-```
-
 If the file is too big use set-file:
 ```bash
 helm template edge ./charts/hivemq-edge -f values.yaml --set-file license.file=license.edgelic_b64
