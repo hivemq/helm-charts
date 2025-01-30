@@ -17,6 +17,9 @@ This repository contains the HiveMQ Helm charts.
   
 - The [HiveMQ Swarm Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-swarm)
   - This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulation tool.
+  
+- The [HiveMQ Edge Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-edge)
+  - This chart deploys a HiveMQ Edge instance, an advanced IoT edge computing solution.
 
 ## Documentation
 See the [HiveMQ Kubernetes documentation](https://docs.hivemq.com/hivemq-platform-operator/introduction.html) for more detailed information.

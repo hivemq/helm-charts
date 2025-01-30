@@ -20,6 +20,11 @@ This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
 
 This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulation tool.
 
+### [hivemq-edge](./hivemq-edge)
+
+This chart deploys HiveMQ Edge, a lightweight edge solution for industrial IoT.
+
+
 ## Usage
 
 To deploy a chart, navigate to the respective chart directory and follow the instructions in the corresponding `README.md` file.

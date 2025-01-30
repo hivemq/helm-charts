@@ -19,3 +19,7 @@ See the [HiveMQ Helm Charts](https://docs.hivemq.com/hivemq-operator/deploying.h
 Examples for the HiveMQ Swam chart, including examples for Prometheus and Grafana monitoring.
 
 See the [Run HiveMQ Swarm on Kubernetes](https://docs.hivemq.com/hivemq-swarm/latest/clustering.html#deploy-on-k8s) section for more information.
+
+### hivemq-edge
+
+See the [Run HiveMQ Edge on Kubernetes](https://docs.hivemq.com/hivemq-edge/installing-hivemq-edge.html#installation-with-helm) section for more information.
