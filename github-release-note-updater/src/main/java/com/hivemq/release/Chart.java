@@ -13,7 +13,7 @@ record Chart(String name, Version version, Version appVersion, String descriptio
             @JsonProperty(value = "version") final @NotNull String version,
             @JsonProperty(value = "app_version") final @NotNull String appVersion,
             @JsonProperty(value = "description") final @NotNull String description) {
-        this(name.split("/")[1], Version.parse(version), Version.parse(appVersion), description);
+        this(name.split("/")[1], Version.parse(version), Version.parse(appVersion, false), description);
     }
 
     @Override
