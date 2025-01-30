@@ -1131,6 +1131,8 @@ spec:
                                             properties:
                                               name:
                                                 type: "string"
+                                              request:
+                                                type: "string"
                                             type: "object"
                                           type: "array"
                                         limits:
@@ -1682,6 +1684,8 @@ spec:
                                           items:
                                             properties:
                                               name:
+                                                type: "string"
+                                              request:
                                                 type: "string"
                                             type: "object"
                                           type: "array"
@@ -2241,6 +2245,8 @@ spec:
                                             properties:
                                               name:
                                                 type: "string"
+                                              request:
+                                                type: "string"
                                             type: "object"
                                           type: "array"
                                         limits:
@@ -2464,15 +2470,38 @@ spec:
                                   properties:
                                     name:
                                       type: "string"
-                                    source:
-                                      properties:
-                                        resourceClaimName:
-                                          type: "string"
-                                        resourceClaimTemplateName:
-                                          type: "string"
-                                      type: "object"
+                                    resourceClaimName:
+                                      type: "string"
+                                    resourceClaimTemplateName:
+                                      type: "string"
                                   type: "object"
                                 type: "array"
+                              resources:
+                                properties:
+                                  claims:
+                                    items:
+                                      properties:
+                                        name:
+                                          type: "string"
+                                        request:
+                                          type: "string"
+                                      type: "object"
+                                    type: "array"
+                                  limits:
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: "integer"
+                                      - type: "string"
+                                      x-kubernetes-int-or-string: true
+                                    type: "object"
+                                  requests:
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: "integer"
+                                      - type: "string"
+                                      x-kubernetes-int-or-string: true
+                                    type: "object"
+                                type: "object"
                               restartPolicy:
                                 type: "string"
                               runtimeClassName:
@@ -2505,6 +2534,8 @@ spec:
                                     type: "boolean"
                                   runAsUser:
                                     type: "integer"
+                                  seLinuxChangePolicy:
+                                    type: "string"
                                   seLinuxOptions:
                                     properties:
                                       level:
@@ -2527,6 +2558,8 @@ spec:
                                     items:
                                       type: "integer"
                                     type: "array"
+                                  supplementalGroupsPolicy:
+                                    type: "string"
                                   sysctls:
                                     items:
                                       properties:
@@ -2994,6 +3027,13 @@ spec:
                                         path:
                                           type: "string"
                                         type:
+                                          type: "string"
+                                      type: "object"
+                                    image:
+                                      properties:
+                                        pullPolicy:
+                                          type: "string"
+                                        reference:
                                           type: "string"
                                       type: "object"
                                     iscsi:
