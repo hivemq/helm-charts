@@ -94,7 +94,7 @@ helm ... --set image.tag=snapshot
 
 ### Provide adapter configs
 
-I recommend setting the actual config via set-file.
+We recommend setting the actual config via set-file.
 
 Create the config like the fragment.xml (see layout in files) and add what's needed:
 
