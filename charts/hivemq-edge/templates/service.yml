@@ -13,19 +13,19 @@ metadata:
     {{- end }}
 spec:
   ports:
-    {{- if .Values.http.enable }}
+    {{- if .Values.http.enabled }}
     - port: 8080
       name: http
     {{- end }}
-    {{- if .Values.mqtt.enable }}
+    {{- if .Values.mqtt.enabled }}
     - port: 1883
       name: mqtt
     {{- end }}
-    {{- if .Values.mqtts.enable }}
+    {{- if .Values.mqtts.enabled }}
     - port: 8883
       name: mqtts
     {{- end }}
-    {{- if .Values.mqttsn.enable }}
+    {{- if .Values.mqttsn.enabled }}
     - port: 2442
       name: mqttsn
     {{- end }}
