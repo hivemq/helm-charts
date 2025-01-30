@@ -66,9 +66,9 @@ jobs:
       - name: Set latest release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ./release/set-latest-release.sh
+        run: bash ./scripts/set-latest-release.sh
 
       - name: Update GitHub release notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ./release/update-github-release-notes.sh 10
+        run: bash ./scripts/update-github-release-notes.sh 10

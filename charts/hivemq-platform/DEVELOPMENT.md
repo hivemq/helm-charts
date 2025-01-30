@@ -18,6 +18,7 @@ helm install platform ./charts/hivemq-platform --dry-run
 ```
 
 ### Unit tests
+
 To run unit tests, the Helm [helm-unittest](https://github.com/helm-unittest/helm-unittest?tab=readme-ov-file#helm-unittest) plugin is required to be installed as part of your Helm installation.
 In order to run them all, just simply execute the following Gradle command:
 
@@ -26,6 +27,7 @@ In order to run them all, just simply execute the following Gradle command:
 ```
 
 Or execute the Helm unittest command for the specific chart you want to test as below:
+
 ```bash
 helm unittest ./charts/hivemq-platform-operator -f './tests/**/*_test.yaml'
 helm unittest ./charts/hivemq-platform -f './tests/**/*_test.yaml'
