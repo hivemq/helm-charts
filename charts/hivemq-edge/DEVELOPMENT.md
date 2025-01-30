@@ -169,6 +169,39 @@ Since the file is huge I recommend setting via set-file:
 helm --debug template edge ./charts/hivemq-edge -f values.yaml --set-file mqttsClientauth.create.file=keystore.jks_b64
 ```
 
+### Adding an adapter
+Edit the values.yaml to contain:
+
+```yaml
+config: |
+  <protocol-adapters>
+      <protocol-adapter>
+          <adapterId>simulation</adapterId>
+          <protocolId>simulation</protocolId>
+          <config>
+              <simulationToMqtt>
+                  <pollingIntervalMillis>100</pollingIntervalMillis>
+                  <maxPollingErrorsBeforeRemoval>-1</maxPollingErrorsBeforeRemoval>
+              </simulationToMqtt>
+          </config>
+          <northboundMappings>
+              <northboundMapping>
+                  <topic>test</topic>
+                  <tagName>t2</tagName>
+                  <mqttUserProperties>
+                      <mqttUserProperty>
+                          <name>simulation</name>
+                          <value>2</value>
+                      </mqttUserProperty>
+                  </mqttUserProperties>
+              </northboundMapping>
+          </northboundMappings>
+      </protocol-adapter>
+  </protocol-adapters>
+```
+
+After applying the config it will take a little and the new adapter will be available in the UI.
+
 
 ### Unit tests
 To run unit tests, the Helm [helm-unittest](https://github.com/helm-unittest/helm-unittest?tab=readme-ov-file#helm-unittest) plugin is required to be installed as part of your Helm installation.
