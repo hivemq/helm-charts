@@ -165,6 +165,15 @@
       "description" : "Refresh interval for filechecks",
       "type" : "integer"
     },
+    "persistenceMode" : {
+      "description" : "The persistence mode of hivemq edge",
+      "enum" : [
+        "in-memory",
+        "file",
+        "file-native"
+      ],
+      "type" : "string"
+    },
     "volumes" : {
       "description" : "Additional volumes.",
       "type" : "array",
