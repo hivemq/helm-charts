@@ -97,7 +97,7 @@ spec:
             - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
               value: "{{ .Values.mqtts.preferServerCipherSuites }}"
             - name: HIVEMQ_MQTTS_KEYSTORE_PATH
-              value: /mqtts/kestore.jks
+              value: /mqtts/keystore.jks
             - name: HIVEMQ_MQTTS_SECRET_KEYSTORE_PASSWORD
               valueFrom:
                 secretKeyRef:
