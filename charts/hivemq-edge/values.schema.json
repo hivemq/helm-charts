@@ -1,0 +1,235 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "properties" : {
+    "image" : {
+      "properties" : {
+        "pullPolicy" : {
+          "enum" : [
+            "IfNotPresent",
+            "Never",
+            "Always"
+          ],
+          "type" : "string"
+        },
+        "repository" : {
+          "type" : "string"
+        },
+        "tag" : {
+          "type" : "string"
+        }
+      }
+    },
+    "config" : {
+      "description": "The configuration fragment.",
+      "type" : "string"
+    },
+    "persistenceMode" : {
+      "description": "How persistence should be handled.",
+      "type" : "string"
+    },
+    "license" : {
+      "description": "License configuration.",
+      "enabled" : {
+        "type" : "boolean"
+      },
+      "volume" : {
+        "description": "Volume containing the license.",
+        "type" : "object"
+      },
+      "file" : {
+        "description": "Specify the external file to load as the license.",
+        "type" : "string"
+      }
+    },
+    "persistence" : {
+      "description": "Location of the edge persistence.",
+      "enabled" : {
+        "type" : "boolean"
+      },
+      "volume" : {
+        "description": "Volume to be used for persistence.",
+        "type" : "object"
+      }
+    },
+    "mqttsn" : {
+      "enabled" : {
+        "description": "Enable the mqtt sn listener.",
+        "type" : "boolean"
+      }
+    },
+    "mqtt" : {
+      "enabled" : {
+        "description": "Enable the unencrypted mqtt listener.",
+        "type" : "boolean"
+      }
+    },
+    "http" : {
+      "enabled" : {
+        "description": "Enable the unencrypted http listener for the REST API and the UI.",
+        "type" : "boolean"
+      }
+    },
+    "mqtts" : {
+      "enabled" : {
+        "description": "Enable the TLS protected MQTT endpoint.",
+        "type" : "boolean"
+      },
+      "preferServerCipherSuites" : {
+        "description": "Server cipher suite is preferred over the client one.",
+        "type" : "boolean"
+      },
+      "keystore": {
+        "passwordSecretName" : {
+          "description": "Name of the secret where the keystore password is stored.",
+          "type" : "string"
+        },
+        "passwordSecretKey" : {
+          "description": "Name of the key inside the secrete which contains the password for the keystore.",
+          "type" : "string"
+        },
+        "privateKeyPasswordSecretName" : {
+          "description": "Name of the secret where the private key password is stored.",
+          "type" : "string"
+        },
+        "privateKeyPasswordSecretKey" : {
+          "description": "Name of key in the secret where the private key password is stored.",
+          "type" : "string"
+        }
+      },
+      "create" : {
+        "description": "Create the secret for the keystore and its passwords.",
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "privateKeyPassword" : {
+          "description": "Password for the private key in the keystore.",
+          "type" : "object"
+        },
+        "keystorePassword" : {
+          "description": "Password for the keystore itself.",
+          "type" : "object"
+        },
+        "file" : {
+          "description": "The actual keystore, base64 encoded.",
+          "type" : "object"
+        }
+      }
+    },
+    "mqttsClientauth" : {
+      "clientAuthenticationMode" : {
+        "description": "Select whether client auth is enabled and if it is required.",
+        "enum" : [
+          "NONE",
+          "OPTIONAL",
+          "REQUIRED"
+        ],
+        "type" : "string"
+      },
+      "truststore": {
+        "passwordSecretName" : {
+          "description": "Name of the secret which contains the password for the keystore.",
+          "type" : "string"
+        },
+        "passwordSecretKey" : {
+          "description": "Key inside the secret which contains the password for the keystore.",
+          "type" : "string"
+        },
+        "truststoreSecretName" : {
+          "description": "Name of the secret which contains the truststore.",
+          "type" : "string"
+        },
+        "truststoreSecretKey" : {
+          "description": "Key inside the secret which contains the truststore.",
+          "type" : "string"
+        }
+      },
+      "create" : {
+        "description": "Create the secret for the truststore and its passwords.",
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "truststorePassword" : {
+          "description": "Password for the truststore itself.",
+          "type" : "string"
+        },
+        "file" : {
+          "description": "The actual truststore, either the base64 encoded.",
+          "type" : "string"
+        }
+      }
+    },
+    "resources" : {
+      "properties" : {
+        "cpu" : {
+          "type" : "string"
+        },
+        "memory" : {
+          "type" : "string"
+        }
+      }
+    },
+    "logLevel" : {
+      "enum" : [
+        "DEBUG",
+        "ERROR",
+        "FATAL",
+        "INFO",
+        "TRACE",
+        "WARN"
+      ],
+      "type" : "string"
+    },
+    "javaOpts" : {
+      "type" : "string"
+    },
+    "podAnnotations" : {
+      "description" : "Annotations to add to the HiveMQ Edge Pod.",
+      "type" : "object"
+    },
+    "podLabels" : {
+      "description" : "Labels to add to the HiveMQ Edge Pod.",
+      "type" : "object"
+    },
+    "serviceAnnotations" : {
+      "description" : "Annotations to add to the HiveMQ Edge Pod.",
+      "type" : "object"
+    },
+    "serviceLabels" : {
+      "description" : "Labels to add to the HiveMQ Edge Pod.",
+      "type" : "object"
+    },
+    "env" : {
+      "description" : "Environment variables to be added to the container.",
+      "items" : {
+        "type" : "object"
+      },
+      "type" : "array"
+    },
+    "refresh" : {
+      "description" : "Refresh interval for filechecks",
+      "type" : "integer"
+    },
+    "volumes" : {
+      "description" : "Additional volumes.",
+      "type" : "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mount": {
+            "type": "string"
+          },
+          "definition": {
+            "type" : "array",
+            "items" : {
+              "type" : "object"
+            }
+          }
+        },
+        "required": [
+          "mount", "definition"
+        ]
+      }
+    }
+  },
+  "type" : "object"
+}

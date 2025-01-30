@@ -1,0 +1,132 @@
+# HiveMQ Edge Helm Chart default values
+# See documentation for more information: https://docs.hivemq.com/edge/configuration.html#install-edge-with-helm
+
+# Container image configuration
+image:
+  repository: hivemq/hivemq-edge
+  pullPolicy: IfNotPresent
+  tag: "2025.1-k8s"
+
+refresh: 1000
+
+# Resources, limits and requests are set to equal values.
+resources:
+  cpu: 1000m
+  memory: 1Gi
+
+# License: a volume containing the actual license file
+license:
+  enabled: false
+#  volume:
+#    - name: license
+#      secret:
+#        secretName: "hivemq-license-secret"
+#        items:
+#          - key: "license.edgelic"
+#            path: "license.edgelic"
+
+# Persistence: a volume for persistent state, e.g. rocksdb files
+persistence:
+  enabled: false
+  volume:
+    - emptyDir: { }
+      name: persistence
+
+persistenceMode: in-memory
+
+mqttsn:
+  enabled: false
+
+mqtt:
+  enabled: true
+
+http:
+  enabled: true
+
+mqtts:
+  enabled: false
+  preferServerCipherSuites: false
+  keystore:
+    passwordSecretName: hivemq-keystore-secret
+    passwordSecretKey: keystore-password
+    privateKeyPasswordSecretName: hivemq-keystore-secret
+    privateKeyPasswordSecretKey: secret-key-password
+    keystoreSecretName: hivemq-keystore-secret
+    keystoreSecretKey: keystore.jks
+  create:
+    enabled: false
+    keystorePassword: changeit
+    privateKeyPassword: changeit
+
+mqttsClientauth:
+  clientAuthenticationMode: NONE
+  truststore:
+    passwordSecretName: hivemq-truststore-secret
+    passwordSecretKey: truststore-password
+    truststoreSecretName: hivemq-truststore-secret
+    truststoreSecretKey: truststore.jks
+  create:
+    enabled: false
+    truststorePassword: changeit
+
+# Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
+logLevel: INFO
+
+# Configures the Java JVM runtime options for the process.
+javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+
+# Annotations to add to the edge pod.
+podAnnotations: {}
+# Labels to add to the edge pod.
+podLabels: {}
+
+# Annotations to add to the edge Service.
+serviceAnnotations: {}
+# Labels to add to the edge Service.
+serviceLabels: {}
+
+# Configures how the edge pod should be scheduled on the Kubernetes cluster nodes.
+podScheduling:
+  # Configures the affinity for the Edge pod.
+  affinity:
+  # podAffinity:
+  #    requiredDuringSchedulingIgnoredDuringExecution:
+  #      - labelSelector:
+  #          matchExpressions:
+  #            - key: app
+  #              operator: In
+  #              values:
+  #                - my-app
+  #        topologyKey: "kubernetes.io/hostname"
+
+  # Configures the tolerations for the Edge pod.
+  tolerations:
+  #  - key: "example-key"
+  #    operator: "Exists"
+  #    effect: "NoSchedule"
+
+# Specifies environment variables to be added to the Edge container.
+# Environment variables can be defined as a list of either key-value pairs or
+# using valueFrom to reference a Secret or ConfigMap.
+env: []
+  # - name: <ENV_VAR_NAME2>
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: mysecret
+  #       key: mysecretkey
+  #       optional: false
+  #  - name: <ENV_VAR_NAME3>
+  #    valueFrom:
+  #      configMapKeyRef:
+  #        name: myconfigmap
+  #        key: myconfigmapkey
+  #        optional: true
+
+# Mostly used to reference secrets from protocol adapter definitions
+# Whenever you need a file, e.g a keystore, inside a protocol adapter define
+# it here and use the directory to load it
+volumes: []
+#  - mount: /test
+#    definition:
+#      - name: data
+#        emptyDir: { }

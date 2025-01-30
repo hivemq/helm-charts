@@ -1,0 +1,71 @@
+---
+# Source: hivemq-edge/templates/statefulset.yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hivemq-my-edge
+  labels:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "my-edge"
+    app.kubernetes.io/version: "2025.1"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "hivemq-edge"
+      app.kubernetes.io/instance: "my-edge"
+  serviceName: "hivemq-edge"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "hivemq-edge"
+        app.kubernetes.io/instance: "my-edge"
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: hivemq-edge
+          image: "hivemq/hivemq-edge:2025.1-k8s"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/liveness
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          ports:
+            - containerPort: 8080
+              name: web
+            - containerPort: 1883
+              name: mqtt
+          env:
+            - name: HIVEMQ_CONFIG_WRITEABLE
+              value: "false"
+            - name: HIVEMQ_LOG_LEVEL
+              value: "INFO"
+            - name: JAVA_OPTS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+            - name: HIVEMQ_LICENSE_FOLDER
+              value: "/license.edgelic"
+            - name: HIVEMQ_DATA_FOLDER
+              value: "/persistence"
+            - name: HIVEMQ_CONFIG_FOLDER
+              value: "/opt/hivemq/conf-k8s"
+            - name: HIVEMQ_CONFIG_REFRESHINTERVAL
+              value: "1000"
+            - name: HIVEMQ_PERSISTENCE_MODE
+              value: "in-memory"
+            - name: HIVEMQ_MQTT_ENABLED
+              value: "true"
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+            requests:
+              memory: "1Gi"
+              cpu: "1000m"
+          volumeMounts:
+          - name: fragment
+            mountPath: /fragment
+      volumes:
+        - name: fragment
+          configMap:
+            name: hivemq-edge-config-my-edge

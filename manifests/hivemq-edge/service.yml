@@ -1,0 +1,20 @@
+---
+# Source: hivemq-edge/templates/service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hivemq-edge-my-edge
+  labels:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "my-edge"
+    app.kubernetes.io/version: "2025.1"
+spec:
+  ports:
+    - port: 8080
+      name: http
+    - port: 1883
+      name: mqtt
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "my-edge"

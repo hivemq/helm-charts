@@ -1,0 +1,17 @@
+---
+# Source: hivemq-edge/templates/configmap-configuration.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "my-edge"
+    app.kubernetes.io/version: "2025.1"
+  name: hivemq-edge-config-my-edge
+  namespace: default
+data:
+  config: |
+    <mqtt-bridges>
+    </mqtt-bridges>
+    <protocol-adapters>
+    </protocol-adapters>
