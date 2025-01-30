@@ -103,7 +103,7 @@ Download the licenses as a file, e.g. **license.edgelic**.
 File must be base64 encoded:
 
 ```bash
-base64 -i license.edgelic -o license.edgelic_b64
+base64 -i license.edgelic | tr -d '\n' > license.edgelic_b64
 ```
 
 In your values.yaml add:
@@ -124,7 +124,7 @@ Use [genkeystore.sh](test%2Fgenkeystore.sh) to generate a keystore with a self s
 Encode it to base64.
 
 ```bash
-base64 -i keystore.jks -o keystore.jks_b64
+base64 -i keystore.jks | tr -d '\n' >  keystore.jks_b64
 ```
 
 In your values.yaml add:
@@ -146,7 +146,7 @@ helm --debug template edge ./charts/hivemq-edge -f values.yaml --set-file mqtts.
 Encode the truststore to base64.
 
 ```bash
-base64 -i truststore.jks -o truststore.jks_b64
+base64 -i truststore.jks | tr -d '\n' > truststore.jks_b64
 ```
 
 In your values.yaml add:
