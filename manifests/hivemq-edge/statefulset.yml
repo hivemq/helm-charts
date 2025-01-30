@@ -51,6 +51,8 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "1000"
+            - name: HIVEMQ_PERSISTENCE_MODE
+              value: "in-memory"
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
           resources:

@@ -10,10 +10,6 @@ metadata:
     app.kubernetes.io/version: "2025.1"
 spec:
   ports:
-    - port: 8080
-      name: http
-    - port: 1883
-      name: mqtt
   clusterIP: None
   selector:
     app.kubernetes.io/name: "hivemq-edge"
