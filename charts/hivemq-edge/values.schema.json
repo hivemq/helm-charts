@@ -150,11 +150,11 @@
         },
         "truststorePassword" : {
           "description": "Password for the truststore itself.",
-          "type" : "object"
+          "type" : "string"
         },
         "file" : {
           "description": "The actual truststore, either the base64 encoded.",
-          "type" : "object"
+          "type" : "string"
         }
       }
     },
