@@ -63,6 +63,8 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
+            - name: HIVEMQ_PERSISTENCE_MODE
+              value: "{{ .Values.persistenceMode }}"
             {{- if .Values.mqtt.enable }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
