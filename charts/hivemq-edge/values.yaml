@@ -32,6 +32,8 @@ persistence:
     - emptyDir: { }
       name: persistence
 
+persistenceMode: in-memory
+
 https:
   enable: false
   keystore:
