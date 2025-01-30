@@ -6,7 +6,7 @@ HELM_CHARTS_BASE_FOLDER="$(cd -- "$(dirname -- "$0")/../.." && pwd)"
 
 export LABEL="HiveMQ Edge"
 export CHART_NAME="hivemq-edge"
-export RELEASE_NAME="${1:-my-platform}"
+export RELEASE_NAME="${1:-my-edge}"
 export HELM_CHARTS_BASE_FOLDER
 
 update_manifests

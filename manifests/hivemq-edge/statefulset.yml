@@ -3,22 +3,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hivemq-my-platform
+  name: hivemq-my-edge
   labels:
     app.kubernetes.io/name: "hivemq-edge"
-    app.kubernetes.io/instance: "my-platform"
+    app.kubernetes.io/instance: "my-edge"
     app.kubernetes.io/version: "2025.1"
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: "hivemq-edge"
-      app.kubernetes.io/instance: "my-platform"
+      app.kubernetes.io/instance: "my-edge"
   serviceName: "hivemq-edge"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: "hivemq-edge"
-        app.kubernetes.io/instance: "my-platform"
+        app.kubernetes.io/instance: "my-edge"
     spec:
       terminationGracePeriodSeconds: 10
       containers:
@@ -68,4 +68,4 @@ spec:
       volumes:
         - name: fragment
           configMap:
-            name: hivemq-edge-config-my-platform
+            name: hivemq-edge-config-my-edge

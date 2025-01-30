@@ -5,9 +5,9 @@ kind: ConfigMap
 metadata:
   labels:
     app.kubernetes.io/name: "hivemq-edge"
-    app.kubernetes.io/instance: "my-platform"
+    app.kubernetes.io/instance: "my-edge"
     app.kubernetes.io/version: "2025.1"
-  name: hivemq-edge-config-my-platform
+  name: hivemq-edge-config-my-edge
   namespace: default
 data:
   config: |
