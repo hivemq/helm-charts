@@ -27,6 +27,16 @@
       "volume" : {
         "description": "Volume containing the license.",
         "type" : "object"
+      },
+      "create" : {
+        "description": "Create the secret for the license.",
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "file" : {
+          "description": "Filename of the license in the files folder.",
+          "type" : "object"
+        }
       }
     },
     "persistence" : {

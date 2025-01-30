@@ -6,6 +6,12 @@ build
 # Files created for Helm dependencies
 charts/**/charts/**.tgz
 
+# Acoid checking in the license
+charts/hivemq-edge/files/*.edgelic
+
+# Acoid checking in test values
+values.yaml
+
 # Folders and files created when enabling debug mode in Helm
 .debug
 

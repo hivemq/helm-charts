@@ -24,6 +24,9 @@ license:
 #        items:
 #          - key: "license.edgelic"
 #            path: "license.edgelic"
+  create:
+    enabled: false
+    file: license.edgelic
 
 # Persistence: a volume for persistent state, e.g. rocksdb files
 persistence:
@@ -33,16 +36,6 @@ persistence:
       name: persistence
 
 persistenceMode: in-memory
-
-https:
-  enable: false
-  keystore:
-    passwordSecretName: hivemq-keystore-secret
-    passwordSecretKey: keystore-password
-    privateKeyPasswordSecretName: hivemq-keystore-secret
-    privateKeyPasswordSecretKey: secret-key-password
-    keystoreSecretName: hivemq-keystore-secret
-    keystoreSecretKey: keystore.jks
 
 mqttsn:
   enable: false
@@ -63,6 +56,11 @@ mqtts:
     privateKeyPasswordSecretKey: secret-key-password
     keystoreSecretName: hivemq-keystore-secret
     keystoreSecretKey: keystore.jks
+#  createSecret:
+#    enable: false
+#    password:
+#    privateKeyPassword:
+#    keystore: keystore.jks
 
 mqttsClientauth:
   clientAuthenticationMode: NONE

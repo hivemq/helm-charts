@@ -164,8 +164,16 @@ spec:
               - key: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
                 path: "{{ .Values.mqttsClientauth.truststore.truststoreSecretKey }}"
       {{- end -}}
-      {{- if .Values.license.enabled -}}
+      {{- if and (.Values.license.enabled) (eq .Values.license.create.enabled false) -}}
         {{ toYaml .Values.license.volume | nindent 8}}
+      {{- end -}}
+      {{- if and (.Values.license.enabled) (.Values.license.create.enabled) }}
+        - name: license
+          secret:
+            secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "license" "releaseName" .Release.Name) }}
+            items:
+              - key: license.edgelic
+                path: license.edgelic
       {{- end -}}
       {{- if .Values.persistence.enabled -}}
         {{ toYaml .Values.persistence.volume | nindent 8}}
