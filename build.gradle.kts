@@ -1,5 +1,3 @@
-import java.io.ByteArrayOutputStream
-
 /* ******************** update versions ******************** */
 
 val updateEdgeChartVersion by tasks.registering(Exec::class) {
@@ -152,46 +150,11 @@ val updateAllManifestFiles by tasks.registering {
     }
 }
 
-val test by tasks.registering {
+val test by tasks.registering(Exec::class) {
     group = "test"
     description = "Executes all Helm unit tests."
-    val charts = listOf(
-        "hivemq-edge",
-        "hivemq-operator",
-        "hivemq-platform",
-        "hivemq-platform-operator",
-        "hivemq-swarm"
-    )
-    doLast {
-        charts.forEach { chart ->
-            val stdout = ByteArrayOutputStream()
-            val stderr = ByteArrayOutputStream()
-            try {
-                println("\nhelm unittest ./charts/$chart -f ./tests/**/*_test.yaml")
-                exec {
-                    workingDir(layout.projectDirectory)
-                    commandLine("helm", "unittest", "./charts/$chart", "-f", "./tests/**/*_test.yaml")
-                    isIgnoreExitValue = true
-                    standardOutput = stdout
-                    errorOutput = stderr
-                }
-                val errorString = stderr.toString().trim()
-                if (errorString.isNotEmpty()) {
-                    println("Helm unit tests failed for chart: $chart")
-                    println("Error output:\n$errorString")
-                    throw GradleException("Helm unit tests failed for $chart. See above for details.")
-                } else {
-                    val outputString = stdout.toString().trim()
-                    println("Helm unit tests passed for chart: $chart")
-                    if (outputString.isNotEmpty()) {
-                        println("Output:\n$outputString")
-                    }
-                }
-            } catch (e: Exception) {
-                throw GradleException("Error while running Helm unit tests for chart: $chart", e)
-            }
-        }
-    }
+    workingDir(layout.projectDirectory)
+    commandLine("sh", "./scripts/helm-unittest.sh")
 }
 
 fun updateChartAndValueFilesWithVersion(
