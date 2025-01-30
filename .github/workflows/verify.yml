@@ -76,4 +76,4 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ secrets.JENKINS_GITHUB_TOKEN }}
-        run: bash ./release/validate-branch-protection.sh ${{ github.base_ref }}
+        run: bash ./scripts/validate-branch-protection.sh ${{ github.base_ref }}
