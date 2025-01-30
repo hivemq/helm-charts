@@ -86,6 +86,12 @@ Make sure that in the StatefulSet you have `imagePullPolicy: Never`.
 
 This ensures Kind will only use the images it already has and not try to pull a new version from somewhere else.
 
+When running helm you have to override the tag to use the snapshot build;
+
+```
+helm ... --set image.tag=snapshot
+```
+
 ### Provide adapter configs
 
 I recommend setting the actual config via set-file.
