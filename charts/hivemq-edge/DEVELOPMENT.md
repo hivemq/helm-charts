@@ -88,33 +88,38 @@ This ensures Kind will only use the images it already has and not try to pull a 
 
 ### Testing commercial features
 
-The file `charts/hivemq-edge/tests/secret-license.yml` contains an example for a license secret.
+Copy the license to **files/license.edgelic**.
 
-First encode the license-file (named **hivemq-edge.edgelic** for this example) you got to base64:
-```bash
-base64 -i hivemq-edge.edgelic
-```
-
-Replace `<BASE64-ENCODED LICENSE GOES HERE>` in secret-license.yaml with the encoded string.
-
-Then apply the secret using:
-
-```
-kubectl apply -f secret-license.yml 
-```
-
-In yor values.yaml now add the following entry (mind the indentation!!):
-
+In your values.yaml add:
 ```yaml
 license:
   enabled: true
-  volume:
-    - name: license
-      secret:
-        secretName: "hivemq-license-secret"
-        items:
-          - key: "license.edgelic"
-            path: "license.edgelic"
+  create: true
+```
+
+### Testing mqtts
+
+Use [genkeystore.sh](test%2Fgenkeystore.sh) to generate a keystore with a self signed cert.
+Copy the keystore to [mqtts-keystore.jks](files%2Fmqtts-keystore.jks)
+
+In your values.yaml add:
+```yaml
+mqtts:
+  enabled: true
+  create:
+    enabled: true
+```
+
+### Testing mqtts clientauth
+
+Put your truststore into [mqtts-truststore.jks](files%2Fmqtts-truststore.jks).
+
+In your values.yaml add:
+```yaml
+mqttsClientauth:
+  clientAuthenticationMode: REQUIRED
+  create:
+    enabled: true
 ```
 
 ### Unit tests
