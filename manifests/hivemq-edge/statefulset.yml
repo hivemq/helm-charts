@@ -23,7 +23,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: hivemq-edge
-          image: "hivemq/hivemq-edge:2025.1"
+          image: "hivemq/hivemq-edge:2025.1-k8s"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
