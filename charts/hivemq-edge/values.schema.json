@@ -19,6 +19,10 @@
         }
       }
     },
+    "config" : {
+      "description": "The configuration fragment.",
+      "type" : "string"
+    },
     "license" : {
       "description": "License configuration.",
       "enabled" : {
@@ -28,9 +32,9 @@
         "description": "Volume containing the license.",
         "type" : "object"
       },
-      "create" : {
-        "description": "Create the secret for the license.",
-        "type" : "boolean"
+      "file" : {
+        "description": "Specify the external file to load as the license.",
+        "type" : "string"
       }
     },
     "persistence" : {
@@ -100,6 +104,10 @@
         "keystorePassword" : {
           "description": "Password for the keystore itself.",
           "type" : "object"
+        },
+        "file" : {
+          "description": "The actual keystore, base64 encoded.",
+          "type" : "object"
         }
       }
     },
@@ -129,6 +137,20 @@
         "truststoreSecretKey" : {
           "description": "Key inside the secret which contains the truststore.",
           "type" : "string"
+        }
+      },
+      "create" : {
+        "description": "Create the secret for the truststore and its passwords.",
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "truststorePassword" : {
+          "description": "Password for the truststore itself.",
+          "type" : "object"
+        },
+        "file" : {
+          "description": "The actual truststore, either the base64 encoded.",
+          "type" : "object"
         }
       }
     },

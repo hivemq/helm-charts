@@ -7,4 +7,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   config: |
+    {{- if .Values.config }}
+    {{- .Values.config | nindent 4}}
+    {{- else }}
     {{- .Files.Get "files/fragment.xml" | nindent 4 }}
+    {{- end }}

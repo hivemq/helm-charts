@@ -86,21 +86,46 @@ Make sure that in the StatefulSet you have `imagePullPolicy: Never`.
 
 This ensures Kind will only use the images it already has and not try to pull a new version from somewhere else.
 
+### Provide adapter configs
+
+I recommend setting the actual config via set-file.
+
+Create the config like the fragment.xml (see layout in files) and add what's needed:
+
+```
+helm template edge ./charts/hivemq-edge -f values.yaml --set-file config=fragment.xml
+```
+
 ### Testing commercial features
 
-Copy the license to **files/license.edgelic**.
+Download the licenses as a file, e.g. **license.edgelic**.
+
+File must be base64 encoded:
+
+```bash
+base64 -i license.edgelic -o license.edgelic_b64
+```
 
 In your values.yaml add:
 ```yaml
 license:
   enabled: true
-  create: true
+  file: <FULL BASE64 ENCODED CONTENT>
+```
+
+If the file is too big use set-file:
+```bash
+helm template edge ./charts/hivemq-edge -f values.yaml --set-file license.file=license.edgelic_b64
 ```
 
 ### Testing mqtts
 
 Use [genkeystore.sh](test%2Fgenkeystore.sh) to generate a keystore with a self signed cert.
-Copy the keystore to [mqtts-keystore.jks](files%2Fmqtts-keystore.jks)
+Encode it to base64.
+
+```bash
+base64 -i keystore.jks -o keystore.jks_b64
+```
 
 In your values.yaml add:
 ```yaml
@@ -108,11 +133,21 @@ mqtts:
   enabled: true
   create:
     enabled: true
+    file: <BASE64 ENCODED FILE CONTENT>
+```
+
+Since the file is huge I recommend setting via set-file:
+```
+helm --debug template edge ./charts/hivemq-edge -f values.yaml --set-file mqtts.create.file=keystore.jks_b64
 ```
 
 ### Testing mqtts clientauth
 
-Put your truststore into [mqtts-truststore.jks](files%2Fmqtts-truststore.jks).
+Encode the truststore to base64.
+
+```bash
+base64 -i truststore.jks -o truststore.jks_b64
+```
 
 In your values.yaml add:
 ```yaml
@@ -120,7 +155,14 @@ mqttsClientauth:
   clientAuthenticationMode: REQUIRED
   create:
     enabled: true
+    file: <BASE64 ENCODED CONTENT>
 ```
+
+Since the file is huge I recommend setting via set-file:
+```
+helm --debug template edge ./charts/hivemq-edge -f values.yaml --set-file mqttsClientauth.create.file=keystore.jks_b64
+```
+
 
 ### Unit tests
 To run unit tests, the Helm [helm-unittest](https://github.com/helm-unittest/helm-unittest?tab=readme-ov-file#helm-unittest) plugin is required to be installed as part of your Helm installation.
