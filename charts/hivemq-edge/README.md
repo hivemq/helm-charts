@@ -60,8 +60,3 @@ See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-edge/) on configur
 ```console
 helm show values hivemq/hivemq-edge
 ```
-
-### License example
-```
-hivemq-license-secret
-```
