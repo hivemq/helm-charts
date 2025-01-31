@@ -1,0 +1,23 @@
+nodes:
+  replicaCount: 1
+restApi:
+  authEnabled: true
+services:
+  - type: rest-api
+    exposed: true
+    containerPort: 8890
+extensions:
+  - name: hivemq-allow-all-extension
+    extensionUri: preinstalled
+    enabled: false
+    supportsHotReload: false
+  - name: hivemq-enterprise-security-extension
+    extensionUri: preinstalled
+    enabled: true
+    supportsHotReload: false
+    configMapName: "ese-configuration"
+additionalVolumes:
+  - name: ese-file-realm-config-map
+    mountName: ese-file-realm
+    path: "/realm/"
+    type: configMap
