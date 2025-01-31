@@ -67,5 +67,5 @@ This will install HiveMQ Edge.
 helm upgrade --install edge hivemq/hivemq-edge
 ```
 
-For more information on configuring HiveMQ Swarm and advanced usage,
+For more information on configuring HiveMQ Edge and advanced usage,
 visit the [HiveMQ Edge documentation](https://docs.hivemq.com/hivemq-edge/index.html).
