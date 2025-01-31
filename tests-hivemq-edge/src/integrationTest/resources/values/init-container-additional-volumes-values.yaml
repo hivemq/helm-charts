@@ -1,0 +1,6 @@
+nodes:
+  replicaCount: 1
+additionalVolumes:
+  - type: emptyDir
+    mountName: init-container-volume
+    path: /init-container-test

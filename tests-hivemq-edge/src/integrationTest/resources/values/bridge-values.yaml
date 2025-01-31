@@ -1,0 +1,8 @@
+nodes:
+  replicaCount: 1
+extensions:
+  - name: hivemq-bridge-extension
+    extensionUri: preinstalled
+    enabled: true
+    supportsHotReload: false
+    configMapName: "test-bridge-configuration"

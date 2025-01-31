@@ -1,0 +1,6 @@
+nodes:
+  replicaCount: 1
+services:
+  - type: mqtt
+    exposed: true
+    containerPort: 1884

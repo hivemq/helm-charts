@@ -1,0 +1,56 @@
+operator:
+  admissionWebhooks:
+    enabled: false
+
+hivemq:
+  nodeCount: 1
+  cpu: 512m
+  controllerTemplate: cluster-stateful-set.yaml
+  ports:
+    - name: "mqtt"
+      port: 1883
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/selector/hivemq.com~1node-offline","value":"false"},{"op":"add","path":"/metadata/annotations","value":{"service.spec.externalTrafficPolicy":"Local"}}]'
+    - name: "cc"
+      port: 8080
+      expose: true
+      patch:
+        - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+    - name: "api"
+      port: 8888
+      expose: true
+      patch:
+        # TODO: session affinity is only hardcoded for the Control Center service and not configurable yet for any other service
+        - '[{"op":"add","path":"/spec/sessionAffinity","value":"ClientIP"}]'
+  env:
+    - name: HIVEMQ_ALLOW_ALL_CLIENTS
+      value: "false"
+  extensions:
+    - configMap: ese-configuration
+      enabled: true
+      extensionUri: preinstalled
+      name: hivemq-enterprise-security-extension
+  additionalVolumes:
+    - name: "ese-file-realm"
+      configMap:
+        name: "ese-file-realm-config-map"
+  additionalVolumeMounts:
+    - name: "ese-file-realm"
+      mountPath: "/realm/"
+  restApiConfiguration: |
+    <rest-api>
+      <enabled>true</enabled>
+      <auth>
+        <enabled>true</enabled>
+      </auth>
+      <listeners>
+        <http>
+          <port>8888</port>
+          <bind-address>0.0.0.0</bind-address>
+        </http>
+      </listeners>
+    </rest-api>
+
+monitoring:
+  enabled: true

@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ese-configuration
+data:
+  enterprise-security-extension.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <enterprise-security-extension>
+        <access-log>
+            <enabled>true</enabled>
+            <file-name>access</file-name>
+            <sub-folder>access</sub-folder>
+            <write-through>false</write-through>
+        </access-log>
+        <realms>
+            <file-realm>
+                <name>ese-file-realm</name>
+                <enabled>true</enabled>
+                <configuration>
+                    <file-path>/realm/ese-file-realm.xml</file-path>
+                </configuration>
+            </file-realm>
+        </realms>
+        <pipelines>
+            <listener-pipeline listener="ALL">
+              <allow-all-authentication-manager/>
+              <allow-all-authorization-manager/>
+            </listener-pipeline>
+            <rest-api-pipeline listener="ALL">
+                <authentication-preprocessors>
+                    <http-headers-preprocessor>
+                        <basic-auth-extraction/>
+                    </http-headers-preprocessor>
+                </authentication-preprocessors>
+                <file-authentication-manager>
+                    <realm>ese-file-realm</realm>
+                </file-authentication-manager>
+                <file-authorization-manager>
+                    <realm>ese-file-realm</realm>
+                    <use-authorization-key>true</use-authorization-key>
+                    <use-authorization-role-key>true</use-authorization-role-key>
+                </file-authorization-manager>
+            </rest-api-pipeline>
+        </pipelines>
+    </enterprise-security-extension>
+    
