@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "hivemq-test-connection-{{.Release.Name}}"
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: hivemq-mqtt-cli
+      image: hivemq/mqtt-cli:4.36.0
+      args: [ "test",
+              "-h",
+              "{{ printf "hivemq-%s-mqtt" $.Release.Name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}" ]
+  restartPolicy: Never

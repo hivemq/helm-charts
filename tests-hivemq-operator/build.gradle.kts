@@ -182,12 +182,15 @@ val updatePlatformVersion by tasks.registering {
             }.plus(fileTree("../examples/hivemq-operator").matching{
                 include("**/*.yml")
                 include("**/*.yaml")
-            })
+                // include test hivemq/mqtt-cli image to update, which is part of the hivemq-operator chart
+            }).plus(file("../charts/hivemq-operator/templates/tests/test-mqtt-cli.yml"))
             filesToUpdate.forEach { file ->
                 val text = file.readText()
                 file.writeText(text.replace("""^hivemq-platform = \"(.*)\"$""".toRegex(RegexOption.MULTILINE)) {
                     "hivemq-platform = \"${appVersion}\""
                 }.replace("""(?i)(hivemq/hivemq4:k8s-)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
+                    "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
+                }.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
                     "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
                 })
             }
