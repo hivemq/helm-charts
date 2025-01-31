@@ -33,16 +33,13 @@ tests:
 
   - it: Should define the correct ports
     asserts:
-      - contains:
+      - equal:
           path: spec.ports
-          content:
-            port: 8080
-            name: http
-      - contains:
-          path: spec.ports
-          content:
-            port: 1883
-            name: mqtt
+          value:
+            - port: 8080
+              name: http
+            - port: 1883
+              name: mqtt
 
   - it: Should have a ClusterIP set to None
     asserts:
