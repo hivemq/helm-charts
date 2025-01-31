@@ -10,17 +10,13 @@ concurrency:
 env:
   RELEASE_NAME: "smoke-test-release"
 jobs:
+
   smoke-test-platform:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-      - name: Get binaries
-        run: |
-          curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.18.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
-
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -67,8 +63,8 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
         with:
-          java-version: 21
           distribution: temurin
+          java-version: 21
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@cc4fc85e6b35bafd578d5ffbc76a5518407e1af0 # v4
@@ -82,10 +78,14 @@ jobs:
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-platform-operator:build :tests-hivemq-platform-operator:saveDockerImages
 
-      - name: Start up KinD cluster with local images
+      - name: Create K8s Kind Cluster
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3
+        with:
+          cluster_name: "kind"
+
+      - name: Load local images into KinD cluster
         working-directory: helm-charts
         run: |
-          kind create cluster
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator-init.tar
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator.tar
           kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform.tar
@@ -104,7 +104,7 @@ jobs:
           # Otherwise the pods are not created and the next step fails
           echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=$RELEASE_NAME --timeout=5m -n test
-          helm test $RELEASE_NAME -n test
+          helm test $RELEASE_NAME --logs -n test
 
       - name: Capture HiveMQ Platform Pods logs on failure
         if: failure()
@@ -124,8 +124,8 @@ jobs:
       - name: Uninstall HiveMQ Platform charts
         if: always()
         run: |
-          helm uninstall $RELEASE_NAME --wait -n test
-          helm uninstall operator-test --wait
+          helm uninstall $RELEASE_NAME --wait --ignore-not-found -n test
+          helm uninstall operator-test --wait --ignore-not-found
           kubectl get pods -A
 
   smoke-test-legacy:
@@ -134,11 +134,6 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Get binaries
-        run: |
-          curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/v0.18.0/kind-linux-amd64 && chmod +x kind && sudo mv kind /usr/local/bin/
-
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -185,8 +180,8 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4
         with:
-          java-version: 21
           distribution: temurin
+          java-version: 21
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@cc4fc85e6b35bafd578d5ffbc76a5518407e1af0 # v4
@@ -200,10 +195,14 @@ jobs:
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-operator:build :tests-hivemq-operator:saveDockerImages
 
-      - name: Start up KinD cluster with local images
+      - name: Create K8s Kind Cluster
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3
+        with:
+          cluster_name: "kind"
+
+      - name: Load local images into KinD cluster
         working-directory: helm-charts
         run: |
-          kind create cluster
           kind load image-archive ./tests-hivemq-operator/build/hivemq-dns-init-wait.tar
           kind load image-archive ./tests-hivemq-operator/build/hivemq-k8s.tar
           kind load image-archive ./tests-hivemq-operator/build/hivemq-operator.tar
@@ -221,7 +220,7 @@ jobs:
           # Otherwise the pods are not created and the next step fails
           echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
           kubectl wait --for=condition=ready pod -l hivemq-cluster=$RELEASE_NAME --timeout=5m -n test
-          helm test $RELEASE_NAME -n test
+          helm test $RELEASE_NAME --logs -n test
 
       - name: Capture HiveMQ Legacy Operator Pods logs on failure
         if: failure()
@@ -241,5 +240,53 @@ jobs:
       - name: Uninstall HiveMQ Legacy Operator charts
         if: always()
         run: |
-          helm uninstall $RELEASE_NAME --wait -n test
+          helm uninstall $RELEASE_NAME --wait --ignore-not-found -n test
+          kubectl get pods -A
+
+  smoke-test-edge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          path: helm-charts
+
+      - name: Create K8s Kind Cluster
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3
+        with:
+          cluster_name: "kind"
+
+      - name: Install HiveMQ Edge
+        working-directory: helm-charts
+        run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --create-namespace -n test
+
+      - name: Test HiveMQ Edge
+        run: |
+          kubectl get events -n test -w &
+          # Otherwise the pods are not created and the next step fails
+          echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=$RELEASE_NAME --timeout=5m -n test
+          helm test $RELEASE_NAME --logs -n test
+
+      - name: Capture HiveMQ Edge Pods logs on failure
+        if: failure()
+        run: |
+          mkdir ${{ runner.temp }}/logs
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/edge-pod.log
+
+      - name: Upload HiveMQ Edge Pods logs on failure
+        if: failure()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        with:
+          name: Pod logs
+          path: ${{ runner.temp }}/logs/*.log
+          retention-days: 5
+
+      - name: Uninstall HiveMQ Edge chart
+        if: always()
+        run: |
+          helm uninstall $RELEASE_NAME --wait --ignore-not-found -n test 
           kubectl get pods -A
