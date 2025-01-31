@@ -1,0 +1,6 @@
+nodes:
+  replicaCount: 1
+services:
+  - type: control-center
+    exposed: true
+    containerPort: 8081

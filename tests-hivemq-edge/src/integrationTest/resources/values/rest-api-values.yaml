@@ -1,0 +1,6 @@
+nodes:
+  replicaCount: 1
+services:
+  - type: rest-api
+    exposed: true
+    containerPort: 8890

@@ -1,0 +1,6 @@
+- name: test-init-container
+  image: busybox
+  command: [ 'sh', '-c', 'echo -n "test init container" >> /init-container-volume-test/init-container-test.txt' ]
+  volumeMounts:
+    - name: init-container-volume
+      mountPath: /init-container-volume-test

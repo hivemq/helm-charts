@@ -1,0 +1,9 @@
+nodes:
+  replicaCount: 1
+extensions:
+  - name: hivemq-custom-test-extension
+    enabled: true
+    supportsHotReload: false
+    extensionUri: "https://nginx-service/hivemq-custom-test-extension-3.0.0.zip"
+    skipHttpsCertificateValidation: true
+    skipHttpsHostnameVerification: true

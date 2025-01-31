@@ -1,0 +1,25 @@
+nodes:
+  replicaCount: 1
+extensions:
+  - name: hivemq-appending-foo-extension
+    enabled: true
+    supportsHotReload: false
+    extensionUri: "http://nginx-service/hivemq-appending-foo-extension-1.0.0.zip"
+    priority: 3000
+    startPriority: 1000
+  - name: hivemq-appending-bar-extension
+    enabled: true
+    supportsHotReload: false
+    extensionUri: "http://nginx-service/hivemq-appending-bar-extension-1.0.0.zip"
+    priority: 2000
+    startPriority: 2000
+  - name: hivemq-appending-baz-extension
+    enabled: true
+    supportsHotReload: false
+    extensionUri: "http://nginx-service/hivemq-appending-baz-extension-1.0.0.zip"
+    priority: 1000
+    startPriority: 3000
+services:
+  - type: mqtt
+    exposed: true
+    containerPort: 1884

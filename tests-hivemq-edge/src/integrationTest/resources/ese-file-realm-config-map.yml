@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ese-file-realm-config-map
+data:
+  ese-file-realm.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <ese-file-realm>
+        <rest-api>
+            <users>
+                <user>
+                    <name>user</name>
+                    <password>password</password>
+                    <roles>
+                        <role>simple</role>
+                    </roles>
+                </user>
+            </users>
+            <roles>
+                <role>
+                    <id>simple</id>
+                    <permissions>
+                        <permission>HIVEMQ_MQTT_CLIENTS_GET</permission>
+                    </permissions>
+                </role>
+            </roles>
+        </rest-api>
+    </ese-file-realm>

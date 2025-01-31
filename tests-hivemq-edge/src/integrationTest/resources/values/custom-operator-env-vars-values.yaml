@@ -1,0 +1,6 @@
+env:
+  - name: QUARKUS_OPERATOR_SDK_NAMESPACES
+    valueFrom:
+      configMapKeyRef:
+        name: operator-config-map
+        key: namespace

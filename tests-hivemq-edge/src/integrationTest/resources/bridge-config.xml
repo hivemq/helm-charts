@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hivemq-bridge-extension xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                         xsi:noNamespaceSchemaLocation="../../../../../hivemq-bridge-extension/src/main/resources/config.xsd">
+    <message-log>
+        <enabled>true</enabled>
+        <log-level>DEBUG</log-level>
+        <mqtt-packets>CONNECT, SUBSCRIBE, DISCONNECT, OUTGOING-PUBLISH, INCOMING-PUBLISH</mqtt-packets>
+    </message-log>
+    <bridges>
+        <bridge>
+            <enabled>true</enabled>
+            <name>testbridge</name>
+            <remote-broker>
+                <authentication>
+                    <mqtt-simple-authentication>
+                        <username>my-username</username>
+                        <password>my-password</password>
+                    </mqtt-simple-authentication>
+                </authentication>
+                <connection>
+                    <static>
+                        <host>remote</host>
+                        <port>1883</port>
+                    </static>
+                </connection>
+            </remote-broker>
+            <topics>
+                <topic>
+                    <filter>bridge/topic/test</filter>
+                </topic>
+            </topics>
+            <internal>
+                <option>
+                    <key>max-client-count</key>
+                    <value>2</value>
+                </option>
+            </internal>
+        </bridge>
+    </bridges>
+</hivemq-bridge-extension>

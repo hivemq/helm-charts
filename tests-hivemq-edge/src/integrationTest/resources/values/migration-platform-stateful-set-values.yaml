@@ -1,0 +1,59 @@
+migration:
+  statefulSet: true
+restApi:
+  authEnabled: true
+nodes:
+  replicaCount: 1
+  podSecurityContext:
+    enabled: true
+    fsGroup: 0
+additionalVolumes:
+  - type: persistentVolumeClaim
+    name: data
+    path: /opt/hivemq/data
+  - name: ese-file-realm-config-map
+    mountName: ese-file-realm
+    path: "/realm/"
+    type: configMap
+volumeClaimTemplates:
+ - kind: PersistentVolumeClaim
+   apiVersion: v1
+   metadata:
+     name: data
+   spec:
+     accessModes:
+       - ReadWriteOnce
+     resources:
+       requests:
+         storage: 100Gi
+     volumeMode: Filesystem
+services:
+  - type: "mqtt"
+    name: "hivemq-test-hivemq-legacy-platform-mqtt"
+    annotations:
+      service.spec.externalTrafficPolicy: Local
+    exposed: true
+    containerPort: 1883
+    legacyPortName: "mqtt"
+  - type: "control-center"
+    exposed: true
+    containerPort: 8080
+    legacyPortName: "cc"
+  - type: "metrics"
+    exposed: true
+    containerPort: 9399
+    legacyPortName: "metrics"
+  - type: "rest-api"
+    exposed: true
+    containerPort: 8888
+    legacyPortName: "api"
+extensions:
+  - name: hivemq-allow-all-extension
+    extensionUri: preinstalled
+    enabled: false
+    supportsHotReload: false
+  - name: hivemq-enterprise-security-extension
+    extensionUri: preinstalled
+    enabled: true
+    supportsHotReload: false
+    configMapName: "ese-configuration"
