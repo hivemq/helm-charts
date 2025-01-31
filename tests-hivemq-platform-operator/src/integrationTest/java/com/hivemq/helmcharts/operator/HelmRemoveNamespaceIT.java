@@ -2,7 +2,6 @@ package com.hivemq.helmcharts.operator;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -16,7 +15,6 @@ import static org.awaitility.Durations.TWO_MINUTES;
 /**
  * Tests the operator permissions when deleting the namespace.
  */
-@Tag("Namespace")
 class HelmRemoveNamespaceIT extends AbstractHelmChartIT {
 
     @Override

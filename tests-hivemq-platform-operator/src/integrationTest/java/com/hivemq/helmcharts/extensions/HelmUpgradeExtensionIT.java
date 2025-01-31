@@ -3,7 +3,6 @@ package com.hivemq.helmcharts.extensions;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -19,10 +18,7 @@ import static com.hivemq.helmcharts.testcontainer.DockerImageNames.HIVEMQ_DOCKER
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Tag("Extensions")
-@Tag("Extensions2")
 @Testcontainers
-@SuppressWarnings("DuplicatedCode")
 class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
 
     @Container

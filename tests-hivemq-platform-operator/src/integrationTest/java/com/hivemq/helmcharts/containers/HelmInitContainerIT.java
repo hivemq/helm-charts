@@ -6,7 +6,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -19,8 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.TWO_MINUTES;
 
-@Tag("Containers")
-@SuppressWarnings("DuplicatedCode")
 class HelmInitContainerIT extends AbstractHelmChartIT {
 
     @Test

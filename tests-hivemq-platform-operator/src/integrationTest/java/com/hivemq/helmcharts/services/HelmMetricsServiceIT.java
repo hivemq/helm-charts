@@ -4,14 +4,11 @@ import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.MonitoringUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.TimeUnit;
 
-@Tag("Services")
-@Tag("Services4")
 class HelmMetricsServiceIT extends AbstractHelmChartIT {
 
     private static final int METRICS_SERVICE_PORT_9499 = 9499;

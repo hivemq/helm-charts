@@ -3,7 +3,6 @@ package com.hivemq.helmcharts.services;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,8 +25,6 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PA
 import static com.hivemq.helmcharts.util.ControlCenterUtil.assertLogin;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
-@Tag("Services")
-@Tag("Services2")
 @Testcontainers
 class HelmControlCenterIT extends AbstractHelmChartIT {
 

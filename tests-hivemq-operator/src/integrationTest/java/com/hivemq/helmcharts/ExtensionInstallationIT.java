@@ -3,7 +3,6 @@ package com.hivemq.helmcharts;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.testcontainers.junit.jupiter.Container;
@@ -11,7 +10,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.TimeUnit;
 
-@Tag("Extensions")
 @Testcontainers
 class ExtensionInstallationIT {
 

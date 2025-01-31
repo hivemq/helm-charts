@@ -5,7 +5,6 @@ import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.api.model.Pod;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Tag("Platform")
 class UpdateLogLevelIT extends AbstractHelmChartIT {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(UpdateLogLevelIT.class);

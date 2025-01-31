@@ -5,7 +5,6 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.testcontainers.junit.jupiter.Container;
@@ -19,9 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Using locally build images tests that all the artifacts are installed and is possible to send a mqtt message
  */
-@Tag("LocalImages")
 @Testcontainers
-@SuppressWarnings("DuplicatedCode")
 class LocalHelmChartDeploymentIT {
 
     @Container

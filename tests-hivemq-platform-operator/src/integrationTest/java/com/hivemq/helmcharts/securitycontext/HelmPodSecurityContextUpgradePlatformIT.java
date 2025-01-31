@@ -2,15 +2,12 @@ package com.hivemq.helmcharts.securitycontext;
 
 import com.hivemq.helmcharts.util.K8sUtil;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.concurrent.TimeUnit;
 
-@Tag("PodSecurityContext")
-@Tag("PodSecurityContextUpgradePlatform")
 class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityContextIT {
 
     @Override

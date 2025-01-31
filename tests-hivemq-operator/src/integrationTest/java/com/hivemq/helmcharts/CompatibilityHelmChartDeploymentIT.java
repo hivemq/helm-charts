@@ -4,7 +4,6 @@ import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.helmcharts.testcontainer.OperatorHelmChartContainer;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test that the chart is deployed successfully on specific kubernetes cluster versions
  */
-@Tag("K8sVersionCompatibility")
 @Testcontainers
 class CompatibilityHelmChartDeploymentIT {
 
