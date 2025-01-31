@@ -1,0 +1,117 @@
+suite: HiveMQ Edge - Statefulset tests
+
+templates:
+  - statefulset.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.1.0
+  appVersion: "2025.1"
+set:
+  mqtts:
+    enabled: true
+  mqttsClientauth:
+    clientAuthenticationMode: REQUIRED
+
+tests:
+  - it: Should have correct metadata
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hivemq-edge-0.1.0
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "2025.1"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: Should define correct container properties
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: hivemq-edge
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "hivemq/hivemq-edge:2025.1-k8s"
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: Should define correct ports
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports
+          value:
+            - containerPort: 8080
+              name: web
+            - containerPort: 8883
+              name: mqtts
+
+  - it: Should define correct environment variables
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_SECRET_KEYSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: hivemq-keystore-secret
+                key: keystore-password
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_SECRET_PRIVATE_KEY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: hivemq-keystore-secret
+                key: secret-key-password
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: hivemq-truststore-secret
+                key: truststore-password
+
+  - it: Should define correct volumes and mounts
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes
+          value:
+            - name: fragment
+              configMap:
+                name: hivemq-edge-config-edge
+            - name: mqtts-jks
+              secret:
+                secretName: hivemq-keystore-secret
+                items:
+                  - key: keystore.jks
+                    path: keystore.jks
+            - name: mqtts-truststore-jks
+              secret:
+                secretName: hivemq-truststore-secret
+                items:
+                  - key: truststore.jks
+                    path: truststore.jks
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: fragment
+              mountPath: /fragment
+            - name: mqtts-jks
+              mountPath: /mqtts
+            - name: mqtts-truststore-jks
+              mountPath: /mqtts-trust
+

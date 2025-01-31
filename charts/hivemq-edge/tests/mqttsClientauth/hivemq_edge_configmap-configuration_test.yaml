@@ -1,0 +1,50 @@
+suite: HiveMQ Edge - Configmap Config tests
+
+templates:
+  - configmap-configuration.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.1.0
+  appVersion: "2025.1"
+set:
+  mqtts:
+    enabled: true
+  mqttsClientauth:
+    clientAuthenticationMode: REQUIRED
+
+tests:
+  - it: Should have the correct metadata
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-edge-config-edge
+      - equal:
+          path: metadata.namespace
+          value: hivemq-edge-namespace
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hivemq-edge-0.1.0
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "2025.1"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: Should have the correct config data
+    asserts:
+      - equal:
+          path: data.config
+          value: |
+            <mqtt-bridges>
+            </mqtt-bridges>
+            <protocol-adapters>
+            </protocol-adapters>
