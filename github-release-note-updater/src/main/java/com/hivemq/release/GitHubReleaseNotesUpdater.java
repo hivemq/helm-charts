@@ -206,19 +206,13 @@ public class GitHubReleaseNotesUpdater {
             final @NotNull List<Chart> charts,
             final @NotNull String releaseNoteTemplate,
             final @NotNull Function<Version, String> releaseUrlFunction) {
-        for (int i = 0; i < charts.size(); i++) {
-            // we get the previous chart and check if the appVersion has changed in the current chart
-            final var chart = charts.get(i);
-            final var previousChart = i == 0 ? null : charts.get(i - 1);
-            final var wasChartUpdated = previousChart == null || !previousChart.appVersion().equals(chart.appVersion());
-            if (wasChartUpdated) {
-                final var releaseTag = String.format("%s-%s", chart.name(), chart.version());
-                final var releaseNote = String.format(releaseNoteTemplate,
-                        chart.description(),
-                        chart.appVersion(),
-                        releaseUrlFunction.apply(chart.appVersion()));
-                releaseNotes.put(releaseTag, releaseNote);
-            }
+        for (final var chart : charts) {
+            final var releaseTag = String.format("%s-%s", chart.name(), chart.version());
+            final var releaseNote = String.format(releaseNoteTemplate,
+                    chart.description(),
+                    chart.appVersion(),
+                    releaseUrlFunction.apply(chart.appVersion()));
+            releaseNotes.put(releaseTag, releaseNote);
         }
     }
 
