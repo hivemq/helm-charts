@@ -9,11 +9,6 @@ REPO="hivemq/helm-charts"
 RELEASE_COUNT=${1:-200}
 
 # check if binaries are installed
-IS_HELM_INSTALLED=$(which helm >/dev/null 2>&1 || echo "Helm is not installed")
-if [ -n "$IS_HELM_INSTALLED" ]; then
-  echo "$IS_HELM_INSTALLED"
-  exit 1
-fi
 IS_GH_INSTALLED=$(which gh >/dev/null 2>&1 || echo "GitHub CLI is not installed")
 if [ -n "$IS_GH_INSTALLED" ]; then
   echo "$IS_GH_INSTALLED"
@@ -29,13 +24,11 @@ fi
 
 cd .. || exit 1
 
-helm repo add hivemq https://hivemq.github.io/helm-charts
-helm repo update
-helm search repo hivemq --versions -o json > charts.json
+curl -L -s -o charts.yaml https://raw.githubusercontent.com/hivemq/helm-charts/refs/heads/gh-pages/index.yaml
 gh release list --repo "$REPO" --limit "$RELEASE_COUNT" --json name,tagName,publishedAt > releases.json
 
 GH_PATH=$(which gh)
 PWD=$(pwd)
 ./gradlew :github-release-note-updater:run --args " -g $GH_PATH -p $PWD"
 
-rm releases.json charts.json
+rm charts.yaml releases.json

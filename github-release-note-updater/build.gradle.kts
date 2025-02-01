@@ -21,6 +21,7 @@ repositories {
 dependencies {
     compileOnly(libs.jetbrains.annotations)
     implementation(libs.jackson.databind)
+    implementation(libs.jackson.dataformat.yaml)
     implementation(libs.java.semver)
     implementation(libs.jcommander)
 }
