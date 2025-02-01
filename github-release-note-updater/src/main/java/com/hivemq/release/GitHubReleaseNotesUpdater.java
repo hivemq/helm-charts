@@ -2,6 +2,7 @@ package com.hivemq.release;
 
 import com.beust.jcommander.JCommander;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.zafarkhaja.semver.Version;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,7 +59,7 @@ public class GitHubReleaseNotesUpdater {
             System.exit(0);
         }
 
-        final var chartsPath = Path.of(arguments.path, "charts.json");
+        final var chartsPath = Path.of(arguments.path, "charts.yaml");
         final var releasesPath = Path.of(arguments.path, "releases.json");
         if (Files.notExists(chartsPath)) {
             System.err.printf("Charts path '%s' does not exist%n", chartsPath);
@@ -69,12 +70,13 @@ public class GitHubReleaseNotesUpdater {
             System.exit(1);
         }
 
-        final var objectMapper = new ObjectMapper();
-        final var charts = Arrays.stream(objectMapper.readValue(Files.readString(chartsPath), Chart[].class)).toList();
+        final var objectMapper = new ObjectMapper(new YAMLFactory());
+        final var indexFile = objectMapper.readValue(Files.readString(chartsPath), IndexFile.class);
         final var releases =
                 Arrays.stream(objectMapper.readValue(Files.readString(releasesPath), Release[].class)).toList();
 
         // sort the released Helm charts
+        final var charts = indexFile.entries().values().stream().flatMap(List::stream).toList();
         final var platformOperatorCharts =
                 charts.stream().filter(chart -> chart.name().equals("hivemq-platform-operator")).sorted().toList();
         final var platformCharts =
