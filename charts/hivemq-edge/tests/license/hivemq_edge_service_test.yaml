@@ -7,7 +7,7 @@ release:
   namespace: hivemq-edge-namespace
 chart:
   version: 0.0.1
-  appVersion: 1.0.0
+  appVersion: "2367.359"
 set:
   license:
     enabled: true
@@ -29,7 +29,7 @@ tests:
           value: edge
       - equal:
           path: metadata.labels["app.kubernetes.io/version"]
-          value: 1.0.0
+          value: "2367.359"
       - equal:
           path: metadata.labels["app.kubernetes.io/managed-by"]
           value: Helm
