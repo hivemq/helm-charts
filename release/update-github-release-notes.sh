@@ -6,7 +6,7 @@ cd "${SCRIPT_DIR}" || exit 1
 
 # configuration
 REPO="hivemq/helm-charts"
-RELEASE_COUNT=${1:-200}
+RELEASE_COUNT=${1:-10}
 
 # check if binaries are installed
 IS_GH_INSTALLED=$(which gh >/dev/null 2>&1 || echo "GitHub CLI is not installed")
