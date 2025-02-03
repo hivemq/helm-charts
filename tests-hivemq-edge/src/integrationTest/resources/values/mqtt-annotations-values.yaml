@@ -1,9 +1,0 @@
-nodes:
-  replicaCount: 1
-services:
-  - type: mqtt
-    exposed: true
-    containerPort: 1884
-    annotations:
-      test-annotation-key: test-annotation-value
-      test-annotation-key/v1: test-annotation-value-v1

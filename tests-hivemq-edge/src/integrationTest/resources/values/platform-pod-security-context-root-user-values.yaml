@@ -1,8 +1,0 @@
-nodes:
-  replicaCount: 1
-  podSecurityContext:
-    enabled: true
-    runAsNonRoot: false
-  env:
-    - name: HIVEMQ_NO_ROOT_STEP_DOWN
-      value: "true"
