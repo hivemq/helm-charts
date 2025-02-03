@@ -6,7 +6,7 @@ release:
   name: edge
   namespace: hivemq-edge-namespace
 chart:
-  version: 0.1.0
+  version: 0.1.1
   appVersion: "2025.1"
 set:
   mqtts:
@@ -22,7 +22,7 @@ tests:
           value: hivemq-edge
       - equal:
           path: metadata.labels["helm.sh/chart"]
-          value: hivemq-edge-0.1.0
+          value: hivemq-edge-0.1.1
       - equal:
           path: metadata.labels["app.kubernetes.io/name"]
           value: hivemq-edge
