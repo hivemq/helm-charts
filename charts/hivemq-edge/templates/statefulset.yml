@@ -212,7 +212,7 @@ spec:
       {{- if and (.Values.license.enabled) (eq .Values.license.create false) -}}
         {{ toYaml .Values.license.volume | nindent 8}}
       {{- end -}}
-      {{- if and (.Values.license.enabled) (.Values.license.create) }}
+      {{- if and (.Values.license.enabled) (.Values.license.file) }}
         - name: license
           secret:
             secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "license" "releaseName" .Release.Name) }}

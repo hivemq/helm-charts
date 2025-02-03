@@ -9,8 +9,9 @@ chart:
   version: 0.1.0
   appVersion: "2025.1"
 set:
-  mqtts:
+  license:
     enabled: true
+    file: "1234"
 
 tests:
   - it: Should have the correct metadata
@@ -67,15 +68,18 @@ tests:
           path: spec.template.spec.containers[0].livenessProbe.httpGet.port
           value: 8080
 
-  - it: Should define correct ports
+  - it: Should expose the correct ports
     asserts:
-      - equal:
+      - contains:
           path: spec.template.spec.containers[0].ports
-          value:
-            - containerPort: 8080
-              name: web
-            - containerPort: 8883
-              name: mqtts
+          content:
+            containerPort: 8080
+            name: web
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            containerPort: 1883
+            name: mqtt
 
   - it: Should set the correct environment variables
     asserts:
@@ -94,21 +98,6 @@ tests:
           content:
             name: JAVA_OPTS
             value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_MQTTS_ENABLED
-            value: "true"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
-            value: "NONE"
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
-            value: "false"
 
   - it: Should set the correct resource limits and requests
     asserts:
@@ -132,9 +121,8 @@ tests:
           value:
             - name: fragment
               mountPath: /fragment
-            - mountPath: /mqtts
-              name: mqtts-jks
-
+            - name: license
+              mountPath: /license.edgelic
 
   - it: Should define the correct volumes
     asserts:
@@ -144,10 +132,10 @@ tests:
             - name: fragment
               configMap:
                 name: hivemq-edge-config-edge
-            - name: mqtts-jks
+            - name: license
               secret:
                 items:
-                    - key: keystore.jks
-                      path: keystore.jks
-                secretName: hivemq-keystore-secret
+                  - key: "license.edgelic"
+                    path: "license.edgelic"
+                secretName: hivemq-edge-license-edge
 

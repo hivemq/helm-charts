@@ -36,17 +36,38 @@ tests:
           path: metadata.labels["app.kubernetes.io/managed-by"]
           value: Helm
 
-  - it: Should define correct container properties
+  - it: Should have correct selector and serviceName
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: spec.serviceName
+          value: hivemq-edge
+
+  - it: Should define the correct container properties
     asserts:
       - equal:
           path: spec.template.spec.containers[0].name
           value: hivemq-edge
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "hivemq/hivemq-edge:2025.1-k8s"
+          value: hivemq/hivemq-edge:2025.1-k8s
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
+
+  - it: Should define the correct probes
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /api/v1/health/liveness
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: 8080
 
   - it: Should define correct ports
     asserts:
@@ -58,8 +79,72 @@ tests:
             - containerPort: 8883
               name: mqtts
 
-  - it: Should define correct environment variables
+  - it: Should set the correct environment variables
     asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CONFIG_WRITEABLE
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_LEVEL
+            value: "INFO"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
+            value: "REQUIRED"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_KEYSTORE_PATH
+            value: /mqtts/keystore.jks
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_SECRET_KEYSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "hivemq-keystore-secret"
+                key: "keystore-password"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_SECRET_PRIVATE_KEY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "hivemq-keystore-secret"
+                key: "secret-key-password"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_TRUSTSTORE_PATH
+            value: /mqtts-trust/truststore.jks
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_SECRET_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "hivemq-truststore-secret"
+                key: "truststore-password"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -85,6 +170,18 @@ tests:
                 name: hivemq-truststore-secret
                 key: truststore-password
 
+  - it: Should define the correct volume mounts
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: fragment
+              mountPath: /fragment
+            - name: mqtts-jks
+              mountPath: /mqtts
+            - name: mqtts-truststore-jks
+              mountPath: /mqtts-trust
+
   - it: Should define correct volumes and mounts
     asserts:
       - equal:
@@ -105,13 +202,3 @@ tests:
                 items:
                   - key: truststore.jks
                     path: truststore.jks
-      - equal:
-          path: spec.template.spec.containers[0].volumeMounts
-          value:
-            - name: fragment
-              mountPath: /fragment
-            - name: mqtts-jks
-              mountPath: /mqtts
-            - name: mqtts-truststore-jks
-              mountPath: /mqtts-trust
-
