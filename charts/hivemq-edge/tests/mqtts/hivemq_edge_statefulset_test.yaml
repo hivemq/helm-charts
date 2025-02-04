@@ -1,0 +1,153 @@
+suite: HiveMQ Edge - Statefulset tests
+
+templates:
+  - statefulset.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.0.1
+  appVersion: "2367.359"
+set:
+  mqtts:
+    enabled: true
+
+tests:
+  - it: Should have the correct metadata
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hivemq-edge-0.0.1
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "2367.359"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: Should have correct selector and serviceName
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: spec.serviceName
+          value: hivemq-edge
+
+  - it: Should define the correct container properties
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: hivemq-edge
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: hivemq/hivemq-edge:2025.1-k8s
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: Should define the correct probes
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /api/v1/health/liveness
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: 8080
+
+  - it: Should define correct ports
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports
+          value:
+            - containerPort: 8080
+              name: web
+            - containerPort: 8883
+              name: mqtts
+
+  - it: Should set the correct environment variables
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CONFIG_WRITEABLE
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_LEVEL
+            value: "INFO"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
+            value: "NONE"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
+            value: "false"
+
+  - it: Should set the correct resource limits and requests
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: "1Gi"
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: "1000m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: "1Gi"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: "1000m"
+
+  - it: Should define the correct volume mounts
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: fragment
+              mountPath: /fragment
+            - mountPath: /mqtts
+              name: mqtts-jks
+
+
+  - it: Should define the correct volumes
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes
+          value:
+            - name: fragment
+              configMap:
+                name: hivemq-edge-config-edge
+            - name: mqtts-jks
+              secret:
+                items:
+                    - key: keystore.jks
+                      path: keystore.jks
+                secretName: hivemq-keystore-secret
+
