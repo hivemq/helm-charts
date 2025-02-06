@@ -3,6 +3,6 @@
 k3s-minimum = { image = "rancher/k3s", tag = "v1.23.17-k3s1", update = false }
 k3s-latest = { image = "rancher/k3s", tag = "v1.32.1-k3s1" }
 # https://hub.docker.com/_/nginx/tags?page=&page_size=&ordering=&name=1.27
-nginx = { image = "nginx", tag = "1.27.3" }
+nginx = { image = "nginx", tag = "1.27.4" }
 # https://hub.docker.com/r/selenium/standalone-chrome/tags?name=4.
 selenium = { image = "selenium/standalone-chrome", tag = "4.28.1" }
