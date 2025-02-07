@@ -3573,8 +3573,6 @@ spec:
               message:
                 description: "A human readable state message"
                 type: "string"
-              observedGeneration:
-                type: "integer"
               reconciliationRequests:
                 description: "Requests for state changes in the next reconciliation"
                 items:
