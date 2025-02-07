@@ -9,6 +9,8 @@ chart:
   version: 0.0.1
   appVersion: "2367.359"
 set:
+  image:
+    tag: edge-tag
   mqtts:
     enabled: true
 
@@ -53,7 +55,7 @@ tests:
           value: hivemq-edge
       - equal:
           path: spec.template.spec.containers[0].image
-          value: hivemq/hivemq-edge:2025.1-k8s
+          value: hivemq/hivemq-edge:edge-tag
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
