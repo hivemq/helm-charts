@@ -32,9 +32,15 @@
       "enabled" : {
         "type" : "boolean"
       },
-      "volume" : {
-        "description": "Volume containing the license.",
-        "type" : "object"
+      "volume": {
+        "licenseSecretName" : {
+          "description": "Name of the secret where the license is stored.",
+          "type" : "string"
+        },
+        "licenseSecretKey" : {
+          "description": "Name of the key inside the secrete which contains the license.",
+          "type" : "string"
+        }
       },
       "file" : {
         "description": "Specify the external file to load as the license.",
