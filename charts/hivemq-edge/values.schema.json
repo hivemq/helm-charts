@@ -231,5 +231,13 @@
       }
     }
   },
+  "podSecurityContext" : {
+    "description": "Security context for the pod.",
+    "type" : "object"
+  },
+  "containerSecurityContext" : {
+    "description": "Security context for the container.",
+    "type" : "object"
+  },
   "type" : "object"
 }
