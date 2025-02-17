@@ -217,7 +217,7 @@ spec:
               - key: truststore.jks
                 path: truststore.jks
       {{- end -}}
-      {{- if and (.Values.license.enabled) (.Values.license.volume) }}
+      {{- if and .Values.license.enabled .Values.license.volume }}
         - name: license
           secret:
             secretName: "{{ .Values.license.volume.licenseSecretName }}"
