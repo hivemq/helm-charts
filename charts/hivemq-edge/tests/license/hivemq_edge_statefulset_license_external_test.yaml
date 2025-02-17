@@ -13,7 +13,7 @@ set:
     tag: edge-tag
   license:
     enabled: true
-    volume:
+    secret:
       secretName: secrety
       secretKey: keyy
 

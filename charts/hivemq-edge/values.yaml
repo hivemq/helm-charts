@@ -14,16 +14,12 @@ resources:
   cpu: 1000m
   memory: 1Gi
 
-# License: a volume containing the actual license file
+# License for activating commercial features
 license:
   enabled: false
-#  volume:
-#    - name: license
-#      secret:
-#        secretName: "hivemq-license-secret"
-#        items:
-#          - key: "license.edgelic"
-#            path: "license.edgelic"
+#  secret:
+#    secretName: "licenseSecret"
+#    secretKey: "license.edgelic"
 
 # Persistence: a volume for persistent state, e.g. rocksdb files
 persistence:
