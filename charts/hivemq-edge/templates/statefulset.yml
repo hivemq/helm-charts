@@ -22,10 +22,18 @@ spec:
         {{- end }}
     spec:
       terminationGracePeriodSeconds: 10
+      {{- if .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8}}
+      {{- end }}
       containers:
         - name: hivemq-edge
           image: "{{ .Values.image.repository }}:{{.Values.image.tag}}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12}}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /api/v1/health/liveness
@@ -127,6 +135,29 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
+            {{- if .Values.admin.secret.enabled }}
+            - name: HIVEMQ_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.admin.secret.secretName }}"
+                  key: "{{ .Values.admin.secret.secretUserKey }}"
+            - name: HIVEMQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.admin.secret.secretName }}"
+                  key: "{{ .Values.admin.secret.secretPasswordKey }}"
+            {{- else }}
+            - name: HIVEMQ_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}"
+                  key: user
+            - name: HIVEMQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}"
+                  key: password
+            {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -209,8 +240,13 @@ spec:
               - key: truststore.jks
                 path: truststore.jks
       {{- end -}}
-      {{- if and (.Values.license.enabled) (eq .Values.license.create false) -}}
-        {{ toYaml .Values.license.volume | nindent 8}}
+      {{- if and .Values.license.enabled .Values.license.secret }}
+        - name: license
+          secret:
+            secretName: "{{ .Values.license.secret.secretName }}"
+            items:
+              - key: "{{ .Values.license.secret.secretKey }}"
+                path: "{{ .Values.license.secret.secretKey }}"
       {{- end -}}
       {{- if and (.Values.license.enabled) (.Values.license.file) }}
         - name: license

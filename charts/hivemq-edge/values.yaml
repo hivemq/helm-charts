@@ -5,7 +5,7 @@
 image:
   repository: hivemq/hivemq-edge
   pullPolicy: IfNotPresent
-  tag: "2025.2"
+  tag: "2025.3"
 
 refresh: 1000
 
@@ -14,16 +14,12 @@ resources:
   cpu: 1000m
   memory: 1Gi
 
-# License: a volume containing the actual license file
+# License for activating commercial features
 license:
   enabled: false
-#  volume:
-#    - name: license
-#      secret:
-#        secretName: "hivemq-license-secret"
-#        items:
-#          - key: "license.edgelic"
-#            path: "license.edgelic"
+#  secret:
+#    secretName: "licenseSecret"
+#    secretKey: "license.edgelic"
 
 # Persistence: a volume for persistent state, e.g. rocksdb files
 persistence:
@@ -130,3 +126,21 @@ volumes: []
 #    definition:
 #      - name: data
 #        emptyDir: { }
+
+podSecurityContext: {}
+#  runAsUser: 1000
+#  runAsGroup: 3000
+#  supplementalGroups: [ 4000 ]
+containerSecurityContext: {}
+#  allowPrivilegeEscalation: false
+
+admin:
+  user: "admin"
+  password: "hivemq"
+  secret:
+    enabled: false
+#  secret:
+#    enabled:
+#    secretName:
+#    secretUserKey:
+#    secretPasswordKey:

@@ -32,9 +32,49 @@
       "enabled" : {
         "type" : "boolean"
       },
-      "volume" : {
-        "description": "Volume containing the license.",
-        "type" : "object"
+      "secret": {
+        "properties" : {
+          "secretName" : {
+            "description": "Name of the secret where the license is stored.",
+            "type" : "string"
+          },
+          "secretKey" : {
+            "description": "Name of the key inside the secret which contains the license.",
+            "type" : "string"
+          }
+        }
+      },
+      "file" : {
+        "description": "Specify the external file to load as the license.",
+        "type" : "string"
+      }
+    },
+    "admin" : {
+      "description": "Configure the admin user/password.",
+      "user" : {
+        "type" : "string"
+      },
+      "password" : {
+        "type" : "string"
+      },
+      "secret": {
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "secretName" : {
+            "description": "Name of the secret where the admin credentials are stored.",
+            "type" : "string"
+          },
+          "secretUserKey" : {
+            "description": "Name of the key inside the secret which contains the admin user name.",
+            "type" : "string"
+          },
+          "secretPasswordKey" : {
+            "description": "Name of the key inside the secret which contains the admin password.",
+            "type" : "string"
+          }
+        }
       },
       "file" : {
         "description": "Specify the external file to load as the license.",
@@ -84,7 +124,7 @@
           "type" : "string"
         },
         "passwordSecretKey" : {
-          "description": "Name of the key inside the secrete which contains the password for the keystore.",
+          "description": "Name of the key inside the secret which contains the password for the keystore.",
           "type" : "string"
         },
         "privateKeyPasswordSecretName" : {
@@ -229,6 +269,14 @@
           "mount", "definition"
         ]
       }
+    },
+    "podSecurityContext" : {
+      "description": "Security context for the pod.",
+      "type" : "object"
+    },
+    "containerSecurityContext" : {
+      "description": "Security context for the container.",
+      "type" : "object"
     }
   },
   "type" : "object"

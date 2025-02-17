@@ -11,6 +11,12 @@ chart:
 set:
   image:
     tag: edge-tag
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+    supplementalGroups: [ 4000 ]
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
 
 tests:
   - it: Should have the correct metadata
@@ -90,19 +96,8 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: HIVEMQ_ADMIN_USER
-            valueFrom:
-              secretKeyRef:
-                key: user
-                name: hivemq-edge-admin-edge
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: hivemq-edge-admin-edge
+            name: HIVEMQ_LOG_LEVEL
+            value: "INFO"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -140,3 +135,21 @@ tests:
             name: fragment
             configMap:
               name: hivemq-edge-config-edge
+
+  - it: Should define the pod security context
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 1000
+      - equal:
+          path: spec.template.spec.securityContext.runAsGroup
+          value: 3000
+      - equal:
+          path: spec.template.spec.securityContext.supplementalGroups[0]
+          value: 4000
+
+  - it: Should define the container security context
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false

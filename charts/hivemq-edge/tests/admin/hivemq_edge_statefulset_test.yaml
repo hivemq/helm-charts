@@ -11,6 +11,12 @@ chart:
 set:
   image:
     tag: edge-tag
+  admin:
+    secret:
+      enabled: true
+      secretName: "admin-secret"
+      secretUserKey: "adminy"
+      secretPasswordKey: "passwordy"
 
 tests:
   - it: Should have the correct metadata
@@ -93,16 +99,17 @@ tests:
             name: HIVEMQ_ADMIN_USER
             valueFrom:
               secretKeyRef:
-                key: user
-                name: hivemq-edge-admin-edge
+                key: adminy
+                name: admin-secret
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: password
-                name: hivemq-edge-admin-edge
+                key: passwordy
+                name: admin-secret
+
       - contains:
           path: spec.template.spec.containers[0].env
           content:
