@@ -34,16 +34,15 @@
       },
       "volume": {
         "properties" : {
-          "licenseSecretName" : {
+          "secretName" : {
             "description": "Name of the secret where the license is stored.",
             "type" : "string"
           },
-          "licenseSecretKey" : {
+          "secretKey" : {
             "description": "Name of the key inside the secrete which contains the license.",
             "type" : "string"
           }
-        },
-        "type" : "object"
+        }
       },
       "file" : {
         "description": "Specify the external file to load as the license.",

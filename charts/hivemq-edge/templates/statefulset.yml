@@ -220,10 +220,10 @@ spec:
       {{- if and .Values.license.enabled .Values.license.volume }}
         - name: license
           secret:
-            secretName: "{{ .Values.license.volume.licenseSecretName }}"
+            secretName: "{{ .Values.license.volume.secretName }}"
             items:
-              - key: "{{ .Values.license.volume.licenseSecretKey }}"
-                path: "{{ .Values.license.volume.licenseSecretKey }}"
+              - key: "{{ .Values.license.volume.secretKey }}"
+                path: "{{ .Values.license.volume.secretKey }}"
       {{- end -}}
       {{- if and (.Values.license.enabled) (.Values.license.file) }}
         - name: license
