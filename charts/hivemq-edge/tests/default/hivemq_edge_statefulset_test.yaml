@@ -90,8 +90,19 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: HIVEMQ_LOG_LEVEL
-            value: "INFO"
+            name: HIVEMQ_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                key: user
+                name: hivemq-edge-admin-edge
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: hivemq-edge-admin-edge
       - contains:
           path: spec.template.spec.containers[0].env
           content:

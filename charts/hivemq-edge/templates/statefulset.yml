@@ -135,6 +135,29 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
+            {{- if .Values.admin.secret.enabled }}
+            - name: HIVEMQ_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.admin.secret.secretName }}"
+                  key: "{{ .Values.admin.secret.secretUserKey }}"
+            - name: HIVEMQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.admin.secret.secretName }}"
+                  key: "{{ .Values.admin.secret.secretPasswordKey }}"
+            {{- else }}
+            - name: HIVEMQ_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}"
+                  key: user
+            - name: HIVEMQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}"
+                  key: password
+            {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

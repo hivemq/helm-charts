@@ -133,3 +133,14 @@ podSecurityContext: {}
 #  supplementalGroups: [ 4000 ]
 containerSecurityContext: {}
 #  allowPrivilegeEscalation: false
+
+admin:
+  user: "admin"
+  password: "hivemq"
+  secret:
+    enabled: false
+#  secret:
+#    enabled:
+#    secretName:
+#    secretUserKey:
+#    secretPasswordKey:
