@@ -39,7 +39,39 @@
             "type" : "string"
           },
           "secretKey" : {
-            "description": "Name of the key inside the secrete which contains the license.",
+            "description": "Name of the key inside the secret which contains the license.",
+            "type" : "string"
+          }
+        }
+      },
+      "file" : {
+        "description": "Specify the external file to load as the license.",
+        "type" : "string"
+      }
+    },
+    "admin" : {
+      "description": "Configure the admin user/password.",
+      "user" : {
+        "type" : "string"
+      },
+      "password" : {
+        "type" : "string"
+      },
+      "secret": {
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "secretName" : {
+            "description": "Name of the secret where the admin credentials are stored.",
+            "type" : "string"
+          },
+          "secretUserKey" : {
+            "description": "Name of the key inside the secret which contains the admin user name.",
+            "type" : "string"
+          },
+          "secretPasswordKey" : {
+            "description": "Name of the key inside the secret which contains the admin password.",
             "type" : "string"
           }
         }
@@ -92,7 +124,7 @@
           "type" : "string"
         },
         "passwordSecretKey" : {
-          "description": "Name of the key inside the secrete which contains the password for the keystore.",
+          "description": "Name of the key inside the secret which contains the password for the keystore.",
           "type" : "string"
         },
         "privateKeyPasswordSecretName" : {
