@@ -217,13 +217,13 @@ spec:
               - key: truststore.jks
                 path: truststore.jks
       {{- end -}}
-      {{- if and .Values.license.enabled .Values.license.volume }}
+      {{- if and .Values.license.enabled .Values.license.secret }}
         - name: license
           secret:
-            secretName: "{{ .Values.license.volume.secretName }}"
+            secretName: "{{ .Values.license.secret.secretName }}"
             items:
-              - key: "{{ .Values.license.volume.secretKey }}"
-                path: "{{ .Values.license.volume.secretKey }}"
+              - key: "{{ .Values.license.secret.secretKey }}"
+                path: "{{ .Values.license.secret.secretKey }}"
       {{- end -}}
       {{- if and (.Values.license.enabled) (.Values.license.file) }}
         - name: license
