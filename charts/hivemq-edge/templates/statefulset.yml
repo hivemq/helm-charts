@@ -147,15 +147,16 @@ spec:
                   name: "{{ .Values.admin.secret.secretName }}"
                   key: "{{ .Values.admin.secret.secretPasswordKey }}"
             {{- else }}
+            {{- $secretName := include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) -}}
             - name: HIVEMQ_ADMIN_USER
               valueFrom:
                 secretKeyRef:
-                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}"
+                  name: "{{ $secretName }}"
                   key: user
             - name: HIVEMQ_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}"
+                  name: "{{ $secretName }}"
                   key: password
             {{- end }}
             {{- with .Values.env }}
