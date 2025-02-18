@@ -55,6 +55,16 @@ spec:
               value: "in-memory"
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
+            - name: HIVEMQ_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "hivemq-edge-admin-my-edge"
+                  key: user
+            - name: HIVEMQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "hivemq-edge-admin-my-edge"
+                  key: password
           resources:
             limits:
               memory: "1Gi"
