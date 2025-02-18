@@ -140,7 +140,7 @@ admin:
   secret:
     enabled: false
 #  secret:
-#    enabled:
-#    secretName:
-#    secretUserKey:
-#    secretPasswordKey:
+#    enabled: true
+#    secretName: "the-external-secret"
+#    secretUserKey: "user"
+#    secretPasswordKey: "password"
