@@ -42,7 +42,8 @@
             "description": "Name of the key inside the secret which contains the license.",
             "type" : "string"
           }
-        }
+        },
+        type : "object"
       },
       "file" : {
         "description": "Specify the external file to load as the license.",
