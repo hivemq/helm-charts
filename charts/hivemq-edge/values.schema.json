@@ -76,7 +76,8 @@
             "description": "Name of the key inside the secret which contains the admin password.",
             "type" : "string"
           }
-        }
+        },
+        "type": "object"
       },
       "file" : {
         "description": "Specify the external file to load as the license.",
