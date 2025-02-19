@@ -23,7 +23,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Set up Helm
-        uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
