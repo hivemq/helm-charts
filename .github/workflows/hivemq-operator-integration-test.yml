@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Generate split index list
         id: generate
-        uses: donnerbart/split-tests-java-action/generate-split-index-json@52df899b627fca5cd7cedd49a5c34313415a6711 # v1
+        uses: donnerbart/split-tests-java-action/generate-split-index-json@43b9b01a5a9bfb19cdcfc7ea30b8e18afc6b2443 # v1
         with:
           split-total: ${{ env.split-total }}
 
@@ -107,14 +107,14 @@ jobs:
 
       - name: Split tests
         id: split-tests
-        uses: donnerbart/split-tests-java-action@52df899b627fca5cd7cedd49a5c34313415a6711 # v1
+        uses: donnerbart/split-tests-java-action@43b9b01a5a9bfb19cdcfc7ea30b8e18afc6b2443 # v1
         with:
           split-index: ${{ matrix.split-index }}
           split-total: ${{ env.split-total }}
           glob: '**/helm-charts/tests-hivemq-operator/**/*IT.java'
           junit-glob: '**/junit-reports/*.xml'
           format: 'gradle'
-          average-time: true
+          new-test-time: 'average'
           debug: true
 
       - name: Run HiveMQ Legacy Operator integration tests
@@ -159,7 +159,7 @@ jobs:
       contents: write
     steps:
       - name: Merge JUnit reports
-        uses: donnerbart/split-tests-java-action/merge-junit-reports@52df899b627fca5cd7cedd49a5c34313415a6711 # v1
+        uses: donnerbart/split-tests-java-action/merge-junit-reports@43b9b01a5a9bfb19cdcfc7ea30b8e18afc6b2443 # v1
         with:
           git-branch: junit-reports/legacy/${{ github.base_ref }}
           artifact-name: junit-xml-reports-${{ github.base_ref }}
