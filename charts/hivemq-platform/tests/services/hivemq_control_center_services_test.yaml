@@ -168,3 +168,32 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a Control Center service enabled and HiveMQ Connect Overload Protection enabled, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          hivemqConnectOverloadProtection:
+            enabled: true
+            connectRate: 500
+            connectBurstSize: 1000
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `control-center` with container port `8081` is using `hivemqConnectOverloadProtection` value. HiveMQ Connect Overload Protection is only supported by MQTT and WebSocket services
+
+  - it: with a Control Center service disabled and HiveMQ Connect Overload Protection enabled, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+          hivemqConnectOverloadProtection:
+            enabled: true
+            connectRate: 500
+            connectBurstSize: 1000
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
