@@ -283,6 +283,17 @@ services:
     # Configures the HiveMQ listener name for a HiveMQ listener. Only applicable to MQTT and WebSocket services.
     # See https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html
     # hivemqListenerName: my-tcp-listener
+    # Configures the connect overload protection for the HiveMQ MQTT and WebSocket listeners.
+    # See https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html#throttle-connections
+    # hivemqConnectOverloadProtection:
+    #  # Defines whether connect overload protection is enabled. Possible values are `true` and `false`. The default setting is `true`.
+    #  enabled: true
+    #  # The maximum sustained rate of connects that the listener allows per second. The connect rate cannot be set to 0 (zero).
+    #  # The default setting is `500`.
+    #  connectRate: 500
+    #  # The maximum amount of simultaneous `CONNECT` messages that the listener allows for short periods. The burst size cannot be set to 0 (zero).
+    #  # When no burst rate is specified, the listener allows a burst rate that is double the defined connect rate.
+    #  connectBurstSize: 1000
     # Used to maintain Kubernetes session affinity.
     # See: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies.
     # sessionAffinity:
