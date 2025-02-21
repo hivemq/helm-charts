@@ -224,8 +224,8 @@
           "type" : "boolean"
         },
         "lifetime" : {
-          "maximum": 864000,
-          "minimum": 1,
+          "maximum" : 864000,
+          "minimum" : 1,
           "type" : "integer"
         }
       },
@@ -236,7 +236,7 @@
       "properties" : {
         "replicaCount" : {
           "description" : "Number of replicas to be persisted across cluster nodes.",
-          "minimum": 1,
+          "minimum" : 1,
           "type" : "integer"
         }
       },
@@ -248,7 +248,7 @@
       "items" : {
         "properties" : {
           "key" : {
-            "minLength": 1,
+            "minLength" : 1,
             "type" : "string"
           },
           "value" : {
@@ -261,7 +261,7 @@
         ],
         "type" : "object"
       },
-      "type": "array"
+      "type" : "array"
     },
     "hivemqMqtt" : {
       "description" : "Configures HiveMQ MQTT options. See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#mqtt-config.",
@@ -272,35 +272,42 @@
         },
         "keepAliveMax" : {
           "description" : "Defines the maximum keep alive value that a client can set.",
-          "maximum": 65535,
-          "minimum": 1,
+          "maximum" : 65535,
+          "minimum" : 1,
           "type" : "integer"
         },
         "maxPacketSize" : {
           "description" : "Defines the maximum packet size that the broker accepts from clients.",
-          "maximum": 268435460,
-          "minimum": 15,
+          "maximum" : 268435460,
+          "minimum" : 15,
           "type" : "integer"
         },
         "maxQualityOfService" : {
           "description" : "Defines the maximum Quality of Service (QoS) level allowed in MQTT PUBLISH messages.",
-          "enum": [0, 1, 2],
+          "enum" : [
+            0,
+            1,
+            2
+          ],
           "type" : "integer"
         },
         "messageExpiryMaxInterval" : {
           "description" : "Defines the maximum message expiry value that clients can set.",
-          "maximum": 4294967296,
-          "minimum": 0,
+          "maximum" : 4294967296,
+          "minimum" : 0,
           "type" : "integer"
         },
         "queuedMessagesMaxSize" : {
           "description" : "Sets the maximum number of messages the HiveMQ broker can store per client.",
-          "minimum": 1,
+          "minimum" : 1,
           "type" : "integer"
         },
         "queuedMessagesStrategy" : {
           "description" : "Defines how messages that arrive at the HiveMQ broker when the message queue of the corresponding client is full are handled.",
-          "enum" : ["discard", "discard-oldest"],
+          "enum" : [
+            "discard",
+            "discard-oldest"
+          ],
           "type" : "string"
         },
         "retainedMessages" : {
@@ -309,8 +316,8 @@
         },
         "serverReceiveMaximum" : {
           "description" : "Defines the maximum number of concurrent publishes the broker accepts from one client.",
-          "maximum": 65535,
-          "minimum": 1,
+          "maximum" : 65535,
+          "minimum" : 1,
           "type" : "integer"
         },
         "sharedSubscriptions" : {
@@ -319,8 +326,8 @@
         },
         "sessionExpiryMaxInterval" : {
           "description" : "Defines the maximum session expiry value that clients can set.",
-          "maximum": 4294967295,
-          "minimum": 0,
+          "maximum" : 4294967295,
+          "minimum" : 0,
           "type" : "integer"
         },
         "subscriptionIdentifier" : {
@@ -333,8 +340,8 @@
         },
         "topicAliasMaxPerClient" : {
           "description" : "The number of topic aliases available per client.",
-          "maximum": 65535,
-          "minimum": 1,
+          "maximum" : 65535,
+          "minimum" : 1,
           "type" : "integer"
         },
         "wildcardSubscriptions" : {
@@ -383,7 +390,7 @@
         },
         "restApiAuditLog" : {
           "description" : "Defines whether audit logging for the REST API is enabled.",
-          "type": "boolean"
+          "type" : "boolean"
         },
         "utf8Validation" : {
           "description" : "Enables the UTF-8 validation of topic names and client IDs.",
@@ -407,29 +414,29 @@
       "properties" : {
         "incomingBandwidthThrottling" : {
           "description" : "The maximum incoming traffic as bytes per second (b/s).",
-          "minimum": 0,
+          "minimum" : 0,
           "type" : "integer"
         },
         "maxClientIdLength" : {
           "description" : "The maximum number of characters HiveMQ accepts in an MQTT-client ID.",
-          "maximum": 65535,
-          "minimum": 1,
+          "maximum" : 65535,
+          "minimum" : 1,
           "type" : "integer"
         },
         "maxConnections" : {
           "description" : "The maximum number of concurrent MQTT connections the HiveMQ instance allows.",
-          "minimum": -1,
+          "minimum" : -1,
           "type" : "integer"
         },
         "maxTopicLength" : {
           "description" : "The maximum number of characters HiveMQ accepts in a topic string.",
-          "maximum": 65535,
-          "minimum": 1,
+          "maximum" : 65535,
+          "minimum" : 1,
           "type" : "integer"
         },
         "noConnectIdleTimeout" : {
           "description" : "The time in milliseconds that HiveMQ waits for a CONNECT message of a client before an open TCP socket is closed.",
-          "minimum": 0,
+          "minimum" : 0,
           "type" : "integer"
         }
       },
@@ -505,7 +512,7 @@
         },
         "isLicenseBase64Encoded" : {
           "description" : "Configures whether to use a Base64 encoded string (data) or clear string (stringData) for the Kubernetes Secret. The default setting is `true`.",
-          "type": "boolean"
+          "type" : "boolean"
         }
       },
       "type" : "object"
@@ -539,51 +546,51 @@
       "properties" : {
         "enabled" : {
           "description" : "Defines whether the monitoring configuration for the HiveMQ Platform is enabled. The default setting is `false`.",
-          "type": "boolean"
+          "type" : "boolean"
         },
         "dashboard" : {
           "description" : "Grafana dashboard configuration options.",
           "properties" : {
             "create" : {
               "description" : "Boolean value that configures whether to use the default HiveMQ Platform Grafana dashboard ConfigMap. The default setting is `true`.",
-              "type": "boolean"
+              "type" : "boolean"
             },
             "namespace" : {
               "description" : "Namespace where to deploy the Grafana dashboard ConfigMap. Defaults to the namespace of the HiveMQ Platform.",
-              "maxLength": 63,
-              "type": "string"
+              "maxLength" : 63,
+              "type" : "string"
             },
             "overrideDashboard" : {
               "description" : "Sets the Grafana dashboard content for the HiveMQ Platform Grafana dashboard ConfigMap with your own JSON file from a specified path.",
-              "type": "string"
+              "type" : "string"
             }
           },
-          "type": "object"
+          "type" : "object"
         },
         "serviceMonitor" : {
           "description" : "Prometheus ServiceMonitor configuration options.",
           "properties" : {
             "interval" : {
               "description" : "Defines how often Prometheus scrapes metrics from the operator endpoints. Valid formats include `1d`, `1h30m`, `5m`, and `10s`. Defaults to 15 seconds.",
-              "pattern": "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
-              "type": "string"
+              "pattern" : "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
+              "type" : "string"
             },
             "namespace" : {
               "description" : "Namespace where to deploy the ServiceMonitor. Defaults to the namespace of the HiveMQ Platform.",
-              "maxLength": 63,
-              "type": "string"
+              "maxLength" : 63,
+              "type" : "string"
             },
             "releaseName" : {
               "description" : "Helm chart release name of the Prometheus Monitoring stack available in the Kubernetes cluster. Defaults to the HiveMQ Platform Helm chart release name.",
-              "type": "string"
+              "type" : "string"
             },
             "scrapeTimeout" : {
               "description" : "Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource. Valid formats include `1d`, `1h30m`, `5m`, and `10s`. Defaults to 10 seconds.",
-              "pattern": "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
-              "type": "string"
+              "pattern" : "^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$",
+              "type" : "string"
             }
           },
-          "type": "object"
+          "type" : "object"
         }
       },
       "type" : "object"
@@ -730,6 +737,27 @@
           "annotations" : {
             "type" : "object"
           },
+          "hivemqConnectOverloadProtection" : {
+            "description" : "Configures the connect overload protection for the HiveMQ MQTT and WebSocket listeners.",
+            "properties" : {
+              "connectBurstSize" : {
+                "description" : "The maximum amount of simultaneous `CONNECT` messages that the listener allows for short periods. The burst size cannot be set to 0 (zero). \nWhen no burst rate is specified, the listener allows a burst rate that is double the defined connect rate.",
+                "exclusiveMinimum" : 0,
+                "format" : "int64",
+                "type" : "integer"
+              },
+              "connectRate" : {
+                "description" : "The maximum sustained rate of connects that the listener allows per second. The connect rate cannot be set to 0 (zero). The default setting is `500`.",
+                "exclusiveMinimum" : 0,
+                "type" : "number"
+              },
+              "enabled" : {
+                "description" : "Defines whether connect overload protection is enabled. Possible values are `true` and `false`. The default setting is `true`.",
+                "type" : "boolean"
+              }
+            },
+            "type" : "object"
+          },
           "containerPort" : {
             "maximum" : 65535,
             "minimum" : 0,
@@ -744,7 +772,7 @@
               "Cluster",
               "Local"
             ],
-            "type": "string"
+            "type" : "string"
           },
           "hivemqListenerName" : {
             "description" : "Defines the optional custom name for the MQTT and WebSocket listeners.",
@@ -799,7 +827,7 @@
           },
           "sessionAffinity" : {
             "additionalProperties" : false,
-            "description": "Used to maintain session affinity. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+            "description" : "Used to maintain session affinity. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
             "properties" : {
               "type" : {
                 "description" : "Session affinity type. Must be ClientIP or None. Defaults to `ClientIP` for `control-services` service type.",
@@ -810,7 +838,7 @@
                 "type" : "string"
               }
             },
-            "type": "object"
+            "type" : "object"
           },
           "tlsClientAuthenticationMode" : {
             "enum" : [
