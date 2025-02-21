@@ -497,7 +497,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
-          count: 7
+          count: 8
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].ports
           content:
@@ -533,6 +533,11 @@ tests:
           content:
             name: mqtt-1889
             containerPort: 1889
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: mqtt-1890
+            containerPort: 1890
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - lengthEqual:
@@ -607,7 +612,7 @@ tests:
           path: spec.services
       - lengthEqual:
           path: spec.services
-          count: 7
+          count: 8
       - contains:
           path: spec.services
           content:
@@ -678,6 +683,16 @@ tests:
                 - name: mqtt-1889
                   targetPort: mqtt-1889
                   port: 1889
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1890
+            spec:
+              ports:
+                - name: mqtt-1890
+                  targetPort: mqtt-1890
+                  port: 1890
 
   - it: with several secure MQTT services using mTLS
     values:
