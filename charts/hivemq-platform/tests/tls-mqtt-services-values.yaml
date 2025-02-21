@@ -16,6 +16,10 @@ services:
     keystorePasswordSecretName: "secret-password1"
     hivemqProxyProtocol: true
     hivemqListenerName: my-custom-mqtt-listener-1885
+    hivemqConnectOverloadProtection:
+      enabled: true
+      connectRate: 500
+      connectBurstSize: 1000
   - type: mqtt
     exposed: false
     containerPort: 1886
@@ -41,3 +45,10 @@ services:
     containerPort: 1889
     hivemqProxyProtocol: true
     hivemqListenerName: my-custom-mqtt-listener-1889
+  - type: mqtt
+    exposed: true
+    containerPort: 1890
+    hivemqConnectOverloadProtection:
+      enabled: false
+      connectRate: 100
+      connectBurstSize: 200
