@@ -995,3 +995,32 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a Metrics service enabled and HiveMQ Connect Overload Protection enabled, validation fails
+    set:
+      services:
+        - type: metrics
+          exposed: true
+          containerPort: 9399
+          hivemqConnectOverloadProtection:
+            enabled: true
+            connectRate: 500
+            connectBurstSize: 1000
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `metrics` with container port `9399` is using `hivemqConnectOverloadProtection` value. HiveMQ Connect Overload Protection is only supported by MQTT and WebSocket services
+
+  - it: with a Metrics service disabled and HiveMQ Connect Overload Protection enabled, validation succeeds
+    set:
+      services:
+        - type: metrics
+          exposed: false
+          containerPort: 9399
+          hivemqConnectOverloadProtection:
+            enabled: true
+            connectRate: 500
+            connectBurstSize: 1000
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

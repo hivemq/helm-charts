@@ -23,6 +23,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
       {{- end }}
+      {{- if hasKey $service "hivemqConnectOverloadProtection" }}
+      {{- $connectOverloadProtection := $service.hivemqConnectOverloadProtection }}
+      <connect-overload-protection>
+        {{- if hasKey $connectOverloadProtection "enabled" }}
+        <enabled>{{ $connectOverloadProtection.enabled }}</enabled>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectRate" }}
+        <connect-rate>{{ $connectOverloadProtection.connectRate }}</connect-rate>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectBurstSize" }}
+        <connect-burst-size>{{ $connectOverloadProtection.connectBurstSize }}</connect-burst-size>
+        {{- end }}
+      </connect-overload-protection>
+      {{- end }}
       <tls>
         <keystore>
           <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
@@ -50,6 +64,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
       {{- end }}
+      {{- if hasKey $service "hivemqConnectOverloadProtection" }}
+      {{- $connectOverloadProtection := $service.hivemqConnectOverloadProtection }}
+      <connect-overload-protection>
+        {{- if hasKey $connectOverloadProtection "enabled" }}
+        <enabled>{{ $connectOverloadProtection.enabled }}</enabled>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectRate" }}
+        <connect-rate>{{ $connectOverloadProtection.connectRate }}</connect-rate>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectBurstSize" }}
+        <connect-burst-size>{{ $connectOverloadProtection.connectBurstSize }}</connect-burst-size>
+        {{- end }}
+      </connect-overload-protection>
+      {{- end }}
     </tcp-listener>
     {{- end }}
     {{- else if eq $service.type "websocket" }}
@@ -62,6 +90,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       {{- end }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
+      {{- end }}
+      {{- if hasKey $service "hivemqConnectOverloadProtection" }}
+      {{- $connectOverloadProtection := $service.hivemqConnectOverloadProtection }}
+      <connect-overload-protection>
+        {{- if hasKey $connectOverloadProtection "enabled" }}
+        <enabled>{{ $connectOverloadProtection.enabled }}</enabled>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectRate" }}
+        <connect-rate>{{ $connectOverloadProtection.connectRate }}</connect-rate>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectBurstSize" }}
+        <connect-burst-size>{{ $connectOverloadProtection.connectBurstSize }}</connect-burst-size>
+        {{- end }}
+      </connect-overload-protection>
       {{- end }}
       <path>/mqtt</path>
       <tls>
@@ -90,6 +132,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       {{- end }}
       {{- if hasKey $service "hivemqProxyProtocol" }}
       <proxy-protocol>{{ $service.hivemqProxyProtocol }}</proxy-protocol>
+      {{- end }}
+      {{- if hasKey $service "hivemqConnectOverloadProtection" }}
+      {{- $connectOverloadProtection := $service.hivemqConnectOverloadProtection }}
+      <connect-overload-protection>
+        {{- if hasKey $connectOverloadProtection "enabled" }}
+        <enabled>{{ $connectOverloadProtection.enabled }}</enabled>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectRate" }}
+        <connect-rate>{{ $connectOverloadProtection.connectRate }}</connect-rate>
+        {{- end }}
+        {{- if hasKey $connectOverloadProtection "connectBurstSize" }}
+        <connect-burst-size>{{ $connectOverloadProtection.connectBurstSize }}</connect-burst-size>
+        {{- end }}
+      </connect-overload-protection>
       {{- end }}
       <path>/mqtt</path>
     </websocket-listener>
