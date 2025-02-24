@@ -21,6 +21,10 @@ services:
     keystorePasswordSecretName: "secret-password2"
     hivemqProxyProtocol: true
     hivemqListenerName: my-custom-ws-listener-8004
+    hivemqConnectOverloadProtection:
+      enabled: true
+      connectRate: 500
+      connectBurstSize: 1000
   - type: websocket
     exposed: true
     containerPort: 8005
@@ -42,3 +46,7 @@ services:
     containerPort: 8007
     hivemqProxyProtocol: true
     hivemqListenerName: my-custom-ws-listener-8007
+    hivemqConnectOverloadProtection:
+      enabled: false
+      connectRate: 100
+      connectBurstSize: 200

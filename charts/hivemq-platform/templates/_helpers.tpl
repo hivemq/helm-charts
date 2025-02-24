@@ -360,6 +360,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-metrics-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
+{{- include "hivemq-platform.validate-hivemq-connect-overload-protection" . -}}
 {{- include "hivemq-platform.validate-external-traffic-policy" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
@@ -499,6 +500,19 @@ Usage: {{ include "hivemq-platform.validate-hivemq-listener-name-services" . }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
     {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that HiveMQ Connect Overload Protection value is only used by either MQTT or WebSocket services and the service is exposed.
+Usage: {{ include "hivemq-platform.validate-hivemq-connect-overload-protection" . }}
+*/}}
+{{- define "hivemq-platform.validate-hivemq-connect-overload-protection" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "hivemqConnectOverloadProtection") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqConnectOverloadProtection` value. HiveMQ Connect Overload Protection is only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
