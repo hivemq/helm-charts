@@ -134,6 +134,8 @@ tests:
           value:
             - name: fragment
               mountPath: /fragment
+            - mountPath: /opt/hivemq/conf-k8s
+              name: topicfilters
             - mountPath: /mqtts
               name: mqtts-jks
 
@@ -146,6 +148,9 @@ tests:
             - name: fragment
               configMap:
                 name: hivemq-edge-config-edge
+            - name: topicfilters
+              configMap:
+                name: hivemq-edge-topicfilters-edge
             - name: mqtts-jks
               secret:
                 items:

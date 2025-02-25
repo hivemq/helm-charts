@@ -172,6 +172,8 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          - name: topicfilters
+            mountPath: /opt/hivemq/conf-k8s
           {{- range .Values.volumes }}
           {{- with (index .definition 0) }}
           - name: {{ .name }}
@@ -206,6 +208,9 @@ spec:
         - name: fragment
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "config" "releaseName" .Release.Name) }}
+        - name: topicfilters
+          configMap:
+            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "topicfilters" "releaseName" .Release.Name) }}
       {{- range .Values.volumes }}
         {{- toYaml .definition | nindent 8 }}
       {{- end }}

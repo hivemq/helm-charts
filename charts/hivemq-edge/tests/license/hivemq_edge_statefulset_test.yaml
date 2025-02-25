@@ -123,6 +123,8 @@ tests:
           value:
             - name: fragment
               mountPath: /fragment
+            - mountPath: /opt/hivemq/conf-k8s
+              name: topicfilters
             - name: license
               mountPath: /license.edgelic
 
@@ -134,6 +136,9 @@ tests:
             - name: fragment
               configMap:
                 name: hivemq-edge-config-edge
+            - name: topicfilters
+              configMap:
+                name: hivemq-edge-topicfilters-edge
             - name: license
               secret:
                 items:
