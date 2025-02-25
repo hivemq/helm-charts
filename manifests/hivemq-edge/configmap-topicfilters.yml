@@ -1,0 +1,18 @@
+---
+# Source: hivemq-edge/templates/configmap-topicfilters.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "my-edge"
+    app.kubernetes.io/version: "2025.3"
+  name: hivemq-edge-topicfilters-my-edge
+  namespace: default
+data:
+  topic-filters.xml: |
+    <?xml version='1.0' encoding='UTF-8'?>
+    <topic-filters-persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="topic-filters.xsd">
+      <topicFilters>
+      </topicFilters>
+    </topic-filters-persistence>

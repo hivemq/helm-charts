@@ -75,7 +75,13 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          - name: topicfilters
+            mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
+            subPath: topic-filters.xml
       volumes:
         - name: fragment
           configMap:
             name: hivemq-edge-config-my-edge
+        - name: topicfilters
+          configMap:
+            name: hivemq-edge-topicfilters-my-edge
