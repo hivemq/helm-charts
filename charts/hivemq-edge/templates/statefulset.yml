@@ -173,7 +173,8 @@ spec:
           - name: fragment
             mountPath: /fragment
           - name: topicfilters
-            mountPath: /opt/hivemq/conf-k8s
+            mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
+            subPath: topic-filters.xml
           {{- range .Values.volumes }}
           {{- with (index .definition 0) }}
           - name: {{ .name }}

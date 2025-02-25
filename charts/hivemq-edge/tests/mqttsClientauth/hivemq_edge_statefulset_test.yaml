@@ -179,7 +179,8 @@ tests:
           value:
             - name: fragment
               mountPath: /fragment
-            - mountPath: /opt/hivemq/conf-k8s
+            - mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
+              subPath: topic-filters.xml
               name: topicfilters
             - name: mqtts-jks
               mountPath: /mqtts
