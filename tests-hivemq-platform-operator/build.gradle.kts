@@ -165,8 +165,8 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.sh")
                 include("**/*.toml")
                 include("**/*.java")
-                // include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform chart
-            }.plus(file("../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml"))
+                // include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform and hivemq-edge charts
+            }.plus(files("../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml", "../charts/hivemq-edge/templates/tests/test-mqtt-cli.yml"))
             filesToUpdate.forEach { file ->
                 val text = file.readText()
                 file.writeText(text.replace("""^hivemq-platform = \"(.*)\"$""".toRegex(RegexOption.MULTILINE)) {
