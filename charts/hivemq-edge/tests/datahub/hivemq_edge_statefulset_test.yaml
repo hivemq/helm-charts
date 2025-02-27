@@ -11,6 +11,14 @@ chart:
 set:
   image:
     tag: edge-tag
+  license:
+    enabled: true
+    file: "1234"
+  modules:
+    dataHub:
+      enabled: true
+    persistence:
+      enabled: true
 
 tests:
   - it: Should have the correct metadata
@@ -91,12 +99,12 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_PERSISTENCE_MODE
-            value: "in-memory"
+            value: "file-native"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_DATAHUB_ENABLED
-            value: "false"
+            value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:

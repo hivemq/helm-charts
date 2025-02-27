@@ -71,8 +71,19 @@ spec:
               value: "/opt/hivemq/conf-k8s"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
+            {{- if and .Values.license.enabled .Values.modules.persistence.enabled }}
             - name: HIVEMQ_PERSISTENCE_MODE
-              value: "{{ .Values.persistenceMode }}"
+              value: "file-native"
+            {{- else }}
+            - name: HIVEMQ_PERSISTENCE_MODE
+              value: "in-memory"
+            {{- end }}
+            - name: HIVEMQ_DATAHUB_ENABLED
+              value: "{{ and .Values.modules.dataHub.enabled .Values.license.enabled }}"
+            {{- if and .Values.license.enabled .Values.modules.persistence.enabled .Values.modules.dataHub.enabled }}
+            - name: HIVEMQ_DATAHUB_SCRIPTSTATE_PATH
+              value: /persistence/scriptstate.db
+              {{- end }}
             {{- if .Values.mqtt.enabled }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
@@ -175,6 +186,10 @@ spec:
           - name: topicfilters
             mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
             subPath: topic-filters.xml
+          {{- if .Values.modules.persistence.enabled }}
+          - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
+            mountPath: /persistence
+          {{- end }}
           {{- range .Values.volumes }}
           {{- with (index .definition 0) }}
           - name: {{ .name }}
@@ -193,7 +208,7 @@ spec:
           - mountPath: /license.edgelic
             name: license
           {{- end }}
-          {{- if .Values.persistence.enabled }}
+          {{- if .Values.modules.persistence.enabled }}
           - mountPath: /persistence
             name: persistence
           {{- end }}
@@ -262,7 +277,17 @@ spec:
             items:
               - key: license.edgelic
                 path: license.edgelic
-      {{- end -}}
-      {{- if .Values.persistence.enabled -}}
-        {{ toYaml .Values.persistence.volume | nindent 8}}
-      {{- end -}}
+      {{- end }}
+  {{- if .Values.modules.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
+      labels:
+          {{- include "hivemq-edge.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "{{.Values.modules.persistence.storageClassName }}"
+      resources:
+        requests:
+          storage: "{{.Values.modules.persistence.size }}"
+  {{- end }}

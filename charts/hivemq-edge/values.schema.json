@@ -23,10 +23,6 @@
       "description" : "The configuration fragment.",
       "type" : "string"
     },
-    "persistenceMode" : {
-      "description" : "How persistence should be handled.",
-      "type" : "string"
-    },
     "license" : {
       "description" : "License configuration.",
       "enabled" : {
@@ -85,16 +81,6 @@
         }
       },
       "type" : "object"
-    },
-    "persistence" : {
-      "description" : "Location of the edge persistence.",
-      "enabled" : {
-        "type" : "boolean"
-      },
-      "volume" : {
-        "description" : "Volume to be used for persistence.",
-        "type" : "object"
-      }
     },
     "mqttsn" : {
       "enabled" : {
@@ -292,6 +278,40 @@
           "mount",
           "definition"
         ]
+      }
+    },
+    "modules": {
+      "dataHub": {
+        "description" : "Configuration for DataHub.",
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean",
+            "description" : "Enable/Disable datahub."
+          }
+        }
+      },
+      "persistence" : {
+        "description" : "Location of the edge persistence.",
+        "mode" : {
+          "enum" : [
+            "in-memory",
+            "file",
+            "file-native"
+          ],
+          "type" : "string"
+        },
+        "enabled" : {
+          "type" : "boolean"
+        },
+        "storageClassName" : {
+          "description" : "Storage class to be used.",
+          "type" : "object"
+        },
+        "size" : {
+          "description" : "Size for the requested claim.",
+          "type" : "object"
+        }
       }
     },
     "podSecurityContext" : {

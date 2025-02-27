@@ -21,15 +21,6 @@ license:
 #    secretName: "licenseSecret"
 #    secretKey: "license.edgelic"
 
-# Persistence: a volume for persistent state, e.g. rocksdb files
-persistence:
-  enabled: false
-  volume:
-    - emptyDir: { }
-      name: persistence
-
-persistenceMode: in-memory
-
 mqttsn:
   enabled: false
 
@@ -150,3 +141,15 @@ topicFilters:
 #    schema: "data:application/json;base64,eyIkc2..."
 #  - filter: "topic1"
 #    schema: "data:application/json;base64,eyJhbm90..."
+
+modules:
+  # DataHub
+  dataHub:
+    enabled: false
+  # Persistence: a volume for persistent state, e.g. rocksdb files
+  persistence:
+    enabled: false
+    storageClassName: "local-storage"
+    size: 2Gi
+
+
