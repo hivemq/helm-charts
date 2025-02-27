@@ -186,7 +186,7 @@ spec:
           - name: topicfilters
             mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
             subPath: topic-filters.xml
-          {{- if .Values.modules.persistence.enabled }}
+          {{- if and .Values.modules.persistence.enabled .Values.license.enabled }}
           - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
             mountPath: /persistence
           {{- end }}
@@ -207,10 +207,6 @@ spec:
           {{- if .Values.license.enabled }}
           - mountPath: /license.edgelic
             name: license
-          {{- end }}
-          {{- if .Values.modules.persistence.enabled }}
-          - mountPath: /persistence
-            name: persistence
           {{- end }}
       {{- with .Values.podScheduling.affinity }}
       affinity:
