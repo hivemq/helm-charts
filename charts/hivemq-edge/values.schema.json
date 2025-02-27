@@ -288,6 +288,10 @@
           "enabled" : {
             "type" : "boolean",
             "description" : "Enable/Disable datahub."
+          },
+          "init" : {
+            "description" : "Specify the init file to load as for datahub.",
+            "type" : "string"
           }
         }
       },

@@ -183,6 +183,8 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          - name: datahubinit
+            mountPath: /datahubinit
           - name: topicfilters
             mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
             subPath: topic-filters.xml
@@ -220,6 +222,9 @@ spec:
         - name: fragment
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "config" "releaseName" .Release.Name) }}
+        - name: datahubinit
+          configMap:
+            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "datahub" "releaseName" .Release.Name) }}
         - name: topicfilters
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "topicfilters" "releaseName" .Release.Name) }}

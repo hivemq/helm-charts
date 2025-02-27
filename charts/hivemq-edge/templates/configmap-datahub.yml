@@ -3,12 +3,12 @@ kind: ConfigMap
 metadata:
   labels:
     {{- include "hivemq-edge.labels" . | nindent 4 }}
-  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "config" "releaseName" .Release.Name) }}
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "datahub" "releaseName" .Release.Name) }}
   namespace: {{ .Release.Namespace }}
 data:
-  config: |
-    {{- if .Values.config }}
-    {{- .Values.config | nindent 4}}
+  init.json: |
+    {{- if .Values.modules.dataHub.init }}
+    {{- .Values.modules.dataHub.init | nindent 4}}
     {{- else }}
-    {{- .Files.Get "files/fragment.xml" | nindent 4 }}
+    {{- .Files.Get "files/datahub.json" | nindent 4 }}
     {{- end }}
