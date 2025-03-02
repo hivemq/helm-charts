@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Generate split index list
         id: generate
-        uses: donnerbart/split-tests-java-action/generate-split-index-json@5d60956c50d6aa1c7aef53982ee29d2f7670d330 # v1
+        uses: donnerbart/split-tests-java-action/generate-split-index-json@c007d50615e5efd388a6e3a7b274d922b4f38392 # v1
         with:
           split-total: ${{ env.split-total }}
 
@@ -107,7 +107,7 @@ jobs:
 
       - name: Split tests
         id: split-tests
-        uses: donnerbart/split-tests-java-action@5d60956c50d6aa1c7aef53982ee29d2f7670d330 # v1
+        uses: donnerbart/split-tests-java-action@c007d50615e5efd388a6e3a7b274d922b4f38392 # v1
         with:
           split-index: ${{ matrix.split-index }}
           split-total: ${{ env.split-total }}
@@ -159,7 +159,7 @@ jobs:
       contents: write
     steps:
       - name: Merge JUnit reports
-        uses: donnerbart/split-tests-java-action/merge-junit-reports@5d60956c50d6aa1c7aef53982ee29d2f7670d330 # v1
+        uses: donnerbart/split-tests-java-action/merge-junit-reports@c007d50615e5efd388a6e3a7b274d922b4f38392 # v1
         with:
           git-branch: junit-reports/legacy/${{ github.base_ref }}
           artifact-name: junit-xml-reports-${{ github.base_ref }}
