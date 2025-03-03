@@ -241,7 +241,7 @@
       "type" : "integer"
     },
     "topicFilters" : {
-      "description" : "Configures the available topic filters",
+      "description" : "Configure the available topic filters",
       "properties" : {
         "filter" : {
           "type" : "string"
@@ -256,7 +256,8 @@
       "required" : [
         "filter",
         "schema"
-      ]
+      ],
+      "type" : "array"
     },
     "volumes" : {
       "description" : "Additional volumes.",
@@ -288,10 +289,10 @@
           "properties" : {
             "enabled" : {
               "type" : "boolean",
-              "description" : "Enable/Disable datahub."
+              "description" : "Enable/Disable DataHub."
             },
             "init" : {
-              "description" : "Specify the init file to load as for datahub.",
+              "description" : "Specify the init file to load as for DataHub.",
               "type" : "string"
             }
           }
@@ -311,11 +312,11 @@
           },
           "storageClassName" : {
             "description" : "Storage class to be used.",
-            "type" : "object"
+            "type" : "string"
           },
           "size" : {
             "description" : "Size for the requested claim.",
-            "type" : "object"
+            "type" : "string"
           }
         }        
       },
