@@ -144,11 +144,20 @@ tests:
 
   - it: Should define the correct volume mounts
     asserts:
-      - contains:
+      - equal:
           path: spec.template.spec.containers[0].volumeMounts
-          content:
-            name: fragment
-            mountPath: /fragment
+          value:
+            - mountPath: /fragment
+              name: fragment
+            - mountPath: /opt/hivemq/conf-secondary
+              name: topicfilters
+            - mountPath: /datahubinit
+              name: datahubinit
+            - mountPath: /persistence
+              name: hivemq-edge-persistence-edge
+            - mountPath: /license.edgelic
+              name: license
+
 
   - it: Should define the correct volumes
     asserts:
