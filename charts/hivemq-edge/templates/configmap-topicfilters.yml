@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "hivemq-edge.labels" . | nindent 4 }}
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "topicfilters" "releaseName" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+data:
+  topic-filters.xml: |
+    <?xml version='1.0' encoding='UTF-8'?>
+    <topic-filters-persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="topic-filters.xsd">
+      <topicFilters>
+      {{- range .Values.topicFilters }}
+        <topicFilter>
+          <description>{{ .description | default "" }}</description>
+          <filter>{{ .filter }}</filter>
+          <schema>{{ .schema }}</schema>
+        </topicFilter>
+      {{- end }}
+      </topicFilters>
+    </topic-filters-persistence>
