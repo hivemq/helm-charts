@@ -281,42 +281,45 @@
       }
     },
     "modules": {
-      "dataHub": {
-        "description" : "Configuration for DataHub.",
-        "type" : "object",
-        "properties" : {
-          "enabled" : {
-            "type" : "boolean",
-            "description" : "Enable/Disable datahub."
-          },
-          "init" : {
-            "description" : "Specify the init file to load as for datahub.",
-            "type" : "string"
+      "properties" : {
+        "dataHub": {
+          "description" : "Configuration for DataHub.",
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean",
+              "description" : "Enable/Disable datahub."
+            },
+            "init" : {
+              "description" : "Specify the init file to load as for datahub.",
+              "type" : "string"
+            }
           }
-        }
+        },
+        "persistence" : {
+          "description" : "Location of the edge persistence.",
+          "mode" : {
+            "enum" : [
+              "in-memory",
+              "file",
+              "file-native"
+            ],
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "storageClassName" : {
+            "description" : "Storage class to be used.",
+            "type" : "object"
+          },
+          "size" : {
+            "description" : "Size for the requested claim.",
+            "type" : "object"
+          }
+        }        
       },
-      "persistence" : {
-        "description" : "Location of the edge persistence.",
-        "mode" : {
-          "enum" : [
-            "in-memory",
-            "file",
-            "file-native"
-          ],
-          "type" : "string"
-        },
-        "enabled" : {
-          "type" : "boolean"
-        },
-        "storageClassName" : {
-          "description" : "Storage class to be used.",
-          "type" : "object"
-        },
-        "size" : {
-          "description" : "Size for the requested claim.",
-          "type" : "object"
-        }
-      }
+      "type": "object"
     },
     "podSecurityContext" : {
       "description" : "Security context for the pod.",
