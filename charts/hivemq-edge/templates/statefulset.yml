@@ -279,7 +279,7 @@ spec:
               - key: license.edgelic
                 path: license.edgelic
       {{- end }}
-  {{- if .Values.modules.persistence.enabled }}
+  {{- if and .Values.modules.persistence.enabled .Values.license.enabled }}
   volumeClaimTemplates:
   - metadata:
       name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
