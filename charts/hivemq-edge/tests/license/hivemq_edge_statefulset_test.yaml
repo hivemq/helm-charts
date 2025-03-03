@@ -123,8 +123,8 @@ tests:
           value:
             - name: fragment
               mountPath: /fragment
-            - mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
-              subPath: topic-filters.xml
+
+            - mountPath: /opt/hivemq/conf-secondary
               name: topicfilters
             - name: license
               mountPath: /license.edgelic

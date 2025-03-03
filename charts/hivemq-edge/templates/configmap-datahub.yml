@@ -1,3 +1,4 @@
+{{- if and .Values.modules.dataHub.enabled .Values.license.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,3 +13,4 @@ data:
     {{- else }}
     {{- .Files.Get "files/datahub.json" | nindent 4 }}
     {{- end }}
+{{- end }}

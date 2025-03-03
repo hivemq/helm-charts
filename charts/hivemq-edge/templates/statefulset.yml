@@ -69,6 +69,8 @@ spec:
               value: "/persistence"
             - name: HIVEMQ_CONFIG_FOLDER
               value: "/opt/hivemq/conf-k8s"
+            - name: HIVEMQ_CONFIG_SECONDARY
+              value: "/opt/hivemq/conf-secondary"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "{{ .Values.refresh }}"
             {{- if and .Values.license.enabled .Values.modules.persistence.enabled }}
@@ -183,11 +185,12 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          - name: topicfilters
+            mountPath: /opt/hivemq/conf-secondary
+          {{- if  and .Values.modules.dataHub.enabled .Values.license.enabled }}
           - name: datahubinit
             mountPath: /datahubinit
-          - name: topicfilters
-            mountPath: /opt/hivemq/conf-k8s/topic-filters.xml
-            subPath: topic-filters.xml
+          {{- end }}
           {{- if and .Values.modules.persistence.enabled .Values.license.enabled }}
           - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
             mountPath: /persistence
@@ -222,12 +225,14 @@ spec:
         - name: fragment
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "config" "releaseName" .Release.Name) }}
-        - name: datahubinit
-          configMap:
-            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "datahub" "releaseName" .Release.Name) }}
         - name: topicfilters
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "topicfilters" "releaseName" .Release.Name) }}
+      {{- if  and .Values.modules.dataHub.enabled .Values.license.enabled }}
+        - name: datahubinit
+          configMap:
+            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "datahub" "releaseName" .Release.Name) }}
+      {{- end }}
       {{- range .Values.volumes }}
         {{- toYaml .definition | nindent 8 }}
       {{- end }}
