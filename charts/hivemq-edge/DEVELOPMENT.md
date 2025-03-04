@@ -40,6 +40,9 @@ Start the cloud provider to enable load balancing:
 sudo cloud-provider-kind
 ```
 
+**Note:**
+The cloud-provider-kind needs to be restarted after deleting and recreating things. Not sure why that is.
+
 Create a file `service.yaml` with the following content:
 
 ```yaml
