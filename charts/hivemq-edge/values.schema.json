@@ -243,6 +243,12 @@
       "description" : "Refresh interval for filechecks",
       "type" : "integer"
     },
+    "liveness" : {
+      "type" : "object",
+      "initialDelaySeconds": {
+        "type" : "integer"
+      }
+    },
     "topicFilters" : {
       "description" : "Configure the available topic filters",
       "properties" : {

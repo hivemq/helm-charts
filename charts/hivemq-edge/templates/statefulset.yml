@@ -41,8 +41,8 @@ spec:
             httpGet:
               path: /api/v1/health/liveness
               port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3
+            initialDelaySeconds: {{ .Values.liveness.initialDelaySeconds }}
+            periodSeconds: 5
           ports:
             {{- if .Values.http.enabled }}
             - containerPort: 8080

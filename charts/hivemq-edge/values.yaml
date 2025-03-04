@@ -156,4 +156,6 @@ modules:
 #    storageClassName: "local-storage"
 #    size: 2Gi
 
+liveness:
+  initialDelaySeconds: 10
 
