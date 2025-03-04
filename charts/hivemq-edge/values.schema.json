@@ -23,10 +23,6 @@
       "description" : "The configuration fragment.",
       "type" : "string"
     },
-    "persistenceMode" : {
-      "description" : "How persistence should be handled.",
-      "type" : "string"
-    },
     "license" : {
       "description" : "License configuration.",
       "enabled" : {
@@ -85,16 +81,6 @@
         }
       },
       "type" : "object"
-    },
-    "persistence" : {
-      "description" : "Location of the edge persistence.",
-      "enabled" : {
-        "type" : "boolean"
-      },
-      "volume" : {
-        "description" : "Volume to be used for persistence.",
-        "type" : "object"
-      }
     },
     "mqttsn" : {
       "enabled" : {
@@ -224,6 +210,9 @@
       ],
       "type" : "string"
     },
+    "serviceAccountName" : {
+      "type" : "string"
+    },
     "javaOpts" : {
       "type" : "string"
     },
@@ -254,6 +243,31 @@
       "description" : "Refresh interval for filechecks",
       "type" : "integer"
     },
+    "liveness" : {
+      "type" : "object",
+      "initialDelaySeconds": {
+        "type" : "integer"
+      }
+    },
+    "topicFilters" : {
+      "description" : "Configure the available topic filters",
+      "properties" : {
+        "filter" : {
+          "type" : "string"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "filter",
+        "schema"
+      ],
+      "type" : "array"
+    },
     "volumes" : {
       "description" : "Additional volumes.",
       "type" : "array",
@@ -275,6 +289,47 @@
           "definition"
         ]
       }
+    },
+    "modules": {
+      "properties" : {
+        "dataHub": {
+          "description" : "Configuration for DataHub.",
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean",
+              "description" : "Enable/Disable DataHub."
+            },
+            "init" : {
+              "description" : "Specify the init file to load as for DataHub.",
+              "type" : "string"
+            }
+          }
+        },
+        "persistence" : {
+          "description" : "Location of the edge persistence.",
+          "mode" : {
+            "enum" : [
+              "in-memory",
+              "file",
+              "file-native"
+            ],
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "storageClassName" : {
+            "description" : "Storage class to be used.",
+            "type" : "string"
+          },
+          "size" : {
+            "description" : "Size for the requested claim.",
+            "type" : "string"
+          }
+        }        
+      },
+      "type": "object"
     },
     "podSecurityContext" : {
       "description" : "Security context for the pod.",

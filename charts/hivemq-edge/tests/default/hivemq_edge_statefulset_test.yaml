@@ -90,6 +90,16 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
+            name: HIVEMQ_PERSISTENCE_MODE
+            value: "in-memory"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_ENABLED
+            value: "false"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: HIVEMQ_ADMIN_USER
             valueFrom:
               secretKeyRef:

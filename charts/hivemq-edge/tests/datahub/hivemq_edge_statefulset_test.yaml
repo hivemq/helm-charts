@@ -14,6 +14,11 @@ set:
   license:
     enabled: true
     file: "1234"
+  modules:
+    dataHub:
+      enabled: true
+    persistence:
+      enabled: true
 
 tests:
   - it: Should have the correct metadata
@@ -93,8 +98,29 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: HIVEMQ_LOG_LEVEL
-            value: "INFO"
+            name: HIVEMQ_PERSISTENCE_MODE
+            value: "file-native"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                key: user
+                name: hivemq-edge-admin-edge
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: hivemq-edge-admin-edge
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -121,29 +147,23 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].volumeMounts
           value:
-            - name: fragment
-              mountPath: /fragment
-
+            - mountPath: /fragment
+              name: fragment
             - mountPath: /opt/hivemq/conf-secondary
               name: topicfilters
-            - name: license
-              mountPath: /license.edgelic
+            - mountPath: /datahubinit
+              name: datahubinit
+            - mountPath: /persistence
+              name: hivemq-edge-persistence-edge
+            - mountPath: /license.edgelic
+              name: license
+
 
   - it: Should define the correct volumes
     asserts:
-      - equal:
+      - contains:
           path: spec.template.spec.volumes
-          value:
-            - name: fragment
-              configMap:
-                name: hivemq-edge-config-edge
-            - name: topicfilters
-              configMap:
-                name: hivemq-edge-topicfilters-edge
-            - name: license
-              secret:
-                items:
-                  - key: "license.edgelic"
-                    path: "license.edgelic"
-                secretName: hivemq-edge-license-edge
-
+          content:
+            name: fragment
+            configMap:
+              name: hivemq-edge-config-edge

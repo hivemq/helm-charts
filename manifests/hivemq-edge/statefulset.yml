@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-edge"
     app.kubernetes.io/instance: "my-edge"
-    app.kubernetes.io/version: "2025.3"
+    app.kubernetes.io/version: "2025.4-rc"
 spec:
   selector:
     matchLabels:
@@ -23,14 +23,14 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: hivemq-edge
-          image: "hivemq/hivemq-edge:2025.3"
+          image: "hivemq/hivemq-edge:2025.4-rc"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /api/v1/health/liveness
               port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3
+            initialDelaySeconds: 10
+            periodSeconds: 5
           ports:
             - containerPort: 8080
               name: web
@@ -49,10 +49,14 @@ spec:
               value: "/persistence"
             - name: HIVEMQ_CONFIG_FOLDER
               value: "/opt/hivemq/conf-k8s"
+            - name: HIVEMQ_CONFIG_SECONDARY
+              value: "/opt/hivemq/conf-secondary"
             - name: HIVEMQ_CONFIG_REFRESHINTERVAL
               value: "1000"
             - name: HIVEMQ_PERSISTENCE_MODE
               value: "in-memory"
+            - name: HIVEMQ_DATAHUB_ENABLED
+              value: "false"
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"
             - name: HIVEMQ_ADMIN_USER
@@ -75,7 +79,12 @@ spec:
           volumeMounts:
           - name: fragment
             mountPath: /fragment
+          - name: topicfilters
+            mountPath: /opt/hivemq/conf-secondary
       volumes:
         - name: fragment
           configMap:
             name: hivemq-edge-config-my-edge
+        - name: topicfilters
+          configMap:
+            name: hivemq-edge-topicfilters-my-edge

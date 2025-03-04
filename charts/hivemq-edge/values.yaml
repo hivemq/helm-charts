@@ -5,7 +5,7 @@
 image:
   repository: hivemq/hivemq-edge
   pullPolicy: IfNotPresent
-  tag: "2025.3"
+  tag: "2025.4-rc"
 
 refresh: 1000
 
@@ -20,15 +20,6 @@ license:
 #  secret:
 #    secretName: "licenseSecret"
 #    secretKey: "license.edgelic"
-
-# Persistence: a volume for persistent state, e.g. rocksdb files
-persistence:
-  enabled: false
-  volume:
-    - emptyDir: { }
-      name: persistence
-
-persistenceMode: in-memory
 
 mqttsn:
   enabled: false
@@ -144,3 +135,27 @@ admin:
 #    secretName: "the-external-secret"
 #    secretUserKey: "user"
 #    secretPasswordKey: "password"
+
+# Configures the available topic filters
+topicFilters: []
+#  - filter: "topic0"
+#    schema: "data:application/json;base64,eyIkc2..."
+#    description: "My topic filter 0"
+#  - filter: "topic1"
+#    schema: "data:application/json;base64,eyJhbm90..."
+#    description: "My topic filter 1"
+
+# Configures modules for Edge.
+modules:
+  # DataHub
+  dataHub:
+    enabled: false
+  # Persistence: a volume for persistent state, e.g. rocksdb files
+  persistence:
+    enabled: false
+#    storageClassName: "local-storage"
+#    size: 2Gi
+
+liveness:
+  initialDelaySeconds: 10
+

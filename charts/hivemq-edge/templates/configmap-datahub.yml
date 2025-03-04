@@ -1,0 +1,16 @@
+{{- if and .Values.modules.dataHub.enabled .Values.license.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "hivemq-edge.labels" . | nindent 4 }}
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "datahub" "releaseName" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+data:
+  init.json: |
+    {{- if .Values.modules.dataHub.init }}
+    {{- .Values.modules.dataHub.init | nindent 4}}
+    {{- else }}
+    {{- .Files.Get "files/datahub.json" | nindent 4 }}
+    {{- end }}
+{{- end }}

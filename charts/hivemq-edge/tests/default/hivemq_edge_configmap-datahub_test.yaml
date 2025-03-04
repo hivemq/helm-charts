@@ -1,0 +1,16 @@
+suite: HiveMQ Edge - Configmap Config tests
+
+templates:
+  - configmap-datahub.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.0.1
+  appVersion: "2367.359"
+
+tests:
+  - it: datahub init configmpa shouldn't be created
+    asserts:
+      - hasDocuments:
+          count: 0
