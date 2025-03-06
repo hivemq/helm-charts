@@ -1,4 +1,15 @@
 import com.fasterxml.jackson.dataformat.toml.TomlMapper
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.jackson.dataformat.toml)
+    }
+}
 
 plugins {
     java
@@ -14,15 +25,6 @@ java {
 
 repositories {
     mavenCentral()
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.jackson.dataformat.toml)
-    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -47,7 +49,14 @@ testing {
             targets.configureEach {
                 testTask {
                     testLogging {
-                        events("started", "passed", "skipped", "failed")
+                        events = setOf(
+                            TestLogEvent.STARTED,
+                            TestLogEvent.PASSED,
+                            TestLogEvent.SKIPPED,
+                            TestLogEvent.FAILED,
+                            TestLogEvent.STANDARD_ERROR,
+                        )
+                        exceptionFormat = TestExceptionFormat.FULL
                         showStandardStreams = true
                     }
                     reports {
