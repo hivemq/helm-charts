@@ -140,12 +140,12 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
      */
     private void bindLocalImages() {
         try {
-            final var buildPath = Path.of("build/");
+            final var buildPath = Path.of("build/test-image-tars/");
             try (var files = Files.list(buildPath).filter(file -> file.toString().endsWith(".tar"))) {
                 files.map(file -> file.getFileName().toString()).forEach(s -> imageNamePaths.put(s, "/containers"));
             }
             if (!imageNamePaths.isEmpty()) {
-                super.withFileSystemBind("build/", "/containers", BindMode.READ_ONLY);
+                super.withFileSystemBind(buildPath.toString(), "/containers", BindMode.READ_ONLY);
             } else {
                 LOG.warn("No container image files could be found on local path {}", buildPath.toAbsolutePath());
             }

@@ -86,9 +86,9 @@ jobs:
       - name: Load local images into KinD cluster
         working-directory: helm-charts
         run: |
-          kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator-init.tar
-          kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform-operator.tar
-          kind load image-archive ./tests-hivemq-platform-operator/build/hivemq-platform.tar
+          kind load image-archive ./tests-hivemq-platform-operator/build/test-image-tars/hivemq-platform-operator-init.tar
+          kind load image-archive ./tests-hivemq-platform-operator/build/test-image-tars/hivemq-platform-operator.tar
+          kind load image-archive ./tests-hivemq-platform-operator/build/test-image-tars/hivemq-platform.tar
 
       - name: Install HiveMQ Platform Operator
         working-directory: helm-charts
