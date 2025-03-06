@@ -42,3 +42,6 @@ testcontainers-hivemq = { module = "org.testcontainers:hivemq", version.ref = "t
 testcontainers-junitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
 testcontainers-k3s = { module = "org.testcontainers:k3s", version.ref = "testcontainers" }
 testcontainers-selenium = { module = "org.testcontainers:selenium", version.ref = "testcontainers" }
+
+[plugins]
+oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.22.0" }
