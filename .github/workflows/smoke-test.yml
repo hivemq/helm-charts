@@ -110,8 +110,15 @@ jobs:
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/operator-pod.log
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test > ${{ runner.temp }}/logs/platform-pod.log
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/platform-operator-pod.log
+          kubectl get pods -n test >> ${{ runner.temp }}/logs/platform-operator-pod.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/platform-operator-pod.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default >> ${{ runner.temp }}/logs/platform-operator-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-operator-pod.log
+
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/platform-pod.log
+          kubectl get pods -n test >> ${{ runner.temp }}/logs/platform-pod.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/platform-pod.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/platform-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-pod.log
 
       - name: Upload HiveMQ Platform Pods logs on failure
         if: failure()
@@ -226,8 +233,10 @@ jobs:
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/operator-pod.log
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test > ${{ runner.temp }}/logs/platform-pod.log
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/legacy-pods.log
+          kubectl get pods -n test >> ${{ runner.temp }}/logs/legacy-pods.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/legacy-pods.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/legacy-pods.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/legacy-pods.log
 
       - name: Upload HiveMQ Legacy Operator Pods logs on failure
         if: failure()
@@ -275,7 +284,10 @@ jobs:
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default > ${{ runner.temp }}/logs/edge-pod.log
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/edge-pod.log
+          kubectl get pods -n test >> ${{ runner.temp }}/logs/edge-pod.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/edge-pod.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/edge-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/edge-pod.log
 
       - name: Upload HiveMQ Edge Pods logs on failure
         if: failure()
