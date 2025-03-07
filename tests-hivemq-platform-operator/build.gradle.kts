@@ -1,7 +1,19 @@
 import com.fasterxml.jackson.dataformat.toml.TomlMapper
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.jackson.dataformat.toml)
+    }
+}
 
 plugins {
     java
+    alias(libs.plugins.oci)
 }
 
 group = "com.hivemq.helmcharts"
@@ -14,15 +26,6 @@ java {
 
 repositories {
     mavenCentral()
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.jackson.dataformat.toml)
-    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -64,7 +67,14 @@ testing {
             targets.configureEach {
                 testTask {
                     testLogging {
-                        events("started", "passed", "skipped", "failed")
+                        events = setOf(
+                            TestLogEvent.STARTED,
+                            TestLogEvent.PASSED,
+                            TestLogEvent.SKIPPED,
+                            TestLogEvent.FAILED,
+                            TestLogEvent.STANDARD_ERROR,
+                        )
+                        exceptionFormat = TestExceptionFormat.FULL
                         showStandardStreams = true
                     }
                     reports {
@@ -95,8 +105,8 @@ testing {
                         layout.buildDirectory.file("hivemq-dns-init-wait.tar"),
                         layout.buildDirectory.file("hivemq-operator.tar"),
                         layout.buildDirectory.file("hivemq-k8s.tar"),
-                        layout.buildDirectory.file("hivemq-platform-operator-init.tar"),
-                        layout.buildDirectory.file("hivemq-platform-operator.tar"),
+                        layout.buildDirectory.file("test-image-tars/hivemq-platform-operator-init.tar"),
+                        layout.buildDirectory.file("test-image-tars/hivemq-platform-operator.tar"),
                         layout.buildDirectory.file("hivemq-platform.tar"),
                     )
                 }
@@ -107,26 +117,40 @@ testing {
 
 /* ******************** Docker Platform Operator Images ******************** */
 
-val savePlatformOperatorDockerImage by tasks.registering(Exec::class) {
-    group = "container"
-    description = "Save HiveMQ Platform Operator Docker image"
-    dependsOn(gradle.includedBuild("hivemq-platform-operator").task(":docker"))
-    workingDir(layout.buildDirectory)
-    commandLine("docker", "save", "-o", "hivemq-platform-operator.tar", "hivemq/hivemq-platform-operator-test:snapshot")
+oci {
+    registries {
+        dockerHub {
+            optionalCredentials()
+        }
+    }
 }
 
-val savePlatformOperatorInitDockerImage by tasks.registering(Exec::class) {
-    group = "container"
-    description = "Save HiveMQ Platform Operator Init Docker image"
-    dependsOn(gradle.includedBuild("hivemq-platform-operator-init").task(":docker"))
-    workingDir(layout.buildDirectory)
-    commandLine(
-        "docker",
-        "save",
-        "-o",
-        "hivemq-platform-operator-init.tar",
-        "hivemq/hivemq-platform-operator-init-test:snapshot"
-    )
+val operatorImageLayoutForTesting by tasks.registering(oci.imagesLayoutTaskClass) {
+    from(oci.imageDependencies.create("operatorImageTarForTesting") {
+        runtime("com.hivemq:hivemq-platform-operator").name("hivemq/hivemq-platform-operator-test")
+            .tag("snapshot")
+    })
+    destinationDirectory = layout.buildDirectory.dir("test-image-tars")
+    classifier = "hivemq-platform-operator"
+}
+
+val operatorImageLayoutForTestingTar by tasks.existing(Tar::class) {
+    destinationDirectory = layout.buildDirectory
+    archiveFileName = "hivemq-platform-operator.tar"
+}
+
+val initImageLayoutForTesting by tasks.registering(oci.imagesLayoutTaskClass) {
+    from(oci.imageDependencies.create("initImageTarForTesting") {
+        runtime("com.hivemq:hivemq-platform-operator-init").name("hivemq/hivemq-platform-operator-init-test")
+            .tag("snapshot")
+    })
+    destinationDirectory = layout.buildDirectory.dir("test-image-tars")
+    classifier = "hivemq-platform-operator-init"
+}
+
+val initImageLayoutForTestingTar by tasks.existing(Tar::class) {
+    destinationDirectory = layout.buildDirectory
+    archiveFileName = "hivemq-platform-operator-init.tar"
 }
 
 val hivemqVersion = libs.versions.hivemq.platform.get()
@@ -146,8 +170,8 @@ val pullPlatformDockerImage by tasks.registering(Exec::class) {
 val saveDockerImages by tasks.registering {
     group = "container"
     description = "Save all Platform Docker images"
-    dependsOn(savePlatformOperatorInitDockerImage)
-    dependsOn(savePlatformOperatorDockerImage)
+    dependsOn(operatorImageLayoutForTestingTar)
+    dependsOn(initImageLayoutForTestingTar)
     dependsOn(savePlatformDockerImage)
 }
 
