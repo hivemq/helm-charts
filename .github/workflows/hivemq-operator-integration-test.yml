@@ -115,6 +115,7 @@ jobs:
           junit-glob: '**/junit-reports/*.xml'
           format: 'gradle'
           new-test-time: 'average'
+          calculate-optimal-total-split: true
           debug: true
 
       - name: Run HiveMQ Legacy Operator integration tests
