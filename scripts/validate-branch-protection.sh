@@ -87,10 +87,40 @@ EXPECTED_CHECKS_STRING=$(printf "%s\n" "${EXPECTED_CHECKS[@]}" | sort)
 REQUIRED_CHECKS=$(gh api -H "Accept: application/vnd.github.v3+json" "/repos/$OWNER/$REPO/branches/$BRANCH/protection" | jq -r '.required_status_checks.contexts[]' | sort)
 
 # compare expected checks with branch required checks
-DIFF=$(comm -23 <(echo "$EXPECTED_CHECKS_STRING") <(echo "$REQUIRED_CHECKS"))
+DIFF=$(comm -23 <(echo "$EXPECTED_CHECKS_STRING") <(echo "$REQUIRED_CHECKS") | sort -f -V)
 if [ -n "$DIFF" ]; then
-  echo "Missing checks in $BRANCH branch protection:"
-  echo "$DIFF"
+  RULE_JSON=$(gh api graphql -f query="
+  query(\$owner: String!, \$repo: String!, \$branch: String!) {
+    repository(owner: \$owner, name: \$repo) {
+      ref(qualifiedName: \$branch) {
+        branchProtectionRule {
+          id
+          requiredStatusCheckContexts
+        }
+      }
+    }
+  }" -F owner=$OWNER -F repo=$REPO -F branch=refs/heads/$BRANCH)
+  RULE_ID=$(echo "$RULE_JSON" | jq -r '.data.repository.ref.branchProtectionRule.id')
+  MUTATION_CHECKS_STRING=$(printf "      \"%s\",\n" "${EXPECTED_CHECKS[@]}" | sort -f -V | sed '$s/,$//')
+
+  cat << EOF
+Missing checks in $BRANCH branch protection:
+$DIFF
+
+Execute the following commands to update the branch protection rule:
+cat << EOL > mutation.json
+{
+  "query": "mutation(\$id: ID!, \$contexts: [String!]!) { updateBranchProtectionRule(input: {branchProtectionRuleId: \$id, requiredStatusCheckContexts: \$contexts}) { branchProtectionRule { id requiredStatusCheckContexts } } }",
+  "variables": {
+    "id": "$RULE_ID",
+    "contexts": [
+$MUTATION_CHECKS_STRING
+    ]
+  }
+}
+EOL
+gh api graphql --input mutation.json && rm mutation.json
+EOF
   exit 1
 fi
 echo "No checks are missing in $BRANCH branch protection"
