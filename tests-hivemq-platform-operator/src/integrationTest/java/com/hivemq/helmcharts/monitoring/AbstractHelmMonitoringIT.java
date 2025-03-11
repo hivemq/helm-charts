@@ -20,7 +20,7 @@ import static io.restassured.RestAssured.given;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 
-class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
+abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
 
     private static final @NotNull String MONITORING_NAMESPACE = "monitoring";
     private static final @NotNull String MONITORING_RELEASE = "monitoring-stack";
