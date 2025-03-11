@@ -76,11 +76,11 @@ jobs:
           fi
 
       - name: Checkout JUnit reports
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: donnerbart/split-tests-java-action/checkout-junit-reports@309d1540b26a944f2ed215688ddc0e3164dfeadf # v1
         with:
+          split-index: ${{ matrix.split-index }}
+          git-branch: junit-reports/platform/${{ github.base_ref }}
           path: junit-reports
-          ref: junit-reports/platform/${{ github.base_ref }}
-        continue-on-error: true
 
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
