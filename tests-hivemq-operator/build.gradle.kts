@@ -85,6 +85,10 @@ testing {
     }
 }
 
+tasks.register("integrationTestPrepare") {
+    dependsOn(tasks.named("integrationTest").get().taskDependencies.getDependencies(null))
+}
+
 /* ******************** Legacy Docker Operator Images ******************** */
 
 val containerName = findProperty("containerName") ?: "hivemq-k8s-test"

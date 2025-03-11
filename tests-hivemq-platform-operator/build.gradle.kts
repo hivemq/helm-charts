@@ -105,6 +105,10 @@ testing {
     }
 }
 
+tasks.register("integrationTestPrepare") {
+    dependsOn(tasks.named("integrationTest").get().taskDependencies.getDependencies(null))
+}
+
 /* ******************** Docker Platform Operator Images ******************** */
 
 val savePlatformOperatorDockerImage by tasks.registering(Exec::class) {
