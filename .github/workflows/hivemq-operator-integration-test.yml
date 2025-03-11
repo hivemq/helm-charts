@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Generate split index list
         id: generate
-        uses: donnerbart/split-tests-java-action/generate-split-index-json@309d1540b26a944f2ed215688ddc0e3164dfeadf # v1
+        uses: donnerbart/split-tests-java-action/generate-split-index-json@bc8f37be9b3260c4106f7ef3bb3d0dc88a528cc3 # v1
         with:
           split-total: ${{ env.split-total }}
 
@@ -131,11 +131,12 @@ jobs:
           fi
 
       - name: Checkout JUnit reports
-        uses: donnerbart/split-tests-java-action/checkout-junit-reports@309d1540b26a944f2ed215688ddc0e3164dfeadf # v1
+        uses: donnerbart/split-tests-java-action/checkout-junit-reports@bc8f37be9b3260c4106f7ef3bb3d0dc88a528cc3 # v1
         with:
           split-index: ${{ matrix.split-index }}
           git-branch: junit-reports/legacy/${{ github.base_ref }}
           path: junit-reports
+          upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
 
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
@@ -162,7 +163,7 @@ jobs:
 
       - name: Split tests
         id: split-tests
-        uses: donnerbart/split-tests-java-action@309d1540b26a944f2ed215688ddc0e3164dfeadf # v1
+        uses: donnerbart/split-tests-java-action@bc8f37be9b3260c4106f7ef3bb3d0dc88a528cc3 # v1
         with:
           split-index: ${{ matrix.split-index }}
           split-total: ${{ env.split-total }}
@@ -215,7 +216,7 @@ jobs:
       contents: write
     steps:
       - name: Merge JUnit reports
-        uses: donnerbart/split-tests-java-action/merge-junit-reports@309d1540b26a944f2ed215688ddc0e3164dfeadf # v1
+        uses: donnerbart/split-tests-java-action/merge-junit-reports@bc8f37be9b3260c4106f7ef3bb3d0dc88a528cc3 # v1
         with:
           git-branch: junit-reports/legacy/${{ github.base_ref }}
           artifact-name: junit-xml-reports-${{ github.base_ref }}
