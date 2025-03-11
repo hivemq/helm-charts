@@ -103,12 +103,12 @@ if [ -n "$DIFF" ]; then
   RULE_ID=$(echo "$RULE_JSON" | jq -r '.data.repository.ref.branchProtectionRule.id')
   MUTATION_CHECKS_STRING=$(printf "      \"%s\",\n" "${EXPECTED_CHECKS[@]}" | sort -f -V | sed '$s/,$//')
 
-  cat << EOF
+  cat << END_OF_SCRIPT
 Missing checks in $BRANCH branch protection:
 $DIFF
 
 Execute the following commands to update the branch protection rule:
-cat << EOL > mutation.json
+cat << EOF > mutation.json
 {
   "query": "mutation(\$id: ID!, \$contexts: [String!]!) { updateBranchProtectionRule(input: {branchProtectionRuleId: \$id, requiredStatusCheckContexts: \$contexts}) { branchProtectionRule { id requiredStatusCheckContexts } } }",
   "variables": {
@@ -118,9 +118,9 @@ $MUTATION_CHECKS_STRING
     ]
   }
 }
-EOL
-gh api graphql --input mutation.json && rm mutation.json
 EOF
+gh api graphql --input mutation.json && rm mutation.json
+END_OF_SCRIPT
   exit 1
 fi
 echo "No checks are missing in $BRANCH branch protection"
