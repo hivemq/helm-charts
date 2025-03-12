@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.operator.HelmApplyCrdIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2025-03-12T15:56:15" hostname="fv-az810-976" time="121.121">
+<testsuite name="com.hivemq.helmcharts.operator.HelmApplyCrdIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2025-03-12T17:58:10" hostname="fv-az2023-957" time="106.075">
   <properties/>
-  <testcase name="withCrdNotDeployed_withDisabledCrdApply_operatorIsFailing()" classname="com.hivemq.helmcharts.operator.HelmApplyCrdIT" time="30.091"/>
-  <testcase name="withCrdNotDeployed_operatorIsRunning()" classname="com.hivemq.helmcharts.operator.HelmApplyCrdIT" time="46.168"/>
-  <testcase name="withOutdatedCrd_operatorIsRunning()" classname="com.hivemq.helmcharts.operator.HelmApplyCrdIT" time="44.862"/>
+  <testcase name="withCrdNotDeployed_withDisabledCrdApply_operatorIsFailing()" classname="com.hivemq.helmcharts.operator.HelmApplyCrdIT" time="26.271"/>
+  <testcase name="withCrdNotDeployed_operatorIsRunning()" classname="com.hivemq.helmcharts.operator.HelmApplyCrdIT" time="40.642"/>
+  <testcase name="withOutdatedCrd_operatorIsRunning()" classname="com.hivemq.helmcharts.operator.HelmApplyCrdIT" time="39.162"/>
 </testsuite>
