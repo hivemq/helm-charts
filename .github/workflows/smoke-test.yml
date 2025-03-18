@@ -98,22 +98,21 @@ jobs:
         working-directory: helm-charts
         run: helm install $RELEASE_NAME --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --create-namespace -n test
 
+      - name: Wait for pods to be ready
+        working-directory: helm-charts
+        run: bash ./scripts/wait-for-pods.sh hivemq-platform app.kubernetes.io/instance=$RELEASE_NAME test
+
       - name: Test HiveMQ Platform
-        run: |
-          kubectl get events -n test -w &
-          # Otherwise the pods are not created and the next step fails
-          echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=$RELEASE_NAME --timeout=5m -n test
-          helm test $RELEASE_NAME --logs -n test
+        run: helm test $RELEASE_NAME --logs -n test
 
       - name: Capture HiveMQ Platform Pods logs on failure
         if: failure()
         run: |
           mkdir ${{ runner.temp }}/logs
           echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/platform-operator-pod.log
-          kubectl get pods -n test >> ${{ runner.temp }}/logs/platform-operator-pod.log
+          kubectl get pods -n default >> ${{ runner.temp }}/logs/platform-operator-pod.log
           echo "=== LOGS ===" >> ${{ runner.temp }}/logs/platform-operator-pod.log
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n default >> ${{ runner.temp }}/logs/platform-operator-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-operator-pod.log
+          kubectl logs -l app.kubernetes.io/instance=operator-test --tail -1 -n default >> ${{ runner.temp }}/logs/platform-operator-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-operator-pod.log
 
           echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/platform-pod.log
           kubectl get pods -n test >> ${{ runner.temp }}/logs/platform-pod.log
@@ -221,13 +220,12 @@ jobs:
           helm dependency build ./charts/hivemq-operator
           helm install $RELEASE_NAME ./charts/hivemq-operator -f ./examples/hivemq-operator/localStatefulTest.yml --wait --create-namespace -n test
 
+      - name: Wait for pods to be ready
+        working-directory: helm-charts
+        run: bash ./scripts/wait-for-pods.sh hivemq-cluster hivemq-cluster=$RELEASE_NAME test
+
       - name: Test HiveMQ Cluster
-        run: |
-          kubectl get events -n test -w &
-          # Otherwise the pods are not created and the next step fails
-          echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
-          kubectl wait --for=condition=ready pod -l hivemq-cluster=$RELEASE_NAME --timeout=5m -n test
-          helm test $RELEASE_NAME --logs -n test
+        run: helm test $RELEASE_NAME --logs -n test
 
       - name: Capture HiveMQ Legacy Operator Pods logs on failure
         if: failure()
@@ -235,8 +233,10 @@ jobs:
           mkdir ${{ runner.temp }}/logs
           echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/legacy-pods.log
           kubectl get pods -n test >> ${{ runner.temp }}/logs/legacy-pods.log
-          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/legacy-pods.log
-          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/legacy-pods.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/legacy-pods.log
+          echo "=== CLUSTER LOGS ===" >> ${{ runner.temp }}/logs/legacy-pods.log
+          kubectl logs -l hivemq-cluster=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/legacy-pods.log 2>&1 || echo "Failed to retrieve cluster pods logs" >> ${{ runner.temp }}/logs/legacy-pods.log
+          echo "=== LEGACY OPERATOR LOGS ===" >> ${{ runner.temp }}/logs/legacy-pods.log
+          kubectl logs -l app=hivemq-operator --tail -1 -n test >> ${{ runner.temp }}/logs/legacy-pods.log 2>&1 || echo "Failed to retrieve legacy operator pod logs" >> ${{ runner.temp }}/logs/legacy-pods.log          
 
       - name: Upload HiveMQ Legacy Operator Pods logs on failure
         if: failure()
@@ -260,8 +260,6 @@ jobs:
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          path: helm-charts
 
       - name: Create K8s Kind Cluster
         uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3
@@ -269,16 +267,13 @@ jobs:
           cluster_name: "kind"
 
       - name: Install HiveMQ Edge
-        working-directory: helm-charts
         run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --create-namespace -n test
 
+      - name: Wait for pods to be ready
+        run: bash ./scripts/wait-for-pods.sh hivemq-edge app.kubernetes.io/instance=$RELEASE_NAME test
+
       - name: Test HiveMQ Edge
-        run: |
-          kubectl get events -n test -w &
-          # Otherwise the pods are not created and the next step fails
-          echo Waiting for statefulSet to be created && sleep 15 && echo Done Waiting
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=$RELEASE_NAME --timeout=5m -n test
-          helm test $RELEASE_NAME --logs -n test
+        run: helm test $RELEASE_NAME --logs -n test
 
       - name: Capture HiveMQ Edge Pods logs on failure
         if: failure()
