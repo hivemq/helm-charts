@@ -42,9 +42,10 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
                 K8sUtil.waitForHiveMQPlatformState(client, platformNamespace, PLATFORM_RELEASE_NAME, "ERROR");
         //noinspection unchecked
         assertThat((Map<String, String>) hivemqCustomResource.getAdditionalProperties().get("status")).containsValues(
-                String.format("The custom resource spec is invalid: The ServiceAccount '%s' does not exist",
+                String.format(
+                        "The ServiceAccount and its permissions are invalid: The ServiceAccount '%s' does not exist",
                         SERVICE_ACCOUNT_NAME),
-                "INVALID_CUSTOM_RESOURCE_SPEC");
+                "INVALID_SERVICEACCOUNT_PERMISSION");
 
         // create missing ServiceAccount
         K8sUtil.createServiceAccount(client, platformNamespace, SERVICE_ACCOUNT_NAME);
@@ -80,9 +81,9 @@ class HelmCustomServiceAccountIT extends AbstractHelmChartIT {
         //noinspection unchecked
         assertThat((Map<String, String>) hivemqCustomResource.getAdditionalProperties().get("status")).containsValues(
                 String.format(
-                        "The custom resource spec is invalid: The ServiceAccount '%s' must have the Pod resource permissions: [get, patch, update]",
+                        "The ServiceAccount and its permissions are invalid: Found no ClusterRoleBinding for ServiceAccount '%s'",
                         SERVICE_ACCOUNT_NAME),
-                "INVALID_CUSTOM_RESOURCE_SPEC");
+                "INVALID_SERVICEACCOUNT_PERMISSION");
 
         // create missing permissions
         createRole();
