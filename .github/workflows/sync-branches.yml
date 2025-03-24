@@ -1,4 +1,4 @@
-name: Sync Branch with HiveMQ Platform Operator
+name: Sync branches with HiveMQ Platform Operator and HiveMQ K8s testsuite repos
 
 on:
   pull_request:
@@ -6,18 +6,23 @@ on:
       - develop
 
 jobs:
-  sync-branch:
+  sync-branches:
     permissions:
       contents: read
       packages: write
-
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repository: [
+          hivemq-platform-operator,
+          hivemq-k8s-testsuite
+        ]
 
     steps:
-      - name: Checkout HiveMQ Platform Operator on the default branch
+      - name: Checkout hivemq/${{ matrix.repository }} on the default branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
-          repository: hivemq/hivemq-platform-operator
+          repository: hivemq/${{ matrix.repository }}
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
 
       - name: Configure Git
@@ -28,13 +33,13 @@ jobs:
       - name: Check if same branch exists
         id: check-branch
         run: |
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
+          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on ${{ matrix.repository }}"
           BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
           if [[ -n "${BRANCH}" ]]; then
-            echo "Same branch exists on hivemq-platform-operator"
+            echo "Same branch exists on ${{ matrix.repository }}"
             echo "branch_exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Same branch does not exists on hivemq-platform-operator"
+            echo "Same branch does not exists on ${{ matrix.repository }}"
             echo "branch_exists=false" >> "$GITHUB_OUTPUT"
           fi
 
