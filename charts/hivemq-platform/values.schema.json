@@ -231,6 +231,73 @@
       },
       "type" : "object"
     },
+    "hivemqClusterFailureDetection" : {
+      "additionalProperties" : false,
+      "description" : "Configures HiveMQ Cluster failure detection. See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#failure-detection.",
+      "properties" : {
+        "heartbeat" : {
+          "additionalProperties" : false,
+          "description" : "Continuously sends a heartbeat between nodes.",
+          "properties" : {
+            "enabled" : {
+              "description" : "Enables the heartbeat.",
+              "type": "boolean"
+            },
+            "interval" : {
+              "description" : "The interval in which a heartbeat message is sent to other nodes.",
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "timeout" : {
+              "description" : "Amount of time that is tolerated for the response to a heartbeat message before a node is temporarily removed from the cluster.",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "type" : "object"
+        },
+        "tcpHealthCheck" : {
+          "additionalProperties" : false,
+          "description" : "Holds an open TCP connection between nodes.",
+          "properties" : {
+            "bindAddress" : {
+              "description" : "The network address to bind to.",
+              "minLength" : 1,
+              "pattern": ".*\\S.*",
+              "type" : "string"
+            },
+            "bindPort" : {
+              "description" : "The port to bind to. 0 uses an ephemeral port.",
+              "maximum" : 65535,
+              "minimum" : 0,
+              "type" : "integer"
+            },
+            "enabled" : {
+              "description" : "Enables the TCP health check.",
+              "type": "boolean"
+            },
+            "externalAddress" : {
+              "description" : "The external address to bind to if the node is behind some kind of NAT.",
+              "minLength" : 1,
+              "pattern": ".*\\S.*",
+              "type" : "string"
+            },
+            "externalPort" : {
+              "description" : "The external port to bind to if the node is behind some kind of NAT.",
+              "maximum" : 65535,
+              "minimum" : 0,
+              "type" : "integer"
+            },
+            "portRange" : {
+              "description" : "Port range to check on other nodes.",
+              "type": "integer"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
+    },
     "hivemqClusterReplication" : {
       "description" : "Configures HiveMQ Cluster replication. See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication.",
       "properties" : {
