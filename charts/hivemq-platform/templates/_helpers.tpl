@@ -824,11 +824,27 @@ Returns:
 {{- end }}
 
 {{/*
-Checks if there is any HiveMQ Replication options set based on the `.Values.hivemqClusterReplication` values
+Checks if there is any HiveMQ Cluster Failure Detection options set based on the `.Values.hivemqClusterFailureDetection` values
 Params:
-- hivemqClusterReplication: The set of values from hivemqClusterReplication
+- hivemqClusterFailureDetection: The set of values from `hivemqClusterFailureDetection`
 Returns:
-- `true` if any of the expected values under the hivemqClusterReplication top level root value is present, empty string otherwise.
+- `true` if any of the expected values under the `hivemqClusterFailureDetection` top level root value is present, empty string otherwise.
+*/}}
+{{- define "hivemq-platform.has-cluster-failure-detection-config" }}
+{{- $failureDetection := .hivemqClusterFailureDetection }}
+{{- $contains := "" }}
+{{- if or (hasKey $failureDetection "heartbeat") (hasKey $failureDetection "tcpHealthCheck") }}
+{{- $contains = true }}
+{{- end }}
+{{- $contains }}
+{{- end }}
+
+{{/*
+Checks if there is any HiveMQ Cluster Replication options set based on the `.Values.hivemqClusterReplication` values
+Params:
+- hivemqClusterReplication: The set of values from `hivemqClusterReplication`
+Returns:
+- `true` if any of the expected values under the `hivemqClusterReplication` top level root value is present, empty string otherwise.
 */}}
 {{- define "hivemq-platform.has-cluster-replication-config" }}
 {{- $replicationConfig := .hivemqClusterReplication }}
