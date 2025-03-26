@@ -210,12 +210,27 @@ license:
 #  enabled: false
 #  lifetime: 604800
 
-# Configures HiveMQ Cluster overload protection.
+# Configures HiveMQ Cluster overload protection options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/overload-protection.html
 #hivemqOverloadProtection:
 #  enabled: true
 
-# Configures HiveMQ Cluster replication.
+# Configures HiveMQ Cluster failure detection options.
+# See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#failure-detection
+#hivemqClusterFailureDetection:
+#  heartbeat:
+#    enabled: true
+#    interval: 3000
+#    timeout: 9000
+#  tcpHealthCheck:
+#    enabled: true
+#    bindAddress:
+#    bindPort: 0
+#    portRange: 50
+#    externalAddress:
+#    externalPort: 0
+
+# Configures HiveMQ Cluster replication options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#replication
 #hivemqClusterReplication:
 #  replicaCount: 2
