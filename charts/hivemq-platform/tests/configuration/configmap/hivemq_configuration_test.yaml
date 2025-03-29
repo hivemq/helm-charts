@@ -760,6 +760,1336 @@ tests:
     asserts:
       - failedTemplate: {}
 
+  - it: with default platform values and all default cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: true
+          interval: 3000
+          timeout: 9000
+        tcpHealthCheck:
+          enabled: true
+          bindPort: 0
+          portRange: 50
+          externalPort: 0
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <enabled>true</enabled>
+                    <interval>3000</interval>
+                    <timeout>9000</timeout>
+                  </heartbeat>
+                  <tcp-health-check>
+                    <enabled>true</enabled>
+                    <bind-port>0</bind-port>
+                    <port-range>50</port-range>
+                    <external-port>0</external-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and some cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          timeout: 9000
+        tcpHealthCheck:
+          enabled: true
+          portRange: 50
+          externalPort: 0
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <timeout>9000</timeout>
+                  </heartbeat>
+                  <tcp-health-check>
+                    <enabled>true</enabled>
+                    <port-range>50</port-range>
+                    <external-port>0</external-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and all cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: false
+          interval: 2000
+          timeout: 3000
+        tcpHealthCheck:
+          enabled: true
+          bindAddress: 0.0.0.0
+          bindPort: 1443
+          portRange: 100
+          externalAddress: external-address.svc.local
+          externalPort: 8001
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <enabled>false</enabled>
+                    <interval>2000</interval>
+                    <timeout>3000</timeout>
+                  </heartbeat>
+                  <tcp-health-check>
+                    <enabled>true</enabled>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>1443</bind-port>
+                    <port-range>100</port-range>
+                    <external-address>external-address.svc.local</external-address>
+                    <external-port>8001</external-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and heartbeat enabled cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <enabled>false</enabled>
+                  </heartbeat>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and heartbeat interval cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          interval: 2000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <interval>2000</interval>
+                  </heartbeat>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and heartbeat timeout cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          timeout: 3000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <timeout>3000</timeout>
+                  </heartbeat>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and some heartbeat cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          interval: 2000
+          timeout: 3000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <interval>2000</interval>
+                    <timeout>3000</timeout>
+                  </heartbeat>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and empty cluster failure detection config value set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with invalid config value for cluster failure detection, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        foo: bar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with default platform values and heartbeat cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: false
+          interval: 1000
+          timeout: 2000
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <enabled>false</enabled>
+                    <interval>1000</interval>
+                    <timeout>2000</timeout>
+                  </heartbeat>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and empty heartbeat cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <heartbeat>
+                  </heartbeat>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with invalid config value for heartbeat cluster failure detection, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          foo: bar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid enabled value type for heartbeat cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: "true"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid enabled value for heartbeat cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid interval minimum value for heartbeat cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          interval: 0
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid interval value type for heartbeat cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          interval: "10"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid timeout minimum value for heartbeat cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          timeout: 0
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid timeout value type for heartbeat cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        heartbeat:
+          timeout: "10"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with default platform values and tcpHealthCheck cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          enabled: true
+          bindAddress: 127.0.0.0
+          bindPort: 1443
+          portRange: 100
+          externalAddress: external-address.svc.local
+          externalPort: 8001
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <enabled>true</enabled>
+                    <bind-address>127.0.0.0</bind-address>
+                    <bind-port>1443</bind-port>
+                    <port-range>100</port-range>
+                    <external-address>external-address.svc.local</external-address>
+                    <external-port>8001</external-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and tcpHealthCheck enabled cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          enabled: false
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <enabled>false</enabled>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and tcpHealthCheck bindAddress cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindAddress: 127.0.0.0
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <bind-address>127.0.0.0</bind-address>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and tcpHealthCheck bindPort cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindPort: 1443
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <bind-port>1443</bind-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and tcpHealthCheck portRange cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          portRange: 100
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <port-range>100</port-range>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and tcpHealthCheck externalAddress cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalAddress: external-address.svc.local
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <external-address>external-address.svc.local</external-address>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and tcpHealthCheck externalPort cluster failure detection config value set only
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalPort: 8001
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <external-port>8001</external-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and some tcpHealthCheck cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindAddress: 127.0.0.0
+          externalPort: 8001
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                    <bind-address>127.0.0.0</bind-address>
+                    <external-port>8001</external-port>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with default platform values and empty tcpHealthCheck cluster failure detection config values set
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck: {}
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - equal:
+          path: data["config.xml"]
+          value: |-
+            <?xml version="1.0"?>
+            <hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="config.xsd">
+              <listeners>
+                <tcp-listener>
+                  <port>1883</port>
+                  <bind-address>0.0.0.0</bind-address>
+                </tcp-listener>
+              </listeners>
+              <cluster>
+                <transport>
+                  <tcp>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>7000</bind-port>
+                  </tcp>
+                </transport>
+                <enabled>true</enabled>
+                <discovery>
+                  <extension/>
+                </discovery>
+                <failure-detection>
+                  <tcp-health-check>
+                  </tcp-health-check>
+                </failure-detection>
+              </cluster>
+              <!-- required and should not be configured different -->
+              <health-api>
+                <enabled>true</enabled>
+                <listeners>
+                  <http>
+                    <port>8889</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </health-api>
+              <control-center>
+                <listeners>
+                  <http>
+                    <port>8080</port>
+                    <bind-address>0.0.0.0</bind-address>
+                  </http>
+                </listeners>
+              </control-center>
+            </hivemq>
+
+  - it: with invalid config value for tcpHealthCheck cluster failure detection, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          foo: bar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid enabled value type for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          enabled: "true"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid enabled value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          enabled: foobar
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid bindAddress minimum value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindAddress: ""
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid blank spaces bindAddress value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindAddress: " "
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid bindPort minimum value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindPort: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid bindPort maximum value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindPort: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid bindPort type value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          bindPort: "123"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid portRange type value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          portRange: "123"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid externalAddress minimum value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalAddress: ""
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid blank spaces externalAddress value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalAddress: " "
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid externalPort minimum value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalPort: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid externalPort maximum value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalPort: 65536
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid externalPort type value for tcpHealthCheck cluster failure detection config, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqClusterFailureDetection:
+        tcpHealthCheck:
+          externalPort: "123"
+    asserts:
+      - failedTemplate: {}
+
   - it: with default platform values and all default hivemqRestrictions config values
     template: hivemq-configuration.yml
     set:
@@ -1910,6 +3240,16 @@ tests:
         lifetime: 1000
       hivemqOverloadProtection:
         enabled: true
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: true
+          interval: 3000
+          timeout: 9000
+        tcpHealthCheck:
+          enabled: true
+          bindPort: 0
+          portRange: 50
+          externalPort: 0
       hivemqClusterReplication:
         replicaCount: 2
     asserts:
@@ -1937,6 +3277,19 @@ tests:
                 <discovery>
                   <extension/>
                 </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <enabled>true</enabled>
+                    <interval>3000</interval>
+                    <timeout>9000</timeout>
+                  </heartbeat>
+                  <tcp-health-check>
+                    <enabled>true</enabled>
+                    <bind-port>0</bind-port>
+                    <port-range>50</port-range>
+                    <external-port>0</external-port>
+                  </tcp-health-check>
+                </failure-detection>
                 <replication>
                   <replica-count>2</replica-count>
                 </replication>
@@ -2097,6 +3450,18 @@ tests:
         lifetime: 14
       hivemqOverloadProtection:
         enabled: false
+      hivemqClusterFailureDetection:
+        heartbeat:
+          enabled: false
+          interval: 2000
+          timeout: 3000
+        tcpHealthCheck:
+          enabled: true
+          bindAddress: 0.0.0.0
+          bindPort: 1443
+          portRange: 100
+          externalAddress: external-address.svc.local
+          externalPort: 8001
       hivemqClusterReplication:
         replicaCount: 1
     asserts:
@@ -2124,6 +3489,21 @@ tests:
                 <discovery>
                   <extension/>
                 </discovery>
+                <failure-detection>
+                  <heartbeat>
+                    <enabled>false</enabled>
+                    <interval>2000</interval>
+                    <timeout>3000</timeout>
+                  </heartbeat>
+                  <tcp-health-check>
+                    <enabled>true</enabled>
+                    <bind-address>0.0.0.0</bind-address>
+                    <bind-port>1443</bind-port>
+                    <port-range>100</port-range>
+                    <external-address>external-address.svc.local</external-address>
+                    <external-port>8001</external-port>
+                  </tcp-health-check>
+                </failure-detection>
                 <replication>
                   <replica-count>1</replica-count>
                 </replication>

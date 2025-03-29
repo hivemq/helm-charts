@@ -169,9 +169,52 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <discovery>
       <extension/>
     </discovery>
+    {{- $clusterFailureDetectionConfig := .Values.hivemqClusterFailureDetection }}
+    {{- $hasClusterFailureDetectionConfig := include "hivemq-platform.has-cluster-failure-detection-config" (dict "hivemqClusterFailureDetection" $clusterFailureDetectionConfig) }}
+    {{- if $hasClusterFailureDetectionConfig }}
+    <failure-detection>
+      {{- if (hasKey $clusterFailureDetectionConfig "heartbeat") }}
+      {{- $heartbeat := $clusterFailureDetectionConfig.heartbeat }}
+      <heartbeat>
+        {{- if (hasKey $heartbeat "enabled") }}
+        <enabled>{{ $heartbeat.enabled }}</enabled>
+        {{- end }}
+        {{- if (hasKey $heartbeat "interval") }}
+        <interval>{{ $heartbeat.interval }}</interval>
+        {{- end }}
+        {{- if (hasKey $heartbeat "timeout") }}
+        <timeout>{{ $heartbeat.timeout }}</timeout>
+        {{- end }}
+      </heartbeat>
+      {{- end }}
+      {{- if (hasKey $clusterFailureDetectionConfig "tcpHealthCheck") }}
+      {{- $tcpHealthCheck := $clusterFailureDetectionConfig.tcpHealthCheck }}
+      <tcp-health-check>
+        {{- if (hasKey $tcpHealthCheck "enabled") }}
+        <enabled>{{ $tcpHealthCheck.enabled }}</enabled>
+        {{- end }}
+        {{- if (hasKey $tcpHealthCheck "bindAddress") }}
+        <bind-address>{{ $tcpHealthCheck.bindAddress }}</bind-address>
+        {{- end }}
+        {{- if (hasKey $tcpHealthCheck "bindPort") }}
+        <bind-port>{{ $tcpHealthCheck.bindPort }}</bind-port>
+        {{- end }}
+        {{- if (hasKey $tcpHealthCheck "portRange") }}
+        <port-range>{{ $tcpHealthCheck.portRange }}</port-range>
+        {{- end }}
+        {{- if (hasKey $tcpHealthCheck "externalAddress") }}
+        <external-address>{{ $tcpHealthCheck.externalAddress }}</external-address>
+        {{- end }}
+        {{- if (hasKey $tcpHealthCheck "externalPort") }}
+        <external-port>{{ $tcpHealthCheck.externalPort }}</external-port>
+        {{- end }}
+      </tcp-health-check>
+      {{- end }}
+    </failure-detection>
+    {{- end }}
     {{- $clusterReplicationConfig := .Values.hivemqClusterReplication }}
-    {{- $hasclusterReplicationConfig := include "hivemq-platform.has-cluster-replication-config" (dict "hivemqClusterReplication" $clusterReplicationConfig) }}
-    {{- if $hasclusterReplicationConfig }}
+    {{- $hasClusterReplicationConfig := include "hivemq-platform.has-cluster-replication-config" (dict "hivemqClusterReplication" $clusterReplicationConfig) }}
+    {{- if $hasClusterReplicationConfig }}
     <replication>
       {{- if (hasKey $clusterReplicationConfig "replicaCount") }}
       <replica-count>{{ $clusterReplicationConfig.replicaCount }}</replica-count>
