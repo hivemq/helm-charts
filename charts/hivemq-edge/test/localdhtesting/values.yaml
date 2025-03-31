@@ -1,0 +1,10 @@
+logLevel: DEBUG
+license:
+  enabled: true
+modules:
+  dataHub:
+    enabled: true
+  persistence:
+    enabled: true
+    storageClassName: "local-storage"
+    size: 2Gi

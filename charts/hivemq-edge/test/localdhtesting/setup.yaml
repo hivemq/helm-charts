@@ -1,0 +1,48 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hivemq-edge-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "edge"
+  ports:
+  - port: 5678
+    targetPort: 8080
+    name: http
+  - port: 5679
+    targetPort: 1883
+    name: mqtt
+  - port: 5680
+    targetPort: 8883
+    name: mqtts
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-pv
+spec:
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/local-storage  # Path inside the Kind node
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kind-control-plane  # Name of the Kind node
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
