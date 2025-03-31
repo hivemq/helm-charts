@@ -6,14 +6,14 @@ cd charts/hivemq-edge/test/localdhtesting
 ```bash
 mkdir /tmp/volume
 kind delete cluster
-kind create cluster --config  kind-cluster.yaml
-kubectl apply -f setup.yaml
+kind create cluster --config  charts/hivemq-edge/test/localdhtesting/kind-cluster.yaml
+kubectl apply -f charts/hivemq-edge/test/localdhtesting/setup.yaml
 kind load docker-image hivemq/hivemq-edge:2025.5-SNAPSHOT
 ```
 
 from the repo-root
 ```bash
-helm install edge ./charts/hivemq-edge -f values.yaml --set-file license.file=<LICENSE>
+helm install edge ./charts/hivemq-edge --set image.tag=2025.5-SNAPSHOT --values=charts/hivemq-edge/test/localdhtesting/values.yaml --set-file modules.dataHub.init=charts/hivemq-edge/test/localdhtesting/dh.json --set-file license.file=<PATH_TO_LICENSE> 
 ```
 
 
