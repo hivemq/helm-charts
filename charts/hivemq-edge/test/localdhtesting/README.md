@@ -6,7 +6,7 @@ cd charts/hivemq-edge/test/localdhtesting
 ```bash
 mkdir /tmp/volume
 kind delete cluster
-kind create cluster --config  charts/hivemq-edge/test/localdhtesting/kind-cluster.yaml
+kind create cluster --config kind-cluster.yaml
 kubectl apply -f charts/hivemq-edge/test/localdhtesting/setup.yaml
 kind load docker-image hivemq/hivemq-edge:2025.5-SNAPSHOT
 ```
