@@ -152,8 +152,8 @@ modules:
     enabled: false
     watcher:
       waitBeforeDelete: 5000
-      initialDelay: 2000
-      interval: 2000
+      initialDelay: 30000
+      interval: 5000
   # Persistence: a volume for persistent state, e.g. rocksdb files
   persistence:
     enabled: false
