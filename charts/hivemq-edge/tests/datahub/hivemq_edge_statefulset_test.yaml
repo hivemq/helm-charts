@@ -119,7 +119,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
-            value: "2000"
+            value: "5000"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
