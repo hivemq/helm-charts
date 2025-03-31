@@ -114,7 +114,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
-            value: "2000"
+            value: "30000"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
