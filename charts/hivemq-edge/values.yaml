@@ -150,6 +150,10 @@ modules:
   # DataHub
   dataHub:
     enabled: false
+    watcher:
+      waitBeforeDelete: 5000
+      initialDelay: 2000
+      interval: 2000
   # Persistence: a volume for persistent state, e.g. rocksdb files
   persistence:
     enabled: false

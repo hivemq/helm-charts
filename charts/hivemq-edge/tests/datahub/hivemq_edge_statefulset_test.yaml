@@ -108,6 +108,21 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
+            name: HIVEMQ_DATAHUB_WAIT_BEFORE_DELETE
+            value: "5000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
+            value: "2000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
+            value: "2000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: HIVEMQ_ADMIN_USER
             valueFrom:
               secretKeyRef:

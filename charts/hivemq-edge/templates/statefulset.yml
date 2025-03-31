@@ -88,7 +88,13 @@ spec:
             {{- if and .Values.license.enabled .Values.modules.persistence.enabled .Values.modules.dataHub.enabled }}
             - name: HIVEMQ_DATAHUB_SCRIPTSTATE_PATH
               value: /persistence/scriptstate.db
-              {{- end }}
+            - name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
+              value: "{{ .Values.modules.dataHub.watcher.interval }}"
+            - name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
+              value: "{{ .Values.modules.dataHub.watcher.initialDelay }}"
+            - name: HIVEMQ_DATAHUB_WAIT_BEFORE_DELETE
+              value: "{{ .Values.modules.dataHub.watcher.waitBeforeDelete }}"
+            {{- end }}
             {{- if .Values.mqtt.enabled }}
             - name: HIVEMQ_MQTT_ENABLED
               value: "true"

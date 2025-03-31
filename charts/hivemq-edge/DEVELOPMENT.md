@@ -174,6 +174,12 @@ config: |
                   <maxPollingErrorsBeforeRemoval>-1</maxPollingErrorsBeforeRemoval>
               </simulationToMqtt>
           </config>
+          <tags>
+            <tag>
+              <name>t2</name>
+              <description>description</description>
+            </tag>
+          </tags>
           <northboundMappings>
               <northboundMapping>
                   <topic>test</topic>
