@@ -303,6 +303,24 @@
             "init" : {
               "description" : "Specify the init file to load as for DataHub.",
               "type" : "string"
+            },
+            "watcher": {
+              "description" : "Configuration for the DataHub config reload watcher.",
+              "type" : "object",
+              "properties" : {
+                "waitBeforeDelete" : {
+                  "type" : "integer",
+                  "description" : "Wait time before deleting in ms."
+                },
+                "initialDelay" : {
+                  "description" : "Initial delay before watcher starts acting in ms.",
+                  "type" : "integer"
+                },
+                "interval" : {
+                  "description" : "Watcher interval for checks in ms.",
+                  "type" : "integer"
+                }
+              }
             }
           }
         },

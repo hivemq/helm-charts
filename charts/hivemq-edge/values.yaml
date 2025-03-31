@@ -5,7 +5,7 @@
 image:
   repository: hivemq/hivemq-edge
   pullPolicy: IfNotPresent
-  tag: "2025.4"
+  tag: "2025.5"
 
 refresh: 1000
 
@@ -150,6 +150,10 @@ modules:
   # DataHub
   dataHub:
     enabled: false
+    watcher:
+      waitBeforeDelete: 5000
+      initialDelay: 30000
+      interval: 5000
   # Persistence: a volume for persistent state, e.g. rocksdb files
   persistence:
     enabled: false
