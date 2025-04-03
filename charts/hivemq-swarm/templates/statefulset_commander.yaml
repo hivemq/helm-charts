@@ -29,6 +29,10 @@ spec:
       serviceAccountName: {{ include "hivemq-swarm.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.commander.podSecurityContext | nindent 8 }}
+      {{- with .Values.commander.additionalInitContainers }}
+      additionalInitContainers:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-commander
           securityContext:

@@ -40,6 +40,8 @@ commander:
   ## Add environment variables to the commander
   ##
   env: []
+  ## Additional init containers for the HiveMQ Commander pod
+  additionalInitContainers: []
   ## Additional volumes to the Swarm pod.
   ## By default: ephemeral volume for scenarios + previous run persistence
   ##
@@ -104,6 +106,8 @@ agents:
   ## Add environment variables to the commander
   ##
   env: []
+  ## Additional init containers for the HiveMQ Swarm agent pod
+  additionalInitContainers: []
   ## Additional volumes for the HiveMQ Swarm agent pod.
   extraVolumes: []
   ## Extra volume mounts that will be added to the swarm agent container
