@@ -55,6 +55,6 @@ class AbstractHelmCustomServiceAccountIT extends AbstractHelmChartIT {
                 .list()
                 .getItems()
                 .forEach(pod -> assertThat(pod.getMetadata().getAnnotations()) //
-                        .containsKey("hivemq/platform-operator-init-app-version")));
+                        .containsKey("operator.platform.hivemq.com/init-app-version")));
     }
 }
