@@ -14,21 +14,30 @@ spec:
   scope: "Namespaced"
   versions:
   - additionalPrinterColumns:
+    - description: "Human readable details of the current health status"
+      jsonPath: ".status.healthDetails"
+      name: "Health Details"
+      priority: 0
+      type: "string"
+    - description: "The aggregated health status of the HiveMQ Platform"
+      jsonPath: ".status.healthStatus"
+      name: "Health Status"
+      priority: 0
+      type: "string"
     - description: "A human readable state message"
       jsonPath: ".status.message"
       name: "Message"
       priority: 0
       type: "string"
-    - description: "The current state of the deployment, indicating if updates are\
-        \ in progress, have failed, or the state was degraded"
+    - description: "The current state of the reconciliation"
       jsonPath: ".status.state"
       name: "State"
       priority: 0
       type: "string"
-    - description: "The state phase, indicating the current step of the reconciliation\
+    - description: "The current state phase, indicating the current step of the reconciliation\
         \ state"
       jsonPath: ".status.statePhase"
-      name: "StatePhase"
+      name: "State Phase"
       priority: 0
       type: "string"
     name: "v1"
@@ -3570,6 +3579,17 @@ spec:
                 - "V1_6_0"
                 - "V1_7_0"
                 type: "string"
+              healthDetails:
+                description: "Human readable details of the current health status"
+                type: "string"
+              healthStatus:
+                description: "The aggregated health status of the HiveMQ Platform"
+                enum:
+                - "DEGRADED"
+                - "DOWN"
+                - "UNKNOWN"
+                - "UP"
+                type: "string"
               message:
                 description: "A human readable state message"
                 type: "string"
@@ -3580,7 +3600,6 @@ spec:
                 items:
                   enum:
                   - "RECOVER"
-                  - "REQUESTS_UPDATED"
                   - "RESTART_EXTENSIONS"
                   - "ROLLING_RESTART"
                   - "SCALING"
@@ -3640,8 +3659,7 @@ spec:
                 description: "The extensions to be restarted"
                 type: "string"
               state:
-                description: "The current state of the deployment, indicating if updates\
-                  \ are in progress, have failed, or the state was degraded"
+                description: "The current state of the reconciliation"
                 enum:
                 - "CREATED"
                 - "ERROR"
@@ -3655,8 +3673,8 @@ spec:
                 - "UPDATE_INIT_APP"
                 type: "string"
               statePhase:
-                description: "The state phase, indicating the current step of the\
-                  \ reconciliation state"
+                description: "The current state phase, indicating the current step\
+                  \ of the reconciliation state"
                 enum:
                 - "INVALID_CONFIG_MAP"
                 - "INVALID_CUSTOM_RESOURCE_SPEC"
