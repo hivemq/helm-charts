@@ -300,7 +300,7 @@ public class K8sUtil {
      * @return {@link Map}  Map containing some of the fixed labels expected for a legacy Operator pod.
      */
     public static @NotNull Map<String, String> getHiveMQLegacyOperatorLabels(final @NotNull String releaseName) {
-        return Map.of("app", "hivemq-operator", "operator", String.format("%s-hivemq-operator", releaseName));
+        return Map.of("app", "hivemq-operator", "operator", "%s-hivemq-operator".formatted(releaseName));
     }
 
     /**
