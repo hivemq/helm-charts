@@ -249,7 +249,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
             final var namespace = eventRegarding.getNamespace();
             final var podName = eventRegarding.getName();
             final var podUid = eventRegarding.getUid();
-            final var eventLog = String.format("%s [%s] %s [%s:%s]", event.getType(), reason, note, namespace, podName);
+            final var eventLog = "%s [%s] %s [%s:%s]".formatted(event.getType(), reason, note, namespace, podName);
             LOG.info("[{}] {}", LOG_PREFIX_EVENT, eventLog);
             logWaiter.accept(LOG_PREFIX_EVENT, eventLog);
 
@@ -335,7 +335,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 final var namespace = pod.getMetadata().getNamespace();
                 final var podName = pod.getMetadata().getName();
                 final var podUid = pod.getMetadata().getUid();
-                final var podLog = String.format("%s [%s] in %s was %s", podName, podUid, namespace, action);
+                final var podLog = "%s [%s] in %s was %s".formatted(podName, podUid, namespace, action);
                 LOG.info("[{}] {}", LOG_PREFIX_POD, podLog);
                 logWaiter.accept(LOG_PREFIX_POD, podLog);
             }
