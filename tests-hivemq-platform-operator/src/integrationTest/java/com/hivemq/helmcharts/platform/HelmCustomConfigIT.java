@@ -96,9 +96,9 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCustomEnvVars_hivemqRunning() throws Exception {
         K8sUtil.createConfigMap(client, operatorNamespace, "operator-custom-env-var-config-map.yml");
-        final var operatorStartedFuture = waitForOperatorLog(String.format(
-                ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]",
-                platformNamespace));
+        final var operatorStartedFuture = waitForOperatorLog(
+                ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]".formatted(
+                        platformNamespace));
         installPlatformOperatorChartAndWaitToBeRunning("/files/custom-operator-env-vars-values.yaml");
         await().atMost(ONE_MINUTE).until(operatorStartedFuture::isDone);
 

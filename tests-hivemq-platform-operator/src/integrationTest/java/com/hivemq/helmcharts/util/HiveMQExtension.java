@@ -114,7 +114,7 @@ public class HiveMQExtension {
         final var extensionXml = extensionDir.resolve("hivemq-extension.xml");
         Files.createFile(extensionXml);
         Files.writeString(extensionXml,
-                String.format(VALID_EXTENSION_XML, extensionId, name, version, priority, startPriority));
+                VALID_EXTENSION_XML.formatted(extensionId, name, version, priority, startPriority));
         extensionZipArchive.add(new FileAsset(extensionXml.toFile()),
                 extensionId + "/" + extensionXml.getFileName().toString());
 
@@ -194,8 +194,7 @@ public class HiveMQExtension {
         final var compilationUnits = fileManager.getJavaFileObjectsFromFiles(List.of(javaSourcePath.toFile()));
         final var compilerTask = compiler.getTask(null, fileManager, null, compilerOptions, null, compilationUnits);
         if (!compilerTask.call()) {
-            throw new IllegalStateException(String.format("Could not compile class '%s' into extension '%s'",
-                    classToCompile,
+            throw new IllegalStateException("Could not compile class '%s' into extension '%s'".formatted(classToCompile,
                     extensionId));
         }
         fileManager.getLocation(StandardLocation.CLASS_OUTPUT)
