@@ -10,7 +10,6 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.NginxUtil;
 import io.fabric8.kubernetes.api.model.Pod;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
@@ -125,14 +124,14 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
             client.pods()
                     .inNamespace(platformNamespace)
                     .withName(pod.getMetadata().getName())
-                    .file(String.format("/opt/hivemq/extensions/%s/hivemq-extension.xml", extensionId))
+                    .file("/opt/hivemq/extensions/%s/hivemq-extension.xml".formatted(extensionId))
                     .copy(extensionXml);
             final var logbackXml = Files.readString(extensionXml);
             for (final var value : values) {
                 assertThat(logbackXml).contains(value);
             }
         } catch (final IOException e) {
-            throw new AssertionError(String.format("Could not copy hivemq-extension.xml file for extension %s from pod",
+            throw new AssertionError("Could not copy hivemq-extension.xml file for extension %s from pod".formatted(
                     extensionId), e);
         }
     }

@@ -167,7 +167,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
     public @NotNull Chart getPreviousPlatformChart() throws Exception {
         final var currentChart = getCurrentPlatformChart();
-        final var regex = String.format("*.%s*", currentChart.getDescription());
+        final var regex = "*.%s*".formatted(currentChart.getDescription());
         final var platformCharts = executeHelmSearchCommand("hivemq/hivemq-platform",
                 Stream.of("--versions", "--regexp", regex, "--output", "yaml"));
         final var objectMapper = new ObjectMapper(new YAMLFactory());
@@ -478,8 +478,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
             final @NotNull Stream<String> additionalCommands,
             final boolean debugOnFailure) {
         try {
-            return String.format("Helm command: %s\nstdout: %s\nstderr: %s\nyaml:\n%s",
-                    helmCommandList,
+            return "Helm command: %s\nstdout: %s\nstderr: %s\nyaml:\n%s".formatted(helmCommandList,
                     execDeploy.getStdout(),
                     execDeploy.getStderr(),
                     // execute Helm command with --debug and --dry-run to get additional error information
@@ -581,7 +580,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
             final var namespace = eventRegarding.getNamespace();
             final var podName = eventRegarding.getName();
             final var podUid = eventRegarding.getUid();
-            final var eventLog = String.format("%s [%s] %s [%s:%s]", event.getType(), reason, note, namespace, podName);
+            final var eventLog = "%s [%s] %s [%s:%s]".formatted(event.getType(), reason, note, namespace, podName);
             LOG.info("[{}] {}", LOG_PREFIX_EVENT, eventLog);
             logWaiter.accept(LOG_PREFIX_EVENT, eventLog);
 
@@ -672,7 +671,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
                 final var namespace = pod.getMetadata().getNamespace();
                 final var podName = pod.getMetadata().getName();
                 final var podUid = pod.getMetadata().getUid();
-                final var podLog = String.format("%s [%s] in %s was %s", podName, podUid, namespace, action);
+                final var podLog = "%s [%s] in %s was %s".formatted(podName, podUid, namespace, action);
                 LOG.info("[{}] {}", LOG_PREFIX_POD, podLog);
                 logWaiter.accept(LOG_PREFIX_POD, podLog);
             }
