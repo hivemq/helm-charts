@@ -7,12 +7,12 @@ public class AppendingFooPublishInboundInterceptorExtensionMain
         extends BaseAppendingPublishInboundInterceptorExtensionMain {
 
     @Override
-    @NotNull String getAdditionalPayload() {
+    public @NotNull String getAdditionalPayload() {
         return "-foo";
     }
 
     @Override
-    @NotNull String getName() {
+    public @NotNull String getName() {
         return "HiveMQ Foo-Appending PublishInboundInterceptor Extension";
     }
 }
