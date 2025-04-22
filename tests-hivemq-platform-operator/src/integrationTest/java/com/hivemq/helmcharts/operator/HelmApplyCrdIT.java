@@ -53,19 +53,16 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCrdNotDeployed_withDisabledCrdApply_operatorIsFailing() throws Exception {
         final var crdApplyDisabled = waitForOperatorLog(".*Apply HiveMQ Platform CRD: false");
-        final var crdWaiting = waitForOperatorLog(String.format(
-                ".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...",
-                CRD_NAME));
-        final var crdReadyFailed = waitForOperatorLog(String.format(
-                ".*Could not verify ready status of applied HiveMQ Platform CRD '%s'",
-                CRD_NAME));
+        final var crdWaiting =
+                waitForOperatorLog(".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...".formatted(CRD_NAME));
+        final var crdReadyFailed =
+                waitForOperatorLog(".*Could not verify ready status of applied HiveMQ Platform CRD '%s'".formatted(
+                        CRD_NAME));
 
         // installOperatorChart() blocks until the Operator is ready, so we have to call it async
-        final var additionalCommands = List.of("--skip-crds",
-                "--set",
-                "crd.apply=false",
-                "--set",
-                "crd.waitTimeout=PT1S").toArray(new String[0]);
+        final var additionalCommands =
+                List.of("--skip-crds", "--set", "crd.apply=false", "--set", "crd.waitTimeout=PT1S")
+                        .toArray(new String[0]);
         final var uncaughtExceptionRef = new AtomicReference<Exception>();
         final var operatorInstallThread = new Thread(() -> {
             try {
@@ -101,9 +98,8 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withOutdatedCrd_operatorIsRunning() throws Exception {
         final var rootPath = Path.of("..").toAbsolutePath();
-        final var crdPath = rootPath.resolve(String.format("charts/hivemq-platform-operator/crds/%s-%s.yml",
-                CRD_NAME,
-                CRD_VERSION));
+        final var crdPath =
+                rootPath.resolve("charts/hivemq-platform-operator/crds/%s-%s.yml".formatted(CRD_NAME, CRD_VERSION));
         final var crdYaml = Files.readString(crdPath);
         final var crd = client.getKubernetesSerialization().unmarshal(crdYaml, CustomResourceDefinition.class);
         crd.getSpec()
@@ -135,14 +131,12 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
             throws Exception {
         final var crdApplyEnabled = waitForOperatorLog(".*Apply HiveMQ Platform CRD: true");
         final var crdVerify = waitForOperatorLog(expectedCrdVerifyMessagePattern);
-        final var crdApplying = waitForOperatorLog(String.format(
-                ".*Applying %s HiveMQ Platform CRD '%s' \\(version: .*\\)",
+        final var crdApplying = waitForOperatorLog(".*Applying %s HiveMQ Platform CRD '%s' \\(version: .*\\)".formatted(
                 CRD_VERSION,
                 CRD_NAME));
-        final var crdWaiting = waitForOperatorLog(String.format(
-                ".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...",
-                CRD_NAME));
-        final var crdReady = waitForOperatorLog(String.format(".*HiveMQ Platform CRD '%s' is ready", CRD_NAME));
+        final var crdWaiting =
+                waitForOperatorLog(".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...".formatted(CRD_NAME));
+        final var crdReady = waitForOperatorLog(".*HiveMQ Platform CRD '%s' is ready".formatted(CRD_NAME));
 
         installPlatformOperatorChartAndWaitToBeRunning(List.of("--skip-crds").toArray(new String[0]));
         await().atMost(ONE_MINUTE).until(crdApplyEnabled::isDone);
