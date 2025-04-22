@@ -8,7 +8,6 @@ import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -63,11 +62,11 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
                     .filter(volumeMount -> PVC_NAME.equals(volumeMount.getName()))
                     .map(VolumeMount::getMountPath)
                     .findAny()
-                    .orElseThrow(() -> new AssertionError(String.format("Could not find mount path %s", PVC_NAME)));
+                    .orElseThrow(() -> new AssertionError("Could not find mount path %s".formatted(PVC_NAME)));
             final var podName = pod.getMetadata().getName();
-            final var fileName = String.format("%s.txt", podName);
+            final var fileName = "%s.txt".formatted(podName);
             final var filePath = Path.of(mountPath).resolve(fileName);
-            final var fileContentCommand = String.format("echo -n '%s' >> %s", getFileContentForPod(podName), filePath);
+            final var fileContentCommand = "echo -n '%s' >> %s".formatted(getFileContentForPod(podName), filePath);
             K8sUtil.executeInHiveMQPod(client, platformNamespace, pod, "touch", filePath.toString());
             K8sUtil.executeInHiveMQPod(client, platformNamespace, pod, "sh", "-c", fileContentCommand);
         });
@@ -86,7 +85,7 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
                     assertThat(pod).isNotNull();
                     final var podSpec = pod.getSpec();
                     final var podName = pod.getMetadata().getName();
-                    final var pvcNameForPod = String.format("%s-%s", PVC_NAME, podName);
+                    final var pvcNameForPod = "%s-%s".formatted(PVC_NAME, podName);
                     assertVolumes(podSpec.getVolumes(), PVC_NAME, pvcNameForPod);
                     assertVolumeMounts(podSpec.getContainers().getFirst().getVolumeMounts(),
                             PVC_NAME,
@@ -106,9 +105,8 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
                             .filter(volumeMount -> PVC_NAME.equals(volumeMount.getName()))
                             .map(VolumeMount::getMountPath)
                             .findAny()
-                            .orElseThrow(() -> new AssertionError(String.format("Could not find mount path %s",
-                                    PVC_NAME)));
-                    final var fileName = String.format("%s.txt", podName);
+                            .orElseThrow(() -> new AssertionError("Could not find mount path %s".formatted(PVC_NAME)));
+                    final var fileName = "%s.txt".formatted(podName);
                     final var filePath = Path.of(mountPath).resolve(fileName);
                     assertFileInPersistentVolumeClaims(filePath, getFileContentForPod(podName), podName);
                 }));
@@ -126,7 +124,7 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
             assertThat(execResult.exitCode()).isNotNull().isEqualTo(0);
             assertThat(execResult.getOutput()).as("stdout: %s", execResult.getOutput()).isEqualTo(fileContent);
         } catch (final Exception e) {
-            throw new AssertionError(String.format("Could not get file %s in Pod '%s'", filePath, podName), e);
+            throw new AssertionError("Could not get file %s in Pod '%s'".formatted(filePath, podName), e);
         } finally {
             execResult.close();
         }
@@ -170,6 +168,6 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
     }
 
     private static @NotNull String getFileContentForPod(final @NotNull String podName) {
-        return String.format("Persisted content for pod %s", podName);
+        return "Persisted content for pod %s".formatted(podName);
     }
 }
