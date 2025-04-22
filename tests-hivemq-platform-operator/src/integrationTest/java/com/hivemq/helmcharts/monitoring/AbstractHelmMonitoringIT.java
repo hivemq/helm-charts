@@ -61,16 +61,17 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
                     MONITORING_RELEASE + "-kube-prom-prometheus",
                     9090)) {
                 final var response = given().port(forwarded.getLocalPort())
-                        .log().all(true)
+                        .log()
+                        .all(true)
                         .when()
-                            .param("query", metric)
-                            .get("/api/v1/query")
+                        .param("query", metric)
+                        .get("/api/v1/query")
                         .then()
-                            .log()
-                            .all(true)
-                            .statusCode(HttpStatus.SC_OK)
-                            .extract()
-                            .as(PrometheusResponse.class);
+                        .log()
+                        .all(true)
+                        .statusCode(HttpStatus.SC_OK)
+                        .extract()
+                        .as(PrometheusResponse.class);
                 assertResponse.accept(response);
             }
         });
@@ -84,13 +85,15 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
                     3000)) {
                 given().port(forwarded.getLocalPort())
                         .header("Authorization", createBasicAuthHeader("admin", "prom-operator"))
-                        .log().all(true)
+                        .log()
+                        .all(true)
                         .when()
-                            .get("/api/search")
+                        .get("/api/search")
                         .then()
-                            .log().all(true)
-                            .statusCode(HttpStatus.SC_OK)
-                            .body(containsString(String.format("\"title\":\"%s\"", dashboardTitle)));
+                        .log()
+                        .all(true)
+                        .statusCode(HttpStatus.SC_OK)
+                        .body(containsString("\"title\":\"%s\"".formatted(dashboardTitle)));
             }
         });
     }

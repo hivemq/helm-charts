@@ -53,15 +53,15 @@ abstract class AbstractHelmSecurityContextIT extends AbstractHelmChartIT {
 
     protected record ChartValues(@NotNull Values operator, @NotNull Values platform) {
         @Override
-        public String toString() {
-            return String.format("Operator values: %s and Platform values: %s", operator, platform);
+        public @NotNull String toString() {
+            return "Operator values: %s and Platform values: %s".formatted(operator, platform);
         }
     }
 
     protected record Values(int uid, int gid, @NotNull String valuesFile) {
         @Override
-        public String toString() {
-            return String.format("(UID=%s, GID=%s, valuesFile='%s')", uid, gid, valuesFile);
+        public @NotNull String toString() {
+            return "(UID=%s, GID=%s, valuesFile='%s')".formatted(uid, gid, valuesFile);
         }
     }
 

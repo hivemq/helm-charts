@@ -62,7 +62,7 @@ class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
         // the operator should reconcile the platforms in the alpha and beta namespace,
         // but ignore the platform in the gamma namespace
         installPlatformOperatorChartAndWaitToBeRunning("--set",
-                String.format("namespaces=%s\\,%s", namespaceAlpha, namespaceBeta));
+                "namespaces=%s\\,%s".formatted(namespaceAlpha, namespaceBeta));
 
         helmChartContainer.installPlatformChart(PLATFORM_NAME_ALPHA,
                 "--namespace",

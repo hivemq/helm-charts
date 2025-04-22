@@ -81,8 +81,7 @@ public class ControlCenterUtil {
                 options.setAcceptInsecureCerts(true);
 
                 final var webDriver = new RemoteWebDriver(webDriverContainer.getSeleniumAddress(), options, false);
-                webDriver.get(String.format("%s://host.docker.internal:%s",
-                        isSecure ? "https" : "http",
+                webDriver.get("%s://host.docker.internal:%s".formatted(isSecure ? "https" : "http",
                         forwarded.getLocalPort()));
 
                 try {

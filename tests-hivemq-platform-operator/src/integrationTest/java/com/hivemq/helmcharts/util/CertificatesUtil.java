@@ -17,8 +17,7 @@ public class CertificatesUtil {
 
     public static final @NotNull String DEFAULT_CHART_NAME = "platform";
     public static final @NotNull String DEFAULT_SERVICE = "secure-service";
-    public static final @NotNull String DEFAULT_SERVICE_NAME =
-            String.format("%s-%s", DEFAULT_SERVICE, DEFAULT_CHART_NAME);
+    public static final @NotNull String DEFAULT_SERVICE_NAME = "%s-%s".formatted(DEFAULT_SERVICE, DEFAULT_CHART_NAME);
     public static final @NotNull String DEFAULT_NAMESPACE = "default";
     public static final @NotNull String DEFAULT_KEYSTORE_PASSWORD = "key-changeme";
     public static final @NotNull String DEFAULT_PRIVATE_KEY_PASSWORD = "key-changeme";
@@ -42,7 +41,8 @@ public class CertificatesUtil {
 
     public static void generateCertificates(
             final @NotNull File path,
-            final @NotNull Map<String, String> environmentVariables) throws IOException, InterruptedException {
+            final @NotNull Map<String, String> environmentVariables)
+            throws IOException, InterruptedException {
         final var processBuilder = new ProcessBuilder("bash",
                 "-c",
                 "source ./build/resources/integrationTest/scripts/generate-certificates.sh " + path.getAbsolutePath());
