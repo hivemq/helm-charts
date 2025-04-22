@@ -45,7 +45,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void whenLogLevelIsChanged_thenLogbackXmlIsUpdated(final boolean withNamespaces) throws Exception {
         if (withNamespaces) {
-            installPlatformOperatorChartAndWaitToBeRunning("--set", String.format("namespaces=%s", platformNamespace));
+            installPlatformOperatorChartAndWaitToBeRunning("--set", "namespaces=%s".formatted(platformNamespace));
         } else {
             installPlatformOperatorChartAndWaitToBeRunning();
         }

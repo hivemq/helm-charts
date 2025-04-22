@@ -49,7 +49,7 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
 
     @Override
     public @NotNull String toString() {
-        return String.format("%s.%s.%s", major, minor, patch);
+        return "%s.%s.%s".formatted(major, minor, patch);
     }
 
     static class Deserializer extends JsonDeserializer<Version> {
@@ -60,7 +60,7 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
             final var versionString = parser.getValueAsString();
             final var versionParts = versionString.split("\\.");
             if (versionParts.length != 3) {
-                throw new IllegalArgumentException(String.format("Invalid version format: %s", versionString));
+                throw new IllegalArgumentException("Invalid version format: %s".formatted(versionString));
             }
             final var major = Integer.parseInt(versionParts[0]);
             final var minor = Integer.parseInt(versionParts[1]);

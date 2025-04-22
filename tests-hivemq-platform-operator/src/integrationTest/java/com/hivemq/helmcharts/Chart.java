@@ -40,18 +40,9 @@ public class Chart {
 
     @Override
     public @NotNull String toString() {
-        return "Chart{" +
-                "name='" +
-                name +
-                '\'' +
-                ", description='" +
-                description +
-                '\'' +
-                ", appVersion='" +
-                appVersion +
-                '\'' +
-                ", version=" +
-                version +
-                '}';
+        return "Chart{name='%s', description='%s', appVersion='%s', version=%s}".formatted(name,
+                description,
+                appVersion,
+                version);
     }
 }

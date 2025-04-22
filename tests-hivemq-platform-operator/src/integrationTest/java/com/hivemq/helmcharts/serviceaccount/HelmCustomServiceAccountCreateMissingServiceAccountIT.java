@@ -27,8 +27,7 @@ class HelmCustomServiceAccountCreateMissingServiceAccountIT extends AbstractHelm
                 K8sUtil.waitForHiveMQPlatformState(client, platformNamespace, PLATFORM_RELEASE_NAME, "ERROR");
         //noinspection unchecked
         assertThat((Map<String, String>) hivemqCustomResource.getAdditionalProperties().get("status")).containsValues(
-                String.format(
-                        "The ServiceAccount and its permissions are invalid: The ServiceAccount '%s' does not exist",
+                "The ServiceAccount and its permissions are invalid: The ServiceAccount '%s' does not exist".formatted(
                         SERVICE_ACCOUNT_NAME),
                 "INVALID_SERVICEACCOUNT_PERMISSION");
 
