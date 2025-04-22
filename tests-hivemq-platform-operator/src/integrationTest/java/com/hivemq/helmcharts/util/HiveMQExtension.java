@@ -38,13 +38,15 @@ public class HiveMQExtension {
     private static final @NotNull String JAVA_VERSION = "11";
     private static final @NotNull String DEFAULT_SOURCE_FOLDER = "integrationTest";
     private static final @NotNull String EXTENSION_MAIN_CLASS_NAME = "com.hivemq.extension.sdk.api.ExtensionMain";
-    private static final @NotNull String VALID_EXTENSION_XML = "<hivemq-extension>\n" + //
-            "   <id>%s</id>\n" + //
-            "   <name>%s</name>\n" + //
-            "   <version>%s</version>\n" + //
-            "   <priority>%s</priority>\n" + //
-            "   <start-priority>%s</start-priority>\n" + //
-            "</hivemq-extension>\n";
+    private static final @NotNull String VALID_EXTENSION_XML = """
+            <hivemq-extension>
+               <id>%s</id>
+               <name>%s</name>
+               <version>%s</version>
+               <priority>%s</priority>
+               <start-priority>%s</start-priority>
+            </hivemq-extension>
+            """;
 
     private static final @NotNull Logger LOGGER = LoggerFactory.getLogger(HiveMQExtension.class);
 
