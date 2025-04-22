@@ -37,11 +37,11 @@ public abstract class AbstractHelmChartIT {
 
     protected static final int DEFAULT_MQTT_SERVICE_PORT = 1883;
     protected static final @NotNull String DEFAULT_MQTT_SERVICE_NAME =
-            "hivemq-" + PLATFORM_RELEASE_NAME + "-mqtt-" + DEFAULT_MQTT_SERVICE_PORT;
+            "hivemq-%s-mqtt-%s".formatted(PLATFORM_RELEASE_NAME, DEFAULT_MQTT_SERVICE_PORT);
 
     protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
     protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX =
-            String.format("%s-%s-.*", DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
+            "%s-%s-.*".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
 
     @RegisterExtension
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
@@ -206,11 +206,11 @@ public abstract class AbstractHelmChartIT {
             assertThat(resource).isNotNull();
             return Files.readString(Path.of(resource.toURI()));
         } catch (final Exception e) {
-            throw new AssertionError(String.format("Could not read resource file '%s'", filename), e);
+            throw new AssertionError("Could not read resource file '%s'".formatted(filename), e);
         }
     }
 
     protected static @NotNull String getOperatorName() {
-        return String.format("%s-%s", DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
+        return "%s-%s".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
     }
 }
