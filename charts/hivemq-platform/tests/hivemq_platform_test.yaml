@@ -412,6 +412,44 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
           value: 1M
 
+  - it: with custom numeric resource requests, schema validation fails
+    set:
+      nodes.resources.cpu: 1
+      nodes.resources.memory: 2
+      nodes.resources.ephemeralStorage: 3
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom numeric resource requests as string
+    set:
+      nodes.resources.cpu: "1"
+      nodes.resources.memory: "2"
+      nodes.resources.ephemeralStorage: "3"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: "1"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: "2"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: "3"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "2"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: "3"
+
   - it: with override resource limits and default resource requests
     set:
       nodes.resources.overrideLimits:
@@ -475,6 +513,28 @@ tests:
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
           value: 2M
+
+  - it: with override custom numeric resource limits as string
+    set:
+      nodes.resources.overrideLimits:
+        cpu: "1"
+        memory: "2"
+        ephemeral-storage: "3"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers
+          count: 1
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "2"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: "3"
 
   - it: with empty override resource limits
     set:
