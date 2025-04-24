@@ -172,17 +172,17 @@ spec:
                 {{- end }}
                 {{- else }}
                 limits:
-                  cpu: {{ .Values.nodes.resources.cpu | trim }}
-                  memory: {{ .Values.nodes.resources.memory | trim }}
-                  {{- with .Values.nodes.resources.ephemeralStorage }}
+                  cpu: {{ .Values.nodes.resources.cpu | trim | quote }}
+                  memory: {{ .Values.nodes.resources.memory | trim | quote }}
+                  {{- with .Values.nodes.resources.ephemeralStorage | quote }}
                   ephemeral-storage: {{ . | trim }}
                   {{- end }}
                 {{- end }}
                 requests:
-                  cpu: {{ .Values.nodes.resources.cpu | trim }}
-                  memory: {{ .Values.nodes.resources.memory | trim }}
+                  cpu: {{ .Values.nodes.resources.cpu | trim | quote }}
+                  memory: {{ .Values.nodes.resources.memory | trim | quote }}
                   {{- with .Values.nodes.resources.ephemeralStorage }}
-                  ephemeral-storage: {{ . | trim }}
+                  ephemeral-storage: {{ . | trim | quote }}
                   {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
               {{- if or $hasAdditionalVolumeMounts (or $hasLicense $hasKeystore) }}
