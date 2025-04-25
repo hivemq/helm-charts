@@ -298,7 +298,8 @@ spec:
   - metadata:
       name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
       labels:
-          {{- include "hivemq-edge.labels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: "{{.Values.modules.persistence.storageClassName }}"
