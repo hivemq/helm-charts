@@ -5,7 +5,7 @@ operator:
   admissionWebhooks:
     enabled: false
 hivemq:
-  image: hivemq/hivemq4:k8s-4.38.0
+  image: hivemq/hivemq4:k8s-4.39.0
   imagePullPolicy: Never
   initDnsWaitImage: hivemq/init-dns-wait:snapshot
   logLevel: DEBUG
