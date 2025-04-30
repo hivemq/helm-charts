@@ -173,6 +173,17 @@ tests:
             - mountPath: /license.edgelic
               name: license
 
+  - it: Should define the correct volumeClaimTemplates metadata
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.name
+          value: hivemq-edge-persistence-edge
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.labels["app.kubernetes.io/name"]
+          value: hivemq-edge-persistence-edge
+      - equal:
+          path: spec.volumeClaimTemplates[0].metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
 
   - it: Should define the correct volumes
     asserts:
