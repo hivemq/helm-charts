@@ -278,6 +278,10 @@ public class OperatorHelmChartContainer extends K3sContainer {
                                 .withName(podName)
                                 .inContainer(containerName)
                                 .watchLog();
+                        logWatch.onClose().thenRun(() -> {
+                            logWatches.remove(podUid + "-" + podName + "-" + containerName);
+                            LOG.info("Stopped log watcher for {} in pod {} [{}]", containerName, podName, podUid);
+                        });
                         final var logPodName = getLogPodName(podName);
                         executorService.submit(() -> {
                             LOG.info("Started log watcher for {} in pod {} [{}]", containerName, podName, podUid);
@@ -296,13 +300,9 @@ public class OperatorHelmChartContainer extends K3sContainer {
                                 });
                             } catch (final Exception ignored) {
                             }
-                            removeAndCloseLogWatcher(containerName, podName, podUid);
                         });
                         return logWatch;
                     });
-                } else if (reason.equals("Killing")) {
-                    // close log watcher for container
-                    removeAndCloseLogWatcher(containerName, podName, podUid);
                 }
             } catch (final Exception e) {
                 LOG.info("Uncaught exception in log watcher for {} in pod {} [{}]", containerName, podName, podUid, e);
@@ -319,17 +319,6 @@ public class OperatorHelmChartContainer extends K3sContainer {
                 return podName.substring(0, maxLength);
             }
             return podName.substring(0, dashPos);
-        }
-
-        private void removeAndCloseLogWatcher(
-                final @NotNull String containerName,
-                final @NotNull String podName,
-                final @NotNull String podUid) {
-            final var logWatch = logWatches.remove(podUid + "-" + podName + "-" + containerName);
-            if (logWatch != null) {
-                logWatch.close();
-                LOG.info("Stopped log watcher for {} in pod {} [{}]", containerName, podName, podUid);
-            }
         }
 
         @Override
