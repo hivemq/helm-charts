@@ -25,7 +25,9 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
         assertThat(currentPlatformChart.getAppVersion()).isNotNull();
         assertThat(previousPlatformChart.getVersion()).isNotNull();
         assertThat(previousPlatformChart.getAppVersion()).isNotNull();
-        assertThat(currentPlatformChart.getVersion()).isGreaterThan(previousPlatformChart.getVersion());
+        assertThat(currentPlatformChart.getVersion()).as(
+                        "If there was a HiveMQ Platform Chart released recently, make sure to rebase this branch with latest")
+                .isGreaterThan(previousPlatformChart.getVersion());
         LOG.info("Current platform chart: {}", helmChartContainer.getCurrentPlatformChart());
         LOG.info("Previous platform chart: {}", helmChartContainer.getPreviousPlatformChart());
 
