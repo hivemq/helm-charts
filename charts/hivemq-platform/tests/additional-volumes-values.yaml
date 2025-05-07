@@ -2,7 +2,7 @@ additionalVolumes:
   - type: configMap
     name: test-configmap-volume
     mountName: test-configmap-mount-volume
-    path: /additional-configmap-volume
+    path: /additional-configmap-volume-1
     subPath: subpath-configmap
   - type: secret
     name: test-secret-volume
@@ -17,11 +17,29 @@ additionalVolumes:
     name: test-hivemq-configmap-volume
     mountName: test-hivemq-configmap-volume-mount
     containerName: hivemq
-    path: /additional-configmap-volume
+    path: /additional-configmap-volume-2
     subPath: subpath-configmap
   - type: configMap
     name: test-non-hivemq-configmap-volume
     mountName: test-non-hivemq-configmap-volume-mount
     containerName: foobar
-    path: /additional-configmap-volume
+    path: /additional-configmap-volume-3
     subPath: subpath-configmap
+  - type: projected
+    mountName: test-projected-volume
+    path: /additional-projected-volume
+    projectedSources:
+      - configMap:
+          name: test-projected-configmap-volume
+          items:
+            - key: config
+              path: my-config
+      - secret:
+          name: test-projected-secret-volume
+          items:
+            - key: username
+              path: my-username
+      - serviceAccountToken:
+          audience: api
+          expirationSeconds: 3600
+          path: token

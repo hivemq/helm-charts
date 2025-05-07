@@ -57,10 +57,10 @@
       "type" : "array"
     },
     "additionalInitContainers" : {
-      "type" : "array",
       "items" : {
         "type" : "object"
-      }
+      },
+      "type" : "array"
     },
     "additionalVolumes" : {
       "items" : {
@@ -77,6 +77,12 @@
           "path" : {
             "type" : "string"
           },
+          "projectedSources" : {
+            "items" : {
+              "type" : "object"
+            },
+            "type" : "array"
+          },
           "subPath" : {
             "type" : "string"
           },
@@ -85,6 +91,7 @@
               "configMap",
               "emptyDir",
               "persistentVolumeClaim",
+              "projected",
               "secret"
             ],
             "type" : "string"
