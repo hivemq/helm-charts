@@ -646,14 +646,34 @@ extensions:
 #    # skipHttpsCertificateValidation: true
 #    # skipHttpsHostnameVerification: true
 
-# Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim".
+# Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim", "projected".
 additionalVolumes: []
+## Example of an additional volume using a ConfigMap:
 #  - type: configMap
 #    name: configmap-name
 #    mountName: mount-name
 #    containerName: container-name
 #    path: /file/mount/path
 #    subPath: ""
+## Example of an additional volume using a projected volume:
+#  - type: projected
+#    mountName: mount-name
+#    path: /file/mount/path
+#    projectedSources:
+#      - configMap:
+#          name: test-projected-configmap-volume
+#          items:
+#            - key: config
+#              path: my-config
+#      - secret:
+#          name: test-projected-secret-volume
+#          items:
+#            - key: username
+#              path: my-username
+#      - serviceAccountToken:
+#          audience: api
+#          expirationSeconds: 3600
+#          path: token
 
 # type: Choose a type of volume that you want to mount.
 # name: The name used for the Secret, the ConfigMap or the PersistentVolumeClaim to be mounted.

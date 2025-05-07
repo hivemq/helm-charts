@@ -595,7 +595,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.volumes
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.volumes
-          count: 6
+          count: 7
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -631,6 +631,26 @@ tests:
             name: test-non-hivemq-configmap-volume-mount
             configMap:
               name: test-non-hivemq-configmap-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-projected-volume
+            projected:
+              sources:
+                - configMap:
+                    items:
+                      - key: config
+                        path: my-config
+                    name: test-projected-configmap-volume
+                - secret:
+                    name: test-projected-secret-volume
+                    items:
+                      - key: username
+                        path: my-username
+                - serviceAccountToken:
+                    audience: api
+                    expirationSeconds: 3600
+                    path: token
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0]
       - equal:
@@ -640,12 +660,12 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
-          count: 5
+          count: 6
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
             name: test-configmap-mount-volume
-            mountPath: /additional-configmap-volume/subpath-configmap
+            mountPath: /additional-configmap-volume-1/subpath-configmap
             subPath: subpath-configmap
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
@@ -666,14 +686,19 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
             name: test-hivemq-configmap-volume-mount
-            mountPath: /additional-configmap-volume/subpath-configmap
+            mountPath: /additional-configmap-volume-2/subpath-configmap
             subPath: subpath-configmap
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
             name: test-non-hivemq-volume-mount
-            mountPath: /additional-configmap-volume/subpath-configmap
+            mountPath: /additional-configmap-volume-3/subpath-configmap
             subPath: subpath-configmap
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-projected-volume
+            mountPath: /additional-projected-volume
 
   - it: with duplicated additionalVolumes `mountName` value in same `hivemq` container, then fails
     set:
@@ -688,7 +713,8 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
+          errorPattern: |-
+            VolumeMount `foobar-mount-volume` (name: `test-configmap-volume-2` value, mountName: `foobar-mount-volume` value) is duplicated for container `hivemq`
 
   - it: with duplicated additionalVolumes `mountName` value in same `foobar` container, then fails
     set:
@@ -705,9 +731,10 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
+          errorPattern: |- 
+            VolumeMount `foobar-mount-volume` (name: `test-configmap-volume-2` value, mountName: `foobar-mount-volume` value) is duplicated for container `foobar`
 
-  - it: with duplicated additionalVolumes `mountName` value but different containers, then success
+  - it: with duplicated additionalVolumes `mountName` value but different containers, then succeeds
     set:
       additionalVolumes:
         - type: configMap
@@ -754,7 +781,8 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `hivemq`
+          errorPattern: |-
+            VolumeMount `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is duplicated for container `hivemq`
 
   - it: with duplicated additionalVolumes `name` value in same `foobar` container, then fails
     set:
@@ -769,9 +797,106 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: VolumeMount `foobar-mount-volume` is duplicated for container `foobar`
+          errorPattern: |-
+            VolumeMount `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is duplicated for container `foobar`
 
-  - it: with duplicated additionalVolumes `name` value but different containers, then success
+  - it: with duplicated additionalVolumes `path` for the default container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foo-mount-volume
+          path: /additional-configmap-volume
+        - type: configMap
+          name: bar-mount-volume
+          path: /additional-configmap-volume
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            VolumeMount path `/additional-configmap-volume` (path: `/additional-configmap-volume` value, subPath: `` value) is duplicated for container `hivemq`
+
+  - it: with duplicated additionalVolumes `subPath` for the default container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foo-mount-volume
+          path: /additional-configmap-volume
+          subPath: subpath
+        - type: configMap
+          name: bar-mount-volume
+          path: /additional-configmap-volume
+          subPath: subpath
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            VolumeMount path `/additional-configmap-volume/subpath` (path: `/additional-configmap-volume` value, subPath: `subpath` value) is duplicated for container `hivemq`
+
+  - it: with duplicated additionalVolumes `path` but different `subPath` for the default container, then succeeds
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foo-mount-volume
+          path: /additional-configmap-volume
+        - type: configMap
+          name: bar-mount-volume
+          path: /additional-configmap-volume
+          subPath: subpath
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with duplicated additionalVolumes `path` for the same `foobar` container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foo-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume
+        - type: configMap
+          name: bar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            VolumeMount path `/additional-configmap-volume` (path: `/additional-configmap-volume` value, subPath: `` value) is duplicated for container `foobar`
+
+  - it: with duplicated additionalVolumes `subPath` for the same `foobar` container, then fails
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foo-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume
+          subPath: subpath
+        - type: configMap
+          name: bar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume
+          subPath: subpath
+    asserts:
+      - failedTemplate:
+          errorPattern: |- 
+            VolumeMount path `/additional-configmap-volume/subpath` (path: `/additional-configmap-volume` value, subPath: `subpath` value) is duplicated for container `foobar`
+
+  - it: with duplicated additionalVolumes `path` but different `subPath` for the same `foobar` container, then succeeds
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: foo-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume
+        - type: configMap
+          name: bar-mount-volume
+          containerName: foobar
+          path: /additional-configmap-volume
+          subPath: subpath
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with duplicated additionalVolumes `name` value but different containers, then succeeds
     set:
       additionalVolumes:
         - type: configMap
@@ -805,7 +930,7 @@ tests:
             configMap:
               name: foobar-mount-volume
 
-  - it: with duplicated volumes but same type, then success with no duplicates
+  - it: with duplicated volumes but same type, then succeeds with no duplicates
     set:
       additionalVolumes:
         - type: configMap
@@ -852,7 +977,8 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: Volume `foobar-mount-volume` is defined more than once but with different types
+          errorPattern: |-
+            Volume `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is defined more than once but with different types
 
   - it: with invalid additional volume `type`, then schema validation fails
     set:
@@ -860,6 +986,21 @@ tests:
         - type: fakeAdditionalVolume
           name: fake-volume-name
           path: /fake-volume-path
+    asserts:
+      - failedTemplate: {}
+
+  - it: with additional volume `projected` and invalid `projectedSources` type, then schema validation fails
+    set:
+      additionalVolumes:
+        - type: fakeAdditionalVolume
+          name: fake-volume-name
+          path: /fake-volume-path
+          projectedSources:
+            configMap:
+              name: test-projected-configmap-volume
+              items:
+                - key: config
+                  path: my-config
     asserts:
       - failedTemplate: {}
 
@@ -894,7 +1035,7 @@ tests:
           errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container
 
-  - it: with missing mandatory additional volume `path` for `foobar` container, then success
+  - it: with missing mandatory additional volume `path` for `foobar` container, then succeeds
     set:
       additionalVolumes:
         - type: emptyDir
@@ -953,7 +1094,7 @@ tests:
           errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
             `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
 
-  - it: with additional volume type `emptyDir` but missing `name`, then success
+  - it: with additional volume type `emptyDir` but missing `name`, then succeeds
     set:
       additionalVolumes:
         - type: emptyDir
@@ -974,6 +1115,82 @@ tests:
           content:
             name: test-empty-mount-volume
             emptyDir: {}
+
+  - it: with additional volume type `projected` but missing `name`, then succeeds
+    set:
+      additionalVolumes:
+        - type: projected
+          path: /additional-projected-volume
+          mountName: test-projected-mount-volume
+          projectedSources:
+            - configMap:
+                name: test-projected-configmap-volume
+                items:
+                  - key: config
+                    path: my-config
+            - serviceAccountToken:
+                audience: api
+                expirationSeconds: 3600
+                path: token
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-projected-mount-volume
+            mountPath: /additional-projected-volume
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-projected-mount-volume
+            projected:
+              sources:
+                - configMap:
+                    items:
+                      - key: config
+                        path: my-config
+                    name: test-projected-configmap-volume
+                - serviceAccountToken:
+                    audience: api
+                    expirationSeconds: 3600
+                    path: token
+
+  - it: with additional volume type `projected` but missing `projectedSources`, then fails
+    set:
+      additionalVolumes:
+        - type: projected
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499  
+            `projectedSources` value is required for type "projected"
+
+  - it: with additional volume type different than `projected` but `projectedSources` is present, then fails
+    set:
+      additionalVolumes:
+        - type: emptyDir
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+          projectedSources:
+            - configMap:
+                name: test-projected-configmap-volume
+                items:
+                  - key: config
+                    path: my-config
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499  
+            `projectedSources` value is only available for type "projected"
 
   - it: with default settings, no volume claim template is set
     asserts:
