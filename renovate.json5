@@ -17,7 +17,7 @@
             customType: "regex",
             datasourceTemplate: "docker",
             description: "Custom Manager for Docker images",
-            fileMatch: [
+            managerFilePatterns: [
                 "(^|/)docker.versions.toml$"
             ],
             matchStrings: [
