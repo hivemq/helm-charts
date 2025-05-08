@@ -110,7 +110,7 @@ $DIFF
 Execute the following commands to update the branch protection rule:
 cat << EOF > mutation.json
 {
-  "query": "mutation(\$id: ID!, \$contexts: [String!]!) { updateBranchProtectionRule(input: {branchProtectionRuleId: \$id, requiredStatusCheckContexts: \$contexts}) { branchProtectionRule { id requiredStatusCheckContexts } } }",
+  "query": "mutation(\\\$id: ID!, \\\$contexts: [String!]!) { updateBranchProtectionRule(input: {branchProtectionRuleId: \\\$id, requiredStatusCheckContexts: \\\$contexts}) { branchProtectionRule { id requiredStatusCheckContexts } } }",
   "variables": {
     "id": "$RULE_ID",
     "contexts": [
