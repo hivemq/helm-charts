@@ -303,10 +303,10 @@ services:
     # hivemqConnectOverloadProtection:
     #  # Defines whether connect overload protection is enabled. Possible values are `true` and `false`. The default setting is `true`.
     #  enabled: true
-    #  # The maximum sustained rate of connects that the listener allows per second. The connect rate cannot be set to 0 (zero).
+    #  # The maximum sustained rate of `CONNECT` messages the listener allows per second. The connect rate cannot be set to `0` (zero).
     #  # The default setting is `500`.
     #  connectRate: 500
-    #  # The maximum amount of simultaneous `CONNECT` messages that the listener allows for short periods. The burst size cannot be set to 0 (zero).
+    #  # The maximum number of simultaneous `CONNECT` messages the listener allows for short periods. The burst size cannot be set to `0` (zero).
     #  # When no burst rate is specified, the listener allows a burst rate that is double the defined connect rate.
     #  connectBurstSize: 1000
     # Used to maintain Kubernetes session affinity.
