@@ -1,4 +1,4 @@
-ARG K3S_TAG=v1.32.4-k3s1@sha256:1b71c68b063364bab469452eb9cc27edcb2767273f1aca5582db3586a3927483
+ARG K3S_TAG=v1.33.0-k3s1@sha256:6146167343bf05063ad78d181359077f5d50807e3d8ba4428a6ea752d78e7478
 
 FROM ubuntu:noble-20250415.1@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233 AS builder
 RUN apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq
