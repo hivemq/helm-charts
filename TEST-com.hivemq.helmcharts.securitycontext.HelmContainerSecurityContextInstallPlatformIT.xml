@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2025-05-13T09:27:35" hostname="fv-az810-589" time="243.467">
+<testsuite name="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2025-05-13T14:38:52" hostname="fv-az1288-534" time="281.513">
   <properties/>
-  <testcase name="installPlatform_withRandomNonRootUsers_hivemqRunning()" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" time="88.367"/>
-  <testcase name="Operator values: (UID=0, GID=0, valuesFile='/files/operator-container-security-context-root-user-values.yaml') and Platform values: (UID=0, GID=0, valuesFile='/files/platform-container-security-context-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" time="82.03"/>
-  <testcase name="Operator values: (UID=185, GID=0, valuesFile='/files/operator-container-security-context-non-root-user-values.yaml') and Platform values: (UID=10000, GID=0, valuesFile='/files/platform-container-security-context-non-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" time="73.053"/>
+  <testcase name="installPlatform_withRandomNonRootUsers_hivemqRunning()" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" time="90.63"/>
+  <testcase name="Operator values: (UID=0, GID=0, valuesFile='/files/operator-container-security-context-root-user-values.yaml') and Platform values: (UID=0, GID=0, valuesFile='/files/platform-container-security-context-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" time="94.431"/>
+  <testcase name="Operator values: (UID=185, GID=0, valuesFile='/files/operator-container-security-context-non-root-user-values.yaml') and Platform values: (UID=10000, GID=0, valuesFile='/files/platform-container-security-context-non-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextInstallPlatformIT" time="96.432"/>
 </testsuite>

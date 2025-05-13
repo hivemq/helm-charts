@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.services.HelmMqttIT" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-05-13T09:26:24" hostname="fv-az2020-210" time="435.411">
+<testsuite name="com.hivemq.helmcharts.services.HelmMqttIT" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-05-13T14:35:18" hostname="fv-az1278-122" time="458.029">
   <properties/>
-  <testcase name="platformChart_withCustomServiceName_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="95.251"/>
-  <testcase name="platformChart_whenMqttNodePortEnabled_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="77.829"/>
-  <testcase name="platformChart_whenMqttLoadBalancerEnabled_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="88.422"/>
-  <testcase name="platformChart_whenMqttAnnotationsEnabled_thenAnnotationsExist()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="86.941"/>
-  <testcase name="platformChart_whenMqttEnabled_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="86.967"/>
+  <testcase name="platformChart_withCustomServiceName_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="97.973"/>
+  <testcase name="platformChart_whenMqttNodePortEnabled_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="92.614"/>
+  <testcase name="platformChart_whenMqttLoadBalancerEnabled_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="89.25"/>
+  <testcase name="platformChart_whenMqttAnnotationsEnabled_thenAnnotationsExist()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="91.466"/>
+  <testcase name="platformChart_whenMqttEnabled_thenSendsReceivesMessage()" classname="com.hivemq.helmcharts.services.HelmMqttIT" time="86.725"/>
 </testsuite>
