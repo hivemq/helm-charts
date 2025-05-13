@@ -8,6 +8,12 @@ if [ -n "$IS_HELM_INSTALLED" ]; then
   exit 1
 fi
 
+# check if the 'unittest' Helm plugin is installed
+if ! helm plugin list | grep -q 'unittest'; then
+  echo "Helm plugin 'unittest' is not installed"
+  exit 1
+fi
+
 CHARTS="hivemq-edge hivemq-operator hivemq-platform hivemq-platform-operator hivemq-swarm"
 for CHART in ${CHARTS}; do
   helm unittest "./charts/$CHART" -f ./tests/**/*_test.yaml
