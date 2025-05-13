@@ -685,6 +685,30 @@ tests:
     asserts:
       - failedTemplate: {}
 
+  - it: with a MQTT service exposed and HiveMQ WebSocket path value, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          path: /mqtt
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using `path` value. HiveMQ WebSocket path is only supported by WebSocket services
+
+  - it: with a MQTT service not exposed and HiveMQ WebSocket path value, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          path: /mqtt
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
   - it: with a MQTT service exposed and zero `connectRate` Connect Overload Protection value, schema validation fails
     template: hivemq-configuration.yml
     set:

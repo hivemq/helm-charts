@@ -199,3 +199,26 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a REST API service enabled and HiveMQ WebSocket path value, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          path: /mqtt
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `rest-api` with container port `8888` is using `path` value. HiveMQ WebSocket path is only supported by WebSocket services
+
+  - it: with a REST API service disabled and HiveMQ WebSocket path value, validation succeeds
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8888
+          path: /mqtt
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

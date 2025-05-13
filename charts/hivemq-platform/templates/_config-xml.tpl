@@ -105,7 +105,8 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
         {{- end }}
       </connect-overload-protection>
       {{- end }}
-      <path>/mqtt</path>
+      {{- $path := $service.path | default "/mqtt" }}
+      <path>{{ $path }}</path>
       <tls>
         <keystore>
           <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
@@ -147,7 +148,8 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
         {{- end }}
       </connect-overload-protection>
       {{- end }}
-      <path>/mqtt</path>
+      {{- $path := $service.path | default "/mqtt" }}
+      <path>{{ $path }}</path>
     </websocket-listener>
     {{- end }}
     {{- end }}
