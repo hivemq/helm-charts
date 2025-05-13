@@ -9,6 +9,7 @@ services:
     containerPort: 8002
     keystoreSecretName: "websocket-secret"
     keystorePasswordSecretName: "secret-password"
+    path: /secure-mqtt-path
   - type: websocket
     exposed: true
     containerPort: 8003
@@ -50,3 +51,4 @@ services:
       enabled: false
       connectRate: 100
       connectBurstSize: 200
+    path: /mqtt-path

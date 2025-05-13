@@ -361,6 +361,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-connect-overload-protection" . -}}
+{{- include "hivemq-platform.validate-hivemq-websocket-path" . -}}
 {{- include "hivemq-platform.validate-external-traffic-policy" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
 {{- end -}}
@@ -513,6 +514,19 @@ Usage: {{ include "hivemq-platform.validate-hivemq-connect-overload-protection" 
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "hivemqConnectOverloadProtection") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
     {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqConnectOverloadProtection` value. HiveMQ Connect Overload Protection is only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that HiveMQ WebSocket path is only used by WebSocket services when the service is exposed.
+Usage: {{ include "hivemq-platform.validate-hivemq-websocket-path" . }}
+*/}}
+{{- define "hivemq-platform.validate-hivemq-websocket-path" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "path") (not (eq $service.type "websocket")) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `path` value. HiveMQ WebSocket path is only supported by WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}

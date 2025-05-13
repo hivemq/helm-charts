@@ -298,6 +298,9 @@ services:
     # Configures the HiveMQ listener name for a HiveMQ listener. Only applicable to MQTT and WebSocket services.
     # See https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html
     # hivemqListenerName: my-tcp-listener
+    # Configures the path for a HiveMQ listener. Only applicable to WebSocket services.
+    # See https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html#websockets
+    # path: /mqtt
     # Configures the connect overload protection for the HiveMQ MQTT and WebSocket listeners.
     # See https://docs.hivemq.com/hivemq/latest/user-guide/restrictions.html#throttle-connections
     # hivemqConnectOverloadProtection:

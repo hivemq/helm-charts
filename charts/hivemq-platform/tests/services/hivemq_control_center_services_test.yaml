@@ -197,3 +197,26 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a Control Center service enabled and HiveMQ WebSocket path value, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          path: /mqtt
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `control-center` with container port `8081` is using `path` value. HiveMQ WebSocket path is only supported by WebSocket services
+
+  - it: with a Control Center service disabled and HiveMQ WebSocket path value, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+          path: /mqtt
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
