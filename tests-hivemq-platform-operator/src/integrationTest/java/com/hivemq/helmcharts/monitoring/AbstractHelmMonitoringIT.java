@@ -34,6 +34,8 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
                 "prometheus-community/kube-prometheus-stack",
                 "--set",
                 "prometheus-node-exporter.hostRootFsMount.enabled=false",
+                "--set",
+                "prometheus.prometheusSpec.maximumStartupDurationSeconds=900",
                 "-n",
                 MONITORING_NAMESPACE,
                 "--create-namespace");
