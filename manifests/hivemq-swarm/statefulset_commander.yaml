@@ -8,7 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: hivemq-swarm
     app.kubernetes.io/instance: my-swarm
-    app.kubernetes.io/version: "4.39.0"
+    app.kubernetes.io/version: "4.40.0"
 spec:
   replicas: 1
   serviceName: my-swarm-hivemq-swarm-api
@@ -31,7 +31,7 @@ spec:
         - name: hivemq-swarm-commander
           securityContext:
             {}
-          image: "hivemq/hivemq-swarm:4.39.0"
+          image: "hivemq/hivemq-swarm:4.40.0"
           imagePullPolicy: IfNotPresent
           env:
             - name: SWARM_COMMANDER_MODE
