@@ -38,7 +38,7 @@ class EseExtensionInstallationIT {
         final var eseConfigMap = new ConfigMapBuilder().withNewMetadata()
                 .withName("ese-extension-config")
                 .endMetadata()
-                .withData(Map.of("hivemq-enterprise-security-extension.xml", configMapData))
+                .withData(Map.of("enterprise-security-extension.xml", configMapData))
                 .build();
         client.resource(eseConfigMap).inNamespace(namespace).create();
 
