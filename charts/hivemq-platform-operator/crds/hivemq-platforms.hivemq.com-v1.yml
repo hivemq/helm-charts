@@ -3638,6 +3638,7 @@ spec:
                     description: "The recovery state phase, indicating the step of\
                       \ the recovery reconciliation state"
                     enum:
+                    - "FAILED_CREATE_PODS"
                     - "INVALID_CONFIG_MAP"
                     - "INVALID_CUSTOM_RESOURCE_SPEC"
                     - "INVALID_CUSTOM_RESOURCE_STATUS"
@@ -3682,6 +3683,7 @@ spec:
                 description: "The current state phase, indicating the current step\
                   \ of the reconciliation state"
                 enum:
+                - "FAILED_CREATE_PODS"
                 - "INVALID_CONFIG_MAP"
                 - "INVALID_CUSTOM_RESOURCE_SPEC"
                 - "INVALID_CUSTOM_RESOURCE_STATUS"
