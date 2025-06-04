@@ -14,11 +14,13 @@ services:
     containerPort: 8892
     keystoreSecretName: "rest-api-secret1"
     keystorePasswordSecretName: "secret-password1"
+    hivemqListenerName: my-custom-secure-rest-api-listener-8892
   - type: rest-api
     exposed: false
     containerPort: 8893
     keystoreSecretName: "rest-api-secret2"
     keystorePasswordSecretName: "secret-password2"
+    hivemqListenerName: my-custom-secure-rest-api-listener-8893
   - type: rest-api
     exposed: true
     containerPort: 8894
@@ -31,6 +33,7 @@ services:
     keystoreSecretName: "rest-api-secret4"
     keystorePasswordSecretName: "secret-password4"
     keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    hivemqListenerName: my-custom-secure-rest-api-listener-8895
   - type: rest-api
     exposed: true
     containerPort: 8888

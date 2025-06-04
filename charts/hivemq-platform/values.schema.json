@@ -832,24 +832,8 @@
             },
             "type" : "object"
           },
-          "containerPort" : {
-            "maximum" : 65535,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "exposed" : {
-            "type" : "boolean"
-          },
-          "externalTrafficPolicy" : {
-            "description" : "Describes if the Service routes external traffic to node-local or cluster-wide endpoints. See https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy.",
-            "enum" : [
-              "Cluster",
-              "Local"
-            ],
-            "type" : "string"
-          },
           "hivemqListenerName" : {
-            "description" : "Defines the optional custom name for the MQTT and WebSocket listeners.",
+            "description" : "Defines the optional custom name for the MQTT, WebSocket and REST API listeners.",
             "type" : "string"
           },
           "hivemqProxyProtocol" : {

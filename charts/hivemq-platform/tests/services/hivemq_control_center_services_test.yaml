@@ -155,7 +155,7 @@ tests:
           hivemqListenerName: foobar
     asserts:
       - failedTemplate:
-          errorPattern: Service type `control-center` with container port `8081` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services
+          errorPattern: Service type `control-center` with container port `8081` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT, WebSocket and REST API services
 
   - it: with a Control Center service disabled and HiveMQ listener name enabled, validation succeeds
     set:
