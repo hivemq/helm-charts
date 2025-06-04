@@ -39,6 +39,9 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
             "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8444;
     private static final @NotNull String CC_CUSTOM_SERVICE_NAME = "control-center-service";
 
+    @TempDir
+    private @NotNull Path tmp;
+
     @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
@@ -57,7 +60,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenTlsEnabled_thenAbleToLogin(@TempDir final @NotNull Path tmp) throws Exception {
+    void platformChart_whenTlsEnabled_thenAbleToLogin() throws Exception {
         CertificatesUtil.generateCertificates(tmp.toFile());
         final var encoder = Base64.getEncoder();
         final var keystore = tmp.resolve("keystore.jks");
@@ -88,8 +91,7 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenTlsEnabledWithDifferentPrivateKey_thenAbleToLogin(@TempDir final @NotNull Path tmp)
-            throws Exception {
+    void platformChart_whenTlsEnabledWithDifferentPrivateKey_thenAbleToLogin() throws Exception {
         final var keystorePassword = "keystore-password";
         final var privateKeyPassword = "private-key-password";
         CertificatesUtil.generateCertificates(tmp.toFile(),

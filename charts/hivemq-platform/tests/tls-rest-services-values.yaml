@@ -1,0 +1,36 @@
+services:
+  - type: rest-api
+    exposed: true
+    containerPort: 8890
+    keystoreSecretName: "rest-api-secret"
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+  - type: rest-api
+    exposed: true
+    containerPort: 8891
+    keystoreSecretName: "rest-api-secret"
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+  - type: rest-api
+    exposed: true
+    containerPort: 8892
+    keystoreSecretName: "rest-api-secret1"
+    keystorePasswordSecretName: "secret-password1"
+  - type: rest-api
+    exposed: false
+    containerPort: 8893
+    keystoreSecretName: "rest-api-secret2"
+    keystorePasswordSecretName: "secret-password2"
+  - type: rest-api
+    exposed: true
+    containerPort: 8894
+    keystoreSecretName: "rest-api-secret3"
+    keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+  - type: rest-api
+    exposed: true
+    containerPort: 8895
+    keystoreSecretName: "rest-api-secret4"
+    keystorePasswordSecretName: "secret-password4"
+    keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+  - type: rest-api
+    exposed: true
+    containerPort: 8888

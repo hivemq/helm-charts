@@ -284,22 +284,34 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <auth>
       <enabled>{{ printf "%t" .Values.restApi.authEnabled | default false }}</enabled>
     </auth>
+    <listeners>
     {{- $containerPortsList := list }}
     {{- range $service := .Values.services }}
-    {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) }}
-    {{- if eq $service.type "rest-api" }}
-    <listeners>
+    {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) (eq $service.type "rest-api") }}
+    {{- if $service.keystoreSecretName }}
+      <https>
+        <port>{{ $service.containerPort }}</port>
+        <bind-address>0.0.0.0</bind-address>
+        <tls>
+          <keystore>
+            <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
+            <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
+            <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
+          </keystore>
+        </tls>
+      </https>
+    {{- else }}
       <http>
         <port>{{ $service.containerPort }}</port>
         <bind-address>0.0.0.0</bind-address>
       </http>
-    </listeners>
     {{- end }}
     {{- end }}
     {{- if $service.exposed }}
       {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
     {{- end }}
     {{- end }}
+    </listeners>
   </rest-api>
   {{- end }}
   {{- if and .Values.config.dataHub (or .Values.config.dataHub.behaviorValidationEnabled .Values.config.dataHub.dataValidationEnabled) }}

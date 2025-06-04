@@ -44,6 +44,9 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private static final @NotNull String HIVEMQ_CC_SERVICE_NAME = "hivemq-test-hivemq-platform-cc-8080";
     private static final int HIVEMQ_CC_SERVICE_PORT = 8080;
 
+    @TempDir
+    private @NotNull Path tmp;
+
     @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
@@ -55,10 +58,10 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenTlsEnabled_hivemqRunning(@TempDir final @NotNull Path tempDir) throws Exception {
-        CertificatesUtil.generateCertificates(tempDir.toFile());
+    void platformChart_whenTlsEnabled_hivemqRunning() throws Exception {
+        CertificatesUtil.generateCertificates(tmp.toFile());
         final var encoder = Base64.getEncoder();
-        final var keystore = tempDir.resolve("keystore.jks");
+        final var keystore = tmp.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(keystore);
         final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
         createSecret(client,
@@ -101,14 +104,13 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenTlsEnabledWithDifferentPrivateKey_hivemqRunning(@TempDir final @NotNull Path tempDir)
-            throws Exception {
+    void platformChart_whenTlsEnabledWithDifferentPrivateKey_hivemqRunning() throws Exception {
         final var keystorePassword = "keystore-password";
         final var privateKeyPassword = "private-key-password";
-        CertificatesUtil.generateCertificates(tempDir.toFile(),
+        CertificatesUtil.generateCertificates(tmp.toFile(),
                 Map.of(ENV_VAR_KEYSTORE_PASSWORD, keystorePassword, ENV_VAR_PRIVATE_KEY_PASSWORD, privateKeyPassword));
         final var encoder = Base64.getEncoder();
-        final var keystore = tempDir.resolve("keystore.jks");
+        final var keystore = tmp.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(keystore);
         final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
 

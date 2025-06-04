@@ -6,6 +6,9 @@ services:
   - type: rest-api
     exposed: true
     containerPort: 8890
+    keystoreSecretName: "rest-api-keystore"
+    keystoreSecretKey: "keystore.jks"
+    keystorePasswordSecretName: "rest-api-keystore-password"
 extensions:
   - name: hivemq-allow-all-extension
     extensionUri: preinstalled
