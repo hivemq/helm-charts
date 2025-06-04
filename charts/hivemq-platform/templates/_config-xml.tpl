@@ -292,6 +292,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       <https>
         <port>{{ $service.containerPort }}</port>
         <bind-address>0.0.0.0</bind-address>
+        {{- if $service.hivemqListenerName }}
+        <name>{{ $service.hivemqListenerName }}</name>
+        {{- end }}
         <tls>
           <keystore>
             <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
@@ -304,6 +307,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       <http>
         <port>{{ $service.containerPort }}</port>
         <bind-address>0.0.0.0</bind-address>
+        {{- if $service.hivemqListenerName }}
+        <name>{{ $service.hivemqListenerName }}</name>
+        {{- end }}
       </http>
     {{- end }}
     {{- end }}

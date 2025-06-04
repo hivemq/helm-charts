@@ -499,8 +499,8 @@ Usage: {{ include "hivemq-platform.validate-hivemq-listener-name-services" . }}
 {{- define "hivemq-platform.validate-hivemq-listener-name-services" -}}
 {{- $services := .Values.services }}
 {{- range $service := $services }}
-  {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
-    {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+  {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket")) (not (eq $service.type "rest-api"))) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT, WebSocket and REST API services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}

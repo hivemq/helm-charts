@@ -91,6 +91,75 @@ tests:
           path: data["config.xml"]
           pattern: "(?s)<rest-api>.*?<auth>.*?<enabled>false</enabled>.*?</auth>.*?</rest-api>"
 
+  - it: with a REST API service exposed and a listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          hivemqListenerName: my-custom-rest-api-listener
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<name>my-custom-rest-api-listener</name>.*?</http>.*?</listeners>.*?</rest-api>"
+
+  - it: with a REST API exposed and an empty listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          hivemqListenerName: ""
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<name>.*?</name>.*?</http>.*?</listeners>.*?</rest-api>"
+
+  - it: with a REST API service exposed and a duplicated listener name, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          hivemqListenerName: my-custom-rest-api-listener
+        - type: rest-api
+          exposed: true
+          containerPort: 8891
+          hivemqListenerName: my-custom-rest-api-listener
+    asserts:
+      - failedTemplate:
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-rest-api-listener`
+
+  - it: with non-exposed REST API services and duplicated listener name, validation succeeds
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          hivemqListenerName: my-custom-rest-api-listener
+        - type: rest-api
+          exposed: false
+          containerPort: 8891
+          hivemqListenerName: my-custom-rest-api-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
   - it: with a secure REST API service enabled, using keystorePassword
     template: hivemq-configuration.yml
     set:
@@ -488,6 +557,7 @@ tests:
                   <https>
                     <port>8892</port>
                     <bind-address>0.0.0.0</bind-address>
+                    <name>my-custom-secure-rest-api-listener-8892</name>
                     <tls>
                       <keystore>
                         <path>/tls-rest-api-secret1/keystore</path>
@@ -510,6 +580,7 @@ tests:
                   <https>
                     <port>8895</port>
                     <bind-address>0.0.0.0</bind-address>
+                    <name>my-custom-secure-rest-api-listener-8895</name>
                     <tls>
                       <keystore>
                         <path>/tls-rest-api-secret4/keystore</path>
@@ -575,3 +646,96 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<rest-api>.*?<listeners>.*?<https>.*?<port>8890</port>.*?</https>.*?<https>.*?<port>8890</port>.*?</https>.*?</listeners>.*?</rest-api>"
+
+  - it: with a secure REST API service exposed and a listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<name>my-custom-secure-rest-api-listener</name>.*?</http>.*?</listeners>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<https>.*?<port>8890</port>.*?</https>.*?</listeners>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<https>.*?<name>my-custom-secure-rest-api-listener</name>.*?</https>.*?</listeners>.*?</rest-api>"
+
+  - it: with a secure REST API service exposed and an empty listener name
+    template: hivemq-configuration.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: ""
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<port>8890</port>.*?</http>.*?</listeners>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<http>.*?<name>.*?</name>.*?</http>.*?</listeners>.*?</rest-api>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<https>.*?<port>8890</port>.*?</https>.*?</listeners>.*?</rest-api>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<rest-api>.*?<listeners>.*?<https>.*?<name>.*?</name>.*?</https>.*?</listeners>.*?</rest-api>"
+
+  - it: with a secure REST API service exposed and a duplicated listener name, validation fails
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+        - type: rest-api
+          exposed: true
+          containerPort: 8891
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+    asserts:
+      - failedTemplate:
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-secure-rest-api-listener`
+
+  - it: with non-exposed secure REST API services and duplicated listener name, validation succeeds
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+        - type: rest-api
+          exposed: false
+          containerPort: 8891
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
