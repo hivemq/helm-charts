@@ -398,6 +398,30 @@ services:
     exposed: false
     containerPort: 8888
 
+  # Secure REST API service configuration
+  - type: rest-api
+    exposed: false
+    containerPort: 8889
+    # The name of the Kubernetes secret that contains the keystore file.
+    keystoreSecretName: ""
+    # The key of the Kubernetes secret that contains the keystore file. Defaults to `keystore`
+    keystoreSecretKey: ""
+
+    # Two options are available to configure secure Control Center listeners:
+    # 1. Using base64 encoded passwords configured via Helm chart values, as below
+    # The inlined password for the keystore, Base 64 encoded.
+    keystorePassword: ""
+    # The inlined private key password for the keystore, Base 64 encoded. Defaults to the `keystorePassword` value.
+    keystorePrivatePassword: ""
+
+    # 2. Using base64 encoded passwords stored in a Kubernetes secret, as below
+    # Alternatively, the name of the Kubernetes secret which contains the keystore password and optionally the private key password for the keystore.
+    keystorePasswordSecretName: ""
+    # The optional entry key for the keystore password in the Kubernetes secret. Defaults to `keystore.password`
+    keystorePasswordSecretKey: ""
+    # The optional entry key for the keystore private password in the Kubernetes secret.
+    keystorePrivatePasswordSecretKey: ""
+
   # WebSocket service configuration
   - type: websocket
     exposed: false

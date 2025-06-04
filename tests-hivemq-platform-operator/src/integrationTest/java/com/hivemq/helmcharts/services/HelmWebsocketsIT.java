@@ -38,13 +38,15 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
     private static final int WEBSOCKET_SERVICE_PORT_8004 = 8004;
     private static final @NotNull String WEBSOCKET_SERVICE_PATH = "/mqtt";
 
+    @TempDir
+    private @NotNull Path tmp;
+
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMtlsWebsocketEnabled_thenSendsReceivesMessage(@TempDir final @NotNull Path tempDir)
-            throws Exception {
-        CertificatesUtil.generateCertificates(tempDir.toFile());
+    void platformChart_whenMtlsWebsocketEnabled_thenSendsReceivesMessage() throws Exception {
+        CertificatesUtil.generateCertificates(tmp.toFile());
         final var encoder = Base64.getEncoder();
-        final var keystore = tempDir.resolve("keystore.jks");
+        final var keystore = tmp.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(keystore);
         final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
 
@@ -56,7 +58,7 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        final var truststore = tempDir.resolve("truststore.jks");
+        final var truststore = tmp.resolve("truststore.jks");
         final var truststoreContent = Files.readAllBytes(truststore);
         final var base64TruststoreContent = encoder.encodeToString(truststoreContent);
         createSecret(client, platformNamespace, "ws-truststore-8003", "truststore.jks", base64TruststoreContent);
@@ -84,12 +86,11 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMtlsWebsocketEnabledWithDifferentPrivateKey_thenSendsReceivesMessage(@TempDir final @NotNull Path tempDir)
-            throws Exception {
+    void platformChart_whenMtlsWebsocketEnabledWithDifferentPrivateKey_thenSendsReceivesMessage() throws Exception {
         final var keystorePassword = "keystore-password";
         final var privateKeyPassword = "private-key-password";
         final var truststorePassword = "truststore-password";
-        CertificatesUtil.generateCertificates(tempDir.toFile(),
+        CertificatesUtil.generateCertificates(tmp.toFile(),
                 Map.of(ENV_VAR_KEYSTORE_PASSWORD,
                         keystorePassword,
                         ENV_VAR_PRIVATE_KEY_PASSWORD,
@@ -97,7 +98,7 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                         ENV_VAR_TRUSTSTORE_PASSWORD,
                         truststorePassword));
         final var encoder = Base64.getEncoder();
-        final var keystore = tempDir.resolve("keystore.jks");
+        final var keystore = tmp.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(keystore);
         final var base64KeystoreContent = encoder.encodeToString(keystoreContent);
 
@@ -111,7 +112,7 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                         "my-private-key.password",
                         encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
-        final var truststore = tempDir.resolve("truststore.jks");
+        final var truststore = tmp.resolve("truststore.jks");
         final var truststoreContent = Files.readAllBytes(truststore);
         final var base64TruststoreContent = encoder.encodeToString(truststoreContent);
         createSecret(client, platformNamespace, "ws-truststore-8003", "truststore.jks", base64TruststoreContent);

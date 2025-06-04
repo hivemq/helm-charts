@@ -25,7 +25,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(UpdateLogLevelIT.class);
 
     @TempDir
-    private @NotNull Path tempDir;
+    private @NotNull Path tmp;
 
     private @NotNull Path logbackFile;
 
@@ -37,7 +37,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
     @BeforeEach
     @Timeout(value = 3, unit = TimeUnit.MINUTES)
     void setUp() {
-        logbackFile = tempDir.resolve("logback.xml");
+        logbackFile = tmp.resolve("logback.xml");
     }
 
     @ParameterizedTest(name = "{index} withNamespaces: {0}")
