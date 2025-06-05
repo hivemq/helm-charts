@@ -124,3 +124,127 @@ tests:
                   targetPort: ws-8001
                   port: 8001
               sessionAffinity: None
+
+  - it: with a WebSocket service exposed and a duplicated listener name, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          hivemqListenerName: my-custom-ws-listener
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          hivemqListenerName: my-custom-ws-listener
+    asserts:
+      - failedTemplate:
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-ws-listener`
+
+  - it: with non-exposed WebSocket services and duplicated listener name, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          hivemqListenerName: my-custom-ws-listener
+        - type: websocket
+          exposed: false
+          containerPort: 8001
+          hivemqListenerName: my-custom-ws-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure WebSocket service and a duplicated listener name
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+        - type: websocket
+          exposed: true
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+    asserts:
+      - failedTemplate:
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-secure-ws-listener`
+
+  - it: with non-exposed secure WebSocket services and duplicated listener name, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+        - type: websocket
+          exposed: false
+          containerPort: 8001
+          keystoreSecretName: "websocket-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "websocket-keystore-password"
+          hivemqListenerName: my-custom-secure-ws-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a non-secure WebSocket service exposed and TLS protocol set, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using `tlsProtocols` value. TLS protocols are only supported by secure services
+
+  - it: with a non-secure WebSocket service non-exposed and TLS protocol set, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a non-secure WebSocket service exposed and Cipher suites set, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using `tlsCipherSuites` value. Cipher suites are only supported by secure services
+
+  - it: with a non-secure WebSocket service non-exposed and Cipher suites set, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

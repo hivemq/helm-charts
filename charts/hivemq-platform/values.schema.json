@@ -811,6 +811,33 @@
           "annotations" : {
             "type" : "object"
           },
+          "tlsCipherSuites" : {
+            "additionalProperties": false,
+            "description" : "Optional setting to explicitly define the accepted cipher suites.",
+            "items" : {
+              "minLength" : 1,
+              "pattern": ".*\\S.*",
+              "type" : "string"
+            },
+            "minItems": 1,
+            "type" : "array"
+          },
+          "containerPort" : {
+            "maximum" : 65535,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "exposed" : {
+            "type" : "boolean"
+          },
+          "externalTrafficPolicy" : {
+            "description" : "Describes if the Service routes external traffic to node-local or cluster-wide endpoints. See https://kubernetes.io/docs/reference/networking/virtual-ips/#external-traffic-policy.",
+            "enum" : [
+              "Cluster",
+              "Local"
+            ],
+            "type" : "string"
+          },
           "hivemqConnectOverloadProtection" : {
             "description" : "Configures the connect overload protection for the HiveMQ MQTT and WebSocket listeners.",
             "properties" : {
@@ -910,6 +937,17 @@
               "REQUIRED"
             ],
             "type" : "string"
+          },
+          "tlsProtocols" : {
+            "additionalProperties": false,
+            "description" : "Optional setting to explicitly define the accepted TLS version.",
+            "items" : {
+              "minLength" : 1,
+              "pattern": ".*\\S.*",
+              "type" : "string"
+            },
+            "minItems": 1,
+            "type" : "array"
           },
           "truststorePassword" : {
             "type" : "string"

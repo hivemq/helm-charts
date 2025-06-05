@@ -199,3 +199,123 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a REST API service exposed and a duplicated listener name, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          hivemqListenerName: my-custom-rest-api-listener
+        - type: rest-api
+          exposed: true
+          containerPort: 8891
+          hivemqListenerName: my-custom-rest-api-listener
+    asserts:
+      - failedTemplate:
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-rest-api-listener`
+
+  - it: with non-exposed REST API services and duplicated listener name, validation succeeds
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          hivemqListenerName: my-custom-rest-api-listener
+        - type: rest-api
+          exposed: false
+          containerPort: 8891
+          hivemqListenerName: my-custom-rest-api-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure REST API service exposed and a duplicated listener name, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+        - type: rest-api
+          exposed: true
+          containerPort: 8891
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+    asserts:
+      - failedTemplate:
+          errorPattern: Found duplicated HiveMQ listener name `my-custom-secure-rest-api-listener`
+
+  - it: with non-exposed secure REST API services and duplicated listener name, validation succeeds
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+        - type: rest-api
+          exposed: false
+          containerPort: 8891
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          hivemqListenerName: my-custom-secure-rest-api-listener
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a non-secure REST API service exposed and TLS protocol set, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `rest-api` with container port `8890` is using `tlsProtocols` value. TLS protocols are only supported by secure services
+
+  - it: with a non-secure REST API service non-exposed and TLS protocol set, validation succeeds
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a non-secure REST API service exposed and Cipher suites set, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `rest-api` with container port `8890` is using `tlsCipherSuites` value. Cipher suites are only supported by secure services
+
+  - it: with a non-secure REST API service non-exposed and Cipher suites set, validation succeeds
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

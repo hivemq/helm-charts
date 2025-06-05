@@ -1,7 +1,6 @@
 suite: HiveMQ Platform Configuration as ConfigMap - Control Center listeners tests
 templates:
   - hivemq-configuration.yml
-  - hivemq-custom-resource.yml
 release:
   name: test-hivemq-platform
   namespace: test-hivemq-platform-namespace
@@ -16,11 +15,9 @@ asserts:
     kind: ConfigMap
     name: hivemq-configuration-test-hivemq-platform
     namespace: test-hivemq-platform-namespace
-    template: hivemq-configuration.yml
 tests:
 
   - it: with a Control Center service exposed
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -34,7 +31,6 @@ tests:
           pattern: "(?s)<control-center>.*?<port>8081</port>.*?</control-center>"
 
   - it: with a Control Center service not exposed
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -48,7 +44,6 @@ tests:
           pattern: "(?s)<control-center>.*?<port>8081</port>.*?</control-center>"
 
   - it: with Control Center user and password
-    template: hivemq-configuration.yml
     set:
       controlCenter.username: "test-username"
       controlCenter.password: "c638833f69bbfb3c267afa0a74434812436b8f08a81fd263c6be6871de4f1265"
@@ -105,7 +100,6 @@ tests:
             </hivemq>
 
   - it: with default Control Center username and password
-    template: hivemq-configuration.yml
     asserts:
       - exists:
           path: data["config.xml"]
@@ -114,7 +108,6 @@ tests:
           pattern: "(?s)<user>.*?<name>test-username</name>.*?<password>test-password</password>.*?</user>"
 
   - it: with a secure Control Center service enabled, using keystorePassword
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -171,7 +164,6 @@ tests:
             </hivemq>
 
   - it: with a secure Control Center service enabled, using keystorePasswordSecretName
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -228,7 +220,6 @@ tests:
             </hivemq>
 
   - it: with a secure Control Center service disabled, no secure Control Center service is exposed
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -245,7 +236,6 @@ tests:
           pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<listeners>.*?</control-center>"
 
   - it: with a secure Control Center services exposed using a custom keystore private password
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -320,7 +310,6 @@ tests:
             </hivemq>
 
   - it: with a secure Control Center services exposed reusing the same keystore password and keystore private password
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -430,7 +419,6 @@ tests:
             </hivemq>
 
   - it: with several secure and non-secure Control Center services
-    template: hivemq-configuration.yml
     values:
       - ../../tls-cc-services-values.yaml
     asserts:
@@ -529,7 +517,6 @@ tests:
             </hivemq>
 
   - it: with duplicated container port in multiple Control Center services, no duplicated listener is created
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -551,7 +538,6 @@ tests:
           pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?<port>8080</port>.*?</http>.*?<http>.*?<port>8080</port>.*?</http>.*?</listeners>.*?</control-center>"
 
   - it: with duplicated container port in multiple secure Control Center services, no duplicated listener is created
-    template: hivemq-configuration.yml
     set:
       services:
         - type: control-center
@@ -577,3 +563,205 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+
+  - it: with a secure Control Center service exposed and TLS protocol set
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<tls>.*?<protocols>.*?<protocol>TLSv1.2</protocol>.*?</protocols>.*?</tls>.*?</https>.*?</listeners>.*?</control-center>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?</http>.*?</listeners>.*?</control-center>"
+
+  - it: with a secure Control Center service exposed and several TLS protocols set
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            - TLSv1.2
+            - TLSv1.3
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<tls>.*?<protocols>.*?<protocol>TLSv1.2</protocol>.*?</protocols>.*?</tls>.*?</https>.*?</listeners>.*?</control-center>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<tls>.*?<protocols>.*?<protocol>TLSv1.3</protocol>.*?</protocols>.*?</tls>.*?</https>.*?</listeners>.*?</control-center>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?</http>.*?</listeners>.*?</control-center>"
+
+  - it: with a secure Control Center service exposed and TLS protocols defined with no protocol, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and empty TLS protocols list, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            -
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and TLS protocols defined with blank space only, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            - " "
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and TLS protocols defined with an invalid additional property, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            protocol: TLSv1.2
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and Cipher suites set
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<tls>.*?<cipher-suites>.*?<cipher-suite>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</cipher-suite>.*?</cipher-suites>.*?</tls>.*?</https>.*?</listeners>.*?</control-center>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?</http>.*?</listeners>.*?</control-center>"
+
+  - it: with a secure Control Center service exposed and several Cipher suites set
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+            - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<port>8443</port>.*?</https>.*?</listeners>.*?</control-center>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<tls>.*?<cipher-suites>.*?<cipher-suite>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</cipher-suite>.*?</cipher-suites>.*?</tls>.*?</https>.*?</listeners>.*?</control-center>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<https>.*?<tls>.*?<cipher-suites>.*?<cipher-suite>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</cipher-suite>.*?</cipher-suites>.*?</tls>.*?</https>.*?</listeners>.*?</control-center>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<control-center>.*?<listeners>.*?<http>.*?</http>.*?</listeners>.*?</control-center>"
+
+  - it: with a secure Control Center service exposed and Cipher suites defined with no suite, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and empty Cipher suites list, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            -
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and Cipher suites defined with blank space only, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            - " "
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure Control Center service exposed and Cipher suites defined with an invalid additional property, schema validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            cipherSuite: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - failedTemplate: {}

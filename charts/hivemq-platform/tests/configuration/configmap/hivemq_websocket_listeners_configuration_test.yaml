@@ -1,7 +1,6 @@
 suite: HiveMQ Platform Configuration as ConfigMap - WebSocket listeners tests
 templates:
   - hivemq-configuration.yml
-  - hivemq-custom-resource.yml
 release:
   name: test-hivemq-platform
   namespace: test-hivemq-platform-namespace
@@ -16,11 +15,9 @@ asserts:
     kind: ConfigMap
     name: hivemq-configuration-test-hivemq-platform
     namespace: test-hivemq-platform-namespace
-    template: hivemq-configuration.yml
 tests:
 
   - it: with a WebSocket service exposed
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -49,7 +46,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
 
   - it: with a WebSocket service exposed and PROXY protocol enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -73,7 +69,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a WebSocket service exposed and PROXY protocol disabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -97,7 +92,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>.*?</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a WebSocket service exposed and a listener name
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -121,7 +115,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
 
   - it: with a WebSocket service exposed and an empty listener name
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -144,41 +137,7 @@ tests:
           path: data["config.xml"]
           pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
 
-  - it: with a WebSocket service exposed and a duplicated listener name, validation fails
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: websocket
-          exposed: true
-          containerPort: 8000
-          hivemqListenerName: my-custom-ws-listener
-        - type: websocket
-          exposed: true
-          containerPort: 8001
-          hivemqListenerName: my-custom-ws-listener
-    asserts:
-      - failedTemplate:
-          errorPattern: Found duplicated HiveMQ listener name `my-custom-ws-listener`
-
-  - it: with non-exposed WebSocket services and duplicated listener name, validation succeeds
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: websocket
-          exposed: false
-          containerPort: 8000
-          hivemqListenerName: my-custom-ws-listener
-        - type: websocket
-          exposed: false
-          containerPort: 8001
-          hivemqListenerName: my-custom-ws-listener
-    asserts:
-      - notFailedTemplate: {}
-      - hasDocuments:
-          count: 1
-
   - it: with a WebSocket service exposed and Connect Overload Protection enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -211,7 +170,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and Connect Overload Protection enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -247,7 +205,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service not exposed and Connect Overload Protection enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -274,7 +231,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service not exposed and Connect Overload Protection enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -304,7 +260,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and empty Connect Overload Protection values enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -337,7 +292,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and empty Connect Overload Protection values enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -373,7 +327,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and only `enabled=true` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -404,7 +357,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and only `enabled=true` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -438,7 +390,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and only `enabled=false` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -469,7 +420,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and only `enabled=false` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -503,7 +453,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and only `connectRate` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -534,7 +483,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and only `connectRate` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -568,7 +516,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and only `connectBurstSize` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -599,7 +546,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and only `connectBurstSize` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -633,7 +579,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and decimal `connectRate` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -664,7 +609,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and decimal `connectRate` Connect Overload Protection value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -698,7 +642,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and invalid `enabled` Connect Overload Protection value, schema validation fails
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -710,7 +653,6 @@ tests:
       - failedTemplate: {}
 
   - it: with a WebSocket service exposed and zero `connectRate` Connect Overload Protection value, schema validation fails
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -722,7 +664,6 @@ tests:
       - failedTemplate: {}
 
   - it: with a WebSocket service exposed and decimal `connectBurstSize` Connect Overload Protection value, schema validation fails
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -734,7 +675,6 @@ tests:
       - failedTemplate: {}
 
   - it: with a WebSocket service exposed and zero `connectBurstSize` Connect Overload Protection value, schema validation fails
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -745,8 +685,209 @@ tests:
     asserts:
       - failedTemplate: {}
 
+  - it: with a secure WebSocket service exposed and TLS protocol set
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<protocols>.*?<protocol>TLSv1.2</protocol>.*?</protocols>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?</websocket-listener>"
+
+  - it: with a secure WebSocket service exposed and several TLS protocols set
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            - TLSv1.2
+            - TLSv1.3
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<protocols>.*?<protocol>TLSv1.2</protocol>.*?</protocols>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<protocols>.*?<protocol>TLSv1.3</protocol>.*?</protocols>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?</websocket-listener>"
+
+  - it: with a secure WebSocket service exposed and TLS protocols defined with no protocol, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and empty TLS protocols list, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            -
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and TLS protocols defined with blank space only, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            - " "
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and TLS protocols defined with an invalid additional property, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsProtocols:
+            protocol: TLSv1.2
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and Cipher suite set
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            - TLSv1.2
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<cipher-suites>.*?<cipher-suite>TLSv1.2</cipher-suite>.*?</cipher-suites>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?</websocket-listener>"
+
+  - it: with a secure WebSocket service exposed and several Cipher suites set
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            - TLSv1.2
+            - TLSv1.3
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<port>8000</port>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<cipher-suites>.*?<cipher-suite>TLSv1.2</cipher-suite>.*?</cipher-suites>.*?</tls-websocket-listener>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<tls-websocket-listener>.*?<cipher-suites>.*?<cipher-suite>TLSv1.3</cipher-suite>.*?</cipher-suites>.*?</tls-websocket-listener>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<websocket-listener>.*?</websocket-listener>"
+
+  - it: with a secure WebSocket service exposed and Cipher suites defined with no suite, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and empty Cipher suites list, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            -
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and Cipher suites defined with blank space only, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            - " "
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a secure WebSocket service exposed and Cipher suites defined with an invalid additional property, schema validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "websocket-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsCipherSuites:
+            cipherSuite: TLSv1.2
+    asserts:
+      - failedTemplate: {}
+
   - it: with a WebSocket service exposed and no path value, default path value set
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -769,7 +910,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a WebSocket service exposed and custom path value, custom path value set
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -793,7 +933,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and no path value, default path value set
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -819,7 +958,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a secure WebSocket service exposed and custom path value, custom path value set
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -846,7 +984,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service not exposed and path value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -870,7 +1007,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service not exposed and path value
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -897,7 +1033,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service exposed and empty path value, schema validation fails
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -908,7 +1043,6 @@ tests:
       - failedTemplate: {}
 
   - it: with a WebSocket service exposed and invalid path value type, validation fails
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -919,7 +1053,6 @@ tests:
       - failedTemplate: {}
 
   - it: with a WebSocket service exposed and numeric as string path value, validation succeeds
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -943,7 +1076,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service exposed and numeric as string path value, validation succeeds
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -970,7 +1102,6 @@ tests:
           pattern: "(?s)<websocket-listener>.*?<connect-overload-protection>.*?</connect-overload-protection>.*?</websocket-listener>"
 
   - it: with a WebSocket service not exposed
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -999,7 +1130,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service enabled, using keystorePassword
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1055,7 +1185,6 @@ tests:
             </hivemq>
 
   - it: with a secure WebSocket service enabled, using keystorePasswordSecretName
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1111,7 +1240,6 @@ tests:
             </hivemq>
 
   - it: with a secure WebSocket service disabled, no secure WebSocket service is exposed
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1134,7 +1262,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket services exposed using a custom keystore private password
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1209,7 +1336,6 @@ tests:
             </hivemq>
 
   - it: with a secure WebSocket services exposed reusing the same keystore password and keystore private password
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1321,7 +1447,6 @@ tests:
             </hivemq>
 
   - it: with several secure and non-secure WebSocket services
-    template: hivemq-configuration.yml
     values:
       - ../../tls-ws-services-values.yaml
     asserts:
@@ -1435,7 +1560,6 @@ tests:
             </hivemq>
 
   - it: with duplicated container port in multiple WebSocket services, no duplicated listener is created
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1457,7 +1581,6 @@ tests:
           pattern: "(?s)<listeners>.*?<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>.*?<websocket-listener>.*?<port>8000</port>.*?</websocket-listener>.*?</listeners>"
 
   - it: with duplicated container port in multiple secure WebSocket services, no duplicated listener is created
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1485,7 +1608,6 @@ tests:
           pattern: "(?s)<listeners>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?<tls-websocket-listener>.*?<port>8001</port>.*?</tls-websocket-listener>.*?</listeners>"
 
   - it: with a secure WebSocket service and PROXY protocol enabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1512,7 +1634,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>true</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service and PROXY protocol disabled
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1539,7 +1660,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<proxy-protocol>false</proxy-protocol>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service and a listener name
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1566,7 +1686,6 @@ tests:
           pattern: "(?s)<tls-websocket-listener>.*?<name>my-custom-secure-websocket-listener</name>.*?</tls-websocket-listener>"
 
   - it: with a secure WebSocket service and an empty listener name
-    template: hivemq-configuration.yml
     set:
       services:
         - type: websocket
@@ -1591,49 +1710,3 @@ tests:
       - notMatchRegex:
           path: data["config.xml"]
           pattern: "(?s)<tls-websocket-listener>.*?<name>.*?</name>.*?</tls-websocket-listener>"
-
-  - it: with a secure WebSocket service and a duplicated listener name
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: websocket
-          exposed: true
-          containerPort: 8000
-          keystoreSecretName: "websocket-secret"
-          keystoreSecretKey: "keystore.jks"
-          keystorePasswordSecretName: "websocket-keystore-password"
-          hivemqListenerName: my-custom-secure-ws-listener
-        - type: websocket
-          exposed: true
-          containerPort: 8001
-          keystoreSecretName: "websocket-secret"
-          keystoreSecretKey: "keystore.jks"
-          keystorePasswordSecretName: "websocket-keystore-password"
-          hivemqListenerName: my-custom-secure-ws-listener
-    asserts:
-      - failedTemplate:
-          errorPattern: Found duplicated HiveMQ listener name `my-custom-secure-ws-listener`
-
-  - it: with non-exposed secure WebSocket services and duplicated listener name, validation succeeds
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: websocket
-          exposed: false
-          containerPort: 8000
-          keystoreSecretName: "websocket-secret"
-          keystoreSecretKey: "keystore.jks"
-          keystorePasswordSecretName: "websocket-keystore-password"
-          hivemqListenerName: my-custom-secure-ws-listener
-        - type: websocket
-          exposed: false
-          containerPort: 8001
-          keystoreSecretName: "websocket-secret"
-          keystoreSecretKey: "keystore.jks"
-          keystorePasswordSecretName: "websocket-keystore-password"
-          hivemqListenerName: my-custom-secure-ws-listener
-    asserts:
-      - notFailedTemplate: {}
-      - hasDocuments:
-          count: 1
-
