@@ -270,3 +270,16 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a secure Control Center service exposed and Client Authentication Mode set, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          keystoreSecretName: "control-center-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `control-center` with container port `8443` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services
