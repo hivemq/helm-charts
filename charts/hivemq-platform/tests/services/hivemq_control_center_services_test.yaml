@@ -220,3 +220,53 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a non-secure Control Center service exposed and TLS protocol set, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `control-center` with container port `8443` is using `tlsProtocols` value. TLS protocols are only supported by secure services
+
+  - it: with a non-secure Control Center service non-exposed and TLS protocol set, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8443
+          tlsProtocols:
+            - TLSv1.2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a non-secure Control Center service exposed and Cipher suites set, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8443
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `control-center` with container port `8443` is using `tlsCipherSuites` value. Cipher suites are only supported by secure services
+
+  - it: with a non-secure Control Center service non-exposed and Cipher suites set, validation succeeds
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8443
+          tlsCipherSuites:
+            - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

@@ -362,6 +362,17 @@ services:
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
 
+    # Configures the optional settings to define the accepted TLS version.
+    # See: https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html#tcp-tls-listener
+    tlsProtocols:
+      - TLSv1.2
+      - TLSv1.3
+    # Configures the optional settings to define the accepted cipher suites
+    # See: https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html#tcp-tls-listener
+    tlsCipherSuites:
+      - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+
   # Control Center service configuration
   - type: control-center
     exposed: true
@@ -393,6 +404,17 @@ services:
     # The optional entry key for the keystore private password in the Kubernetes secret.
     keystorePrivatePasswordSecretKey: ""
 
+    # Configures the optional setting to define the accepted TLS version.
+    # See: https://docs.hivemq.com/hivemq-control-center/latest/configuration.html#https-listener
+    tlsProtocols:
+      - TLSv1.2
+      - TLSv1.3
+    # Configures the optional setting to define the accepted cipher suites.
+    # See: https://docs.hivemq.com/hivemq-control-center/latest/configuration.html#https-listener
+    tlsCipherSuites:
+      - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+
   # REST API service configuration
   - type: rest-api
     exposed: false
@@ -421,6 +443,17 @@ services:
     keystorePasswordSecretKey: ""
     # The optional entry key for the keystore private password in the Kubernetes secret.
     keystorePrivatePasswordSecretKey: ""
+
+    # Configures the optional setting to define the accepted TLS version.
+    # See: https://docs.hivemq.com/hivemq/latest/rest-api/index.html#https-listener
+    tlsProtocols:
+      - TLSv1.2
+      - TLSv1.3
+    # Configures the optional setting to define the accepted cipher suites.
+    # See: https://docs.hivemq.com/hivemq/latest/rest-api/index.html#https-listener
+    tlsCipherSuites:
+      - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
 
   # WebSocket service configuration
   - type: websocket
@@ -462,6 +495,17 @@ services:
     truststorePasswordSecretName: ""
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
+
+    # Configures the optional setting to define the accepted TLS version.
+    # See: https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html#wss-listener
+    tlsProtocols:
+      - TLSv1.2
+      - TLSv1.3
+    # Configures the optional setting to define the accepted cipher suites.
+    # See: https://docs.hivemq.com/hivemq/latest/user-guide/listeners.html#wss-listener
+    tlsCipherSuites:
+      - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
 
 # Configurations and Overrides
 # These configurations provide a convenient option to override entire sections with your customized files,

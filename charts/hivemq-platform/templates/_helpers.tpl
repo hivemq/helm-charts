@@ -360,6 +360,8 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-metrics-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
+{{- include "hivemq-platform.validate-tls-protocols-services" . -}}
+{{- include "hivemq-platform.validate-cipher-suites-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-connect-overload-protection" . -}}
 {{- include "hivemq-platform.validate-hivemq-websocket-path" . -}}
 {{- include "hivemq-platform.validate-external-traffic-policy" . -}}
@@ -501,6 +503,32 @@ Usage: {{ include "hivemq-platform.validate-hivemq-listener-name-services" . }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket")) (not (eq $service.type "rest-api"))) }}
     {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT, WebSocket and REST API services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the TLS protocols value is only used by secure services.
+Usage: {{ include "hivemq-platform.validate-tls-protocols-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-tls-protocols-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "tlsProtocols") (not (hasKey $service "keystoreSecretName")) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsProtocols` value. TLS protocols are only supported by secure services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the Cipher suites value are only used by secure services.
+Usage: {{ include "hivemq-platform.validate-cipher-suites-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-cipher-suites-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "tlsCipherSuites") (not (hasKey $service "keystoreSecretName")) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsCipherSuites` value. Cipher suites are only supported by secure services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}

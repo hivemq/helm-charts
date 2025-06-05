@@ -49,6 +49,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
           <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
         </truststore>
         {{- end }}
+        {{- if $service.tlsProtocols }}
+        <protocols>
+        {{- range $protocol := $service.tlsProtocols }}
+          <protocol>{{ $protocol }}</protocol>
+        {{- end }}
+        </protocols>
+        {{- end }}
+        {{- if $service.tlsCipherSuites }}
+        <cipher-suites>
+        {{- range $cipherSuite := $service.tlsCipherSuites }}
+          <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+        {{- end }}
+        </cipher-suites>
+        {{- end }}
         {{- if $service.tlsClientAuthenticationMode}}
         <client-authentication-mode>{{ $service.tlsClientAuthenticationMode }}</client-authentication-mode>
         {{- end }}
@@ -118,6 +132,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
           <path>/tls-{{ $service.truststoreSecretName }}/{{ $service.truststoreSecretKey | default "truststore" }}</path>
           <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
         </truststore>
+        {{- end }}
+        {{- if $service.tlsProtocols }}
+        <protocols>
+        {{- range $protocol := $service.tlsProtocols }}
+          <protocol>{{ $protocol }}</protocol>
+        {{- end }}
+        </protocols>
+        {{- end }}
+        {{- if $service.tlsCipherSuites }}
+        <cipher-suites>
+        {{- range $cipherSuite := $service.tlsCipherSuites }}
+          <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+        {{- end }}
+        </cipher-suites>
         {{- end }}
         {{- if $service.tlsClientAuthenticationMode}}
         <client-authentication-mode>{{ $service.tlsClientAuthenticationMode }}</client-authentication-mode>
@@ -252,6 +280,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
             <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
             <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
           </keystore>
+          {{- if $service.tlsProtocols }}
+          <protocols>
+          {{- range $protocol := $service.tlsProtocols }}
+            <protocol>{{ $protocol }}</protocol>
+          {{- end }}
+          </protocols>
+          {{- end }}
+          {{- if $service.tlsCipherSuites }}
+          <cipher-suites>
+          {{- range $cipherSuite := $service.tlsCipherSuites }}
+            <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+          {{- end }}
+          </cipher-suites>
+          {{- end }}
         </tls>
       </https>
       {{- else }}
@@ -301,6 +343,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
             <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
             <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
           </keystore>
+          {{- if $service.tlsProtocols }}
+          <protocols>
+          {{- range $protocol := $service.tlsProtocols }}
+            <protocol>{{ $protocol }}</protocol>
+          {{- end }}
+          </protocols>
+          {{- end }}
+          {{- if $service.tlsCipherSuites }}
+          <cipher-suites>
+          {{- range $cipherSuite := $service.tlsCipherSuites }}
+            <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+          {{- end }}
+          </cipher-suites>
+          {{- end }}
         </tls>
       </https>
     {{- else }}
