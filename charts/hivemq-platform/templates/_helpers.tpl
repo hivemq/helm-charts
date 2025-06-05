@@ -362,6 +362,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
 {{- include "hivemq-platform.validate-tls-protocols-services" . -}}
 {{- include "hivemq-platform.validate-cipher-suites-services" . -}}
+{{- include "hivemq-platform.validate-client-authentication-mode-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-connect-overload-protection" . -}}
 {{- include "hivemq-platform.validate-hivemq-websocket-path" . -}}
 {{- include "hivemq-platform.validate-external-traffic-policy" . -}}
@@ -529,6 +530,25 @@ Usage: {{ include "hivemq-platform.validate-cipher-suites-services" . }}
 {{- range $service := $services }}
   {{- if and ($service.exposed) (hasKey $service "tlsCipherSuites") (not (hasKey $service "keystoreSecretName")) }}
     {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsCipherSuites` value. Cipher suites are only supported by secure services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the Client Authentication Mode value is only used by either secure MQTT or secure WebSocket services.
+Usage: {{ include "hivemq-platform.validate-client-authentication-mode-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-client-authentication-mode-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if not $service.exposed }}
+    {{- break }}
+  {{- end }}
+  {{- if and (or (eq $service.type "mqtt") (eq $service.type "websocket")) (hasKey $service "keystoreSecretName") }}
+    {{- break }}
+  {{- end }}
+  {{- if hasKey $service "tlsClientAuthenticationMode" }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}

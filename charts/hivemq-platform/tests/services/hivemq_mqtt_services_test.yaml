@@ -169,3 +169,26 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a non-secure MQTT service exposed and Client Authentication Mode set, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services
+
+  - it: with a non-secure MQTT service non-exposed and Client Authentication Mode set, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

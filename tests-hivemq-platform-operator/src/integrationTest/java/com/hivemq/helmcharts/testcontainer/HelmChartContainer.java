@@ -191,7 +191,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         watches.put("pods", client.pods().inAnyNamespace().watch(new PodWatcher()));
         this.client = client;
         try {
-            final var configPath = Path.of("/Users/antonio.alhambra/Downloads/temp/temp-config/kubeconfig.yaml");
+            final var configPath = Files.createTempFile("kubeconfig-", ".yaml").toAbsolutePath();
             configPath.toFile().deleteOnExit();
             Files.writeString(configPath, getKubeConfigYaml());
             LOG.info("Saved kubeconfig file on {}", configPath);

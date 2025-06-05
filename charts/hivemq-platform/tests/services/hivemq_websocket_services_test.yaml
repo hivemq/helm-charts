@@ -248,3 +248,26 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a non-secure WebSocket service exposed and Client Authentication Mode set, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services
+
+  - it: with a non-secure WebSocket service non-exposed and Client Authentication Mode set, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

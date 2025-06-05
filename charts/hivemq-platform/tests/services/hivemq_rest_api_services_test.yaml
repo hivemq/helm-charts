@@ -319,3 +319,16 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a secure REST API service exposed and Client Authentication Mode set, validation fails
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystorePasswordSecretName: "secret-password"
+          tlsClientAuthenticationMode: "OPTIONAL"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `rest-api` with container port `8890` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services
