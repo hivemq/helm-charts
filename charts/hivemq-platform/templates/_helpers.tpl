@@ -360,6 +360,9 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-metrics-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
+{{- include "hivemq-platform.validate-tls-protocols-services" . -}}
+{{- include "hivemq-platform.validate-cipher-suites-services" . -}}
+{{- include "hivemq-platform.validate-client-authentication-mode-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-connect-overload-protection" . -}}
 {{- include "hivemq-platform.validate-hivemq-websocket-path" . -}}
 {{- include "hivemq-platform.validate-external-traffic-policy" . -}}
@@ -499,8 +502,53 @@ Usage: {{ include "hivemq-platform.validate-hivemq-listener-name-services" . }}
 {{- define "hivemq-platform.validate-hivemq-listener-name-services" -}}
 {{- $services := .Values.services }}
 {{- range $service := $services }}
-  {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket"))) }}
-    {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT and WebSocket services" $service.type (int64 $service.containerPort)) }}
+  {{- if and ($service.exposed) (hasKey $service "hivemqListenerName") (and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket")) (not (eq $service.type "rest-api"))) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `hivemqListenerName` value. HiveMQ listener names are only supported by MQTT, WebSocket and REST API services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the TLS protocols value is only used by secure services.
+Usage: {{ include "hivemq-platform.validate-tls-protocols-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-tls-protocols-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "tlsProtocols") (not (hasKey $service "keystoreSecretName")) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsProtocols` value. TLS protocols are only supported by secure services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the Cipher suites value are only used by secure services.
+Usage: {{ include "hivemq-platform.validate-cipher-suites-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-cipher-suites-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if and ($service.exposed) (hasKey $service "tlsCipherSuites") (not (hasKey $service "keystoreSecretName")) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsCipherSuites` value. Cipher suites are only supported by secure services" $service.type (int64 $service.containerPort)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates that the Client Authentication Mode value is only used by either secure MQTT or secure WebSocket services.
+Usage: {{ include "hivemq-platform.validate-client-authentication-mode-services" . }}
+*/}}
+{{- define "hivemq-platform.validate-client-authentication-mode-services" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- if not $service.exposed }}
+    {{- break }}
+  {{- end }}
+  {{- if and (or (eq $service.type "mqtt") (eq $service.type "websocket")) (hasKey $service "keystoreSecretName") }}
+    {{- break }}
+  {{- end }}
+  {{- if hasKey $service "tlsClientAuthenticationMode" }}
+    {{- fail (printf "\nService type `%s` with container port `%d` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services" $service.type (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}

@@ -67,7 +67,7 @@ jobs:
           java-version: 21
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4
+        uses: gradle/actions/setup-gradle@8379f6a1328ee0e06e2bb424dadb7b159856a326 # v4
         with:
           gradle-home-cache-includes: |
             caches
@@ -79,7 +79,7 @@ jobs:
         run: ./gradlew :tests-hivemq-platform-operator:build :tests-hivemq-platform-operator:saveDockerImages
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@d730aaf5682e7d9c25245c74b8a105b96decb21a
+        uses: helm/kind-action@d4887be296b90d45c7a7aaf1379c0ebd88c8aa31
         with:
           cluster_name: "kind"
 
@@ -190,7 +190,7 @@ jobs:
           java-version: 21
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4
+        uses: gradle/actions/setup-gradle@8379f6a1328ee0e06e2bb424dadb7b159856a326 # v4
         with:
           gradle-home-cache-includes: |
             caches
@@ -202,7 +202,7 @@ jobs:
         run: ./gradlew :tests-hivemq-operator:build :tests-hivemq-operator:saveDockerImages
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@d730aaf5682e7d9c25245c74b8a105b96decb21a
+        uses: helm/kind-action@d4887be296b90d45c7a7aaf1379c0ebd88c8aa31
         with:
           cluster_name: "kind"
 
@@ -262,7 +262,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@d730aaf5682e7d9c25245c74b8a105b96decb21a
+        uses: helm/kind-action@d4887be296b90d45c7a7aaf1379c0ebd88c8aa31
         with:
           cluster_name: "kind"
 

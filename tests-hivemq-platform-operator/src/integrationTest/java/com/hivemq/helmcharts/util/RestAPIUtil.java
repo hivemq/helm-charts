@@ -37,7 +37,8 @@ public class RestAPIUtil {
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String serviceName,
-            final int port) throws Exception {
+            final int port,
+            final boolean isSecure) throws Exception {
         assertAuth(client,
                 namespace,
                 serviceName,
@@ -45,7 +46,8 @@ public class RestAPIUtil {
                 REST_API_DEFAULT_ENDPOINT_PATH,
                 REST_API_DEFAULT_USER,
                 REST_API_DEFAULT_PASSWORD,
-                HttpStatus.SC_OK);
+                HttpStatus.SC_OK,
+                isSecure);
     }
 
     public static void assertAuth(
@@ -53,6 +55,7 @@ public class RestAPIUtil {
             final @NotNull String namespace,
             final @NotNull String serviceName,
             final int port,
+            final boolean isSecure,
             final @NotNull String username,
             final @NotNull String password,
             final int expectedHttpCode) throws Exception {
@@ -63,7 +66,8 @@ public class RestAPIUtil {
                 REST_API_DEFAULT_ENDPOINT_PATH,
                 username,
                 password,
-                expectedHttpCode);
+                expectedHttpCode,
+                isSecure);
     }
 
     public static void assertAuth(
@@ -71,6 +75,7 @@ public class RestAPIUtil {
             final @NotNull String namespace,
             final @NotNull String serviceName,
             final int port,
+            final boolean isSecure,
             final @NotNull String endpointPath,
             final int expectedHttpCode) throws Exception {
         assertAuth(client,
@@ -80,7 +85,8 @@ public class RestAPIUtil {
                 endpointPath,
                 REST_API_DEFAULT_USER,
                 REST_API_DEFAULT_PASSWORD,
-                expectedHttpCode);
+                expectedHttpCode,
+                isSecure);
     }
 
     public static void assertAuth(
@@ -91,7 +97,8 @@ public class RestAPIUtil {
             final @NotNull String endpointPath,
             final @NotNull String username,
             final @NotNull String password,
-            final int expectedHttpCode) throws Exception {
+            final int expectedHttpCode,
+            final boolean isSecure) throws Exception {
         LOG.info("Checking authorization for REST API on {}:{} (username: {}) (password: {}) (endpoint path: {})",
                 serviceName,
                 port,
@@ -99,10 +106,12 @@ public class RestAPIUtil {
                 password,
                 endpointPath);
         try (final var forwarded = K8sUtil.getPortForward(client, namespace, serviceName, port)) {
-            final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();
+            final var baseRestApiEndpoint =
+                    "%s://localhost:%s".formatted(isSecure ? "https" : "http", forwarded.getLocalPort());
 
             given().header("Authorization", createBasicAuthHeader(username, password))
                     .when()
+                    .relaxedHTTPSValidation()
                     .get(new URI(baseRestApiEndpoint + endpointPath).toURL())
                     .then()
                     .statusCode(expectedHttpCode)
@@ -115,12 +124,15 @@ public class RestAPIUtil {
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
             final @NotNull String serviceName,
-            final int port) throws IOException {
-        final List<Object> clients = new ArrayList<>(0);
+            final int port,
+            final boolean isSecure) throws IOException {
+        final var clients = new ArrayList<>(0);
         try (final var forwarded = K8sUtil.getPortForward(client, namespace, serviceName, port)) {
-            final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();
+            final var baseRestApiEndpoint =
+                    "%s://localhost:%s".formatted(isSecure ? "https" : "http", forwarded.getLocalPort());
 
             final var body = given().when()
+                    .relaxedHTTPSValidation()
                     .get(baseRestApiEndpoint + REST_API_DEFAULT_ENDPOINT_PATH)
                     .then()
                     .statusCode(HttpStatus.SC_OK)

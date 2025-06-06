@@ -1542,6 +1542,721 @@ tests:
                   port: 8081
               sessionAffinity: ClientIP
 
+  - it: with a secure REST API service enabled, using keystorePassword
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            value: key-changeme
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            value: key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service enabled, using keystorePassword and keystorePrivatePassword
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            value: private-key-changeme
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service enabled, using keystorePasswordSecretName only
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "rest-api-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: rest-api-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: rest-api-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service enabled, using keystorePasswordSecretName and keystorePasswordSecretKey
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "rest-api-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: rest-api-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: rest-api-keystore-password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: rest-api-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service enabled, using keystorePasswordSecretName and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "rest-api-keystore-password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: rest-api-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: rest-api-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service enabled, using keystorePasswordSecretKey and keystorePrivatePasswordSecretKey
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "rest-api-keystore-password"
+          keystorePasswordSecretKey: "my-custom-secret-key.password"
+          keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.password
+                name: rest-api-keystore-password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-custom-secret-key.private-password
+                name: rest-api-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service disabled, no secure REST API service is exposed
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "rest-api-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: rest-api-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with a secure REST API service disabled, no secure REST API service is exposed
+    set:
+      services:
+        - type: rest-api
+          exposed: false
+          containerPort: 8890
+          keystoreSecretName: "rest-api-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "rest-api-keystore-password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: rest-api-keystore-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - exists:
+          path: spec.services
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name:  hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+
+  - it: with several secure and non-secure REST API services enabled and reusing keystores
+    values:
+      - ../tls-rest-services-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password1
+                key: keystore.password
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password2
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret3_keystore_pass
+            value: key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret3_keystore_private_pass
+            value: private-key-changeme
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret4_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: rest-api_test-hivemq-platform_rest-api-secret4_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: secret-password4
+                key: my-custom-secret-key.private-password
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 7
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8890
+            containerPort: 8890
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8891
+            containerPort: 8891
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8892
+            containerPort: 8892
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8893
+            containerPort: 8893
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8894
+            containerPort: 8894
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8895
+            containerPort: 8895
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            name: rest-8888
+            containerPort: 8888
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret
+            mountPath: /tls-rest-api-secret
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret1
+            mountPath: /tls-rest-api-secret1
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret2
+            mountPath: /tls-rest-api-secret2
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret3
+            mountPath: /tls-rest-api-secret3
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rest-api-secret4
+            mountPath: /tls-rest-api-secret4
+            readOnly: true
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret
+            secret:
+              secretName: rest-api-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret1
+            secret:
+              secretName: rest-api-secret1
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret2
+            secret:
+              secretName: rest-api-secret2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret3
+            secret:
+              secretName: rest-api-secret3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: rest-api-secret4
+            secret:
+              secretName: rest-api-secret4
+      - exists:
+          path: spec.services
+      - lengthEqual:
+          path: spec.services
+          count: 7
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8890
+            spec:
+              ports:
+                - name: rest-8890
+                  targetPort: rest-8890
+                  port: 8890
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8891
+            spec:
+              ports:
+                - name: rest-8891
+                  targetPort: rest-8891
+                  port: 8891
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8892
+            spec:
+              ports:
+                - name: rest-8892
+                  targetPort: rest-8892
+                  port: 8892
+      - notContains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8893
+            spec:
+              ports:
+                - name: rest-8893
+                  targetPort: rest-8893
+                  port: 8893
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8894
+            spec:
+              ports:
+                - name: rest-8894
+                  targetPort: rest-8894
+                  port: 8894
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8895
+            spec:
+              ports:
+                - name: rest-8895
+                  targetPort: rest-8895
+                  port: 8895
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-rest-8888
+            spec:
+              ports:
+                - name: rest-8888
+                  targetPort: rest-8888
+                  port: 8888
+
   - it: with a secure WebSocket service enabled, using keystorePassword
     set:
       services:

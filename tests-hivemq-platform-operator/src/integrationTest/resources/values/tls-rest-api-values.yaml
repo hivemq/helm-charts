@@ -1,0 +1,14 @@
+nodes:
+  replicaCount: 1
+services:
+  - type: rest-api
+    exposed: true
+    containerPort: 8890
+    keystoreSecretName: "rest-api-keystore"
+    keystorePasswordSecretName: "rest-api-keystore-password"
+  - type: rest-api
+    exposed: true
+    containerPort: 8891
+    keystoreSecretName: "rest-api-keystore"
+    keystoreSecretKey: "keystore.jks"
+    keystorePasswordSecretName: "rest-api-keystore-password"

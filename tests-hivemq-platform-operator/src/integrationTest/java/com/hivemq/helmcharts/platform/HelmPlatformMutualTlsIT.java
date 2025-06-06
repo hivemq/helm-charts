@@ -38,7 +38,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
 
     @TempDir
-    private @NotNull Path tempDir;
+    private @NotNull Path tmp;
 
     private @NotNull Path brokerCertificateStore;
     private @NotNull Path clientCertificateStore;
@@ -46,10 +46,10 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void setup() throws Exception {
-        CertificatesUtil.generateCertificates(tempDir.toFile());
+        CertificatesUtil.generateCertificates(tmp.toFile());
         final var encoder = Base64.getEncoder();
 
-        brokerCertificateStore = tempDir.resolve("keystore.jks");
+        brokerCertificateStore = tmp.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(brokerCertificateStore);
         createSecret(client,
                 platformNamespace,
@@ -67,7 +67,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        clientCertificateStore = tempDir.resolve("truststore.jks");
+        clientCertificateStore = tmp.resolve("truststore.jks");
         final var truststoreContent = Files.readAllBytes(clientCertificateStore);
         final var base64TruststoreContent = encoder.encodeToString(truststoreContent);
         createSecret(client, platformNamespace, "mqtts-truststore-1884", "truststore.jks", base64TruststoreContent);

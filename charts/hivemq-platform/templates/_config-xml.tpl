@@ -49,6 +49,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
           <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
         </truststore>
         {{- end }}
+        {{- if $service.tlsProtocols }}
+        <protocols>
+        {{- range $protocol := $service.tlsProtocols }}
+          <protocol>{{ $protocol }}</protocol>
+        {{- end }}
+        </protocols>
+        {{- end }}
+        {{- if $service.tlsCipherSuites }}
+        <cipher-suites>
+        {{- range $cipherSuite := $service.tlsCipherSuites }}
+          <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+        {{- end }}
+        </cipher-suites>
+        {{- end }}
         {{- if $service.tlsClientAuthenticationMode}}
         <client-authentication-mode>{{ $service.tlsClientAuthenticationMode }}</client-authentication-mode>
         {{- end }}
@@ -118,6 +132,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
           <path>/tls-{{ $service.truststoreSecretName }}/{{ $service.truststoreSecretKey | default "truststore" }}</path>
           <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
         </truststore>
+        {{- end }}
+        {{- if $service.tlsProtocols }}
+        <protocols>
+        {{- range $protocol := $service.tlsProtocols }}
+          <protocol>{{ $protocol }}</protocol>
+        {{- end }}
+        </protocols>
+        {{- end }}
+        {{- if $service.tlsCipherSuites }}
+        <cipher-suites>
+        {{- range $cipherSuite := $service.tlsCipherSuites }}
+          <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+        {{- end }}
+        </cipher-suites>
         {{- end }}
         {{- if $service.tlsClientAuthenticationMode}}
         <client-authentication-mode>{{ $service.tlsClientAuthenticationMode }}</client-authentication-mode>
@@ -252,6 +280,20 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
             <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
             <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
           </keystore>
+          {{- if $service.tlsProtocols }}
+          <protocols>
+          {{- range $protocol := $service.tlsProtocols }}
+            <protocol>{{ $protocol }}</protocol>
+          {{- end }}
+          </protocols>
+          {{- end }}
+          {{- if $service.tlsCipherSuites }}
+          <cipher-suites>
+          {{- range $cipherSuite := $service.tlsCipherSuites }}
+            <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+          {{- end }}
+          </cipher-suites>
+          {{- end }}
         </tls>
       </https>
       {{- else }}
@@ -284,22 +326,54 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <auth>
       <enabled>{{ printf "%t" .Values.restApi.authEnabled | default false }}</enabled>
     </auth>
+    <listeners>
     {{- $containerPortsList := list }}
     {{- range $service := .Values.services }}
-    {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) }}
-    {{- if eq $service.type "rest-api" }}
-    <listeners>
+    {{- if and ($service.exposed) (not (has $service.containerPort $containerPortsList)) (eq $service.type "rest-api") }}
+    {{- if $service.keystoreSecretName }}
+      <https>
+        <port>{{ $service.containerPort }}</port>
+        <bind-address>0.0.0.0</bind-address>
+        {{- if $service.hivemqListenerName }}
+        <name>{{ $service.hivemqListenerName }}</name>
+        {{- end }}
+        <tls>
+          <keystore>
+            <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
+            <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
+            <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
+          </keystore>
+          {{- if $service.tlsProtocols }}
+          <protocols>
+          {{- range $protocol := $service.tlsProtocols }}
+            <protocol>{{ $protocol }}</protocol>
+          {{- end }}
+          </protocols>
+          {{- end }}
+          {{- if $service.tlsCipherSuites }}
+          <cipher-suites>
+          {{- range $cipherSuite := $service.tlsCipherSuites }}
+            <cipher-suite>{{ $cipherSuite }}</cipher-suite>
+          {{- end }}
+          </cipher-suites>
+          {{- end }}
+        </tls>
+      </https>
+    {{- else }}
       <http>
         <port>{{ $service.containerPort }}</port>
         <bind-address>0.0.0.0</bind-address>
+        {{- if $service.hivemqListenerName }}
+        <name>{{ $service.hivemqListenerName }}</name>
+        {{- end }}
       </http>
-    </listeners>
     {{- end }}
     {{- end }}
     {{- if $service.exposed }}
       {{- $containerPortsList = $service.containerPort | append $containerPortsList}}
     {{- end }}
     {{- end }}
+    </listeners>
   </rest-api>
   {{- end }}
   {{- if and .Values.config.dataHub (or .Values.config.dataHub.behaviorValidationEnabled .Values.config.dataHub.dataValidationEnabled) }}

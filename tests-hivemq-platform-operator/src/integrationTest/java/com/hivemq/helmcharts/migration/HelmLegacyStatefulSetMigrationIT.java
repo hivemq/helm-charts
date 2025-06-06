@@ -178,7 +178,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         final var topicList =
                 MqttUtil.publishRetainedMessages(client, operatorNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
         // assert RestAPI service and authorization with ESE extension
-        RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT);
+        RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT, false);
         // assert publishes metrics
         MonitoringUtil.assertPublishesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
 
@@ -343,7 +343,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         // assert retained messages
         MqttUtil.assertRetainedMessages(client, operatorNamespace, topicList, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
         // assert RestAPI service and authorization with ESE extension
-        RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT);
+        RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT, false);
         // assert subscribe and publishes metrics
         MonitoringUtil.assertSubscribesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
     }
