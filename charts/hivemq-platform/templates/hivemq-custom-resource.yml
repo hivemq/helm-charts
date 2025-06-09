@@ -132,7 +132,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       name: {{ $service.truststorePasswordSecretName }}
-                      key: truststore.password
+                      key: {{ $service.truststorePasswordSecretKey | default "truststore.password" }}
                   {{- else }}
                   {{- fail ("\nA truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
                   {{- end }}

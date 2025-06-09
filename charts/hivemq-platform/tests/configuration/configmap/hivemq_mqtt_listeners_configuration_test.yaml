@@ -193,7 +193,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -256,7 +256,7 @@ tests:
         - type: mqtt
           exposed: false
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -319,7 +319,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection: {}
@@ -386,7 +386,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -451,7 +451,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -516,7 +516,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -581,7 +581,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -646,7 +646,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           hivemqConnectOverloadProtection:
@@ -692,7 +692,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsProtocols:
             - TLSv1.2
@@ -716,7 +716,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsProtocols:
             - TLSv1.2
@@ -744,7 +744,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsProtocols:
     asserts:
@@ -757,7 +757,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsProtocols:
             -
@@ -771,7 +771,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsProtocols:
             - " "
@@ -784,7 +784,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsProtocols:
             protocol: TLSv1.2
@@ -798,7 +798,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsCipherSuites:
             - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
@@ -822,7 +822,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsCipherSuites:
             - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
@@ -850,7 +850,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsCipherSuites:
     asserts:
@@ -863,7 +863,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsCipherSuites:
             -
@@ -877,7 +877,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsCipherSuites:
             - " "
@@ -890,7 +890,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "secret-password"
           tlsCipherSuites:
             cipherSuite: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
@@ -994,7 +994,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           tlsClientAuthenticationMode: "OPTIONAL"
@@ -1012,9 +1012,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore.jks</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
                     </keystore>
                     <client-authentication-mode>OPTIONAL</client-authentication-mode>
                   </tls>
@@ -1049,7 +1049,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
             value: key-changeme
         template: hivemq-custom-resource.yml
       - notContains:
@@ -1066,13 +1066,13 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
         - type: mqtt
           exposed: true
           containerPort: 1885
-          keystoreSecretName: "mqtt-secret1"
+          keystoreSecretName: "keystore-secret1"
           keystorePasswordSecretName: "secret-password1"
           keystorePasswordSecretKey: "keystore.password1"
           keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
@@ -1090,9 +1090,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1101,9 +1101,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret1/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1139,26 +1139,26 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
         - type: mqtt
           exposed: true
           containerPort: 1885
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
         - type: mqtt
           exposed: true
           containerPort: 1886
-          keystoreSecretName: "mqtt-secret1"
+          keystoreSecretName: "keystore-secret1"
           keystorePasswordSecretName: "secret-password1"
           keystorePasswordSecretKey: "keystore.password1"
           keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
         - type: mqtt
           exposed: true
           containerPort: 1887
-          keystoreSecretName: "mqtt-secret1"
+          keystoreSecretName: "keystore-secret1"
           keystorePasswordSecretName: "secret-password1"
           keystorePasswordSecretKey: "keystore.password1"
           keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
@@ -1176,9 +1176,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1187,9 +1187,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1198,9 +1198,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret1/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1209,9 +1209,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret1/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1247,7 +1247,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           tlsClientAuthenticationMode: "OPTIONAL"
@@ -1268,9 +1268,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore.jks</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
                     </keystore>
                     <truststore>
                       <path>/tls-truststore-secret/truststore.jks</path>
@@ -1309,7 +1309,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
             value: key-changeme
         template: hivemq-custom-resource.yml
       - contains:
@@ -1326,7 +1326,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePasswordSecretName: "my-keystore-secret"
           tlsClientAuthenticationMode: "OPTIONAL"
@@ -1347,9 +1347,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore.jks</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore.jks</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
                     </keystore>
                     <truststore>
                       <path>/tls-truststore-secret/truststore.jks</path>
@@ -1388,7 +1388,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1404,6 +1404,76 @@ tests:
                 name: my-truststore-secret
         template: hivemq-custom-resource.yml
 
+  - it: with a secure mutual TLS MQTT service exposed, using keystorePasswordSecretKey and truststorePasswordSecretKey
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret-name"
+          keystorePasswordSecretKey: "my-keystore-secret-key"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret-name"
+          truststorePasswordSecretKey: "my-truststore-secret-key"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-keystore-secret-key
+                name: my-keystore-secret-name
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_truststore-secret_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                key: my-truststore-secret-key
+                name: my-truststore-secret-name
+
+  - it: with a secure mutual TLS MQTT service exposed, with empty keystorePasswordSecretKey and truststorePasswordSecretKey, then default values
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret-name"
+          keystorePasswordSecretKey: ""
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret-name"
+          truststorePasswordSecretKey: ""
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                key: keystore.password
+                name: my-keystore-secret-name
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: mqtt_test-hivemq-platform_truststore-secret_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                key: truststore.password
+                name: my-truststore-secret-name
+
   - it: with a secure mutual TLS MQTT service exposed but missing required keystore password, validation fails
     template: hivemq-custom-resource.yml
     set:
@@ -1411,7 +1481,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           tlsClientAuthenticationMode: "OPTIONAL"
           truststoreSecretName: "truststore-secret"
@@ -1428,7 +1498,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePasswordSecretName: "my-keystore-secret"
           tlsClientAuthenticationMode: "OPTIONAL"
@@ -1445,7 +1515,7 @@ tests:
         - type: mqtt
           exposed: false
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           tlsClientAuthenticationMode: "OPTIONAL"
           truststoreSecretName: "truststore-secret"
@@ -1480,7 +1550,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1498,9 +1568,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
                     </keystore>
                     <truststore>
                       <path>/tls-truststore-secret/truststore</path>
@@ -1538,7 +1608,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1561,7 +1631,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1589,7 +1659,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1617,7 +1687,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1645,7 +1715,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1673,7 +1743,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1681,7 +1751,7 @@ tests:
         - type: mqtt
           exposed: true
           containerPort: 1885
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1697,7 +1767,7 @@ tests:
         - type: mqtt
           exposed: false
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1705,7 +1775,7 @@ tests:
         - type: mqtt
           exposed: false
           containerPort: 1885
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystorePasswordSecretName: "my-keystore-secret"
           truststoreSecretName: "truststore-secret"
           truststorePasswordSecretName: "my-truststore-secret"
@@ -1733,9 +1803,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1744,9 +1814,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1762,9 +1832,9 @@ tests:
                   </connect-overload-protection>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret1/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass}</private-key-password>
+                      <path>/tls-keystore-secret1/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret1_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1774,9 +1844,9 @@ tests:
                   <proxy-protocol>false</proxy-protocol>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret3/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret3_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret3_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret3/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret3_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret3_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1785,9 +1855,9 @@ tests:
                   <bind-address>0.0.0.0</bind-address>
                   <tls>
                     <keystore>
-                      <path>/tls-mqtt-secret4/keystore</path>
-                      <password>${mqtt_test-hivemq-platform_mqtt-secret4_keystore_pass}</password>
-                      <private-key-password>${mqtt_test-hivemq-platform_mqtt-secret4_keystore_private_pass}</private-key-password>
+                      <path>/tls-keystore-secret4/keystore</path>
+                      <password>${mqtt_test-hivemq-platform_keystore-secret4_keystore_pass}</password>
+                      <private-key-password>${mqtt_test-hivemq-platform_keystore-secret4_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-tcp-listener>
@@ -1861,7 +1931,7 @@ tests:
           name: my-secure-mqtt-1
           exposed: true
           containerPort: 1883
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           tlsClientAuthenticationMode: "OPTIONAL"
@@ -1869,7 +1939,7 @@ tests:
           name: my-secure-mqtt-2
           exposed: true
           containerPort: 1884
-          keystoreSecretName: "mqtt-secret"
+          keystoreSecretName: "keystore-secret"
           keystoreSecretKey: "keystore.jks"
           keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
           tlsClientAuthenticationMode: "OPTIONAL"
