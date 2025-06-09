@@ -292,11 +292,18 @@
       "type" : "object"
     },
     "serviceAccount" : {
+      "description" : "Configures the ServiceAccount for the Operator.",
       "properties" : {
+        "annotations" : {
+          "description" : "Defines specific annotations to be applied to the ServiceAccount.",
+          "type" : "object"
+        },
         "create" : {
+          "description" : "Specifies whether a ServiceAccount should be created for the Operator.",
           "type" : "boolean"
         },
         "name" : {
+          "description" : "The ServiceAccount name that is used. Defaults to \"hivemq-<release name>\" if not set.",
           "type" : "string"
         }
       },
