@@ -65,6 +65,8 @@ serviceAccount:
   create: true
   # The ServiceAccount name that is used. Defaults to "hivemq-<release name>" if not set.
   name: ""
+  # Defines specific annotations to be applied to the ServiceAccount.
+  annotations: {}
 
 # Configures the ServiceAccount and RBAC permissions (Role, RoleBinding) the Operator creates for the HiveMQ Platform pods.
 hivemqPlatformServiceAccount:
