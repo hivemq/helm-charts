@@ -1,32 +1,32 @@
 services:
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1883
+    containerPort: 8000
     keystoreSecretName: "keystore-secret"
     keystorePasswordSecretName: "secret-password"
     truststoreSecretName: "truststore-secret"
     truststorePassword: "dHJ1c3RzdG9yZS1wYXNzd29yZA==" # truststore-password
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1884
+    containerPort: 8001
     keystoreSecretName: "keystore-secret"
     keystorePasswordSecretName: "secret-password"
     truststoreSecretName: "truststore-secret"
     truststorePasswordSecretName: "secret-password"
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1885
+    containerPort: 8002
     keystoreSecretName: "keystore-secret1"
     keystorePasswordSecretName: "secret-password1"
     truststoreSecretName: "truststore-secret1"
     truststorePasswordSecretName: "secret-password1"
-  - type: mqtt
+  - type: websocket
     exposed: false
-    containerPort: 1886
+    containerPort: 8003
     keystoreSecretName: "keystore-secret-1886"
     keystorePasswordSecretName: "secret-password-1886"
     truststoreSecretName: "truststore-secret-1886"
     truststorePassword: "dHJ1c3RzdG9yZS1wYXNzd29yZA==" # truststore-password
-  - type: mqtt
+  - type: websocket
     exposed: true
-    containerPort: 1887
+    containerPort: 8004

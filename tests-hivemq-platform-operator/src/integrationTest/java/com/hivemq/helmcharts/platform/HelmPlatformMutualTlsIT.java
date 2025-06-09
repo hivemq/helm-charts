@@ -64,7 +64,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
         createSecret(client,
                 platformNamespace,
                 "mqtts-keystore-password-1885",
-                "keystore.password",
+                "keystore.password.secret.key",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
         clientCertificateStore = tmp.resolve("truststore.jks");
@@ -75,7 +75,7 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
         createSecret(client,
                 platformNamespace,
                 "mqtts-truststore-password-1885",
-                "truststore.password",
+                "truststore.password.secret.key",
                 encoder.encodeToString(DEFAULT_TRUSTSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
     }
 
