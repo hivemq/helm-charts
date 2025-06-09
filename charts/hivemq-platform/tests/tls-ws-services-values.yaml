@@ -2,23 +2,23 @@ services:
   - type: websocket
     exposed: true
     containerPort: 8001
-    keystoreSecretName: "websocket-secret"
+    keystoreSecretName: "keystore-secret"
     keystorePasswordSecretName: "secret-password"
   - type: websocket
     exposed: true
     containerPort: 8002
-    keystoreSecretName: "websocket-secret"
+    keystoreSecretName: "keystore-secret"
     keystorePasswordSecretName: "secret-password"
     path: /secure-mqtt-path
   - type: websocket
     exposed: true
     containerPort: 8003
-    keystoreSecretName: "websocket-secret1"
+    keystoreSecretName: "keystore-secret1"
     keystorePasswordSecretName: "secret-password1"
   - type: websocket
     exposed: false
     containerPort: 8004
-    keystoreSecretName: "websocket-secret2"
+    keystoreSecretName: "keystore-secret2"
     keystorePasswordSecretName: "secret-password2"
     hivemqProxyProtocol: true
     hivemqListenerName: my-custom-ws-listener-8004
@@ -29,7 +29,7 @@ services:
   - type: websocket
     exposed: true
     containerPort: 8005
-    keystoreSecretName: "websocket-secret3"
+    keystoreSecretName: "keystore-secret3"
     keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
     keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU=" # private-key-changeme
     hivemqProxyProtocol: false
@@ -37,7 +37,7 @@ services:
   - type: websocket
     exposed: true
     containerPort: 8006
-    keystoreSecretName: "websocket-secret4"
+    keystoreSecretName: "keystore-secret4"
     keystorePasswordSecretName: "secret-password4"
     keystorePrivatePasswordSecretKey: "my-custom-secret-key.private-password"
     hivemqProxyProtocol: true
