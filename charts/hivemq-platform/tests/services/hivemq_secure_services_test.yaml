@@ -446,7 +446,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -454,7 +454,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret1_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -462,7 +462,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret2_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret2_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password2
@@ -470,17 +470,17 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret3_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret3_keystore_pass
             value: key-changeme
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret3_keystore_private_pass
+            name: mqtt_test-hivemq-platform_keystore-secret3_keystore_private_pass
             value: private-key-changeme
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret4_keystore_pass
+            name: mqtt_test-hivemq-platform_keystore-secret4_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -488,7 +488,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret4_keystore_private_pass
+            name: mqtt_test-hivemq-platform_keystore-secret4_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -546,32 +546,32 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: mqtt-secret
-            mountPath: /tls-mqtt-secret
+            name: keystore-secret
+            mountPath: /tls-keystore-secret
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: mqtt-secret1
-            mountPath: /tls-mqtt-secret1
+            name: keystore-secret1
+            mountPath: /tls-keystore-secret1
             readOnly: true
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: mqtt-secret2
-            mountPath: /tls-mqtt-secret2
+            name: keystore-secret2
+            mountPath: /tls-keystore-secret2
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: mqtt-secret3
-            mountPath: /tls-mqtt-secret3
+            name: keystore-secret3
+            mountPath: /tls-keystore-secret3
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: mqtt-secret4
-            mountPath: /tls-mqtt-secret4
+            name: keystore-secret4
+            mountPath: /tls-keystore-secret4
             readOnly: true
       - exists:
           path: spec.statefulSet.spec.template.spec.volumes
@@ -581,33 +581,33 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: mqtt-secret
+            name: keystore-secret
             secret:
-              secretName: mqtt-secret
+              secretName: keystore-secret
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: mqtt-secret1
+            name: keystore-secret1
             secret:
-              secretName: mqtt-secret1
+              secretName: keystore-secret1
       - notContains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: mqtt-secret2
+            name: keystore-secret2
             secret:
-              secretName: mqtt-secret2
+              secretName: keystore-secret2
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: mqtt-secret3
+            name: keystore-secret3
             secret:
-              secretName: mqtt-secret3
+              secretName: keystore-secret3
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: mqtt-secret4
+            name: keystore-secret4
             secret:
-              secretName: mqtt-secret4
+              secretName: keystore-secret4
       - exists:
           path: spec.services
       - lengthEqual:
@@ -706,9 +706,9 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: "mqtt-secret"
+            name: "keystore-secret"
             secret:
-              secretName: "mqtt-secret"
+              secretName: "keystore-secret"
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -718,9 +718,9 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: "mqtt-secret1"
+            name: "keystore-secret1"
             secret:
-              secretName: "mqtt-secret1"
+              secretName: "keystore-secret1"
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -730,9 +730,9 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: "mqtt-secret-1886"
+            name: "keystore-secret-1886"
             secret:
-              secretName: "mqtt-secret-1886"
+              secretName: "keystore-secret-1886"
       - exists:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - lengthEqual:
@@ -741,7 +741,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "mqtt_test-hivemq-platform_mqtt-secret_keystore_pass"
+            name: "mqtt_test-hivemq-platform_keystore-secret_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password"
@@ -749,7 +749,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass"
+            name: "mqtt_test-hivemq-platform_keystore-secret1_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password1"
@@ -770,7 +770,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "mqtt_platform_mqtt-secret-1886_keystore_pass"
+            name: "mqtt_platform_keystore-secret-1886_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password-1886"
@@ -823,8 +823,8 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: "mqtt-secret"
-            mountPath: "/tls-mqtt-secret"
+            name: "keystore-secret"
+            mountPath: "/tls-keystore-secret"
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
@@ -835,8 +835,8 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: "mqtt-secret1"
-            mountPath: "/tls-mqtt-secret1"
+            name: "keystore-secret1"
+            mountPath: "/tls-keystore-secret1"
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
@@ -847,14 +847,177 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: "mqtt-secret-1886"
-            mountPath: "/tls-mqtt-secret-1886"
+            name: "keystore-secret-1886"
+            mountPath: "/tls-keystore-secret-1886"
             readOnly: true
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
             name: "truststore-secret-1886"
             mountPath: "/tls-truststore-secret-1886"
+            readOnly: true
+
+  - it: with several secure WebSocket services using mTLS
+    values:
+      - ../mtls-ws-services-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "keystore-secret"
+            secret:
+              secretName: "keystore-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "truststore-secret"
+            secret:
+              secretName: "truststore-secret"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "keystore-secret1"
+            secret:
+              secretName: "keystore-secret1"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "truststore-secret1"
+            secret:
+              secretName: "truststore-secret1"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: "keystore-secret-8003"
+            secret:
+              secretName: "keystore-secret-8003"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_test-hivemq-platform_keystore-secret_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_test-hivemq-platform_keystore-secret1_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "keystore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_test-hivemq-platform_truststore-secret_truststore_pass"
+            value: "truststore-password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_test-hivemq-platform_truststore-secret1_truststore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password1"
+                key: "truststore.password"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_platform_keystore-secret-8003_keystore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password-8003"
+                key: "keystore.password"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_platform_truststore-secret-8003_truststore_pass"
+            value: "truststore-password"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 8000
+            name: ws-8000
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 8001
+            name: ws-8001
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 8002
+            name: ws-8002
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 8003
+            name: ws-8003
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 8004
+            name: ws-8004
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 9399
+            name: metrics-9399
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "keystore-secret"
+            mountPath: "/tls-keystore-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret"
+            mountPath: "/tls-truststore-secret"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "keystore-secret1"
+            mountPath: "/tls-keystore-secret1"
+            readOnly: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret1"
+            mountPath: "/tls-truststore-secret1"
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "keystore-secret-8003"
+            mountPath: "/tls-keystore-secret-8003"
+            readOnly: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: "truststore-secret-8003"
+            mountPath: "/tls-truststore-secret-8003"
             readOnly: true
 
   - it: with a secure Control Center service enabled, using keystorePassword
@@ -2710,7 +2873,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            name: websocket_test-hivemq-platform_keystore-secret_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -2718,7 +2881,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret1_keystore_pass
+            name: websocket_test-hivemq-platform_keystore-secret1_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -2726,7 +2889,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret2_keystore_pass
+            name: websocket_test-hivemq-platform_keystore-secret2_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password2
@@ -2734,17 +2897,17 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret3_keystore_pass
+            name: websocket_test-hivemq-platform_keystore-secret3_keystore_pass
             value: key-changeme
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret3_keystore_private_pass
+            name: websocket_test-hivemq-platform_keystore-secret3_keystore_private_pass
             value: private-key-changeme
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret4_keystore_pass
+            name: websocket_test-hivemq-platform_keystore-secret4_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -2752,7 +2915,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret4_keystore_private_pass
+            name: websocket_test-hivemq-platform_keystore-secret4_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -2805,32 +2968,32 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: websocket-secret
-            mountPath: /tls-websocket-secret
+            name: keystore-secret
+            mountPath: /tls-keystore-secret
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: websocket-secret1
-            mountPath: /tls-websocket-secret1
+            name: keystore-secret1
+            mountPath: /tls-keystore-secret1
             readOnly: true
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: websocket-secret2
-            mountPath: /tls-websocket-secret2
+            name: keystore-secret2
+            mountPath: /tls-keystore-secret2
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: websocket-secret3
-            mountPath: /tls-websocket-secret3
+            name: keystore-secret3
+            mountPath: /tls-keystore-secret3
             readOnly: true
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
-            name: websocket-secret4
-            mountPath: /tls-websocket-secret4
+            name: keystore-secret4
+            mountPath: /tls-keystore-secret4
             readOnly: true
       - exists:
           path: spec.statefulSet.spec.template.spec.volumes
@@ -2840,33 +3003,33 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: websocket-secret
+            name: keystore-secret
             secret:
-              secretName: websocket-secret
+              secretName: keystore-secret
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: websocket-secret1
+            name: keystore-secret1
             secret:
-              secretName: websocket-secret1
+              secretName: keystore-secret1
       - notContains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: websocket-secret2
+            name: keystore-secret2
             secret:
-              secretName: websocket-secret2
+              secretName: keystore-secret2
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: websocket-secret3
+            name: keystore-secret3
             secret:
-              secretName: websocket-secret3
+              secretName: keystore-secret3
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
-            name: websocket-secret4
+            name: keystore-secret4
             secret:
-              secretName: websocket-secret4
+              secretName: keystore-secret4
       - exists:
           path: spec.services
       - lengthEqual:

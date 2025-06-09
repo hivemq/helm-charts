@@ -359,6 +359,8 @@ services:
     truststorePassword: ""
     # Alternatively, the name of the secret with the password, using the key: `truststore.password`.
     truststorePasswordSecretName: ""
+    # The optional entry key for the truststore password in the Kubernetes secret. Defaults to `truststore.password`
+    truststorePasswordSecretKey: ""
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
 
@@ -493,6 +495,8 @@ services:
     truststorePassword: ""
     # Alternatively, the name of the secret with the password, using the key: `truststore.password`.
     truststorePasswordSecretName: ""
+    # The optional entry key for the truststore password in the Kubernetes secret. Defaults to `truststore.password`
+    truststorePasswordSecretKey: ""
     # The way HiveMQ platform authenticates client certificates. Possible values are `NONE`, `OPTIONAL` and `REQUIRED`
     tlsClientAuthenticationMode: "NONE"
 

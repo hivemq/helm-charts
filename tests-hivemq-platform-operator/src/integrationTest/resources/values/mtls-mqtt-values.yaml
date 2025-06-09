@@ -19,6 +19,8 @@ services:
     containerPort: 1885
     keystoreSecretName: "mqtts-keystore-1885"
     keystorePasswordSecretName: "mqtts-keystore-password-1885"
+    keystorePasswordSecretKey: "keystore.password.secret.key"
     truststoreSecretName: "mqtts-truststore-1885"
     truststorePasswordSecretName: "mqtts-truststore-password-1885"
+    truststorePasswordSecretKey: "truststore.password.secret.key"
     tlsClientAuthenticationMode: "REQUIRED"
