@@ -19,7 +19,7 @@ public class ControlCenterUtil {
 
     private static final int MAX_LOGIN_RETRIES = 5;
     private static final @NotNull String LOGIN_BUTTON = ".v-button-hmq-login-button";
-    private static final @NotNull String LOGOUT_BUTTON = ".hmq-logout-button";
+    private static final @NotNull String LOGOUT_BUTTON = ".v-button-hmq-logout-button";
     private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
     private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
 
@@ -85,16 +85,16 @@ public class ControlCenterUtil {
                         isSecure ? "https" : "http",
                         forwarded.getLocalPort()));
 
-                final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
                 try {
-                    wait.until(webWaitDriver -> {
-                        webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
-                        webWaitDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
-                        webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
-                        webWaitDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
-                        webWaitDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
-                        return ExpectedConditions.visibilityOfElementLocated(By.cssSelector(LOGOUT_BUTTON));
-                    });
+                    webDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
+                    webDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
+                    webDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
+                    webDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
+                    webDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
+
+                    final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
+                    wait.until(webWaitDriver -> ExpectedConditions.visibilityOfElementLocated(By.cssSelector(
+                            LOGOUT_BUTTON)).apply(webWaitDriver));
                 } catch (final Exception e) {
                     if (loginAttempt == MAX_LOGIN_RETRIES) {
                         LOG.error("Login attempt {} of {} failed, giving up", loginAttempt, MAX_LOGIN_RETRIES);

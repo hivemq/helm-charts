@@ -815,6 +815,16 @@ Usage: {{ include "hivemq-platform.generate-licenses-content" (dict "licenses" .
 {{- end -}}
 
 {{/*
+Validates Control Center credentials are only located in either plain text values or in a Kubernetes Secrets and no both.
+Usage: {{ include "hivemq-platform.validate-control-center-credentials" . }}
+*/}}
+{{- define "hivemq-platform.validate-control-center-credentials" -}}
+{{- if and (.Values.controlCenter.credentialsSecret) (or .Values.controlCenter.username .Values.controlCenter.password) }}
+    {{- fail (printf "\nEither `username` and `password` values are set along with the `credentialSecret` values for Control Center. Only one can be defined at a time") }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Check if there are services exposed with keystore
 */}}
 {{- define "hivemq-platform.has-keystore" -}}

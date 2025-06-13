@@ -283,3 +283,182 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: Service type `control-center` with container port `8443` is using `tlsClientAuthenticationMode` value. Client Authentication Mode is only supported by secure MQTT or secure WebSocket services
+
+  - it: with a Control Center service enabled with default controlCenter values, no Control Center credentials EnvVar is created
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_username
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_password
+
+  - it: with a Control Center service disabled, no Control Center credentials EnvVar is created
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_username
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_password
+
+  - it: with a Control Center service disabled with username and password values, no Control Center credentials EnvVar is created
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+      controlCenter:
+        username: "admin"
+        password: "password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_username
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_password
+
+  - it: with a Control Center service disabled with controlCenter credential values, no Control Center credentials EnvVar is created
+    set:
+      services:
+        - type: control-center
+          exposed: false
+          containerPort: 8081
+      controlCenter.credentialsSecret:
+        name: "control-center-secret"
+        usernameKey: "username-secret-key"
+        passwordKey: "password-secret-key"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_username
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_password
+
+  - it: with a Control Center service enabled with username and password values, no Control Center credentials EnvVar is created
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+      controlCenter:
+        username: "admin"
+        password: "password"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_username
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_password
+
+  - it: with a Control Center service enabled with controlCenter credentials values, Control Center credentials EnvVars are created
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+      controlCenter.credentialsSecret:
+        name: "control-center-secret"
+        usernameKey: "username-secret-key"
+        passwordKey: "password-secret-key"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_username
+            valueFrom:
+              secretKeyRef:
+                key: username-secret-key
+                name: control-center-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: test-hivemq-platform_control_center_password
+            valueFrom:
+              secretKeyRef:
+                key: password-secret-key
+                name: control-center-secret
+
+  - it: with a Control Center service enabled with controlCenter credentials, username values set, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+      controlCenter:
+        username: "admin"
+        credentialsSecret:
+          name: "control-center-secret"
+          usernameKey: "username-secret-key"
+          passwordKey: "password-secret-key"
+    asserts:
+      - failedTemplate:
+          errorPattern: Either `username` and `password` values are set along with the `credentialSecret` values for Control Center. Only one can be defined at a time
+
+  - it: with a Control Center service enabled with controlCenter credentials, password values set, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+      controlCenter:
+        password: "admin"
+        credentialsSecret:
+          name: "control-center-secret"
+          usernameKey: "username-secret-key"
+          passwordKey: "password-secret-key"
+    asserts:
+      - failedTemplate:
+          errorPattern: Either `username` and `password` values are set along with the `credentialSecret` values for Control Center. Only one can be defined at a time
+
+  - it: with a Control Center service enabled with controlCenter credentials, username and password values set, validation fails
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+      controlCenter:
+        username: "admin"
+        password: "password"
+        credentialsSecret:
+          name: "control-center-secret"
+          usernameKey: "username-secret-key"
+          passwordKey: "password-secret-key"
+    asserts:
+      - failedTemplate:
+          errorPattern: Either `username` and `password` values are set along with the `credentialSecret` values for Control Center. Only one can be defined at a time

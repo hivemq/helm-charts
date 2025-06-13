@@ -88,6 +88,14 @@ controlCenter:
   # The password of the user as a SHA256 hash. See password generation here:
   # https://docs.hivemq.com/hivemq/latest/control-center/configuration.html#generate-password
   password: ""
+  # Configures the Control Center credentials by using an existing Kubernetes Secret.
+  #credentialsSecret:
+  #  # Configures the name of an existing Kubernetes Secret containing the Control Center credentials.
+  #  name: ""
+  #  # Configures the key for the Kubernetes Secret used holding the Control Center username.
+  #  usernameKey: ""
+  #  # Configures the key for the Kubernetes Secret used holding the Control Center password.
+  #  passwordKey: ""
 
 # REST API configuration
 restApi:

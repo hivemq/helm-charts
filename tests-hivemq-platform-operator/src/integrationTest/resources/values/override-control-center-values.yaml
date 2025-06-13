@@ -1,9 +1,0 @@
-nodes:
-  replicaCount: 1
-controlCenter:
-  username: "test"
-  password: "9e2ee742214c2940b9e21149d4e1749d98d8d74e2b0f7453d190b1a7d73308b9" # abc123
-services:
-  - type: control-center
-    exposed: true
-    containerPort: 8081
