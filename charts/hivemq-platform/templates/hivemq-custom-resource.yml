@@ -145,6 +145,24 @@ spec:
                 {{- with .Values.nodes.env }}
                   {{- toYaml . | nindent 16 }}
                 {{- end }}
+                {{- $hasControlCenter := include "hivemq-platform.has-service-type" (dict "services" .Values.services "expectedType" "control-center") }}
+                {{- if $hasControlCenter }}
+                {{- include "hivemq-platform.validate-control-center-credentials" . -}}
+                {{- with .Values.controlCenter.credentialsSecret }}
+                {{- $controlCenterUsernameEnvVar := (printf "%s_control_center_username" $.Release.Name) }}
+                - name: {{ $controlCenterUsernameEnvVar }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .name }}
+                      key: {{ .usernameKey }}
+                {{- $controlCenterPasswordEnvVar := (printf "%s_control_center_password" $.Release.Name) }}
+                - name: {{ $controlCenterPasswordEnvVar }}
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .name }}
+                      key: {{ .passwordKey }}
+                {{- end }}
+                {{- end }}
               image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               ports:

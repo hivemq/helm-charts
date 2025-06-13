@@ -309,11 +309,16 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       {{- end }}
     {{- end }}
     </listeners>
-    {{- if and .Values.controlCenter.username .Values.controlCenter.password }}
+    {{- if or (and .Values.controlCenter.username .Values.controlCenter.password) (.Values.controlCenter.credentialsSecret) }}
     <users>
       <user>
+        {{- if .Values.controlCenter.credentialsSecret }}
+        <name>{{ printf "${%s_control_center_username}" .Release.Name }}</name>
+        <password>{{ printf "${%s_control_center_password}" .Release.Name }}</password>
+        {{- else }}
         <name>{{ .Values.controlCenter.username | trim }}</name>
         <password>{{ .Values.controlCenter.password | trim }}</password>
+        {{- end }}
       </user>
     </users>
     {{- end }}
