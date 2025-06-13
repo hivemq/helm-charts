@@ -162,11 +162,32 @@
       "type" : "object"
     },
     "controlCenter" : {
+      "description" : "Optional setting to override the default username and password for the HiveMQ Control Center when the default configuration is used.",
       "properties" : {
+        "credentialsSecret" : {
+          "description" : "Configures the Control Center credentials by using an existing Kubernetes Secret.",
+          "properties" : {
+            "name" : {
+              "description" : "Configures the name of an existing Kubernetes Secret containing the Control Center credentials.",
+              "type" : "string"
+            },
+            "passwordKey" : {
+              "description" : "Configures the key for the Kubernetes Secret used holding the Control Center password.",
+              "type" : "string"
+            },
+            "usernameKey" : {
+              "description" : "Configures the key for the Kubernetes Secret used holding the Control Center username.",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        },
         "password" : {
+          "description" : "The SHA256 encoded password for the HiveMQ Control Center user.",
           "type" : "string"
         },
         "username" : {
+          "description" : "The name of the HiveMQ Control Center user.",
           "type" : "string"
         }
       },
