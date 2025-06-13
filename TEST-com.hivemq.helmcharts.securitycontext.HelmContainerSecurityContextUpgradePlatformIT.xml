@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextUpgradePlatformIT" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-06-13T13:15:34" hostname="fv-az1384-181" time="442.898">
+<testsuite name="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextUpgradePlatformIT" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-06-13T20:53:40" hostname="fv-az802-566" time="437.023">
   <properties/>
-  <testcase name="Operator values: (UID=0, GID=0, valuesFile='/files/operator-container-security-context-root-user-values.yaml') and Platform values: (UID=0, GID=0, valuesFile='/files/platform-container-security-context-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextUpgradePlatformIT" time="221.822"/>
-  <testcase name="Operator values: (UID=185, GID=0, valuesFile='/files/operator-container-security-context-non-root-user-values.yaml') and Platform values: (UID=10000, GID=0, valuesFile='/files/platform-container-security-context-non-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextUpgradePlatformIT" time="221.074"/>
+  <testcase name="Operator values: (UID=0, GID=0, valuesFile='/files/operator-container-security-context-root-user-values.yaml') and Platform values: (UID=0, GID=0, valuesFile='/files/platform-container-security-context-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextUpgradePlatformIT" time="227.695"/>
+  <testcase name="Operator values: (UID=185, GID=0, valuesFile='/files/operator-container-security-context-non-root-user-values.yaml') and Platform values: (UID=10000, GID=0, valuesFile='/files/platform-container-security-context-non-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmContainerSecurityContextUpgradePlatformIT" time="209.327"/>
 </testsuite>
