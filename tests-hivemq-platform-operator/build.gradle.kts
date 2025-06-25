@@ -31,6 +31,7 @@ repositories {
 @Suppress("UnstableApiUsage")
 testing {
     suites {
+        @Suppress("unused")
         val integrationTest by registering(JvmTestSuite::class) {
             useJUnitJupiter(libs.versions.junit.jupiter)
             dependencies {
@@ -42,27 +43,28 @@ testing {
 
                 // Testcontainers
                 implementation(libs.testcontainers)
-                implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.junitJupiter)
+                implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.selenium)
 
                 // Testing
                 implementation(libs.assertj)
                 implementation(libs.awaitility)
-                implementation(libs.selenium.remote.driver)
                 implementation(libs.selenium.java)
+                implementation(libs.selenium.remote.driver)
 
                 // Misc
-                implementation(libs.fabric8.kubernetes.client)
                 runtimeOnly(libs.bouncycastle.pkix)
                 runtimeOnly(libs.bouncycastle.prov)
-                implementation(libs.junit.platform.launcher)
-                implementation(libs.slf4j.api)
-                runtimeOnly(libs.logback.classic)
-                implementation(libs.rest.assured)
+                implementation(libs.fabric8.kubernetes.client)
+                implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.hivemq.mqttClient)
+                implementation(libs.junit.platform.launcher)
+                runtimeOnly(libs.logback.classic)
                 implementation(libs.netty.codec.http)
+                implementation(libs.rest.assured)
+                implementation(libs.slf4j.api)
             }
             targets.configureEach {
                 testTask {
@@ -108,6 +110,14 @@ testing {
                     )
                 }
             }
+            oci.of(this) {
+                imageDependencies {
+                    runtime(project).tag("latest")
+                }
+                val linuxAmd64 = platformSelector(platform("linux", "amd64"))
+                val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
+                platformSelector = if (System.getenv("CI_RUN") != null) linuxAmd64 else linuxAmd64.and(linuxArm64v8)
+            }
         }
     }
 }
@@ -116,12 +126,52 @@ tasks.register("integrationTestPrepare") {
     dependsOn(tasks.named("integrationTest").get().taskDependencies.getDependencies(null))
 }
 
-/* ******************** Docker Platform Operator Images ******************** */
+/* ******************** OCI Platform Operator Images ******************** */
+
+val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
+    from = "library/ubuntu@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233"
+    platform = oci.platform("linux", "amd64")
+    command = "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
+            "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
+            "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
+    destinationDirectory = layout.buildDirectory.dir("oci/layers")
+    classifier = "helm@linux,amd64"
+}
+
+val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
+    from = "library/ubuntu@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233"
+    platform = oci.platform("linux", "arm64", "v8")
+    command = "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
+            "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
+            "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
+    destinationDirectory = layout.buildDirectory.dir("oci/layers")
+    classifier = "helm@linux,arm64,v8"
+}
 
 oci {
     registries {
         dockerHub {
             optionalCredentials()
+        }
+    }
+    imageDefinitions {
+        register("main") {
+            imageTag = provider { project.version.toString().lowercase() }
+            allPlatforms {
+                dependencies {
+                    runtime("rancher:k3s:sha256!a2920ca992f197e35812173322734207b89f73084dbe3e2404c11d582a9ecf40") // v1.33.1-k3s1
+                }
+            }
+            specificPlatform(platform("linux", "amd64")) {
+                layer("helm") {
+                    contents(helmOciLayerLinuxAmd64)
+                }
+            }
+            specificPlatform(platform("linux", "arm64", "v8")) {
+                layer("helm") {
+                    contents(helmOciLayerLinuxArm64)
+                }
+            }
         }
     }
 }
