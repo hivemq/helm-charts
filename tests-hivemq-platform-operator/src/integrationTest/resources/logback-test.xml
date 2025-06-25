@@ -13,4 +13,6 @@
     <logger name="com.hivemq.helmcharts" level="DEBUG"/>
     <logger name="io.fabric8.kubernetes" level="INFO"/>
 
+    <!-- Gradle OCI plugin -->
+    <logger name="io.github.sgtsilvio.gradle.oci" level="INFO"/>
 </configuration>

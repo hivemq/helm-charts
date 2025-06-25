@@ -3,6 +3,7 @@ assertj = "3.27.4"
 awaitility = "4.3.0"
 bouncycastle = "1.81"
 fabric8-kubernetes-client = "7.3.1"
+gradleOci-junitJupiter = "0.7.0"
 hivemq-mqttClient = "1.3.7"
 hivemq-platform = "4.43.0"
 jackson = "2.19.2"
@@ -23,6 +24,7 @@ awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" 
 bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 fabric8-kubernetes-client = { module = "io.fabric8:kubernetes-client", version.ref = "fabric8-kubernetes-client" }
+gradleOci-junitJupiter = { module = "io.github.sgtsilvio:gradle-oci-junit-jupiter", version.ref = "gradleOci-junitJupiter" }
 hivemq-extensionSdk = { module = "com.hivemq:hivemq-extension-sdk", version.ref = "hivemq-platform" }
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
 jackson-dataformat-toml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-toml", version.ref = "jackson" }
