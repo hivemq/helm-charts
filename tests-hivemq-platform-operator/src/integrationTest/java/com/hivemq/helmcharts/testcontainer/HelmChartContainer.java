@@ -15,18 +15,16 @@ import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.LogWatch;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.ComparableVersion;
-import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
@@ -56,7 +54,7 @@ import static org.awaitility.Durations.FIVE_MINUTES;
 import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
-public class HelmChartContainer extends K3sContainer implements ExtensionContext.Store.CloseableResource {
+public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
@@ -92,7 +90,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
     }
 
     public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
-        super(getAdHocImageName());
+        super(OciImages.getImageName("hivemq/hivemq-k8s-testsuite").asCompatibleSubstituteFor("rancher/k3s"));
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
                 "/charts/" + LEGACY_OPERATOR_CHART);
@@ -265,13 +263,8 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
 
     public void addHelmRepo(final @NotNull String name, final @NotNull String url) {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo add <name> <url>
-        final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
-                "--kubeconfig",
-                "/etc/rancher/k3s/k3s.yaml",
-                "repo",
-                "add",
-                name,
-                url));
+        final var helmCommandList =
+                new ArrayList<>(List.of("helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", "repo", "add", name, url));
         LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
         try {
             final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
@@ -408,7 +401,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
             final @NotNull Stream<String> additionalCommands,
             final boolean debugOnFailure) throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --wait --timeout 5m0s
-        final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
+        final var helmCommandList = new ArrayList<>(List.of("helm",
                 "--kubeconfig",
                 "/etc/rancher/k3s/k3s.yaml",
                 helmCommand,
@@ -421,7 +414,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         helmCommandList.addAll(additionalCommandsList);
         if (chartName != null && withLocalCharts) {
             // helm dependency update /chart
-            final var outUpdate = execInContainer("/bin/helm", "dependency", "update", chartName);
+            final var outUpdate = execInContainer("helm", "dependency", "update", chartName);
             assertThat(outUpdate.getStderr()).as("stdout: %s\nstderr: %s", outUpdate.getStdout(), outUpdate.getStderr())
                     .isEmpty();
         }
@@ -446,7 +439,7 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
             final @NotNull Stream<String> additionalCommands)
             throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml search repo <repo|chart>
-        final var helmCommandList = new ArrayList<>(List.of("/bin/helm",
+        final var helmCommandList = new ArrayList<>(List.of("helm",
                 "--kubeconfig",
                 "/etc/rancher/k3s/k3s.yaml",
                 "search",
@@ -493,14 +486,6 @@ public class HelmChartContainer extends K3sContainer implements ExtensionContext
         } catch (final Exception e) {
             return "Could not describe Helm command: " + e;
         }
-    }
-
-    private static @NotNull DockerImageName getAdHocImageName() {
-        final var dockerfile = Path.of(MountableFile.forClasspathResource("helm.dockerfile").getFilesystemPath());
-        final var imageName = new ImageFromDockerfile().withDockerfile(dockerfile)
-                .withBuildArg("K3S_TAG", K3S_DOCKER_IMAGE.getVersionPart())
-                .get();
-        return DockerImageName.parse(imageName).asCompatibleSubstituteFor(K3S_DOCKER_IMAGE.getUnversionedPart());
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
