@@ -25,11 +25,13 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.ComparableVersion;
+import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -46,7 +48,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.hivemq.helmcharts.testcontainer.DockerImageNames.K3S_DOCKER_IMAGE;
 import static com.hivemq.helmcharts.util.NginxUtil.NGINX_CONTAINER_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -58,11 +59,12 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
+    private static final @NotNull DockerImageName K3S_DOCKER_IMAGE = OciImages.getImageName("hivemq/helm-charts")
+            .asCompatibleSubstituteFor("rancher/k3s")
+            .withTag(System.getProperty("k3s.tag", "latest"));
     private static final @NotNull String LEGACY_OPERATOR_CHART = "hivemq-operator";
     private static final @NotNull String PLATFORM_OPERATOR_CHART = "hivemq-platform-operator";
     private static final @NotNull String PLATFORM_CHART = "hivemq-platform";
-    private static final @NotNull String OPERATOR_IMAGE_NAME = "hivemq-platform-operator-test";
-    private static final @NotNull String OPERATOR_INIT_IMAGE_NAME = "hivemq-platform-operator-init-test";
     private static final @NotNull String PLATFORM_IMAGE_TAG = System.getProperty("hivemq.tag");
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
@@ -76,21 +78,19 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartContainer.class);
 
     private final @NotNull ExecutorService executorService = Executors.newCachedThreadPool();
-    private final @NotNull Map<String, String> imageNamePaths = new ConcurrentHashMap<>();
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
     private @Nullable Chart currentPlatformChart;
 
     private @Nullable KubernetesClient client;
-    private boolean withLocalImages = true;
 
     public HelmChartContainer(final boolean withK3sDebugging) {
         this(withK3sDebugging, List.of());
     }
 
     public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
-        super(OciImages.getImageName("hivemq/hivemq-k8s-testsuite").asCompatibleSubstituteFor("rancher/k3s"));
+        super(K3S_DOCKER_IMAGE);
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
                 "/charts/" + LEGACY_OPERATOR_CHART);
@@ -100,13 +100,12 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
                 "/charts/" + PLATFORM_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../" + MANIFEST_FILES), "/" + MANIFEST_FILES);
         super.withCopyFileToContainer(MountableFile.forHostPath("../scripts/test.sh"), "/bin/test.sh");
+        super.withCopyFileToContainer(MountableFile.forHostPath(getRegistryPath()), "/etc/rancher/k3s/registries.yaml");
+        super.withExtraHost("host.docker.internal", "host-gateway");
 
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
-        if (withLocalImages) {
-            bindLocalImages();
-        }
         final var k3sCommands = new ArrayList<>(List.of("server",
                 "--etcd-arg=unsafe-no-fsync",
                 "--etcd-arg=snapshot-count=10000",
@@ -128,28 +127,6 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
             k3sCommands.add("4");
         }
         super.withCommand(k3sCommands.toArray(new String[0]));
-    }
-
-    /**
-     * Checks if there are any images on the build containers directory to be loaded into K3s locally.
-     * Otherwise, it will try to pull the images from the GitHub container registry by using the secret set as
-     * an environment variables.
-     * See { @link #createContainerRegistrySecret() createContainerRegistrySecret} method
-     */
-    private void bindLocalImages() {
-        try {
-            final var buildPath = Path.of("build/test-image-tars/");
-            try (var files = Files.list(buildPath).filter(file -> file.toString().endsWith(".tar"))) {
-                files.map(file -> file.getFileName().toString()).forEach(s -> imageNamePaths.put(s, "/containers"));
-            }
-            if (!imageNamePaths.isEmpty()) {
-                super.withFileSystemBind(buildPath.toString(), "/containers", BindMode.READ_ONLY);
-            } else {
-                LOG.warn("No container image files could be found on local path {}", buildPath.toAbsolutePath());
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public @NotNull Chart getCurrentPlatformChart() {
@@ -221,12 +198,6 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
     public @NotNull HelmChartContainer withNetwork(final @NotNull Network network) {
         super.withNetwork(network);
-        return this;
-    }
-
-    @SuppressWarnings("unused")
-    public @NotNull HelmChartContainer withLocalImages(final boolean withLocalImages) {
-        this.withLocalImages = withLocalImages;
         return this;
     }
 
@@ -488,6 +459,25 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         }
     }
 
+    @SuppressWarnings("HttpUrlsUsage")
+    private static @NotNull Path getRegistryPath() {
+        final var registry = URI.create("http://%s".formatted(K3S_DOCKER_IMAGE.getRegistry()));
+        final var registryContent = """
+                mirrors:
+                  docker.io:
+                    endpoint:
+                      - "http://host.docker.internal:%d"
+                """.formatted(registry.getPort());
+        try {
+            final var registryPath = Files.createTempFile("registries", ".yaml").toAbsolutePath();
+            registryPath.toFile().deleteOnExit();
+            Files.writeString(registryPath, registryContent);
+            return registryPath;
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
         if (withLocalCharts) {
             return Stream.concat(getLocalOperatorRepositoryValues(), getOperatorFixedValues());
@@ -504,26 +494,12 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
     private static @NotNull Stream<String> getLocalOperatorRepositoryValues() {
         // fixed values, loaded locally
-        return Stream.of("--set",
-                "image.repository=docker.io/hivemq",
-                "--set",
-                "image.name=" + OPERATOR_IMAGE_NAME,
-                "--set",
-                "image.initImageName=" + OPERATOR_INIT_IMAGE_NAME,
-                "--set",
-                "image.tag=snapshot",
-                "--set",
-                "image.pullPolicy=Never");
+        return Stream.of("--set", "image.tag=snapshot");
     }
 
     private static @NotNull Stream<String> getLocalPlatformRepositoryValues() {
         // fixed values, loaded locally
-        return Stream.of("--set",
-                "image.repository=docker.io/hivemq",
-                "--set",
-                "image.tag=" + PLATFORM_IMAGE_TAG,
-                "--set",
-                "image.pullPolicy=Never");
+        return Stream.of("--set", "image.tag=" + PLATFORM_IMAGE_TAG);
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues() {
@@ -686,28 +662,12 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
                 container.containerIsStarted(container.getContainerInfo());
                 final var yaml = container.getKubeConfigYaml();
                 assertThat(yaml).isNotNull();
-                loadLocalImages();
             } catch (final Exception e) {
                 LOG.warn("K3s image not ready yet '{}'", e.getMessage());
                 throw new RuntimeException(e);
             }
             LOG.debug("Successful Helm chart Container startup");
             return StartupStatus.SUCCESSFUL;
-        }
-
-        private void loadLocalImages() {
-            container.imageNamePaths.forEach((imageName, containerPath) -> {
-                try {
-                    final var execResult =
-                            container.execInContainer("/bin/ctr", "images", "import", containerPath + "/" + imageName);
-                    assertThat(execResult.getStderr()).as("Unable to load %s image - %s",
-                            imageName,
-                            execResult.getStderr()).isEmpty();
-                    LOG.debug("Image file loaded '{}'", imageName);
-                } catch (final Exception e) {
-                    throw new RuntimeException("Failed loading container image " + imageName, e);
-                }
-            });
         }
     }
 }

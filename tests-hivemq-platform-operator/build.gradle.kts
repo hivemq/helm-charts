@@ -2,15 +2,6 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.jackson.dataformat.toml)
-    }
-}
-
 plugins {
     java
     alias(libs.plugins.oci)
@@ -27,6 +18,18 @@ java {
 repositories {
     mavenCentral()
 }
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.jackson.dataformat.toml)
+    }
+}
+
+val hivemqVersion = libs.versions.hivemq.platform.get()
+val k3sTag = resolveK3sTag()
 
 @Suppress("UnstableApiUsage")
 testing {
@@ -85,34 +88,26 @@ testing {
                     maxHeapSize = "3g"
                     doFirst {
                         // sets Docker image tags for the tests
-                        val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
-                        val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
-                        tomlDocker.fields().forEach { (key, value) ->
-                            val tag = value.path("tag").asText()
-                            if (tag.isNotEmpty()) {
-                                println("Configuring test Docker image $key:$tag")
-                                systemProperty("$key.tag", tag)
-                            }
-                        }
-                        systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
                         val k8sVersionType = environment["K8S_VERSION_TYPE"] ?: "LATEST"
                         val key = if (k8sVersionType == "MINIMUM") "k3s-minimum" else "k3s-latest"
+                        val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
+                        val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
                         val tag = tomlDocker.path(key).path("tag").asText()
-                        println("Configuring test Docker image k3s:$tag ($k8sVersionType)")
+                        println("Configuring test OCI image k3s:$tag ($k8sVersionType)")
+                        systemProperty("hivemq.tag", hivemqVersion)
                         systemProperty("k3s.tag", tag)
                         systemProperty("k3s.version.type", k8sVersionType)
                     }
-                    dependsOn(saveDockerImages)
-                    inputs.files(
-                        layout.buildDirectory.file("test-image-tars/hivemq-platform-operator-init.tar"),
-                        layout.buildDirectory.file("test-image-tars/hivemq-platform-operator.tar"),
-                        layout.buildDirectory.file("test-image-tars/hivemq-platform.tar"),
-                    )
                 }
             }
             oci.of(this) {
                 imageDependencies {
-                    runtime(project).tag("latest")
+                    runtime(project).name("hivemq/helm-charts").tag(k3sTag)
+                    runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
+                    runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
+                    runtime("hivemq:hivemq4:$hivemqVersion").tag("latest")
+                    runtime("library:nginx:1.28.0").tag("latest")
+                    runtime("selenium:standalone-firefox:4.32.0").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
                 val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
@@ -126,24 +121,26 @@ tasks.register("integrationTestPrepare") {
     dependsOn(tasks.named("integrationTest").get().taskDependencies.getDependencies(null))
 }
 
-/* ******************** OCI Platform Operator Images ******************** */
+/* ******************** OCI images ******************** */
 
 val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233"
+    from = "library/ubuntu@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233" // noble-20250529
     platform = oci.platform("linux", "amd64")
-    command = "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-            "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
-            "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
+    command =
+        "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
+                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
+                "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
     destinationDirectory = layout.buildDirectory.dir("oci/layers")
     classifier = "helm@linux,amd64"
 }
 
 val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233"
+    from = "library/ubuntu@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233" // noble-20250529
     platform = oci.platform("linux", "arm64", "v8")
-    command = "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-            "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
-            "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
+    command =
+        "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
+                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
+                "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
     destinationDirectory = layout.buildDirectory.dir("oci/layers")
     classifier = "helm@linux,arm64,v8"
 }
@@ -159,7 +156,7 @@ oci {
             imageTag = provider { project.version.toString().lowercase() }
             allPlatforms {
                 dependencies {
-                    runtime("rancher:k3s:sha256!a2920ca992f197e35812173322734207b89f73084dbe3e2404c11d582a9ecf40") // v1.33.1-k3s1
+                    runtime("rancher:k3s:$k3sTag")
                 }
             }
             specificPlatform(platform("linux", "amd64")) {
@@ -176,10 +173,10 @@ oci {
     }
 }
 
+@Suppress("unused")
 val operatorImageLayoutForTesting by tasks.registering(oci.imagesLayoutTaskClass) {
     from(oci.imageDependencies.create("operatorImageTarForTesting") {
-        runtime("com.hivemq:hivemq-platform-operator").name("hivemq/hivemq-platform-operator-test")
-            .tag("snapshot")
+        runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
     })
     destinationDirectory = layout.buildDirectory.dir("test-image-tars")
     classifier = "hivemq-platform-operator"
@@ -190,10 +187,10 @@ val operatorImageLayoutForTestingTar by tasks.existing(Tar::class) {
     archiveFileName = "hivemq-platform-operator.tar"
 }
 
+@Suppress("unused")
 val initImageLayoutForTesting by tasks.registering(oci.imagesLayoutTaskClass) {
     from(oci.imageDependencies.create("initImageTarForTesting") {
-        runtime("com.hivemq:hivemq-platform-operator-init").name("hivemq/hivemq-platform-operator-init-test")
-            .tag("snapshot")
+        runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
     })
     destinationDirectory = layout.buildDirectory.dir("test-image-tars")
     classifier = "hivemq-platform-operator-init"
@@ -203,8 +200,6 @@ val initImageLayoutForTestingTar by tasks.existing(Tar::class) {
     destinationDirectory = layout.buildDirectory.dir("test-image-tars")
     archiveFileName = "hivemq-platform-operator-init.tar"
 }
-
-val hivemqVersion = libs.versions.hivemq.platform.get()
 
 val savePlatformDockerImage by tasks.registering(Exec::class) {
     group = "container"
@@ -225,6 +220,7 @@ val pullPlatformDockerImage by tasks.registering(Exec::class) {
     commandLine("docker", "pull", "docker.io/hivemq/hivemq4:$hivemqVersion")
 }
 
+@Suppress("unused")
 val saveDockerImages by tasks.registering {
     group = "container"
     description = "Save all Platform Docker images"
@@ -235,6 +231,7 @@ val saveDockerImages by tasks.registering {
 
 /* ******************** update versions ******************** */
 
+@Suppress("unused")
 val updatePlatformVersion by tasks.registering {
     group = "version"
     val appVersion = project.properties["appVersion"]
@@ -248,7 +245,12 @@ val updatePlatformVersion by tasks.registering {
                 include("**/*.toml")
                 include("**/*.java")
                 // include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform and hivemq-edge charts
-            }.plus(files("../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml", "../charts/hivemq-edge/templates/tests/test-mqtt-cli.yml"))
+            }.plus(
+                files(
+                    "../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml",
+                    "../charts/hivemq-edge/templates/tests/test-mqtt-cli.yml"
+                )
+            )
             filesToUpdate.forEach { file ->
                 val text = file.readText()
                 file.writeText(text.replace("""^hivemq-platform = \"(.*)\"$""".toRegex(RegexOption.MULTILINE)) {
@@ -261,4 +263,13 @@ val updatePlatformVersion by tasks.registering {
             }
         }
     }
+}
+
+fun resolveK3sTag(): String {
+    val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
+    val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
+
+    val k8sVersionType = System.getenv("K8S_VERSION_TYPE") ?: "LATEST"
+    val key = if (k8sVersionType == "MINIMUM") "k3s-minimum" else "k3s-latest"
+    return tomlDocker.path(key).path("tag").asText()
 }

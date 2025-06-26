@@ -10,6 +10,7 @@ concurrency:
 env:
   check-prefix: 'Platform Test #'
   split-total: 23
+  CI_RUN: true
 jobs:
   generate-split-index-json:
     name: Generate split indexes

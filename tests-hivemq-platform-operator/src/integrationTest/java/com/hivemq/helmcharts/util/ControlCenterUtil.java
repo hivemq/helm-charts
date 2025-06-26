@@ -3,7 +3,7 @@ package com.hivemq.helmcharts.util;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.By;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -77,7 +77,7 @@ public class ControlCenterUtil {
         while (true) {
             final var loginAttempt = loginRetry.incrementAndGet();
             try (final var forwarded = K8sUtil.getPortForward(client, namespace, serviceName, port)) {
-                final var options = new ChromeOptions();
+                final var options = new FirefoxOptions();
                 options.setAcceptInsecureCerts(true);
 
                 final var webDriver = new RemoteWebDriver(webDriverContainer.getSeleniumAddress(), options, false);
