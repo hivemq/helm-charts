@@ -1,6 +1,5 @@
 package com.hivemq.helmcharts.util;
 
-import com.hivemq.helmcharts.testcontainer.DockerImageNames;
 import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
@@ -200,7 +199,7 @@ public class NginxUtil {
                 .withVolumes(volumes)
                 .addNewContainer()
                 .withName(NGINX_CONTAINER_NAME)
-                .withImage(DockerImageNames.NGINX_DOCKER_IMAGE.asCanonicalNameString())
+                .withImage(HelmChartContainer.resolveLocalImage("library/nginx"))
                 .addNewPort()
                 .withName("http")
                 .withContainerPort(80)

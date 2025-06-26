@@ -51,15 +51,6 @@ jobs:
             git checkout origin/${GITHUB_BASE_REF}
           fi
 
-      - name: Set up Docker QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
       - name: Set up JDK 21
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
@@ -74,29 +65,27 @@ jobs:
             notifications
             jdks
 
-      - name: Build HiveMQ Platform Operator and HiveMQ Platform Operator Init images
-        working-directory: helm-charts
-        run: ./gradlew :tests-hivemq-platform-operator:build :tests-hivemq-platform-operator:saveDockerImages
-
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@b72c923563e6e80ea66e8e8c810798cc73e97e5e
+        id: kind
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1
         with:
           cluster_name: "kind"
+          registry: true
+          registry_name: kind-registry
+          registry_port: 5000
 
-      - name: Load local images into KinD cluster
+      - name: Push images to the Kind registry
         working-directory: helm-charts
         run: |
-          kind load image-archive ./tests-hivemq-platform-operator/build/test-image-tars/hivemq-platform-operator-init.tar
-          kind load image-archive ./tests-hivemq-platform-operator/build/test-image-tars/hivemq-platform-operator.tar
-          kind load image-archive ./tests-hivemq-platform-operator/build/test-image-tars/hivemq-platform.tar
+          ./gradlew :tests-hivemq-platform-operator:pushAllImagesForTesting --url ${{ steps.kind.outputs.LOCAL_REGISTRY }}
 
       - name: Install HiveMQ Platform Operator
         working-directory: helm-charts
-        run: helm install operator-test --set image.name=hivemq-platform-operator-test --set image.initImageName=hivemq-platform-operator-init-test --set image.tag=snapshot ./charts/hivemq-platform-operator --wait
+        run: helm install operator-test --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=snapshot ./charts/hivemq-platform-operator --wait --timeout 2m0s
 
       - name: Install HiveMQ Platform
         working-directory: helm-charts
-        run: helm install $RELEASE_NAME --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --create-namespace -n test
+        run: helm install $RELEASE_NAME --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=latest --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test
 
       - name: Wait for pods to be ready
         working-directory: helm-charts
@@ -218,7 +207,7 @@ jobs:
         run: |
           helm repo add prometheus https://prometheus-community.github.io/helm-charts
           helm dependency build ./charts/hivemq-operator
-          helm install $RELEASE_NAME ./charts/hivemq-operator -f ./examples/hivemq-operator/localStatefulTest.yml --wait --create-namespace -n test
+          helm install $RELEASE_NAME ./charts/hivemq-operator -f ./examples/hivemq-operator/localStatefulTest.yml --wait --timeout 5m0s --create-namespace -n test
 
       - name: Wait for pods to be ready
         working-directory: helm-charts
@@ -267,7 +256,7 @@ jobs:
           cluster_name: "kind"
 
       - name: Install HiveMQ Edge
-        run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --create-namespace -n test
+        run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --timeout 5m0s --create-namespace -n test
 
       - name: Wait for pods to be ready
         run: bash ./scripts/wait-for-pods.sh hivemq-edge app.kubernetes.io/instance=$RELEASE_NAME test
