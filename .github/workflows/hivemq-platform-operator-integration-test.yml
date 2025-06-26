@@ -10,6 +10,7 @@ concurrency:
 env:
   check-prefix: 'Platform Test #'
   split-total: 23
+  CI_RUN: true
 jobs:
   generate-split-index-json:
     name: Generate split indexes
@@ -137,15 +138,6 @@ jobs:
           git-branch: junit-reports/platform/${{ github.base_ref }}
           path: junit-reports
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
-
-      - name: Set up Docker QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4

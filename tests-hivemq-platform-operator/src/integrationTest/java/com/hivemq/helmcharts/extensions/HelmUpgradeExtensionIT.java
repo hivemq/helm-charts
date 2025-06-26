@@ -2,6 +2,7 @@ package com.hivemq.helmcharts.extensions;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -14,7 +15,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.helmcharts.testcontainer.DockerImageNames.HIVEMQ_DOCKER_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -22,10 +22,11 @@ import static org.awaitility.Awaitility.await;
 class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
 
     @Container
-    private static final @NotNull HiveMQContainer HIVEMQ_CONTAINER = new HiveMQContainer(HIVEMQ_DOCKER_IMAGE) //
-            .withNetwork(network) //
-            .withNetworkAliases("remote") //
-            .withLogLevel(Level.DEBUG);
+    private static final @NotNull HiveMQContainer HIVEMQ_CONTAINER =
+            new HiveMQContainer(OciImages.getImageName("hivemq/hivemq4")) //
+                    .withNetwork(network) //
+                    .withNetworkAliases("remote") //
+                    .withLogLevel(Level.DEBUG);
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
