@@ -8,12 +8,13 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -25,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -47,23 +47,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT = 1883;
-    private static final @NotNull String MQTT_SERVICE_NAME = String.format("hivemq-%s-mqtt", LEGACY_RELEASE_NAME);
+    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-%s-mqtt".formatted(LEGACY_RELEASE_NAME);
     private static final int CC_SERVICE_PORT = 8080;
-    private static final @NotNull String CC_SERVICE_NAME = String.format("hivemq-%s-cc", LEGACY_RELEASE_NAME);
+    private static final @NotNull String CC_SERVICE_NAME = "hivemq-%s-cc".formatted(LEGACY_RELEASE_NAME);
     private static final int METRICS_SERVICE_PORT = 9399;
-    private static final @NotNull String METRICS_SERVICE_NAME = String.format("hivemq-%s-metrics", LEGACY_RELEASE_NAME);
+    private static final @NotNull String METRICS_SERVICE_NAME = "hivemq-%s-metrics".formatted(LEGACY_RELEASE_NAME);
     private static final int REST_API_SERVICE_PORT = 8888;
-    private static final @NotNull String REST_API_SERVICE_NAME = String.format("hivemq-%s-api", LEGACY_RELEASE_NAME);
-    private static final @NotNull String CLUSTER_SERVICE_NAME = String.format("hivemq-%s-cluster", LEGACY_RELEASE_NAME);
+    private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-%s-api".formatted(LEGACY_RELEASE_NAME);
+    private static final @NotNull String CLUSTER_SERVICE_NAME = "hivemq-%s-cluster".formatted(LEGACY_RELEASE_NAME);
 
     @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(SELENIUM_DOCKER_IMAGE) //
+            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
                     .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new ChromeOptions());
+                    .withCapabilities(new FirefoxOptions());
 
     @Override
     protected boolean uninstallPlatformChart() {
@@ -184,7 +184,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
         // scale down the legacy operator
         // kubectl scale deployment <release-name>-hivemq-operator-operator --replicas=0 -n <namespace>
-        final var legacyOperatorDeploymentName = String.format("%s-hivemq-operator-operator", LEGACY_RELEASE_NAME);
+        final var legacyOperatorDeploymentName = "%s-hivemq-operator-operator".formatted(LEGACY_RELEASE_NAME);
         K8sUtil.scaleDeployment(client, operatorNamespace, legacyOperatorDeploymentName, 0);
         var legacyOperatorLabels = K8sUtil.getHiveMQLegacyOperatorLabels(LEGACY_RELEASE_NAME);
         client.pods()
@@ -310,6 +310,9 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 clusterServiceLabels,
                 true,
                 true);
+        final var statefulSetAnnotations = new HashMap<String, String>(platformLabels.size() + 1);
+        statefulSetAnnotations.putAll(helmAnnotations);
+        statefulSetAnnotations.put("operator.platform.hivemq.com/last-controller-revision-hash", "");
         assertAnnotationsAndLabels("StatefulSet",
                 () -> client.apps()
                         .statefulSets()
@@ -317,7 +320,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                         .withName(LEGACY_RELEASE_NAME)
                         .get()
                         .getMetadata(),
-                helmAnnotations,
+                statefulSetAnnotations,
                 platformLabels,
                 true,
                 true);
@@ -330,10 +333,10 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                         .getSpec()
                         .getTemplate()
                         .getMetadata(),
-                helmAnnotations,
+                Map.of(),
                 platformLabels,
                 true,
-                true);
+                false);
         // assert again Control Center login
         ControlCenterUtil.assertLogin(client,
                 operatorNamespace,
@@ -365,9 +368,9 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                         !entry.getKey().contains("kubernetes-resource-versions"))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (expectedAnnotationsToBeEqual) {
-            assertThat(actualAnnotations).as(String.format("%s annotations", label)).isEqualTo(expectedAnnotations);
+            assertThat(actualAnnotations).as("%s annotations".formatted(label)).isEqualTo(expectedAnnotations);
         } else {
-            assertThat(actualAnnotations).as(String.format("%s annotations", label)).isNotEqualTo(expectedAnnotations);
+            assertThat(actualAnnotations).as("%s annotations".formatted(label)).isNotEqualTo(expectedAnnotations);
         }
         final var actualLabels = metadata.getLabels()
                 .entrySet()
@@ -375,9 +378,9 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 .filter(entry -> !entry.getKey().contains("helm.sh/chart") && !entry.getKey().contains("jobLabel"))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (expectedLabelsToBeEqual) {
-            assertThat(actualLabels).as(String.format("%s labels", label)).isEqualTo(expectedLabels);
+            assertThat(actualLabels).as("%s labels".formatted(label)).isEqualTo(expectedLabels);
         } else {
-            assertThat(actualLabels).as(String.format("%s labels", label)).isNotEqualTo(expectedLabels);
+            assertThat(actualLabels).as("%s labels".formatted(label)).isNotEqualTo(expectedLabels);
         }
     }
 }
