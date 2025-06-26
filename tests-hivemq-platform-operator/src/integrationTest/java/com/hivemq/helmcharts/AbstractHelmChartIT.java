@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Durations.FIVE_MINUTES;
 import static org.awaitility.Durations.TWO_SECONDS;
 
+@SuppressWarnings("NotNullFieldNotInitialized")
 public abstract class AbstractHelmChartIT {
 
     protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq";
@@ -47,13 +48,9 @@ public abstract class AbstractHelmChartIT {
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
             new HelmChartContainerExtension(false);
 
-    @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull HelmChartContainer helmChartContainer;
-    @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull Network network;
-    @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull KubernetesClient client;
-    @SuppressWarnings("NotNullFieldNotInitialized")
     protected static @NotNull LogWaiterUtil logWaiter;
 
     protected final @NotNull String platformNamespace = getNamespaceName(getClass());
