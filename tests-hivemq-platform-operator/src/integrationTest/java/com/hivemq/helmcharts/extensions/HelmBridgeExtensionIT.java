@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.extensions;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.helmcharts.testcontainer.DockerImageNames.HIVEMQ_DOCKER_IMAGE;
 import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,10 +30,11 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
     private @NotNull String ipAddress;
 
     @Container
-    private final @NotNull HiveMQContainer hivemqContainer = new HiveMQContainer(HIVEMQ_DOCKER_IMAGE) //
-            .withNetwork(network) //
-            .withNetworkAliases("remote") //
-            .withLogLevel(Level.DEBUG);
+    private final @NotNull HiveMQContainer hivemqContainer =
+            new HiveMQContainer(OciImages.getImageName("hivemq/hivemq4")) //
+                    .withNetwork(network) //
+                    .withNetworkAliases("remote") //
+                    .withLogLevel(Level.DEBUG);
 
     @BeforeEach
     void setUp() {
