@@ -8,12 +8,13 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -25,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -59,11 +59,11 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(SELENIUM_DOCKER_IMAGE) //
+            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
                     .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new ChromeOptions());
+                    .withCapabilities(new FirefoxOptions());
 
     @Override
     protected boolean uninstallPlatformChart() {
@@ -132,7 +132,6 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 legacyLabels,
                 true,
                 true);
-        final var hiveMQVersion = System.getProperty("hivemq.tag", "latest");
         final var legacyStatefulSetLabels = new HashMap<>(Map.of("app.kubernetes.io/instance",
                 LEGACY_RELEASE_NAME,
                 "app.kubernetes.io/managed-by",
@@ -140,7 +139,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 "app.kubernetes.io/name",
                 "hivemq-operator",
                 "app.kubernetes.io/version",
-                hiveMQVersion));
+                "latest"));
         legacyStatefulSetLabels.putAll(legacyLabels);
         assertAnnotationsAndLabels("StatefulSet",
                 () -> client.apps()
@@ -253,7 +252,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 "app.kubernetes.io/name",
                 "hivemq-platform",
                 "app.kubernetes.io/version",
-                hiveMQVersion,
+                "latest",
                 "hivemq-platform",
                 LEGACY_RELEASE_NAME);
         final var platformServiceLabels = new HashMap<String, String>(platformLabels.size() + 1);
