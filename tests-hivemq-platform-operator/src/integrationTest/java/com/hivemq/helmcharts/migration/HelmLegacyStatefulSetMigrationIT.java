@@ -8,6 +8,7 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.hivemq.helmcharts.testcontainer.DockerImageNames.SELENIUM_DOCKER_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -59,7 +59,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     @Container
     @SuppressWarnings("resource")
     private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(SELENIUM_DOCKER_IMAGE) //
+            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
                     .withExtraHost("host.docker.internal", "host-gateway") //

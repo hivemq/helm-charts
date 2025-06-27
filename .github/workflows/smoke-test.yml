@@ -92,7 +92,7 @@ jobs:
 
       - name: Install HiveMQ Platform Operator
         working-directory: helm-charts
-        run: helm install operator-test --set image.name=hivemq-platform-operator-test --set image.initImageName=hivemq-platform-operator-init-test --set image.tag=snapshot ./charts/hivemq-platform-operator --wait
+        run: helm install operator-test --set image.tag=snapshot ./charts/hivemq-platform-operator --wait
 
       - name: Install HiveMQ Platform
         working-directory: helm-charts
