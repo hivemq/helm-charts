@@ -181,7 +181,7 @@ jobs:
         run: ./gradlew :tests-hivemq-platform-operator:integrationTest ${{ steps.split-tests.outputs.test-suite }}
 
       - name: Upload HiveMQ Platform Operator test results
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: "Test results HiveMQ Platform Operator #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
@@ -199,13 +199,32 @@ jobs:
             helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest/*.xml
 
       - name: Publish test report
-        if: always()
-        uses: mikepenz/action-junit-report@a83fd2b5d58d4fc702e690c1ea688d702d28d281 # v5
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@890a17cecf52a379fc869ab770a71657660be727 # v2
         with:
-          annotate_only: true
-          detailed_summary: true
-          job_name: platform-integration-test-report
-          report_paths: '**/build/test-results/integrationTest/TEST-*.xml'
+          name: Integration tests report
+          path: '**/build/test-results/integrationTest/TEST-*.xml'
+          reporter: java-junit
+          fail-on-error: false
+          working-directory: helm-charts
+
+      - name: Install xmllint
+        if: failure()
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Set annotations for failed tests
+        if: failure()
+        run: |
+          find helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest -type f -name "*.xml" | while read -r FILE; do
+            COUNT=$(xmllint --xpath 'count(//testcase[failure or error])' "$FILE")
+            for INDEX in $(seq 1 "$COUNT"); do
+              TEST_CLASS=$(xmllint --xpath "string((//testcase[failure or error])[$INDEX]/@classname)" "$FILE" 2>/dev/null)
+              TEST_METHOD=$(xmllint --xpath "string((//testcase[failure or error])[$INDEX]/@name)" "$FILE" 2>/dev/null)
+              MESSAGE=$(xmllint --xpath "string((//testcase[failure or error])[$INDEX]/failure/@message | (//testcase[failure or error])[$INDEX]/error/@message)" "$FILE" 2>/dev/null)
+              [ -z "$MESSAGE" ] && MESSAGE="Test failed"
+              echo "::error title=Test #${{ matrix.split-index }}::$TEST_CLASS.$TEST_METHOD%0A$MESSAGE"
+            done
+          done
 
   merge-junit-reports:
     name: Merge JUnit reports
