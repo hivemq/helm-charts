@@ -3584,6 +3584,7 @@ spec:
                 - "V1_5_0"
                 - "V1_6_0"
                 - "V1_7_0"
+                - "V2_0_0"
                 type: "string"
               healthDetails:
                 description: "Human readable details of the current health status"
@@ -3592,7 +3593,9 @@ spec:
                 description: "The aggregated health status of the HiveMQ Platform"
                 enum:
                 - "DEGRADED"
+                - "DEGRADED_SERVICE"
                 - "DOWN"
+                - "OUT_OF_SERVICE"
                 - "UNKNOWN"
                 - "UP"
                 type: "string"
@@ -3600,9 +3603,11 @@ spec:
                 description: "A human readable state message"
                 type: "string"
               observedGeneration:
+                description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0]"
                 type: "integer"
               reconciliationRequests:
-                description: "Requests for state changes in the next reconciliation"
+                description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0] Requests\
+                  \ for state changes in the next reconciliation"
                 items:
                   enum:
                   - "RECOVER"
@@ -3663,7 +3668,8 @@ spec:
                     type: "string"
                 type: "object"
               restartExtensions:
-                description: "The extensions to be restarted"
+                description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0] The\
+                  \ extensions to be restarted"
                 type: "string"
               state:
                 description: "The current state of the reconciliation"
