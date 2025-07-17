@@ -34,12 +34,23 @@ tests:
           path: metadata.labels["app.kubernetes.io/managed-by"]
           value: Helm
 
-  - it: Should have the correct config data
+  - it: Should have the correct config data when configCompressed is set
+    set:
+      configCompressed: UEsDBBQAAAAIACd98Vrve9nWKQAAAEgAAAADABwAY2ZnVVQJAAN5/Xhoe/14aHV4CwABBPYBAAAEFAAAALPJLSwp0U0qykxJTy2247LRR+MXFOWX5Cfn5+gmpiQWlKQWgdVgEQQAUEsBAh4DFAAAAAgAJ33xWu972dYpAAAASAAAAAMAGAAAAAAAAQAAAKSBAAAAAGNmZ1VUBQADef14aHV4CwABBPYBAAAEFAAAAFBLBQYAAAAAAQABAEkAAABmAAAAAAA=
     asserts:
       - equal:
           path: data.config
           value: |
-            <mqtt-bridges>
-            </mqtt-bridges>
-            <protocol-adapters>
-            </protocol-adapters>
+            UEsDBBQAAAAIACd98Vrve9nWKQAAAEgAAAADABwAY2ZnVVQJAAN5/Xhoe/14aHV4CwABBPYBAAAEFAAAALPJLSwp0U0qykxJTy2247LRR+MXFOWX5Cfn5+gmpiQWlKQWgdVgEQQAUEsBAh4DFAAAAAgAJ33xWu972dYpAAAASAAAAAMAGAAAAAAAAQAAAKSBAAAAAGNmZ1VUBQADef14aHV4CwABBPYBAAAEFAAAAFBLBQYAAAAAAQABAEkAAABmAAAAAAA=
+
+  - it: Should should fail if config and configCompressed are both set
+    set:
+      config: |
+        <mqtt-bridges>
+        </mqtt-bridges>
+        <protocol-adapters>
+        </protocol-adapters>
+      configCompressed: UEsDBBQAAAAIACd98Vrve9nWKQAAAEgAAAADABwAY2ZnVVQJAAN5/Xhoe/14aHV4CwABBPYBAAAEFAAAALPJLSwp0U0qykxJTy2247LRR+MXFOWX5Cfn5+gmpiQWlKQWgdVgEQQAUEsBAh4DFAAAAAgAJ33xWu972dYpAAAASAAAAAMAGAAAAAAAAQAAAKSBAAAAAGNmZ1VUBQADef14aHV4CwABBPYBAAAEFAAAAFBLBQYAAAAAAQABAEkAAABmAAAAAAA=
+    asserts:
+      - failedTemplate:
+          contains: "Must not validate the schema (not)"

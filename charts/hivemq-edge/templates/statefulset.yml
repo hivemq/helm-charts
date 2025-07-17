@@ -64,6 +64,15 @@ spec:
               value: "false"
             - name: HIVEMQ_LOG_LEVEL
               value: "{{ .Values.logLevel }}"
+            {{- if .Values.configCompressed }}
+            - name: HIVEMQ_CONFIG_FRAGMENT_BASE64ZIP
+              value: "true"
+            {{- else }}
+            - name: HIVEMQ_CONFIG_FRAGMENT_BASE64ZIP
+              value: "false"
+            {{- end }}
+
+
             - name: JAVA_OPTS
               value: "{{ .Values.javaOpts }}"
             - name: HIVEMQ_LICENSE_FOLDER
