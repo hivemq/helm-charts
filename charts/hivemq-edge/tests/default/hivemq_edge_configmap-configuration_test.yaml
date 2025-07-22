@@ -43,7 +43,7 @@ tests:
           value: |
             UEsDBBQAAAAIACd98Vrve9nWKQAAAEgAAAADABwAY2ZnVVQJAAN5/Xhoe/14aHV4CwABBPYBAAAEFAAAALPJLSwp0U0qykxJTy2247LRR+MXFOWX5Cfn5+gmpiQWlKQWgdVgEQQAUEsBAh4DFAAAAAgAJ33xWu972dYpAAAASAAAAAMAGAAAAAAAAQAAAKSBAAAAAGNmZ1VUBQADef14aHV4CwABBPYBAAAEFAAAAFBLBQYAAAAAAQABAEkAAABmAAAAAAA=
 
-  - it: Should should fail if config and configCompressed are both set
+  - it: Should fail if config and configCompressed are both set
     set:
       config: |
         <mqtt-bridges>
