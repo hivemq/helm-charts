@@ -41,6 +41,8 @@ spec:
               value: "false"
             - name: HIVEMQ_LOG_LEVEL
               value: "INFO"
+            - name: HIVEMQ_CONFIG_FRAGMENT_BASE64ZIP
+              value: "false"
             - name: JAVA_OPTS
               value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
             - name: HIVEMQ_LICENSE_FOLDER
