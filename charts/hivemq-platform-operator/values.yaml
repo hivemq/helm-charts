@@ -68,6 +68,20 @@ serviceAccount:
   # Defines specific annotations to be applied to the ServiceAccount.
   annotations: {}
 
+# Configuration options for the HiveMQ Platform Operator Init container.
+hivemqPlatformInitContainer:
+  # Configures the resource requests and limits for the HiveMQ Platform Operator Init container.
+  resources:
+    # The CPU resource requests and limits the operator configures for the HiveMQ Platform Operator Init container.
+    cpu: 250m
+    # The memory resource requests and limits the operator configures for the HiveMQ Platform Operator Init container.
+    memory: 100Mi
+    # The ephemeral resource requests and limits the operator configures for the HiveMQ Platform Operator Init container.
+    # If the HiveMQ Platform container has no ephemeral storage limit configured,
+    # the operator no longer sets ephemeral storage requests and limits for the init container.
+    # This ensures the expected unlimited ephemeral storage for the HiveMQ Platform pod.
+    ephemeralStorage: 1Gi
+
 # Configures the ServiceAccount and RBAC permissions (Role, RoleBinding) the Operator creates for the HiveMQ Platform pods.
 hivemqPlatformServiceAccount:
   # Specifies whether a ServiceAccount should be created for all HiveMQ Platforms.

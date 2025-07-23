@@ -78,6 +78,16 @@ spec:
               value: "{{ .Values.crd.waitTimeout }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
               value: "{{ .Values.image.repository}}/{{ .Values.image.initImageName}}:{{.Values.image.tag}}"
+            {{- with .Values.hivemqPlatformInitContainer }}
+              {{- with .resources }}
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+              value: "{{ .cpu }}"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+              value: "{{ .memory }}"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+              value: "{{ .ephemeralStorage }}"
+              {{- end }}
+            {{- end }}
             - name: HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET
               value: "{{ .Values.image.pullSecretName }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL

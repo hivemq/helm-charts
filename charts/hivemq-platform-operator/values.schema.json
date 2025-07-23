@@ -66,6 +66,30 @@
       },
       "type" : "object"
     },
+    "hivemqPlatformInitContainer" : {
+      "description" : "Configuration options for the HiveMQ Platform Operator Init container.",
+      "properties" : {
+        "resources" : {
+          "description" : "Configures the resource requests and limits for the HiveMQ Platform Operator Init container.",
+          "properties" : {
+            "cpu" : {
+              "description" : "The CPU resource requests and limits the operator configures for the HiveMQ Platform Operator Init container.",
+              "type" : "string"
+            },
+            "ephemeralStorage" : {
+              "description" : "The ephemeral resource requests and limits the operator configures for the HiveMQ Platform Operator Init container.",
+              "type" : "string"
+            },
+            "memory" : {
+              "description" : "The memory resource requests and limits the operator configures for the HiveMQ Platform Operator Init container.",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
+    },
     "hivemqPlatformServiceAccount" : {
       "properties" : {
         "create" : {
@@ -260,14 +284,18 @@
       "type" : "object"
     },
     "resources" : {
+      "description" : "Configures the resource requests and limits for the HiveMQ Platform Operator container.",
       "properties" : {
         "cpu" : {
+          "description" : "The CPU resource requests and limits for the HiveMQ Platform Operator container.",
           "type" : "string"
         },
         "ephemeralStorage" : {
+          "description" : "The ephemeral resource requests and limits the operator configures for the HiveMQ Platform Operator container.",
           "type" : "string"
         },
         "memory" : {
+          "description" : "The memory resource requests and limits the operator configures for the HiveMQ Platform Operator container.",
           "type" : "string"
         },
         "overrideLimits" : {
