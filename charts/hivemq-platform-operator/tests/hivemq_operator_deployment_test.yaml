@@ -196,6 +196,146 @@ tests:
       - failedTemplate:
           errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
 
+  - it: with default values, default operator init container resources EnvVars set
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+            value: "250m"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+            value: "100Mi"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+            value: "1Gi"
+
+  - it: with custom operator init container resources, operator init container resources EnvVars set
+    set:
+      hivemqPlatformInitContainer:
+        resources:
+          cpu: 1m
+          memory: 2Gi
+          ephemeralStorage: 3Gi
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+            value: "1m"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+            value: "2Gi"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+            value: "3Gi"
+
+  - it: with no operator init container settings, operator init container resources EnvVars not set
+    set:
+      hivemqPlatformInitContainer: {}
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+
+  - it: with empty operator init container resources, operator init container resources EnvVars not set
+    set:
+      hivemqPlatformInitContainer:
+        resources: {}
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+
+  - it: with empty operator init container cpu resource, operator init container CPU resources EnvVar not set
+    set:
+      hivemqPlatformInitContainer:
+        resources:
+          cpu: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+            value: "100Mi"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+            value: "1Gi"
+
+  - it: with empty operator init container memory resource, operator init container memory resources EnvVar not set
+    set:
+      hivemqPlatformInitContainer:
+        resources:
+          memory: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+            value: "250m"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+            value: "1Gi"
+
+  - it: with empty operator init container ephemeral-storage resource, operator init container ephemeral-storage resources EnvVar not set
+    set:
+      hivemqPlatformInitContainer:
+        resources:
+          ephemeralStorage: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+            value: "250m"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+            value: "100Mi"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+
   - it: with defaults, no pod security context set
     asserts:
       - notExists:
