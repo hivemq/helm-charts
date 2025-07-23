@@ -79,7 +79,7 @@ jobs:
         run: ./gradlew :tests-hivemq-platform-operator:build :tests-hivemq-platform-operator:saveDockerImages
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@d4887be296b90d45c7a7aaf1379c0ebd88c8aa31
+        uses: helm/kind-action@b72c923563e6e80ea66e8e8c810798cc73e97e5e
         with:
           cluster_name: "kind"
 
@@ -202,7 +202,7 @@ jobs:
         run: ./gradlew :tests-hivemq-operator:build :tests-hivemq-operator:saveDockerImages
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@d4887be296b90d45c7a7aaf1379c0ebd88c8aa31
+        uses: helm/kind-action@b72c923563e6e80ea66e8e8c810798cc73e97e5e
         with:
           cluster_name: "kind"
 
@@ -262,7 +262,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@d4887be296b90d45c7a7aaf1379c0ebd88c8aa31
+        uses: helm/kind-action@b72c923563e6e80ea66e8e8c810798cc73e97e5e
         with:
           cluster_name: "kind"
 
