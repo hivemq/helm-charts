@@ -169,6 +169,33 @@ tests:
                 key: myconfigmapkey
                 optional: true
 
+  - it: with custom environment variables for the operator init cpu resource, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+          value: 250m
+    asserts:
+      - failedTemplate:
+          errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
+
+  - it: with custom environment variables for the operator init memory resource, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+          value: 100Mi
+    asserts:
+      - failedTemplate:
+          errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
+
+  - it: with custom environment variables for the operator init ephemeral-storage resource, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+          value: 1Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
+
   - it: with defaults, no pod security context set
     asserts:
       - notExists:
