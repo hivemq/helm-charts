@@ -103,6 +103,19 @@ Usage: {{- include "hivemq-platform-operator.validate-run-as-user-security-conte
 {{- end -}}
 
 {{/*
+Validates no Operator init resources are defined directly as environment variables.
+Usage: {{- include "hivemq-platform-operator.validate-operator-init-resources-env-vars" . }}
+*/}}
+{{- define "hivemq-platform-operator.validate-operator-init-resources-env-vars" -}}
+{{- $initImageResourcesEnvVarList := list "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU" "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY" "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE" }}
+{{- range .Values.env }}
+  {{- if has .name $initImageResourcesEnvVarList }}
+    {{- fail (printf "\nEnvironment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.") }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Generates the runAsNonRoot, runAsUser and runAsGroup fields for the PodSecurityContext or the SecurityContext.
 Params:
 - securityContext: Either `.Values.podSecurityContext` or `.Values.containerSecurityContext` values.

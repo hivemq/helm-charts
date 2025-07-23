@@ -48,6 +48,7 @@ spec:
       {{- end }}
       containers:
         - name: hivemq-platform-operator
+          {{- include "hivemq-platform-operator.validate-operator-init-resources-env-vars" . }}
           env:
             - name: JAVA_OPTS
               value: {{.Values.javaOpts | quote }}
