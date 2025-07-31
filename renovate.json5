@@ -1,29 +1,29 @@
 {
-    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
     extends: [
-        "local>hivemq/renovate-config:default.json5",
+        'local>hivemq/renovate-config:default.json5',
     ],
-    baseBranches: [
-        "develop",
-        "renovate-playground",
+    baseBranchPatterns: [
+        'develop',
+        'renovate-playground',
     ],
-    useBaseBranchConfig: "merge",
-    branchPrefix: "renovate/helm-charts/",
+    useBaseBranchConfig: 'merge',
+    branchPrefix: 'renovate/helm-charts/',
     addLabels: [
-        "integrations-team-coordination",
+        'integrations-team-coordination',
     ],
-    "customManagers": [
+    customManagers: [
         {
-            customType: "regex",
-            datasourceTemplate: "docker",
-            description: "Custom Manager for Docker images",
+            customType: 'regex',
+            datasourceTemplate: 'docker',
+            description: 'Custom Manager for Docker images',
             managerFilePatterns: [
-                "(^|/)docker.versions.toml$"
+                '(^|/)docker.versions.toml$',
             ],
             matchStrings: [
-                ".* = \\{ image = \"(?<packageName>.+)\", tag = \"(?<currentValue>.+)\" \\}"
+                '.* = \\{ image = "(?<packageName>.+)", tag = "(?<currentValue>.+)" \\}',
             ],
-            versioningTemplate: "docker",
-        }
+            versioningTemplate: 'docker',
+        },
     ],
 }
