@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.containers.HelmInitContainerIT" tests="2" skipped="1" failures="0" errors="0" timestamp="2025-07-30T14:18:09" hostname="pkrvmjbmru5nbw0" time="103.627">
+<testsuite name="com.hivemq.helmcharts.containers.HelmInitContainerIT" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-07-31T16:04:03" hostname="pkrvmjbmru5nbw0" time="183.53">
   <properties/>
-  <testcase name="whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated()" classname="com.hivemq.helmcharts.containers.HelmInitContainerIT" time="0.0">
-    <skipped/>
-  </testcase>
-  <testcase name="withOverrideInitContainer_hivemqRunningWithVolumeMounts()" classname="com.hivemq.helmcharts.containers.HelmInitContainerIT" time="103.624"/>
+  <testcase name="whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated()" classname="com.hivemq.helmcharts.containers.HelmInitContainerIT" time="89.32"/>
+  <testcase name="withOverrideInitContainer_hivemqRunningWithVolumeMounts()" classname="com.hivemq.helmcharts.containers.HelmInitContainerIT" time="94.209"/>
 </testsuite>
