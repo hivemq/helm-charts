@@ -95,10 +95,14 @@ testing {
             oci.of(this) {
                 imageDependencies {
                     runtime(project).name("hivemq/helm-charts").tag("latest")
+                    runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
+                    runtime("com.hivemq:hivemq-enterprise-k8s:$hivemqVersion").tag("k8s-latest")
+                    runtime("com.hivemq:hivemq-operator:4.7.10").tag("latest")
                     runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
                     runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
-                    runtime("hivemq:hivemq4:$hivemqVersion").tag("latest")
-                    runtime("library:nginx:1.28.0").tag("latest")
+                    runtime("com.hivemq:init-dns-wait:1.0.1").tag("latest")
+                    runtime("library:busybox:latest").name("busybox").tag("latest")
+                    runtime("library:nginx:1.28.0").name("nginx").tag("latest")
                     runtime("selenium:standalone-firefox:4.32.0").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
@@ -141,6 +145,14 @@ oci {
     registries {
         dockerHub {
             optionalCredentials()
+        }
+    }
+    imageMapping {
+        mapModule("com.hivemq", "hivemq-enterprise") {
+            toImage("hivemq/hivemq4").withTag(version)
+        }
+        mapModule("com.hivemq", "hivemq-enterprise-k8s") {
+            toImage("hivemq/hivemq4").withTag(version.prefix("k8s-"))
         }
     }
     imageDefinitions {
