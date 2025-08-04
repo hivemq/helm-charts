@@ -199,7 +199,7 @@ public class NginxUtil {
                 .withVolumes(volumes)
                 .addNewContainer()
                 .withName(NGINX_CONTAINER_NAME)
-                .withImage(HelmChartContainer.resolveLocalImage("library/nginx"))
+                .withImage(HelmChartContainer.resolveLocalImage("nginx"))
                 .addNewPort()
                 .withName("http")
                 .withContainerPort(80)
