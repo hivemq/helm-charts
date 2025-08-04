@@ -1,8 +1,12 @@
 operator:
+  image: host.docker.internal/hivemq/hivemq-operator:latest
   admissionWebhooks:
     enabled: false
 
 hivemq:
+  image: host.docker.internal/hivemq/hivemq4:k8s-latest
+  initDnsWaitImage: host.docker.internal/hivemq/init-dns-wait:latest
+  initBusyboxImage: host.docker.internal/busybox:latest
   nodeCount: 1
   cpu: 512m
   controllerTemplate: cluster-stateful-set.yaml
