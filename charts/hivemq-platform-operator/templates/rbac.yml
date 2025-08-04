@@ -1,8 +1,9 @@
 {{- if .Values.rbac.create -}}
 {{- $roleName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
 {{- $labels := include "hivemq-platform-operator.labels" . }}
-{{- $clusterRules := include "hivemq-platform-operator.rbac.rules.cluster" (dict "platformServiceAccountPermissionsValidate" .Values.hivemqPlatformServiceAccount.permissions.validate) }}
+{{- $clusterRules := include "hivemq-platform-operator.rbac.rules.cluster" (dict "crdApply" .Values.crd.apply "crdWaitReady" .Values.crd.waitReady "platformServiceAccountPermissionsValidate" .Values.hivemqPlatformServiceAccount.permissions.validate) }}
 {{- $namespaceRules := include "hivemq-platform-operator.rbac.rules.namespace" (dict "platformServiceAccountCreate" .Values.hivemqPlatformServiceAccount.create "platformServiceAccountValidate" .Values.hivemqPlatformServiceAccount.validate "platformServiceAccountPermissionsCreate" .Values.hivemqPlatformServiceAccount.permissions.create "platformServiceAccountPermissionsValidate" .Values.hivemqPlatformServiceAccount.permissions.validate) }}
+{{- if (include "hivemq-platform-operator.rbac.hasClusterRules" .) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -15,6 +16,7 @@ rules:
   {{- $namespaceRules }}
   {{- end }}
 ---
+{{- end }}
 {{- if .Values.namespaces }}
 {{- $namespaces := split "," .Values.namespaces }}
 {{- range $namespace := $namespaces }}
