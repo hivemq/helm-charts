@@ -10,20 +10,6 @@ metadata:
     app.kubernetes.io/version: "1.7.2"
 rules:
   - apiGroups:
-      - hivemq.com
-    resources:
-      - hivemq-platforms
-      - hivemq-platforms/status
-      - hivemq-platforms/finalizers
-    verbs:
-      - get
-      - list
-      - watch
-      - patch
-      - update
-      - create
-      - delete
-  - apiGroups:
       - apiextensions.k8s.io
     resources:
       - customresourcedefinitions
@@ -43,6 +29,20 @@ rules:
       - get
       - list
       - watch
+  - apiGroups:
+      - hivemq.com
+    resources:
+      - hivemq-platforms
+      - hivemq-platforms/status
+      - hivemq-platforms/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - update
+      - create
+      - delete
   - apiGroups:
       - ""
     resources:
