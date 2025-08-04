@@ -1,8 +1,8 @@
 {{- if .Values.rbac.create -}}
-{{- $roleBindingName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role-binding" "releaseName" .Release.Name) }}
-{{- $roleName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
 {{- $labels := include "hivemq-platform-operator.labels" . }}
 {{- $serviceAccountName := include "hivemq-platform-operator.serviceAccountName" . }}
+{{- $roleBindingName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role-binding" "releaseName" .Release.Name) }}
+{{- $roleName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -19,6 +19,7 @@ subjects:
     name: {{ $serviceAccountName }}
     namespace: {{ .Release.Namespace }}
 ---
+{{- if (include "hivemq-platform-operator.rbac.hasClusterRules" .) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -34,6 +35,7 @@ subjects:
     name: {{ $serviceAccountName }}
     namespace: {{ .Release.Namespace }}
 ---
+{{- end }}
 {{- if .Values.namespaces }}
 {{- $namespaces := split "," .Values.namespaces }}
 {{- range $namespace := $namespaces }}
