@@ -249,6 +249,73 @@ tests:
             resources: [ "clusterroles", "clusterrolebindings" ]
             verbs: [ "get", "list", "watch" ]
 
+  - it: with CRD apply and waitReady enabled
+    set:
+      crd.apply: true
+      crd.waitReady: true
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "apiextensions.k8s.io" ]
+            resources: [ "customresourcedefinitions" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update" ]
+
+  - it: with CRD apply disabled
+    set:
+      crd.apply: false
+      crd.waitReady: true
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "apiextensions.k8s.io" ]
+            resources: [ "customresourcedefinitions" ]
+            verbs: [ "get", "list", "watch" ]
+
+  - it: with CRD waitReady disabled
+    set:
+      crd.apply: true
+      crd.waitReady: false
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "apiextensions.k8s.io" ]
+            resources: [ "customresourcedefinitions" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update" ]
+
+  - it: with CRD apply and waitReady disabled
+    set:
+      crd.apply: false
+      crd.waitReady: false
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [ "apiextensions.k8s.io" ]
+            resources: [ "customresourcedefinitions" ]
+
+  - it: with all cluster-wide permissions disabled
+    set:
+      namespaces: test
+      crd.apply: false
+      crd.waitReady: false
+      hivemqPlatformServiceAccount.permissions.validate: false
+    documentIndex: 0
+    asserts:
+      - hasDocuments:
+          count: 1
+      - containsDocument:
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: Role
+          name: hivemq-platform-operator-role-operator
+          namespace: test
+
   - it: with default values
     asserts:
       - matchSnapshot:
