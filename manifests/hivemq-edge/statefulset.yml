@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-edge"
     app.kubernetes.io/instance: "my-edge"
-    app.kubernetes.io/version: "2025.12"
+    app.kubernetes.io/version: "2025.13"
 spec:
   selector:
     matchLabels:
@@ -23,7 +23,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: hivemq-edge
-          image: "hivemq/hivemq-edge:2025.12"
+          image: "hivemq/hivemq-edge:2025.13"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
