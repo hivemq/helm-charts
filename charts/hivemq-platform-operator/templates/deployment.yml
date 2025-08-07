@@ -78,6 +78,8 @@ spec:
               value: "{{ .Values.crd.waitTimeout }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
               value: "{{ .Values.image.repository}}/{{ .Values.image.initImageName}}:{{.Values.image.tag}}"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY
+              value: "{{ .Values.image.pullPolicy }}"
             {{- with .Values.hivemqPlatformInitContainer }}
               {{- with .resources }}
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU

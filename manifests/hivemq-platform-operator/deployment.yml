@@ -42,6 +42,8 @@ spec:
               value: "PT10S"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
               value: "docker.io/hivemq/hivemq-platform-operator-init:1.7.2"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY
+              value: "IfNotPresent"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
               value: "250m"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
