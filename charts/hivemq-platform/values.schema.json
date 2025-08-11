@@ -918,6 +918,12 @@
             "maxLength" : 63,
             "type" : "string"
           },
+          "nodePort" : {
+            "description" : "Defines the port that the service exposes to external clients when the service type is set to `NodePort`.",
+            "maximum" : 65535,
+            "minimum" : 0,
+            "type" : "integer"
+          },
           "path" : {
             "description" : "The last part of the path to the WebSocket. For the HiveMQ WebSocket listener, /mqtt routes to ws://broker.hivemq.com:8000/mqtt.",
             "minLength" : 1,

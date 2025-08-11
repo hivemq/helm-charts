@@ -296,6 +296,11 @@ services:
     port: 1883
     # Set if different from ClusterIP. Possible values are `ClusterIP`, `NodePort` and `LoadBalancer`
     # serviceType: NodePort
+    # Defines the port that the service exposes to external clients when the service type is set to `NodePort`.
+    # The port must be within the NodePort range configured for your cluster, and you are responsible for preventing port collisions.
+    # If left unset, Kubernetes automatically assigns a port.
+    # See https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    # nodePort: 30007
     # Annotations to add to the service
     annotations: {}
     # Labels to add to the service

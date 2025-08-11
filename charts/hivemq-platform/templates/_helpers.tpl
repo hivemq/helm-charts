@@ -357,6 +357,7 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-duplicated-listener-names" . -}}
 {{- include "hivemq-platform.validate-service-container-ports" . -}}
 {{- include "hivemq-platform.validate-default-service-ports" . -}}
+{{- include "hivemq-platform.validate-service-node-ports" . -}}
 {{- include "hivemq-platform.validate-metrics-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-proxy-protocol-services" . -}}
 {{- include "hivemq-platform.validate-hivemq-listener-name-services" . -}}
@@ -443,6 +444,20 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
     {{- fail (printf "\nContainer port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates `nodePort` value is only set with serviceType `NodePort`.
+Usage: {{ include "hivemq-platform.validate-service-node-ports" . }}
+*/}}
+{{- define "hivemq-platform.validate-service-node-ports" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+  {{- $serviceType := ternary $service.serviceType $service.type (hasKey $service "serviceType") -}}
+  {{- if and $service.exposed $service.nodePort (not (eq $serviceType "NodePort")) }}
+    {{- fail (printf "\nService type `%s` with container port `%d` cannot use `nodePort` value" $serviceType (int64 $service.containerPort)) }}
   {{- end }}
 {{- end }}
 {{- end -}}
