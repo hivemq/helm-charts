@@ -82,7 +82,7 @@ tests:
     asserts:
       - failedTemplate: {}
 
-  - it: with NodePort
+  - it: with NodePort service type
     set:
       services:
         - type: mqtt
@@ -103,6 +103,77 @@ tests:
                 - name: mqtt-1884
                   targetPort: mqtt-1884
                   port: 1884
+
+  - it: with NodePort service type and nodePort set
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          nodePort: 30007
+          serviceType: NodePort
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-mqtt-1884
+            spec:
+              type: NodePort
+              ports:
+                - name: mqtt-1884
+                  targetPort: mqtt-1884
+                  port: 1884
+                  nodePort: 30007
+
+  - it: with invalid service type and nodePort set, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          serviceType: ClusterIP
+          containerPort: 1884
+          nodePort: 30007
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `ClusterIP` with container port `1884` cannot use `nodePort` value
+
+  - it: with no service type and nodePort set, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          nodePort: 30007
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` cannot use `nodePort` value
+
+  - it: with invalid service type and nodePort set but service not exposed, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          serviceType: ClusterIP
+          containerPort: 1884
+          nodePort: 30007
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with invalid nodePort set, schema validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          serviceType: NodePort
+          containerPort: 1884
+          nodePort: 65536
+    asserts:
+      - failedTemplate: {}
 
   - it: with additional annotations
     set:

@@ -291,10 +291,13 @@ spec:
         ports:
           - name: {{ include "hivemq-platform.service-port-name" . }}
             targetPort: {{ include "hivemq-platform.container-port-name" . }}
-          {{- if $service.port}}
+          {{- if $service.port }}
             port: {{ $service.port }}
           {{- else }}
             port: {{ $service.containerPort }}
+          {{- end }}
+          {{- if and ($service.nodePort) (eq $service.serviceType "NodePort") }}
+            nodePort: {{ $service.nodePort }}
           {{- end }}
     {{- end }}
     {{- end }}
