@@ -29,12 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           path: helm-charts
 
       - name: Checkout HiveMQ Platform Operator
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
@@ -98,12 +98,12 @@ jobs:
         ]
     steps:
       - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           path: helm-charts
 
       - name: Checkout HiveMQ Platform Operator
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           repository: hivemq/hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
@@ -192,7 +192,7 @@ jobs:
 
       - name: Publish test report
         if: ${{ !cancelled() }}
-        uses: dorny/test-reporter@890a17cecf52a379fc869ab770a71657660be727 # v2
+        uses: dorny/test-reporter@dc3a92680fcc15842eef52e8c4606ea7ce6bd3f3 # v2
         with:
           name: Integration tests report
           path: '**/build/test-results/integrationTest/TEST-*.xml'
