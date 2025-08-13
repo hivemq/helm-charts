@@ -21,6 +21,10 @@ resources:
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
 
+# Configures the maximum number of HiveMQ Platforms that can do a rolling restart at the same time.
+# If set to `0`, no limit is applied.
+concurrentRollingRestartLimit: 0
+
 # Configures the Operator ports for http/s. These ports provide access to metrics and other services.
 http:
   port: 8080
