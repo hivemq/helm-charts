@@ -42,6 +42,68 @@ tests:
             app.kubernetes.io/instance: operator
             app.kubernetes.io/name: hivemq-platform-operator
 
+  - it: with default values, default EnvVars created
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env
+          value:
+            - name: JAVA_OPTS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: HIVEMQ_PLATFORM_OPERATOR_RELEASE_NAME
+              value: "operator"
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_APPLY
+              value: "true"
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY
+              value: "true"
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
+              value: "PT10S"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+              value: "docker.io/hivemq/hivemq-platform-operator-init:1.7.2"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY
+              value: "IfNotPresent"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
+              value: "250m"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
+              value: "100Mi"
+            - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
+              value: "1Gi"
+            - name: HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET
+              value: ""
+            - name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL
+              value: "INFO"
+            - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
+              value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
+              value: "0"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
+              value: "true"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
+              value: "true"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME
+              value: ""
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_CREATE
+              value: "true"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
+              value: "true"
+            - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
+              value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
+              value: "INFO"
+            - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
+              value: "WARN"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
+              value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
+              value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_PORT
+              value: "8080"
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_PORT
+              value: "8443"
+
   - it: with default values, no template annotations created
     asserts:
       - notExists:
@@ -114,6 +176,32 @@ tests:
           path: spec.template.spec.containers[0].readinessProbe
       - exists:
           path: spec.template.spec.containers[0].resources
+
+  - it: with custom concurrentRollingRestartLimit, operator container EnvVar created
+    set:
+      concurrentRollingRestartLimit: 5
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
+            value: "5"
+
+  - it: with empty concurrentRollingRestartLimit, operator container EnvVar created empty
+    set:
+      concurrentRollingRestartLimit:
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
+            value: ""
+
+  - it: with invalid concurrentRollingRestartLimit, schema validation fails
+    set:
+      concurrentRollingRestartLimit: -1
+    asserts:
+      - failedTemplate: {}
 
   - it: with environment variables override for init container
     set:
