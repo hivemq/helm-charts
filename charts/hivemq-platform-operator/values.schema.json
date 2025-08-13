@@ -166,6 +166,7 @@
       "type" : "string"
     },
     "logConfiguration" : {
+      "description" : "Logs the configuration values at operator startup. Sensitive values are redacted.",
       "type" : "boolean"
     },
     "logLevel" : {
