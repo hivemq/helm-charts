@@ -140,6 +140,15 @@ spec:
                   name: {{ .Values.tls.secretName }}
                   key: keystore.password
               {{- end }}
+            - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PRIVATE_KEY_PASSWORD
+              {{- if .Values.tls.privateKeystorePassword }}
+              value: "{{ .Values.tls.privateKeystorePassword }}"
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tls.secretName }}
+                  key: private.keystore.password
+              {{- end }}
             - name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
               {{- /* `nil` check needed for backward compatibility */ -}}
               {{- if and (ne .Values.tls.truststorePassword "nil") (.Values.tls.truststorePassword) }}
