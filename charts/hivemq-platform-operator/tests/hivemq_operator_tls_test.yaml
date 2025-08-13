@@ -28,6 +28,10 @@ tests:
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PRIVATE_KEY_PASSWORD
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
       - notExists:
           path: spec.template.spec.containers[0].volumeMounts
@@ -39,6 +43,7 @@ tests:
       tls:
         secretName: nil
         keystorePassword: nil
+        privateKeystorePassword:
         truststorePassword: nil
     asserts:
       - exists:
@@ -61,6 +66,10 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PRIVATE_KEY_PASSWORD
       - notContains:
           path: spec.template.spec.containers[0].env
           content:
@@ -109,6 +118,14 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PRIVATE_KEY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: my-tls-secret
+                key: private.keystore.password
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -135,6 +152,7 @@ tests:
     set:
       tls.secretName: my-tls-secret
       tls.keystorePassword: my-keystore-password
+      tls.privateKeystorePassword: my-private-keystore-password
       tls.truststorePassword: my-truststore-password
     asserts:
       - equal:
@@ -166,6 +184,11 @@ tests:
           content:
             name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD
             value: "my-keystore-password"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PRIVATE_KEY_PASSWORD
+            value: "my-private-keystore-password"
       - contains:
           path: spec.template.spec.containers[0].env
           content:

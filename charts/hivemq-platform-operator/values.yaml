@@ -128,13 +128,18 @@ podScheduling:
   #    operator: "Exists"
   #    effect: "NoSchedule"
 
-# TLS configuration for the Operator to access the Kubernetes API.
+# Configures the TLS options for the operator to access a secured Kubernetes API server.
 tls:
-  # Name of the Secret that contains keystore and truststore.
+  # The name of the Kubernetes Secret that contains the keystore and truststore files for TLS.
   secretName: ""
-  # The keystore password. Can also be set as "keystore.password" in the Secret.
+  # The password for the keystore.
+  # If the `keystorePassword` value is not set, the `keystore.password` value in the Kubernetes Secret is used.
   keystorePassword: ""
-  # The truststore password. Can also be set as "truststore.password" in the Secret.
+  # The private password for the keystore.
+  # If the `privateKeystorePassword` value is not set, the `private.keystore.password` value in the Kubernetes Secret is used.
+  privateKeystorePassword: ""
+  # The password for the truststore.
+  # If the `truststorePassword` value is not set, the `truststore.password` value in the Kubernetes Secret is used.
   truststorePassword: ""
 
 # Configures pod-level security for the HiveMQ Platform Operator pod.
