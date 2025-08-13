@@ -355,14 +355,22 @@
       "type" : "string"
     },
     "tls" : {
+      "description" : "Configures the TLS options for the operator to access a secured Kubernetes API server.",
       "properties" : {
         "keystorePassword" : {
+          "description" : "The password for the keystore.",
+          "type" : "string"
+        },
+        "privateKeystorePassword" : {
+          "description" : "The private password for the keystore.",
           "type" : "string"
         },
         "secretName" : {
+          "description" : "The name of the Kubernetes Secret that contains the keystore and truststore files for TLS.",
           "type" : "string"
         },
         "truststorePassword" : {
+          "description" : "The password for the truststore.",
           "type" : "string"
         }
       },
