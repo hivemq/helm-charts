@@ -203,6 +203,22 @@ tests:
     asserts:
       - failedTemplate: {}
 
+  - it: with logConfiguration enabled, operator container EnvVar created
+    set:
+      logConfiguration: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
+            value: "true"
+
+  - it: with invalid logConfiguration, schema validation fails
+    set:
+      logConfiguration: "invalid-value"
+    asserts:
+      - failedTemplate: {}
+
   - it: with environment variables override for init container
     set:
       image.repository: test-repo
