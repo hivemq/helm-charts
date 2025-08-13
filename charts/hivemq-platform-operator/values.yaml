@@ -21,6 +21,9 @@ resources:
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
 
+# Logs the configuration values at operator startup. Sensitive values are redacted.
+logConfiguration: false
+
 # Configures the maximum number of HiveMQ Platforms that can do a rolling restart at the same time.
 # If set to `0`, no limit is applied.
 concurrentRollingRestartLimit: 0
