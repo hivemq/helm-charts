@@ -379,32 +379,47 @@ tests:
                 key: myconfigmapkey
                 optional: true
 
-  - it: with custom environment variables for the operator init cpu resource, validation fails
+  - it: with duplicated custom environment variables for the operator init cpu resource, validation fails
     set:
       env:
         - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
           value: 250m
     asserts:
       - failedTemplate:
-          errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
 
-  - it: with custom environment variables for the operator init memory resource, validation fails
+  - it: with duplicated custom environment variables for the operator init memory resource, validation fails
     set:
       env:
         - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY
           value: 100Mi
     asserts:
       - failedTemplate:
-          errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
+          errorPattern:  Default environment variable `HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
 
-  - it: with custom environment variables for the operator init ephemeral-storage resource, validation fails
+  - it: with duplicated custom environment variables for the operator init ephemeral-storage resource, validation fails
     set:
       env:
         - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE
           value: 1Gi
     asserts:
       - failedTemplate:
-          errorPattern: Environment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with duplicated custom environment variables, validation fails
+    set:
+      env:
+        - name: foo-bar
+          value: abc
+        - name: foo-bar
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mysecretkey
+              optional: false
+    asserts:
+      - failedTemplate:
+          errorPattern: Duplicated environment variable `foo-bar` found in the `.Values.env` value.
 
   - it: with default values, default operator init container resources EnvVars set
     asserts:
