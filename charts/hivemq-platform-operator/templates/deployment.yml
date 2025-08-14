@@ -95,7 +95,7 @@ spec:
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL
               value: "{{ .Values.logLevel }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
-              value: "{{ .Values.logConfiguration }}"
+              value: "{{ .Values.logConfiguration | default "false" }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT
               value: "{{ .Values.hivemqPlatformHealthDetailsFormat }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
@@ -113,9 +113,9 @@ spec:
             - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
               value: "{{ .Values.hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
-              value: "{{ .Values.sdkLogLevel }}"
+              value: "{{ .Values.sdkLogLevel | default "INFO" }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
-              value: "{{ .Values.networkLogLevel }}"
+              value: "{{ .Values.networkLogLevel | default "WARN" }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
               value: "{{ .Values.https.skipCertificateValidation | default false }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
