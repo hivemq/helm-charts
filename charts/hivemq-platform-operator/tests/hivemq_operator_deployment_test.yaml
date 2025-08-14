@@ -77,6 +77,8 @@ tests:
               value: "INFO"
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
               value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT
+              value: "plain"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
               value: "0"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
@@ -200,6 +202,32 @@ tests:
   - it: with invalid concurrentRollingRestartLimit, schema validation fails
     set:
       concurrentRollingRestartLimit: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom hivemqPlatformHealthDetailsFormat, operator container EnvVar created
+    set:
+      hivemqPlatformHealthDetailsFormat: json
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT
+            value: "json"
+
+  - it: with empty hivemqPlatformHealthDetailsFormat, operator container EnvVar created empty
+    set:
+      hivemqPlatformHealthDetailsFormat:
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT
+            value: ""
+
+  - it: with invalid hivemqPlatformHealthDetailsFormat, schema validation fails
+    set:
+      hivemqPlatformHealthDetailsFormat: invalid
     asserts:
       - failedTemplate: {}
 

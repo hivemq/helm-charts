@@ -75,6 +75,10 @@ serviceAccount:
   # Defines specific annotations to be applied to the ServiceAccount.
   annotations: {}
 
+# Configures the format of the HiveMQ Platform health details in the custom resource and Kubernetes events.
+# Valid values are plain, json and yaml.
+hivemqPlatformHealthDetailsFormat: "plain"
+
 # Configures the ServiceAccount and RBAC permissions (Role, RoleBinding) the Operator creates for the HiveMQ Platform pods.
 hivemqPlatformServiceAccount:
   # Specifies whether a ServiceAccount should be created for all HiveMQ Platforms.
