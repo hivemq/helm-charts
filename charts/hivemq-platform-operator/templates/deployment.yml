@@ -96,6 +96,8 @@ spec:
               value: "{{ .Values.logLevel }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
               value: "{{ .Values.logConfiguration }}"
+            - name: HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT
+              value: "{{ .Values.hivemqPlatformHealthDetailsFormat }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
               value: "{{ .Values.concurrentRollingRestartLimit }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
