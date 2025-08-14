@@ -51,18 +51,18 @@ spec:
           {{- include "hivemq-platform-operator.validate-operator-init-resources-env-vars" . }}
           env:
             - name: JAVA_OPTS
-              value: {{.Values.javaOpts | quote }}
+              value: "{{ .Values.javaOpts }}"
             {{- if .Values.namespaces }}
             - name: HIVEMQ_PLATFORM_OPERATOR_NAMESPACES
-              value: {{ .Values.namespaces }}
+              value: "{{ .Values.namespaces }}"
             {{- end }}
             {{- /* `nil` check needed for backward compatibility */ -}}
             {{- if and (ne .Values.selector "nil") (.Values.selector) }}
             - name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
-              value: operator={{ .Values.selector }}
+              value: "operator={{ .Values.selector }}"
             {{- else if .Values.selectors }}
             - name: HIVEMQ_PLATFORM_OPERATOR_SELECTOR
-              value: {{ .Values.selectors }}
+              value: "{{ .Values.selectors }}"
             {{- end }}
             - name: KUBERNETES_NAMESPACE
               valueFrom:
