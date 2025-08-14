@@ -22,17 +22,6 @@ resources:
 # Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
 
-# Configures the Java Operator SDK log level for the HiveMQ Platform Operator.
-# Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
-networkLogLevel: WARN
-
-# Configures the Java Operator SDK log level for the HiveMQ Platform Operator.
-# Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
-sdkLogLevel: INFO
-
-# Configures whether to log the HiveMQ Platform Operator configuration at startup. Sensitive values are redacted.
-logConfiguration: false
-
 # One HiveMQ Platform Operator can manage many HiveMQ Platforms.
 # This value configures the maximum number of HiveMQ Platforms that can perform a rolling restart at the same time.
 # If set to `0`, no limit is applied.
