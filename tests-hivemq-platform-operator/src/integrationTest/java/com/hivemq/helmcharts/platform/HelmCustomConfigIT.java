@@ -95,11 +95,10 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withCustomEnvVars_hivemqRunning() throws Exception {
-        K8sUtil.createConfigMap(client, operatorNamespace, "operator-custom-env-var-config-map.yml");
         final var operatorStartedFuture = waitForOperatorLog(
                 ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]".formatted(
                         platformNamespace));
-        installPlatformOperatorChartAndWaitToBeRunning("/files/custom-operator-env-vars-values.yaml");
+        installPlatformOperatorChartAndWaitToBeRunning("--set", "namespaces=%s".formatted(platformNamespace));
         await().atMost(ONE_MINUTE).until(operatorStartedFuture::isDone);
 
         installPlatformChartAndWaitToBeRunning("/files/custom-platform-env-vars-values.yaml");
@@ -108,8 +107,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
         final var operatorDeployment = K8sUtil.getDeployment(client, operatorNamespace, getOperatorName());
         assertThat(operatorDeployment.getSpec().getTemplate().getSpec().getContainers().getFirst().getEnv()) //
                 .anyMatch(envVar -> "HIVEMQ_PLATFORM_OPERATOR_NAMESPACES".equals(envVar.getName()) &&
-                        "operator-config-map".equals(envVar.getValueFrom().getConfigMapKeyRef().getName()) &&
-                        "namespace".equals(envVar.getValueFrom().getConfigMapKeyRef().getKey()));
+                        platformNamespace.equals(envVar.getValue()));
 
         // assert the custom platform configuration
         final var statefulSet = K8sUtil.getStatefulSet(client, platformNamespace, PLATFORM_RELEASE_NAME);

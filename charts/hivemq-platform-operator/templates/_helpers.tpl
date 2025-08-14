@@ -103,14 +103,77 @@ Usage: {{- include "hivemq-platform-operator.validate-run-as-user-security-conte
 {{- end -}}
 
 {{/*
-Validates no Operator init resources are defined directly as environment variables.
-Usage: {{- include "hivemq-platform-operator.validate-operator-init-resources-env-vars" . }}
+Validates:
+- No duplicated EnvVars defined in the `.Values.env` value.
+- No default Operator EnvVar is set through `.Values.env`. Otherwise it clashes with the defaults already set.
+Usage: {{ include "hivemq-platform-operator.validate-env-vars" . }}
 */}}
-{{- define "hivemq-platform-operator.validate-operator-init-resources-env-vars" -}}
-{{- $initImageResourcesEnvVarList := list "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU" "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY" "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE" }}
+{{- define "hivemq-platform-operator.validate-env-vars" -}}
+{{- include "hivemq-platform-operator.validate-duplicated-env-vars" . -}}
+{{- include "hivemq-platform-operator.validate-default-operator-env-vars" . -}}
+{{- end -}}
+
+{{/*
+Validates no default Operator EnvVar is set through `.Values.env`. Otherwise it clashes with the defaults already set.
+Usage: {{- include "hivemq-platform-operator.validate-default-operator-env-vars" . }}
+*/}}
+{{- define "hivemq-platform-operator.validate-default-operator-env-vars" -}}
+{{- $defaultEnvs := list
+  "JAVA_OPTS"
+  "HIVEMQ_PLATFORM_OPERATOR_NAMESPACES"
+  "HIVEMQ_PLATFORM_OPERATOR_SELECTOR"
+  "KUBERNETES_NAMESPACE"
+  "HIVEMQ_PLATFORM_OPERATOR_RELEASE_NAME"
+  "HIVEMQ_PLATFORM_OPERATOR_CRD_APPLY"
+  "HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY"
+  "HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT"
+  "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE"
+  "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY"
+  "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU"
+  "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_MEMORY"
+  "HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE"
+  "HIVEMQ_PLATFORM_OPERATOR_IMAGE_PULL_SECRET"
+  "HIVEMQ_PLATFORM_OPERATOR_LOG_LEVEL"
+  "HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION"
+  "HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT"
+  "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT"
+  "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE"
+  "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE"
+  "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME"
+  "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_CREATE"
+  "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE"
+  "HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE"
+  "HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL"
+  "HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL"
+  "HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION"
+  "HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_PORT"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_PORT"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE_TYPE"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_FILE"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_FILE"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PASSWORD"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_KEY_STORE_PRIVATE_KEY_PASSWORD"
+  "HIVEMQ_PLATFORM_OPERATOR_HTTP_SSL_CERTIFICATE_TRUST_STORE_PASSWORD"
+}}
 {{- range .Values.env }}
-  {{- if has .name $initImageResourcesEnvVarList }}
-    {{- fail (printf "\nEnvironment variables for the HiveMQ Platform Operator init resources are not allowed to be set. Please use `hivemqPlatformInitContainer` values instead to define the HiveMQ Platform Operator Init resources.") }}
+  {{- if has .name $defaultEnvs }}
+    {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead." .name) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates there is no duplicated EnvVars defined in the `.Values.env` value.
+Usage: {{- include "hivemq-platform-operator.validate-duplicated-env-vars" . }}
+*/}}
+{{- define "hivemq-platform-operator.validate-duplicated-env-vars" -}}
+{{- $envList := list }}
+{{- range .Values.env }}
+  {{- if has .name $envList }}
+    {{- fail (printf "\nDuplicated environment variable `%s` found in the `.Values.env` value." .name) }}
+  {{- else }}
+    {{- $envList = .name | append $envList}}
   {{- end }}
 {{- end }}
 {{- end -}}

@@ -1,6 +1,0 @@
-env:
-  - name: HIVEMQ_PLATFORM_OPERATOR_NAMESPACES
-    valueFrom:
-      configMapKeyRef:
-        name: operator-config-map
-        key: namespace
