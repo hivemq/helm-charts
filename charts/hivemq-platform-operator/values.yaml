@@ -18,8 +18,17 @@ resources:
   # Set to specify the ephemeral-storage needed for managing local ephemeral storage in the Operator pod.
   # ephemeralStorage: 1Gi
 
-# Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
+# Configures the log level for the HiveMQ Platform Operator.
+# Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
+
+# Configures the Java Operator SDK log level for the HiveMQ Platform Operator.
+# Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
+networkLogLevel: WARN
+
+# Configures the Java Operator SDK log level for the HiveMQ Platform Operator.
+# Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
+sdkLogLevel: INFO
 
 # Logs the configuration values at operator startup. Sensitive values are redacted.
 logConfiguration: false
