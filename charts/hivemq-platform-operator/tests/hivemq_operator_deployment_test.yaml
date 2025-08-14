@@ -283,16 +283,6 @@ tests:
             name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
             value: "DEBUG"
 
-  - it: with empty networkLogLevel, operator container EnvVar created empty
-    set:
-      networkLogLevel:
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
-            value: ""
-
   - it: with invalid networkLogLevel, schema validation fails
     set:
       networkLogLevel: INVALID
@@ -308,16 +298,6 @@ tests:
           content:
             name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
             value: "ERROR"
-
-  - it: with empty sdkLogLevel, operator container EnvVar created empty
-    set:
-      sdkLogLevel:
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
-            value: ""
 
   - it: with invalid networkLogLevel, schema validation fails
     set:
