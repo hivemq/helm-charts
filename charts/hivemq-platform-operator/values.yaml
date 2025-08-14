@@ -30,10 +30,11 @@ networkLogLevel: WARN
 # Possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 sdkLogLevel: INFO
 
-# Logs the configuration values at operator startup. Sensitive values are redacted.
+# Configures whether to log the HiveMQ Platform Operator configuration at startup. Sensitive values are redacted.
 logConfiguration: false
 
-# Configures the maximum number of HiveMQ Platforms that can do a rolling restart at the same time.
+# One HiveMQ Platform Operator can manage many HiveMQ Platforms.
+# This value configures the maximum number of HiveMQ Platforms that can perform a rolling restart at the same time.
 # If set to `0`, no limit is applied.
 concurrentRollingRestartLimit: 0
 
@@ -84,7 +85,7 @@ serviceAccount:
   # Defines specific annotations to be applied to the ServiceAccount.
   annotations: {}
 
-# Configures the format of the HiveMQ Platform health details in the custom resource and Kubernetes events.
+# Configures the format for the HiveMQ Platform health details in the custom resource and Kubernetes events.
 # Valid values are plain, json and yaml.
 hivemqPlatformHealthDetailsFormat: "plain"
 
