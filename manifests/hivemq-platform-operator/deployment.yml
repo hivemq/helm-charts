@@ -56,6 +56,8 @@ spec:
               value: "INFO"
             - name: HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION
               value: "false"
+            - name: HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT
+              value: "plain"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
               value: "0"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
