@@ -248,6 +248,7 @@
       "type" : "string"
     },
     "networkLogLevel" : {
+      "description" : "Configures the network log level for the HiveMQ Platform Operator.",
       "enum" : [
         "DEBUG",
         "ERROR",
@@ -353,7 +354,8 @@
       },
       "type" : "object"
     },
-    "skdLogLevel" : {
+    "sdkLogLevel" : {
+      "description" : "Configures the Java Operator SDK log level for the HiveMQ Platform Operator.",
       "enum" : [
         "DEBUG",
         "ERROR",
