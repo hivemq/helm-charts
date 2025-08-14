@@ -113,9 +113,9 @@ spec:
             - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
               value: "{{ .Values.hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
-              value: "{{ .Values.sdkLogLevel | default "INFO" }}"
+              value: "{{ .Values.sdkLogLevel }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
-              value: "{{ .Values.networkLogLevel | default "WARN" }}"
+              value: "{{ .Values.networkLogLevel }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
               value: "{{ .Values.https.skipCertificateValidation | default false }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_HOSTNAME_VERIFICATION
