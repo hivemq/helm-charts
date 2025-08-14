@@ -45,31 +45,14 @@
       },
       "type" : "array"
     },
-    "http" : {
-      "properties" : {
-        "port" : {
-          "minimum" : 1000,
-          "type" : "integer"
-        }
-      },
-      "type" : "object"
-    },
-    "https" : {
-      "properties" : {
-        "port" : {
-          "minimum" : 1000,
-          "type" : "integer"
-        },
-        "skipCertificateValidation" : {
-          "description" : "Configures if certificate validation should be skipped for all managed custom resources.",
-          "type" : "boolean"
-        },
-        "skipHostnameVerification" : {
-          "description" : "Configures if hostname verification should be skipped for all managed custom resources.",
-          "type" : "boolean"
-        }
-      },
-      "type" : "object"
+    "hivemqPlatformHealthDetailsFormat" : {
+      "description" : "Configures the format of the HiveMQ Platform health details in the custom resource and Kubernetes events.",
+      "enum" : [
+        "plain",
+        "json",
+        "yaml"
+      ],
+      "type" : "string"
     },
     "hivemqPlatformInitContainer" : {
       "description" : "Configuration options for the HiveMQ Platform Operator Init container.",
@@ -123,6 +106,32 @@
     "hivemqPlatformStatefulSet" : {
       "properties" : {
         "rollingRestartOnTemplateMetadataChange" : {
+          "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "http" : {
+      "properties" : {
+        "port" : {
+          "minimum" : 1000,
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
+    },
+    "https" : {
+      "properties" : {
+        "port" : {
+          "minimum" : 1000,
+          "type" : "integer"
+        },
+        "skipCertificateValidation" : {
+          "description" : "Configures if certificate validation should be skipped for all managed custom resources.",
+          "type" : "boolean"
+        },
+        "skipHostnameVerification" : {
+          "description" : "Configures if hostname verification should be skipped for all managed custom resources.",
           "type" : "boolean"
         }
       },
