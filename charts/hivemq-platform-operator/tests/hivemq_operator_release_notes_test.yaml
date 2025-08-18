@@ -78,3 +78,60 @@ tests:
             *** Warning ***
             `resources.overrideLimits` is not recommended for production use cases and may lead to unpredictable memory and cpu allocation for pods.
             -----
+
+  - it: with platform statefulset rolling-restart-on-template-metadata-change, shows warning
+    set:
+      hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange: true
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            `hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange` and its counterpart environment variable `HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE` are no longer supported by the Operator.
+            -----
+
+  - it: with platform statefulset only, no warning is shown
+    set:
+      hivemqPlatformStatefulSet: "foobar"
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            -----
+
+  - it: with platform statefulset and nested value, no warning is shown
+    set:
+      hivemqPlatformStatefulSet:
+        foobar: "baz"
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            -----
+
+  - it: with platform statefulset rolling-restart-on-template-metadata-change EnvVar, shows warning
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
+          value: false
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            `hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange` and its counterpart environment variable `HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE` are no longer supported by the Operator.
+            -----
