@@ -91,8 +91,6 @@ tests:
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
               value: "true"
-            - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
-              value: "false"
             - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
               value: "INFO"
             - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
@@ -1118,34 +1116,6 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
-            value: "false"
-
-  - it: with platform statefulset rolling-restart-on-template-metadata-change enabled
-    set:
-      hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange: true
-    asserts:
-      - exists:
-          path: spec.template.spec.containers[0]
-      - exists:
-          path: spec.template.spec.containers[0].env
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
-            value: "true"
-
-  - it: with platform statefulset rolling-restart-on-template-metadata-change disabled
-    set:
-      hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange: false
-    asserts:
-      - exists:
-          path: spec.template.spec.containers[0]
-      - exists:
-          path: spec.template.spec.containers[0].env
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
             value: "false"
 
   - it: with default resource requests

@@ -108,12 +108,6 @@ hivemqPlatformInitContainer:
     # This ensures the expected unlimited ephemeral storage for the HiveMQ Platform pod.
     ephemeralStorage: 1Gi
 
-# Configures how the Operator reconciles the HiveMQ Platform StatefulSet.
-hivemqPlatformStatefulSet:
-  # Specifies whether a change of the StatefulSet template metadata should trigger a rolling restart.
-  # If this is disabled the rollout of updated annotations and labels to the HiveMQ Platform pods will be delayed until the next rolling restart occurs.
-  rollingRestartOnTemplateMetadataChange: false
-
 # Configures how the Operator pod should be scheduled on the Kubernetes cluster nodes.
 podScheduling:
   # Configures the affinity for the Operator pod.
