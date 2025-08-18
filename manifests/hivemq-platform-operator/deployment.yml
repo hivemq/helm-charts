@@ -70,8 +70,6 @@ spec:
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_PERMISSIONS_VALIDATE
               value: "true"
-            - name: HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE
-              value: "false"
             - name: HIVEMQ_PLATFORM_OPERATOR_SDK_LOG_LEVEL
               value: "INFO"
             - name: HIVEMQ_PLATFORM_OPERATOR_NETWORK_LOG_LEVEL
