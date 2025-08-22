@@ -1,0 +1,96 @@
+name: Publish HiveMQ Operator Helm chart to Harbor
+on:
+  push:
+    branches:
+      - "master"
+      - "develop"
+    paths:
+      - charts/hivemq-platform-operator
+  workflow_run:
+    workflows:
+      - "Verify"
+    types:
+      - "completed"
+    branches:
+      - "master"
+      - "develop"
+  workflow_dispatch:
+jobs:
+  build:
+    if: >
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: Set up Helm
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
+
+      - name: Login to Harbor
+        run: |
+          helm registry login https://${{ secrets.HARBOR_REGISTRY_URL }} --username ${{ secrets.HARBOR_CI_ROBOT_API_USER }} --password ${{ secrets.HARBOR_CI_ROBOT_API_TOKEN }}
+
+      - name: Setup dev Harbor environment
+        if: ${{ github.ref_name == 'develop' }}
+        run: |
+          echo "HARBOR_DEV_URL=${{ github.ref_name }}/dev" >> $GITHUB_ENV
+          echo "HARBOR_PROJECT=dev" >> $GITHUB_ENV
+
+      - name: Publish HiveMQ Operator Helm chart
+        id: push-chart
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          chart_name="hivemq-platform-operator"
+          chart_dir="charts/$chart_name"
+          chart_version=$(grep '^version:' "$chart_dir/Chart.yaml" | awk '{print $2}')
+          harbor_url="${HARBOR_DEV_URL:-${{ secrets.HARBOR_REGISTRY_URL }}}"
+
+          publish_version="$chart_version"
+          # check if snapshot suffix is needed for the Chart version based on the branch
+          if [[ "$BRANCH" == "develop" && "$chart_version" != *"-snapshot" ]]; then
+            # increment patch version and add -snapshot suffix: 0.2.32 -> 0.2.33-snapshot
+            IFS='.' read -r major minor patch <<< "$chart_version"
+            patch=$((patch + 1))
+            publish_version="${major}.${minor}.${patch}-snapshot"
+            sed -i "s/^version: .*/version: $publish_version/" "$chart_dir/Chart.yaml"
+            echo "Updated $chart_dir/Chart.yaml to snapshot version $publish_version"
+          fi
+
+          echo "--------------------------------------------------"
+          echo "🔎 Checking chart: $chart_dir version: $chart_version"
+
+          chart_url="oci://$harbor_url/hivemq/helm-charts/$chart_name"
+
+          if [[ "$publish_version" != *"-snapshot" ]] && helm show chart "$chart_url" --version "$publish_version" > /dev/null 2>&1; then
+            echo "⏭️ Skipping: Chart version $chart_version already exists."
+            echo "sign_chart=false" >> $GITHUB_ENV
+          else
+            helm package "$chart_dir" --destination .
+            chart_archive="${chart_name}-${publish_version}.tgz"
+            helm push "$chart_archive" "oci://$harbor_url/hivemq/helm-charts"
+            echo "🎉 Successfully published $chart_archive"
+            rm "$chart_archive"
+            echo "sign_chart=true" >> $GITHUB_ENV
+            echo "sign_chart_version=$publish_version" >> $GITHUB_ENV
+          fi
+
+      - name: Install Sigstore
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159
+
+      - name: Sign HiveMQ Platform Operator Helm chart
+        if: ${{ env.sign_chart == 'true' }}
+        env:
+          CHART_NAME: ${{ github.ref_name == 'develop' && 'hivemq/helm-charts/hivemq-platform-operator' || 'helm-charts/hivemq-platform-operator' }}
+          CHART_VERSION: ${{ env.sign_chart_version }}
+          HARBOR_REGISTRY_URL: ${{ secrets.HARBOR_REGISTRY_URL }}
+          HARBOR_API_USER: ${{ secrets.HARBOR_CI_ROBOT_API_USER }}
+          HARBOR_API_TOKEN: ${{ secrets.HARBOR_CI_ROBOT_API_TOKEN }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: bash ./scripts/sign-harbor-chart.sh "$CHART_NAME" "$CHART_VERSION"
+
