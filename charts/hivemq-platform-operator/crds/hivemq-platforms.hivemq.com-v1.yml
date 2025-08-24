@@ -3605,6 +3605,9 @@ spec:
               observedGeneration:
                 description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0]"
                 type: "integer"
+              platformReplicas:
+                description: "Current desired number of HiveMQ Platform replicas"
+                type: "integer"
               reconciliationRequests:
                 description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0] Requests\
                   \ for state changes in the next reconciliation"
