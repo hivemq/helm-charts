@@ -56,11 +56,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         final var extensionStoppedBrokerFuture = brokerExtensionStoppedFuture();
         final var extensionStoppedInitAppFuture = initAppExtensionStoppedFuture();
         final var extensionUpdateDoneInitAppFuture = initAppExtensionUpdateDoneFuture();
-        helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
-                "-f",
-                "/files/disable-bridge-values.yaml",
-                "--namespace",
-                platformNamespace);
+        upgradePlatformChart(PLATFORM_RELEASE_NAME, "-f", "/files/disable-bridge-values.yaml");
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 1,
@@ -110,11 +106,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client, platformNamespace, "updated-test-bridge-configuration", bridgeConfiguration);
 
         // upgrade chart and wait to be ready
-        helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
-                "-f",
-                "/files/bridge-updated-values.yaml",
-                "--namespace",
-                platformNamespace);
+        upgradePlatformChart(PLATFORM_RELEASE_NAME, "-f", "/files/bridge-updated-values.yaml");
         K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().until(extensionEnabledInitAppFuture2::isDone);
         await().until(extensionStartedBrokerFuture2::isDone);

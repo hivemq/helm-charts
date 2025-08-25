@@ -143,6 +143,14 @@ public abstract class AbstractHelmChartIT {
                         .toArray(String[]::new));
     }
 
+    @SuppressWarnings("SameParameterValue")
+    protected void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
+            throws Exception {
+        helmChartContainer.upgradePlatformChart(releaseName,
+                Stream.concat(Arrays.stream(commands), Stream.of("--namespace", platformNamespace))
+                        .toArray(String[]::new));
+    }
+
     /**
      * Override with {@code return false;} to prevent the creation of the Platform Operator namespace in the
      * {@code @BeforeEach} method.

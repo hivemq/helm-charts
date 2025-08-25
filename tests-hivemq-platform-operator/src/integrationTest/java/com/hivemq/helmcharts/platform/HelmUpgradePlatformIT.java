@@ -22,11 +22,7 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
         installPlatformChartAndWaitToBeRunning("--set", "nodes.replicaCount=1");
         LOG.debug("Platform ready");
 
-        helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
-                "--set",
-                "nodes.replicaCount=2",
-                "--namespace",
-                platformNamespace);
+        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.replicaCount=2");
 
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SCALING"),
