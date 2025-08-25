@@ -64,7 +64,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
         });
 
         LOG.info("Trigger update of log level");
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.logLevel=WARN");
+        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.replicaCount=1", "--set", "nodes.logLevel=WARN");
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SET_LOG_LEVEL"),
                 1,
