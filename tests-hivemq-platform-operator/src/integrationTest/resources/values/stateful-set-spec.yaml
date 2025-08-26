@@ -4,7 +4,7 @@ spec:
     spec:
       containers:
         - name: hivemq
-          image: docker.io/hivemq/hivemq4:4.42.0
+          image: docker.io/hivemq/hivemq4:4.43.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: mqtt-1883
