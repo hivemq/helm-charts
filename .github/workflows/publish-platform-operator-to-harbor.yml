@@ -31,8 +31,11 @@ jobs:
         uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4
 
       - name: Login to Harbor
-        run: |
-          helm registry login https://${{ secrets.HARBOR_REGISTRY_URL }} --username ${{ secrets.HARBOR_CI_ROBOT_API_USER }} --password ${{ secrets.HARBOR_CI_ROBOT_API_TOKEN }}
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        with:
+          registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+          username: ${{ secrets.HARBOR_CI_ROBOT_API_USER }}
+          password: ${{ secrets.HARBOR_CI_ROBOT_API_TOKEN }}
 
       - name: Setup dev Harbor environment
         if: ${{ github.ref_name == 'develop' }}
