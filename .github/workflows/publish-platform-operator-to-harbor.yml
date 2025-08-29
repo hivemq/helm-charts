@@ -40,7 +40,7 @@ jobs:
       - name: Setup dev Harbor environment
         if: ${{ github.ref_name == 'develop' }}
         run: |
-          echo "HARBOR_DEV_URL=${{ github.ref_name }}/dev" >> $GITHUB_ENV
+          echo "HARBOR_DEV_URL=${{ secrets.HARBOR_REGISTRY_URL }}/dev" >> $GITHUB_ENV
           echo "HARBOR_PROJECT=dev" >> $GITHUB_ENV
 
       - name: Publish HiveMQ Operator Helm chart
