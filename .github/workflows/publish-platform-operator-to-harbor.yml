@@ -34,8 +34,8 @@ jobs:
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
         with:
           registry: ${{ secrets.HARBOR_REGISTRY_URL }}
-          username: ${{ secrets.HARBOR_CI_ROBOT_API_USER }}
-          password: ${{ secrets.HARBOR_CI_ROBOT_API_TOKEN }}
+          username: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_USER }}
+          password: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_TOKEN }}
 
       - name: Setup dev Harbor environment
         if: ${{ github.ref_name == 'develop' }}
@@ -91,8 +91,8 @@ jobs:
           CHART_NAME: ${{ github.ref_name == 'develop' && 'hivemq/helm-charts/hivemq-platform-operator' || 'helm-charts/hivemq-platform-operator' }}
           CHART_VERSION: ${{ env.sign_chart_version }}
           HARBOR_REGISTRY_URL: ${{ secrets.HARBOR_REGISTRY_URL }}
-          HARBOR_API_USER: ${{ secrets.HARBOR_CI_ROBOT_API_USER }}
-          HARBOR_API_TOKEN: ${{ secrets.HARBOR_CI_ROBOT_API_TOKEN }}
+          HARBOR_API_USER: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_USER }}
+          HARBOR_API_TOKEN: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_TOKEN }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: bash ./scripts/sign-harbor-chart.sh "$CHART_NAME" "$CHART_VERSION"
