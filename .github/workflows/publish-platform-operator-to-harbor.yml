@@ -64,7 +64,7 @@ jobs:
           fi
 
           echo "--------------------------------------------------"
-          echo "🔎 Checking chart: $chart_dir version: $chart_version"
+          echo "🔎 Checking chart: $chart_dir version: $publish_version"
 
           chart_url="oci://$harbor_url/hivemq/helm-charts/$chart_name"
 
