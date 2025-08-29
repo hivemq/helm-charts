@@ -74,9 +74,8 @@ jobs:
           else
             helm package "$chart_dir" --destination .
             chart_archive="${chart_name}-${publish_version}.tgz"
-            chart_publish="${chart_name}-${publish_version}-final.tgz"
-            bash ./scripts/create-reproducible-chart.sh "$PWD/$chart_archive" "$PWD/$chart_publish"
-            helm push "$chart_publish" "oci://$harbor_url/hivemq/helm-charts"
+            bash ./scripts/create-reproducible-chart.sh "$PWD/$chart_archive" "$PWD/$chart_archive"
+            helm push "$chart_archive" "oci://$harbor_url/hivemq/helm-charts"
             echo "🎉 Successfully published $chart_archive"
             rm "$chart_archive"
             echo "sign_chart=true" >> $GITHUB_ENV
