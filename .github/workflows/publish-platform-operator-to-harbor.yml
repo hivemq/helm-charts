@@ -14,7 +14,6 @@ on:
     branches:
       - "master"
       - "develop"
-  workflow_dispatch:
 jobs:
   build:
     if: >
@@ -75,6 +74,8 @@ jobs:
           else
             helm package "$chart_dir" --destination .
             chart_archive="${chart_name}-${publish_version}.tgz"
+            chart_publish="${chart_name}-${publish_version}-final.tgz"
+            bash ./scripts/create-reproducible-chart.sh "$PWD/$chart_archive" "$PWD/$chart_publish"
             helm push "$chart_archive" "oci://$harbor_url/hivemq/helm-charts"
             echo "🎉 Successfully published $chart_archive"
             rm "$chart_archive"
