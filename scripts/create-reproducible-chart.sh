@@ -23,12 +23,18 @@ trap 'rm -rf -- "$TMP_DIR"' EXIT
 # extract the original, non-deterministic archive
 tar -xzf "$INPUT_TGZ" -C "$TMP_DIR"
 
+chart_dir=$(ls "$TMP_DIR")
+
 # re-create the archive with deterministic options
 tar -czf "$OUTPUT_TGZ" \
   --sort=name \
   --mtime='@0' \
   --owner=0 --group=0 \
   --numeric-owner \
-  -C "$TMP_DIR" .
+  --warning=no-timestamp-in-future \
+  -C "$TMP_DIR" "$chart_dir"
+
+# set the modification time to the Unix epoch for full determinism
+touch --date=@0 "$OUTPUT_TGZ"
 
 echo "Successfully created reproducible archive: $OUTPUT_TGZ"

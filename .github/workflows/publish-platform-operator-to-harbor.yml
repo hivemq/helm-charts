@@ -68,16 +68,18 @@ jobs:
 
           chart_url="oci://$harbor_url/hivemq/helm-charts/$chart_name"
 
+          # skip publishing and signing if this chart is a release version (not a snapshot) and the same version already exists in the registry
           if [[ "$publish_version" != *"-snapshot" ]] && helm show chart "$chart_url" --version "$publish_version" > /dev/null 2>&1; then
             echo "⏭️ Skipping: Chart version $chart_version already exists."
             echo "sign_chart=false" >> $GITHUB_ENV
           else
             helm package "$chart_dir" --destination .
             chart_archive="${chart_name}-${publish_version}.tgz"
-            bash ./scripts/create-reproducible-chart.sh "$PWD/$chart_archive" "$PWD/$chart_archive"
-            helm push "$chart_archive" "oci://$harbor_url/hivemq/helm-charts"
-            echo "🎉 Successfully published $chart_archive"
-            rm "$chart_archive"
+            reproducible_chart_archive="${chart_name}-${publish_version}-reproducible.tgz"
+            bash ./scripts/create-reproducible-chart.sh "$PWD/$chart_archive" "$PWD/$reproducible_chart_archive"
+            helm push "$reproducible_chart_archive" "oci://$harbor_url/hivemq/helm-charts"
+            echo "🎉 Successfully published $reproducible_chart_archive"
+            rm "$chart_archive" "$reproducible_chart_archive"
             echo "sign_chart=true" >> $GITHUB_ENV
             echo "sign_chart_version=$publish_version" >> $GITHUB_ENV
           fi
