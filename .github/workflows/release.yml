@@ -1,9 +1,10 @@
 name: Release Charts
 on:
   push:
-    branches: [master]
+    branches:
+      - "master"
     paths:
-      - charts/**
+      - "charts/**"
   workflow_dispatch:
 jobs:
   release:
