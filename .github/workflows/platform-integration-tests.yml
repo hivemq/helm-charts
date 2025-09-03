@@ -1,19 +1,16 @@
-name: HiveMQ Platform Operator Integration Tests
+name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Integration Tests
 on:
-  pull_request:
-    branches:
-      - "**"
-  workflow_dispatch:
+  workflow_call:
 concurrency:
-  group: hivemq-operator-platform-integration-test-${{ github.ref }}
+  group: platform-integration-test-${{ github.ref }}
   cancel-in-progress: true
 env:
-  check-prefix: 'Platform Test #'
+  check-prefix: 'Test #'
   split-total: 23
   CI_RUN: true
 jobs:
   generate-split-index-json:
-    name: Generate split indexes
+    name: Generate split Platform integration tests indexes
     runs-on: ubuntu-latest
     outputs:
       json: ${{ steps.generate.outputs.split-index-json }}
@@ -25,7 +22,7 @@ jobs:
           split-total: ${{ env.split-total }}
 
   compile-integration-test:
-    name: Compile integration tests
+    name: Compile Platform integration tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout HiveMQ Helm Charts
@@ -74,20 +71,17 @@ jobs:
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
       - name: Warmup Gradle cache
-        if: ${{ steps.setup-java.outputs.cache-hit == 'false' }}
+        if: steps.setup-java.outputs.cache-hit == 'false'
         working-directory: helm-charts
         run: ./gradlew :tests-hivemq-platform-operator:integrationTestPrepare
 
-  platform-integration-test:
-    name: "Platform Test #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
+  run-integration-tests:
+    name: "Test #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
     runs-on: ubuntu-latest
     needs:
       - generate-split-index-json
       - compile-integration-test
     timeout-minutes: 25
-    permissions:
-      contents: read
-      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -166,13 +160,13 @@ jobs:
           calculate-optimal-total-split: true
           debug: true
 
-      - name: Run HiveMQ Platform Operator integration tests
+      - name: Run integration tests
         working-directory: helm-charts
         env:
           K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
         run: ./gradlew :tests-hivemq-platform-operator:integrationTest ${{ steps.split-tests.outputs.test-suite }}
 
-      - name: Upload HiveMQ Platform Operator test results
+      - name: Upload test results
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -183,7 +177,7 @@ jobs:
           retention-days: 5
 
       - name: Upload JUnit report artifact
-        if: ${{ matrix.k8s-version-type == 'LATEST' }}
+        if: matrix.k8s-version-type == 'LATEST'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: junit-xml-reports-${{ matrix.split-index }}
@@ -219,10 +213,10 @@ jobs:
           done
 
   merge-junit-reports:
-    name: Merge JUnit reports
+    name: Merge Platform JUnit reports
     runs-on: ubuntu-latest
     needs:
-      - platform-integration-test
+      - run-integration-tests
     permissions:
       contents: write
     steps:

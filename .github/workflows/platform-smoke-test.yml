@@ -1,0 +1,121 @@
+name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Smoke Test
+on:
+  workflow_call:
+concurrency:
+  group: platform-smoke-test-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  RELEASE_NAME: "smoke-test-release"
+jobs:
+  run-smoke-test:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          path: helm-charts
+
+      - name: Checkout HiveMQ Platform Operator on the default branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          repository: hivemq/hivemq-platform-operator
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          path: hivemq-platform-operator
+
+      - name: Checkout HiveMQ Platform Operator on the same or target branch
+        working-directory: hivemq-platform-operator
+        run: |
+          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+          if [[ -n "${BRANCH}" ]]; then 
+            echo "Checking out branch with the same name"
+            git fetch --all
+            git checkout origin/${GITHUB_HEAD_REF}
+            exit
+          fi
+          if [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
+            exit
+          fi
+          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
+          if [[ -n "${BRANCH}" ]]; then 
+            echo "Checking out target branch"
+            git fetch --all
+            git checkout origin/${GITHUB_BASE_REF}
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4
+        with:
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+
+      - name: Create K8s Kind Cluster
+        id: kind
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1
+        with:
+          cluster_name: "kind"
+          registry: true
+          registry_name: kind-registry
+          registry_port: 5000
+
+      - name: Push images to the Kind registry
+        working-directory: helm-charts
+        run: |
+          ./gradlew :tests-hivemq-platform-operator:pushAllImagesForTesting --url ${{ steps.kind.outputs.LOCAL_REGISTRY }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+
+      - name: Install HiveMQ Platform Operator
+        working-directory: helm-charts
+        run: helm install operator-test --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=snapshot ./charts/hivemq-platform-operator --wait --timeout 2m0s
+
+      - name: Install HiveMQ Platform
+        working-directory: helm-charts
+        run: helm install $RELEASE_NAME --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=latest --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test
+
+      - name: Wait for pods to be ready
+        working-directory: helm-charts
+        run: bash ./scripts/wait-for-pods.sh hivemq-platform app.kubernetes.io/instance=$RELEASE_NAME test
+
+      - name: Test HiveMQ Platform
+        run: helm test $RELEASE_NAME --logs -n test
+
+      - name: Capture HiveMQ Platform Pods logs on failure
+        if: failure()
+        run: |
+          mkdir ${{ runner.temp }}/logs
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/platform-operator-pod.log
+          kubectl get pods -n default >> ${{ runner.temp }}/logs/platform-operator-pod.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/platform-operator-pod.log
+          kubectl logs -l app.kubernetes.io/instance=operator-test --tail -1 -n default >> ${{ runner.temp }}/logs/platform-operator-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-operator-pod.log
+
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/platform-pod.log
+          kubectl get pods -n test >> ${{ runner.temp }}/logs/platform-pod.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/platform-pod.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/platform-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-pod.log
+
+      - name: Upload HiveMQ Platform Pods logs on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: smoke-test-platform-pod-logs
+          path: ${{ runner.temp }}/logs/*.log
+          retention-days: 5
+
+      - name: Uninstall HiveMQ Platform and Platform Operator
+        if: always()
+        run: |
+          helm uninstall $RELEASE_NAME --wait --ignore-not-found -n test
+          helm uninstall operator-test --wait --ignore-not-found
+          kubectl get pods -A

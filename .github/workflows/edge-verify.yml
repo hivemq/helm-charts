@@ -1,0 +1,45 @@
+name: HiveMQ Edge Helm Chart Verify Tests
+on:
+  workflow_call:
+concurrency:
+  group: edge-verify-tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  run-verify-tests:
+    name: Verify tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+
+      - name: Set up Kubeconform
+        run: |
+          helm plugin install https://github.com/jtyr/kubeconform-helm
+
+      - name: Lint
+        if: always()
+        run: |
+          helm lint charts/hivemq-edge
+
+      - name: Unit Test
+        if: always()
+        uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
+        with:
+          charts: charts/hivemq-edge
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flags: --file './tests/**/*_test.yaml'
+
+      - name: Check manifests are up-to-date
+        if: always()
+        run: |
+          manifests/hivemq-edge/manifests.sh
+          git add manifests/ -v
+          git diff HEAD --exit-code
+
+      - name: Validate rendered manifests
+        if: always()
+        run: |
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-edge -r hivemq-edge-release -n hivemq-edge-namespace
