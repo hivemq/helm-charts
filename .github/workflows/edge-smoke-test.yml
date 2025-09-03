@@ -1,0 +1,55 @@
+name: HiveMQ Edge Helm Chart Smoke Test
+on:
+  workflow_call:
+concurrency:
+  group: edge-smoke-test-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  RELEASE_NAME: "smoke-test-release"
+jobs:
+  run-smoke-test:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: Create K8s Kind Cluster
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1
+        with:
+          cluster_name: "kind"
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+
+      - name: Install HiveMQ Edge
+        run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --timeout 5m0s --create-namespace -n test
+
+      - name: Wait for pods to be ready
+        run: bash ./scripts/wait-for-pods.sh hivemq-edge app.kubernetes.io/instance=$RELEASE_NAME test
+
+      - name: Test HiveMQ Edge
+        run: helm test $RELEASE_NAME --logs -n test
+
+      - name: Capture HiveMQ Edge Pods logs on failure
+        if: failure()
+        run: |
+          mkdir ${{ runner.temp }}/logs
+          echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/edge-pod.log
+          kubectl get pods -n test >> ${{ runner.temp }}/logs/edge-pod.log
+          echo "=== LOGS ===" >> ${{ runner.temp }}/logs/edge-pod.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/edge-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/edge-pod.log
+
+      - name: Upload HiveMQ Edge Pods logs on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: smoke-test-edge-pod-logs
+          path: ${{ runner.temp }}/logs/*.log
+          retention-days: 5
+
+      - name: Uninstall HiveMQ Edge chart
+        if: always()
+        run: |
+          helm uninstall $RELEASE_NAME --wait --ignore-not-found -n test 
+          kubectl get pods -A

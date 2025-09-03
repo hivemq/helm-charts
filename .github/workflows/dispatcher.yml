@@ -1,0 +1,288 @@
+name: Helm Charts Dispatcher
+on:
+  push:
+    branches:
+      - "master"
+      - "develop"
+    paths:
+      - "charts/**"
+      - "manifests/**"
+      - "tests-hivemq-operator/**"
+      - "tests-hivemq-platform-operator/**"
+  pull_request:
+concurrency:
+  group: helm-charts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check-edge-changes:
+    name: Edge changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/hivemq-edge/**
+            manifests/hivemq-edge/**
+          files_ignore: |
+            **/*.md
+
+  check-swarm-changes:
+    name: Swarm changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/hivemq-swarm/**
+            manifests/hivemq-swarm/**
+          files_ignore: |
+            **/*.md
+
+  check-legacy-operator-changes:
+    name: Legacy Operator changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/hivemq-operator/**
+            manifests/hivemq-operator/**
+            tests-hivemq-operator/**
+          files_ignore: |
+            **/*.md
+
+  check-platform-changes:
+    name: Platform changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/hivemq-platform/**
+            manifests/hivemq-platform/**
+            tests-hivemq-platform-operator/**
+          files_ignore: |
+            **/*.md
+
+  check-platform-operator-changes:
+    name: Platform Operator changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/hivemq-platform-operator/**
+            manifests/hivemq-platform-operator/**
+            tests-hivemq-platform-operator/**
+          files_ignore: |
+            **/*.md
+
+  check-platform-operator-chart-only-changes:
+    name: Platform Operator chart only changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/hivemq-platform-operator/**
+          files_ignore: |
+            **/*.md
+
+  check-chart-changes:
+    name: Chart changes
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'master'
+    outputs:
+      should-run: ${{ steps.changes.outputs.any_modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        with:
+          files: |
+            charts/**
+          files_ignore: |
+            **/*.md
+
+  edge-smoke-test:
+    name: Edge smoke tests
+    needs: check-edge-changes
+    if: needs.check-edge-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/edge-smoke-test.yml
+
+  edge-verify-tests:
+    name: Edge verify tests
+    needs: check-edge-changes
+    if: needs.check-edge-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/edge-verify.yml
+
+  swarm-verify-tests:
+    name: Swarm verify tests
+    needs: check-swarm-changes
+    if: needs.check-swarm-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/swarm-verify.yml
+
+  legacy-operator-smoke-test:
+    name: Legacy Operator smoke tests
+    needs: check-legacy-operator-changes
+    if: needs.check-legacy-operator-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/legacy-smoke-test.yml
+    secrets: inherit
+
+  legacy-operator-verify-tests:
+    name: Legacy Operator verify tests
+    needs: check-legacy-operator-changes
+    if: needs.check-legacy-operator-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/legacy-verify.yml
+
+  legacy-operator-integration-tests:
+    name: Legacy Operator integration tests
+    needs: check-legacy-operator-changes
+    if: needs.check-legacy-operator-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/legacy-integration-tests.yml
+    secrets: inherit
+
+  platform-verify-tests:
+    name: Platform verify tests
+    needs:
+      - check-platform-changes
+      - check-platform-operator-changes
+    if: >
+      needs.check-platform-changes.outputs.should-run == 'true' ||
+      needs.check-platform-operator-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/platform-verify.yml
+
+  platform-smoke-test:
+    name: Platform smoke tests
+    needs:
+      - check-platform-changes
+      - check-platform-operator-changes
+    if: >
+      needs.check-platform-changes.outputs.should-run == 'true' ||
+      needs.check-platform-operator-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/platform-smoke-test.yml
+    secrets: inherit
+
+  platform-integration-tests:
+    name: Platform integration tests
+    needs:
+      - check-platform-changes
+      - check-platform-operator-changes
+    if: >
+      needs.check-platform-changes.outputs.should-run == 'true' ||
+      needs.check-platform-operator-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/platform-integration-tests.yml
+    secrets: inherit
+
+  tests-summary-report:
+    name: Tests Summary Report
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - edge-smoke-test
+      - edge-verify-tests
+      - swarm-verify-tests
+      - legacy-operator-smoke-test
+      - legacy-operator-verify-tests
+      - legacy-operator-integration-tests
+      - platform-verify-tests
+      - platform-smoke-test
+      - platform-integration-tests
+    steps:
+      - name: Tests results summary
+        if: |
+          needs.edge-smoke-test.result == 'failure' ||
+          needs.edge-verify-tests.result == 'failure' ||
+          needs.swarm-verify-tests.result == 'failure' ||
+          needs.legacy-operator-smoke-test.result == 'failure' ||
+          needs.legacy-operator-verify-tests.result == 'failure' ||
+          needs.legacy-operator-integration-tests.result == 'failure' ||
+          needs.platform-verify-tests.result == 'failure' ||
+          needs.platform-smoke-test.result == 'failure' ||
+          needs.platform-integration-tests.result == 'failure'
+        run: |
+          echo "One or more test jobs failed."
+          exit 1
+
+  publish-harbor:
+    name: Publish to Harbor
+    if: >
+      (github.ref_name == 'master' || github.ref_name == 'develop') &&
+      github.event_name == 'push' &&
+      needs.check-platform-operator-chart-only-changes.outputs.should-run == 'true'
+    needs:
+      - check-platform-operator-chart-only-changes
+      - tests-summary-report
+    uses: ./.github/workflows/harbor.yml
+    secrets: inherit
+
+  release-charts:
+    name: Release
+    if: >
+      github.ref_name == 'master' &&
+      github.event_name == 'push' &&
+      needs.check-chart-changes.outputs.should-run == 'true'
+    needs:
+      - check-chart-changes
+      - tests-summary-report
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
