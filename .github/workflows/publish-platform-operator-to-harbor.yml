@@ -5,7 +5,7 @@ on:
       - "master"
       - "develop"
     paths:
-      - charts/hivemq-platform-operator
+      - "charts/hivemq-platform-operator/**"
   workflow_run:
     workflows:
       - "Verify"
