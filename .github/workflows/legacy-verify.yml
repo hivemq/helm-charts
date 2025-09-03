@@ -1,0 +1,51 @@
+name: HiveMQ Legacy Operator Helm Chart Verify Tests
+on:
+  workflow_call:
+concurrency:
+  group: legacy-verify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  run-verify-tests:
+    name: Verify tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+
+      - name: Set up Kubeconform
+        run: |
+          helm plugin install https://github.com/jtyr/kubeconform-helm
+
+      - name: Add Prometheus dependency Helm chart repo
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+      - name: Update HiveMQ legacy Operator chart dependencies
+        run: |
+          helm dependency update charts/hivemq-operator
+
+      - name: Lint
+        if: always()
+        run: |
+          helm lint charts/hivemq-operator
+
+      - name: Check manifests are up-to-date
+        if: always()
+        run: |
+          manifests/hivemq-operator/manifests.sh
+          git add manifests/ -v
+          git diff HEAD --exit-code
+
+      - name: Parse HiveMQ Legacy Operator CRD from OpenAPI to JSON schema
+        if: always()
+        run: |
+          export FILENAME_FORMAT='{kind}.{group}-{version}'
+          .github/openapi2jsonschema.py charts/hivemq-operator/crds/hivemq-cluster.yaml
+
+      - name: Validate rendered manifests
+        if: always()
+        run: |
+          helm kubeconform --config .github/configs/kubeconform.yml charts/hivemq-operator -r hivemq-operator-release -n hivemq-operator-namespace --schema-location hivemqcluster.hivemq-v1.json

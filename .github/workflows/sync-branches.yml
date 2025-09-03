@@ -1,15 +1,11 @@
 name: Sync branches with HiveMQ Platform Operator and HiveMQ K8s testsuite repos
-
 on:
   pull_request:
     branches:
       - develop
-
 jobs:
   sync-branches:
-    permissions:
-      contents: read
-      packages: write
+    name: Sync branches with hivemq-platform-operator and hivemq-k8s-testsuite repos
     runs-on: ubuntu-latest
     strategy:
       matrix:
