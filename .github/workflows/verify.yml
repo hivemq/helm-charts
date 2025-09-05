@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - "**"
-  workflow_dispatch:
 concurrency:
   group: verify-${{ github.ref }}
   cancel-in-progress: true
