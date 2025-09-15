@@ -5,6 +5,7 @@ on:
       - "master"
       - "develop"
     paths:
+      - ".github/workflows/**"
       - "charts/**"
       - "manifests/**"
       - "tests-hivemq-operator/**"
