@@ -136,6 +136,13 @@ admin:
 #    secretUserKey: "user"
 #    secretPasswordKey: "password"
 
+# Pre-login notice configuration for admin UI
+preLoginNotice:
+  enabled: false
+  title: ""
+  message: ""
+  consent: ""
+
 # Configures the available topic filters
 topicFilters: []
 #  - filter: "topic0"

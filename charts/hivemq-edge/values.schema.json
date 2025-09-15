@@ -86,6 +86,28 @@
       },
       "type" : "object"
     },
+    "preLoginNotice" : {
+      "description" : "Pre-login notice configuration for admin UI.",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean",
+          "description" : "Enable the pre-login notice."
+        },
+        "title" : {
+          "type" : "string",
+          "description" : "Title of the pre-login notice."
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Message content of the pre-login notice."
+        },
+        "consent" : {
+          "type" : "string",
+          "description" : "Consent text for the pre-login notice."
+        }
+      },
+      "type" : "object"
+    },
     "mqttsn" : {
       "enabled" : {
         "description" : "Enable the mqtt sn listener.",

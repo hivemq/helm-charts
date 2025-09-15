@@ -1,0 +1,209 @@
+suite: HiveMQ Edge - Pre-Login Notice Statefulset tests
+
+templates:
+  - statefulset.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.0.1
+  appVersion: "2367.359"
+
+tests:
+  - it: Should have the correct metadata when preLoginNotice is enabled
+    set:
+      preLoginNotice:
+        enabled: true
+        title: "Test Title"
+        message: "Test Message"
+        consent: "Test Consent"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hivemq-edge-0.0.1
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "2367.359"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: Should not add pre-login notice environment variables when disabled
+    set:
+      preLoginNotice:
+        enabled: false
+        title: "Should not appear"
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+
+  - it: Should add all pre-login notice environment variables when fully configured
+    set:
+      preLoginNotice:
+        enabled: true
+        title: "Welcome to HiveMQ Edge"
+        message: "Please read and accept our terms before proceeding."
+        consent: "I agree to the terms and conditions"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+            value: "Welcome to HiveMQ Edge"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_MESSAGE
+            value: "Please read and accept our terms before proceeding."
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
+            value: "I agree to the terms and conditions"
+
+  - it: Should add only enabled and title environment variables when other fields are empty
+    set:
+      preLoginNotice:
+        enabled: true
+        title: "Welcome"
+        message: ""
+        consent: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+            value: "Welcome"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_MESSAGE
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
+
+  - it: Should add enabled, title and message when consent is empty
+    set:
+      preLoginNotice:
+        enabled: true
+        title: "System Notice"
+        message: "Maintenance scheduled for tonight"
+        consent: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+            value: "System Notice"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_MESSAGE
+            value: "Maintenance scheduled for tonight"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
+
+  - it: Should handle special characters in pre-login notice fields
+    set:
+      preLoginNotice:
+        enabled: true
+        title: "Welcome & Greetings"
+        message: "Please read the terms & conditions"
+        consent: "I accept & agree"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+            value: "Welcome & Greetings"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_MESSAGE
+            value: "Please read the terms & conditions"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
+            value: "I accept & agree"
+
+  - it: Should handle boolean enabled value correctly when false
+    set:
+      preLoginNotice:
+        enabled: false
+        title: "Should not appear"
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+
+  - it: Should maintain existing admin environment variables
+    set:
+      preLoginNotice:
+        enabled: true
+        title: "Test"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                key: user
+                name: hivemq-edge-admin-edge
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: hivemq-edge-admin-edge
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+            value: "true"
