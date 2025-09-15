@@ -1,6 +1,11 @@
 name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Integration Tests
 on:
   workflow_call:
+    inputs:
+      base-branch:
+        description: 'The base branch for JUnit reports'
+        type: string
+        required: true
 concurrency:
   group: platform-integration-test-${{ github.ref }}
   cancel-in-progress: true
@@ -40,6 +45,8 @@ jobs:
       - name: Checkout HiveMQ Platform Operator on the same or target branch
         working-directory: hivemq-platform-operator
         run: |
+          BASE_BRANCH='${{ inputs.base-branch }}'
+          echo "Using base branch input: ${BASE_BRANCH}"
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
           BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
           if [[ -n "${BRANCH}" ]]; then 
@@ -48,15 +55,18 @@ jobs:
             git checkout origin/${GITHUB_HEAD_REF}
             exit
           fi
-          if [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
+          if [[ "${BASE_BRANCH}" == "develop" ]]; then
+            echo "Base branch is develop, keeping default branch checkout"
             exit
           fi
-          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
+          echo "Checking if base branch \"${BASE_BRANCH}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${BASE_BRANCH})
           if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out target branch"
+            echo "Checking out target base branch from input"
             git fetch --all
-            git checkout origin/${GITHUB_BASE_REF}
+            git checkout origin/${BASE_BRANCH}
+          else
+            echo "Base branch ${BASE_BRANCH} not found on hivemq-platform-operator, keeping default branch"
           fi
 
       - name: Set up JDK 21
@@ -106,6 +116,8 @@ jobs:
       - name: Checkout HiveMQ Platform Operator on the same or target branch
         working-directory: hivemq-platform-operator
         run: |
+          BASE_BRANCH='${{ inputs.base-branch }}'
+          echo "Using base branch input: ${BASE_BRANCH}"
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
           BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
           if [[ -n "${BRANCH}" ]]; then 
@@ -114,22 +126,25 @@ jobs:
             git checkout origin/${GITHUB_HEAD_REF}
             exit
           fi
-          if [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
+          if [[ "${BASE_BRANCH}" == "develop" ]]; then
+            echo "Base branch is develop, keeping default branch checkout"
             exit
           fi
-          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
+          echo "Checking if base branch \"${BASE_BRANCH}\" exists on hivemq-platform-operator"
+          BRANCH=$(git ls-remote origin ${BASE_BRANCH})
           if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out target branch"
+            echo "Checking out target base branch from input"
             git fetch --all
-            git checkout origin/${GITHUB_BASE_REF}
+            git checkout origin/${BASE_BRANCH}
+          else
+            echo "Base branch ${BASE_BRANCH} not found on hivemq-platform-operator, keeping default branch"
           fi
 
       - name: Checkout JUnit reports
         uses: donnerbart/split-tests-java-action/checkout-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
           split-index: ${{ matrix.split-index }}
-          git-branch: junit-reports/platform/${{ github.base_ref }}
+          git-branch: junit-reports/platform/${{ inputs.base-branch }}
           path: junit-reports
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
 
@@ -223,6 +238,6 @@ jobs:
       - name: Merge JUnit reports
         uses: donnerbart/split-tests-java-action/merge-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
-          git-branch: junit-reports/platform/${{ github.base_ref }}
-          artifact-name: junit-xml-reports-${{ github.base_ref }}
+          git-branch: junit-reports/platform/${{ inputs.base-branch }}
+          artifact-name: junit-xml-reports-${{ inputs.base-branch }}
           split-artifact-pattern: junit-xml-reports-*
