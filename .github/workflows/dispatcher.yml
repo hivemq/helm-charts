@@ -202,7 +202,7 @@ jobs:
     uses: ./.github/workflows/legacy-integration-tests.yml
     secrets: inherit
     with:
-      base-branch: ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
+      base-branch: ${{ github.base_ref || github.ref_name }}
 
   platform-verify-tests:
     name: Platform verify tests
@@ -236,7 +236,7 @@ jobs:
     uses: ./.github/workflows/platform-integration-tests.yml
     secrets: inherit
     with:
-      base-branch: ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
+      base-branch: ${{ github.base_ref || github.ref_name }}
 
   tests-summary-report:
     name: Tests Summary Report
