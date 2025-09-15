@@ -48,12 +48,25 @@ class K3sLogConsumer implements Consumer<OutputFrame> {
                 line.contains("metrics.k8s.io") ||
                 line.contains("certificate CN") ||
                 line.contains("generated self-signed CA certificate") ||
+                line.contains("alloc.go") ||
                 line.contains("cache.go") ||
+                line.contains("cidrallocator.go") ||
+                line.contains("controller.go") ||
                 line.contains("garbagecollector.go") ||
+                line.contains("handler_proxy.go") ||
+                line.contains("kube.go") ||
+                line.contains("kubelet.go") ||
+                line.contains("kubelet_network.go") ||
+                line.contains("kubelet_network_linux.go") ||
+                line.contains("kubelet_node_status.go") ||
+                line.contains("kubelet_volumes.go") ||
                 line.contains("logs.go") ||
+                line.contains("manager.go") ||
                 line.contains("operation_generator.go") ||
                 line.contains("pod_startup_latency_tracker.go") ||
+                line.contains("reconciler_common.go") ||
                 line.contains("resource_quota_monitor.go") ||
+                line.contains("scope.go") ||
                 line.contains("shared_informer.go")) {
             return;
         }

@@ -583,6 +583,10 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
                                     // skip the ISO8601 prefix for logging
                                     final var matcher = LOGBACK_DATE_PREFIX.matcher(line);
                                     final var printLine = matcher.matches() ? matcher.group(1) : line;
+                                    // filter noisy platform logs
+                                    if (printLine.startsWith("DEBUG - Flushing:")) {
+                                        return;
+                                    }
                                     LOG.info("[{}] [{}] [{}] {}",
                                             logPodName,
                                             containerName,
