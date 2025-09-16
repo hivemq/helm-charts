@@ -1,9 +1,6 @@
 name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Verify Tests
 on:
   workflow_call:
-concurrency:
-  group: platform-verify-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   run-verify-tests:
     name: Verify tests

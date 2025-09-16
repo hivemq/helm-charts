@@ -1,9 +1,6 @@
 name: HiveMQ Swarm Helm Chart Verify Tests
 on:
   workflow_call:
-concurrency:
-  group: swarm-verify-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   run-verify-tests:
     name: Verify tests

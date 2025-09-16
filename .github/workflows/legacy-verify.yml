@@ -1,9 +1,6 @@
 name: HiveMQ Legacy Operator Helm Chart Verify Tests
 on:
   workflow_call:
-concurrency:
-  group: legacy-verify-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   run-verify-tests:
     name: Verify tests
