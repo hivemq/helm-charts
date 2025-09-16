@@ -28,7 +28,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/hivemq-edge/**
@@ -49,7 +49,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/hivemq-swarm/**
@@ -70,7 +70,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/hivemq-operator/**
@@ -92,7 +92,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/hivemq-platform/**
@@ -114,7 +114,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/hivemq-platform-operator/**
@@ -136,7 +136,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/hivemq-platform-operator/**
@@ -157,7 +157,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
           files: |
             charts/**
