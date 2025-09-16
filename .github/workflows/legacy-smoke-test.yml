@@ -1,9 +1,6 @@
 name: HiveMQ Legacy Operator Helm Chart Smoke Test
 on:
   workflow_call:
-concurrency:
-  group: legacy-smoke-test-${{ github.ref }}
-  cancel-in-progress: true
 env:
   RELEASE_NAME: "smoke-test-release"
 jobs:

@@ -6,9 +6,6 @@ on:
         description: 'The base branch for JUnit reports'
         type: string
         required: true
-concurrency:
-  group: legacy-integration-tests-${{ github.ref }}
-  cancel-in-progress: true
 env:
   check-prefix: "Test #"
   split-total: 6
