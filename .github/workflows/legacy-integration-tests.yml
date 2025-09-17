@@ -146,6 +146,7 @@ jobs:
           split-index: ${{ matrix.split-index }}
           git-branch: junit-reports/legacy/${{ inputs.base-branch }}
           path: junit-reports
+          artifact-name: junit-xml-reports-legacy-sha
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
 
       - name: Set up Docker QEMU
