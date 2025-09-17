@@ -1,16 +1,6 @@
 name: Helm Charts Dispatcher
 on:
   push:
-    branches:
-      - "master"
-      - "develop"
-    paths:
-      - ".github/**"
-      - "charts/**"
-      - "manifests/**"
-      - "tests-hivemq-operator/**"
-      - "tests-hivemq-platform-operator/**"
-  pull_request:
 concurrency:
   group: helm-charts-${{ github.ref }}
   cancel-in-progress: true
@@ -30,6 +20,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/hivemq-edge/**
             manifests/hivemq-edge/**
@@ -51,6 +42,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/hivemq-swarm/**
             manifests/hivemq-swarm/**
@@ -72,6 +64,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/hivemq-operator/**
             manifests/hivemq-operator/**
@@ -94,6 +87,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/hivemq-platform/**
             manifests/hivemq-platform/**
@@ -116,6 +110,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/hivemq-platform-operator/**
             manifests/hivemq-platform-operator/**
@@ -138,6 +133,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/hivemq-platform-operator/**
           files_ignore: |
@@ -159,6 +155,7 @@ jobs:
         id: changes
         uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
         with:
+          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
             charts/**
           files_ignore: |
