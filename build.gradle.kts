@@ -8,12 +8,12 @@ val updateEdgeChartVersion by tasks.registering(Exec::class) {
                 "\n\t\t- 'chartVersion': Edge chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Edge version. Optional."
     doFirst {
-        updateChartAndValueFilesWithVersion(
+        updateChartAndValueAndTestFilesWithVersion(
             arrayOf(
                 "charts/hivemq-edge/Chart.yaml",
                 "charts/hivemq-edge/values.yaml"
             ),
-            """(tag:\s*)(\S+)""",
+            """(\s+tag:\s*)(\S+)""",
             true
         )
     }
@@ -29,7 +29,7 @@ val updateOperatorChartVersion by tasks.registering(Exec::class) {
                 "\n\t\t- 'chartVersion': Operator Legacy chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
     doFirst {
-        updateChartAndValueFilesWithVersion(
+        updateChartAndValueAndTestFilesWithVersion(
             arrayOf(
                 "charts/hivemq-operator/Chart.yaml",
                 "charts/hivemq-operator/values.yaml"
@@ -51,12 +51,12 @@ val updateSwarmChartVersion by tasks.registering(Exec::class) {
                 "\n\t\t- 'chartVersion': Swarm chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform version. Optional."
     doFirst {
-        updateChartAndValueFilesWithVersion(
+        updateChartAndValueAndTestFilesWithVersion(
             arrayOf(
                 "charts/hivemq-swarm/Chart.yaml",
                 "charts/hivemq-swarm/values.yaml"
             ),
-            """(tag:\s*)(\S+)""",
+            """(\s+tag:\s*)(\S+)""",
             false
         )
     }
@@ -72,12 +72,13 @@ val updatePlatformOperatorChartVersion by tasks.registering(Exec::class) {
                 "\n\t\t- 'chartVersion': Platform Operator chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform Operator version. Optional."
     doFirst {
-        updateChartAndValueFilesWithVersion(
+        updateChartAndValueAndTestFilesWithVersion(
             arrayOf(
                 "charts/hivemq-platform-operator/Chart.yaml",
-                "charts/hivemq-platform-operator/values.yaml"
+                "charts/hivemq-platform-operator/values.yaml",
+                "charts/hivemq-platform-operator/tests/hivemq_operator_deployment_test.yaml"
             ),
-            """(tag:\s*)(\S+)""",
+            """(\s+tag:\s*|hivemq-platform-operator-init:)([^"\s]+)""",
             false
         )
     }
@@ -93,12 +94,12 @@ val updatePlatformChartVersion by tasks.registering(Exec::class) {
                 "\n\t\t- 'chartVersion': Platform chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
                 "\n\t\t- 'appVersion': Platform release version. Optional."
     doFirst {
-        updateChartAndValueFilesWithVersion(
+        updateChartAndValueAndTestFilesWithVersion(
             arrayOf(
                 "charts/hivemq-platform/Chart.yaml",
                 "charts/hivemq-platform/values.yaml"
             ),
-            """(tag:\s*)(\S+)""",
+            """(\s+tag:\s*)(\S+)""",
             false
         )
     }
@@ -157,7 +158,7 @@ val test by tasks.registering(Exec::class) {
     commandLine("sh", "./scripts/helm-unittest.sh")
 }
 
-fun updateChartAndValueFilesWithVersion(
+fun updateChartAndValueAndTestFilesWithVersion(
     versionFilesToUpdate: Array<String>,
     valuesRegex: String,
     shouldQuoteAppVersion: Boolean
@@ -191,7 +192,7 @@ fun updateChartAndValueFilesWithVersion(
         file.writeText(text)
     }
     if (appVersion != null) {
-        filesToUpdate.filter { file -> file.name == "values.yaml" }.forEach { file ->
+        filesToUpdate.filter { file -> file.name == "values.yaml" || file.name.endsWith("_test.yaml") }.forEach { file ->
             val text = file.readText()
             val quotedAppVersion = if (shouldQuoteAppVersion) "\"$appVersion\"" else "$appVersion"
             file.writeText(text.replace(valuesRegex.toRegex()) {
