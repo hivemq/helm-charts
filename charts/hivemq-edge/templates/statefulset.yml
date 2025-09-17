@@ -188,6 +188,22 @@ spec:
                   name: "{{ $secretName }}"
                   key: password
             {{- end }}
+            {{- if .Values.preLoginNotice.enabled }}
+            - name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
+              value: "{{ .Values.preLoginNotice.enabled }}"
+            {{- if .Values.preLoginNotice.title }}
+            - name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
+              value: "{{ .Values.preLoginNotice.title }}"
+            {{- end }}
+            {{- if .Values.preLoginNotice.message }}
+            - name: HIVEMQ_PRE_LOGIN_NOTICE_MESSAGE
+              value: "{{ .Values.preLoginNotice.message }}"
+            {{- end }}
+            {{- if .Values.preLoginNotice.consent }}
+            - name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
+              value: "{{ .Values.preLoginNotice.consent }}"
+            {{- end }}
+            {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

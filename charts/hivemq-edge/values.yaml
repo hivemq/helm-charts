@@ -5,7 +5,7 @@
 image:
   repository: hivemq/hivemq-edge
   pullPolicy: IfNotPresent
-  tag: "2025.14"
+  tag: "2025.15"
 
 refresh: 1000
 
@@ -135,6 +135,13 @@ admin:
 #    secretName: "the-external-secret"
 #    secretUserKey: "user"
 #    secretPasswordKey: "password"
+
+# Pre-login notice configuration for admin UI
+preLoginNotice:
+  enabled: false
+  title: ""
+  message: ""
+  consent: ""
 
 # Configures the available topic filters
 topicFilters: []
