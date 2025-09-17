@@ -30,6 +30,7 @@ repositories {
 @Suppress("UnstableApiUsage")
 testing {
     suites {
+        @Suppress("unused")
         val integrationTest by registering(JvmTestSuite::class) {
             useJUnitJupiter(libs.versions.junit.jupiter)
             dependencies {
@@ -67,7 +68,7 @@ testing {
                         // sets Docker image tags for the tests
                         val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
                         val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
-                        tomlDocker.fields().forEach { (key, value) ->
+                        tomlDocker.properties().forEach { (key, value) ->
                             val tag = value.path("tag").asText()
                             if (tag.isNotEmpty()) {
                                 println("Configuring test Docker image $key:$tag")
