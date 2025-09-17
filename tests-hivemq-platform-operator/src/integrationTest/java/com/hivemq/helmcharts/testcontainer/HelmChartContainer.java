@@ -110,10 +110,10 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
                 "--etcd-arg=auto-compaction-mode=revision",
                 "--etcd-arg=auto-compaction-retention=1000000",
                 "--kube-apiserver-arg=etcd-compaction-interval=0s",
-                Objects.equals(System.getenv("K8S_VERSION_TYPE"), "LATEST") ?
-                        "--disable-default-registry-endpoint" :
-                        "",
                 "--tls-san=" + getHost()));
+        if (Objects.equals(System.getenv("K8S_VERSION_TYPE"), "LATEST")) {
+            k3sCommands.add("--disable-default-registry-endpoint");
+        }
         if (!additionalCommands.isEmpty()) {
             LOG.debug("Starting K3s container with additional commands: {}", additionalCommands);
             k3sCommands.addAll(additionalCommands);
@@ -467,7 +467,11 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     @SuppressWarnings("HttpUrlsUsage")
     private static @NotNull String getRegistriesContent() {
         final var ociRegistry = URI.create("http://%s".formatted(K3S_DOCKER_IMAGE.getRegistry()));
-        final var registry = "host.docker.internal:%d".formatted(ociRegistry.getPort());
+        final int port = ociRegistry.getPort();
+        if (port == -1) {
+            throw new IllegalArgumentException("Registry '%s' does not specify a port".formatted(ociRegistry));
+        }
+        final var registry = "host.docker.internal:%d".formatted(port);
         LOG.debug("Setting up http://{} as OCI registry into K3s", registry);
         return """
                 mirrors:
