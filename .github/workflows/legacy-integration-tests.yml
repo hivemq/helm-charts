@@ -1,3 +1,4 @@
+#file: noinspection UndefinedAction,UndefinedParamsPresent
 name: HiveMQ Legacy Operator Helm Chart Integration Tests
 on:
   workflow_call:
@@ -30,42 +31,16 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           path: helm-charts
+          fetch-depth: 0
 
-      - name: Checkout HiveMQ Legacy Operator on the default branch
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Checkout HiveMQ Legacy Operator
+        uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-operator
-          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          repository-default-branch: master
           path: hivemq-operator
-
-      - name: Checkout HiveMQ Legacy Operator on the same or target branch
-        working-directory: ${{ github.workspace }}/hivemq-operator
-        run: |
-          BASE_BRANCH='${{ inputs.base-branch }}'
-          echo "Using base branch input: ${BASE_BRANCH}"
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-operator"
-          if [[ -n "${GITHUB_HEAD_REF}" ]]; then
-            BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-            if [[ -n "${BRANCH}" ]]; then 
-              echo "Checking out branch with the same name"
-              git fetch --all
-              git checkout origin/${GITHUB_HEAD_REF}
-              exit
-            fi
-          fi
-          if [[ "${BASE_BRANCH}" == "master" ]]; then
-            echo "Base branch is master, keeping default branch checkout"
-            exit
-          fi
-          echo "Checking if base branch \"${BASE_BRANCH}\" exists on hivemq-operator"
-            BRANCH=$(git ls-remote origin ${BASE_BRANCH})
-            if [[ -n "${BRANCH}" ]]; then 
-              echo "Checking out target base branch from input"
-              git fetch --all
-              git checkout origin/${BASE_BRANCH}
-            else
-              echo "Base branch ${BASE_BRANCH} not found on hivemq-operator, keeping default branch"
-            fi
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          base-branch: ${{ inputs.base-branch }}
 
       - name: Set up JDK 21
         id: setup-java
@@ -103,42 +78,16 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           path: helm-charts
+          fetch-depth: 0
 
-      - name: Checkout HiveMQ Legacy Operator on the default branch
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Checkout HiveMQ Legacy Operator
+        uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-operator
-          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          repository-default-branch: master
           path: hivemq-operator
-
-      - name: Checkout HiveMQ Legacy Operator on the same or target branch
-        working-directory: ${{ github.workspace }}/hivemq-operator
-        run: |
-          BASE_BRANCH='${{ inputs.base-branch }}'
-          echo "Using base branch input: ${BASE_BRANCH}"
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-operator"
-          if [[ -n "${GITHUB_HEAD_REF}" ]]; then
-            BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-            if [[ -n "${BRANCH}" ]]; then
-              echo "Checking out branch with the same name"
-              git fetch --all
-              git checkout origin/${GITHUB_HEAD_REF}
-              exit
-            fi
-          fi
-          if [[ "${BASE_BRANCH}" == "master" ]]; then
-            echo "Base branch is master, keeping default branch checkout"
-            exit
-          fi
-          echo "Checking if base branch \"${BASE_BRANCH}\" exists on hivemq-operator"
-            BRANCH=$(git ls-remote origin ${BASE_BRANCH})
-            if [[ -n "${BRANCH}" ]]; then 
-              echo "Checking out target base branch from input"
-              git fetch --all
-              git checkout origin/${BASE_BRANCH}
-            else
-              echo "Base branch ${BASE_BRANCH} not found on hivemq-operator, keeping default branch"
-            fi
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          base-branch: ${{ inputs.base-branch }}
 
       - name: Checkout JUnit reports
         uses: donnerbart/split-tests-java-action/checkout-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1

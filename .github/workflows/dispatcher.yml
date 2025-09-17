@@ -169,18 +169,21 @@ jobs:
     needs: check-edge-changes
     if: needs.check-edge-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/edge-smoke-test.yml
+    secrets: inherit
 
   edge-verify-tests:
     name: Edge verify tests
     needs: check-edge-changes
     if: needs.check-edge-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/edge-verify.yml
+    secrets: inherit
 
   swarm-verify-tests:
     name: Swarm verify tests
     needs: check-swarm-changes
     if: needs.check-swarm-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/swarm-verify.yml
+    secrets: inherit
 
   legacy-operator-smoke-test:
     name: Legacy Operator smoke tests
@@ -188,12 +191,15 @@ jobs:
     if: needs.check-legacy-operator-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/legacy-smoke-test.yml
     secrets: inherit
+    with:
+      base-branch: ${{ github.base_ref || github.ref_name }}
 
   legacy-operator-verify-tests:
     name: Legacy Operator verify tests
     needs: check-legacy-operator-changes
     if: needs.check-legacy-operator-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/legacy-verify.yml
+    secrets: inherit
 
   legacy-operator-integration-tests:
     name: Legacy Operator integration tests
@@ -213,6 +219,7 @@ jobs:
       needs.check-platform-changes.outputs.should-run == 'true' ||
       needs.check-platform-operator-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/platform-verify.yml
+    secrets: inherit
 
   platform-smoke-test:
     name: Platform smoke tests
@@ -224,6 +231,8 @@ jobs:
       needs.check-platform-operator-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/platform-smoke-test.yml
     secrets: inherit
+    with:
+      base-branch: ${{ github.base_ref || github.ref_name }}
 
   platform-integration-tests:
     name: Platform integration tests
