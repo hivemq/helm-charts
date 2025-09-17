@@ -120,7 +120,7 @@ tasks.register("integrationTestPrepare") {
 /* ******************** OCI images ******************** */
 
 val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf86db94eea8528c2c076" // noble-20250619
+    from = "library/ubuntu@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc" // noble
     platform = oci.platform("linux", "amd64")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
@@ -131,7 +131,7 @@ val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
 }
 
 val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf86db94eea8528c2c076" // noble-20250619
+    from = "library/ubuntu@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc" // noble
     platform = oci.platform("linux", "arm64", "v8")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
