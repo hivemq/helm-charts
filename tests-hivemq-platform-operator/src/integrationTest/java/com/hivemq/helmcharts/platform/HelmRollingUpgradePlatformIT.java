@@ -48,7 +48,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 .getResourceVersion();
 
         helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
-                false,
+                true,
                 "--set",
                 "nodes.replicaCount=1",
                 "--version",
