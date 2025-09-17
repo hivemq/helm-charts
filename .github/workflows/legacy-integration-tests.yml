@@ -204,7 +204,7 @@ jobs:
         if: matrix.k8s-version-type == 'LATEST'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: junit-xml-reports-${{ matrix.split-index }}
+          name: junit-xml-reports-legacy-${{ matrix.split-index }}
           path: |
             helm-charts/tests-hivemq-operator/build/test-results/integrationTest/*.xml
 
@@ -248,5 +248,5 @@ jobs:
         uses: donnerbart/split-tests-java-action/merge-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
           git-branch: junit-reports/legacy/${{ inputs.base-branch }}
-          artifact-name: junit-xml-reports-${{ inputs.base-branch }}
-          split-artifact-pattern: junit-xml-reports-*
+          artifact-name: junit-xml-reports-legacy-${{ inputs.base-branch }}
+          split-artifact-pattern: junit-xml-reports-legacy-*
