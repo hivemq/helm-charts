@@ -1,6 +1,12 @@
+#file: noinspection UndefinedAction,UndefinedParamsPresent
 name: HiveMQ Legacy Operator Helm Chart Smoke Test
 on:
   workflow_call:
+    inputs:
+      base-branch:
+        description: 'The base branch for JUnit reports'
+        type: string
+        required: true
 env:
   RELEASE_NAME: "smoke-test-release"
 jobs:
@@ -12,35 +18,16 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           path: helm-charts
+          fetch-depth: 0
 
-      - name: Checkout HiveMQ Legacy Operator on the default branch
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Checkout HiveMQ Legacy Operator
+        uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-operator
-          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          repository-default-branch: master
           path: hivemq-operator
-
-      - name: Checkout HiveMQ Legacy Operator on the same or target branch
-        working-directory: hivemq-operator
-        run: |
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-          if [[ -n "${BRANCH}" ]]; then
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_HEAD_REF}
-            exit
-          fi
-          if [[ "${GITHUB_BASE_REF}" == "master" ]]; then
-            exit
-          fi
-          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out target branch"
-            git fetch --all
-            git checkout origin/${GITHUB_BASE_REF}
-          fi
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          base-branch: ${{ inputs.base-branch }}
 
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3

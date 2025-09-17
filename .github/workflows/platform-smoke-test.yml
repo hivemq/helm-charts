@@ -1,6 +1,12 @@
+#file: noinspection UndefinedAction,UndefinedParamsPresent
 name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Smoke Test
 on:
   workflow_call:
+    inputs:
+      base-branch:
+        description: 'The base branch for JUnit reports'
+        type: string
+        required: true
 env:
   RELEASE_NAME: "smoke-test-release"
 jobs:
@@ -12,35 +18,16 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           path: helm-charts
+          fetch-depth: 0
 
-      - name: Checkout HiveMQ Platform Operator on the default branch
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - name: Checkout HiveMQ Platform Operator
+        uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-platform-operator
-          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          repository-default-branch: develop
           path: hivemq-platform-operator
-
-      - name: Checkout HiveMQ Platform Operator on the same or target branch
-        working-directory: hivemq-platform-operator
-        run: |
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_HEAD_REF}
-            exit
-          fi
-          if [[ "${GITHUB_BASE_REF}" == "develop" ]]; then
-            exit
-          fi
-          echo "Checking if branch \"${GITHUB_BASE_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out target branch"
-            git fetch --all
-            git checkout origin/${GITHUB_BASE_REF}
-          fi
+          token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
+          base-branch: ${{ inputs.base-branch }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5

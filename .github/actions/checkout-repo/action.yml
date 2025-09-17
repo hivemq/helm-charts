@@ -1,0 +1,60 @@
+name: 'Checkout Repository'
+description: 'Checkout a repository with branch logic'
+inputs:
+  repository:
+    description: 'The repository to checkout'
+    required: true
+  repository-default-branch:
+    description: 'The default branch for this repository (e.g. develop or master)'
+    required: true
+  path:
+    description: 'Path to checkout the repository'
+    required: false
+  token:
+    description: 'GitHub token to use for the checkout'
+    required: true
+  base-branch:
+    description: 'The base branch to checkout'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      with:
+        repository: ${{ inputs.repository }}
+        token: ${{ inputs.token }}
+        path: ${{ inputs.path }}
+        fetch-depth: 0
+
+    - name: Checkout Repository on the same or target branch
+      shell: bash
+      working-directory: ${{ inputs.path }}
+      run: |
+        REPOSITORY='${{ inputs.repository }}'
+        BASE_BRANCH='${{ inputs.base-branch }}'
+        DEFAULT_BRANCH='${{ inputs.repository-default-branch }}'
+        if [[ -n "${GITHUB_HEAD_REF}" ]]; then
+          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on ${REPOSITORY}"
+          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+          if [[ -n "${BRANCH}" ]]; then
+            echo "Checking out branch with the same name"
+            git fetch --all
+            git checkout origin/${GITHUB_HEAD_REF}
+            exit
+          fi
+        fi
+        if [[ "${BASE_BRANCH}" == "${DEFAULT_BRANCH}" ]]; then
+          echo "Base branch is default branch, keeping default branch checkout"
+          exit
+        fi
+        echo "Checking if base branch \"${BASE_BRANCH}\" exists on ${REPOSITORY}"
+        BRANCH=$(git ls-remote origin ${BASE_BRANCH})
+        if [[ -n "${BRANCH}" ]]; then 
+          echo "Checking out target base branch from input"
+          git fetch --all
+          git checkout origin/${BASE_BRANCH}
+        else
+          echo "Base branch ${BASE_BRANCH} not found on ${REPOSITORY}, keeping default branch"
+        fi
