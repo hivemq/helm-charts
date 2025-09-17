@@ -45,12 +45,14 @@ jobs:
           BASE_BRANCH='${{ inputs.base-branch }}'
           echo "Using base branch input: ${BASE_BRANCH}"
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_HEAD_REF}
-            exit
+          if [[ -n "${GITHUB_HEAD_REF}" ]]; then
+            BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+            if [[ -n "${BRANCH}" ]]; then
+              echo "Checking out branch with the same name"
+              git fetch --all
+              git checkout origin/${GITHUB_HEAD_REF}
+              exit
+            fi
           fi
           if [[ "${BASE_BRANCH}" == "develop" ]]; then
             echo "Base branch is develop, keeping default branch checkout"
@@ -116,12 +118,14 @@ jobs:
           BASE_BRANCH='${{ inputs.base-branch }}'
           echo "Using base branch input: ${BASE_BRANCH}"
           echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on hivemq-platform-operator"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-          if [[ -n "${BRANCH}" ]]; then 
-            echo "Checking out branch with the same name"
-            git fetch --all
-            git checkout origin/${GITHUB_HEAD_REF}
-            exit
+          if [[ -n "${GITHUB_HEAD_REF}" ]]; then
+            BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+            if [[ -n "${BRANCH}" ]]; then
+              echo "Checking out branch with the same name"
+              git fetch --all
+              git checkout origin/${GITHUB_HEAD_REF}
+              exit
+            fi
           fi
           if [[ "${BASE_BRANCH}" == "develop" ]]; then
             echo "Base branch is develop, keeping default branch checkout"
