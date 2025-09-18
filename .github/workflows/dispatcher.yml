@@ -22,6 +22,8 @@ jobs:
         with:
           base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
+            .github/workflows/dispatcher.yml
+            .github/workflows/edge-*.yml
             charts/hivemq-edge/**
             manifests/hivemq-edge/**
           files_ignore: |
@@ -44,6 +46,8 @@ jobs:
         with:
           base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
+            .github/workflows/dispatcher.yml
+            .github/workflows/swarm-*.yml
             charts/hivemq-swarm/**
             manifests/hivemq-swarm/**
           files_ignore: |
@@ -66,6 +70,8 @@ jobs:
         with:
           base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
+            .github/workflows/dispatcher.yml
+            .github/workflows/legacy-*.yml
             charts/hivemq-operator/**
             manifests/hivemq-operator/**
             tests-hivemq-operator/**
@@ -89,6 +95,8 @@ jobs:
         with:
           base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
+            .github/workflows/dispatcher.yml
+            .github/workflows/platform-*.yml
             charts/hivemq-platform/**
             manifests/hivemq-platform/**
             tests-hivemq-platform-operator/**
@@ -112,6 +120,8 @@ jobs:
         with:
           base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
           files: |
+            .github/workflows/dispatcher.yml
+            .github/workflows/platform-*.yml
             charts/hivemq-platform-operator/**
             manifests/hivemq-platform-operator/**
             tests-hivemq-platform-operator/**
