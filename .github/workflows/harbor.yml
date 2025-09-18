@@ -6,9 +6,6 @@ on:
       - develop
     paths:
       - charts/hivemq-platform-operator/**
-  workflow_run:
-    workflows:
-      - Helm Charts Dispatcher
 jobs:
   platform-operator-chart:
     name: Platform Operator
