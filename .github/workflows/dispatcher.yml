@@ -128,49 +128,6 @@ jobs:
           files_ignore: |
             **/*.md
 
-  check-platform-operator-chart-only-changes:
-    name: Platform Operator chart only changes
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.changes.outputs.any_modified }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 0
-
-      - name: Check for relevant changes
-        id: changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
-        with:
-          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
-          files: |
-            charts/hivemq-platform-operator/**
-          files_ignore: |
-            **/*.md
-
-  check-chart-changes:
-    name: Chart changes
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'master'
-    outputs:
-      should-run: ${{ steps.changes.outputs.any_modified }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 0
-
-      - name: Check for relevant changes
-        id: changes
-        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
-        with:
-          base_sha: ${{ github.ref_name == 'develop' && 'master' || 'develop' }}
-          files: |
-            charts/**
-          files_ignore: |
-            **/*.md
-
   edge-smoke-test:
     name: Edge smoke tests
     needs: check-edge-changes
@@ -283,25 +240,3 @@ jobs:
         run: |
           echo "One or more test jobs failed."
           exit 1
-
-  publish-harbor:
-    name: Publish to Harbor
-    if: >
-      (github.ref_name == 'master' || github.ref_name == 'develop') &&
-      needs.check-platform-operator-chart-only-changes.outputs.should-run == 'true'
-    needs:
-      - check-platform-operator-chart-only-changes
-      - tests-summary-report
-    uses: ./.github/workflows/harbor.yml
-    secrets: inherit
-
-  release-charts:
-    name: Release
-    if: >
-      github.ref_name == 'master' &&
-      needs.check-chart-changes.outputs.should-run == 'true'
-    needs:
-      - check-chart-changes
-      - tests-summary-report
-    uses: ./.github/workflows/release.yml
-    secrets: inherit

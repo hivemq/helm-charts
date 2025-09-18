@@ -1,6 +1,13 @@
 name: Release Charts
 on:
-  workflow_call:
+  push:
+    branches:
+      - master
+    paths:
+      - charts/**
+  workflow_run:
+    workflows:
+      - Helm Charts Dispatcher
 jobs:
   release:
     name: Helm Charts
