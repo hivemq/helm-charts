@@ -9,7 +9,7 @@ more details.
 
 ## Prerequisites
 
-- Kubernetes 1.23+
+- Kubernetes 1.24+
 - Helm 3.10.x
 
 ## Repository Info
