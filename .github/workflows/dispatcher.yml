@@ -288,7 +288,6 @@ jobs:
     name: Publish to Harbor
     if: >
       (github.ref_name == 'master' || github.ref_name == 'develop') &&
-      github.event_name == 'push' &&
       needs.check-platform-operator-chart-only-changes.outputs.should-run == 'true'
     needs:
       - check-platform-operator-chart-only-changes
@@ -300,7 +299,6 @@ jobs:
     name: Release
     if: >
       github.ref_name == 'master' &&
-      github.event_name == 'push' &&
       needs.check-chart-changes.outputs.should-run == 'true'
     needs:
       - check-chart-changes
