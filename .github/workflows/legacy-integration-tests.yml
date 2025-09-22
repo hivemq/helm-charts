@@ -10,6 +10,7 @@ on:
 env:
   check-prefix: "Test #"
   split-total: 6
+  base-ref: ${{ inputs.base-branch == 'develop' && 'master' || 'develop' }}
 jobs:
   generate-split-index-json:
     name: Generate split Legacy Operator integration tests indexes
@@ -93,7 +94,7 @@ jobs:
         uses: donnerbart/split-tests-java-action/checkout-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
           split-index: ${{ matrix.split-index }}
-          git-branch: junit-reports/legacy/${{ inputs.base-branch }}
+          git-branch: junit-reports/legacy/${{ env.base-ref }}
           path: junit-reports
           artifact-name: junit-xml-reports-legacy-sha
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
@@ -197,6 +198,6 @@ jobs:
       - name: Merge JUnit reports
         uses: donnerbart/split-tests-java-action/merge-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
-          git-branch: junit-reports/legacy/${{ inputs.base-branch }}
-          artifact-name: junit-xml-reports-legacy-${{ inputs.base-branch }}
+          git-branch: junit-reports/legacy/${{ env.base-ref }}
+          artifact-name: junit-xml-reports-legacy-${{ env.base-ref }}
           split-artifact-pattern: junit-xml-reports-legacy-*
