@@ -41,7 +41,7 @@ Usage: {{ include "hivemq-platform.configuration-name" . }}
 {{- end -}}
 
 {{/*
-Common labels
+Common labels.
 */}}
 {{- define "hivemq-platform.labels" -}}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
@@ -51,7 +51,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
-Selector labels
+Selector labels.
 */}}
 {{- define "hivemq-platform.selector-labels" -}}
 app.kubernetes.io/name: "hivemq-platform"
@@ -59,7 +59,7 @@ app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end -}}
 
 {{/*
-Checks whether a license is in use by the Platform.
+Checks whether a license is in use by the platform.
 Returns:
 - `true` if it's reusing an existing license created in a separate Secret or if it's creating a new one. Empty string otherwise.
 Usage: {{ include "hivemq-platform.has-license" . }}
@@ -73,14 +73,35 @@ Usage: {{ include "hivemq-platform.has-license" . }}
 {{- end -}}
 
 {{/*
-Returns the default license name for the platform
+Checks whether a HiveMQ Pulse configuration is in use by the platform.
+Returns:
+- `true` if it's reusing an existing Pulse configuration created in a separate Secret or if it's creating a new one. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-pulse-config" . }}
+*/}}
+{{- define "hivemq-platform.has-pulse-config" -}}
+{{- $pulseConfigExists := "" -}}
+{{- if or .Values.pulse.create .Values.pulse.name -}}
+    {{- $pulseConfigExists = true -}}
+{{- end -}}
+{{- $pulseConfigExists -}}
+{{- end -}}
+
+{{/*
+Returns the default license name for the platform.
 */}}
 {{- define "hivemq-platform.default-license-name" -}}
 {{- printf "%s-%s" "hivemq-license" .Release.Name }}
 {{- end -}}
 
 {{/*
-Has additional volumes
+Returns the default pulse configuration name for the platform.
+*/}}
+{{- define "hivemq-platform.default-pulse-name" -}}
+{{- printf "%s-%s" "hivemq-pulse-configuration" .Release.Name }}
+{{- end -}}
+
+{{/*
+Has additional volumes.
 */}}
 {{- define "hivemq-platform.has-additional-volumes" -}}
 {{- if .Values.additionalVolumes }}
@@ -89,7 +110,7 @@ Has additional volumes
 {{- end -}}
 
 {{/*
-Does the `hivemq` container have additional volume mounts
+Does the `hivemq` container have additional volume mounts.
 Returns:
 - `true` if the main `hivemq` container is not explicitily set in any element of the `.Values.additionalVolumes` array
     as a `.Values.additionalVolumes.containerName` (default value), empty string otherwise.
@@ -672,6 +693,29 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- $additionalVolumes := .Values.additionalVolumes }}
 {{- $volumeMountList := list }}
 {{- $volumeMountPathList := list }}
+
+{{- /* add default volume mounts for license, pulse and TLS to validation lists */ -}}
+{{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
+{{- if $hasLicense }}
+  {{- $volumeMountList = "licenses-hivemq" | append $volumeMountList }}
+  {{- $volumeMountPathList = "/opt/hivemq/license-hivemq" | append $volumeMountPathList }}
+{{- end }}
+
+{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
+{{- if $hasPulseConfig }}
+  {{- $volumeMountList = "pulse-config-hivemq" | append $volumeMountList }}
+  {{- $volumeMountPathList = "/opt/hivemq/pulse/conf-hivemq" | append $volumeMountPathList }}
+{{- end }}
+
+{{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
+{{- if $hasKeystore }}
+  {{- $secretNames := include "hivemq-platform.get-tls-secret-names" . | splitList "," }}
+  {{- range $secretName := $secretNames }}
+    {{- $volumeMountList = (printf "%s-hivemq" $secretName) | append $volumeMountList}}
+    {{- $volumeMountPathList = (printf "/tls-%s-hivemq" $secretName) | append $volumeMountPathList }}
+  {{- end -}}
+{{- end }}
+
 {{- range $additionalVolume := $additionalVolumes }}
     {{- if not (hasKey $additionalVolume "type") }}
         {{- fail (printf "\n`type` value is mandatory for all of the `additionalVolumes` defined") }}
@@ -699,34 +743,106 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
         {{- $volumeName = $additionalVolume.name }}
     {{- end -}}
 
-    {{/* Check for duplicates volume mounts within the same container */}}
+    {{- /* check for duplicates volume mounts within the same container */ -}}
     {{- $containerName := $additionalVolume.containerName | default "hivemq" }}
     {{- $volumeMountKey := printf "%s-%s" $volumeName $containerName }}
     {{- if has $volumeMountKey $volumeMountList }}
         {{- fail (printf "\nVolumeMount `%s` (name: `%s` value, mountName: `%s` value) is duplicated for container `%s`" $volumeName ($additionalVolume.name | default "") ($additionalVolume.mountName | default "") $containerName) }}
     {{- else }}
-        {{- $volumeMountList = $volumeMountKey | append $volumeMountList}}
+        {{- $volumeMountList = $volumeMountKey | append $volumeMountList }}
     {{- end }}
 
-    {{/* Check for duplicates volume mount paths within the same container */}}
+    {{- /* check for duplicates volume mount paths within the same container */ -}}
     {{- if hasKey $additionalVolume "path" }}
         {{- $hasSubPath := hasKey $additionalVolume "subPath" }}
-        {{- $volumeMountPathKey := ternary (printf "%s-%s-%s" $containerName $additionalVolume.path $additionalVolume.subPath) (printf "%s-%s" $containerName $additionalVolume.path) ($hasSubPath) }}
+        {{- $volumeMountPathKey := ternary (printf "%s-%s-%s" $additionalVolume.path $additionalVolume.subPath $containerName) (printf "%s-%s" $additionalVolume.path $containerName) ($hasSubPath) }}
         {{- if has $volumeMountPathKey $volumeMountPathList }}
             {{- $duplicatedPath := ternary (printf "%s/%s" $additionalVolume.path $additionalVolume.subPath) (printf "%s" $additionalVolume.path) ($hasSubPath) }}
             {{- fail (printf "\nVolumeMount path `%s` (path: `%s` value, subPath: `%s` value) is duplicated for container `%s`" $duplicatedPath $additionalVolume.path ($additionalVolume.subPath | default "") $containerName) }}
         {{- else }}
-            {{- $volumeMountPathList = $volumeMountPathKey | append $volumeMountPathList}}
+            {{- $volumeMountPathList = $volumeMountPathKey | append $volumeMountPathList }}
         {{- end }}
     {{- end }}
 
-    {{/* Volumes can only be defined with same name and same type */}}
+    {{- /* Volumes can only be defined with same name and same type */ -}}
     {{- range $volume := $additionalVolumes }}
     {{- if and (or (eq $volume.mountName $volumeName) (eq $volume.name $volumeName)) (not (eq $volume.type $additionalVolume.type)) }}
         {{- fail (printf "\nVolume `%s` (name: `%s` value, mountName: `%s` value) is defined more than once but with different types" $volumeName ($additionalVolume.name | default "") ($additionalVolume.mountName | default "")) }}
     {{- end }}
     {{- end -}}
 
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Pulse configuration so:
+ - When the `pulse.create` value is `true`, at least one configuration content is defined.
+ - Only one of `data` or `overridePulseConfig` are set, but not both.
+ - When `isPulseConfigBase64Encoded` is set to `true`, `data` is Base64 encoded.
+Usage: {{ include "hivemq-platform.validate-pulse" . }}
+*/}}
+{{- define "hivemq-platform.validate-pulse" -}}
+{{- if .Values.pulse.create -}}
+    {{- if and (not .Values.pulse.overridePulseConfig) (not .Values.pulse.data) -}}
+        {{- fail (printf "\nHiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values") -}}
+    {{- end -}}
+    {{- if and .Values.pulse.data .Values.pulse.overridePulseConfig -}}
+        {{- fail (printf "\nBoth `data` and `overridePulseConfig` values are set for the HiveMQ Pulse configuration content. Please, use only one of them") -}}
+    {{- end -}}
+    {{- include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates:
+- No duplicated EnvVars are defined in the `.Values.nodes.env` value.
+- No default Platform EnvVar is set through `.Values.nodes.env`.
+Usage: {{ include "hivemq-platform.validate-env-vars" . }}
+*/}}
+{{- define "hivemq-platform.validate-env-vars" -}}
+{{- include "hivemq-platform.validate-duplicated-env-vars" . -}}
+{{- include "hivemq-platform.validate-default-env-vars" . -}}
+{{- end -}}
+
+{{/*
+Validates there is no duplicated EnvVars defined in the `.Values.env` value.
+Usage: {{- include "hivemq-platform.validate-duplicated-env-vars" . }}
+*/}}
+{{- define "hivemq-platform.validate-duplicated-env-vars" -}}
+{{- $envList := list }}
+{{- range .Values.nodes.env }}
+  {{- if has .name $envList }}
+    {{- fail (printf "\nDuplicated environment variable `%s` found in the `.nodes.env` value." .name) }}
+  {{- else }}
+    {{- $envList = .name | append $envList}}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates no default Platform EnvVar is set through `.Values.nodes.env`. Otherwise they may clash with the defaults already set.
+Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
+*/}}
+{{- define "hivemq-platform.validate-default-env-vars" -}}
+{{- $defaultEnvs := list "JAVA_OPTS" }}
+{{- range .Values.nodes.env }}
+  {{- if has .name $defaultEnvs }}
+    {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead." .name) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates the data passed as parameter is a valid Base64 encoded string for HiveMQ Pulse configuration.
+Usage: {{ include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) }}
+*/}}
+{{- define "hivemq-platform.validate-base64-encoded-pulse-data" -}}
+{{- if and .data .isPulseConfigBase64Encoded -}}
+    {{- $original := .data -}}
+    {{- $reencoded := $original | b64dec | b64enc -}}
+    {{- if not (eq $original $reencoded) -}}
+        {{- fail (printf "\nHiveMQ Pulse configuration data content is not a Base64 encoded string") }}
+    {{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -852,24 +968,34 @@ Check if there are services exposed with keystore
 {{- end -}}
 
 {{/*
-Get secret volume mount
- - Only Add truststore if secret is set
+Gets the list of unique TLS secret names from exposed services with keystores/truststores.
+Returns a list of secret names that need to be mounted for TLS, comma separated.
+Usage: {{- $tlsSecrets := include "hivemq-platform.get-tls-secret-names" . | splitList "," }}
 */}}
-{{- define "hivemq-platform.get-tls-volume-mount" -}}
-{{- $secretsNames := list }}
+{{- define "hivemq-platform.get-tls-secret-names" -}}
+{{- $secretNames := list }}
 {{- range $service := .Values.services }}
-  {{- if and $service.exposed (and $service.keystoreSecretName (not (has $service.keystoreSecretName $secretsNames))) }}
-    {{- $secretsNames = $service.keystoreSecretName | append $secretsNames}}
+  {{- if and $service.exposed $service.keystoreSecretName (not (has $service.keystoreSecretName $secretNames)) }}
+    {{- $secretNames = $service.keystoreSecretName | append $secretNames}}
   {{- end -}}
-  {{- if and (and $service.exposed $service.keystoreSecretName) $service.truststoreSecretName }}
-    {{- if not (has $service.truststoreSecretName $secretsNames) }}
-      {{- $secretsNames = $service.truststoreSecretName | append $secretsNames}}
+  {{- if and $service.exposed $service.keystoreSecretName $service.truststoreSecretName }}
+    {{- if not (has $service.truststoreSecretName $secretNames) }}
+      {{- $secretNames = $service.truststoreSecretName | append $secretNames }}
     {{- end -}}
   {{- end -}}
 {{- end -}}
+{{- join "," $secretNames }}
+{{- end -}}
+
+{{/*
+Get secret volume mount
+ - Only add truststore if secret is set
+*/}}
+{{- define "hivemq-platform.get-tls-volume-mount" -}}
+{{- $secretsNames := include "hivemq-platform.get-tls-secret-names" . | splitList "," }}
 {{- range $name := $secretsNames }}
-- name: {{$name}}
-  mountPath: /tls-{{$name}}
+- name: {{ $name }}
+  mountPath: /tls-{{ $name }}
   readOnly: true
 {{- end -}}
 {{- end -}}

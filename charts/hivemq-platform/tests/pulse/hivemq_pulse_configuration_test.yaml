@@ -1,0 +1,418 @@
+suite: HiveMQ Platform - HiveMQ Pulse configuration tests
+templates:
+  - hivemq-pulse-configuration.yml
+  - hivemq-custom-resource.yml
+release:
+  name: test-platform
+tests:
+
+  - it: should not create a Pulse configuration Secret by default
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: hivemq-pulse-configuration.yml
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: pulse-config
+        template: hivemq-custom-resource.yml
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: pulse-config
+        template: hivemq-custom-resource.yml
+
+  - it: should create a Pulse configuration Secret when `create` is true with `data`
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: hivemq-pulse-configuration.yml
+      - containsDocument:
+          apiVersion: v1
+          kind: Secret
+          name: hivemq-pulse-configuration-test-platform
+        template: hivemq-pulse-configuration.yml
+      - equal:
+          path: data["config.xml"]
+          value: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        template: hivemq-pulse-configuration.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+          content:
+            name: pulse-config
+            mountPath: /opt/hivemq/pulse/conf
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+          content:
+            name: pulse-config
+            secret:
+              secretName: hivemq-pulse-configuration-test-platform
+        template: hivemq-custom-resource.yml
+
+  - it: should create a Pulse configuration Secret with custom name
+    set:
+      pulse:
+        create: true
+        name: "custom-pulse-config"
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+    asserts:
+      - equal:
+          path: metadata.name
+          value: custom-pulse-config
+        template: hivemq-pulse-configuration.yml
+      - equal:
+          path: data["config.xml"]
+          value: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        template: hivemq-pulse-configuration.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+          content:
+            name: pulse-config
+            mountPath: /opt/hivemq/pulse/conf
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+          content:
+            name: pulse-config
+            secret:
+              secretName: custom-pulse-config
+        template: hivemq-custom-resource.yml
+
+  - it: should reuse an existing custom Pulse configuration Secret
+    set:
+      pulse:
+        create: false
+        name: "custom-pulse-config"
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: hivemq-pulse-configuration.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+          content:
+            name: pulse-config
+            mountPath: /opt/hivemq/pulse/conf
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+          content:
+            name: pulse-config
+            secret:
+              secretName: custom-pulse-config
+        template: hivemq-custom-resource.yml
+
+  - it: should create a Pulse configuration Secret with annotations
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        annotations:
+          annotation1: value1
+          annotation2: value2
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - equal:
+          path: metadata.annotations.annotation1
+          value: value1
+      - equal:
+          path: metadata.annotations.annotation2
+          value: value2
+
+  - it: should create a Pulse configuration Secret with labels
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        labels:
+          label1: value1
+          label2: value2
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - equal:
+          path: metadata.labels.label1
+          value: value1
+      - equal:
+          path: metadata.labels.label2
+          value: value2
+
+  - it: should create a Pulse configuration Secret with `overridePulseConfig` when `isPulseConfigBase64Encoded` is false
+    set:
+      pulse:
+        create: true
+        isPulseConfigBase64Encoded: false
+        overridePulseConfig: |
+          <pulse-config>
+            foobar
+          </pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - equal:
+          path: stringData["config.xml"]
+          value: |-
+            <pulse-config>
+              foobar
+            </pulse-config>
+
+  - it: should create a Pulse configuration Secret with `overridePulseConfig` when `isPulseConfigBase64Encoded` is true
+    set:
+      pulse:
+        create: true
+        isPulseConfigBase64Encoded: true
+        overridePulseConfig: |
+          <pulse-config>
+            foobar
+          </pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - equal:
+          path: data["config.xml"]
+          decodeBase64: true
+          value: |
+            <pulse-config>
+              foobar
+            </pulse-config>
+
+  - it: should create a Pulse configuration Secret with stringData when `isPulseConfigBase64Encoded` is false
+    set:
+      pulse:
+        create: true
+        isPulseConfigBase64Encoded: false
+        data: "<pulse-config>foobar</pulse-config>"
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - equal:
+          path: stringData["config.xml"]
+          value: "<pulse-config>foobar</pulse-config>"
+
+  - it: should mount existing Pulse configuration Secret when `name` is provided without creating Secret
+    set:
+      pulse:
+        name: "my-existing-pulse-config-secret"
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: hivemq-pulse-configuration.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          count: 1
+          content:
+            name: pulse-config
+            mountPath: /opt/hivemq/pulse/conf
+        template: hivemq-custom-resource.yml
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+          content:
+            name: pulse-config
+            secret:
+              secretName: my-existing-pulse-config-secret
+        template: hivemq-custom-resource.yml
+
+  - it: should fail validation when additional volume mount path clashes with default Pulse configuration mount path
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+      additionalVolumes:
+        - name: conflicting-pulse-secret
+          type: secret
+          path: /opt/hivemq/pulse/conf
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount path `/opt/hivemq/pulse/conf` (path: `/opt/hivemq/pulse/conf` value, subPath: `` value) is duplicated for container `hivemq`"
+
+  - it: should fail validation when additional volume mount path clashes with default Pulse configuration mount path using an existing custom Pulse configuration Secret
+    set:
+      pulse:
+        name: "my-custom-pulse-config"
+      additionalVolumes:
+        - name: conflicting-pulse-secret
+          type: secret
+          path: /opt/hivemq/pulse/conf
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount path `/opt/hivemq/pulse/conf` (path: `/opt/hivemq/pulse/conf` value, subPath: `` value) is duplicated for container `hivemq`"
+
+  - it: should pass validation when additional volume mount path clashes with default Pulse configuration mount path but in different container
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+      additionalVolumes:
+        - name: conflicting-pulse-secret
+          type: secret
+          containerName: foobar
+          path: /opt/hivemq/pulse/conf
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: should fail validation when additional volume name clashes with default Pulse configuration volume name
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+      additionalVolumes:
+        - name: pulse-config
+          type: secret
+          path: /some/other/pulse/config/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount `pulse-config` (name: `pulse-config` value, mountName: `` value) is duplicated for container `hivemq`"
+
+  - it: should fail validation when additional volume name clashes with existing custom Pulse configuration Secret
+    set:
+      pulse:
+        name: "my-custom-pulse-config"
+      additionalVolumes:
+        - name: pulse-config
+          type: secret
+          path: /some/other/pulse/config/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount `pulse-config` (name: `pulse-config` value, mountName: `` value) is duplicated for container `hivemq`"
+
+  - it: should pass validation when additional volume name clashes with default Pulse configuration volume name but in different container
+    set:
+      pulse:
+        name: "my-custom-pulse-config"
+      additionalVolumes:
+        - name: pulse-config
+          type: secret
+          containerName: foobar
+          path: /some/other/pulse/config/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: should fail validation when both `data` and `overridePulseConfig` are set
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        overridePulseConfig: |
+          <pulse-config>
+            foobar
+          </pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "Both `data` and `overridePulseConfig` values are set for the HiveMQ Pulse configuration content. Please, use only one of them"
+
+  - it: should fail validation when neither `data` nor `overridePulseConfig` are set
+    set:
+      pulse:
+        create: true
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "HiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
+
+  - it: should fail validation when `data` is empty
+    set:
+      pulse:
+        create: true
+        data: ""
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "HiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
+
+  - it: should fail validation when `overridePulseConfig` is empty
+    set:
+      pulse:
+        create: true
+        overridePulseConfig: ""
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "HiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
+
+  - it: should fail validation when `isPulseConfigBase64Encoded` is true but `data` is not valid base64
+    set:
+      pulse:
+        create: true
+        isPulseConfigBase64Encoded: true
+        data: "invalid-base64"
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "HiveMQ Pulse configuration data content is not a Base64 encoded string"
+
+  - it: should fail schema validation when `annotations` is not a map
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        annotations: "invalid-annotation"
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when `labels` is not a map
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        labels: "invalid-label"
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when `name` is not a string
+    set:
+      pulse:
+        create: true
+        name: 123
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when `create` is not a boolean
+    set:
+      pulse:
+        create: "foobar"
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when `isPulseConfigBase64Encoded` is not a boolean
+    set:
+      pulse:
+        create: true
+        isPulseConfigBase64Encoded: "foobar"
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when `name` exceeds 253 characters
+    set:
+      pulse:
+        create: true
+        name: "this-is-a-very-long-secret-name-that-exceeds-the-maximum-allowed-length-of-253-characters-for-kubernetes-secret-names-and-should-cause-schema-validation-to-fail-because-it-is-way-too-long-and-violates-the-dns-subdomain-naming-conventions-that-kubernetes-enforces-for-secret-resource-names-in-the-cluster"
+        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+    template: hivemq-pulse-configuration.yml
+    asserts:
+      - failedTemplate: {}

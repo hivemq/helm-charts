@@ -818,6 +818,41 @@
       },
       "type" : "object"
     },
+    "pulse" : {
+      "description" : "Defines the HiveMQ Pulse configuration options.",
+      "properties" : {
+        "annotations" : {
+          "description" : "Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Pulse configuration.",
+          "type" : "object"
+        },
+        "create" : {
+          "description" : "Creates a Kubernetes Secret for the HiveMQ Pulse configuration.",
+          "type" : "boolean"
+        },
+        "data" : {
+          "description" : "Inlines the HiveMQ Pulse configuration as a string. By default, this data is expected as Base64 encoded string. Set \"isPulseConfigBase64Encoded=false\" to provide a plain string.",
+          "type" : "string"
+        },
+        "isPulseConfigBase64Encoded" : {
+          "description" : "Indicates whether the HiveMQ Pulse configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret. This is useful for third party tools that handle content through placeholders, such as the ArgoCD Vault plugin.",
+          "type" : "boolean"
+        },
+        "labels" : {
+          "description" : "Defines custom labels for the Kubernetes Secret that contains the HiveMQ Pulse configuration.",
+          "type" : "object"
+        },
+        "name" : {
+          "description" : "The name of the Kubernetes Secret containing the HiveMQ Pulse configuration. To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.",
+          "maxLength": 253,
+          "type" : "string"
+        },
+        "overridePulseConfig" : {
+          "description" : "Overrides the HiveMQ Pulse configuration via file using --set-file config.xml.",
+          "type" : "string"
+        }
+      },
+      "type" : "object"
+    },
     "restApi" : {
       "properties" : {
         "authEnabled" : {

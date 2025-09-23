@@ -1,5 +1,6 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
+{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
@@ -84,6 +85,7 @@ spec:
           containers:
             - name: hivemq
               env:
+                {{- include "hivemq-platform.validate-env-vars" . }}
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
                 {{- if $hasKeystore }}
@@ -203,11 +205,15 @@ spec:
                   ephemeral-storage: {{ . | trim | quote }}
                   {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
-              {{- if or $hasAdditionalVolumeMounts (or $hasLicense $hasKeystore) }}
+              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore $hasPulseConfig }}
               volumeMounts:
                 {{- if $hasLicense }}
                 - name: licenses
                   mountPath: /opt/hivemq/license
+                {{- end }}
+                {{- if $hasPulseConfig }}
+                - name: pulse-config
+                  mountPath: /opt/hivemq/pulse/conf
                 {{- end }}
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
@@ -229,15 +235,24 @@ spec:
             {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or $hasAdditionalVolumes (or $hasLicense $hasKeystore) }}
+          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore $hasPulseConfig }}
           volumes:
             {{- if $hasLicense }}
             - name: licenses
               secret:
-                {{- if eq .Values.license.name "" }}
-                secretName: {{ include "hivemq-platform.default-license-name" . }}
-                {{- else }}
+                {{- if .Values.license.name }}
                 secretName: {{ .Values.license.name }}
+                {{- else }}
+                secretName: {{ include "hivemq-platform.default-license-name" . }}
+                {{- end }}
+            {{- end }}
+            {{- if $hasPulseConfig }}
+            - name: pulse-config
+              secret:
+                {{- if .Values.pulse.name }}
+                secretName: {{ .Values.pulse.name }}
+                {{- else }}
+                secretName: {{ include "hivemq-platform.default-pulse-name" . }}
                 {{- end }}
             {{- end }}
             {{- if $hasKeystore }}
@@ -260,7 +275,7 @@ spec:
         {{- toYaml . | nindent 12 }}
       {{- end }}
       {{- else -}}
-      {{.Values.config.overrideStatefulSet | nindent 3}}
+      {{ .Values.config.overrideStatefulSet | nindent 3 }}
       {{- end }}
   services:
     {{- include "hivemq-platform.validate-services" . -}}

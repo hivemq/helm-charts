@@ -1,0 +1,30 @@
+{{- if .Values.pulse.create }}
+{{- include "hivemq-platform.validate-pulse" . -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.pulse.name | default (include "hivemq-platform.default-pulse-name" .) }}
+  {{- with .Values.pulse.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.pulse.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{ ternary (println "data:") (println "stringData:") (.Values.pulse.isPulseConfigBase64Encoded) }}
+  {{- if .Values.pulse.data }}
+  config.xml: {{ .Values.pulse.data }}
+  {{- else if .Values.pulse.overridePulseConfig }}
+  config.xml: |-
+    {{- if .Values.pulse.isPulseConfigBase64Encoded -}}
+      {{- range .Values.pulse.overridePulseConfig | b64enc | toStrings -}}
+      {{ . | nindent 6 }}
+      {{ end }}
+    {{- else -}}
+      {{- range .Values.pulse.overridePulseConfig | toStrings -}}
+      {{ . | nindent 6 }}
+      {{ end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
