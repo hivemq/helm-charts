@@ -78,8 +78,10 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
-    private @Nullable Chart currentPlatformChart;
+    private final @NotNull ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
+    private @Nullable Chart platformChart;
+    private @Nullable Chart legacyChart;
     private @Nullable KubernetesClient client;
 
     public HelmChartContainer(final boolean withK3sDebugging) {
@@ -132,23 +134,27 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         return "host.docker.internal/%s:%s".formatted(ociImage.getRepository(), ociImage.getVersionPart());
     }
 
-    public @NotNull Chart getCurrentPlatformChart() {
-        final var platformChart = currentPlatformChart;
+    public @NotNull Chart getLegacyOperatorChart() {
+        if (legacyChart != null) {
+            return legacyChart;
+        }
+        legacyChart = getLocalChart(LEGACY_OPERATOR_CHART);
+        return legacyChart;
+    }
+
+    public @NotNull Chart getPlatformChart() {
         if (platformChart != null) {
             return platformChart;
         }
-        final var objectMapper = new ObjectMapper(new YAMLFactory());
-        currentPlatformChart = copyFileFromContainer("/charts/" + PLATFORM_CHART + "/Chart.yaml",
-                inputStream -> objectMapper.readValue(inputStream, Chart.class));
-        return currentPlatformChart;
+        platformChart = getLocalChart(PLATFORM_CHART);
+        return platformChart;
     }
 
     public @NotNull Chart getPreviousPlatformChart() throws Exception {
-        final var currentChart = getCurrentPlatformChart();
+        final var currentChart = getPlatformChart();
         final var regex = "*.%s*".formatted(currentChart.getDescription());
         final var platformCharts = executeHelmSearchCommand("hivemq/hivemq-platform",
                 Stream.of("--versions", "--regexp", regex, "--output", "yaml"));
-        final var objectMapper = new ObjectMapper(new YAMLFactory());
         final var platformChartsList = objectMapper.readValue(platformCharts.replaceAll("app_version", "appVersion"),
                 new TypeReference<List<Chart>>() {
                 });//
@@ -453,6 +459,11 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         } catch (final Exception e) {
             return "Could not describe Helm command: " + e;
         }
+    }
+
+    private @NotNull Chart getLocalChart(final @NotNull String chart) {
+        return copyFileFromContainer("/charts/" + chart + "/Chart.yaml",
+                inputStream -> objectMapper.readValue(inputStream, Chart.class));
     }
 
     private static @NotNull String resolveChartLocation(
