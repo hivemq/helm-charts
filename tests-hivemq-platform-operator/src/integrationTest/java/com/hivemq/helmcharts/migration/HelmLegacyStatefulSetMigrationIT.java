@@ -119,6 +119,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 .getMetadata();
         assertThat(legacyStatefulSetMetadata.getAnnotations()).containsOnlyKeys("hivemq.com/resource-spec",
                 "kubernetes.io/change-cause");
+        final var legacyChartVersion = helmChartContainer.getLegacyOperatorChart().getVersion();
         assertAnnotationsAndLabels("Legacy StatefulSet",
                 legacyStatefulSetMetadata,
                 legacyStatefulSetMetadata.getAnnotations(),
@@ -132,7 +133,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                                 "app.kubernetes.io/version",
                                 hiveMQVersion,
                                 "helm.sh/chart",
-                                "hivemq-operator-0.11.56",
+                                "hivemq-operator-%s".formatted(legacyChartVersion),
                                 "hivemq-cluster",
                                 LEGACY_RELEASE_NAME)));
         assertAnnotationsAndLabels("Legacy StatefulSet Template",
