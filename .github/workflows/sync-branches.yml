@@ -2,7 +2,7 @@ name: Sync branches with HiveMQ Platform Operator and HiveMQ K8s testsuite repos
 on:
   pull_request:
     branches:
-      - develop
+      - next-operator-release
 jobs:
   sync-branches:
     name: Sync branches with hivemq-platform-operator and hivemq-k8s-testsuite repos
@@ -39,7 +39,7 @@ jobs:
             echo "branch_exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create new branch based on develop
+      - name: Create new branch based on next-operator-release
         if: steps.check-branch.outputs.branch_exists == 'false'
         run: |
           BRANCH=${{ github.event.pull_request.head.ref }}

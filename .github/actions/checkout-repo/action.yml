@@ -5,16 +5,13 @@ inputs:
     description: 'The repository to checkout'
     required: true
   repository-default-branch:
-    description: 'The default branch for this repository (e.g. develop or master)'
+    description: 'The default branch for this repository (e.g. next-operator-release or master)'
     required: true
   path:
     description: 'Path to checkout the repository'
     required: false
   token:
     description: 'GitHub token to use for the checkout'
-    required: true
-  base-branch:
-    description: 'The base branch to checkout'
     required: true
 
 runs:
@@ -32,19 +29,30 @@ runs:
       shell: bash
       working-directory: ${{ inputs.path }}
       run: |
+        if [[ -z "${GITHUB_HEAD_REF}" || -z "${GITHUB_BASE_REF}" ]]; then
+          echo "Not a Pull Request. GITHUB_HEAD_REF or GITHUB_BASE_REF are empty"
+          exit 1
+        fi
         REPOSITORY='${{ inputs.repository }}'
-        BASE_BRANCH='${{ inputs.base-branch }}'
         DEFAULT_BRANCH='${{ inputs.repository-default-branch }}'
-        if [[ "${BASE_BRANCH}" == "${DEFAULT_BRANCH}" ]]; then
+        echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on ${REPOSITORY}"
+        BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+        if [[ -n "${BRANCH}" ]]; then
+          echo "Checking out branch with the same name"
+          git fetch --all
+          git checkout origin/${GITHUB_HEAD_REF}
+          exit
+        fi
+        if [[ "${GITHUB_BASE_REF}" == "${DEFAULT_BRANCH}" ]]; then
           echo "Base branch is default branch, keeping default branch checkout"
           exit
         fi
-        echo "Checking if base branch \"${BASE_BRANCH}\" exists on ${REPOSITORY}"
-        BRANCH=$(git ls-remote origin ${BASE_BRANCH})
-        if [[ -n "${BRANCH}" ]]; then 
-          echo "Checking out target base branch from input"
+        echo "Checking if base branch \"${GITHUB_BASE_REF}\" exists on ${REPOSITORY}"
+        BRANCH=$(git ls-remote origin ${GITHUB_BASE_REF})
+        if [[ -n "${BRANCH}" ]]; then
+          echo "Checking out target base branch"
           git fetch --all
-          git checkout origin/${BASE_BRANCH}
-        else
-          echo "Base branch ${BASE_BRANCH} not found on ${REPOSITORY}, keeping default branch"
+          git checkout origin/${GITHUB_BASE_REF}
+          exit
         fi
+        echo "Base branch ${GITHUB_BASE_REF} not found on ${REPOSITORY}, keeping default branch"

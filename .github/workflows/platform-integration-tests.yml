@@ -2,15 +2,9 @@
 name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Integration Tests
 on:
   workflow_call:
-    inputs:
-      base-branch:
-        description: 'The base branch for JUnit reports'
-        type: string
-        required: true
 env:
   check-prefix: 'Test #'
   split-total: 19
-  base-ref: ${{ inputs.base-branch == 'develop' && 'master' || 'develop' }}
   CI_RUN: true
 jobs:
   generate-split-index-json:
@@ -39,10 +33,9 @@ jobs:
         uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-platform-operator
-          repository-default-branch: develop
+          repository-default-branch: master
           path: hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
-          base-branch: ${{ inputs.base-branch }}
 
       - name: Set up JDK 21
         id: setup-java
@@ -86,16 +79,15 @@ jobs:
         uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-platform-operator
-          repository-default-branch: develop
+          repository-default-branch: master
           path: hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
-          base-branch: ${{ inputs.base-branch }}
 
       - name: Checkout JUnit reports
         uses: donnerbart/split-tests-java-action/checkout-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
           split-index: ${{ matrix.split-index }}
-          git-branch: junit-reports/platform/${{ env.base-ref }}
+          git-branch: junit-reports/platform/${{ github.base_ref }}
           path: junit-reports
           artifact-name: junit-xml-reports-platform-sha
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
@@ -190,6 +182,6 @@ jobs:
       - name: Merge JUnit reports
         uses: donnerbart/split-tests-java-action/merge-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
         with:
-          git-branch: junit-reports/platform/${{ env.base-ref }}
-          artifact-name: junit-xml-reports-platform-${{ env.base-ref }}
+          git-branch: junit-reports/platform/${{ github.base_ref }}
+          artifact-name: junit-xml-reports-platform-${{ github.base_ref }}
           split-artifact-pattern: junit-xml-reports-platform-*
