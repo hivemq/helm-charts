@@ -19,7 +19,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withPreviousPlatformInstalled_upgradeToLatestChartVersion() throws Exception {
-        final var currentPlatformChart = helmChartContainer.getCurrentPlatformChart();
+        final var currentPlatformChart = helmChartContainer.getPlatformChart();
         final var previousPlatformChart = helmChartContainer.getPreviousPlatformChart();
         assertThat(currentPlatformChart.getVersion()).isNotNull();
         assertThat(currentPlatformChart.getAppVersion()).isNotNull();
@@ -28,7 +28,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
         assertThat(currentPlatformChart.getVersion()) //
                 .as("If there was a HiveMQ Platform Chart released recently, make sure to rebase either this branch or its base branch with latest")
                 .isGreaterThan(previousPlatformChart.getVersion());
-        LOG.info("Current platform chart: {}", helmChartContainer.getCurrentPlatformChart());
+        LOG.info("Current platform chart: {}", helmChartContainer.getPlatformChart());
         LOG.info("Previous platform chart: {}", helmChartContainer.getPreviousPlatformChart());
 
         helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
