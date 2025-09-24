@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
-      - develop
+      - next-operator-release
     paths:
       - charts/hivemq-platform-operator/**
+env:
+  operator_chart_name: helm-charts/hivemq-platform-operator
 jobs:
   platform-operator-chart:
     name: Platform Operator
@@ -25,10 +27,11 @@ jobs:
           password: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_TOKEN }}
 
       - name: Setup dev Harbor environment
-        if: ${{ github.ref_name == 'develop' }}
+        if: ${{ github.ref_name != 'master' }}
         run: |
           echo "HARBOR_DEV_URL=${{ secrets.HARBOR_REGISTRY_URL }}/dev" >> $GITHUB_ENV
           echo "HARBOR_PROJECT=dev" >> $GITHUB_ENV
+          echo "operator_chart_name=hivemq/$operator_chart_name" >> $GITHUB_ENV
 
       - name: Publish HiveMQ Platform Operator Helm chart
         id: push-chart
@@ -42,7 +45,7 @@ jobs:
 
           publish_version="$chart_version"
           # check if snapshot suffix is needed for the Chart version based on the branch
-          if [[ "$BRANCH" == "develop" && "$chart_version" != *"-snapshot" ]]; then
+          if [[ "$BRANCH" != "master" && "$chart_version" != *"-snapshot" ]]; then
             # increment patch version and add -snapshot suffix: 0.2.32 -> 0.2.33-snapshot
             IFS='.' read -r major minor patch <<< "$chart_version"
             patch=$((patch + 1))
@@ -73,12 +76,13 @@ jobs:
           fi
 
       - name: Install Sigstore
+        if: ${{ env.sign_chart == 'true' }}
         uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62
 
       - name: Sign HiveMQ Platform Operator Helm chart
         if: ${{ env.sign_chart == 'true' }}
         env:
-          CHART_NAME: ${{ github.ref_name == 'develop' && 'hivemq/helm-charts/hivemq-platform-operator' || 'helm-charts/hivemq-platform-operator' }}
+          CHART_NAME: ${{ env.operator_chart_name }}
           CHART_VERSION: ${{ env.sign_chart_version }}
           HARBOR_REGISTRY_URL: ${{ secrets.HARBOR_REGISTRY_URL }}
           HARBOR_API_USER: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_USER }}

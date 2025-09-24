@@ -2,11 +2,6 @@
 name: HiveMQ Platform Operator Helm Chart and HiveMQ Platform Helm Chart Smoke Test
 on:
   workflow_call:
-    inputs:
-      base-branch:
-        description: 'The base branch for JUnit reports'
-        type: string
-        required: true
 env:
   RELEASE_NAME: "smoke-test-release"
 jobs:
@@ -24,10 +19,9 @@ jobs:
         uses: ./helm-charts/.github/actions/checkout-repo
         with:
           repository: hivemq/hivemq-platform-operator
-          repository-default-branch: develop
+          repository-default-branch: master
           path: hivemq-platform-operator
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
-          base-branch: ${{ inputs.base-branch }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
