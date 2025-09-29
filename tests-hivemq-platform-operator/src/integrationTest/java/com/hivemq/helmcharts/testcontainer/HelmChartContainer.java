@@ -484,12 +484,31 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         }
         final var registry = "host.docker.internal:%d".formatted(port);
         LOG.debug("Setting up http://{} as OCI registry into K3s", registry);
-        return """
+
+        final var registryConfig = new StringBuilder();
+        registryConfig.append("""
                 mirrors:
                   "host.docker.internal":
                     endpoint:
                       - "http://%s"
-                """.formatted(registry);
+                """.formatted(registry));
+
+        final var dockerUsername = System.getenv("DOCKER_USERNAME");
+        final var dockerPassword = System.getenv("DOCKER_PASSWORD");
+        if (dockerUsername != null &&
+                !dockerUsername.isBlank() &&
+                dockerPassword != null &&
+                !dockerPassword.isBlank()) {
+            registryConfig.append("""
+                    configs:
+                      "docker.io":
+                        auth:
+                          username: "%s"
+                          password: "%s"
+                    """.formatted(dockerUsername, dockerPassword));
+        }
+
+        return registryConfig.toString();
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {

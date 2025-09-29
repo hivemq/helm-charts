@@ -37,12 +37,6 @@ jobs:
             notifications
             jdks
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
       - name: Create K8s Kind Cluster
         id: kind
         uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1
@@ -54,6 +48,9 @@ jobs:
 
       - name: Push images to the Kind registry
         working-directory: helm-charts
+        env:
+          ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
+          ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
         run: |
           ./gradlew :tests-hivemq-platform-operator:pushAllImagesForTesting --url ${{ steps.kind.outputs.LOCAL_REGISTRY }}
 
