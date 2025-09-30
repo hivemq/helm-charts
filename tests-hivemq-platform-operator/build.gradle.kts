@@ -38,6 +38,8 @@ testing {
         val integrationTest by registering(JvmTestSuite::class) {
             useJUnitJupiter(libs.versions.junit.jupiter)
             dependencies {
+                runtimeOnly(libs.junit.platform.launcher)
+
                 // Custom Extension
                 implementation(libs.hivemq.extensionSdk)
                 implementation(libs.javassist)
@@ -63,7 +65,6 @@ testing {
                 implementation(libs.fabric8.kubernetes.client)
                 implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.hivemq.mqttClient)
-                implementation(libs.junit.platform.launcher)
                 runtimeOnly(libs.logback.classic)
                 implementation(libs.netty.codec.http)
                 implementation(libs.rest.assured)
