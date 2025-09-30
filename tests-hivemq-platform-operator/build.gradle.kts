@@ -101,9 +101,9 @@ testing {
                     runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
                     runtime("hivemq:hivemq-operator:4.7.10").tag("latest")
                     runtime("hivemq:init-dns-wait:1.0.1").tag("latest")
-                    runtime("library:busybox:latest").name("busybox").tag("latest")
-                    runtime("library:nginx:1.28.0").name("nginx").tag("latest")
-                    runtime("selenium:standalone-firefox:4.32.0").tag("latest")
+                    runtime("library:busybox:1.37.0").name("busybox").tag("latest")
+                    runtime("library:nginx:1.29.1").name("nginx").tag("latest")
+                    runtime("selenium:standalone-firefox:143.0").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
                 val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
