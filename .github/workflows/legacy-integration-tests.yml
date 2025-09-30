@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Generate split index list
         id: generate
-        uses: donnerbart/split-tests-java-action/generate-split-index-json@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
+        uses: donnerbart/split-tests-java-action/generate-split-index-json@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
         with:
           split-total: ${{ env.split-total }}
 
@@ -45,7 +45,7 @@ jobs:
           java-version: 21
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4
 
       - name: Warmup Gradle cache
         if: steps.setup-java.outputs.cache-hit == 'false'
@@ -83,7 +83,7 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
 
       - name: Checkout JUnit reports
-        uses: donnerbart/split-tests-java-action/checkout-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
+        uses: donnerbart/split-tests-java-action/checkout-junit-reports@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
         with:
           split-index: ${{ matrix.split-index }}
           git-branch: junit-reports/legacy/${{ github.base_ref }}
@@ -95,7 +95,7 @@ jobs:
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
@@ -108,7 +108,7 @@ jobs:
           java-version: 21
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4
 
       - name: Compile integration tests
         working-directory: helm-charts
@@ -116,7 +116,7 @@ jobs:
 
       - name: Split tests
         id: split-tests
-        uses: donnerbart/split-tests-java-action@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
+        uses: donnerbart/split-tests-java-action@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
         with:
           split-index: ${{ matrix.split-index }}
           split-total: ${{ env.split-total }}
@@ -188,7 +188,7 @@ jobs:
       contents: write
     steps:
       - name: Merge JUnit reports
-        uses: donnerbart/split-tests-java-action/merge-junit-reports@a520fabe5640fc1d64ed28df590c7014b1a2c03d # v1
+        uses: donnerbart/split-tests-java-action/merge-junit-reports@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
         with:
           git-branch: junit-reports/legacy/${{ github.base_ref }}
           artifact-name: junit-xml-reports-legacy-${{ github.base_ref }}
