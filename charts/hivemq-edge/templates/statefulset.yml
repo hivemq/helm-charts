@@ -75,6 +75,10 @@ spec:
               value: "{{ .Values.javaOpts }}"
             - name: HIVEMQ_LICENSE_FOLDER
               value: "/license.edgelic"
+            {{- if .Values.pulse.enabled }}
+            - name: HIVEMQ_PULSE_TOKEN_FOLDER
+              value: "/pulse"
+            {{- end }}
             - name: HIVEMQ_DATA_FOLDER
               value: "/persistence"
             - name: HIVEMQ_CONFIG_FOLDER
@@ -245,6 +249,10 @@ spec:
           - mountPath: /license.edgelic
             name: license
           {{- end }}
+          {{- if .Values.pulse.enabled }}
+          - mountPath: /pulse/tokenbase64.jwt
+            name: pulse
+          {{- end }}
       {{- with .Values.podScheduling.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -315,6 +323,22 @@ spec:
             items:
               - key: license.edgelic
                 path: license.edgelic
+      {{- end }}
+      {{- if and .Values.pulse.enabled .Values.pulse.secret }}
+        - name: pulse
+          secret:
+            secretName: "{{ .Values.pulse.secret.secretName }}"
+            items:
+              - key: "{{ .Values.pulse.secret.secretKey }}"
+                path: "{{ .Values.pulse.secret.secretKey }}"
+      {{- end -}}
+      {{- if and (.Values.pulse.enabled) (.Values.pulse.token) }}
+        - name: pulse
+          secret:
+            secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "pulse" "releaseName" .Release.Name) }}
+            items:
+              - key: tokenbase64.jwt
+                path: tokenbase64.jwt
       {{- end }}
   {{- if and .Values.modules.persistence.enabled .Values.license.enabled }}
   volumeClaimTemplates:
