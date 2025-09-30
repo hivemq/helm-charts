@@ -1,0 +1,80 @@
+suite: HiveMQ Edge - Statefulset tests
+
+templates:
+  - statefulset.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.0.1
+  appVersion: "2367.359"
+set:
+  image:
+    tag: edge-tag
+
+tests:
+  - it: Should set the HIVEMQ_PULSE_TOKEN_FOLDER variable if pulse is enabled
+    set:
+      pulse:
+        enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PULSE_TOKEN_FOLDER
+            value: "/pulse"
+
+  - it: Should have the correct volume mounts if pulse is enabled with a token
+    set:
+      pulse:
+        enabled: true
+        token: "0123456789"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: pulse
+            mountPath: /pulse/tokenbase64.jwt
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: pulse
+            secret:
+              items:
+                - key: "tokenbase64.jwt"
+                  path: "tokenbase64.jwt"
+              secretName: hivemq-edge-pulse-edge
+
+
+  - it: Should not set the HIVEMQ_PULSE_TOKEN_FOLDER variable if pulse is disabled
+    set:
+      pulse:
+        enabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PULSE_TOKEN_FOLDER
+
+  - it: Should have the correct volume mounts if pulse is enabled with a k8s secret
+    set:
+      pulse:
+        enabled: true
+        secret:
+          secretName: secrety
+          secretKey: keyy
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: pulse
+            mountPath: /pulse/tokenbase64.jwt
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: pulse
+            secret:
+              items:
+                - key: "keyy"
+                  path: "keyy"
+              secretName: secrety

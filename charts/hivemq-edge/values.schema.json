@@ -86,6 +86,36 @@
       },
       "type" : "object"
     },
+    "pulse" : {
+      "description" : "Configure the pulse connection token.",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean",
+          "description" : "Enable pulse."
+        },
+        "token" : {
+          "type" : "string"
+        },
+        "secret" : {
+          "properties" : {
+            "enabled" : {
+              "description" : "Enable wiring pulse token to a provided k8s secret.",
+              "type" : "boolean"
+            },
+            "secretName" : {
+              "description" : "Name of the secret where the pulse token is stored.",
+              "type" : "string"
+            },
+            "secretKey" : {
+              "description" : "Name of the key inside the secret which contains the token.",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
+    },
     "preLoginNotice" : {
       "description" : "Pre-login notice configuration for admin UI.",
       "properties" : {
