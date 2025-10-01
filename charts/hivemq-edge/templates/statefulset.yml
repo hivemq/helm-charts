@@ -324,7 +324,7 @@ spec:
               - key: license.edgelic
                 path: license.edgelic
       {{- end }}
-      {{- if and .Values.pulse.enabled .Values.pulse.secret }}
+      {{- if and .Values.pulse.enabled .Values.pulse.secret.enabled }}
         - name: pulse
           secret:
             secretName: "{{ .Values.pulse.secret.secretName }}"
