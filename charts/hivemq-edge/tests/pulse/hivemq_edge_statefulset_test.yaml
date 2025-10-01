@@ -61,6 +61,7 @@ tests:
       pulse:
         enabled: true
         secret:
+          enabled: true
           secretName: secrety
           secretKey: keyy
     asserts:
