@@ -34,7 +34,7 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: pulse
-            mountPath: /pulse/tokenbase64.jwt
+            mountPath: /pulse
       - contains:
           path: spec.template.spec.volumes
           content:
@@ -68,7 +68,7 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: pulse
-            mountPath: /pulse/tokenbase64.jwt
+            mountPath: /pulse
       - contains:
           path: spec.template.spec.volumes
           content:

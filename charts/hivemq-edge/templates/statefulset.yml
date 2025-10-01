@@ -250,7 +250,7 @@ spec:
             name: license
           {{- end }}
           {{- if .Values.pulse.enabled }}
-          - mountPath: /pulse/tokenbase64.jwt
+          - mountPath: /pulse
             name: pulse
           {{- end }}
       {{- with .Values.podScheduling.affinity }}
