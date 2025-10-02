@@ -34,18 +34,24 @@ testing {
         val integrationTest by registering(JvmTestSuite::class) {
             useJUnitJupiter(libs.versions.junit.jupiter)
             dependencies {
-                implementation(libs.assertj)
-                implementation(libs.awaitility)
+                runtimeOnly(libs.junit.platform.launcher)
+
+                // Testcontainers
                 implementation(libs.testcontainers)
                 implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.junitJupiter)
-                implementation(libs.fabric8.kubernetes.client)
+
+                // Testing
+                implementation(libs.assertj)
+                implementation(libs.awaitility)
+
+                // Misc
                 runtimeOnly(libs.bouncycastle.pkix)
                 runtimeOnly(libs.bouncycastle.prov)
-                implementation(libs.junit.platform.launcher)
+                implementation(libs.fabric8.kubernetes.client)
                 implementation(libs.hivemq.mqttClient)
-                implementation(libs.slf4j.api)
                 runtimeOnly(libs.logback.classic)
+                implementation(libs.slf4j.api)
             }
             targets.configureEach {
                 testTask {

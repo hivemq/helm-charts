@@ -3523,3 +3523,117 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: A keystore password should be set either as a string \(keystorePassword\) or as a secret name \(keystorePasswordSecretName\)
+
+  - it: should fail validation when additional volume mount path clashes with a TLS mount path in a secured service
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+      additionalVolumes:
+        - name: conflicting-tls-secret
+          type: secret
+          path: /tls-mqtt-keystore-secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount path `/tls-mqtt-keystore-secret` (path: `/tls-mqtt-keystore-secret` value, subPath: `` value) is duplicated for container `hivemq`"
+
+  - it: should pass validation when additional volume mount path clashes with a TLS mount path in a secured non-exposed service
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "mqtt-keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+      additionalVolumes:
+        - name: conflicting-tls-secret
+          type: secret
+          path: /tls-mqtt-keystore-secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: should pass validation when additional volume mount path clashes with a TLS mount path in a secured service but in different container
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+      additionalVolumes:
+        - name: conflicting-tls-secret
+          type: secret
+          containerName: foobar
+          path: /tls-mqtt-keystore-secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: should fail validation when additional volume name clashes with a TLS volume name in a secured service
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+      additionalVolumes:
+        - name: mqtt-keystore-secret
+          type: secret
+          path: /some/other/tls/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount `mqtt-keystore-secret` (name: `mqtt-keystore-secret` value, mountName: `` value) is duplicated for container `hivemq`"
+
+  - it: should pass validation when additional volume name clashes with a TLS volume name in a secured non-exposed service
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "mqtt-keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+      additionalVolumes:
+        - name: mqtt-keystore-secret
+          type: secret
+          path: /some/other/tls/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: should pass validation when additional volume name clashes with a TLS volume name in a secured service but in different container
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "mqtt-keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+      additionalVolumes:
+        - name: mqtt-keystore-secret
+          type: secret
+          containerName: foobar
+          path: /some/other/tls/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1

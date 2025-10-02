@@ -358,6 +358,17 @@ tests:
                 key: myconfigmapkey
                 optional: true
 
+  - it: with duplicated environment variables, validation fails
+    set:
+      nodes.env:
+        - name: MY_ENV_VAR
+          value: foo
+        - name: MY_ENV_VAR
+          value: bar
+    asserts:
+      - failedTemplate:
+          errorMessage: "Duplicated environment variable `MY_ENV_VAR` found in the `.nodes.env` value."
+
   - it: with default resource requests
     asserts:
       - exists:
