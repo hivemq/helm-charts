@@ -26,6 +26,7 @@ jobs:
         if: always()
         uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
         with:
+          unittest-version: '1.0.1' # TODO: Regression issue with latest 1.0.2 unittest plugin version. To be removed once this is fixed.
           charts: charts/hivemq-platform charts/hivemq-platform-operator
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flags: --file './tests/**/*_test.yaml'
