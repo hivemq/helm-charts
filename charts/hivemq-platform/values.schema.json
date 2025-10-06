@@ -213,6 +213,7 @@
             "type" : "string"
           },
           "priority" : {
+            "description" : "Dynamically configures the extension priority value in the hivemq-extension.xml file.",
             "type" : "integer"
           },
           "requestHeaderSecretName" : {
@@ -231,7 +232,12 @@
             "description" : "Configures if hostname verification should be skipped for downloads of custom extensions or extension customizations.",
             "type" : "boolean"
           },
+          "startMandatory" : {
+            "description" : "Dynamically configures the extension start-mandatory value in the hivemq-extension.xml file.",
+            "type" : "boolean"
+          },
           "startPriority" : {
+            "description" : "Dynamically configures the extension start-priority value in the hivemq-extension.xml file.",
             "type" : "integer"
           },
           "supportsHotReload" : {

@@ -730,6 +730,10 @@ extensions:
 #    priority: 1000
 #    # Dynamically configures the extension start-priority value in the "hivemq-extension.xml" file.
 #    startPriority: 1000
+#    # Dynamically configures the extension start-mandatory value in the "hivemq-extension.xml" file.
+#    # If not configured, the default value in the "hivemq-extension.xml" file will not be changed.
+#    # If this option is configured to a running HiveMQ Platform, the according extension will be restarted.
+#    # startMandatory: false
 #    # Configures if certificate validation and hostname verification should be skipped for downloading the custom extension.
 #    # skipHttpsCertificateValidation: true
 #    # skipHttpsHostnameVerification: true
