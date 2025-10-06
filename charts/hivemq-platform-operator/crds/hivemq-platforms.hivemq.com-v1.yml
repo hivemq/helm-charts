@@ -67,6 +67,9 @@ spec:
                     extensionPriority:
                       description: "Configures the priority value in the hivemq_extension.xml."
                       type: "integer"
+                    extensionStartMandatory:
+                      description: "Configures the start-mandatory value in the hivemq_extension.xml."
+                      type: "boolean"
                     extensionStartPriority:
                       description: "Configures the start-priority value in the hivemq_extension.xml."
                       type: "integer"
