@@ -38,6 +38,7 @@ tests:
             extensionUri: http://nginx-service/hivemq-custom-test-extension-1.0.0.zip
             customizationUri: http://nginx-service/hivemq-customization.zip
             extensionPriority: 1500
+            extensionStartMandatory: true
             extensionStartPriority: 2000
             skipHttpsCertificateValidation: true
             skipHttpsHostnameVerification: false
@@ -49,6 +50,7 @@ tests:
             supportsHotReload: true
             configMapName: "hivemq-kafka-extension-test-configuration"
             extensionUri: preinstalled
+            extensionStartMandatory: false
       - contains:
           path: spec.extensions
           content:
