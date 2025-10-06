@@ -356,6 +356,9 @@ spec:
       {{- if hasKey $extension "startPriority" }}
       extensionStartPriority: {{ $extension.startPriority | default -1 }}
       {{- end }}
+      {{- if hasKey $extension "startMandatory" }}
+      extensionStartMandatory: {{ $extension.startMandatory | default false }}
+      {{- end }}
       {{- if hasKey $extension "secretName" }}
       secretName: {{ $extension.secretName | quote }}
       {{- end }}
