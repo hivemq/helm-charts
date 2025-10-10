@@ -796,6 +796,35 @@ volumeClaimTemplates: []
 #         storage: 100Gi
 #     volumeMode: Filesystem
 
+# Defines the HiveMQ Pulse configuration options.
+pulse:
+  # Creates a Kubernetes Secret for the HiveMQ Pulse configuration.
+  create: false
+  # The name of the Kubernetes Secret containing the HiveMQ Pulse configuration.
+  # To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.
+  name: ""
+  # Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Pulse configuration.
+  annotations: {}
+  # Defines custom labels for the Kubernetes Secret that contains the HiveMQ Pulse configuration.
+  labels: {}
+  # Indicates whether the HiveMQ Pulse configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret.
+  # This is useful for third party tools that handle content through placeholders, such as the ArgoCD Vault plugin.
+  # For example, the following Helm command:
+  #   `helm template platform hivemq/hivemq-platform --set pulse.create=true --set pulse.isPulseConfigBase64Encoded=false --set pulse.data=<hivemq-pulse-configuration-placeholder>`
+  # renders the the following Kubernetes Secret:
+  #   apiVersion: v1
+  #   kind: Secret
+  #   metadata:
+  #     name: hivemq-pulse-configuration
+  #   stringData:
+  #     config.xml: <hivemq-pulse-configuration-placeholder>
+  isPulseConfigBase64Encoded: true
+  # Inlines the HiveMQ Pulse configuration as a string.
+  # By default, this data is expected as Base64 encoded string. Set "isPulseConfigBase64Encoded=false" to provide a plain string.
+  data: ""
+  # Overrides the HiveMQ Pulse configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.
+  overridePulseConfig: ""
+
 # Enables the ServiceMonitor resource and Grafana dashboard creation for the platform.
 monitoring:
   # Defines whether the monitoring configuration for the HiveMQ Platform is enabled. The default setting is `false`.

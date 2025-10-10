@@ -708,3 +708,89 @@ tests:
               secretName: hivemq-license-test-hivemq-platform
           count: 1
         template: hivemq-custom-resource.yml
+
+  - it: should fail validation when additional volume mount path clashes with default license mount path
+    set:
+      license:
+        create: true
+        data: YnJva2VyLWxpY2Vuc2UtY29udGVudA== # broker-license-content
+      additionalVolumes:
+        - name: conflicting-license-secret
+          type: secret
+          path: /opt/hivemq/license
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount path `/opt/hivemq/license` (path: `/opt/hivemq/license` value, subPath: `` value) is duplicated for container `hivemq`"
+
+  - it: should fail validation when additional volume mount path clashes with existing custom license Secret
+    set:
+      license:
+        name: my-custom-license
+      additionalVolumes:
+        - name: conflicting-license-secret
+          type: secret
+          path: /opt/hivemq/license
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount path `/opt/hivemq/license` (path: `/opt/hivemq/license` value, subPath: `` value) is duplicated for container `hivemq`"
+
+  - it: should pass validation when additional volume mount path clashes with default license mount path but in different container
+    set:
+      license:
+        create: true
+        data: YnJva2VyLWxpY2Vuc2UtY29udGVudA== # broker-license-content
+      additionalVolumes:
+        - name: conflicting-license-secret
+          type: secret
+          containerName: foobar
+          path: /opt/hivemq/license
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: should fail validation when additional volume name clashes with default license volume name
+    set:
+      license:
+        create: true
+        data: YnJva2VyLWxpY2Vuc2UtY29udGVudA== # broker-license-content
+      additionalVolumes:
+        - name: licenses
+          type: secret
+          path: /some/other/license/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount `licenses` (name: `licenses` value, mountName: `` value) is duplicated for container `hivemq`"
+
+  - it: should not fail validation when additional volume name clashes with existing custom license Secret
+    set:
+      license:
+        name: my-custom-license
+      additionalVolumes:
+        - name: licenses
+          type: secret
+          path: /some/other/license/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "VolumeMount `licenses` (name: `licenses` value, mountName: `` value) is duplicated for container `hivemq`"
+
+  - it: should pass validation when additional volume name clashes with default license volume name but in different container
+    set:
+      license:
+        create: true
+        data: YnJva2VyLWxpY2Vuc2UtY29udGVudA== # broker-license-content
+      additionalVolumes:
+        - name: licenses
+          type: secret
+          containerName: foobar
+          path: /some/other/license/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
