@@ -38,10 +38,10 @@ shrinkwrap-api = { module = "org.jboss.shrinkwrap:shrinkwrap-api", version.ref =
 shrinkwrap-impl = { module = "org.jboss.shrinkwrap:shrinkwrap-impl-base", version.ref = "shrinkwrap" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
-testcontainers-hivemq = { module = "org.testcontainers:hivemq", version.ref = "testcontainers" }
-testcontainers-junitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-testcontainers-k3s = { module = "org.testcontainers:k3s", version.ref = "testcontainers" }
-testcontainers-selenium = { module = "org.testcontainers:selenium", version.ref = "testcontainers" }
+testcontainers-hivemq = { module = "org.testcontainers:testcontainers-hivemq", version.ref = "testcontainers" }
+testcontainers-junitJupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-k3s = { module = "org.testcontainers:testcontainers-k3s", version.ref = "testcontainers" }
+testcontainers-selenium = { module = "org.testcontainers:testcontainers-selenium", version.ref = "testcontainers" }
 
 [plugins]
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.24.0" }
