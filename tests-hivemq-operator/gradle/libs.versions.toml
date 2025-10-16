@@ -23,5 +23,5 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
-testcontainers-junitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-testcontainers-k3s = { module = "org.testcontainers:k3s", version.ref = "testcontainers" }
+testcontainers-junitJupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
+testcontainers-k3s = { module = "org.testcontainers:testcontainers-k3s", version.ref = "testcontainers" }
