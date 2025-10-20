@@ -61,6 +61,10 @@ jobs:
         working-directory: helm-charts
         run: netstat -tulpn
 
+      - name: Check Glibc version
+        working-directory: helm-charts
+        run: ldd --version
+
       - name: Install HiveMQ Platform Operator
         working-directory: helm-charts
         run: helm install operator-test --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=snapshot ./charts/hivemq-platform-operator --wait --timeout 2m0s
