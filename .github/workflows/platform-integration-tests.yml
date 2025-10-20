@@ -58,7 +58,7 @@ jobs:
 
   run-integration-tests:
     name: "Test #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - generate-split-index-json
       - compile-integration-test
