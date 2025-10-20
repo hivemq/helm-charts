@@ -28,19 +28,19 @@ data:
     </encoder>
     </appender>
 
-    <logger name="migrations" level="WARN" additivity="false">
+    <logger name="migrations" level="INFO" additivity="false">
     <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <root level="INFO">
+    <root level="TRACE">
     <appender-ref ref="CONSOLE"/>
     </root>
 
-    <logger name="jetbrains.exodus" level="WARN"/>
+    <logger name="jetbrains.exodus" level="TRACE"/>
     <logger name="org.eclipse.jetty" level="ERROR"/>
     <logger name="com.google.common.util.concurrent.Futures.CombinedFuture" level="OFF"/>
     <logger name="oshi" level="ERROR"/>
-    <logger name="org.jgroups" level="INFO"/>
+    <logger name="org.jgroups" level="DEBUG"/>
     <logger name="org.jboss.logging" level="WARN"/>
     <logger name="org.jboss.resteasy" level="WARN"/>
     <logger name="com.networknt" level="WARN"/>
