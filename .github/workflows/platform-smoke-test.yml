@@ -72,7 +72,7 @@ jobs:
 
       - name: Install HiveMQ Platform
         working-directory: helm-charts
-        run: helm install $RELEASE_NAME --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=latest --set nodes.replicaCount=1,nodes.resources.cpu=512m,nodes.logLevel=TRACE ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test
+        run: helm install $RELEASE_NAME --set image.repository=docker.io/davidhivemq --set image.name=hmq --set image.tag=latest --set nodes.replicaCount=1,nodes.resources.cpu=512m,nodes.logLevel=TRACE ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test
 
       - name: Wait for pods to be ready
         working-directory: helm-charts
