@@ -72,6 +72,15 @@ jobs:
           LATEST
         ]
     steps:
+      - name: Check Ubuntu Version
+        run: cat /etc/lsb-release
+
+      - name: Check Glibc version
+        run: ldd --version
+
+      - name: Check ports in use
+        run: netstat -tulpn
+
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
