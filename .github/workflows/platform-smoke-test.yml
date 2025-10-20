@@ -57,6 +57,10 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
 
+      - name: Check ports in use
+        working-directory: helm-charts
+        run: netstat -tulpn
+
       - name: Install HiveMQ Platform Operator
         working-directory: helm-charts
         run: helm install operator-test --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=snapshot ./charts/hivemq-platform-operator --wait --timeout 2m0s
