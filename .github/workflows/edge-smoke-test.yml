@@ -28,8 +28,8 @@ jobs:
       - name: Test HiveMQ Edge
         run: helm test $RELEASE_NAME --logs -n test
 
-      - name: Capture HiveMQ Edge Pods logs on failure
-        if: failure()
+      - name: Capture HiveMQ Edge Pod logs
+        if: always()
         run: |
           mkdir ${{ runner.temp }}/logs
           echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/edge-pod.log
@@ -37,13 +37,18 @@ jobs:
           echo "=== LOGS ===" >> ${{ runner.temp }}/logs/edge-pod.log
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/edge-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/edge-pod.log
 
-      - name: Upload HiveMQ Edge Pods logs on failure
-        if: failure()
+      - name: Upload HiveMQ Edge Pod logs
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: smoke-test-edge-pod-logs
-          path: ${{ runner.temp }}/logs/*.log
+          path: ${{ runner.temp }}/logs/edge-pod.log
           retention-days: 5
+
+      - name: Print HiveMQ Edge Pod logs
+        if: always()
+        run: |
+          cat ${{ runner.temp }}/logs/edge-pod.log
 
       - name: Uninstall HiveMQ Edge chart
         if: always()
