@@ -79,8 +79,8 @@ jobs:
       - name: Test HiveMQ Cluster
         run: helm test $RELEASE_NAME --logs -n test
 
-      - name: Capture HiveMQ Legacy Operator Pods logs on failure
-        if: failure()
+      - name: Capture HiveMQ Legacy Operator Pod logs
+        if: always()
         run: |
           mkdir ${{ runner.temp }}/logs
           echo "=== POD STATUS ===" > ${{ runner.temp }}/logs/legacy-pods.log
@@ -90,13 +90,18 @@ jobs:
           echo "=== LEGACY OPERATOR LOGS ===" >> ${{ runner.temp }}/logs/legacy-pods.log
           kubectl logs -l app=hivemq-operator --tail -1 -n test >> ${{ runner.temp }}/logs/legacy-pods.log 2>&1 || echo "Failed to retrieve legacy operator pod logs" >> ${{ runner.temp }}/logs/legacy-pods.log          
 
-      - name: Upload HiveMQ Legacy Operator Pods logs on failure
-        if: failure()
+      - name: Upload HiveMQ Legacy Operator Pod logs
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: smoke-test-legacy-pod-logs
-          path: ${{ runner.temp }}/logs/*.log
+          path: ${{ runner.temp }}/logs/legacy-pods.log
           retention-days: 5
+
+      - name: Print HiveMQ Legacy Operator Pod logs
+        if: always()
+        run: |
+          cat ${{ runner.temp }}/logs/legacy-pods.log
 
       - name: Uninstall HiveMQ Legacy Operator
         if: always()
