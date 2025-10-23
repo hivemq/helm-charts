@@ -177,15 +177,15 @@ spec:
               value: "{{ .Values.adminLdap.servers.server1.port }}"
               {{- if ge (len .Values.adminLdap.servers) 2 }}
             - name: HIVEMQ_LDAP_SERVER2_HOST
-              value: "{{ index .Values.adminLdap.servers 1 | get "host" }}"
+              value: "{{ (index .Values.adminLdap.servers 1).host }}"
             - name: HIVEMQ_LDAP_SERVER2_PORT
-              value: "{{ index .Values.adminLdap.servers 1 | get "port" }}"
+              value: "{{ (index .Values.adminLdap.servers 1).port }}"
               {{- end }}
               {{- if ge (len .Values.adminLdap.servers) 3 }}
             - name: HIVEMQ_LDAP_SERVER3_HOST
-              value: "{{ index .Values.adminLdap.servers 2 | get "host" }}"
+              value: "{{ (index .Values.adminLdap.servers 2).host }}"
             - name: HIVEMQ_LDAP_SERVER3_PORT
-              value: "{{ index .Values.adminLdap.servers 2 | get "port" }}"
+              value: "{{ (index .Values.adminLdap.servers 2).port }}"
               {{- end }}
             {{- else }}
             - name: HIVEMQ_USERS_ENABLED
