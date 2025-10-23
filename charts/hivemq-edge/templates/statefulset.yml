@@ -168,6 +168,24 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
+            {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.create.enabled true) }}
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
+              value: /ldap-trust/{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.adminLdap.tls.truststore.passwordSecretName }}"
+                  key: "{{ .Values.adminLdap.tls.truststore.passwordSecretKey }}"
+            {{- end }}
+            {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
+              value: /ldap-trust/truststore.jks
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "ldap" "releaseName" .Release.Name) }}"
+                  key: truststore-password
+            {{- end }}
             {{- if .Values.adminLdap.enabled }}
             - name: HIVEMQ_LDAP_ENABLED
               value: "true"
