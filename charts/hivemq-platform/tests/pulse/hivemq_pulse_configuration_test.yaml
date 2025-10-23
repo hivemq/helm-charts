@@ -26,7 +26,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
     asserts:
       - hasDocuments:
           count: 1
@@ -38,7 +38,7 @@ tests:
         template: hivemq-pulse-configuration.yml
       - equal:
           path: data["config.xml"]
-          value: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+          value: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         template: hivemq-pulse-configuration.yml
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
@@ -61,7 +61,7 @@ tests:
       pulse:
         create: true
         name: "custom-pulse-config"
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
     asserts:
       - equal:
           path: metadata.name
@@ -69,7 +69,7 @@ tests:
         template: hivemq-pulse-configuration.yml
       - equal:
           path: data["config.xml"]
-          value: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+          value: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         template: hivemq-pulse-configuration.yml
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
@@ -116,7 +116,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         annotations:
           annotation1: value1
           annotation2: value2
@@ -133,7 +133,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         labels:
           label1: value1
           label2: value2
@@ -152,17 +152,17 @@ tests:
         create: true
         isPulseConfigBase64Encoded: false
         overridePulseConfig: |
-          <pulse-config>
-            foobar
-          </pulse-config>
+          <pulse>
+            <enabled>true</enabled>
+          </pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - equal:
           path: stringData["config.xml"]
           value: |-
-            <pulse-config>
-              foobar
-            </pulse-config>
+            <pulse>
+              <enabled>true</enabled>
+            </pulse>
 
   - it: should create a Pulse configuration Secret with `overridePulseConfig` when `isPulseConfigBase64Encoded` is true
     set:
@@ -170,30 +170,30 @@ tests:
         create: true
         isPulseConfigBase64Encoded: true
         overridePulseConfig: |
-          <pulse-config>
-            foobar
-          </pulse-config>
+          <pulse>
+            <enabled>true</enabled>
+          </pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - equal:
           path: data["config.xml"]
           decodeBase64: true
           value: |
-            <pulse-config>
-              foobar
-            </pulse-config>
+            <pulse>
+              <enabled>true</enabled>
+            </pulse>
 
   - it: should create a Pulse configuration Secret with stringData when `isPulseConfigBase64Encoded` is false
     set:
       pulse:
         create: true
         isPulseConfigBase64Encoded: false
-        data: "<pulse-config>foobar</pulse-config>"
+        data: "<pulse><enabled>true</enabled></pulse>"
     template: hivemq-pulse-configuration.yml
     asserts:
       - equal:
           path: stringData["config.xml"]
-          value: "<pulse-config>foobar</pulse-config>"
+          value: "<pulse><enabled>true</enabled></pulse>"
 
   - it: should mount existing Pulse configuration Secret when `name` is provided without creating Secret
     set:
@@ -223,7 +223,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
       additionalVolumes:
         - name: conflicting-pulse-secret
           type: secret
@@ -250,7 +250,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
       additionalVolumes:
         - name: conflicting-pulse-secret
           type: secret
@@ -266,7 +266,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
       additionalVolumes:
         - name: pulse-config
           type: secret
@@ -308,11 +308,11 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         overridePulseConfig: |
-          <pulse-config>
-            foobar
-          </pulse-config>
+          <pulse>
+            <enabled>true</enabled>
+          </pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate:
@@ -362,7 +362,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         annotations: "invalid-annotation"
     template: hivemq-pulse-configuration.yml
     asserts:
@@ -372,7 +372,7 @@ tests:
     set:
       pulse:
         create: true
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         labels: "invalid-label"
     template: hivemq-pulse-configuration.yml
     asserts:
@@ -383,7 +383,7 @@ tests:
       pulse:
         create: true
         name: 123
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate: {}
@@ -392,7 +392,7 @@ tests:
     set:
       pulse:
         create: "foobar"
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate: {}
@@ -402,7 +402,7 @@ tests:
       pulse:
         create: true
         isPulseConfigBase64Encoded: "foobar"
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate: {}
@@ -412,7 +412,7 @@ tests:
       pulse:
         create: true
         name: "this-is-a-very-long-secret-name-that-exceeds-the-maximum-allowed-length-of-253-characters-for-kubernetes-secret-names-and-should-cause-schema-validation-to-fail-because-it-is-way-too-long-and-violates-the-dns-subdomain-naming-conventions-that-kubernetes-enforces-for-secret-resource-names-in-the-cluster"
-        data: "PHB1bHNlLWNvbmZpZz5mb29iYXI8L3B1bHNlLWNvbmZpZz4=" # <pulse-config>foobar</pulse-config>
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate: {}
