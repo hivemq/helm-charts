@@ -117,6 +117,28 @@ spec:
                 type: "string"
               metricsPort:
                 type: "integer"
+              monitoredResources:
+                items:
+                  properties:
+                    files:
+                      description: "List of files to monitor. If empty, all files\
+                        \ in the resource will be monitored"
+                      items:
+                        type: "string"
+                      type: "array"
+                    name:
+                      description: "The name of the ConfigMap or Secret to monitor\
+                        \ for changes"
+                      type: "string"
+                    type:
+                      description: "The type of resource to monitor (CONFIG_MAP or\
+                        \ SECRET)"
+                      enum:
+                      - "CONFIG_MAP"
+                      - "SECRET"
+                      type: "string"
+                  type: "object"
+                type: "array"
               operatorRestApiPort:
                 type: "integer"
               secretName:
