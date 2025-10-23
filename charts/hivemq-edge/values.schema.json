@@ -91,7 +91,24 @@
       "properties" : {
         "enabled" : {
           "type" : "boolean",
-          "description" : "Enable LDAp, will disable user based authentication source."
+          "description" : "Enable LDAP, will disable user based authentication source."
+        },
+        "servers" : {
+          "description" : "Set of ldap servers used for round robin",
+          "items" : {
+            "properties" : {
+              "host" : {
+                "type" : "string",
+                "description" : "The hostname or IP address of the LDAP server."
+              },
+              "port" : {
+                "type" : "integer",
+                "description" : "The port number of the LDAP server."
+              }
+            },
+            "type" : "object"
+          },
+          "type" : "array",
         }
       },
       "type" : "object"

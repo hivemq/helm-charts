@@ -146,15 +146,12 @@ admin:
 adminLdap:
   enabled: false
   servers:
-    server1:
-      host: "ldap.example.com"
-      port: 389
-#    server2:
-#      host: "ldap2.example.com"
-#      port: 389
-#    server3:
-#      host: "ldap3.example.com"
-#      port: 389
+      - host: "ldap.example.com"
+        port: 389
+#      - host: "ldap2.example.com"
+#        port: 389
+#      - host: "ldap3.example.com"
+#        port: 389
   tlsMode: "NONE" # Possible values: NONE, STARTTLS, SSL
   tls:
     enabled: false
