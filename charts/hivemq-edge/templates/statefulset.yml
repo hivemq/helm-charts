@@ -308,6 +308,10 @@ spec:
           - mountPath: /mqtts-trust
             name: mqtts-truststore-jks
           {{- end }}
+          {{- if .Values.adminLdap.tls.enabled }}
+          - mountPath: /ldap-trust
+            name: ldap-truststore-jks
+          {{- end }}
           {{- if .Values.license.enabled }}
           - mountPath: /license.edgelic
             name: license
@@ -367,6 +371,22 @@ spec:
         - name: mqtts-truststore-jks
           secret:
             secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
+      {{- end -}}
+      {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.mqttsClientauth.create.enabled true) }}
+        - name: ldap-truststore-jks
+          secret:
+            secretName: "{{ .Values.adminLdap.tls.truststore.truststoreSecretName }}"
+            items:
+              - key: "{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}"
+                path: "{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}"
+      {{- end -}}
+      {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+        - name: ldap-truststore-jks
+          secret:
+            secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "ldap" "releaseName" .Release.Name) }}
             items:
               - key: truststore.jks
                 path: truststore.jks
