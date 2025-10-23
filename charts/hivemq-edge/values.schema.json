@@ -120,7 +120,36 @@
           "type" : "string"
         },
         "tls" : {
+          "description" : "Configure the TLS truststore for the LDAP connection.",
           "properties" : {
+            "enabled" : {
+              "type" : "boolean",
+              "description" : "Enable LDAP, will disable user based authentication source."
+            },
+            "truststore" : {
+              "secretName" : {
+                "description" : "Name of the secret which contains the truststore.",
+                "type" : "string"
+              },
+              "secretKey" : {
+                "description" : "Key inside the secret which contains the truststore.",
+                "type" : "string"
+              }
+            },
+            "create" : {
+              "description" : "Create the secret for the truststore and its password.",
+              "enabled" : {
+                "type" : "boolean"
+              },
+              "password" : {
+                "description" : "Password for the truststore itself.",
+                "type" : "string"
+              },
+              "file" : {
+                "description" : "The actual truststore, base64 encoded.",
+                "type" : "string"
+              }
+            }
           },
           "type" : "object"
         },
@@ -327,7 +356,7 @@
           "type" : "string"
         },
         "file" : {
-          "description" : "The actual truststore, either the base64 encoded.",
+          "description" : "The actual truststore, base64 encoded.",
           "type" : "string"
         }
       }
