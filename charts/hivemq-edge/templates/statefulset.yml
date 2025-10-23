@@ -189,6 +189,10 @@ spec:
               value: "{{ .Values.adminLdap.connectionTimeoutMillis }}"
             - name: HIVEMQ_LDAP_SEARCH_TIMEOUT_S
               value: "{{ .Values.adminLdap.searchTimeoutSeconds }}"
+              {{- if and (hasKey .Values.adminLdap "objectClass") .Values.adminLdap.objectClass }}
+            - name: HIVEMQ_LDAP_OBJECT_CLASS
+              value: "{{ .Values.adminLdap.objectClass }}"
+              {{- end }}
             - name: HIVEMQ_LDAP_SERVER1_HOST
               value: "{{ .Values.adminLdap.servers.server1.host }}"
             - name: HIVEMQ_LDAP_SERVER1_PORT

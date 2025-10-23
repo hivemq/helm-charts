@@ -124,6 +124,10 @@
           },
           "type" : "object"
         },
+        "objectClass" : {
+          "type" : "string",
+          "description" : "The object class to use for user entries."
+        },
         "simplebind" : {
           "properties" : {
             "userDn" : {

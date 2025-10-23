@@ -164,9 +164,7 @@ adminLdap:
   uid: "uid"
   rdns: "dc=example,dc=com"
   directoryDescent: false
-  objectClass:
-    enabled: false
-#    value: "person"
+#  objectClass: "person"
   maxConnections: 5
   connectionTimeoutMillis: 5000
   responseTimeoutMillis: 5000
