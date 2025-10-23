@@ -141,6 +141,40 @@ admin:
 #    secretUserKey: "user"
 #    secretPasswordKey: "password"
 
+
+
+adminLdap:
+  enabled: false
+  servers:
+    server1:
+      host: "ldap.example.com"
+      port: 389
+#    server2:
+#      host: "ldap2.example.com"
+#      port: 389
+#    server3:
+#      host: "ldap3.example.com"
+#      port: 389
+  tlsMode: "NONE" # Possible values: NONE, STARTTLS, SSL
+  tls:
+    enabled: false
+#    secretName: "the-external-secret"
+#    secretUserKey: "user"
+#    secretPasswordKey: "password"
+  simplebind:
+    userDn: "cn=admin,dc=example,dc=com"
+    password: "adminpassword"
+  uid: "uid"
+  rdns: "dc=example,dc=com"
+  directoryDescent: false
+  objectClass:
+    enabled: false
+#    value: "person"
+  maxConnections: 5
+  connectionTimeoutMillis: 5000
+  responseTimeoutMillis: 5000
+  searchTimeoutMillis: 5000
+
 # Pre-login notice configuration for admin UI
 preLoginNotice:
   enabled: false

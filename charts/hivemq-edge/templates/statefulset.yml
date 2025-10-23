@@ -168,7 +168,9 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
-            {{- if .Values.admin.secret.enabled }}
+            {{- if .Values.adminLdap.enabled }}
+            {{- else }}
+              {{- if .Values.admin.secret.enabled }}
             - name: HIVEMQ_ADMIN_USER
               valueFrom:
                 secretKeyRef:
@@ -179,7 +181,7 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.admin.secret.secretName }}"
                   key: "{{ .Values.admin.secret.secretPasswordKey }}"
-            {{- else }}
+              {{- else }}
             {{- $secretName := include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}
             - name: HIVEMQ_ADMIN_USER
               valueFrom:
@@ -191,6 +193,7 @@ spec:
                 secretKeyRef:
                   name: "{{ $secretName }}"
                   key: password
+              {{- end }}
             {{- end }}
             {{- if .Values.preLoginNotice.enabled }}
             - name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED

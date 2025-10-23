@@ -86,6 +86,16 @@
       },
       "type" : "object"
     },
+    "adminLdap" : {
+      "description" : "Configure the admin source via LDAP.",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean",
+          "description" : "Enable LDAp, will disable user based authentication source."
+        }
+      },
+      "type" : "object"
+    },
     "pulse" : {
       "description" : "Configure the pulse connection token.",
       "properties" : {
