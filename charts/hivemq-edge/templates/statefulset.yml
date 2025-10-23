@@ -168,7 +168,7 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
-            {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.create.enabled true) }}
+            {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
             - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
               value: /ldap-trust/{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}
             - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
@@ -212,9 +212,9 @@ spec:
               value: "{{ .Values.adminLdap.objectClass }}"
               {{- end }}
             - name: HIVEMQ_LDAP_SERVER1_HOST
-              value: "{{ .Values.adminLdap.servers.server1.host }}"
+              value: "{{ (index .Values.adminLdap.servers 0).host }}"
             - name: HIVEMQ_LDAP_SERVER1_PORT
-              value: "{{ .Values.adminLdap.servers.server1.port }}"
+              value: "{{ (index .Values.adminLdap.servers 0).port }}"
               {{- if ge (len .Values.adminLdap.servers) 2 }}
             - name: HIVEMQ_LDAP_SERVER2_HOST
               value: "{{ (index .Values.adminLdap.servers 1).host }}"
@@ -375,7 +375,7 @@ spec:
               - key: truststore.jks
                 path: truststore.jks
       {{- end -}}
-      {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.mqttsClientauth.create.enabled true) }}
+      {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
         - name: ldap-truststore-jks
           secret:
             secretName: "{{ .Values.adminLdap.tls.truststore.truststoreSecretName }}"
