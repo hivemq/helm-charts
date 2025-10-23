@@ -152,7 +152,7 @@ adminLdap:
 #        port: 389
 #      - host: "ldap3.example.com"
 #        port: 389
-  tlsMode: "NONE" # Possible values: NONE, STARTTLS, SSL
+  tlsMode: "NONE" # Possible values: NONE, LDAPS, START_TLS
   tls:
     enabled: false
 #    secretName: "the-external-secret"
@@ -170,7 +170,7 @@ adminLdap:
   maxConnections: 5
   connectionTimeoutMillis: 5000
   responseTimeoutMillis: 5000
-  searchTimeoutMillis: 5000
+  searchTimeoutSeconds: 10
 
 # Pre-login notice configuration for admin UI
 preLoginNotice:

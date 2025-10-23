@@ -171,6 +171,24 @@ spec:
             {{- if .Values.adminLdap.enabled }}
             - name: HIVEMQ_LDAP_ENABLED
               value: "true"
+            - name: HIVEMQ_LDAP_TLS_MODE
+              value: "{{ .Values.adminLdap.tlsMode }}"
+            - name: HIVEMQ_LDAP_SIMPLEBIND_RDNS
+              value: "{{ .Values.adminLdap.simplebind.userDn }}"
+            - name: HIVEMQ_LDAP_SIMPLEBIND_PASSWORD
+              value: "{{ .Values.adminLdap.simplebind.password }}"
+            - name: HIVEMQ_LDAP_UID
+              value: "{{ .Values.adminLdap.uid }}"
+            - name: HIVEMQ_LDAP_RDNS
+              value: "{{ .Values.adminLdap.rdns }}"
+            - name: HIVEMQ_LDAP_DIRECTORY_DESCENT
+              value: "{{ .Values.adminLdap.directoryDescent }}"
+            - name: HIVEMQ_LDAP_MAX_CONNECTION
+              value: "{{ .Values.adminLdap.maxConnections }}"
+            - name: HIVEMQ_LDAP_CONNECT_TIMEOUT_MS
+              value: "{{ .Values.adminLdap.connectionTimeoutMillis }}"
+            - name: HIVEMQ_LDAP_SEARCH_TIMEOUT_S
+              value: "{{ .Values.adminLdap.searchTimeoutSeconds }}"
             - name: HIVEMQ_LDAP_SERVER1_HOST
               value: "{{ .Values.adminLdap.servers.server1.host }}"
             - name: HIVEMQ_LDAP_SERVER1_PORT

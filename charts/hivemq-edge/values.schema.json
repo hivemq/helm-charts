@@ -109,6 +109,61 @@
             "type" : "object"
           },
           "type" : "array"
+        },
+        "tlsMode" : {
+          "description" : "TLS mode for the LDAP connection.",
+          "enum" : [
+            "NONE",
+            "START_TLS",
+            "LDAPS"
+          ],
+          "type" : "string"
+        },
+        "tls" : {
+          "properties" : {
+          },
+          "type" : "object"
+        },
+        "simplebind" : {
+          "properties" : {
+            "userDn" : {
+              "type" : "string",
+              "description" : "The distinguished name of the user to bind as."
+            },
+            "password" : {
+              "type" : "string",
+              "description" : "The password to use for the bind."
+            }
+          },
+          "type" : "object"
+        },
+        "uid" : {
+          "type" : "string",
+          "description" : "The uid to use for the user bind."
+        },
+        "rdns" : {
+          "type" : "string",
+          "description" : "The RDNS to use for the user bind."
+        },
+        "directoryDescent" : {
+          "type" : "boolean",
+          "description" : "Whether to sue directory descent to find the user."
+        },
+        "maxConnections" : {
+          "type" : "integer",
+          "description" : "Maximum number of pooled ldap connections."
+        },
+        "connectionTimeoutMillis" : {
+          "type" : "integer",
+          "description" : "Timeout for LDAP connection attempts."
+        },
+        "responseTimeoutMillis" : {
+          "type" : "integer",
+          "description" : "Timeout for LDAP responses."
+        },
+        "searchTimeoutSeconds" : {
+          "type" : "integer",
+          "description" : "Timeout for LDAP searches."
         }
       },
       "type" : "object"
