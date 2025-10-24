@@ -26,6 +26,9 @@ metadata:
 spec:
   {{- $configName := include "hivemq-platform.configuration-name" . -}}
   {{ ternary (printf "secretName: %s" $configName) (printf "configMapName: %s" $configName) (eq .Values.config.createAs "Secret") | nindent 2 }}
+  {{- if $hasPulseConfig }}
+  pulseSecretName: {{ .Values.pulse.name | default (include "hivemq-platform.default-pulse-name" .) }}
+  {{- end }}
   logLevel: {{ .Values.nodes.logLevel }}
   operatorRestApiPort: {{ include "hivemq-platform.operator-rest-api-port" . }}
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
@@ -205,15 +208,11 @@ spec:
                   ephemeral-storage: {{ . | trim | quote }}
                   {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
-              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore $hasPulseConfig }}
+              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore }}
               volumeMounts:
                 {{- if $hasLicense }}
                 - name: licenses
                   mountPath: /opt/hivemq/license
-                {{- end }}
-                {{- if $hasPulseConfig }}
-                - name: pulse-config
-                  mountPath: /opt/hivemq/pulse/conf
                 {{- end }}
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
@@ -235,7 +234,7 @@ spec:
             {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore $hasPulseConfig }}
+          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore }}
           volumes:
             {{- if $hasLicense }}
             - name: licenses
@@ -244,15 +243,6 @@ spec:
                 secretName: {{ .Values.license.name }}
                 {{- else }}
                 secretName: {{ include "hivemq-platform.default-license-name" . }}
-                {{- end }}
-            {{- end }}
-            {{- if $hasPulseConfig }}
-            - name: pulse-config
-              secret:
-                {{- if .Values.pulse.name }}
-                secretName: {{ .Values.pulse.name }}
-                {{- else }}
-                secretName: {{ include "hivemq-platform.default-pulse-name" . }}
                 {{- end }}
             {{- end }}
             {{- if $hasKeystore }}
