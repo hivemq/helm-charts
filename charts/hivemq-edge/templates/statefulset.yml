@@ -205,9 +205,13 @@ spec:
               value: "{{ .Values.adminLdap.maxConnections }}"
             - name: HIVEMQ_LDAP_CONNECT_TIMEOUT_MS
               value: "{{ .Values.adminLdap.connectionTimeoutMillis }}"
+            - name: HIVEMQ_LDAP_RESPONSE_TIMEOUT_MS
+              value: "{{ .Values.adminLdap.responseTimeoutMillis }}"
             - name: HIVEMQ_LDAP_SEARCH_TIMEOUT_S
               value: "{{ .Values.adminLdap.searchTimeoutSeconds }}"
               {{- if and (hasKey .Values.adminLdap "objectClass") .Values.adminLdap.objectClass }}
+            - name: HIVEMQ_LDAP_OBJECT_CLASS_ENABLED
+              value: "true"
             - name: HIVEMQ_LDAP_OBJECT_CLASS
               value: "{{ .Values.adminLdap.objectClass }}"
               {{- end }}

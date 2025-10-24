@@ -1,0 +1,267 @@
+---
+# ConfigMap for LDIF initialization data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openldap-ldif
+  namespace: default
+data:
+  nested.ldif: |
+    # OpenLDAP Test Data - Nested OUs Structure
+    # Users are in nested organizational units to demonstrate Directory Descent (search-based DN resolution)
+    # This structure shows why Direct Reference fails and Directory Descent is needed
+
+    # Organizational units
+    dn: ou=people,dc=example,dc=org
+    objectClass: organizationalUnit
+    ou: people
+    description: Container for user accounts
+
+    dn: ou=groups,dc=example,dc=org
+    objectClass: organizationalUnit
+    ou: groups
+    description: Container for group definitions
+
+    # Engineering department (nested OU)
+    dn: ou=engineering,ou=people,dc=example,dc=org
+    objectClass: organizationalUnit
+    ou: engineering
+    description: Engineering department
+
+    # Sales department (nested OU)
+    dn: ou=sales,ou=people,dc=example,dc=org
+    objectClass: organizationalUnit
+    ou: sales
+    description: Sales department
+
+    # Users in engineering department (nested structure)
+    dn: uid=alice,ou=engineering,ou=people,dc=example,dc=org
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: top
+    uid: alice
+    cn: Alice Anderson
+    sn: Anderson
+    givenName: Alice
+    mail: alice@example.org
+    userPassword: alice123
+    uidNumber: 10001
+    gidNumber: 10001
+    homeDirectory: /home/alice
+    description: Software Engineer
+
+    dn: uid=bob,ou=engineering,ou=people,dc=example,dc=org
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: top
+    uid: bob
+    cn: Bob Brown
+    sn: Brown
+    givenName: Bob
+    mail: bob@example.org
+    userPassword: bob456
+    uidNumber: 10002
+    gidNumber: 10001
+    homeDirectory: /home/bob
+    description: DevOps Engineer
+
+    # User in sales department (different nested OU)
+    dn: uid=charlie,ou=sales,ou=people,dc=example,dc=org
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: top
+    uid: charlie
+    cn: Charlie Chen
+    sn: Chen
+    givenName: Charlie
+    mail: charlie@example.org
+    userPassword: charlie789
+    uidNumber: 10003
+    gidNumber: 10002
+    homeDirectory: /home/charlie
+    description: Sales Manager
+
+    # Groups
+    dn: cn=developers,ou=groups,dc=example,dc=org
+    objectClass: groupOfNames
+    cn: developers
+    description: Software Development Team
+    member: uid=alice,ou=engineering,ou=people,dc=example,dc=org
+    member: uid=bob,ou=engineering,ou=people,dc=example,dc=org
+
+    dn: cn=administrators,ou=groups,dc=example,dc=org
+    objectClass: groupOfNames
+    cn: administrators
+    description: System Administrators
+    member: uid=bob,ou=engineering,ou=people,dc=example,dc=org
+---
+# PersistentVolumeClaim for LDAP data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ldap-data
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# PersistentVolumeClaim for LDAP config
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ldap-config
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Mi
+---
+# Deployment for OpenLDAP
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openldap
+  namespace: default
+  labels:
+    app: openldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openldap
+  template:
+    metadata:
+      labels:
+        app: openldap
+    spec:
+      initContainers:
+      - name: copy-ldif
+        image: busybox:latest
+        command:
+        - sh
+        - -c
+        - |
+          cp /tmp/ldif-source/* /tmp/ldif-target/
+          chmod -R 755 /tmp/ldif-target/
+        volumeMounts:
+        - name: ldif-source
+          mountPath: /tmp/ldif-source
+        - name: ldif-data
+          mountPath: /tmp/ldif-target
+      containers:
+      - name: openldap
+        image: osixia/openldap:1.5.0
+        env:
+        - name: LDAP_DOMAIN
+          value: "example.org"
+        - name: LDAP_SSL_HELPER_PREFIX
+          value: "ldap"
+        - name: LDAP_TLS_VERIFY_CLIENT
+          value: "never"
+        - name: LDAP_READONLY_USER
+          value: "false"
+        - name: LDAP_RFC2307BIS_SCHEMA
+          value: "false"
+        - name: LDAP_REPLICATION
+          value: "false"
+        - name: LDAP_ORGANISATION
+          value: "Example Inc"
+        - name: LDAP_ADMIN_PASSWORD
+          value: "admin"
+        - name: LDAP_BACKEND
+          value: "mdb"
+        - name: LDAP_CONFIG_PASSWORD
+          value: "config"
+        - name: LDAP_TLS
+          value: "true"
+        - name: KEEP_EXISTING_CONFIG
+          value: "false"
+        - name: LDAP_REMOVE_CONFIG_AFTER_SETUP
+          value: "false"
+        ports:
+        - name: ldap
+          containerPort: 389
+          protocol: TCP
+        - name: ldaps
+          containerPort: 636
+          protocol: TCP
+        volumeMounts:
+        - name: ldap-data
+          mountPath: /var/lib/ldap
+        - name: ldap-config
+          mountPath: /etc/ldap/slapd.d
+        - name: ldif-data
+          mountPath: /container/service/slapd/assets/config/bootstrap/ldif/custom
+        livenessProbe:
+          exec:
+            command:
+            - ldapsearch
+            - "-x"
+            - "-H"
+            - "ldap://localhost"
+            - "-b"
+            - "dc=example,dc=org"
+            - "-D"
+            - "cn=admin,dc=example,dc=org"
+            - "-w"
+            - "admin"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          exec:
+            command:
+            - ldapsearch
+            - "-x"
+            - "-H"
+            - "ldap://localhost"
+            - "-b"
+            - "dc=example,dc=org"
+            - "-D"
+            - "cn=admin,dc=example,dc=org"
+            - "-w"
+            - "admin"
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+      volumes:
+      - name: ldap-data
+        persistentVolumeClaim:
+          claimName: ldap-data
+      - name: ldap-config
+        persistentVolumeClaim:
+          claimName: ldap-config
+      - name: ldif-source
+        configMap:
+          name: openldap-ldif
+      - name: ldif-data
+        emptyDir: {}
+---
+# Service for OpenLDAP
+apiVersion: v1
+kind: Service
+metadata:
+  name: openldap
+  namespace: default
+  labels:
+    app: openldap
+spec:
+  type: ClusterIP
+  ports:
+  - name: ldap
+    port: 389
+    targetPort: 389
+    protocol: TCP
+  - name: ldaps
+    port: 636
+    targetPort: 636
+    protocol: TCP
+  selector:
+    app: openldap
