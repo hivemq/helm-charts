@@ -16,9 +16,9 @@ adminLdap:
       port: 389
   simplebind:
     userDn: "cn=admin"
-    password: "admin-password"
+    password: "admin"
   uid: "uid"
-  rdns: "dc=example,dc=com"
+  rdns: "dc=example,dc=org"
   directoryDescent: true
   maxConnections: 10
   connectionTimeoutMillis: 5000
