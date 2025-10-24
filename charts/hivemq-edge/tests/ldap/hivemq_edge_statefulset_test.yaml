@@ -1,0 +1,341 @@
+suite: HiveMQ Edge - Statefulset LDAP tests
+
+templates:
+  - statefulset.yml
+release:
+  name: edge
+  namespace: hivemq-edge-namespace
+chart:
+  version: 0.0.1
+  appVersion: "2367.359"
+set:
+  image:
+    tag: edge-tag
+  adminLdap:
+    enabled: true
+    tlsMode: "NONE"
+    servers:
+      - host: "ldap.example.com"
+        port: 389
+    simplebind:
+      userDn: "cn=admin,dc=example,dc=com"
+      password: "admin-password"
+    uid: "uid"
+    rdns: "ou=users,dc=example,dc=com"
+    directoryDescent: true
+    maxConnections: 10
+    connectionTimeoutMillis: 5000
+    searchTimeoutSeconds: 10
+
+tests:
+  - it: Should have the correct metadata
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hivemq-edge-0.0.1
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hivemq-edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: edge
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: "2367.359"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: Should set LDAP environment variables when LDAP is enabled
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TLS_MODE
+            value: "NONE"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SIMPLEBIND_RDNS
+            value: "cn=admin,dc=example,dc=com"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SIMPLEBIND_PASSWORD
+            value: "admin-password"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_UID
+            value: "uid"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_RDNS
+            value: "ou=users,dc=example,dc=com"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_DIRECTORY_DESCENT
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_MAX_CONNECTION
+            value: "10"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_CONNECT_TIMEOUT_MS
+            value: "5000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SEARCH_TIMEOUT_S
+            value: "10"
+
+  - it: Should set LDAP server configuration with single server
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER1_HOST
+            value: "ldap.example.com"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER1_PORT
+            value: "389"
+
+  - it: Should set LDAP server configuration with multiple servers
+    set:
+      adminLdap:
+        servers:
+          - host: "ldap1.example.com"
+            port: 389
+          - host: "ldap2.example.com"
+            port: 636
+          - host: "ldap3.example.com"
+            port: 389
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER1_HOST
+            value: "ldap1.example.com"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER1_PORT
+            value: "389"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER2_HOST
+            value: "ldap2.example.com"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER2_PORT
+            value: "636"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER3_HOST
+            value: "ldap3.example.com"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER3_PORT
+            value: "389"
+
+  - it: Should set objectClass when provided
+    set:
+      adminLdap:
+        objectClass: "inetOrgPerson"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_OBJECT_CLASS
+            value: "inetOrgPerson"
+
+  - it: Should not set objectClass when not provided
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_OBJECT_CLASS
+
+  - it: Should set LDAP TLS truststore configuration with external secret
+    set:
+      adminLdap:
+        tlsMode: "LDAPS"
+        tls:
+          enabled: true
+          create:
+            enabled: false
+          truststore:
+            truststoreSecretName: "my-ldap-truststore"
+            truststoreSecretKey: "truststore.jks"
+            passwordSecretName: "my-ldap-truststore"
+            passwordSecretKey: "password"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TLS_MODE
+            value: "LDAPS"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TRUSTSTORE_PATH
+            value: /ldap-trust/truststore.jks
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "my-ldap-truststore"
+                key: "password"
+
+  - it: Should set LDAP TLS truststore configuration with created secret
+    set:
+      adminLdap:
+        tlsMode: "START_TLS"
+        tls:
+          enabled: true
+          create:
+            enabled: true
+            password: "changeit"
+            file: "truststore-content"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TLS_MODE
+            value: "START_TLS"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TRUSTSTORE_PATH
+            value: /ldap-trust/truststore.jks
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "hivemq-edge-ldap-edge"
+                key: truststore-password
+
+  - it: Should mount LDAP truststore volume when TLS is enabled with external secret
+    set:
+      adminLdap:
+        tls:
+          enabled: true
+          create:
+            enabled: false
+          truststore:
+            truststoreSecretName: "my-ldap-truststore"
+            truststoreSecretKey: "truststore.jks"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            mountPath: /ldap-trust
+            name: ldap-truststore-jks
+
+  - it: Should mount LDAP truststore volume when TLS is enabled with created secret
+    set:
+      adminLdap:
+        tls:
+          enabled: true
+          create:
+            enabled: true
+            password: "changeit"
+            file: "truststore-content"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            mountPath: /ldap-trust
+            name: ldap-truststore-jks
+
+  - it: Should define LDAP truststore volume with external secret
+    set:
+      adminLdap:
+        tls:
+          enabled: true
+          create:
+            enabled: false
+          truststore:
+            truststoreSecretName: "my-ldap-truststore"
+            truststoreSecretKey: "truststore.jks"
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: ldap-truststore-jks
+            secret:
+              secretName: "my-ldap-truststore"
+              items:
+                - key: "truststore.jks"
+                  path: "truststore.jks"
+
+  - it: Should define LDAP truststore volume with created secret
+    set:
+      adminLdap:
+        tls:
+          enabled: true
+          create:
+            enabled: true
+            password: "changeit"
+            file: "truststore-content"
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: ldap-truststore-jks
+            secret:
+              secretName: hivemq-edge-ldap-edge
+              items:
+                - key: truststore.jks
+                  path: truststore.jks
+
+  - it: Should not set admin user/password environment variables when LDAP is enabled
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_USERS_ENABLED
+            value: "true"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_USER
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_ADMIN_PASSWORD
+
+  - it: Should not mount LDAP truststore when TLS is disabled
+    set:
+      adminLdap:
+        tls:
+          enabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            mountPath: /ldap-trust
+            name: ldap-truststore-jks
