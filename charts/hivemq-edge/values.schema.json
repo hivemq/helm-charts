@@ -108,7 +108,9 @@
             },
             "type" : "object"
           },
-          "type" : "array"
+          "type" : "array",
+          "minItems": 1,
+          "maxItems": 3
         },
         "tlsMode" : {
           "description" : "TLS mode for the LDAP connection.",
