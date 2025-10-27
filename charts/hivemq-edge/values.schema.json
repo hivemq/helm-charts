@@ -125,7 +125,7 @@
           "properties" : {
             "enabled" : {
               "type" : "boolean",
-              "description" : "Enable LDAP, will disable user based authentication source."
+              "description" : "Enable or disable TLS for the LDAP connection."
             },
             "truststore" : {
               "description" : "The truststore for interacting with ldap.",
