@@ -168,7 +168,76 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
-            {{- if .Values.admin.secret.enabled }}
+            {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
+              value: /ldap-trust/{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.adminLdap.tls.truststore.passwordSecretName }}"
+                  key: "{{ .Values.adminLdap.tls.truststore.passwordSecretKey }}"
+            {{- end }}
+            {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
+              value: /ldap-trust/truststore.jks
+            - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "ldap" "releaseName" .Release.Name) }}"
+                  key: truststore-password
+            {{- end }}
+            {{- if .Values.adminLdap.enabled }}
+            {{- if or (not .Values.adminLdap.servers) (lt (len .Values.adminLdap.servers) 1) }}
+            {{- fail "adminLdap.servers is required and must contain at least one server when adminLdap.enabled is true" }}
+            {{- end }}
+            - name: HIVEMQ_LDAP_ENABLED
+              value: "true"
+            - name: HIVEMQ_LDAP_TLS_MODE
+              value: "{{ .Values.adminLdap.tlsMode }}"
+            - name: HIVEMQ_LDAP_SIMPLEBIND_RDNS
+              value: "{{ .Values.adminLdap.simplebind.userDn }}"
+            - name: HIVEMQ_LDAP_SIMPLEBIND_PASSWORD
+              value: "{{ .Values.adminLdap.simplebind.password }}"
+            - name: HIVEMQ_LDAP_UID
+              value: "{{ .Values.adminLdap.uid }}"
+            - name: HIVEMQ_LDAP_RDNS
+              value: "{{ .Values.adminLdap.rdns }}"
+            - name: HIVEMQ_LDAP_DIRECTORY_DESCENT
+              value: "{{ .Values.adminLdap.directoryDescent }}"
+            - name: HIVEMQ_LDAP_MAX_CONNECTION
+              value: "{{ .Values.adminLdap.maxConnections }}"
+            - name: HIVEMQ_LDAP_CONNECT_TIMEOUT_MS
+              value: "{{ .Values.adminLdap.connectionTimeoutMillis }}"
+            - name: HIVEMQ_LDAP_RESPONSE_TIMEOUT_MS
+              value: "{{ .Values.adminLdap.responseTimeoutMillis }}"
+            - name: HIVEMQ_LDAP_SEARCH_TIMEOUT_S
+              value: "{{ .Values.adminLdap.searchTimeoutSeconds }}"
+              {{- if .Values.adminLdap.objectClass }}
+            - name: HIVEMQ_LDAP_OBJECT_CLASS_ENABLED
+              value: "true"
+            - name: HIVEMQ_LDAP_OBJECT_CLASS
+              value: "{{ .Values.adminLdap.objectClass }}"
+              {{- end }}
+            - name: HIVEMQ_LDAP_SERVER1_HOST
+              value: "{{ (index .Values.adminLdap.servers 0).host }}"
+            - name: HIVEMQ_LDAP_SERVER1_PORT
+              value: "{{ (index .Values.adminLdap.servers 0).port }}"
+              {{- if ge (len .Values.adminLdap.servers) 2 }}
+            - name: HIVEMQ_LDAP_SERVER2_HOST
+              value: "{{ (index .Values.adminLdap.servers 1).host }}"
+            - name: HIVEMQ_LDAP_SERVER2_PORT
+              value: "{{ (index .Values.adminLdap.servers 1).port }}"
+              {{- end }}
+              {{- if ge (len .Values.adminLdap.servers) 3 }}
+            - name: HIVEMQ_LDAP_SERVER3_HOST
+              value: "{{ (index .Values.adminLdap.servers 2).host }}"
+            - name: HIVEMQ_LDAP_SERVER3_PORT
+              value: "{{ (index .Values.adminLdap.servers 2).port }}"
+              {{- end }}
+            {{- else }}
+            - name: HIVEMQ_USERS_ENABLED
+              value: "true"
+              {{- if .Values.admin.secret.enabled }}
             - name: HIVEMQ_ADMIN_USER
               valueFrom:
                 secretKeyRef:
@@ -179,7 +248,7 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.admin.secret.secretName }}"
                   key: "{{ .Values.admin.secret.secretPasswordKey }}"
-            {{- else }}
+              {{- else }}
             {{- $secretName := include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "admin" "releaseName" .Release.Name) }}
             - name: HIVEMQ_ADMIN_USER
               valueFrom:
@@ -191,6 +260,7 @@ spec:
                 secretKeyRef:
                   name: "{{ $secretName }}"
                   key: password
+              {{- end }}
             {{- end }}
             {{- if .Values.preLoginNotice.enabled }}
             - name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
@@ -244,6 +314,10 @@ spec:
           {{- if ne .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
           - mountPath: /mqtts-trust
             name: mqtts-truststore-jks
+          {{- end }}
+          {{- if .Values.adminLdap.tls.enabled }}
+          - mountPath: /ldap-trust
+            name: ldap-truststore-jks
           {{- end }}
           {{- if .Values.license.enabled }}
           - mountPath: /license.edgelic
@@ -304,6 +378,22 @@ spec:
         - name: mqtts-truststore-jks
           secret:
             secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}
+            items:
+              - key: truststore.jks
+                path: truststore.jks
+      {{- end -}}
+      {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
+        - name: ldap-truststore-jks
+          secret:
+            secretName: "{{ .Values.adminLdap.tls.truststore.truststoreSecretName }}"
+            items:
+              - key: "{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}"
+                path: "{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}"
+      {{- end -}}
+      {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+        - name: ldap-truststore-jks
+          secret:
+            secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "ldap" "releaseName" .Release.Name) }}
             items:
               - key: truststore.jks
                 path: truststore.jks

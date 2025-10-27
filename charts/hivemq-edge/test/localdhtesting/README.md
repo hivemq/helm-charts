@@ -7,6 +7,8 @@ kubectl apply -f charts/hivemq-edge/test/localdhtesting/setup.yaml #create the v
 kind load docker-image hivemq/hivemq-edge:2025.8-SNAPSHOT #load image from local registry intp kind
 ```
 
+## Regular testing
+
 The next command brings up edge with the default config loaded.
 Make sure to have a license locally available if you want to test commercial features.
 ```bash
@@ -26,3 +28,10 @@ docker - container-registry (127.0.0.1)
 KIND           |
 |              |
 container-registry (172.12.10.1)
+
+## LDAP testing
+
+```bash
+kubectl apply -f charts/hivemq-edge/test/localdhtesting/openldap.yml
+helm install edge ./charts/hivemq-edge --set image.tag=2025.8-SNAPSHOT --values=charts/hivemq-edge/test/localdhtesting/values.yaml --set-file modules.dataHub.init=charts/hivemq-edge/test/localdhtesting/dh.json --set-file license.file=<PATH_TO_LICENSE>
+```

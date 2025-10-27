@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hivemq-edge-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: "hivemq-edge"
+    app.kubernetes.io/instance: "edge"
+  ports:
+    - port: 5678
+      targetPort: 8080
+      name: http
+    - port: 5679
+      targetPort: 1883
+      name: mqtt
+    - port: 5680
+      targetPort: 8883
+      name: mqtts

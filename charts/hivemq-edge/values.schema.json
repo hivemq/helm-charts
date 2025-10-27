@@ -86,6 +86,138 @@
       },
       "type" : "object"
     },
+    "adminLdap" : {
+      "description" : "Configure the admin source via LDAP.",
+      "properties" : {
+        "enabled" : {
+          "type" : "boolean",
+          "description" : "Enable LDAP, will disable user based authentication source."
+        },
+        "servers" : {
+          "description" : "Set of ldap servers used for round robin",
+          "items" : {
+            "properties" : {
+              "host" : {
+                "type" : "string",
+                "description" : "The hostname or IP address of the LDAP server."
+              },
+              "port" : {
+                "type" : "integer",
+                "description" : "The port number of the LDAP server."
+              }
+            },
+            "type" : "object"
+          },
+          "type" : "array",
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "tlsMode" : {
+          "description" : "TLS mode for the LDAP connection.",
+          "enum" : [
+            "NONE",
+            "START_TLS",
+            "LDAPS"
+          ],
+          "type" : "string"
+        },
+        "tls" : {
+          "description" : "Configure the TLS truststore for the LDAP connection.",
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean",
+              "description" : "Enable or disable TLS for the LDAP connection."
+            },
+            "truststore" : {
+              "description" : "The truststore for interacting with ldap.",
+              "type" : "object",
+              "properties" : {
+                "passwordSecretName" : {
+                  "description" : "Name of the secret which contains the password for the keystore.",
+                  "type" : "string"
+                },
+                "passwordSecretKey" : {
+                  "description" : "Key inside the secret which contains the password for the keystore.",
+                  "type" : "string"
+                },
+                "truststoreSecretName" : {
+                  "description" : "Name of the secret which contains the truststore.",
+                  "type" : "string"
+                },
+                "truststoreSecretKey" : {
+                  "description" : "Key inside the secret which contains the truststore.",
+                  "type" : "string"
+                }
+              }
+            },
+            "create" : {
+              "description" : "Create the secret for the truststore and its password.",
+              "type" : "object",
+              "properties" : {
+                "enabled" : {
+                  "type" : "boolean"
+                },
+                "password" : {
+                  "description" : "Password for the truststore itself.",
+                  "type" : "string"
+                },
+                "file" : {
+                  "description" : "The actual truststore, base64 encoded.",
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "objectClass" : {
+          "type" : "string",
+          "description" : "The object class to use for user entries."
+        },
+        "simplebind" : {
+          "properties" : {
+            "userDn" : {
+              "type" : "string",
+              "description" : "The distinguished name of the user to bind as."
+            },
+            "password" : {
+              "type" : "string",
+              "description" : "The password to use for the bind."
+            }
+          },
+          "type" : "object"
+        },
+        "uid" : {
+          "type" : "string",
+          "description" : "The uid to use for the user bind."
+        },
+        "rdns" : {
+          "type" : "string",
+          "description" : "The RDNS to use for the user bind."
+        },
+        "directoryDescent" : {
+          "type" : "boolean",
+          "description" : "Whether to use directory descent to find the user."
+        },
+        "maxConnections" : {
+          "type" : "integer",
+          "description" : "Maximum number of pooled ldap connections."
+        },
+        "connectionTimeoutMillis" : {
+          "type" : "integer",
+          "description" : "Timeout for LDAP connection attempts."
+        },
+        "responseTimeoutMillis" : {
+          "type" : "integer",
+          "description" : "Timeout for LDAP responses."
+        },
+        "searchTimeoutSeconds" : {
+          "type" : "integer",
+          "description" : "Timeout for LDAP searches."
+        }
+      },
+      "type" : "object"
+    },
     "pulse" : {
       "description" : "Configure the pulse connection token.",
       "properties" : {
@@ -241,7 +373,7 @@
           "type" : "string"
         },
         "file" : {
-          "description" : "The actual truststore, either the base64 encoded.",
+          "description" : "The actual truststore, base64 encoded.",
           "type" : "string"
         }
       }
