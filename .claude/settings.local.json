@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(helm lint:*)",
-      "Bash(helm version:*)"
+      "Bash(helm version:*)",
+      "Bash(helm template:*)"
     ],
     "deny": [],
     "ask": []

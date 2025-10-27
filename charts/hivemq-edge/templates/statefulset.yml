@@ -187,6 +187,9 @@ spec:
                   key: truststore-password
             {{- end }}
             {{- if .Values.adminLdap.enabled }}
+            {{- if or (not .Values.adminLdap.servers) (lt (len .Values.adminLdap.servers) 1) }}
+            {{- fail "adminLdap.servers is required and must contain at least one server when adminLdap.enabled is true" }}
+            {{- end }}
             - name: HIVEMQ_LDAP_ENABLED
               value: "true"
             - name: HIVEMQ_LDAP_TLS_MODE
