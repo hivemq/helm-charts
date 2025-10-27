@@ -155,9 +155,14 @@ adminLdap:
   tlsMode: "NONE" # Possible values: NONE, LDAPS, START_TLS
   tls:
     enabled: false
-#    secretName: "the-external-secret"
-#    secretUserKey: "user"
-#    secretPasswordKey: "password"
+#    truststore:
+#      passwordSecretName: "the-external-secret"
+#      passwordSecretKey: "key-of-the-password"
+#      truststoreSecretName: "password"
+#      truststoreSecretKey: "password"
+#    create:
+#      enabled: true
+#      password: "truststore-password"
   simplebind:
     userDn: "cn=admin,dc=example,dc=com"
     password: "adminpassword"
