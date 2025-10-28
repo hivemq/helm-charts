@@ -6,6 +6,32 @@ entries:
         fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
         url: https://www.hivemq.com/public.pgp
     apiVersion: v2
+    appVersion: "2025.18"
+    created: "2025-10-28T15:56:32.84318819Z"
+    description: HiveMQ Edge Helm Chart
+    digest: 572f6c3888eb10a0bfbd6dee4309703619d5616e539b1c1a1f5b32ac2e3a84ad
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Edge
+    - Edge
+    - MQTT
+    - IoT
+    - Java
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ Edge
+    name: hivemq-edge
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-edge-0.1.18/hivemq-edge-0.1.18.tgz
+    version: 0.1.18
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
     appVersion: "2025.17"
     created: "2025-10-27T13:27:38.408895294Z"
     description: HiveMQ Edge Helm Chart
@@ -5592,4 +5618,4 @@ entries:
     urls:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.1.0/hivemq-swarm-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-27T13:27:38.409401921Z"
+generated: "2025-10-28T15:56:32.84361718Z"
