@@ -1,7 +1,12 @@
+{{- if .Values.testing.enabled }}
+{{- range $service := .Values.services }}
+{{- if and (eq $service.type "mqtt") $service.exposed }}
+{{- $serviceName := include "hivemq-platform.range-service-name" (dict "name" $service.name "releaseName" $.Release.Name "type" $service.type "port" $service.port "containerPort" $service.containerPort "legacyPortName" $service.legacyPortName) }}
+---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "hivemq-test-connection-{{.Release.Name}}"
+  name: "hivemq-test-connection-{{$.Release.Name}}-{{ $serviceName }}"
   annotations:
     "helm.sh/hook": test
 spec:
@@ -10,5 +15,8 @@ spec:
       image: hivemq/mqtt-cli:4.46.0
       args: [ "test",
               "-h",
-              "{{ printf "hivemq-%s-mqtt-1883" $.Release.Name | trimAll "-" | trunc 63 | trimSuffix "-" | trim }}" ]
+              "{{ $serviceName }}" ]
   restartPolicy: Never
+{{- end }}
+{{- end }}
+{{- end }}
