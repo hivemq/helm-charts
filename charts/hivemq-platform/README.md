@@ -37,6 +37,22 @@ helm uninstall [RELEASE_NAME] -n <namespace>
 
 This removes all Kubernetes components associated with the chart and deletes the release.
 
+## Test the Chart
+
+After installing the chart, you can run Helm tests to verify the release:
+
+```console
+helm test [RELEASE_NAME] -n <namespace>
+```
+
+This runs a test pod for each exposed MQTT service to verify connectivity to the HiveMQ Platform. Each test pod connects to its respective MQTT service and validates that the connection is working.
+
+To disable test pod creation, set `testing.enabled=false`:
+
+```console
+helm install [RELEASE_NAME] hivemq/hivemq-platform -n <namespace> --set testing.enabled=false
+```
+
 ## Verify the chart
 
 ```console
