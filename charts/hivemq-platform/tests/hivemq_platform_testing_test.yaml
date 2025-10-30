@@ -1,0 +1,199 @@
+suite: HiveMQ Platform - Testing configuration tests
+templates:
+  - tests/test-mqtt-cli.yml
+release:
+  name: test-platform
+tests:
+
+  - it: should render test pod by default when MQTT service is exposed
+    asserts:
+      - hasDocuments:
+          count: 1
+      - containsDocument:
+          apiVersion: v1
+          kind: Pod
+      - matchRegex:
+          path: metadata.name
+          pattern: ^hivemq-test-connection-test-platform-hivemq-test-platform-mqtt-\d+$
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: test
+      - equal:
+          path: spec.containers[0].name
+          value: hivemq-mqtt-cli
+      - matchRegex:
+          path: spec.containers[0].image
+          pattern: ^hivemq/mqtt-cli:\d+\.\d+\.\d+$
+      - equal:
+          path: spec.restartPolicy
+          value: Never
+
+  - it: should not render test pod when testing.enabled is false
+    set:
+      testing:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render test pod when no MQTT service is exposed
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          port: 8080
+          containerPort: 8080
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render test pod when MQTT service is not exposed
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          port: 1883
+          containerPort: 1883
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render test pod with custom MQTT service name
+    set:
+      services:
+        - type: mqtt
+          name: custom-mqtt-service
+          exposed: true
+          port: 1883
+          containerPort: 1883
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: hivemq-test-connection-test-platform-custom-mqtt-service
+      - contains:
+          path: spec.containers[0].args
+          content: -h
+      - contains:
+          path: spec.containers[0].args
+          content: custom-mqtt-service
+
+  - it: should render test pod when testing.enabled is explicitly true
+    set:
+      testing:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - containsDocument:
+          apiVersion: v1
+          kind: Pod
+
+  - it: should fail schema validation when testing.enabled is not a boolean
+    set:
+      testing:
+        enabled: "true"
+    asserts:
+      - failedTemplate: {}
+
+  - it: should allow testing object with only enabled property
+    set:
+      testing:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should render test pod with default MQTT service when multiple services exist
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          port: 8080
+          containerPort: 8080
+        - type: mqtt
+          exposed: true
+          port: 1883
+          containerPort: 1883
+        - type: metrics
+          exposed: true
+          port: 9399
+          containerPort: 9399
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: Pod
+
+  - it: should use correct test command arguments
+    asserts:
+      - equal:
+          path: spec.containers[0].args[0]
+          value: test
+      - equal:
+          path: spec.containers[0].args[1]
+          value: -h
+      - exists:
+          path: spec.containers[0].args[2]
+
+  - it: should have helm test hook annotation
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: test
+
+  - it: should use Never restart policy for test pod
+    asserts:
+      - equal:
+          path: spec.restartPolicy
+          value: Never
+
+  - it: should render one test pod per exposed MQTT service with unique names
+    set:
+      services:
+        - type: mqtt
+          name: mqtt-primary
+          exposed: true
+          port: 1883
+          containerPort: 1883
+        - type: mqtt
+          name: mqtt-secondary
+          exposed: true
+          port: 1884
+          containerPort: 1884
+    asserts:
+      - hasDocuments:
+          count: 2
+
+  - it: should render test pods with correct name for multiple MQTT services exposed
+    set:
+      services:
+        - type: mqtt
+          name: mqtt-primary
+          exposed: true
+          port: 1883
+          containerPort: 1883
+        - type: mqtt
+          name: mqtt-secondary
+          exposed: true
+          port: 1884
+          containerPort: 1884
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-test-connection-test-platform-mqtt-primary
+        documentIndex: 0
+      - equal:
+          path: spec.containers[0].args[2]
+          value: mqtt-primary
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: hivemq-test-connection-test-platform-mqtt-secondary
+        documentIndex: 1
+      - equal:
+          path: spec.containers[0].args[2]
+          value: mqtt-secondary
+        documentIndex: 1

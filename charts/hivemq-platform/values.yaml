@@ -853,3 +853,12 @@ monitoring:
     # Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.
     # Valid formats include `1d`, `1h30m`, `5m`, and `10s`. Defaults to 10 seconds.
     scrapeTimeout: 10s
+
+# HiveMQ Platform Helm test configuration.
+testing:
+  # Defines whether Helm test pods should be created.
+  # This runs a test pod for each exposed MQTT service to verify connectivity to the HiveMQ Platform.
+  # Each test pod connects to its respective MQTT service and validates that the connection is working.
+  # When set to `false`, no test pods are rendered and a `helm test` command will not run any tests.
+  # The default setting is `true`.
+  enabled: true
