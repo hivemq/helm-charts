@@ -367,7 +367,16 @@ tests:
           value: bar
     asserts:
       - failedTemplate:
-          errorMessage: "Duplicated environment variable `MY_ENV_VAR` found in the `.nodes.env` value."
+          errorMessage: "Duplicated environment variable `MY_ENV_VAR` found in the `.nodes.env` value"
+
+  - it: with default environment variables defined in nodes.env, validation fails
+    set:
+      nodes.env:
+        - name: JAVA_OPTS
+          value: "-XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+    asserts:
+      - failedTemplate:
+          errorMessage: "Default environment variable `JAVA_OPTS` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead"
 
   - it: with default resource requests
     asserts:

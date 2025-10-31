@@ -31,9 +31,16 @@ spec:
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
   metricsPort: {{ $metricsPort }}
   metricsPath: {{ .Values.metrics.path }}
-  {{- if .Values.monitoredResources }}
+  {{- $pulseSecretName := include "hivemq-platform.pulse-secret-name" . -}}
+  {{- if or $pulseSecretName .Values.monitoredResources }}
   {{- include "hivemq-platform.validate-monitored-resources" . }}
   monitoredResources:
+    {{- if $pulseSecretName }}
+    - name: {{ $pulseSecretName | quote }}
+      type: "SECRET"
+      files:
+        - "config.xml"
+    {{- end }}
     {{- range .Values.monitoredResources }}
     - name: {{ .name | quote }}
       type: {{ ternary "CONFIG_MAP" "SECRET" (eq .type "ConfigMap") | quote }}
@@ -263,11 +270,7 @@ spec:
             {{- if $hasPulseConfig }}
             - name: pulse-config
               secret:
-                {{- if .Values.pulse.name }}
-                secretName: {{ .Values.pulse.name }}
-                {{- else }}
-                secretName: {{ include "hivemq-platform.default-pulse-name" . }}
-                {{- end }}
+                secretName: {{ include "hivemq-platform.pulse-secret-name" . }}
             {{- end }}
             {{- if $hasKeystore }}
               {{- (include "hivemq-platform.get-tls-secret-volumes" .) | indent 12 -}}

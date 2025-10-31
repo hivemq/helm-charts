@@ -1,6 +1,8 @@
 suite: HiveMQ Platform - Monitored Resources tests
 templates:
   - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
 tests:
 
   - it: should not render monitoredResources field when not defined
@@ -59,10 +61,10 @@ tests:
       monitoredResources:
         - name: pulse-config
           type: Secret
-        - name: kafka-extension-config
+        - name: ese-file-realm
           type: ConfigMap
           files:
-            - kafka-config.xml
+            - realm.xml
         - name: custom-secret
           type: Secret
           files:
@@ -81,13 +83,13 @@ tests:
           path: spec.monitoredResources[0].files
       - equal:
           path: spec.monitoredResources[1].name
-          value: kafka-extension-config
+          value: ese-file-realm
       - equal:
           path: spec.monitoredResources[1].type
           value: CONFIG_MAP
       - equal:
           path: spec.monitoredResources[1].files[0]
-          value: kafka-config.xml
+          value: realm.xml
       - equal:
           path: spec.monitoredResources[2].name
           value: custom-secret
