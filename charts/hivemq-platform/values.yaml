@@ -829,6 +829,23 @@ pulse:
   # Overrides the HiveMQ Pulse configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.
   overridePulseConfig: ""
 
+# Configures Kubernetes resources (ConfigMaps and Secrets) to monitor for changes.
+# When one of the files in a monitored resource changes, the HiveMQ Platform pods will perform a rolling restart.
+# This is useful for automatically restarting pods when configurations change.
+monitoredResources: []
+  # List of additional ConfigMaps and Secrets to monitor for changes
+  #
+  # Example: Monitor a ConfigMap (monitors all files specified in the ConfigMap)
+  # - name: my-file-realm
+  #   type: ConfigMap
+  #
+  # Example: Monitor specific files in a Secret
+  # - name: my-credentials-secret
+  #   type: Secret
+  #   files:
+  #     - credentials.xml
+  #     - keystore.jks
+
 # Enables the ServiceMonitor resource and Grafana dashboard creation for the platform.
 monitoring:
   # Defines whether the monitoring configuration for the HiveMQ Platform is enabled. The default setting is `false`.

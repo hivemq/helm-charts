@@ -642,6 +642,43 @@
       },
       "type" : "object"
     },
+    "monitoredResources" : {
+      "description" : "Configures Kubernetes resources (ConfigMaps and Secrets) to monitor for changes. When one of the files in a monitored resource changes, the HiveMQ Platform pods will perform a rolling restart.",
+      "items" : {
+        "additionalProperties" : false,
+        "properties" : {
+          "name" : {
+            "description" : "The name of the ConfigMap or Secret to monitor for changes.",
+            "minLength" : 1,
+            "pattern" : ".*\\S.*",
+            "type" : "string"
+          },
+          "type" : {
+            "description" : "The type of resource to monitor. Must be ConfigMap or Secret.",
+            "enum" : [
+              "ConfigMap",
+              "Secret"
+            ],
+            "type" : "string"
+          },
+          "files" : {
+            "description" : "List of files to monitor within the resource. If empty or omitted, all files in the resource will be monitored.",
+            "items" : {
+              "minLength" : 1,
+              "pattern" : ".*\\S.*",
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [
+          "name",
+          "type"
+        ],
+        "type" : "object"
+      },
+      "type" : "array"
+    },
     "monitoring" : {
       "description" : "Enables the ServiceMonitor resource and Grafana dashboard creation for the platform.",
       "properties" : {

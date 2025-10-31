@@ -775,6 +775,39 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- end -}}
 
 {{/*
+Validate monitored resources configuration.
+ - Ensures no duplicate ConfigMap or Secret names are defined.
+ - Ensures no duplicate files are defined within the same resource.
+Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
+*/}}
+{{- define "hivemq-platform.validate-monitored-resources" -}}
+{{- $configMapNamesList := list }}
+{{- $secretNamesList := list }}
+{{- range $resource := .Values.monitoredResources }}
+  {{- if eq $resource.type "ConfigMap" }}
+    {{- if has $resource.name $configMapNamesList }}
+      {{- fail (printf "\nFound duplicated ConfigMap name '%s' for `monitoredResources`" $resource.name) }}
+    {{- end }}
+    {{- $configMapNamesList = $resource.name | append $configMapNamesList }}
+  {{- else }}
+    {{- if has $resource.name $secretNamesList }}
+      {{- fail (printf "\nFound duplicated Secret name '%s' for `monitoredResources`" $resource.name) }}
+    {{- end }}
+    {{- $secretNamesList = $resource.name | append $secretNamesList }}
+  {{- end }}
+  {{- if $resource.files }}
+    {{- $filesList := list }}
+    {{- range $file := $resource.files }}
+      {{- if has $file $filesList }}
+        {{- fail (printf "\nFound duplicated file '%s' in %s %s for `monitoredResources`" $file $resource.name $resource.type) }}
+      {{- end }}
+      {{- $filesList = $file | append $filesList }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Validates the HiveMQ Pulse configuration so:
  - When the `pulse.create` value is `true`, at least one configuration content is defined.
  - Only one of `data` or `overridePulseConfig` are set, but not both.
