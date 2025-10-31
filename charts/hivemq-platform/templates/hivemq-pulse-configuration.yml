@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.pulse.name | default (include "hivemq-platform.default-pulse-name" .) }}
+  name: {{ include "hivemq-platform.pulse-secret-name" . }}
   {{- with .Values.pulse.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

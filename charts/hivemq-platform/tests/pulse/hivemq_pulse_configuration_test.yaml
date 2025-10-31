@@ -40,6 +40,9 @@ tests:
           path: data["config.xml"]
           value: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         template: hivemq-pulse-configuration.yml
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           count: 1
@@ -71,6 +74,9 @@ tests:
           path: data["config.xml"]
           value: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
         template: hivemq-pulse-configuration.yml
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           count: 1
@@ -96,6 +102,9 @@ tests:
       - hasDocuments:
           count: 0
         template: hivemq-pulse-configuration.yml
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+        template: hivemq-custom-resource.yml
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           count: 1
@@ -195,29 +204,31 @@ tests:
           path: stringData["config.xml"]
           value: "<pulse><enabled>true</enabled></pulse>"
 
-  - it: should mount existing Pulse configuration Secret when `name` is provided without creating Secret
+  - it: should fail validation when HIVEMQ_PULSE_FOLDER env var is defined
     set:
       pulse:
-        name: "my-existing-pulse-config-secret"
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+      nodes:
+        env:
+          - name: HIVEMQ_PULSE_FOLDER
+            value: /some/other/path
+    template: hivemq-custom-resource.yml
     asserts:
+      - failedTemplate:
+          errorMessage: "HIVEMQ_PULSE_FOLDER environment variable cannot be set"
+
+  - it: should not fail validation when HIVEMQ_PULSE_FOLDER env var is defined but no Pulse is configured
+    set:
+      nodes:
+        env:
+          - name: HIVEMQ_PULSE_FOLDER
+            value: /some/other/path
+    template: hivemq-custom-resource.yml
+    asserts:
+      - notFailedTemplate: {}
       - hasDocuments:
-          count: 0
-        template: hivemq-pulse-configuration.yml
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           count: 1
-          content:
-            name: pulse-config
-            mountPath: /opt/hivemq/pulse/conf
-        template: hivemq-custom-resource.yml
-      - contains:
-          path: spec.statefulSet.spec.template.spec.volumes
-          count: 1
-          content:
-            name: pulse-config
-            secret:
-              secretName: my-existing-pulse-config-secret
-        template: hivemq-custom-resource.yml
 
   - it: should fail validation when additional volume mount path clashes with default Pulse configuration mount path
     set:
@@ -416,3 +427,154 @@ tests:
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate: {}
+
+  - it: should add Pulse Secret to monitoredResources when pulse.create is true
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+    template: hivemq-custom-resource.yml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 1
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: hivemq-pulse-configuration-test-platform
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+      - equal:
+          path: spec.monitoredResources[0].files[0]
+          value: config.xml
+
+  - it: should add Pulse Secret with custom name to monitoredResources
+    set:
+      pulse:
+        create: true
+        name: my-pulse-config
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+    template: hivemq-custom-resource.yml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 1
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: my-pulse-config
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+      - equal:
+          path: spec.monitoredResources[0].files[0]
+          value: config.xml
+
+  - it: should add existing Pulse Secret to monitoredResources when pulse.name is set without create
+    set:
+      pulse:
+        name: existing-pulse-secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 1
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: existing-pulse-secret
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+
+  - it: should combine Pulse auto-monitoring with user-defined resources
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+      monitoredResources:
+        - name: ese-file-realm
+          type: ConfigMap
+        - name: custom-credentials
+          type: Secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 3
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: hivemq-pulse-configuration-test-platform
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+      - equal:
+          path: spec.monitoredResources[0].files[0]
+          value: config.xml
+      - equal:
+          path: spec.monitoredResources[1].name
+          value: ese-file-realm
+      - equal:
+          path: spec.monitoredResources[1].type
+          value: CONFIG_MAP
+      - equal:
+          path: spec.monitoredResources[2].name
+          value: custom-credentials
+      - equal:
+          path: spec.monitoredResources[2].type
+          value: SECRET
+
+  - it: should not add monitoredResources field when pulse is not configured
+    asserts:
+      - notExists:
+          path: spec.monitoredResources
+        template: hivemq-custom-resource.yml
+
+  - it: should fail validation when user manually adds Pulse Secret to monitoredResources
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+      monitoredResources:
+        - name: hivemq-pulse-configuration-test-platform
+          type: Secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "The Pulse configuration Secret 'hivemq-pulse-configuration-test-platform' is automatically monitored when Pulse is enabled. Please remove it from `monitoredResources`"
+
+  - it: should fail validation when user manually adds custom Pulse Secret to monitoredResources
+    set:
+      pulse:
+        create: true
+        name: my-custom-pulse
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+      monitoredResources:
+        - name: my-custom-pulse
+          type: Secret
+    template: hivemq-custom-resource.yml
+    asserts:
+      - failedTemplate:
+          errorMessage: "The Pulse configuration Secret 'my-custom-pulse' is automatically monitored when Pulse is enabled. Please remove it from `monitoredResources`"
+
+  - it: should add Pulse Secret to monitoredResources when using overridePulseConfig
+    set:
+      pulse:
+        create: true
+        isPulseConfigBase64Encoded: false
+        overridePulseConfig: |
+          <pulse>
+            <enabled>true</enabled>
+          </pulse>
+    template: hivemq-custom-resource.yml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 1
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: hivemq-pulse-configuration-test-platform
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+      - equal:
+          path: spec.monitoredResources[0].files[0]
+          value: config.xml
