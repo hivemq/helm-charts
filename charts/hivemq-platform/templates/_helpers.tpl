@@ -94,13 +94,6 @@ Returns the default license name for the platform.
 {{- end -}}
 
 {{/*
-Returns the default pulse configuration name for the platform.
-*/}}
-{{- define "hivemq-platform.default-pulse-name" -}}
-{{- printf "%s-%s" "hivemq-pulse-configuration" .Release.Name }}
-{{- end -}}
-
-{{/*
 Has additional volumes.
 */}}
 {{- define "hivemq-platform.has-additional-volumes" -}}
@@ -775,14 +768,34 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- end -}}
 
 {{/*
+Gets the Pulse configuration Secret name.
+Returns the pulse Secret name if pulse is configured, empty string otherwise.
+Usage: {{- include "hivemq-platform.pulse-secret-name" . -}}
+*/}}
+{{- define "hivemq-platform.pulse-secret-name" -}}
+{{- $pulseSecretName := "" }}
+{{- $hasPulseConfig := include "hivemq-platform.has-pulse-config" . -}}
+{{- if $hasPulseConfig }}
+  {{- if .Values.pulse.name }}
+    {{- $pulseSecretName = .Values.pulse.name }}
+  {{- else }}
+    {{- $pulseSecretName = printf "%s-%s" "hivemq-pulse-configuration" .Release.Name }}
+  {{- end }}
+{{- end }}
+{{- $pulseSecretName }}
+{{- end -}}
+
+{{/*
 Validate monitored resources configuration.
  - Ensures no duplicate ConfigMap or Secret names are defined.
  - Ensures no duplicate files are defined within the same resource.
+ - Checks for conflicts with auto-generated Pulse monitored resource.
 Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
 */}}
 {{- define "hivemq-platform.validate-monitored-resources" -}}
 {{- $configMapNamesList := list }}
 {{- $secretNamesList := list }}
+{{- $pulseSecretName := include "hivemq-platform.pulse-secret-name" . -}}
 {{- range $resource := .Values.monitoredResources }}
   {{- if eq $resource.type "ConfigMap" }}
     {{- if has $resource.name $configMapNamesList }}
@@ -792,6 +805,9 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
   {{- else }}
     {{- if has $resource.name $secretNamesList }}
       {{- fail (printf "\nFound duplicated Secret name '%s' for `monitoredResources`" $resource.name) }}
+    {{- end }}
+    {{- if eq $resource.name $pulseSecretName }}
+      {{- fail (printf "\nThe Pulse configuration Secret '%s' is automatically monitored when Pulse is enabled. Please remove it from `monitoredResources`" $resource.name) }}
     {{- end }}
     {{- $secretNamesList = $resource.name | append $secretNamesList }}
   {{- end }}
@@ -845,7 +861,7 @@ Usage: {{- include "hivemq-platform.validate-duplicated-env-vars" . }}
 {{- $envList := list }}
 {{- range .Values.nodes.env }}
   {{- if has .name $envList }}
-    {{- fail (printf "\nDuplicated environment variable `%s` found in the `.nodes.env` value." .name) }}
+    {{- fail (printf "\nDuplicated environment variable `%s` found in the `.nodes.env` value" .name) }}
   {{- else }}
     {{- $envList = .name | append $envList}}
   {{- end }}
@@ -857,10 +873,14 @@ Validates no default Platform EnvVar is set through `.Values.nodes.env`. Otherwi
 Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 */}}
 {{- define "hivemq-platform.validate-default-env-vars" -}}
-{{- $defaultEnvs := list "JAVA_OPTS" }}
+{{- $defaultEnvs := list "JAVA_OPTS"}}
+{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) }}
 {{- range .Values.nodes.env }}
+  {{- if and (eq .name "HIVEMQ_PULSE_FOLDER") $hasPulseConfig }}
+    {{- fail (printf "\nHIVEMQ_PULSE_FOLDER environment variable cannot be set") }}
+  {{- end }}
   {{- if has .name $defaultEnvs }}
-    {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead." .name) }}
+    {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead" .name) }}
   {{- end }}
 {{- end }}
 {{- end -}}
