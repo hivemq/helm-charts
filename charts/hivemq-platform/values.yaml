@@ -820,3 +820,8 @@ monitoring:
     # Defines the maximum duration allowed for scraping metrics from the endpoints defined in the ServiceMonitor resource.
     # Valid formats include `1d`, `1h30m`, `5m`, and `10s`. Defaults to 10 seconds.
     scrapeTimeout: 10s
+
+# HiveMQ Platform helm test configuration
+testing:
+    # Boolean value that configures whether the default HiveMQ Platform Helm test pods should be rendered. The default setting is `true`.
+    enabled: true

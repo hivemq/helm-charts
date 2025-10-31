@@ -1,3 +1,4 @@
+{{- if .Values.testing.enabled }}
 {{- range $service := .Values.services }}
 {{- if and (eq $service.type "mqtt") $service.exposed }}
 apiVersion: v1
@@ -14,5 +15,6 @@ spec:
               "-h",
               "{{ (include "hivemq-platform.range-service-name" (dict "name" $service.name "releaseName" $.Release.Name "type" $service.type "port" $service.port "containerPort" $service.containerPort "legacyPortName" $service.legacyPortName)) }}" ]
   restartPolicy: Never
+{{- end }}
 {{- end }}
 {{- end }}
