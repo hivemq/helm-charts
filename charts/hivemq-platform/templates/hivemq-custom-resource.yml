@@ -31,6 +31,20 @@ spec:
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
   metricsPort: {{ $metricsPort }}
   metricsPath: {{ .Values.metrics.path }}
+  {{- if .Values.monitoredResources }}
+  {{- include "hivemq-platform.validate-monitored-resources" . }}
+  monitoredResources:
+    {{- range .Values.monitoredResources }}
+    - name: {{ .name | quote }}
+      type: {{ ternary "CONFIG_MAP" "SECRET" (eq .type "ConfigMap") | quote }}
+      {{- if .files }}
+      files:
+        {{- range .files }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:

@@ -1,0 +1,314 @@
+suite: HiveMQ Platform - Monitored Resources tests
+templates:
+  - hivemq-custom-resource.yml
+tests:
+
+  - it: should not render monitoredResources field when not defined
+    asserts:
+      - notExists:
+          path: spec.monitoredResources
+
+  - it: should not render monitoredResources field when empty list
+    set:
+      monitoredResources: []
+    asserts:
+      - notExists:
+          path: spec.monitoredResources
+
+  - it: should render monitoredResources with single ConfigMap monitoring all files
+    set:
+      monitoredResources:
+        - name: my-extension-config
+          type: ConfigMap
+    asserts:
+      - exists:
+          path: spec.monitoredResources
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: my-extension-config
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: CONFIG_MAP
+      - notExists:
+          path: spec.monitoredResources[0].files
+
+  - it: should render monitoredResources with Secret monitoring specific files
+    set:
+      monitoredResources:
+        - name: my-credentials-secret
+          type: Secret
+          files:
+            - credentials.xml
+            - keystore.jks
+    asserts:
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: my-credentials-secret
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+      - equal:
+          path: spec.monitoredResources[0].files[0]
+          value: credentials.xml
+      - equal:
+          path: spec.monitoredResources[0].files[1]
+          value: keystore.jks
+
+  - it: should render multiple monitored resources with mixed types
+    set:
+      monitoredResources:
+        - name: pulse-config
+          type: Secret
+        - name: kafka-extension-config
+          type: ConfigMap
+          files:
+            - kafka-config.xml
+        - name: custom-secret
+          type: Secret
+          files:
+            - config.xml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 3
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: pulse-config
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: SECRET
+      - notExists:
+          path: spec.monitoredResources[0].files
+      - equal:
+          path: spec.monitoredResources[1].name
+          value: kafka-extension-config
+      - equal:
+          path: spec.monitoredResources[1].type
+          value: CONFIG_MAP
+      - equal:
+          path: spec.monitoredResources[1].files[0]
+          value: kafka-config.xml
+      - equal:
+          path: spec.monitoredResources[2].name
+          value: custom-secret
+      - equal:
+          path: spec.monitoredResources[2].type
+          value: SECRET
+      - equal:
+          path: spec.monitoredResources[2].files[0]
+          value: config.xml
+
+  - it: should render with empty files array (monitors all files)
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+          files: []
+    asserts:
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: my-config
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: CONFIG_MAP
+      - notExists:
+          path: spec.monitoredResources[0].files
+
+  - it: should fail validation when duplicate ConfigMap name is found
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+        - name: my-config
+          type: ConfigMap
+          files:
+            - different.xml
+    asserts:
+      - failedTemplate:
+          errorMessage: "Found duplicated ConfigMap name 'my-config' for `monitoredResources`"
+
+  - it: should fail validation when duplicate Secret name is found
+    set:
+      monitoredResources:
+        - name: my-secret
+          type: Secret
+        - name: my-secret
+          type: Secret
+          files:
+            - creds.xml
+    asserts:
+      - failedTemplate:
+          errorMessage: "Found duplicated Secret name 'my-secret' for `monitoredResources`"
+
+  - it: should allow same name for ConfigMap and Secret (different types)
+    set:
+      monitoredResources:
+        - name: my-resource
+          type: ConfigMap
+        - name: my-resource
+          type: Secret
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 2
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: my-resource
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: CONFIG_MAP
+      - equal:
+          path: spec.monitoredResources[1].name
+          value: my-resource
+      - equal:
+          path: spec.monitoredResources[1].type
+          value: SECRET
+
+  - it: should fail validation when duplicate file is found in same resource
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+          files:
+            - config.xml
+            - data.json
+            - config.xml
+    asserts:
+      - failedTemplate:
+          errorMessage: "Found duplicated file 'config.xml' in my-config ConfigMap for `monitoredResources`"
+
+  - it: should allow same filename in different resources
+    set:
+      monitoredResources:
+        - name: config-map-1
+          type: ConfigMap
+          files:
+            - config.xml
+        - name: config-map-2
+          type: ConfigMap
+          files:
+            - config.xml
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 2
+      - equal:
+          path: spec.monitoredResources[0].name
+          value: config-map-1
+      - equal:
+          path: spec.monitoredResources[0].type
+          value: CONFIG_MAP
+      - equal:
+          path: spec.monitoredResources[0].files[0]
+          value: config.xml
+      - equal:
+          path: spec.monitoredResources[1].name
+          value: config-map-2
+      - equal:
+          path: spec.monitoredResources[1].type
+          value: CONFIG_MAP
+      - equal:
+          path: spec.monitoredResources[1].files[0]
+          value: config.xml
+
+  - it: should fail schema validation when name is missing
+    set:
+      monitoredResources:
+        - type: ConfigMap
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when name is empty string
+    set:
+      monitoredResources:
+        - name: ""
+          type: ConfigMap
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when name is only whitespace
+    set:
+      monitoredResources:
+        - name: "   "
+          type: ConfigMap
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when type is missing
+    set:
+      monitoredResources:
+        - name: my-config
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when type is invalid
+    set:
+      monitoredResources:
+        - name: my-config
+          type: INVALID_TYPE
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when type is uppercase snake case
+    set:
+      monitoredResources:
+        - name: my-config
+          type: CONFIG_MAP
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when type is lowercase
+    set:
+      monitoredResources:
+        - name: my-config
+          type: configmap
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when files contains empty string
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+          files:
+            - config.xml
+            - ""
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when files contains only whitespace
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+          files:
+            - config.xml
+            - "   "
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when monitoredResources is not an array
+    set:
+      monitoredResources:
+        name: my-config
+        type: ConfigMap
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when resource has additional unexpected properties
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+          unexpectedField: value
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail schema validation when files is not an array
+    set:
+      monitoredResources:
+        - name: my-config
+          type: ConfigMap
+          files: "config.xml"
+    asserts:
+      - failedTemplate: {}
