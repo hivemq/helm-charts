@@ -213,14 +213,14 @@ spec:
                 {{- end }}
                 {{- else }}
                 limits:
-                  cpu: {{ .Values.nodes.resources.cpu | trim | quote }}
+                  cpu: {{ .Values.nodes.resources.cpu | toString | trim | quote }}
                   memory: {{ .Values.nodes.resources.memory | trim | quote }}
                   {{- with .Values.nodes.resources.ephemeralStorage | quote }}
                   ephemeral-storage: {{ . | trim }}
                   {{- end }}
                 {{- end }}
                 requests:
-                  cpu: {{ .Values.nodes.resources.cpu | trim | quote }}
+                  cpu: {{ .Values.nodes.resources.cpu | toString | trim | quote }}
                   memory: {{ .Values.nodes.resources.memory | trim | quote }}
                   {{- with .Values.nodes.resources.ephemeralStorage }}
                   ephemeral-storage: {{ . | trim | quote }}
