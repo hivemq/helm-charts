@@ -15,7 +15,7 @@ increasing the size of the image.
   ```bash
   docker build \
     --build-arg HIVEMQ_IMAGE=hivemq/hivemq4:k8s-<version> \
-    --build-arg JAVA_IMAGE=openjdk:11.0.11-jre-slim \
+    --build-arg JAVA_IMAGE=eclipse-temurin:11-jre-jammy \
     -t <custom-org>:<custom-tag> -f example_nonroot_k8s.dockerfile .
   ```
 - Push your created custom Docker image to your Docker registry, for more info check the [official documentation [2]](https://docs.docker.com/engine/reference/commandline/push/):
