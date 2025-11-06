@@ -13,7 +13,7 @@ ARG HIVEMQ_IMAGE
 ENV HIVEMQ_GID=10000 \
     HIVEMQ_UID=10000
 
-ENV HIVEMQ_LOG_LEVEL INFO
+ENV HIVEMQ_LOG_LEVEL=INFO
 
 WORKDIR /opt/hivemq
 
@@ -47,19 +47,19 @@ RUN chown hivemq:hivemq /opt/docker-entrypoint.sh /opt/hivemq \
 # Set locale
 ENV LANG=en_US.UTF-8
 # Additional JVM options, may be overwritten by user
-ENV JAVA_OPTS "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA"
+ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA"
 
 # Default allow all extension, set this to false to disable it
-ENV HIVEMQ_ALLOW_ALL_CLIENTS "true"
+ENV HIVEMQ_ALLOW_ALL_CLIENTS="true"
 
 # Enable REST API default value
-ENV HIVEMQ_REST_API_ENABLED "false"
+ENV HIVEMQ_REST_API_ENABLED="false"
 
 # Whether we should print additional debug info for the entrypoints
-ENV HIVEMQ_VERBOSE_ENTRYPOINT "true"
+ENV HIVEMQ_VERBOSE_ENTRYPOINT="true"
 
 # Whether nss_wrapper should be used for starting HiveMQ. Can be disabled for container runtimes that natively fixes the user information in the container at run-time like CRI-O.
-ENV HIVEMQ_USE_NSS_WRAPPER "true"
+ENV HIVEMQ_USE_NSS_WRAPPER="true"
 
 # Use default DNS resolution timeout as default discovery interval
 ENV HIVEMQ_DNS_DISCOVERY_TIMEOUT=30
