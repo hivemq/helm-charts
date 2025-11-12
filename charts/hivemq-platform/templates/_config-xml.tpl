@@ -40,13 +40,13 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       <tls>
         <keystore>
           <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
-          <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
-          <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
+          <password>{{ printf "${%s}" (include "hivemq-platform.keystore-password" (dict "releaseName" $.Release.Name "service" $service)) }}</password>
+          <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "service" $service)) }}</private-key-password>
         </keystore>
         {{- if $service.truststoreSecretName }}
         <truststore>
           <path>/tls-{{ $service.truststoreSecretName }}/{{ $service.truststoreSecretKey | default "truststore" }}</path>
-          <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
+          <password>{{ printf "${%s}" (include "hivemq-platform.truststore-password" (dict "releaseName" $.Release.Name "service" $service)) }}</password>
         </truststore>
         {{- end }}
         {{- if $service.tlsProtocols }}
@@ -124,13 +124,13 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       <tls>
         <keystore>
           <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
-          <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
-          <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
+          <password>{{ printf "${%s}" (include "hivemq-platform.keystore-password" (dict "releaseName" $.Release.Name "service" $service)) }}</password>
+          <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "service" $service)) }}</private-key-password>
         </keystore>
         {{- if $service.truststoreSecretName }}
         <truststore>
           <path>/tls-{{ $service.truststoreSecretName }}/{{ $service.truststoreSecretKey | default "truststore" }}</path>
-          <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass" }}</password>
+          <password>{{ printf "${%s}" (include "hivemq-platform.truststore-password" (dict "releaseName" $.Release.Name "service" $service)) }}</password>
         </truststore>
         {{- end }}
         {{- if $service.tlsProtocols }}
@@ -277,8 +277,8 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
         <tls>
           <keystore>
             <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
-            <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
-            <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
+            <password>{{ printf "${%s}" (include "hivemq-platform.keystore-password" (dict "releaseName" $.Release.Name "service" $service)) }}</password>
+            <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "service" $service)) }}</private-key-password>
           </keystore>
           {{- if $service.tlsProtocols }}
           <protocols>
@@ -345,8 +345,8 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
         <tls>
           <keystore>
             <path>/tls-{{ $service.keystoreSecretName }}/{{ $service.keystoreSecretKey | default "keystore" }}</path>
-            <password>{{ printf "${%s_%s_%s_%s}" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass" }}</password>
-            <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey)) }}</private-key-password>
+            <password>{{ printf "${%s}" (include "hivemq-platform.keystore-password" (dict "releaseName" $.Release.Name "service" $service)) }}</password>
+            <private-key-password>{{ printf "${%s}" (include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "service" $service)) }}</private-key-password>
           </keystore>
           {{- if $service.tlsProtocols }}
           <protocols>

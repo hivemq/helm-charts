@@ -1,4 +1,4 @@
-suite: HiveMQ Platform - Secure services tests
+suite: HiveMQ Platform - TLS Services Tests
 templates:
   - hivemq-custom-resource.yml
 release:
@@ -137,7 +137,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -202,7 +202,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -275,7 +275,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -283,7 +283,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -341,7 +341,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -349,7 +349,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -405,7 +405,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_mqtt-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -446,7 +446,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_keystore-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -454,7 +454,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_keystore-secret1_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password1_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -462,7 +462,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_keystore-secret2_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password2_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password2
@@ -480,7 +480,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_keystore-secret4_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password4_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -488,7 +488,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_keystore-secret4_keystore_private_pass
+            name: mqtt_test-hivemq-platform_secret-password4_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -737,11 +737,11 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].env
-          count: 5
+          count: 6
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "mqtt_test-hivemq-platform_keystore-secret_keystore_pass"
+            name: "mqtt_test-hivemq-platform_secret-password_keystore_password_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password"
@@ -749,7 +749,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "mqtt_test-hivemq-platform_keystore-secret1_keystore_pass"
+            name: "mqtt_test-hivemq-platform_secret-password1_keystore_password_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password1"
@@ -762,7 +762,15 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "mqtt_test-hivemq-platform_truststore-secret1_truststore_pass"
+            name: "mqtt_test-hivemq-platform_secret-password_truststore_password_truststore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "truststore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "mqtt_test-hivemq-platform_secret-password1_truststore_password_truststore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password1"
@@ -900,11 +908,11 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].env
-          count: 5
+          count: 6
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "websocket_test-hivemq-platform_keystore-secret_keystore_pass"
+            name: "websocket_test-hivemq-platform_secret-password_keystore_password_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password"
@@ -912,7 +920,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "websocket_test-hivemq-platform_keystore-secret1_keystore_pass"
+            name: "websocket_test-hivemq-platform_secret-password1_keystore_password_keystore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password1"
@@ -925,7 +933,15 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: "websocket_test-hivemq-platform_truststore-secret1_truststore_pass"
+            name: "websocket_test-hivemq-platform_secret-password_truststore_password_truststore_pass"
+            valueFrom:
+              secretKeyRef:
+                name: "secret-password"
+                key: "truststore.password"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: "websocket_test-hivemq-platform_secret-password1_truststore_password_truststore_pass"
             valueFrom:
               secretKeyRef:
                 name: "secret-password1"
@@ -1154,7 +1170,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1220,7 +1236,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -1294,7 +1310,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1302,7 +1318,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -1361,7 +1377,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -1369,7 +1385,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_private_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -1426,7 +1442,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret_keystore_pass
+            name: control-center_test-hivemq-platform_control-center-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1473,7 +1489,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret1_keystore_pass
+            name: control-center_test-hivemq-platform_secret-password1_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -1499,7 +1515,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret4_keystore_pass
+            name: control-center_test-hivemq-platform_secret-password4_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -1507,7 +1523,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: control-center_test-hivemq-platform_control-center-secret4_keystore_private_pass
+            name: control-center_test-hivemq-platform_secret-password4_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -1837,7 +1853,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1902,7 +1918,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -1975,7 +1991,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1983,7 +1999,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -2041,7 +2057,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -2049,7 +2065,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_private_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -2105,7 +2121,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -2149,7 +2165,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret_keystore_pass
+            name: rest-api_test-hivemq-platform_rest-api-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -2195,7 +2211,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret1_keystore_pass
+            name: rest-api_test-hivemq-platform_secret-password1_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -2221,7 +2237,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret4_keystore_pass
+            name: rest-api_test-hivemq-platform_secret-password4_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -2229,7 +2245,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: rest-api_test-hivemq-platform_rest-api-secret4_keystore_private_pass
+            name: rest-api_test-hivemq-platform_secret-password4_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -2552,7 +2568,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            name: websocket_test-hivemq-platform_ws-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -2617,7 +2633,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            name: websocket_test-hivemq-platform_ws-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -2690,7 +2706,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            name: websocket_test-hivemq-platform_ws-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -2698,7 +2714,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            name: websocket_test-hivemq-platform_ws-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -2756,7 +2772,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            name: websocket_test-hivemq-platform_ws-keystore-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.password
@@ -2764,7 +2780,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_private_pass
+            name: websocket_test-hivemq-platform_ws-keystore-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 key: my-custom-secret-key.private-password
@@ -2805,18 +2821,6 @@ tests:
                   targetPort: ws-8001
                   port: 8001
 
-  - it: with a secure WebSocket service enabled but no keystorePassword or keystorePasswordSecretName set, then fails
-    set:
-      services:
-        - type: websocket
-          exposed: true
-          containerPort: 8001
-          keystoreSecretName: "websocket-secret"
-          keystoreSecretKey: "keystore.jks"
-    asserts:
-      - failedTemplate:
-          errorPattern: A keystore password should be set either as a string \(keystorePassword\) or as a secret name \(keystorePasswordSecretName\)
-
   - it: with a secure WebSocket service disabled, no secure WebSocket service is exposed
     set:
       services:
@@ -2832,7 +2836,7 @@ tests:
       - notContains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_websocket-secret_keystore_pass
+            name: websocket_test-hivemq-platform_websocket-keystore-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -2873,7 +2877,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret_keystore_pass
+            name: websocket_test-hivemq-platform_secret-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -2881,7 +2885,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret1_keystore_pass
+            name: websocket_test-hivemq-platform_secret-password1_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -2907,7 +2911,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret4_keystore_pass
+            name: websocket_test-hivemq-platform_secret-password4_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -2915,7 +2919,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret4_keystore_private_pass
+            name: websocket_test-hivemq-platform_secret-password4_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password4
@@ -3175,7 +3179,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -3187,7 +3191,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -3304,7 +3308,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -3312,7 +3316,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            name: mqtt_test-hivemq-platform_secret-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -3320,7 +3324,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -3328,7 +3332,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret1_keystore_private_pass
+            name: mqtt_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password1
@@ -3414,11 +3418,11 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].env
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].env
-          count: 7
+          count: 6
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -3426,7 +3430,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_private_pass
+            name: mqtt_test-hivemq-platform_secret-password_my-custom-secret-key_private-password_keystore_private_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -3444,23 +3448,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: mqtt_test-hivemq-platform_mqtt-secret_keystore_pass
-            valueFrom:
-              secretKeyRef:
-                name: secret-password
-                key: keystore.password
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].env
-          content:
-            name: mqtt_test-hivemq-platform_mqtt-secret2_keystore_pass
-            valueFrom:
-              secretKeyRef:
-                name: secret-password
-                key: my-custom-secret-key.password
-      - contains:
-          path: spec.statefulSet.spec.template.spec.containers[0].env
-          content:
-            name: mqtt_test-hivemq-platform_mqtt-secret2_keystore_pass
+            name: mqtt_test-hivemq-platform_secret-password_my-custom-secret-key_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 name: secret-password
@@ -3512,18 +3500,6 @@ tests:
             secret:
               secretName: mqtt-secret2
 
-  - it: with a secure service enabled but no keystorePassword or keystorePasswordSecretName set, then fails
-    set:
-      services:
-        - type: control-center
-          exposed: true
-          containerPort: 8443
-          keystoreSecretName: "control-center-secret"
-          keystoreSecretKey: "keystore.jks"
-    asserts:
-      - failedTemplate:
-          errorPattern: A keystore password should be set either as a string \(keystorePassword\) or as a secret name \(keystorePasswordSecretName\)
-
   - it: should fail validation when additional volume mount path clashes with a TLS mount path in a secured service
     set:
       services:
@@ -3537,7 +3513,6 @@ tests:
         - name: conflicting-tls-secret
           type: secret
           path: /tls-mqtt-keystore-secret
-    template: hivemq-custom-resource.yml
     asserts:
       - failedTemplate:
           errorMessage: "VolumeMount path `/tls-mqtt-keystore-secret` (path: `/tls-mqtt-keystore-secret` value, subPath: `` value) is duplicated for container `hivemq`"
@@ -3555,7 +3530,6 @@ tests:
         - name: conflicting-tls-secret
           type: secret
           path: /tls-mqtt-keystore-secret
-    template: hivemq-custom-resource.yml
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
@@ -3575,7 +3549,6 @@ tests:
           type: secret
           containerName: foobar
           path: /tls-mqtt-keystore-secret
-    template: hivemq-custom-resource.yml
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
@@ -3594,7 +3567,6 @@ tests:
         - name: mqtt-keystore-secret
           type: secret
           path: /some/other/tls/path
-    template: hivemq-custom-resource.yml
     asserts:
       - failedTemplate:
           errorMessage: "VolumeMount `mqtt-keystore-secret` (name: `mqtt-keystore-secret` value, mountName: `` value) is duplicated for container `hivemq`"
@@ -3612,7 +3584,6 @@ tests:
         - name: mqtt-keystore-secret
           type: secret
           path: /some/other/tls/path
-    template: hivemq-custom-resource.yml
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
@@ -3632,8 +3603,575 @@ tests:
           type: secret
           containerName: foobar
           path: /some/other/tls/path
-    template: hivemq-custom-resource.yml
     asserts:
       - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with truststore in non-exposed service but no password, then validation passes
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1883
+          keystoreSecretName: "mqtt-keystore"
+          keystorePassword: "a2V5c3RvcmUK"
+          truststoreSecretName: "mqtt-truststore"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS MQTT service exposed with ambiguous keystore password (both keystorePassword and keystorePasswordSecretName set), validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Keystore password for service type `mqtt` with container port `1884` is ambiguous. Both `keystorePassword` and `keystorePasswordSecretName` values are set
+
+  - it: with a secure mutual TLS MQTT service not exposed with ambiguous keystore password, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS MQTT service exposed but missing required keystore password, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Keystore password for service type `mqtt` with container port `1884` should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+
+  - it: with a secure mutual TLS MQTT service not exposed with missing keystore password, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS MQTT service exposed with ambiguous truststore password (both truststorePassword and truststorePasswordSecretName set), validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Truststore password for service type `mqtt` with container port `1884` is ambiguous. Both `truststorePassword` and `truststorePasswordSecretName` values are set
+
+  - it: with a secure mutual TLS MQTT service not exposed with ambiguous truststore password, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS MQTT service exposed but missing required truststore password, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+    asserts:
+      - failedTemplate:
+          errorPattern: Truststore password for service type `mqtt` with container port `1884` should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)
+
+  - it: with a secure mutual TLS MQTT service not exposed with missing truststore password, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS WebSocket service exposed with ambiguous keystore password (both keystorePassword and keystorePasswordSecretName set), validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Keystore password for service type `websocket` with container port `8000` is ambiguous. Both `keystorePassword` and `keystorePasswordSecretName` values are set
+
+  - it: with a secure mutual TLS WebSocket service not exposed with ambiguous keystore password, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS WebSocket service exposed but missing required keystore password, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Keystore password for service type `websocket` with container port `8000` should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
+
+  - it: with a secure mutual TLS WebSocket service not exposed with missing keystore password, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS WebSocket service exposed with ambiguous truststore password (both truststorePassword and truststorePasswordSecretName set), validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Truststore password for service type `websocket` with container port `8000` is ambiguous. Both `truststorePassword` and `truststorePasswordSecretName` values are set
+
+  - it: with a secure mutual TLS WebSocket service not exposed with ambiguous truststore password, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with a secure mutual TLS WebSocket service exposed but missing required truststore password, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+    asserts:
+      - failedTemplate:
+          errorPattern: Truststore password for service type `websocket` with container port `8000` should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)
+
+  - it: with a secure mutual TLS WebSocket service not exposed with missing truststore password, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with control-center service using truststore values, validation fails (only MQTT/WebSocket allowed)
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `control-center` with container port `8080` is using truststore values. Truststore configuration is only supported by MQTT or WebSocket services
+
+  - it: with rest-api service using truststore values, validation fails (only MQTT/WebSocket allowed)
+    set:
+      services:
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          keystoreSecretName: "keystore-secret"
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `rest-api` with container port `8888` is using truststore values. Truststore configuration is only supported by MQTT or WebSocket services
+
+  - it: with MQTT service using truststore values without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without keystore values. Truststore configuration requires keystore configuration to be set for mutual TLS
+
+  - it: with WebSocket service using truststore values without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          truststoreSecretName: "truststore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using truststore values without keystore values. Truststore configuration requires keystore configuration to be set for mutual TLS
+
+  - it: with MQTT service using keystoreSecretKey without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS
+
+  - it: with MQTT service not exposed using keystoreSecretKey without keystoreSecretName, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretKey: "keystore.jks"
+          keystorePasswordSecretName: "my-keystore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with WebSocket service using keystorePassword without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS
+
+  - it: with WebSocket service not exposed using keystorePassword without keystoreSecretName, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystorePassword: "a2V5LWNoYW5nZW1lCg=="
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with MQTT service using keystorePasswordSecretName without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystorePasswordSecretName: "my-keystore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS
+
+  - it: with MQTT service not exposed using keystorePasswordSecretName without keystoreSecretName, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystorePasswordSecretName: "my-keystore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with MQTT service using truststoreSecretKey without truststoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without `truststoreSecretName` value. Truststore configuration requires mandatory `truststoreSecretName` value to be set for mutual TLS
+
+  - it: with MQTT service not exposed using truststoreSecretKey without truststoreSecretName, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststoreSecretKey: "truststore.jks"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with WebSocket service using truststorePassword without truststoreSecretName, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using truststore values without `truststoreSecretName` value. Truststore configuration requires mandatory `truststoreSecretName` value to be set for mutual TLS
+
+  - it: with WebSocket service not exposed using truststorePassword without truststoreSecretName, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with MQTT service using truststorePasswordSecretName without truststoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without `truststoreSecretName` value. Truststore configuration requires mandatory `truststoreSecretName` value to be set for mutual TLS
+
+  - it: with MQTT service not exposed using truststorePasswordSecretName without truststoreSecretName, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststorePasswordSecretName: "my-truststore-secret"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with MQTT service using keystorePrivatePassword without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU="
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS
+
+  - it: with MQTT service not exposed using keystorePrivatePassword without keystoreSecretName, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystorePrivatePassword: "cHJpdmF0ZS1rZXktY2hhbmdlbWU="
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with WebSocket service using keystorePasswordSecretKey without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystorePasswordSecretKey: "password-key"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS
+
+  - it: with WebSocket service not exposed using keystorePasswordSecretKey without keystoreSecretName, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystorePasswordSecretKey: "password-key"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with MQTT service using keystorePrivatePasswordSecretKey without keystoreSecretName, validation fails
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystorePrivatePasswordSecretKey: "private-password-key"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `mqtt` with container port `1884` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS
+
+  - it: with MQTT service not exposed using keystorePrivatePasswordSecretKey without keystoreSecretName, validation succeeds
+    set:
+      services:
+        - type: mqtt
+          exposed: false
+          containerPort: 1884
+          keystorePrivatePasswordSecretKey: "private-password-key"
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: with WebSocket service using truststorePasswordSecretKey without truststoreSecretName, validation fails
+    set:
+      services:
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststorePasswordSecretKey: "truststore-password-key"
+    asserts:
+      - failedTemplate:
+          errorPattern: Service type `websocket` with container port `8000` is using truststore values without `truststoreSecretName` value. Truststore configuration requires mandatory `truststoreSecretName` value to be set for mutual TLS
+
+  - it: with WebSocket service not exposed using truststorePasswordSecretKey without truststoreSecretName, validation succeeds
+    set:
+      services:
+        - type: websocket
+          exposed: false
+          containerPort: 8000
+          keystoreSecretName: "keystore-secret"
+          keystorePasswordSecretName: "my-keystore-secret"
+          truststorePasswordSecretKey: "truststore-password-key"
+    asserts:
       - hasDocuments:
           count: 1
