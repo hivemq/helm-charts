@@ -1260,8 +1260,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret/keystore.jks</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_websocket-keystore-password_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_websocket-keystore-password_keystore_password_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -1358,8 +1358,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret1/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret1_keystore_private_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -1458,8 +1458,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret1/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret1_keystore_private_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -1470,8 +1470,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret1/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret1_keystore_private_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -1610,12 +1610,12 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret/keystore.jks</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_my-keystore-secret_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_my-keystore-secret_keystore_password_keystore_pass}</private-key-password>
                     </keystore>
                     <truststore>
                       <path>/tls-truststore-secret/truststore.jks</path>
-                      <password>${websocket_test-hivemq-platform_truststore-secret_truststore_pass}</password>
+                      <password>${websocket_test-hivemq-platform_my-truststore-secret_truststore_password_truststore_pass}</password>
                     </truststore>
                     <client-authentication-mode>OPTIONAL</client-authentication-mode>
                   </tls>
@@ -1650,7 +1650,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret_keystore_pass
+            name: websocket_test-hivemq-platform_my-keystore-secret_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1659,7 +1659,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_truststore-secret_truststore_pass
+            name: websocket_test-hivemq-platform_my-truststore-secret_truststore_password_truststore_pass
             valueFrom:
               secretKeyRef:
                 key: truststore.password
@@ -1687,7 +1687,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret_keystore_pass
+            name: websocket_test-hivemq-platform_my-keystore-secret-name_my-keystore-secret-key_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: my-keystore-secret-key
@@ -1695,7 +1695,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_truststore-secret_truststore_pass
+            name: websocket_test-hivemq-platform_my-truststore-secret-name_my-truststore-secret-key_truststore_pass
             valueFrom:
               secretKeyRef:
                 key: my-truststore-secret-key
@@ -1722,7 +1722,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret_keystore_pass
+            name: websocket_test-hivemq-platform_my-keystore-secret-name_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1730,45 +1730,11 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_truststore-secret_truststore_pass
+            name: websocket_test-hivemq-platform_my-truststore-secret-name_truststore_password_truststore_pass
             valueFrom:
               secretKeyRef:
                 key: truststore.password
                 name: my-truststore-secret-name
-
-  - it: with a secure mutual TLS WebSocket service exposed but missing required keystore password, validation fails
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: websocket
-          exposed: true
-          containerPort: 8000
-          keystoreSecretName: "keystore-secret"
-          keystoreSecretKey: "keystore.jks"
-          tlsClientAuthenticationMode: "OPTIONAL"
-          truststoreSecretName: "truststore-secret"
-          truststoreSecretKey: "truststore.jks"
-          truststorePasswordSecretName: "my-truststore-secret"
-    asserts:
-      - failedTemplate:
-          errorPattern: A keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)
-
-  - it: with a secure mutual TLS WebSocket service exposed but missing required truststore password, validation fails
-    template: hivemq-custom-resource.yml
-    set:
-      services:
-        - type: websocket
-          exposed: true
-          containerPort: 8000
-          keystoreSecretName: "keystore-secret"
-          keystoreSecretKey: "keystore.jks"
-          keystorePasswordSecretName: "my-keystore-secret"
-          tlsClientAuthenticationMode: "OPTIONAL"
-          truststoreSecretName: "truststore-secret"
-          truststoreSecretKey: "truststore.jks"
-    asserts:
-      - failedTemplate:
-          errorPattern: A truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)
 
   - it: with a secure mutual TLS WebSocket service not exposed
     template: hivemq-configuration.yml
@@ -1832,12 +1798,12 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_my-keystore-secret_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_my-keystore-secret_keystore_password_keystore_pass}</private-key-password>
                     </keystore>
                     <truststore>
                       <path>/tls-truststore-secret/truststore</path>
-                      <password>${websocket_test-hivemq-platform_truststore-secret_truststore_pass}</password>
+                      <password>${websocket_test-hivemq-platform_my-truststore-secret_truststore_password_truststore_pass}</password>
                     </truststore>
                   </tls>
                 </tls-websocket-listener>
@@ -1871,7 +1837,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_keystore-secret_keystore_pass
+            name: websocket_test-hivemq-platform_my-keystore-secret_keystore_password_keystore_pass
             valueFrom:
               secretKeyRef:
                 key: keystore.password
@@ -1880,7 +1846,7 @@ tests:
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].env
           content:
-            name: websocket_test-hivemq-platform_truststore-secret_truststore_pass
+            name: websocket_test-hivemq-platform_my-truststore-secret_truststore_password_truststore_pass
             valueFrom:
               secretKeyRef:
                 key: truststore.password
@@ -2043,8 +2009,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password_keystore_password_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -2055,8 +2021,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret_keystore_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password_keystore_password_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -2067,8 +2033,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret1/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret1_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret1_keystore_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password1_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password1_keystore_password_keystore_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
@@ -2095,8 +2061,8 @@ tests:
                   <tls>
                     <keystore>
                       <path>/tls-keystore-secret4/keystore</path>
-                      <password>${websocket_test-hivemq-platform_keystore-secret4_keystore_pass}</password>
-                      <private-key-password>${websocket_test-hivemq-platform_keystore-secret4_keystore_private_pass}</private-key-password>
+                      <password>${websocket_test-hivemq-platform_secret-password4_keystore_password_keystore_pass}</password>
+                      <private-key-password>${websocket_test-hivemq-platform_secret-password4_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                     </keystore>
                   </tls>
                 </tls-websocket-listener>
