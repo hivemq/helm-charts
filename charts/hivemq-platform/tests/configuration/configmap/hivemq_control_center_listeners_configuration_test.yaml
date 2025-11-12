@@ -178,8 +178,8 @@ tests:
                     <tls>
                       <keystore>
                         <path>/tls-control-center-secret/keystore.jks</path>
-                        <password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</password>
-                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret_keystore_pass}</private-key-password>
+                        <password>${control-center_test-hivemq-platform_control-center-keystore-password_keystore_password_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_control-center-keystore-password_keystore_password_keystore_pass}</private-key-password>
                       </keystore>
                     </tls>
                   </https>
@@ -268,8 +268,8 @@ tests:
                     <tls>
                       <keystore>
                         <path>/tls-control-center-secret1/keystore</path>
-                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
-                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_private_pass}</private-key-password>
+                        <password>${control-center_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                       </keystore>
                     </tls>
                   </https>
@@ -366,8 +366,8 @@ tests:
                     <tls>
                       <keystore>
                         <path>/tls-control-center-secret1/keystore</path>
-                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
-                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_private_pass}</private-key-password>
+                        <password>${control-center_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                       </keystore>
                     </tls>
                   </https>
@@ -377,8 +377,8 @@ tests:
                     <tls>
                       <keystore>
                         <path>/tls-control-center-secret1/keystore</path>
-                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
-                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_private_pass}</private-key-password>
+                        <password>${control-center_test-hivemq-platform_secret-password1_keystore_password1_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_secret-password1_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                       </keystore>
                     </tls>
                   </https>
@@ -449,8 +449,8 @@ tests:
                     <tls>
                       <keystore>
                         <path>/tls-control-center-secret1/keystore</path>
-                        <password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</password>
-                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret1_keystore_pass}</private-key-password>
+                        <password>${control-center_test-hivemq-platform_secret-password1_keystore_password_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_secret-password1_keystore_password_keystore_pass}</private-key-password>
                       </keystore>
                     </tls>
                   </https>
@@ -471,8 +471,8 @@ tests:
                     <tls>
                       <keystore>
                         <path>/tls-control-center-secret4/keystore</path>
-                        <password>${control-center_test-hivemq-platform_control-center-secret4_keystore_pass}</password>
-                        <private-key-password>${control-center_test-hivemq-platform_control-center-secret4_keystore_private_pass}</private-key-password>
+                        <password>${control-center_test-hivemq-platform_secret-password4_keystore_password_keystore_pass}</password>
+                        <private-key-password>${control-center_test-hivemq-platform_secret-password4_my-custom-secret-key_private-password_keystore_private_pass}</private-key-password>
                       </keystore>
                     </tls>
                   </https>
