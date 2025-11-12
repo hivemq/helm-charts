@@ -1,0 +1,3386 @@
+suite: HiveMQ Platform - TLS Environment Variables Tests
+templates:
+  - hivemq-custom-resource.yml
+  - hivemq-configuration.yml
+release:
+  name: platform-release
+tests:
+
+  ################################################################################
+  # KEYSTORE SECRET SHARING MATRIX
+  # Testing all combinations of keystoreSecretName and keystorePasswordSecretName
+  ################################################################################
+
+  - it: same keystoreSecretName, same keystorePasswordSecretName, same keystorePasswordSecretKey - should deduplicate
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystoreSecretName, same keystorePasswordSecretName, different keystorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key-1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key-2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystoreSecretName, different keystorePasswordSecretName, same keystorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystoreSecretName, different keystorePasswordSecretName, different keystorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_pass-key-1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_pass-key-2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_pass-key-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_pass-key-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different keystoreSecretName, same keystorePasswordSecretName, same keystorePasswordSecretKey - should deduplicate
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different keystoreSecretName, same keystorePasswordSecretName, different keystorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key-1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key-2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different keystoreSecretName, different keystorePasswordSecretName, same keystorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different keystoreSecretName, different keystorePasswordSecretName, different keystorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_pass-key-1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_pass-key-2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_pass-key-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_pass-key-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # KEYSTORE WITH keystoreSecretKey VARIATIONS
+  ################################################################################
+
+  - it: same keystoreSecretName with different keystoreSecretKey, same password secret - should deduplicate password
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystoreSecretKey: "key-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystoreSecretKey: "key-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystoreSecretName with different keystoreSecretKey, different password secret - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystoreSecretKey: "key-1"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystoreSecretKey: "key-2"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # KEYSTORE PRIVATE PASSWORD SHARING MATRIX
+  ################################################################################
+
+  - it: same keystorePasswordSecretName, same keystorePasswordSecretKey, same keystorePrivatePasswordSecretKey - should deduplicate both
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-pass_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_private-pass_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: private-pass
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-pass_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_private-pass_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystorePasswordSecretName, same keystorePasswordSecretKey, different keystorePrivatePasswordSecretKey - deduplicate keystore only
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-pass_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_private-pass-1_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: private-pass-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_private-pass-2_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: private-pass-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-pass_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_private-pass-1_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_private-pass-2_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystorePasswordSecretName, different keystorePasswordSecretKey, same keystorePrivatePasswordSecretKey - deduplicate private only
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass-1"
+          keystorePrivatePasswordSecretKey: "private-pass"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass-2"
+          keystorePrivatePasswordSecretKey: "private-pass"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-pass-1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-pass-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-pass-2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-pass-2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_private-pass_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: private-pass
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-pass-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-pass-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_private-pass_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same keystorePasswordSecretName, different keystorePasswordSecretKey, different keystorePrivatePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass-1"
+          keystorePrivatePasswordSecretKey: "private-pass-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-pass-2"
+          keystorePrivatePasswordSecretKey: "private-pass-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-pass-1_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-pass-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-pass-2_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-pass-2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_private-pass-1_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: private-pass-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_private-pass-2_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: private-pass-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-pass-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-pass-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_private-pass-1_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_private-pass-2_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different keystorePasswordSecretName, same keystorePasswordSecretKey, same keystorePrivatePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_keystore-pass_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: keystore-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_keystore-pass_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: keystore-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_private-pass_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: private-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_private-pass_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: private-pass
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_keystore-pass_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_keystore-pass_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_private-pass_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_private-pass_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # TRUSTSTORE SECRET SHARING MATRIX
+  # Testing all combinations of truststoreSecretName and truststorePasswordSecretName
+  ################################################################################
+
+  - it: same truststoreSecretName, same truststorePasswordSecretName, same truststorePasswordSecretKey - should deduplicate
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same truststoreSecretName, same truststorePasswordSecretName, different truststorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key-1_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key-2_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key-1_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key-2_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same truststoreSecretName, different truststorePasswordSecretName, same truststorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "trust-pass-secret-1"
+          truststorePasswordSecretKey: "trust-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "trust-pass-secret-2"
+          truststorePasswordSecretKey: "trust-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-1_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-1
+                key: trust-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-2_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-2
+                key: trust-pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-1_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-2_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same truststoreSecretName, different truststorePasswordSecretName, different truststorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "trust-pass-secret-1"
+          truststorePasswordSecretKey: "trust-pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "trust-pass-secret-2"
+          truststorePasswordSecretKey: "trust-pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-1_trust-pass-key-1_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-1
+                key: trust-pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-2_trust-pass-key-2_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-2
+                key: trust-pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-1_trust-pass-key-1_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-2_trust-pass-key-2_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different truststoreSecretName, same truststorePasswordSecretName, same truststorePasswordSecretKey - should deduplicate
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different truststoreSecretName, same truststorePasswordSecretName, different truststorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key-1_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key-2_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key-1_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key-2_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different truststoreSecretName, different truststorePasswordSecretName, same truststorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-pass-secret-1"
+          truststorePasswordSecretKey: "trust-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "trust-pass-secret-2"
+          truststorePasswordSecretKey: "trust-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-1_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-1
+                key: trust-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-2_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-2
+                key: trust-pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-1_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-2_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: different truststoreSecretName, different truststorePasswordSecretName, different truststorePasswordSecretKey - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-pass-secret-1"
+          truststorePasswordSecretKey: "trust-pass-key-1"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "trust-pass-secret-2"
+          truststorePasswordSecretKey: "trust-pass-key-2"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-1_trust-pass-key-1_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-1
+                key: trust-pass-key-1
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-2_trust-pass-key-2_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-2
+                key: trust-pass-key-2
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-1_trust-pass-key-1_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-2_trust-pass-key-2_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # TRUSTSTORE WITH truststoreSecretKey VARIATIONS
+  ################################################################################
+
+  - it: same truststoreSecretName with different truststoreSecretKey, same password secret - should deduplicate password
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststoreSecretKey: "trust-key-1"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststoreSecretKey: "trust-key-2"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "trust-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: trust-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same truststoreSecretName with different truststoreSecretKey, different password secret - no deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststoreSecretKey: "trust-key-1"
+          truststorePasswordSecretName: "trust-pass-secret-1"
+          truststorePasswordSecretKey: "trust-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststoreSecretKey: "trust-key-2"
+          truststorePasswordSecretName: "trust-pass-secret-2"
+          truststorePasswordSecretKey: "trust-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-1_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-1
+                key: trust-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret-2_trust-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret-2
+                key: trust-pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-1_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret-2_trust-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # CROSS-SHARING: keystorePasswordSecretName = truststorePasswordSecretName
+  ################################################################################
+
+  - it: same secret for keystore and truststore passwords, different keys - should deduplicate independently
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-password-secret"
+          keystorePasswordSecretKey: "keystore-pass-key"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "shared-password-secret"
+          truststorePasswordSecretKey: "truststore-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-password-secret"
+          keystorePasswordSecretKey: "keystore-pass-key"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "shared-password-secret"
+          truststorePasswordSecretKey: "truststore-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-password-secret_keystore-pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-password-secret
+                key: keystore-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-password-secret_truststore-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-password-secret
+                key: truststore-pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-password-secret_keystore-pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-password-secret_truststore-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: same secret for keystore and truststore passwords, service 1 uses both, service 2 uses keystore only
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-password-secret"
+          keystorePasswordSecretKey: "keystore-pass-key"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "shared-password-secret"
+          truststorePasswordSecretKey: "truststore-pass-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-password-secret"
+          keystorePasswordSecretKey: "keystore-pass-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-password-secret_keystore-pass-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-password-secret
+                key: keystore-pass-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-password-secret_truststore-pass-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-password-secret
+                key: truststore-pass-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-password-secret_keystore-pass-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-password-secret_truststore-pass-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: keystorePasswordSecretName equals truststorePasswordSecretName with private key password
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "all-passwords-secret"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "all-passwords-secret"
+          truststorePasswordSecretKey: "truststore-pass"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "all-passwords-secret"
+          keystorePasswordSecretKey: "keystore-pass"
+          keystorePrivatePasswordSecretKey: "private-pass"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "all-passwords-secret"
+          truststorePasswordSecretKey: "truststore-pass"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_all-passwords-secret_keystore-pass_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: all-passwords-secret
+                key: keystore-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_all-passwords-secret_private-pass_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: all-passwords-secret
+                key: private-pass
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_all-passwords-secret_truststore-pass_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: all-passwords-secret
+                key: truststore-pass
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_all-passwords-secret_keystore-pass_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_all-passwords-secret_private-pass_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_all-passwords-secret_truststore-pass_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # CROSS-SHARING: keystorePasswordSecretName = keystoreSecretName
+  ################################################################################
+
+  - it: keystorePasswordSecretName equals keystoreSecretName - password stored in keystore secret
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-with-passwords"
+          keystorePasswordSecretName: "keystore-with-passwords"
+          keystorePasswordSecretKey: "password-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-with-passwords"
+          keystorePasswordSecretName: "keystore-with-passwords"
+          keystorePasswordSecretKey: "password-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 2
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-with-passwords_password-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-with-passwords
+                key: password-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-with-passwords_password-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: keystorePasswordSecretName equals keystoreSecretName with private key
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-with-passwords"
+          keystorePasswordSecretName: "keystore-with-passwords"
+          keystorePasswordSecretKey: "password-key"
+          keystorePrivatePasswordSecretKey: "private-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-with-passwords"
+          keystorePasswordSecretName: "keystore-with-passwords"
+          keystorePasswordSecretKey: "password-key"
+          keystorePrivatePasswordSecretKey: "private-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-with-passwords_password-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-with-passwords
+                key: password-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-with-passwords_private-key_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-with-passwords
+                key: private-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-with-passwords_password-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-with-passwords_private-key_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # CROSS-SHARING: truststorePasswordSecretName = truststoreSecretName
+  ################################################################################
+
+  - it: truststorePasswordSecretName equals truststoreSecretName - password stored in truststore secret
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-with-password"
+          truststorePasswordSecretName: "truststore-with-password"
+          truststorePasswordSecretKey: "password-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-with-password"
+          truststorePasswordSecretName: "truststore-with-password"
+          truststorePasswordSecretKey: "password-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_truststore-with-password_password-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: truststore-with-password
+                key: password-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_truststore-with-password_password-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # COMBINED MATRIX: All secrets sharing at once
+  ################################################################################
+
+  - it: all services share all secrets - keystorePasswordSecretName and truststorePasswordSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-pass"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-pass"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: all services share keystorePasswordSecretName but different truststorePasswordSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-keystore-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-pass-1"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-keystore-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "trust-pass-2"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-keystore-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-keystore-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-1
+                key: truststore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-2_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-2
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-keystore-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-2_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: all services share truststorePasswordSecretName but different keystorePasswordSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "keystore-pass-1"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "shared-truststore-pass"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "keystore-pass-2"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "shared-truststore-pass"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-pass-1_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-1
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-pass-2_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-2
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-truststore-pass_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-truststore-pass
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-pass-1_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-pass-2_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-truststore-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: share keystoreSecretName and truststoreSecretName but different password secrets
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystoreSecretKey: "key-1"
+          keystorePasswordSecretName: "keystore-pass-1"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "shared-truststore"
+          truststoreSecretKey: "trust-1"
+          truststorePasswordSecretName: "trust-pass-1"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystoreSecretKey: "key-2"
+          keystorePasswordSecretName: "keystore-pass-2"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "shared-truststore"
+          truststoreSecretKey: "trust-2"
+          truststorePasswordSecretName: "trust-pass-2"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-pass-1_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-1
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-pass-2_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-2
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-1
+                key: truststore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-2_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-2
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-pass-1_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-pass-2_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-2_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: share keystoreSecretName and keystorePasswordSecretName, different truststore configs
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-keystore-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-pass-1"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "shared-keystore-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "trust-pass-2"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-keystore-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-keystore-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-1
+                key: truststore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-2_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-2
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-keystore-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-2_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: share truststoreSecretName and truststorePasswordSecretName, different keystore configs
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "keystore-pass-1"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-truststore-pass"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "keystore-pass-2"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "shared-truststore-pass"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-pass-1_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-1
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-pass-2_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-2
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-truststore-pass_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-truststore-pass
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-pass-1_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-pass-2_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-truststore-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # INLINE VS SECRET MIXING WITH SHARING
+  ################################################################################
+
+  - it: service 1 inline password, service 2 secret password, same keystoreSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePasswordSecretName: "pass-secret"
+          keystorePasswordSecretKey: "keystore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-keystore_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret
+                key: keystore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-keystore_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: service 1 inline password, service 2 secret password, different keystoreSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "pass-secret"
+          keystorePasswordSecretKey: "keystore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret
+                key: keystore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: service 1 inline truststore password, service 2 secret password, same truststoreSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePasswordSecretName: "trust-pass-secret"
+          truststorePasswordSecretKey: "truststore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-truststore_truststore_pass
+            value: "trust-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-secret_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-secret
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-truststore_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-secret_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: both services inline passwords, same keystoreSecretName and truststoreSecretName
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "shared-keystore"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "shared-keystore"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "shared-truststore"
+          truststorePassword: "dHJ1c3QtY2hhbmdlbWUK" # trust-changeme
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 3
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-keystore_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-truststore_truststore_pass
+            value: "trust-changeme"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-keystore_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-truststore_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # THREE+ SERVICES SHARING SCENARIOS
+  ################################################################################
+
+  - it: three services sharing same keystorePasswordSecretName - full deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-key"
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-key"
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+          keystoreSecretName: "keystore-3"
+          keystorePasswordSecretName: "shared-pass"
+          keystorePasswordSecretKey: "keystore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 4
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_shared-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: control-center_platform-release_shared-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-pass
+                key: keystore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_shared-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_shared-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: three services sharing same truststorePasswordSecretName - full deduplication
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-2"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "shared-trust-pass"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+          keystoreSecretName: "keystore-3"
+          keystorePassword: "a2V5LWNoYW5nZW1lCg==" # key-changeme
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 6
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_keystore-1_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_keystore-2_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: control-center_platform-release_keystore-3_keystore_pass
+            value: "key-changeme"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-trust-pass_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: truststore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_shared-trust-pass_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-trust-pass
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_keystore-1_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_keystore-2_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_keystore-3_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-trust-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_shared-trust-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_shared-trust-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: three services with progressive sharing - service 1&2 share keystore pass, service 2&3 share truststore pass
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "shared-keystore-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-pass-1"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "shared-keystore-pass"
+          keystorePasswordSecretKey: "keystore-key"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "shared-truststore-pass"
+          truststorePasswordSecretKey: "truststore-key"
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+          keystoreSecretName: "keystore-3"
+          keystorePasswordSecretName: "keystore-pass-3"
+          keystorePasswordSecretKey: "keystore-key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 6
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_shared-keystore-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-keystore-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_shared-keystore-pass_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-keystore-pass
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-1
+                key: truststore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: control-center_platform-release_keystore-pass-3_keystore-key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: keystore-pass-3
+                key: keystore-key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_shared-truststore-pass_truststore-key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: shared-truststore-pass
+                key: truststore-key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_shared-keystore-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_shared-keystore-pass_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_keystore-pass-3_keystore-key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-1_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_shared-truststore-pass_truststore-key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: four services all sharing one master password secret for all passwords
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "master-password-secret"
+          keystorePasswordSecretKey: "mqtt-keystore"
+          keystorePrivatePasswordSecretKey: "mqtt-private"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "master-password-secret"
+          truststorePasswordSecretKey: "mqtt-truststore"
+        - type: websocket
+          exposed: true
+          containerPort: 8000
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "master-password-secret"
+          keystorePasswordSecretKey: "ws-keystore"
+          keystorePrivatePasswordSecretKey: "ws-private"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "master-password-secret"
+          truststorePasswordSecretKey: "ws-truststore"
+        - type: control-center
+          exposed: true
+          containerPort: 8080
+          keystoreSecretName: "keystore-3"
+          keystorePasswordSecretName: "master-password-secret"
+          keystorePasswordSecretKey: "cc-keystore"
+          keystorePrivatePasswordSecretKey: "cc-private"
+        - type: rest-api
+          exposed: true
+          containerPort: 8888
+          keystoreSecretName: "keystore-4"
+          keystorePasswordSecretName: "master-password-secret"
+          keystorePasswordSecretKey: "api-keystore"
+          keystorePrivatePasswordSecretKey: "api-private"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 11
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_master-password-secret_mqtt-keystore_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: mqtt-keystore
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_master-password-secret_mqtt-private_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: mqtt-private
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_master-password-secret_mqtt-truststore_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: mqtt-truststore
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_master-password-secret_ws-keystore_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: ws-keystore
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_master-password-secret_ws-private_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: ws-private
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: websocket_platform-release_master-password-secret_ws-truststore_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: ws-truststore
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: control-center_platform-release_master-password-secret_cc-keystore_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: cc-keystore
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: control-center_platform-release_master-password-secret_cc-private_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: cc-private
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: rest-api_platform-release_master-password-secret_api-keystore_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: api-keystore
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: rest-api_platform-release_master-password-secret_api-private_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: master-password-secret
+                key: api-private
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_master-password-secret_mqtt-keystore_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_master-password-secret_mqtt-private_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_master-password-secret_mqtt-truststore_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_master-password-secret_ws-keystore_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_master-password-secret_ws-private_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{websocket_platform-release_master-password-secret_ws-truststore_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_master-password-secret_cc-keystore_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_master-password-secret_cc-private_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{control-center_platform-release_master-password-secret_cc-truststore_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{rest-api_platform-release_master-password-secret_api-keystore_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{rest-api_platform-release_master-password-secret_api-private_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{rest-api_platform-release_master-password-secret_api-truststore_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  ################################################################################
+  # EDGE CASES WITH SPECIAL CHARACTERS
+  ################################################################################
+
+  - it: dots in password secret keys for both keystore and truststore
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "pass-1"
+          keystorePasswordSecretKey: "my.keystore.password"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-pass-1"
+          truststorePasswordSecretKey: "my.truststore.password"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "pass-2"
+          keystorePasswordSecretKey: "another.keystore.key"
+          keystorePrivatePasswordSecretKey: "another.private.key"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "trust-pass-2"
+          truststorePasswordSecretKey: "another.truststore.key"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 6
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-1_my_keystore_password_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-1
+                key: my.keystore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-2_another_keystore_key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-2
+                key: another.keystore.key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-2_another_private_key_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-2
+                key: another.private.key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-1_my_truststore_password_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-1
+                key: my.truststore.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-2_another_truststore_key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-2
+                key: another.truststore.key
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-1_my_keystore_password_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-2_another_keystore_key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-2_another_private_key_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-1_my_truststore_password_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-2_another_truststore_key_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: hyphens in secret names for keystore and truststore
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-with-hyphens"
+          keystorePasswordSecretName: "pass-with-hyphens"
+          keystorePasswordSecretKey: "key-with-hyphens"
+          truststoreSecretName: "truststore-with-hyphens"
+          truststorePasswordSecretName: "trust-pass-with-hyphens"
+          truststorePasswordSecretKey: "trust-key-with-hyphens"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "another-keystore-hyphens"
+          keystorePasswordSecretName: "another-pass-hyphens"
+          keystorePasswordSecretKey: "another-key-hyphens"
+          truststoreSecretName: "another-truststore-hyphens"
+          truststorePasswordSecretName: "another-trust-pass-hyphens"
+          truststorePasswordSecretKey: "another-trust-key-hyphens"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 5
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-with-hyphens_key-with-hyphens_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-with-hyphens
+                key: key-with-hyphens
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_another-pass-hyphens_another-key-hyphens_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: another-pass-hyphens
+                key: another-key-hyphens
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-pass-with-hyphens_trust-key-with-hyphens_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-pass-with-hyphens
+                key: trust-key-with-hyphens
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_another-trust-pass-hyphens_another-trust-key-hyphens_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: another-trust-pass-hyphens
+                key: another-trust-key-hyphens
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-with-hyphens_key-with-hyphens_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_another-pass-hyphens_another-key-hyphens_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-pass-with-hyphens_trust-key-with-hyphens_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_another-trust-pass-hyphens_another-trust-key-hyphens_truststore_pass\}'
+        template: hivemq-configuration.yml
+
+  - it: mix of dots and hyphens in all secret keys
+    template: hivemq-custom-resource.yml
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 1883
+          keystoreSecretName: "keystore-1"
+          keystorePasswordSecretName: "pass-secret-1"
+          keystorePasswordSecretKey: "my.keystore-password.key"
+          keystorePrivatePasswordSecretKey: "my.private-key.password"
+          truststoreSecretName: "truststore-1"
+          truststorePasswordSecretName: "trust-secret-1"
+          truststorePasswordSecretKey: "my.truststore-password.key"
+        - type: mqtt
+          exposed: true
+          containerPort: 1884
+          keystoreSecretName: "keystore-2"
+          keystorePasswordSecretName: "pass-secret-2"
+          keystorePasswordSecretKey: "another.keystore-key.format"
+          truststoreSecretName: "truststore-2"
+          truststorePasswordSecretName: "trust-secret-2"
+          truststorePasswordSecretKey: "another.truststore-key.format"
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 6
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: JAVA_OPTS
+            value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_my_keystore-password_key_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: my.keystore-password.key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-1_my_private-key_password_keystore_private_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-1
+                key: my.private-key.password
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_pass-secret-2_another_keystore-key_format_keystore_pass
+            valueFrom:
+              secretKeyRef:
+                name: pass-secret-2
+                key: another.keystore-key.format
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-secret-1_my_truststore-password_key_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-secret-1
+                key: my.truststore-password.key
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          count: 1
+          content:
+            name: mqtt_platform-release_trust-secret-2_another_truststore-key_format_truststore_pass
+            valueFrom:
+              secretKeyRef:
+                name: trust-secret-2
+                key: another.truststore-key.format
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_my_keystore-password_key_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-1_my_private-key_password_keystore_private_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_pass-secret-2_another_keystore-key_format_keystore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-secret-1_my_truststore-password_key_truststore_pass\}'
+        template: hivemq-configuration.yml
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: '\$\{mqtt_platform-release_trust-secret-2_another_truststore-key_format_truststore_pass\}'
+        template: hivemq-configuration.yml
