@@ -265,18 +265,63 @@ Usage: {{ include "hivemq-platform.has-legacy-statefulset-migration" . }}
 {{- end -}}
 
 {{/*
-Returns the placeholder name to be used by the `config.xml` file for the private key password used by the TLS listeners.
+Returns the placeholder/EnvVar name to be used by the `config.xml` file for the key password used by the TLS listeners.
+This can only be used within a range of service values.
+Format:
+    - <.Values.services.type>_<.Release.Name>_<.Values.services.keystoreSecretName>_<keystore_pass>
+    - <.Values.services.type>_<.Release.Name>_<.Values.services.keystorePasswordSecretName>_<.Values.services.keystorePasswordSecretKey>_<keystore_pass>
+Usage: {{ include "hivemq-platform.keystore-password" (dict "releaseName" $.Release.Name "service" $service) }}
+*/}}
+{{- define "hivemq-platform.keystore-password" -}}
+{{- if .service -}}
+    {{- if .service.keystorePasswordSecretName -}}
+        {{- $secretKey := .service.keystorePasswordSecretKey | default "keystore_password" | replace "." "_" -}}
+        {{- printf "%s_%s_%s_%s_%s" .service.type .releaseName .service.keystorePasswordSecretName $secretKey "keystore_pass" -}}
+    {{- else -}}
+        {{- printf "%s_%s_%s_%s" .service.type .releaseName .service.keystoreSecretName "keystore_pass" -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the placeholder name/EnvVar name to be used by the `config.xml` file for the private key password used by the TLS listeners.
 This can only be used within a range of service values.
 Format: <.Values.services.type>_<.Release.Name>_<.Values.services.keystoreSecretName>_<keystore_pass | keystore_private_pass>
-Usage: {{ include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" .type "keystoreSecretName" .keystoreSecretName "keystorePrivatePassword" .keystorePrivatePassword "keystorePrivatePasswordSecretKey" .keystorePrivatePasswordSecretKey) }}
+Usage: {{ include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "service" $service ) }}
 */}}
 {{- define "hivemq-platform.keystore-private-password" -}}
-{{- if or .keystorePrivatePassword .keystorePrivatePasswordSecretKey }}
-    {{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_private_pass" -}}
-{{- else }}
-    {{- printf "%s_%s_%s_%s" .type .releaseName .keystoreSecretName "keystore_pass" -}}
-{{- end }}
-{{- end }}
+{{- if .service -}}
+    {{- if or .service.keystorePrivatePassword .service.keystorePrivatePasswordSecretKey -}}
+        {{- if .service.keystorePasswordSecretName -}}
+            {{- $secretKey := .service.keystorePrivatePasswordSecretKey | default "keystore_password" | replace "." "_" -}}
+            {{- printf "%s_%s_%s_%s_%s" .service.type .releaseName .service.keystorePasswordSecretName $secretKey "keystore_private_pass" -}}
+        {{- else -}}
+            {{- printf "%s_%s_%s_%s" .service.type .releaseName .service.keystoreSecretName "keystore_private_pass" -}}
+        {{- end -}}
+    {{- else -}}
+        {{- printf "%s" (include "hivemq-platform.keystore-password" (dict "releaseName" .releaseName "service" .service)) -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the placeholder name/EnvVar name to be used by the `config.xml` file for the truststore password used by the TLS listeners.
+This can only be used within a range of service values.
+Format:
+    - <.Values.services.type>_<.Release.Name>_<.Values.services.truststoreSecretName>_<truststore_pass>
+    - <.Values.services.type>_<.Release.Name>_<.Values.services.truststorePasswordSecretName>_<.Values.services.truststorePasswordSecretKey>_<truststore_pass>
+Usage: {{ include "hivemq-platform.truststore-password" (dict "releaseName" $.Release.Name "service" $service) }}
+*/}}
+{{- define "hivemq-platform.truststore-password" -}}
+{{- if .service -}}
+    {{- if .service.truststorePasswordSecretName -}}
+        {{- $secretKey := .service.truststorePasswordSecretKey | default "truststore_password" | replace "." "_" -}}
+        {{- printf "%s_%s_%s_%s_%s" .service.type .releaseName .service.truststorePasswordSecretName $secretKey "truststore_pass" -}}
+    {{- else -}}
+        {{- printf "%s_%s_%s_%s" .service.type .releaseName .service.truststoreSecretName "truststore_pass" -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Gets the default Operator REST API port value.
@@ -362,6 +407,7 @@ Validates all the exposed services.
 - No duplicated HiveMQ listener names are defined as part of the `.Values.services` values list.
 - No default ports (7979, 8889, 7000) are defined as part of the `containerPort` defined in the `.Values.services` values list.
 - When migration.statefulSet flag is enabled, `.Values.services.legacyPortName` is mandatory.
+- TLS/mTLS configuration values.
 Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" $.Release.Name) }}
 */}}
 {{- define "hivemq-platform.validate-services" -}}
@@ -382,6 +428,8 @@ Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.s
 {{- include "hivemq-platform.validate-hivemq-websocket-path" . -}}
 {{- include "hivemq-platform.validate-external-traffic-policy" . -}}
 {{- include "hivemq-platform.validate-legacy-services" . -}}
+{{- include "hivemq-platform.validate-truststore" . }}
+{{- include "hivemq-platform.validate-keystore" . }}
 {{- end -}}
 
 {{/*
@@ -974,6 +1022,76 @@ Usage: {{ include "hivemq-platform.validate-base64-encoded-license-data" (dict "
 {{- end -}}
 
 {{/*
+Validates Control Center credentials are only located in either plain text values or in a Kubernetes Secret and not both.
+Usage: {{ include "hivemq-platform.validate-control-center-credentials" . }}
+*/}}
+{{- define "hivemq-platform.validate-control-center-credentials" -}}
+{{- if and (.Values.controlCenter.credentialsSecret) (or .Values.controlCenter.username .Values.controlCenter.password) }}
+    {{- fail (printf "\nEither `username` and `password` values are set along with the `credentialSecret` values for Control Center. Only one can be defined at a time") }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates keystore configuration for the secured services:
+ - Keystore mandatory value `keystoreSecretName` is present when configuring TLS.
+ - Keystore password is present, either in the .keystorePassword or .keystorePasswordSecretName values.
+ - Keystore password is not set in both .keystorePassword and .keystorePasswordSecretName values.
+Usage: {{ include "hivemq-platform.validate-keystore" . }}
+*/}}
+{{- define "hivemq-platform.validate-keystore" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+    {{- $hasKeystore := or (hasKey $service "keystoreSecretName") (hasKey $service "keystoreSecretKey") (hasKey $service "keystorePassword") (hasKey $service "keystorePassword") (hasKey $service "keystorePrivatePassword") (hasKey $service "keystorePasswordSecretName") (hasKey $service "keystorePasswordSecretKey") (hasKey $service "keystorePrivatePasswordSecretKey") }}
+    {{- if and $service.exposed $hasKeystore }}
+        {{- $hasOptionalKeystoreValues := or (hasKey $service "keystoreSecretKey") (hasKey $service "keystorePassword") (hasKey $service "keystorePassword") (hasKey $service "keystorePrivatePassword") (hasKey $service "keystorePasswordSecretName") (hasKey $service "keystorePasswordSecretKey") (hasKey $service "keystorePrivatePasswordSecretKey") }}
+        {{- if and $hasOptionalKeystoreValues (not $service.keystoreSecretName) }}
+            {{- fail (printf "\nService type `%s` with container port `%d` is using truststore values without `keystoreSecretName` value. Keystore configuration requires mandatory `keystoreSecretName` value to be set for TLS" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+        {{- if and $service.keystorePassword $service.keystorePasswordSecretName }}
+            {{- fail (printf "\nKeystore password for service type `%s` with container port `%d` is ambiguous. Both `keystorePassword` and `keystorePasswordSecretName` values are set" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+        {{- if and (not $service.keystorePassword) (not $service.keystorePasswordSecretName) }}
+            {{- fail (printf "\nKeystore password for service type `%s` with container port `%d` should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+    {{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates truststore configuration for the secured services:
+ - Truststore mandatory value `truststoreSecretName` is present when configuring mTLS.
+ - Truststore-related values can only be set for MQTT or WebSocket services.
+ - Truststore-related values can only be set if keystoreSecretName is also present.
+ - Truststore password is present, either in the .truststorePassword or .truststorePasswordSecretName values.
+ - Truststore password is not set in both .truststorePassword and .truststorePasswordSecretName values.
+Usage: {{ include "hivemq-platform.validate-truststore" . }}
+*/}}
+{{- define "hivemq-platform.validate-truststore" -}}
+{{- $services := .Values.services }}
+{{- range $service := $services }}
+    {{- $hasTruststore := or (hasKey $service "truststoreSecretName") (hasKey $service "truststoreSecretKey") (hasKey $service "truststorePassword") (hasKey $service "truststorePasswordSecretName") (hasKey $service "truststorePasswordSecretKey") }}
+    {{- if and $service.exposed $hasTruststore }}
+        {{- if and (not (eq $service.type "mqtt")) (not (eq $service.type "websocket")) }}
+            {{- fail (printf "\nService type `%s` with container port `%d` is using truststore values. Truststore configuration is only supported by MQTT or WebSocket services" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+        {{- $hasOptionalTruststoreValues := or (hasKey $service "truststoreSecretKey") (hasKey $service "truststorePassword") (hasKey $service "truststorePasswordSecretName") (hasKey $service "truststorePasswordSecretKey") }}
+        {{- if and $hasOptionalTruststoreValues (not $service.truststoreSecretName) }}
+            {{- fail (printf "\nService type `%s` with container port `%d` is using truststore values without `truststoreSecretName` value. Truststore configuration requires mandatory `truststoreSecretName` value to be set for mutual TLS" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+        {{- if not (hasKey $service "keystoreSecretName") }}
+            {{- fail (printf "\nService type `%s` with container port `%d` is using truststore values without keystore values. Truststore configuration requires keystore configuration to be set for mutual TLS" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+        {{- if and $service.truststorePassword $service.truststorePasswordSecretName }}
+            {{- fail (printf "\nTruststore password for service type `%s` with container port `%d` is ambiguous. Both `truststorePassword` and `truststorePasswordSecretName` values are set" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+        {{- if and (not $service.truststorePassword) (not $service.truststorePasswordSecretName) }}
+            {{- fail (printf "\nTruststore password for service type `%s` with container port `%d` should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)" $service.type (int64 $service.containerPort)) }}
+        {{- end }}
+    {{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Generates the Secret entry for each of the licenses defined in the license value list passed as argument.
 Usage: {{ include "hivemq-platform.generate-licenses-content" (dict "licenses" .licenses "licenseExtension" ".lic" "isLicenseBase64Encoded" .Values.license.isLicenseBase64Encoded) }}
 */}}
@@ -996,16 +1114,6 @@ Usage: {{ include "hivemq-platform.generate-licenses-content" (dict "licenses" .
         {{- end -}}
     {{- end -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Validates Control Center credentials are only located in either plain text values or in a Kubernetes Secrets and no both.
-Usage: {{ include "hivemq-platform.validate-control-center-credentials" . }}
-*/}}
-{{- define "hivemq-platform.validate-control-center-credentials" -}}
-{{- if and (.Values.controlCenter.credentialsSecret) (or .Values.controlCenter.username .Values.controlCenter.password) }}
-    {{- fail (printf "\nEither `username` and `password` values are set along with the `credentialSecret` values for Control Center. Only one can be defined at a time") }}
-{{- end }}
 {{- end -}}
 
 {{/*
