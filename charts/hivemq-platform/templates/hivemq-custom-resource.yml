@@ -110,60 +110,56 @@ spec:
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
                 {{- if $hasKeystore }}
-                {{- $envNamesKeyStorePasswordList := list }}
-                {{- $envNamesKeyStorePrivatePasswordList := list }}
-                {{- $envNamesTrustStoreList := list }}
-                {{- range $service := .Values.services }}
-                {{- if and $service.exposed $service.keystoreSecretName }}
-                {{- $envNameKeystorePassword := (printf "%s_%s_%s_%s" $service.type $.Release.Name $service.keystoreSecretName "keystore_pass") }}
-                {{- if not (has $envNameKeystorePassword $envNamesKeyStorePasswordList) }}
+                  {{- $envNamesKeyStorePasswordList := list }}
+                  {{- $envNamesKeyStorePrivatePasswordList := list }}
+                  {{- $envNamesTrustStoreList := list }}
+                  {{- range $service := .Values.services }}
+                    {{- if and $service.exposed $service.keystoreSecretName }}
+                      {{- $envNameKeystorePassword := include "hivemq-platform.keystore-password" (dict "releaseName" $.Release.Name "service" $service) }}
+                      {{- if not (has $envNameKeystorePassword $envNamesKeyStorePasswordList) }}
                 - name: {{ $envNameKeystorePassword }}
-                  {{- if $service.keystorePassword }}
+                        {{- if $service.keystorePassword }}
                   value: {{ $service.keystorePassword | b64dec | trim -}}
-                  {{- else if $service.keystorePasswordSecretName }}
+                        {{- else }}
                   valueFrom:
                     secretKeyRef:
                       name: {{ $service.keystorePasswordSecretName }}
                       key: {{ $service.keystorePasswordSecretKey | default "keystore.password" }}
-                  {{- else }}
-                  {{- fail ("\nA keystore password should be set either as a string (keystorePassword) or as a secret name (keystorePasswordSecretName)") }}
-                  {{- end }}
-                {{- if or $service.keystorePrivatePassword (and $service.keystorePasswordSecretName $service.keystorePrivatePasswordSecretKey) }}
-                {{- $envNameKeystorePrivatePassword := include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "type" $service.type "keystoreSecretName" $service.keystoreSecretName "keystorePrivatePassword" $service.keystorePrivatePassword "keystorePrivatePasswordSecretKey" $service.keystorePrivatePasswordSecretKey) }}
-                {{- if not (has $envNameKeystorePrivatePassword $envNamesKeyStorePrivatePasswordList) }}
+                        {{- end }}
+                        {{- $envNamesKeyStorePasswordList = $envNameKeystorePassword | append $envNamesKeyStorePasswordList }}
+                      {{- end }}
+                      {{- if or $service.keystorePrivatePassword (and $service.keystorePasswordSecretName $service.keystorePrivatePasswordSecretKey) }}
+                        {{- $envNameKeystorePrivatePassword := include "hivemq-platform.keystore-private-password" (dict "releaseName" $.Release.Name "service" $service) }}
+                        {{- if not (has $envNameKeystorePrivatePassword $envNamesKeyStorePrivatePasswordList) }}
                 - name: {{ $envNameKeystorePrivatePassword }}
-                {{- if $service.keystorePrivatePassword }}
+                          {{- if $service.keystorePrivatePassword }}
                   value: {{ $service.keystorePrivatePassword | b64dec | trim -}}
-                {{- else }}
+                          {{- else }}
                   valueFrom:
                     secretKeyRef:
                       name: {{ $service.keystorePasswordSecretName }}
                       key: {{ $service.keystorePrivatePasswordSecretKey }}
-                {{- end }}
-                {{- $envNamesKeyStorePrivatePasswordList = $envNameKeystorePrivatePassword | append $envNamesKeyStorePrivatePasswordList }}
-                {{- end }}
-                {{- end }}
-                {{- $envNamesKeyStorePasswordList = $envNameKeystorePassword | append $envNamesKeyStorePasswordList }}
-                {{- end }}
-                {{- if and $service.exposed $service.truststoreSecretName }}
-                {{- $envNameTrustorePassword := (printf "%s_%s_%s_%s" $service.type $.Release.Name $service.truststoreSecretName "truststore_pass") }}
-                {{- if not (has $envNameTrustorePassword $envNamesTrustStoreList) }}
-                - name: {{ $envNameTrustorePassword }}
-                  {{- if $service.truststorePassword }}
+                          {{- end }}
+                          {{- $envNamesKeyStorePrivatePasswordList = $envNameKeystorePrivatePassword | append $envNamesKeyStorePrivatePasswordList }}
+                        {{- end }}
+                      {{- end }}
+                      {{- if $service.truststoreSecretName }}
+                        {{- $envNameTruststorePassword := include "hivemq-platform.truststore-password" (dict "releaseName" $.Release.Name "service" $service) }}
+                        {{- if not (has $envNameTruststorePassword $envNamesTrustStoreList) }}
+                - name: {{ $envNameTruststorePassword }}
+                          {{- if $service.truststorePassword }}
                   value: {{ $service.truststorePassword | b64dec | trim -}}
-                  {{- else if $service.truststorePasswordSecretName }}
+                          {{- else }}
                   valueFrom:
                     secretKeyRef:
                       name: {{ $service.truststorePasswordSecretName }}
                       key: {{ $service.truststorePasswordSecretKey | default "truststore.password" }}
-                  {{- else }}
-                  {{- fail ("\nA truststore password should be set either as a string (truststorePassword) or as a secret name (truststorePasswordSecretName)") }}
+                          {{- end }}
+                          {{- $envNamesTrustStoreList = $envNameTruststorePassword | append $envNamesTrustStoreList }}
+                        {{- end }}
+                      {{- end }}
+                    {{- end }}
                   {{- end }}
-                  {{- $envNamesTrustStoreList = $envNameTrustorePassword | append $envNamesTrustStoreList }}
-                {{- end }}
-                {{- end }}
-                {{- end }}
-                {{- end }}
                 {{- end }}
                 {{- with .Values.nodes.env }}
                   {{- toYaml . | nindent 16 }}
