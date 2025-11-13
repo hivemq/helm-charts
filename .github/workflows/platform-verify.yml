@@ -11,6 +11,8 @@ jobs:
 
       - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        with:
+          version: 'v3.19.2'
 
       - name: Set up Kubeconform
         run: |
@@ -26,6 +28,7 @@ jobs:
         if: always()
         uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
         with:
+          helm-version: 'v3.19.2'
           charts: charts/hivemq-platform charts/hivemq-platform-operator
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flags: --file './tests/**/*_test.yaml'
