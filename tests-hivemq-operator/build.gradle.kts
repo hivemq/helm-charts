@@ -27,6 +27,10 @@ repositories {
     mavenCentral()
 }
 
+configurations.all {
+    exclude("io.fabric8", "kubernetes-httpclient-vertx")
+}
+
 @Suppress("UnstableApiUsage")
 testing {
     suites {
@@ -36,19 +40,22 @@ testing {
             dependencies {
                 runtimeOnly(libs.junit.platform.launcher)
 
-                // Testcontainers
+                // K8s
+                implementation(libs.kubernetes.client)
+                implementation(libs.kubernetes.client.jdk)
+
+                // testcontainers
                 implementation(libs.testcontainers)
                 implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.junitJupiter)
 
-                // Testing
+                // testing
                 implementation(libs.assertj)
                 implementation(libs.awaitility)
 
-                // Misc
+                // misc
                 runtimeOnly(libs.bouncycastle.pkix)
                 runtimeOnly(libs.bouncycastle.prov)
-                implementation(libs.fabric8.kubernetes.client)
                 implementation(libs.hivemq.mqttClient)
                 runtimeOnly(libs.logback.classic)
                 implementation(libs.slf4j.api)
