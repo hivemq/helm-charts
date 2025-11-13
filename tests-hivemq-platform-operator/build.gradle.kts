@@ -28,6 +28,10 @@ repositories {
     mavenCentral()
 }
 
+configurations.all {
+    exclude("io.fabric8", "kubernetes-httpclient-vertx")
+}
+
 val hivemqVersion = libs.versions.hivemq.platform.get()
 val k3sTag = resolveK3sTag()
 
@@ -40,29 +44,32 @@ testing {
             dependencies {
                 runtimeOnly(libs.junit.platform.launcher)
 
-                // Custom Extension
+                // K8s
+                implementation(libs.kubernetes.client)
+                implementation(libs.kubernetes.client.jdk)
+
+                // custom extension
                 implementation(libs.hivemq.extensionSdk)
                 implementation(libs.javassist)
                 implementation(libs.shrinkwrap.api)
                 runtimeOnly(libs.shrinkwrap.impl)
 
-                // Testcontainers
+                // testcontainers
                 implementation(libs.testcontainers)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.testcontainers.k3s)
                 implementation(libs.testcontainers.selenium)
 
-                // Testing
+                // testing
                 implementation(libs.assertj)
                 implementation(libs.awaitility)
                 implementation(libs.selenium.java)
                 implementation(libs.selenium.remote.driver)
 
-                // Misc
+                // misc
                 runtimeOnly(libs.bouncycastle.pkix)
                 runtimeOnly(libs.bouncycastle.prov)
-                implementation(libs.fabric8.kubernetes.client)
                 implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.hivemq.mqttClient)
                 runtimeOnly(libs.logback.classic)
