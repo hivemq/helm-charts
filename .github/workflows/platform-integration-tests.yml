@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Generate split index list
         id: generate
-        uses: donnerbart/split-tests-java-action/generate-split-index-json@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
+        uses: donnerbart/split-tests-java-action/generate-split-index-json@2c851c10022503c980f3f5c323e2af370bc1fd86 # v1
         with:
           split-total: ${{ env.split-total }}
 
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           path: helm-charts
           fetch-depth: 0
@@ -73,7 +73,7 @@ jobs:
         ]
     steps:
       - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           path: helm-charts
           fetch-depth: 0
@@ -87,7 +87,7 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_TOKEN }}
 
       - name: Checkout JUnit reports
-        uses: donnerbart/split-tests-java-action/checkout-junit-reports@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
+        uses: donnerbart/split-tests-java-action/checkout-junit-reports@2c851c10022503c980f3f5c323e2af370bc1fd86 # v1
         with:
           split-index: ${{ matrix.split-index }}
           git-branch: junit-reports/platform/${{ github.base_ref }}
@@ -114,7 +114,7 @@ jobs:
 
       - name: Split tests
         id: split-tests
-        uses: donnerbart/split-tests-java-action@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
+        uses: donnerbart/split-tests-java-action@2c851c10022503c980f3f5c323e2af370bc1fd86 # v1
         with:
           split-index: ${{ matrix.split-index }}
           split-total: ${{ env.split-total }}
@@ -188,7 +188,7 @@ jobs:
       contents: write
     steps:
       - name: Merge JUnit reports
-        uses: donnerbart/split-tests-java-action/merge-junit-reports@fa64683ba08cf8e3b5bf90f98993c5b14229bc4a # v1
+        uses: donnerbart/split-tests-java-action/merge-junit-reports@2c851c10022503c980f3f5c323e2af370bc1fd86 # v1
         with:
           git-branch: junit-reports/platform/${{ github.base_ref }}
           artifact-name: junit-xml-reports-platform-${{ github.base_ref }}
