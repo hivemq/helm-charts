@@ -7,9 +7,6 @@ release:
 chart:
   version: 0.0.1
   appVersion: 1.0.0
-capabilities:
-  apiVersions:
-    - monitoring.coreos.com/v1
 tests:
 
   - it: with default values, default ConfigMap not created
@@ -19,6 +16,10 @@ tests:
           count: 0
 
   - it: with monitoring enabled and Prometheus Monitoring CRDs present, ConfigMap created
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring.enabled: true
     asserts:
@@ -27,6 +28,10 @@ tests:
           count: 1
 
   - it: with monitoring enabled and create disabled, ConfigMap not created
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -38,6 +43,10 @@ tests:
           count: 0
 
   - it: with long Helm release name, ConfigMap name truncated
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     release:
       name: a-very-long-hivemq-platform-release-name
     set:
@@ -48,15 +57,20 @@ tests:
           value: hivemq-platform-dashboard-a-very-long-hivemq-platform-release-n
 
   - it: with no Prometheus Monitoring CRDs installed, validation fails
-    set:
-      monitoring.enabled: true
     capabilities:
       apiVersions:
+        - hivemq.com/v1
+    set:
+      monitoring.enabled: true
     asserts:
       - failedTemplate:
           errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
 
   - it: with invalid Dashboard namespace, schema validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -66,6 +80,10 @@ tests:
       - failedTemplate: {}
 
   - it: with default values, default ConfigMap resource created
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring.enabled: true
     asserts:
@@ -75,6 +93,10 @@ tests:
           name: hivemq-platform-dashboard-test-hivemq-platform
 
   - it: with monitoring enabled and default values, ConfigMap metadata created with defaults values
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring.enabled: true
     asserts:
@@ -92,6 +114,10 @@ tests:
             namespace: test-hivemq-platform-namespace
 
   - it: with monitoring enabled and custom metadata values, ConfigMap metadata created with custom values
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     release:
       name: custom-release-name
       namespace: custom-release-namespace
@@ -118,6 +144,10 @@ tests:
             namespace: my-custom-dashboard-namespace
 
   - it: with monitoring enabled and overrideDashboard set, custom ConfigMap spec created with custom values
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -137,6 +167,10 @@ tests:
             }
 
   - it: with monitoring enabled and default values, ConfigMap spec created with defaults values
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring.enabled: true
     asserts:

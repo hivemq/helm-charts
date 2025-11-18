@@ -1349,14 +1349,21 @@ Usage: {{ include "hivemq-platform.generate-hivemq-logback-configuration" . }}
 {{- end -}}
 
 {{/*
-Validates that the required Prometheus Monitoring CRDs are installed in the Kubernetes cluster.
-If the required CRDs are not present the ServiceMonitor cannot be installed and the installation fails.
+Validates that Prometheus Operator CRDs (monitoring.coreos.com/v1) are installed in the cluster.
+
+Skips validation during 'helm template' by checking if 'hivemq.com/v1' API is available.
+If the HiveMQ Platform Operator CRD exists, we're in a real cluster and validation runs.
+Otherwise, validation is skipped for offline template rendering.
+
 Usage: {{- include "hivemq-platform.validate-prometheus-monitoring-stack-installed" . -}}
 */}}
 {{- define "hivemq-platform.validate-prometheus-monitoring-stack-installed" -}}
-{{- $isCRDPresent := .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
-{{- if not $isCRDPresent }}
-    {{- fail (printf "\nThere is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-platform-operator/observability.html#monitoring for more help and guidance.") }}
+{{- $isHiveMQPlatformCRDPresent := .Capabilities.APIVersions.Has "hivemq.com/v1" }}
+{{- if $isHiveMQPlatformCRDPresent }}
+    {{- $isPrometheusCRDPresent := .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+    {{- if not $isPrometheusCRDPresent }}
+        {{- fail (printf "\nThere is no Prometheus ServiceMonitor CustomResourceDefinition (CRD) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.\nCheck out https://docs.hivemq.com/hivemq-platform-operator/observability.html#monitoring for more help and guidance.") }}
+    {{- end }}
 {{- end }}
 {{- end }}
 

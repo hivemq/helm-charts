@@ -7,9 +7,6 @@ release:
 chart:
   version: 0.0.1
   appVersion: 1.0.0
-capabilities:
-  apiVersions:
-    - monitoring.coreos.com/v1
 tests:
 
   - it: with default values, default ServiceMonitor not created
@@ -19,6 +16,10 @@ tests:
           count: 0
 
   - it: with ServiceMonitor enabled and Prometheus CRDs present, default ServiceMonitor created
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring.enabled: true
     asserts:
@@ -61,6 +62,10 @@ tests:
           value: hivemq-platform-service-monitor-test-hivemq-platform
 
   - it: with long Helm release name, ServiceMonitor name and jobLabel truncated
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     release:
       name: a-very-long-hivemq-platform-release-name
     set:
@@ -76,6 +81,7 @@ tests:
   - it: with no Prometheus Monitoring CRDs installed, validation fails
     capabilities:
       apiVersions:
+        - hivemq.com/v1
     set:
       monitoring.enabled: true
     asserts:
@@ -83,6 +89,10 @@ tests:
           errorPattern: There is no Prometheus ServiceMonitor CustomResourceDefinition \(CRD\) available in your Kubernetes cluster. Prometheus Monitoring CRDs are required before installing the ServiceMonitor resource.
 
   - it: with metrics disabled, validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       metrics.enabled: false
       monitoring.enabled: true
@@ -91,6 +101,10 @@ tests:
           errorPattern: HiveMQ Prometheus extension is disabled. Please, use `.metrics.enabled=true` to create a ServiceMonitor resource for the HiveMQ Platform.
 
   - it: with invalid metrics service, validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring.enabled: true
       metrics.port: 9499
@@ -103,6 +117,10 @@ tests:
           errorPattern: Service type `metrics` with container port `9399` cannot be different than the metrics port `9499` defined for the HiveMQ Prometheus extension value as `metrics.port`
 
   - it: with invalid interval format, then schema validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -112,6 +130,10 @@ tests:
       - failedTemplate: {}
 
   - it: with invalid scrape timeout format, then schema validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -121,6 +143,10 @@ tests:
       - failedTemplate: {}
 
   - it: with invalid ServiceMonitor namespace, then schema validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -130,6 +156,10 @@ tests:
       - failedTemplate: {}
 
   - it: with custom namespace, ServiceMonitor installed on the custom namespace
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
@@ -141,6 +171,10 @@ tests:
           value: monitoring
 
   - it: with custom ServiceMonitor endpoint configuration, ServiceMonitor custom endpoint set
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       metrics:
         path: /metrics
@@ -160,6 +194,10 @@ tests:
             scrapeTimeout: 2s
 
   - it: with custom ServiceMonitor endpoint configuration and a metrics legacy service, ServiceMonitor custom endpoint set
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       migration.statefulSet: true
       services:
@@ -185,6 +223,10 @@ tests:
             scrapeTimeout: 2s
 
   - it: with custom ServiceMonitor release name, custom ServiceMonitor release name set
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+        - monitoring.coreos.com/v1
     set:
       monitoring:
         enabled: true
