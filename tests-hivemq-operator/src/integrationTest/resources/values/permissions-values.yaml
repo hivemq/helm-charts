@@ -28,4 +28,6 @@ hivemq:
       expose: true
       patch:
         - '[{"op":"add","path":"/spec/type","value":"LoadBalancer"}]'
-
+  env:
+    - name: "HIVEMQ_DISABLE_STATISTICS"
+      value: "true"

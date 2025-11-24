@@ -111,7 +111,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
     }
 
     public @NotNull KubernetesClient getKubernetesClient() {
-        final var configYaml = this.getKubeConfigYaml();
+        final var configYaml = getKubeConfigYaml();
         assertThat(configYaml).isNotNull();
         if (kubernetesClient == null) {
             kubernetesClient = new KubernetesClientBuilder().withConfig(Config.fromKubeconfig(configYaml)).build();
@@ -120,17 +120,17 @@ public class OperatorHelmChartContainer extends K3sContainer {
     }
 
     private void upgradeLocalChart(final @NotNull String chartName) throws Exception {
-        this.upgradeLocalChart(chartName, "/files/values.yml");
+        upgradeLocalChart(chartName, "/files/values.yml");
     }
 
     public void upgradeLocalChart(final @NotNull String chartName, final @NotNull String valuesFilePath)
             throws Exception {
         // helm dependency update /chart
-        final var outUpdate = this.execInContainer("/bin/helm", "dependency", "update", "/chart/");
+        final var outUpdate = execInContainer("/bin/helm", "dependency", "update", "/chart/");
         assertThat(outUpdate.getStderr()).isEmpty();
 
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml install hivemq /chart -f /files/values.yml
-        final var execDeploy = this.execInContainer("/bin/helm",
+        final var execDeploy = execInContainer("/bin/helm",
                 "--kubeconfig",
                 "/etc/rancher/k3s/k3s.yaml",
                 "upgrade",
@@ -154,7 +154,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
         final var client = getKubernetesClient();
         watches.put("events", client.events().v1().events().inAnyNamespace().watch(new EventWatcher(client)));
         watches.put("pods", client.pods().inAnyNamespace().watch(new PodWatcher()));
-        this.kubernetesClient = client;
+        kubernetesClient = client;
     }
 
     @Override
@@ -175,7 +175,7 @@ public class OperatorHelmChartContainer extends K3sContainer {
 
         public DeploymentStatusStartupCheckStrategy(@NotNull final OperatorHelmChartContainer container) {
             this.container = container;
-            this.withTimeout(Duration.ofSeconds(240));
+            withTimeout(Duration.ofSeconds(240));
         }
 
         @Override

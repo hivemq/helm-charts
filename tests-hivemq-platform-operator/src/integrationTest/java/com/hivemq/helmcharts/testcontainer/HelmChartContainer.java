@@ -544,7 +544,9 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     private static @NotNull Stream<String> getPlatformFixedValues() {
         return Stream.of(
                 // need to limit cpu resource value for CI jobs
-                "--set", "nodes.resources.cpu=" + POD_CPU_LIMIT);
+                "--set", "nodes.resources.cpu=" + POD_CPU_LIMIT,
+                // disable usage statistics for CI jobs
+                "--set", "telemetry.anonymousUsageStatistics.enabled=false");
     }
 
     private class EventWatcher implements Watcher<Event> {
@@ -686,7 +688,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
         K3sReadyStartupCheckStrategy(final @NotNull HelmChartContainer container) {
             this.container = container;
-            this.withTimeout(Duration.ofSeconds(120));
+            withTimeout(Duration.ofSeconds(120));
         }
 
         @Override
