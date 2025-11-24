@@ -879,3 +879,9 @@ testing:
   # When set to `false`, no test pods are rendered and a `helm test` command will not run any tests.
   # The default setting is `true`.
   enabled: true
+
+# HiveMQ Platform Helm telemetry configuration.
+telemetry:
+  # Configures the collection of anonymous usage statistics.
+  anonymousUsageStatistics:
+    enabled: true

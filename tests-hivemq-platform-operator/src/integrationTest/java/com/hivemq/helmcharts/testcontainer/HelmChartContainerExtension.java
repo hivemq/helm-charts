@@ -34,8 +34,8 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
             // if no additional commands are set, we use the cached network and container
             LOG.info("Using cached HelmChartContainer instance");
             final var store = context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL);
-            networkRef.set((Network) store.getOrComputeIfAbsent("network", key -> Network.newNetwork()));
-            helmChartContainerRef.set((HelmChartContainer) store.getOrComputeIfAbsent("helmChartContainer", key -> {
+            networkRef.set((Network) store.computeIfAbsent("network", key -> Network.newNetwork()));
+            helmChartContainerRef.set((HelmChartContainer) store.computeIfAbsent("helmChartContainer", key -> {
                 LOG.info("Creating cached HelmChartContainer instance");
                 final var container = new HelmChartContainer(withK3sDebugging).withNetwork(networkRef.get());
                 container.start();

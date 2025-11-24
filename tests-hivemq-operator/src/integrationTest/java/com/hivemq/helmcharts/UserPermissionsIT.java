@@ -20,8 +20,8 @@ class UserPermissionsIT {
 
     @Container
     private final @NotNull OperatorHelmChartContainer container =
-            new OperatorHelmChartContainer("values/permissions-values.yaml", "local-hivemq").withLocalImages(
-                    "hivemq-k8s-test-rootless.tar");
+            new OperatorHelmChartContainer("values/permissions-values.yaml", "local-hivemq") //
+                    .withLocalImages("hivemq-k8s-test-rootless.tar");
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)

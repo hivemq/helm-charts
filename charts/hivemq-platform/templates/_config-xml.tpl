@@ -586,5 +586,10 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     {{- end }}
   </security>
   {{- end }}
+  {{- if and .Values.telemetry.anonymousUsageStatistics (hasKey .Values.telemetry.anonymousUsageStatistics "enabled") (not .Values.telemetry.anonymousUsageStatistics.enabled) }}
+  <anonymous-usage-statistics>
+    <enabled>false</enabled>
+  </anonymous-usage-statistics>
+  {{- end }}
 </hivemq>
 {{- end -}}

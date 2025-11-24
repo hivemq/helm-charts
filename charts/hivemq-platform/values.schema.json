@@ -275,7 +275,7 @@
           "properties" : {
             "enabled" : {
               "description" : "Enables the heartbeat.",
-              "type": "boolean"
+              "type" : "boolean"
             },
             "interval" : {
               "description" : "The interval in which a heartbeat message is sent to other nodes.",
@@ -284,8 +284,8 @@
             },
             "timeout" : {
               "description" : "Amount of time that is tolerated for the response to a heartbeat message before a node is temporarily removed from the cluster.",
-              "minimum": 1,
-              "type": "integer"
+              "minimum" : 1,
+              "type" : "integer"
             }
           },
           "type" : "object"
@@ -297,7 +297,7 @@
             "bindAddress" : {
               "description" : "The network address to bind to.",
               "minLength" : 1,
-              "pattern": ".*\\S.*",
+              "pattern" : ".*\\S.*",
               "type" : "string"
             },
             "bindPort" : {
@@ -308,12 +308,12 @@
             },
             "enabled" : {
               "description" : "Enables the TCP health check.",
-              "type": "boolean"
+              "type" : "boolean"
             },
             "externalAddress" : {
               "description" : "The external address to bind to if the node is behind some kind of NAT.",
               "minLength" : 1,
-              "pattern": ".*\\S.*",
+              "pattern" : ".*\\S.*",
               "type" : "string"
             },
             "externalPort" : {
@@ -324,7 +324,7 @@
             },
             "portRange" : {
               "description" : "Port range to check on other nodes.",
-              "type": "integer"
+              "type" : "integer"
             }
           },
           "type" : "object"
@@ -809,7 +809,10 @@
         "resources" : {
           "properties" : {
             "cpu" : {
-              "type" : ["integer", "string"]
+              "type" : [
+                "integer",
+                "string"
+              ]
             },
             "ephemeralStorage" : {
               "type" : "string"
@@ -886,7 +889,7 @@
         },
         "name" : {
           "description" : "The name of the Kubernetes Secret containing the HiveMQ Pulse configuration. To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.",
-          "maxLength": 253,
+          "maxLength" : 253,
           "type" : "string"
         },
         "overridePulseConfig" : {
@@ -911,14 +914,14 @@
             "type" : "object"
           },
           "tlsCipherSuites" : {
-            "additionalProperties": false,
+            "additionalProperties" : false,
             "description" : "Optional setting to explicitly define the accepted cipher suites.",
             "items" : {
               "minLength" : 1,
-              "pattern": ".*\\S.*",
+              "pattern" : ".*\\S.*",
               "type" : "string"
             },
-            "minItems": 1,
+            "minItems" : 1,
             "type" : "array"
           },
           "containerPort" : {
@@ -1044,14 +1047,14 @@
             "type" : "string"
           },
           "tlsProtocols" : {
-            "additionalProperties": false,
+            "additionalProperties" : false,
             "description" : "Optional setting to explicitly define the accepted TLS version.",
             "items" : {
               "minLength" : 1,
-              "pattern": ".*\\S.*",
+              "pattern" : ".*\\S.*",
               "type" : "string"
             },
-            "minItems": 1,
+            "minItems" : 1,
             "type" : "array"
           },
           "truststorePassword" : {
@@ -1083,6 +1086,22 @@
         "type" : "object"
       },
       "type" : "array"
+    },
+    "telemetry" : {
+      "description" : "HiveMQ Platform Helm telemetry configuration.",
+      "properties" : {
+        "anonymousUsageStatistics" : {
+          "description" : "Optional setting for anonymous usage statistics.",
+          "properties" : {
+            "enabled" : {
+              "description" : "Optional setting to disable usage statistics.",
+              "type" : "boolean"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
     },
     "testing" : {
       "description" : "HiveMQ Platform Helm test configuration.",

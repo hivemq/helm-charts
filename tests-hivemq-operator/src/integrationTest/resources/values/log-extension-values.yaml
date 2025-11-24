@@ -17,3 +17,6 @@ hivemq:
       extensionUri: https://github.com/hivemq/hivemq-mqtt-message-log-extension/releases/download/1.1.3/hivemq-mqtt-message-log-extension-1.1.3.zip
       enabled: true
       static: true
+  env:
+    - name: "HIVEMQ_DISABLE_STATISTICS"
+      value: "true"

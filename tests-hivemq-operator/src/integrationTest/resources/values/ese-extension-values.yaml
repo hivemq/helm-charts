@@ -17,3 +17,6 @@ hivemq:
       enabled: true
       extensionUri: preinstalled
       name: hivemq-enterprise-security-extension
+  env:
+    - name: "HIVEMQ_DISABLE_STATISTICS"
+      value: "true"

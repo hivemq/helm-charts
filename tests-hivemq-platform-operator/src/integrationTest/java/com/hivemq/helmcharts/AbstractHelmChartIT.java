@@ -108,9 +108,7 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        helmChartContainer.installLegacyOperatorChart(LEGACY_RELEASE_NAME,
-                Stream.concat(Arrays.stream(commands), Stream.of("--namespace", operatorNamespace))
-                        .toArray(String[]::new));
+        helmChartContainer.installLegacyOperatorChart(LEGACY_RELEASE_NAME, addDefaultOperatorCommands(commands));
         K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
         K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
     }
@@ -121,9 +119,7 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
-                Stream.concat(Arrays.stream(commands), Stream.of("--namespace", operatorNamespace))
-                        .toArray(String[]::new));
+        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, addDefaultOperatorCommands(commands));
         K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
     }
 
@@ -138,17 +134,13 @@ public abstract class AbstractHelmChartIT {
 
     protected void installPlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
             throws Exception {
-        helmChartContainer.installPlatformChart(releaseName,
-                Stream.concat(Arrays.stream(commands), Stream.of("--namespace", platformNamespace))
-                        .toArray(String[]::new));
+        helmChartContainer.installPlatformChart(releaseName, addDefaultPlatformCommands(commands));
     }
 
     @SuppressWarnings("SameParameterValue")
     protected void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
             throws Exception {
-        helmChartContainer.upgradePlatformChart(releaseName,
-                Stream.concat(Arrays.stream(commands), Stream.of("--namespace", platformNamespace))
-                        .toArray(String[]::new));
+        helmChartContainer.upgradePlatformChart(releaseName, addDefaultPlatformCommands(commands));
     }
 
     /**
@@ -213,6 +205,16 @@ public abstract class AbstractHelmChartIT {
         } catch (final Exception e) {
             throw new AssertionError("Could not read resource file '%s'".formatted(filename), e);
         }
+    }
+
+    private @NotNull String @NotNull [] addDefaultOperatorCommands(final @NotNull String... commands) {
+        final var defaultCommands = Stream.of("--namespace", operatorNamespace);
+        return Stream.concat(Arrays.stream(commands), defaultCommands).toArray(String[]::new);
+    }
+
+    private @NotNull String @NotNull [] addDefaultPlatformCommands(final @NotNull String... commands) {
+        final var defaultCommands = Stream.of("--namespace", platformNamespace);
+        return Stream.concat(Arrays.stream(commands), defaultCommands).toArray(String[]::new);
     }
 
     protected static @NotNull String getOperatorName() {

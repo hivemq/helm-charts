@@ -13,3 +13,6 @@ hivemq:
   nodeCount: 1
   cpu: 512m
   controllerTemplate: cluster-stateful-set.yaml
+  env:
+    - name: "HIVEMQ_DISABLE_STATISTICS"
+      value: "true"

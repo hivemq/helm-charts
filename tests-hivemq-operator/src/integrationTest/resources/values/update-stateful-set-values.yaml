@@ -1,4 +1,4 @@
-# Custom images Single node cluster with external mqtt port
+# Custom images single node cluster with external mqtt port
 operator:
   image: hivemq/hivemq-operator:snapshot
   imagePullPolicy: Never
@@ -14,3 +14,6 @@ hivemq:
   nodeCount: 2
   cpu: 512m
   controllerTemplate: cluster-stateful-set.yaml
+  env:
+    - name: "HIVEMQ_DISABLE_STATISTICS"
+      value: "true"
