@@ -89,7 +89,6 @@ tests:
           content:
             annotation-1: annotation-1
             annotation-2: annotation-2
-        template: hivemq-configuration.yml
 
   - it: with invalid custom annotation, schema validation fails
     set:
