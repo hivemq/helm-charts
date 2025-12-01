@@ -137,7 +137,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
-          name: "Test results HiveMQ Legacy Operator #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
+          name: "HiveMQ Legacy Operator - Integration test results #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
           path: |
             helm-charts/tests-hivemq-operator/build/reports/tests/integrationTest/
             helm-charts/tests-hivemq-operator/build/test-results/integrationTest/*.xml

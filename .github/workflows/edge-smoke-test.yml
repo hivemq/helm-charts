@@ -5,8 +5,18 @@ env:
   RELEASE_NAME: "smoke-test-release"
 jobs:
   run-smoke-test:
-    name: Smoke test
+    name: Smoke test on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - helm-label: 'minimum'
+            helm-version: 'v3.10.0'
+          - helm-label: 'latest-3'
+            helm-version: 'v3.19.2'
+          - helm-label: 'latest-4'
+            helm-version: 'v4.0.1'
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -16,8 +26,10 @@ jobs:
         with:
           cluster_name: "kind"
 
-      - name: Set up Helm
+      - name: Set up Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        with:
+          version: ${{ matrix.helm-version }}
 
       - name: Install HiveMQ Edge
         run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --timeout 5m0s --create-namespace -n test
@@ -41,7 +53,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
-          name: smoke-test-edge-pod-logs
+          name: "HiveMQ Edge - Smoke test results on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})"
           path: ${{ runner.temp }}/logs/edge-pod.log
           retention-days: 5
 
@@ -53,5 +65,4 @@ jobs:
       - name: Uninstall HiveMQ Edge chart
         if: always()
         run: |
-          helm uninstall $RELEASE_NAME --wait --ignore-not-found -n test 
-          kubectl get pods -A
+          helm uninstall $RELEASE_NAME --wait -n test
