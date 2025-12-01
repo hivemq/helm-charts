@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.license;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -15,11 +16,13 @@ class HelmDataHubLicensesIT extends AbstractHelmLicensesIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Disabled("Re-enable once Helm Java client supports .setFile feature")
     void withDataHubLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var dataHubLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file dataHub1.plic is corrupt.");
         helmUpgradePlatform.set("license.create", "true")
-                .setFile("license.dataHub.dataHub1.overrideLicense", "mock-data-hub-license.plic")
+                //TODO: uncomment it out, once Helm Java client supports .setFile feature
+                //.setFile("license.dataHub.dataHub1.overrideLicense", "mock-data-hub-license.plic")
                 .call();
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("hivemq-license-test-hivemq-platform");

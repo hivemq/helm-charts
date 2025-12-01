@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.license;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -15,10 +16,14 @@ class HelmBrokerLicensesIT extends AbstractHelmLicensesIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Disabled("Re-enable once Helm Java client supports .setFile feature")
     void withBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var brokerLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file license.lic is corrupt.");
-        helmUpgradePlatform.setFile("license.overrideLicense", "mock-license.lic").set("license.create", "true").call();
+        //TODO: uncomment it out, once Helm Java client supports .setFile feature
+        helmUpgradePlatform.set("license.create", "true")
+                //.setFile("license.overrideLicense", "mock-license.lic")
+                .call();
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("hivemq-license-test-hivemq-platform");
         await().until(brokerLicenseFuture::isDone);

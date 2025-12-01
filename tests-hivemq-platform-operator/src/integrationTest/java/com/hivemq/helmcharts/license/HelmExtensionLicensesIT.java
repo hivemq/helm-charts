@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.license;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -15,6 +16,7 @@ class HelmExtensionLicensesIT extends AbstractHelmLicensesIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Disabled("Re-enable once Helm Java client supports .setFile feature")
     void withExtensionLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         K8sUtil.createConfigMap(client, platformNamespace, "distributed-tracing-config-map.yml");
 
@@ -24,7 +26,8 @@ class HelmExtensionLicensesIT extends AbstractHelmLicensesIT {
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file tracing.elic is corrupt.");
 
         helmUpgradePlatform.set("license.create", "true")
-                .setFile("license.extensions.tracing.overrideLicense", "mock-extension-license.elic")
+                //TODO: uncomment it out, once Helm Java client supports .setFile feature
+                //.setFile("license.extensions.tracing.overrideLicense", "mock-extension-license.elic")
                 .withValuesFile(VALUES_PATH.resolve("distributed-tracing-extension-values.yaml"))
                 .call();
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
