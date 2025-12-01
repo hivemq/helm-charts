@@ -178,13 +178,12 @@ oci {
     }
 }
 
-@Suppress("unused")
 val pushAllImagesForTesting by tasks.registering(oci.pushImageTaskClass) {
-    from(oci.imageDependencies.create("imagesForTesting") {
-        runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
-        runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
-        runtime("hivemq:hivemq4:$hivemqVersion").tag("latest")
-    })
+    val imageDeps = oci.imageDependencies.create("imagesForTesting")
+    imageDeps.runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
+    imageDeps.runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
+    imageDeps.runtime("hivemq:hivemq4:$hivemqVersion").tag("latest")
+    from(imageDeps)
 }
 
 /* ******************** update versions ******************** */
