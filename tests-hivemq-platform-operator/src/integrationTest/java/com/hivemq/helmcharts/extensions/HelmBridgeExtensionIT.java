@@ -50,27 +50,29 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withBridgeConfiguration_messageBridged() throws Exception {
+    void withBridgeConfiguration_messageBridged() {
         // create bridge extension configuration as a ConfigMap
         final var bridgeConfiguration =
                 readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
         K8sUtil.createConfigMap(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
 
         // deploy chart and wait to be ready
-        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("bridge-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertMessagesBridged();
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withBridgeSecretConfiguration_messageBridged() throws Exception {
+    void withBridgeSecretConfiguration_messageBridged() {
         // create bridge extension configuration as a Secret
         final var bridgeConfiguration =
                 readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
         K8sUtil.createSecret(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
 
         // deploy chart and wait to be ready
-        installPlatformChartAndWaitToBeRunning("/files/bridge-with-secret-config-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("bridge-with-secret-config-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertMessagesBridged();
     }
 

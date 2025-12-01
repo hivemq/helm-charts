@@ -2,6 +2,7 @@ package com.hivemq.helmcharts.platform;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Release;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -18,11 +19,13 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withDeployedPlatform_upgradeIncreasingReplicaCount() throws Exception {
-        installPlatformChartAndWaitToBeRunning("--set", "nodes.replicaCount=1");
+    void withDeployedPlatform_upgradeIncreasingReplicaCount() {
+        helmUpgradePlatform.call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         LOG.debug("Platform ready");
 
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.replicaCount=2");
+        final var result = helmUpgradePlatform.set("nodes.replicaCount", "2").call();
+        assertThat(result).returns("deployed", Release::getStatus);
 
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SCALING"),

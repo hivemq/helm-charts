@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.platform;
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import org.jetbrains.annotations.NotNull;
@@ -82,7 +83,8 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withMutualTls_hivemqRunning() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mtls-mqtt-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("mtls-mqtt-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         final var statefulSet =
                 client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();

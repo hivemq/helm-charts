@@ -2,6 +2,7 @@ package com.hivemq.helmcharts.platform;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Release;
 import io.fabric8.kubernetes.api.model.Pod;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,15 +44,17 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
     @ParameterizedTest(name = "{index} withNamespaces: {0}")
     @ValueSource(booleans = {true, false})
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void whenLogLevelIsChanged_thenLogbackXmlIsUpdated(final boolean withNamespaces) throws Exception {
+    void whenLogLevelIsChanged_thenLogbackXmlIsUpdated(final boolean withNamespaces) {
         if (withNamespaces) {
-            installPlatformOperatorChartAndWaitToBeRunning("--set", "namespaces=%s".formatted(platformNamespace));
+            helmUpgradePlatformOperator.set("namespaces", "%s".formatted(platformNamespace)).call();
+            K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         } else {
-            installPlatformOperatorChartAndWaitToBeRunning();
+            helmUpgradePlatformOperator.call();
+            K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         }
-        installPlatformChartAndWaitToBeRunning("/files/platform-values.yaml");
+        helmUpgradePlatform.call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
-
         await().untilAsserted(() -> {
             LOG.info("Assert original logback.xml in pods");
             assertThat(client.pods()
@@ -64,7 +67,8 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
         });
 
         LOG.info("Trigger update of log level");
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.replicaCount=1", "--set", "nodes.logLevel=WARN");
+        final var result = helmUpgradePlatform.set("nodes.logLevel", "WARN").call();
+        assertThat(result).returns("deployed", Release::getStatus);
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SET_LOG_LEVEL"),
                 1,

@@ -2,15 +2,15 @@ package com.hivemq.helmcharts.services;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
+import com.hivemq.helmcharts.util.K8sUtil;
 import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,18 +43,17 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     private @NotNull Path tmp;
 
     @Container
-    @SuppressWarnings("resource")
-    private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
+    private static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
+            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new FirefoxOptions());
+                    .withExtraHost("host.docker.internal", "host-gateway");
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenControlCenterEnabled_thenAbleToLogin() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/control-center-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("control-center-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
     }
 
@@ -82,7 +81,8 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
                 "keystore",
                 encoder.encodeToString(keystoreContent));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-cc-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-cc-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
         assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8443, CC_SERVICE_PORT_8443, true);
@@ -111,7 +111,8 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
                         "my-private-key.password",
                         encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-cc-with-private-key-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-cc-with-private-key-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
         assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8443, CC_SERVICE_PORT_8443, true);
@@ -121,7 +122,8 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_withCustomControlCenterUsernameAndPassword_thenAbleToLogin() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/control-center-basic-credentials-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("control-center-basic-credentials-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLogin(client,
                 platformNamespace,
                 WEB_DRIVER_CONTAINER,
@@ -144,7 +146,8 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
                         // SHA256 of test-usernametest-password
                         encoder.encodeToString("6300801c77089c00a55fd57002e856c6934d3764a1e50cc59e8c99f47e8e10a7".getBytes(
                                 StandardCharsets.UTF_8))));
-        installPlatformChartAndWaitToBeRunning("/files/control-center-credentials-secret-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("control-center-credentials-secret-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLogin(client,
                 platformNamespace,
                 WEB_DRIVER_CONTAINER,
@@ -157,7 +160,8 @@ class HelmControlCenterIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_withCustomServiceName_thenAbleToLogin() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-service-names-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_CUSTOM_SERVICE_NAME, CC_SERVICE_PORT_8081);
     }
 }

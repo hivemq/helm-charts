@@ -13,23 +13,13 @@ class HelmCustomServiceAccountCreateMissingPermissionsIT extends AbstractHelmCus
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformCharts_withNonExistingPermissionsThenCreate_hivemqRunning() throws Exception {
+    void platformCharts_withNonExistingPermissionsThenCreate_hivemqRunning() {
         K8sUtil.createServiceAccount(client, platformNamespace, SERVICE_ACCOUNT_NAME);
 
-        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
-                "--set",
-                "hivemqPlatformServiceAccount.create=false",
-                "--set",
-                "hivemqPlatformServiceAccount.permissions.create=false",
-                "--namespace",
-                operatorNamespace);
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "--set",
-                "nodes.serviceAccountName=" + SERVICE_ACCOUNT_NAME,
-                "--set",
-                "nodes.replicaCount=1",
-                "--namespace",
-                platformNamespace);
+        helmUpgradePlatformOperator.set("hivemqPlatformServiceAccount.create", "false")
+                .set("hivemqPlatformServiceAccount.permissions.create", "false")
+                .call();
+        helmUpgradePlatform.set("nodes.serviceAccountName", SERVICE_ACCOUNT_NAME).call();
 
         final var hivemqCustomResource =
                 K8sUtil.waitForHiveMQPlatformState(client, platformNamespace, PLATFORM_RELEASE_NAME, "ERROR");

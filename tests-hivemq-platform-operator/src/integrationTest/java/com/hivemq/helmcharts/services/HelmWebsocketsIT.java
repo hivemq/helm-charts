@@ -4,6 +4,7 @@ import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.client.mqtt.MqttWebSocketConfig;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,7 +70,8 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 "truststore.password",
                 encoder.encodeToString(DEFAULT_TRUSTSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-ws-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-ws-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(),
@@ -123,7 +125,8 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 "truststore.password",
                 encoder.encodeToString(truststorePassword.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-ws-with-private-key-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-ws-with-private-key-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(), keystorePassword, privateKeyPassword))

@@ -2,9 +2,12 @@ package com.hivemq.helmcharts.operator;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Release;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -59,16 +62,15 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
                 waitForOperatorLog(".*Could not verify ready status of applied HiveMQ Platform CRD '%s'".formatted(
                         CRD_NAME));
 
-        // installOperatorChart() blocks until the Operator is ready, so we have to call it async
-        final var additionalCommands =
-                List.of("--skip-crds", "--set", "crd.apply=false", "--set", "crd.waitTimeout=PT1S")
-                        .toArray(new String[0]);
+        // helmUpgradePlatformOperator.call() blocks until the Operator is ready, so we have to call it async
         final var uncaughtExceptionRef = new AtomicReference<Exception>();
         final var operatorInstallThread = new Thread(() -> {
             try {
-                installPlatformOperatorChartAndWaitToBeRunning(additionalCommands);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
+                final var result = helmUpgradePlatformOperator.set("crd.apply", "false").set("crd.waitTimeout", "PT1S")
+                        .skipCrds()
+                        .call();
+                assertThat(result).returns("deployed", Release::getStatus);
+                K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
             } catch (final Exception e) {
                 uncaughtExceptionRef.set(e);
             }
@@ -90,7 +92,7 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withCrdNotDeployed_operatorIsRunning() throws Exception {
+    void withCrdNotDeployed_operatorIsRunning() {
         installAndAssertRunningOperator(".*HiveMQ Platform CRD is not deployed");
     }
 
@@ -127,8 +129,7 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
                 ".*HiveMQ Platform CRD is not on version .* \\(deployed versions: V1_0_0, V1_0_1\\)");
     }
 
-    private void installAndAssertRunningOperator(final @NotNull String expectedCrdVerifyMessagePattern)
-            throws Exception {
+    private void installAndAssertRunningOperator(final @NotNull String expectedCrdVerifyMessagePattern) {
         final var crdApplyEnabled = waitForOperatorLog(".*Apply HiveMQ Platform CRD: true");
         final var crdVerify = waitForOperatorLog(expectedCrdVerifyMessagePattern);
         final var crdApplying = waitForOperatorLog(".*Applying %s HiveMQ Platform CRD '%s' \\(version: .*\\)".formatted(
@@ -138,7 +139,12 @@ class HelmApplyCrdIT extends AbstractHelmChartIT {
                 waitForOperatorLog(".*Waiting .* ms for HiveMQ Platform CRD '%s' to become ready...".formatted(CRD_NAME));
         final var crdReady = waitForOperatorLog(".*HiveMQ Platform CRD '%s' is ready".formatted(CRD_NAME));
 
-        installPlatformOperatorChartAndWaitToBeRunning(List.of("--skip-crds").toArray(new String[0]));
+        final var result = helmUpgradePlatformOperator
+                .skipCrds()
+                .call();
+        assertThat(result).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
+
         await().atMost(ONE_MINUTE).until(crdApplyEnabled::isDone);
         await().atMost(ONE_MINUTE).until(crdVerify::isDone);
         await().atMost(ONE_MINUTE).until(crdApplying::isDone);

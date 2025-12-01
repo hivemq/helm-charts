@@ -15,22 +15,20 @@ class HelmAdditionalBrokerLicensesIT extends AbstractHelmLicensesIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withAdditionalBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
+    void withAdditionalBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var brokerLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file broker.lic is corrupt.");
-        installPlatformChartAndWaitToBeRunning("--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "license.create=true",
-                "--set-file",
-                "license.additionalLicenses.broker.overrideLicense=/files/mock-additional-license.lic");
+        helmUpgradePlatform.set("license.create", "true")
+                .setFile("license.additionalLicenses.broker.overrideLicense", "mock-additional-license.lic")
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("hivemq-license-test-hivemq-platform");
         await().until(brokerLicenseFuture::isDone);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withExistingAdditionalBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
+    void withExistingAdditionalBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var brokerLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file license.lic is corrupt.");
         K8sUtil.createSecret(client,
@@ -39,10 +37,8 @@ class HelmAdditionalBrokerLicensesIT extends AbstractHelmLicensesIT {
                 Map.of("license.lic",
                         Base64.getEncoder()
                                 .encodeToString("additional broker license data".getBytes(StandardCharsets.UTF_8))));
-        installPlatformChartAndWaitToBeRunning("--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "license.name=test-additional-broker-license");
+        helmUpgradePlatform.set("license.name", "test-additional-broker-license").call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("test-additional-broker-license");
         await().until(brokerLicenseFuture::isDone);
     }

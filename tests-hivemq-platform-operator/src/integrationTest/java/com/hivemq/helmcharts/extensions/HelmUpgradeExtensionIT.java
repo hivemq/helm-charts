@@ -30,7 +30,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withBridgeConfiguration_enableDisableBridge() throws Exception {
+    void withBridgeConfiguration_enableDisableBridge() {
         final var hivemqContainerNetwork =
                 HIVEMQ_CONTAINER.getContainerInfo().getNetworkSettings().getNetworks().values().stream().findFirst();
         assertThat(hivemqContainerNetwork).isPresent();
@@ -43,7 +43,8 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         // deploy chart and wait to be ready
         final var extensionEnabledInitAppFuture = initAppExtensionEnabledFuture();
         final var extensionStartedBrokerFuture = brokerExtensionStartedFuture();
-        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("bridge-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().until(extensionEnabledInitAppFuture::isDone);
         await().until(extensionStartedBrokerFuture::isDone);
 
@@ -56,7 +57,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         final var extensionStoppedBrokerFuture = brokerExtensionStoppedFuture();
         final var extensionStoppedInitAppFuture = initAppExtensionStoppedFuture();
         final var extensionUpdateDoneInitAppFuture = initAppExtensionUpdateDoneFuture();
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "-f", "/files/disable-bridge-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("disable-bridge-values.yaml")).call();
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 1,
@@ -78,7 +79,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
     @EnabledIfSystemProperty(named = "k3s.version.type",
                              matches = "LATEST",
                              disabledReason = "fails regularly with the MINIMUM version, unclear why, could be something with the log watcher")
-    void withBridgeConfiguration_updateExtensionWithNewConfig() throws Exception {
+    void withBridgeConfiguration_updateExtensionWithNewConfig() {
         final var hivemqContainerNetwork =
                 HIVEMQ_CONTAINER.getContainerInfo().getNetworkSettings().getNetworks().values().stream().findFirst();
         assertThat(hivemqContainerNetwork).isPresent();
@@ -91,7 +92,8 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         // deploy chart and wait to be ready
         final var extensionEnabledInitAppFuture1 = initAppExtensionEnabledFuture();
         final var extensionStartedBrokerFuture1 = brokerExtensionStartedFuture();
-        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("bridge-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().until(extensionEnabledInitAppFuture1::isDone);
         await().until(extensionStartedBrokerFuture1::isDone);
 
@@ -106,7 +108,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client, platformNamespace, "updated-test-bridge-configuration", bridgeConfiguration);
 
         // upgrade chart and wait to be ready
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "-f", "/files/bridge-updated-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("bridge-updated-values.yaml")).call();
         K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().until(extensionEnabledInitAppFuture2::isDone);
         await().until(extensionStartedBrokerFuture2::isDone);

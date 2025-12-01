@@ -6,6 +6,7 @@ import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MonitoringUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
+import com.marcnuri.helm.Release;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
@@ -14,10 +15,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,13 +57,11 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     private static final @NotNull String CLUSTER_SERVICE_NAME = "hivemq-%s-cluster".formatted(LEGACY_RELEASE_NAME);
 
     @Container
-    @SuppressWarnings("resource")
-    private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
+    private static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
+            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new FirefoxOptions());
+                    .withExtraHost("host.docker.internal", "host-gateway");
 
     @Override
     protected boolean uninstallPlatformChart() {
@@ -72,8 +70,8 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace);
+    void tearDown() {
+        helmUninstallLegacyOperator.call();
     }
 
     @Test
@@ -84,7 +82,10 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     void migrateToCurrentPlatformOperator() throws Exception {
         K8sUtil.createConfigMap(client, operatorNamespace, "ese-legacy-config-map.yml");
         K8sUtil.createConfigMap(client, operatorNamespace, "ese-file-realm-config-map.yml");
-        installLegacyOperatorChartAndWaitToBeRunning("/files/migration-legacy-stateful-set-values.yaml");
+        final var release = helmUpgradeLegacyOperator.withValuesFile(VALUES_PATH.resolve("migration-legacy-stateful-set-values.yaml")).call();
+        assertThat(release).returns("deployed", Release::getStatus);
+        K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
+        K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
 
         // assert service annotations and labels
         final var hiveMQVersion = System.getProperty("hivemq.tag", "latest");
@@ -119,7 +120,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 .getMetadata();
         assertThat(legacyStatefulSetMetadata.getAnnotations()).containsOnlyKeys("hivemq.com/resource-spec",
                 "kubernetes.io/change-cause");
-        final var legacyChartVersion = helmChartContainer.getLegacyOperatorChart().getVersion();
+        final var legacyChartVersion = legacyChart.getChartVersion();
         assertAnnotationsAndLabels("Legacy StatefulSet",
                 legacyStatefulSetMetadata,
                 legacyStatefulSetMetadata.getAnnotations(),
@@ -214,12 +215,10 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         // ConfigMap by adding a new entry for `config.xml`.
         K8sUtil.updateConfigMap(client, operatorNamespace, "ese-legacy-config-map-update.yml");
 
-        helmChartContainer.installPlatformChart(LEGACY_RELEASE_NAME,
-                "-f",
-                "/files/migration-platform-stateful-set-values.yaml",
-                "--namespace",
-                operatorNamespace);
-
+        helmUpgradePlatform.withName(LEGACY_RELEASE_NAME)
+                .withNamespace(operatorNamespace)
+                .withValuesFile(VALUES_PATH.resolve("migration-platform-stateful-set-values.yaml"))
+                .call();
         K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, LEGACY_RELEASE_NAME, "STATEFULSET_MIGRATION");
         K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, LEGACY_RELEASE_NAME, "ROLLING_RESTART");
         K8sUtil.waitForHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);

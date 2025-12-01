@@ -21,7 +21,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withAdditionalVolumes_hivemqRunningWithVolumeMounts() throws Exception {
+    void withAdditionalVolumes_hivemqRunningWithVolumeMounts() {
         final var pvc = new PersistentVolumeClaimBuilder().withNewMetadata()
                 .withName("test-persistent-volume-claim")
                 .endMetadata()
@@ -42,7 +42,8 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
                 Map.of("test.xml",
                         Base64.getEncoder().encodeToString("test-content".getBytes(StandardCharsets.UTF_8))));
 
-        installPlatformChartAndWaitToBeRunning("/files/additional-volumes-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("additional-volumes-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().untilAsserted(() -> {
             final var statefulSet =

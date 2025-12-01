@@ -68,7 +68,8 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
         final var bazExtensionStartedFuture =
                 waitForPlatformLog(".*Extension \"HiveMQ Appending Baz Extension\" version 1.0.0 started successfully.");
 
-        installPlatformChartAndWaitToBeRunning("/files/extension-priority-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("extension-priority-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().atMost(ONE_MINUTE).until(fooExtensionStartedFuture::isDone);
         await().atMost(ONE_MINUTE).until(barExtensionStartedFuture::isDone);

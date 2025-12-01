@@ -23,9 +23,9 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
     @ParameterizedTest(name = "{0}")
     @MethodSource("chartValues")
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void installPlatform_withRootAndNonRootUsers_hivemqRunning(final @NotNull ChartValues chartValues)
-            throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
+    void installPlatform_withRootAndNonRootUsers_hivemqRunning(final @NotNull ChartValues chartValues) {
+        helmUpgradePlatformOperator.withValuesFile(VALUES_PATH.resolve(chartValues.operator().valuesFile())).call();
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
@@ -33,7 +33,8 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
                 chartValues.operator().uid(),
                 chartValues.operator().gid());
 
-        installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve(chartValues.platform().valuesFile())).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
         assertUidAndGid(platformNamespace,
                 platformLabels,
@@ -44,20 +45,20 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void installPlatform_withRandomNonRootUsers_hivemqRunning() throws Exception {
+    void installPlatform_withRandomNonRootUsers_hivemqRunning() {
         final var operatorUid = ThreadLocalRandom.current().nextInt(MIN_UID, MAX_UID);
-        installPlatformOperatorChartAndWaitToBeRunning("-f",
-                operatorChartNonRootUserValuesFile(),
-                "--set",
-                "containerSecurityContext.runAsUser=" + operatorUid);
+        helmUpgradePlatformOperator.set("containerSecurityContext.runAsUser", operatorUid)
+                .withValuesFile(VALUES_PATH.resolve(operatorChartNonRootUserValuesFile()))
+                .call();
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace, operatorLabels, "hivemq-platform-operator", operatorUid, 0);
 
         final var platformUid = ThreadLocalRandom.current().nextInt(MIN_UID, MAX_UID);
-        installPlatformChartAndWaitToBeRunning("-f",
-                platformChartNonRootUserValuesFile(),
-                "--set",
-                "nodes.containerSecurityContext.runAsUser=" + platformUid);
+        helmUpgradePlatform.set("nodes.containerSecurityContext.runAsUser", platformUid)
+                .withValuesFile(VALUES_PATH.resolve(platformChartNonRootUserValuesFile()))
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
         assertUidAndGid(platformNamespace, //
                 platformLabels, //

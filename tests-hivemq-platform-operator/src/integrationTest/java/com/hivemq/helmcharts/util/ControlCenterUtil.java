@@ -9,7 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -31,7 +31,7 @@ public class ControlCenterUtil {
     public static void assertLogin(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
-            final @NotNull BrowserWebDriverContainer<?> webDriverContainer,
+            final @NotNull BrowserWebDriverContainer webDriverContainer,
             final @NotNull String serviceName,
             final int port) throws IOException {
         assertLogin(client, namespace, webDriverContainer, serviceName, port, "admin", "hivemq", false);
@@ -40,7 +40,7 @@ public class ControlCenterUtil {
     public static void assertLogin(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
-            final @NotNull BrowserWebDriverContainer<?> webDriverContainer,
+            final @NotNull BrowserWebDriverContainer webDriverContainer,
             final @NotNull String serviceName,
             final int port,
             final boolean isSecure) throws IOException {
@@ -50,7 +50,7 @@ public class ControlCenterUtil {
     public static void assertLogin(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
-            final @NotNull BrowserWebDriverContainer<?> webDriverContainer,
+            final @NotNull BrowserWebDriverContainer webDriverContainer,
             final @NotNull String serviceName,
             final int port,
             final @NotNull String username,
@@ -61,7 +61,7 @@ public class ControlCenterUtil {
     public static void assertLogin(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
-            final @NotNull BrowserWebDriverContainer<?> webDriverContainer,
+            final @NotNull BrowserWebDriverContainer webDriverContainer,
             final @NotNull String serviceName,
             final int port,
             final @NotNull String username,

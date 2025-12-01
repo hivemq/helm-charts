@@ -22,16 +22,16 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withOverrideInitContainer_hivemqRunningWithVolumeMounts() throws Exception {
+    void withOverrideInitContainer_hivemqRunningWithVolumeMounts() {
         final var additionalVolumeFile = "/files/init-container-additional-volumes-values.yaml";
         final var additionalInitContainerFile = "/files/init-containers-spec.yaml";
 
         final var mountName = "init-container-volume";
 
-        installPlatformChartAndWaitToBeRunning("--set-file",
-                "config.overrideInitContainers=" + additionalInitContainerFile,
-                "-f",
-                additionalVolumeFile);
+        helmUpgradePlatform.setFile("config.overrideInitContainers", additionalInitContainerFile)
+                .withValuesFile(VALUES_PATH.resolve(additionalVolumeFile))
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().untilAsserted(() -> {
             final var statefulSet =
@@ -56,9 +56,9 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
     @EnabledIfSystemProperty(named = "k3s.version.type",
                              matches = "LATEST",
                              disabledReason = "spec.templates.spec.initContainers[].restartPolicy was added in K8s 1.28")
-    void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
+    void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() {
         K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
-        installPlatformChartAndWaitToBeRunning("/files/additional-init-containers-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("additional-init-containers-values.yaml")).call();
 
         await().atMost(TWO_MINUTES).untilAsserted(() -> {
             final var statefulSet =

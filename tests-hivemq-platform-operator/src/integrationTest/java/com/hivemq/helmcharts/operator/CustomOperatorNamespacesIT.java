@@ -2,6 +2,8 @@ package com.hivemq.helmcharts.operator;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Helm;
+import com.marcnuri.helm.Release;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,35 +52,46 @@ class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
 
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA, namespaceAlpha, true);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_BETA, namespaceBeta, true);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_GAMMA, namespaceGamma, true);
+    void tearDown() {
+        Helm.uninstall(PLATFORM_NAME_ALPHA).withNamespace(namespaceAlpha).call();
+        helmChartContainer.deleteNamespace(namespaceAlpha);
+        Helm.uninstall(PLATFORM_NAME_BETA).withNamespace(namespaceBeta).call();
+        helmChartContainer.deleteNamespace(namespaceBeta);
+        Helm.uninstall(PLATFORM_NAME_GAMMA).withNamespace(namespaceGamma).call();
+        helmChartContainer.deleteNamespace(namespaceGamma);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void whenOperatorNamespacesIsConfigured_thenOnlyCustomResourcesInWatchedNamespacesReconciled() throws Exception {
+    void whenOperatorNamespacesIsConfigured_thenOnlyCustomResourcesInWatchedNamespacesReconciled() {
         // the operator should reconcile the platforms in the alpha and beta namespace,
         // but ignore the platform in the gamma namespace
-        installPlatformOperatorChartAndWaitToBeRunning("--set",
-                "namespaces=%s\\,%s".formatted(namespaceAlpha, namespaceBeta));
+        final var result =
+                helmUpgradePlatformOperator.set("namespaces", "%s\\,%s".formatted(namespaceAlpha, namespaceBeta))
+                        .call();
+        assertThat(result).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
 
-        helmChartContainer.installPlatformChart(PLATFORM_NAME_ALPHA,
-                "--namespace",
-                namespaceAlpha,
-                "--set",
-                "nodes.replicaCount=1");
-        helmChartContainer.installPlatformChart(PLATFORM_NAME_BETA,
-                "--namespace",
-                namespaceBeta,
-                "--set",
-                "nodes.replicaCount=1");
-        helmChartContainer.installPlatformChart(PLATFORM_NAME_GAMMA,
-                "--namespace",
-                namespaceGamma,
-                "--set",
-                "nodes.replicaCount=1");
+        helmUpgradePlatform.withName(PLATFORM_NAME_ALPHA).withNamespace(namespaceAlpha).call();
+//        helmChartContainer.installPlatformChart(PLATFORM_NAME_ALPHA,
+//                "--namespace",
+//                namespaceAlpha,
+//                "--set",
+//                "nodes.replicaCount=1");
+
+        helmUpgradePlatform.withName(PLATFORM_NAME_BETA).withNamespace(namespaceBeta).call();
+//        helmChartContainer.installPlatformChart(PLATFORM_NAME_BETA,
+//                "--namespace",
+//                namespaceBeta,
+//                "--set",
+//                "nodes.replicaCount=1");
+
+        helmUpgradePlatform.withName(PLATFORM_NAME_GAMMA).withNamespace(namespaceGamma).call();
+//        helmChartContainer.installPlatformChart(PLATFORM_NAME_GAMMA,
+//                "--namespace",
+//                namespaceGamma,
+//                "--set",
+//                "nodes.replicaCount=1");
         K8sUtil.waitForHiveMQPlatformStateRunning(client, namespaceAlpha, PLATFORM_NAME_ALPHA);
         K8sUtil.waitForHiveMQPlatformStateRunning(client, namespaceBeta, PLATFORM_NAME_BETA);
 

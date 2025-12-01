@@ -2,6 +2,8 @@ package com.hivemq.helmcharts.operator;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Helm;
+import com.marcnuri.helm.Release;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -29,33 +31,36 @@ class CustomOperatorSelectorsIT extends AbstractHelmChartIT {
 
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA_TIER_1, platformNamespace);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA_TIER_2, platformNamespace);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA_TIER_3, platformNamespace, true);
+    void tearDown() {
+        Helm.uninstall(PLATFORM_NAME_ALPHA_TIER_1).withNamespace(platformNamespace).call();
+        Helm.uninstall(PLATFORM_NAME_ALPHA_TIER_2).withNamespace(platformNamespace).call();
+        Helm.uninstall(PLATFORM_NAME_ALPHA_TIER_3).withNamespace(platformNamespace).call();
+        helmChartContainer.deleteNamespace(platformNamespace);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void whenOperatorSelectorIsConfigured_thenOnlyMatchingCustomResourcesAreReconciled() throws Exception {
+    void whenOperatorSelectorIsConfigured_thenOnlyMatchingCustomResourcesAreReconciled() {
         // the operator should reconcile the tier two and three platforms, but ignore the tier one platform
-        installPlatformOperatorChartAndWaitToBeRunning("--set", "selectors=group=alpha\\,tier!=one");
+        final var operatorRelease = helmUpgradePlatformOperator.set("selectors", "group=alpha\\,tier!=one").call();
+        assertThat(operatorRelease).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
 
-        installPlatformChart(PLATFORM_NAME_ALPHA_TIER_1,
-                "--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "operator.labels.group=alpha,operator.labels.tier=one");
-        installPlatformChart(PLATFORM_NAME_ALPHA_TIER_2,
-                "--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "operator.labels.group=alpha,operator.labels.tier=two");
-        installPlatformChart(PLATFORM_NAME_ALPHA_TIER_3,
-                "--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "operator.labels.group=alpha,operator.labels.tier=three");
+        final var tier1Release = helmUpgradePlatform.withName(PLATFORM_NAME_ALPHA_TIER_1)
+                .set("operator.labels.group", "alpha,operator.labels.tier=one")
+                .call();
+        assertThat(tier1Release).returns("deployed", Release::getStatus);
+
+        final var tier2Release = helmUpgradePlatform.withName(PLATFORM_NAME_ALPHA_TIER_2)
+                .set("operator.labels.group", "alpha,operator.labels.tier=two")
+                .call();
+        assertThat(tier2Release).returns("deployed", Release::getStatus);
+
+        final var tier3Release = helmUpgradePlatform.withName(PLATFORM_NAME_ALPHA_TIER_3)
+                .set("operator.labels.group", "alpha,operator.labels.tier=three")
+                .call();
+        assertThat(tier3Release).returns("deployed", Release::getStatus);
+
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_2);
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_3);
 

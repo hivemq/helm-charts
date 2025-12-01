@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.platform;
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.CertificatesUtil;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
@@ -11,8 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.selenium.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -48,13 +48,11 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private @NotNull Path tmp;
 
     @Container
-    @SuppressWarnings("resource")
-    private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
+    private static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
+            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new FirefoxOptions());
+                    .withExtraHost("host.docker.internal", "host-gateway");
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -82,7 +80,8 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-mqtt-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         assertSecretMounted(client, "mqtts-keystore");
         assertSecretMounted(client, "https-keystore");
@@ -124,7 +123,8 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
                         "my-private-key.password",
                         encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-mqtt-with-private-key-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-mqtt-with-private-key-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         assertSecretMounted(client, "mqtt-keystore-1884");
         assertSecretMounted(client, "mqtt-keystore-1885");

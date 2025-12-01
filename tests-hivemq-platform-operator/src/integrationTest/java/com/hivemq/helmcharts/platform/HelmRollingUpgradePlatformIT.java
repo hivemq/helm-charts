@@ -2,12 +2,14 @@ package com.hivemq.helmcharts.platform;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Helm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,27 +20,30 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withPreviousPlatformInstalled_upgradeToLatestChartVersion() throws Exception {
-        final var currentPlatformChart = helmChartContainer.getPlatformChart();
-        final var previousPlatformChart = helmChartContainer.getPreviousPlatformChart();
-        assertThat(currentPlatformChart.getVersion()).isNotNull();
-        assertThat(currentPlatformChart.getAppVersion()).isNotNull();
-        assertThat(previousPlatformChart.getVersion()).isNotNull();
+    void withPreviousPlatformInstalled_upgradeToLatestChartVersion() {
+        final var previousPlatformChart = getPreviousPlatformChart();
+        assertThat(platformChart.getChartVersion()).isNotNull();
+        assertThat(platformChart.getAppVersion()).isNotNull();
+        assertThat(previousPlatformChart.getChartVersion()).isNotNull();
         assertThat(previousPlatformChart.getAppVersion()).isNotNull();
-        assertThat(currentPlatformChart.getVersion()) //
+        assertThat(platformChart.getChartVersion()) //
                 .as("If there was a HiveMQ Platform Chart released recently, make sure to rebase either this branch or its base branch with latest")
-                .isGreaterThan(previousPlatformChart.getVersion());
-        LOG.info("Current platform chart: {}", helmChartContainer.getPlatformChart());
-        LOG.info("Previous platform chart: {}", helmChartContainer.getPreviousPlatformChart());
+                .isGreaterThan(previousPlatformChart.getChartVersion());
+        LOG.info("Current platform chart: {}", platformChart);
+        LOG.info("Previous platform chart: {}", previousPlatformChart);
 
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
-                false,
-                "--set",
-                "nodes.replicaCount=1",
-                "--version",
-                previousPlatformChart.getVersion().toString(),
-                "--namespace",
-                platformNamespace);
+        // install previous platform chart version released
+        Helm.repo().add().withName("hivemq").withUrl(URI.create("https://hivemq.github.io/helm-charts")).call();
+        Helm.install("hivemq/hivemq-platform")
+                .withName(PLATFORM_RELEASE_NAME)
+                .withNamespace(platformNamespace)
+                .set("nodes.replicaCount", "1")
+                .withVersion(previousPlatformChart.getChartVersion().toString())
+                .withKubeConfig(kubeConfigPath)
+                .atomic()
+                .waitReady()
+                .debug()
+                .call();
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var currentPodResourceVersion = client.pods()
                 .inNamespace(platformNamespace)
@@ -47,20 +52,13 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 .getMetadata()
                 .getResourceVersion();
 
-        helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
-                true,
-                "--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "image.repository=docker.io/hivemq",
-                "--set",
-                "image.tag=%s".formatted(currentPlatformChart.getAppVersion()),
-                "--namespace",
-                platformNamespace);
+        // upgrade to latest local chart version
+        helmUpgradePlatform.set("image.repository", "docker.io/hivemq")
+                .set("image.tag", "%s".formatted(platformChart.getAppVersion()))
+                .call();
 
         final var platform = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
-        final var requiresRollingRestart =
-                !previousPlatformChart.getAppVersion().equals(currentPlatformChart.getAppVersion());
+        final var requiresRollingRestart = !previousPlatformChart.getAppVersion().equals(platformChart.getAppVersion());
         if (requiresRollingRestart) {
             // appVersion is tied to the HiveMQ version, so if they are different it should trigger a rolling restart
             platform.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("ROLLING_RESTART"),
@@ -87,7 +85,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     .getSpec()
                     .getContainers()
                     .getFirst()
-                    .getImage()).isEqualTo("docker.io/hivemq/hivemq4:" + currentPlatformChart.getAppVersion());
+                    .getImage()).isEqualTo("docker.io/hivemq/hivemq4:" + platformChart.getAppVersion());
         } else {
             // make sure no rolling restart was executed
             assertThat(updatedPodResourceVersion).as(

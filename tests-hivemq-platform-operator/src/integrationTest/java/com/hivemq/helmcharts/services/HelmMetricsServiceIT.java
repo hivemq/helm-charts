@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.services;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MonitoringUtil;
 import com.hivemq.helmcharts.util.MqttUtil;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +22,9 @@ class HelmMetricsServiceIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_withCustomMetrics_thenMetricsAvailable() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/metrics-values.yaml");
+    void platformChart_withCustomMetrics_thenMetricsAvailable() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("metrics-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         MqttUtil.assertMessages(client, platformNamespace, DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT);
 
@@ -35,8 +37,9 @@ class HelmMetricsServiceIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_withCustomServiceName_thenMetricsAvailable() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+    void platformChart_withCustomServiceName_thenMetricsAvailable() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-service-names-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         MqttUtil.assertMessages(client, platformNamespace, CUSTOM_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT);
         MonitoringUtil.assertSubscribesPublishesMetrics(client,
                 platformNamespace,

@@ -45,6 +45,7 @@ testing {
                 runtimeOnly(libs.junit.platform.launcher)
 
                 // K8s
+                implementation(libs.helm.java.client)
                 implementation(libs.kubernetes.client)
                 implementation(libs.kubernetes.client.jdk)
 

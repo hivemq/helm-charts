@@ -36,8 +36,8 @@ class HelmRestApiIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenRestApiEnabled_thenCallsEndpoint() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/rest-api-values.yaml");
-
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("rest-api-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertMqttClientsIsEmpty(REST_API_SERVICE_NAME_8890, REST_API_SERVICE_PORT_8890, false);
     }
 
@@ -62,7 +62,8 @@ class HelmRestApiIT extends AbstractHelmChartIT {
         K8sUtil.createConfigMap(client, platformNamespace, "ese-config-map.yml");
         K8sUtil.createConfigMap(client, platformNamespace, "ese-file-realm-config-map.yml");
 
-        installPlatformChartAndWaitToBeRunning("/files/rest-api-with-auth-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("rest-api-with-auth-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         RestAPIUtil.assertAuth(client, platformNamespace, REST_API_SERVICE_NAME_8890, REST_API_SERVICE_PORT_8890, true);
         RestAPIUtil.assertAuth(client,
@@ -85,7 +86,8 @@ class HelmRestApiIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_withCustomServiceName_thenCallsEndpoint() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-service-names-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         assertMqttClientsIsEmpty(REST_API_CUSTOM_SERVICE_NAME, REST_API_SERVICE_PORT_8890, false);
     }
@@ -108,7 +110,8 @@ class HelmRestApiIT extends AbstractHelmChartIT {
                 "keystore.password",
                 encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-rest-api-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("tls-rest-api-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         assertMqttClientsIsEmpty(REST_API_SERVICE_NAME_8890, REST_API_SERVICE_PORT_8890, true);
         assertMqttClientsIsEmpty(REST_API_SERVICE_NAME_8891, REST_API_SERVICE_PORT_8891, true);

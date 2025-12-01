@@ -35,7 +35,8 @@ class HelmCustomExtensionWithHttpBasicAuthIT extends AbstractHelmChartIT {
         final var extensionStartedFuture =
                 waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 2.0.0 started successfully.");
 
-        installPlatformChartAndWaitToBeRunning("/files/custom-extension-values-with-request-headers-secret.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-extension-values-with-request-headers-secret.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
     }
 }

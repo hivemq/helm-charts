@@ -2,6 +2,7 @@ package com.hivemq.helmcharts.platform;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Release;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -20,10 +21,13 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withCustomYml_hivemqRunning() throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning();
-        installPlatformChartAndWaitToBeRunning("--set-file",
-                "config.overrideStatefulSet=/files/stateful-set-spec.yaml");
+    void withCustomYml_hivemqRunning() {
+        final var result = helmUpgradePlatformOperator.call();
+        assertThat(result).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
+
+        helmUpgradePlatform.setFile("config.overrideStatefulSet", "stateful-set-spec.yaml").call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var statefulSet =
@@ -47,10 +51,13 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withCustomXml_hivemqRunning() throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning();
-        installPlatformChartAndWaitToBeRunning("--set-file",
-                "config.overrideHiveMQConfig=/files/hivemq-config-override.xml");
+    void withCustomXml_hivemqRunning() {
+        final var result = helmUpgradePlatformOperator.call();
+        assertThat(result).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
+
+        helmUpgradePlatform.setFile("config.overrideStatefulSet", "hivemq-config-override.xml").call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var configmap = client.configMaps()
@@ -65,12 +72,15 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withExistingConfigMap_customResourceCreated() throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning();
+    void withExistingConfigMap_customResourceCreated() {
+        final var result = helmUpgradePlatformOperator.call();
+        assertThat(result).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
+
         final var configMap = K8sUtil.createConfigMap(client, platformNamespace, "hivemq-config-map.yml");
         final var configMapName = configMap.getMetadata().getName();
-
-        installPlatformChartAndWaitToBeRunning("--set", "config.create=false", "--set", "config.name=" + configMapName);
+        helmUpgradePlatform.set("config.create", "false").set("config.name", configMapName).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var hivemqCustomResource =
@@ -94,14 +104,17 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withCustomEnvVars_hivemqRunning() throws Exception {
+    void withCustomEnvVars_hivemqRunning() {
         final var operatorStartedFuture = waitForOperatorLog(
                 ".*Registered reconciler: 'hivemq-controller' for resource: 'class com.hivemq.platform.operator.v1.HiveMQPlatform' for namespace\\(s\\): \\[%s\\]".formatted(
                         platformNamespace));
-        installPlatformOperatorChartAndWaitToBeRunning("--set", "namespaces=%s".formatted(platformNamespace));
+        final var result = helmUpgradePlatformOperator.set("namespaces", "%s".formatted(platformNamespace)).call();
+        assertThat(result).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         await().atMost(ONE_MINUTE).until(operatorStartedFuture::isDone);
 
-        installPlatformChartAndWaitToBeRunning("/files/custom-platform-env-vars-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-platform-env-vars-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         // assert the custom operator configuration
         final var operatorDeployment = K8sUtil.getDeployment(client, operatorNamespace, getOperatorName());

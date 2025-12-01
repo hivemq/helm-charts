@@ -16,27 +16,27 @@ class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withSecretConfig_hivemqRunning() throws Exception {
+    void withSecretConfig_hivemqRunning() {
         final var secretName = "hivemq-configuration-" + PLATFORM_RELEASE_NAME;
-        installPlatformChartAndWaitToBeRunning("--set", "config.createAs=Secret");
+        helmUpgradePlatform.set("config.createAs", "Secret").call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertSecretConfigMounted(secretName);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withExistingSecret_hivemqRunning() throws Exception {
+    void withExistingSecret_hivemqRunning() {
         final var secret = K8sUtil.createSecret(client,
                 platformNamespace,
                 "hivemq-configuration",
                 readResourceFile("hivemq-config.xml"));
         final var secretName = secret.getMetadata().getName();
 
-        installPlatformChartAndWaitToBeRunning("--set",
-                "config.create=false",
-                "--set",
-                "config.name=" + secretName,
-                "--set",
-                "config.createAs=Secret");
+        helmUpgradePlatform.set("config.create", "false")
+                .set("config.name", secretName)
+                .set("config.createAs", "Secret")
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertSecretConfigMounted(secretName);
     }
 

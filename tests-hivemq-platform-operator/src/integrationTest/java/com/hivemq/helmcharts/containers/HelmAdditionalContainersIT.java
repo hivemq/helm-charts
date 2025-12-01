@@ -14,9 +14,10 @@ class HelmAdditionalContainersIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void whenAdditionalContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
+    void whenAdditionalContainer_withConsulTemplate_thenLicenseUpdated() {
         K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
-        installPlatformChartAndWaitToBeRunning("/files/additional-containers-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("additional-containers-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().untilAsserted(() -> {
             final var statefulSet =

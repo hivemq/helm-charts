@@ -18,9 +18,9 @@ class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityCon
     @ParameterizedTest(name = "{0}")
     @MethodSource("chartValues")
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void updateConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
-            throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
+    void updateConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues) {
+        helmUpgradePlatformOperator.withValuesFile(VALUES_PATH.resolve(chartValues.operator().valuesFile())).call();
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
@@ -28,7 +28,8 @@ class HelmPodSecurityContextUpgradePlatformIT extends AbstractHelmPodSecurityCon
                 chartValues.operator().uid(),
                 chartValues.operator().gid());
 
-        installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve(chartValues.platform().valuesFile())).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
         assertUidAndGid(platformNamespace,
                 platformLabels,

@@ -24,8 +24,9 @@ class HelmRemoveNamespaceIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withSingleOperator_hivemqRunningThenDelete() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/platform-values.yaml");
+    void withSingleOperator_hivemqRunningThenDelete() {
+        helmUpgradePlatform.call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         final var platform = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertThat(platform).isNotNull();

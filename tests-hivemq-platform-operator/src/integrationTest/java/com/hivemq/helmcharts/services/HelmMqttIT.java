@@ -26,16 +26,18 @@ class HelmMqttIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMqttEnabled_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-values.yaml");
+    void platformChart_whenMqttEnabled_thenSendsReceivesMessage() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("mqtt-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
+        MqttUtil.assertMessages(client, platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMqttNodePortEnabled_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-node-port-values.yaml");
+    void platformChart_whenMqttNodePortEnabled_thenSendsReceivesMessage() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("mqtt-node-port-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
@@ -44,13 +46,14 @@ class HelmMqttIT extends AbstractHelmChartIT {
                     .extracting(ServiceSpec::getType)
                     .contains("NodePort");
         });
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
+        MqttUtil.assertMessages(client, platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMqttLoadBalancerEnabled_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-load-balancer-values.yaml");
+    void platformChart_whenMqttLoadBalancerEnabled_thenSendsReceivesMessage() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("mqtt-load-balancer-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
@@ -59,13 +62,14 @@ class HelmMqttIT extends AbstractHelmChartIT {
                     .extracting(ServiceSpec::getType)
                     .contains("LoadBalancer");
         });
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
+        MqttUtil.assertMessages(client, platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMqttAnnotationsEnabled_thenAnnotationsExist() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/mqtt-annotations-values.yaml");
+    void platformChart_whenMqttAnnotationsEnabled_thenAnnotationsExist() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("mqtt-annotations-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
@@ -76,22 +80,15 @@ class HelmMqttIT extends AbstractHelmChartIT {
                             "test-annotation-key/v1",
                             "test-annotation-value-v1")));
         });
-        assertMqttListener(platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
+        MqttUtil.assertMessages(client, platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_withCustomServiceName_thenSendsReceivesMessage() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
+    void platformChart_withCustomServiceName_thenSendsReceivesMessage() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-service-names-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         K8sUtil.assertMqttService(client, platformNamespace, MQTT_CUSTOM_SERVICE_NAME);
-        assertMqttListener(platformNamespace, MQTT_CUSTOM_SERVICE_NAME, MQTT_SERVICE_PORT_1883);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private void assertMqttListener(
-            final @NotNull String namespace,
-            final @NotNull String serviceName,
-            final int servicePort) {
-        MqttUtil.assertMessages(client, namespace, serviceName, servicePort);
+        MqttUtil.assertMessages(client, platformNamespace, MQTT_CUSTOM_SERVICE_NAME, MQTT_SERVICE_PORT_1883);
     }
 }
