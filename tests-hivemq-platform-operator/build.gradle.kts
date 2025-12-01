@@ -103,7 +103,7 @@ testing {
             }
             oci.of(this) {
                 imageDependencies {
-                    runtime(project).name("hivemq/helm-charts").tag("latest")
+                    runtime("rancher:k3s:$k3sTag").tag("latest")
                     runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
                     runtime("com.hivemq:hivemq-enterprise-k8s:$hivemqVersion").tag("k8s-latest")
                     runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
@@ -128,28 +128,6 @@ tasks.register("integrationTestPrepare") {
 
 /* ******************** OCI images ******************** */
 
-val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc" // noble
-    platform = oci.platform("linux", "amd64")
-    command =
-        "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
-                "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
-    destinationDirectory = layout.buildDirectory.dir("oci/layers")
-    classifier = "helm@linux,amd64"
-}
-
-val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc" // noble
-    platform = oci.platform("linux", "arm64", "v8")
-    command =
-        "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
-                "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
-    destinationDirectory = layout.buildDirectory.dir("oci/layers")
-    classifier = "helm@linux,arm64,v8"
-}
-
 oci {
     registries {
         dockerHub {
@@ -162,26 +140,6 @@ oci {
         }
         mapModule("com.hivemq", "hivemq-enterprise-k8s") {
             toImage("hivemq/hivemq4").withTag(version.prefix("k8s-"))
-        }
-    }
-    imageDefinitions {
-        register("main") {
-            imageTag = provider { project.version.toString().lowercase() }
-            allPlatforms {
-                dependencies {
-                    runtime("rancher:k3s:$k3sTag")
-                }
-            }
-            specificPlatform(platform("linux", "amd64")) {
-                layer("helm") {
-                    contents(helmOciLayerLinuxAmd64)
-                }
-            }
-            specificPlatform(platform("linux", "arm64", "v8")) {
-                layer("helm") {
-                    contents(helmOciLayerLinuxArm64)
-                }
-            }
         }
     }
 }

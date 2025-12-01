@@ -47,12 +47,11 @@ import static org.awaitility.Durations.FIVE_MINUTES;
 import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
-public class HelmChartContainer extends K3sContainer implements AutoCloseable {
+public class HelmChartK3sContainer extends K3sContainer implements AutoCloseable {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
-    private static final @NotNull DockerImageName K3S_DOCKER_IMAGE =
-            OciImages.getImageName("hivemq/helm-charts").asCompatibleSubstituteFor("rancher/k3s");
+    private static final @NotNull DockerImageName K3S_DOCKER_IMAGE = OciImages.getImageName("rancher/k3s");
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
@@ -61,7 +60,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
 
-    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartContainer.class);
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartK3sContainer.class);
 
     private final @NotNull ExecutorService executorService = Executors.newCachedThreadPool();
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
@@ -71,11 +70,11 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     private @Nullable KubernetesClient client;
     private @Nullable Path kubeConfigPath;
 
-    public HelmChartContainer(final boolean withK3sDebugging) {
+    public HelmChartK3sContainer(final boolean withK3sDebugging) {
         this(withK3sDebugging, List.of());
     }
 
-    public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
+    public HelmChartK3sContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
         super(K3S_DOCKER_IMAGE);
         super.withCopyToContainer(Transferable.of(getRegistriesContent()), "/etc/rancher/k3s/registries.yaml");
         super.withExtraHost("host.docker.internal", "host-gateway");
@@ -120,7 +119,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
     @Override
     public final void start() {
-        LOG.info("Starting HelmChartContainer...");
+        LOG.info("Starting HelmChartK3sContainer...");
         super.start();
         final var client = getKubernetesClient();
         watches.put("events", client.events().v1().events().inAnyNamespace().watch(new EventWatcher(client)));
@@ -134,12 +133,12 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         } catch (final IOException e) {
             LOG.error("Could not save kubeconfig.yaml to temporary file", e);
         }
-        LOG.info("HelmChartContainer is started");
+        LOG.info("HelmChartK3sContainer is started");
     }
 
     @Override
     public final void stop() {
-        LOG.info("Stopping HelmChartContainer...");
+        LOG.info("Stopping HelmChartK3sContainer...");
         logWatches.values().forEach(LogWatch::close);
         watches.values().forEach(Watch::close);
         final var client = this.client;
@@ -149,7 +148,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         }
         executorService.shutdownNow();
         super.stop();
-        LOG.info("HelmChartContainer is stopped");
+        LOG.info("HelmChartK3sContainer is stopped");
     }
 
     @Override
@@ -157,7 +156,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         stop();
     }
 
-    public @NotNull HelmChartContainer withNetwork(final @NotNull Network network) {
+    public @NotNull HelmChartK3sContainer withNetwork(final @NotNull Network network) {
         super.withNetwork(network);
         return this;
     }
@@ -364,9 +363,9 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
 
     private static class K3sReadyStartupCheckStrategy extends StartupCheckStrategy {
 
-        private final @NotNull HelmChartContainer container;
+        private final @NotNull HelmChartK3sContainer container;
 
-        K3sReadyStartupCheckStrategy(final @NotNull HelmChartContainer container) {
+        K3sReadyStartupCheckStrategy(final @NotNull HelmChartK3sContainer container) {
             this.container = container;
             withTimeout(Duration.ofSeconds(120));
         }

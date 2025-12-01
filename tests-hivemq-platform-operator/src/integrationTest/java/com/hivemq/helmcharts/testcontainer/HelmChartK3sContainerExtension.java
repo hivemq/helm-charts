@@ -13,17 +13,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllCallback {
+public class HelmChartK3sContainerExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartContainerExtension.class);
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartK3sContainerExtension.class);
 
     private final @NotNull AtomicBoolean stopInstances = new AtomicBoolean(false);
-    private final @NotNull AtomicReference<HelmChartContainer> helmChartContainerRef = new AtomicReference<>();
+    private final @NotNull AtomicReference<HelmChartK3sContainer> helmChartK3sContainerRef = new AtomicReference<>();
     private final @NotNull AtomicReference<Network> networkRef = new AtomicReference<>();
 
     private final boolean withK3sDebugging;
 
-    public HelmChartContainerExtension(final boolean withK3sDebugging) {
+    public HelmChartK3sContainerExtension(final boolean withK3sDebugging) {
         this.withK3sDebugging = withK3sDebugging;
     }
 
@@ -32,31 +32,31 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
         final var additionalK3sCommands = getAdditionalK3sCommands(context);
         if (additionalK3sCommands.isEmpty()) {
             // if no additional commands are set, we use the cached network and container
-            LOG.info("Using cached HelmChartContainer instance");
+            LOG.info("Using cached HelmChartK3sContainer instance");
             final var store = context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL);
             networkRef.set((Network) store.computeIfAbsent("network", key -> Network.newNetwork()));
-            helmChartContainerRef.set((HelmChartContainer) store.computeIfAbsent("helmChartContainer", key -> {
-                LOG.info("Creating cached HelmChartContainer instance");
-                final var container = new HelmChartContainer(withK3sDebugging).withNetwork(networkRef.get());
+            helmChartK3sContainerRef.set((HelmChartK3sContainer) store.computeIfAbsent("helmChartK3sContainer", key -> {
+                LOG.info("Creating cached HelmChartK3sContainer instance");
+                final var container = new HelmChartK3sContainer(withK3sDebugging).withNetwork(networkRef.get());
                 container.start();
                 return container;
             }));
             return;
         }
         // spin up a new network and container with the additional commands
-        LOG.info("Using HelmChartContainer instance with additional commands");
+        LOG.info("Using HelmChartK3sContainer instance with additional commands");
         final var network = Network.newNetwork();
-        final var container = new HelmChartContainer(withK3sDebugging, additionalK3sCommands).withNetwork(network);
+        final var container = new HelmChartK3sContainer(withK3sDebugging, additionalK3sCommands).withNetwork(network);
         container.start();
         stopInstances.set(true);
-        helmChartContainerRef.set(container);
+        helmChartK3sContainerRef.set(container);
         networkRef.set(network);
     }
 
     @Override
     public void afterAll(final @NotNull ExtensionContext context) {
         if (stopInstances.getAndSet(false)) {
-            final var container = helmChartContainerRef.getAndSet(null);
+            final var container = helmChartK3sContainerRef.getAndSet(null);
             if (container != null) {
                 container.stop();
             }
@@ -65,13 +65,13 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
                 network.close();
             }
         } else {
-            helmChartContainerRef.set(null);
+            helmChartK3sContainerRef.set(null);
             networkRef.set(null);
         }
     }
 
-    public @NotNull HelmChartContainer getHelmChartContainer() {
-        return helmChartContainerRef.get();
+    public @NotNull HelmChartK3sContainer getHelmChartK3sContainer() {
+        return helmChartK3sContainerRef.get();
     }
 
     public @NotNull Network getNetwork() {

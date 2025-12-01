@@ -197,7 +197,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         // we need to uninstall the legacy release with orphan option so existing resources can be taken over by the platform Helm install
         // TODO: We cannot execute `helm uninstall my-release --cascade orphan` because this will delete resources
         //  without an owner reference, that are still needed - See: https://github.com/helm/helm/issues/13279
-        //helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace, "--cascade", "orphan");
+        //helmChartK3sContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace, "--cascade", "orphan");
 
         // as a workaround we need to delete all the corresponding Helm versioned Secrets installed for each of the possible Helm releases
         // we may have. These will be named with a format like "sh.helm.release.v1.<release-name>.v<release-version>" and we will delete them

@@ -56,7 +56,7 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     final void tearDown() {
         Helm.uninstall(MONITORING_RELEASE).withNamespace(MONITORING_NAMESPACE).call();
-        helmChartContainer.deleteNamespace(MONITORING_NAMESPACE);
+        helmChartK3sContainer.deleteNamespace(MONITORING_NAMESPACE);
     }
 
     protected static void assertPrometheusMetrics(

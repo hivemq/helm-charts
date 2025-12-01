@@ -56,8 +56,7 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                 "1.0.0",
                 AppendingBazPublishInboundInterceptorExtensionMain.class);
         NginxUtil.deployNginx(client,
-                platformNamespace,
-                helmChartContainer,
+                platformNamespace, helmChartK3sContainer,
                 List.of(appendingFooExtension, appendingBarExtension, appendingBazExtension),
                 false,
                 false);

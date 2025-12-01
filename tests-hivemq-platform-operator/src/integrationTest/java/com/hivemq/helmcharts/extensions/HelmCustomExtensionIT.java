@@ -30,7 +30,8 @@ class HelmCustomExtensionIT extends AbstractHelmChartIT {
                 "HiveMQ Custom Test Extension",
                 "1.0.0",
                 CustomTestExtensionMain.class);
-        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), false, false);
+        NginxUtil.deployNginx(client, platformNamespace,
+                helmChartK3sContainer, List.of(customExtensionZip), false, false);
         final var extensionStartedFuture =
                 waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
 

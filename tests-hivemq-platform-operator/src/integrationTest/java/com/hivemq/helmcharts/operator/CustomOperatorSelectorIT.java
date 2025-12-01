@@ -33,7 +33,7 @@ class CustomOperatorSelectorIT extends AbstractHelmChartIT {
     void tearDown() {
         Helm.uninstall(PLATFORM_NAME_ALPHA).withNamespace(platformNamespace).call();
         Helm.uninstall(PLATFORM_NAME_BETA).withNamespace(platformNamespace).call();
-        helmChartContainer.deleteNamespace(platformNamespace);
+        helmChartK3sContainer.deleteNamespace(platformNamespace);
     }
 
     @Test

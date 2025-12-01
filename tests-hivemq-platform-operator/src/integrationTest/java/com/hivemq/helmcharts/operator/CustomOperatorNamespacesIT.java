@@ -45,20 +45,20 @@ class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
         namespaceAlpha = platformNamespace + "-alpha";
         namespaceBeta = platformNamespace + "-beta";
         namespaceGamma = platformNamespace + "-gamma";
-        helmChartContainer.createNamespace(namespaceAlpha);
-        helmChartContainer.createNamespace(namespaceBeta);
-        helmChartContainer.createNamespace(namespaceGamma);
+        helmChartK3sContainer.createNamespace(namespaceAlpha);
+        helmChartK3sContainer.createNamespace(namespaceBeta);
+        helmChartK3sContainer.createNamespace(namespaceGamma);
     }
 
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() {
         Helm.uninstall(PLATFORM_NAME_ALPHA).withNamespace(namespaceAlpha).call();
-        helmChartContainer.deleteNamespace(namespaceAlpha);
+        helmChartK3sContainer.deleteNamespace(namespaceAlpha);
         Helm.uninstall(PLATFORM_NAME_BETA).withNamespace(namespaceBeta).call();
-        helmChartContainer.deleteNamespace(namespaceBeta);
+        helmChartK3sContainer.deleteNamespace(namespaceBeta);
         Helm.uninstall(PLATFORM_NAME_GAMMA).withNamespace(namespaceGamma).call();
-        helmChartContainer.deleteNamespace(namespaceGamma);
+        helmChartK3sContainer.deleteNamespace(namespaceGamma);
     }
 
     @Test
@@ -73,21 +73,21 @@ class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
         K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
 
         helmUpgradePlatform.withName(PLATFORM_NAME_ALPHA).withNamespace(namespaceAlpha).call();
-//        helmChartContainer.installPlatformChart(PLATFORM_NAME_ALPHA,
+//        helmChartK3sContainer.installPlatformChart(PLATFORM_NAME_ALPHA,
 //                "--namespace",
 //                namespaceAlpha,
 //                "--set",
 //                "nodes.replicaCount=1");
 
         helmUpgradePlatform.withName(PLATFORM_NAME_BETA).withNamespace(namespaceBeta).call();
-//        helmChartContainer.installPlatformChart(PLATFORM_NAME_BETA,
+//        helmChartK3sContainer.installPlatformChart(PLATFORM_NAME_BETA,
 //                "--namespace",
 //                namespaceBeta,
 //                "--set",
 //                "nodes.replicaCount=1");
 
         helmUpgradePlatform.withName(PLATFORM_NAME_GAMMA).withNamespace(namespaceGamma).call();
-//        helmChartContainer.installPlatformChart(PLATFORM_NAME_GAMMA,
+//        helmChartK3sContainer.installPlatformChart(PLATFORM_NAME_GAMMA,
 //                "--namespace",
 //                namespaceGamma,
 //                "--set",
