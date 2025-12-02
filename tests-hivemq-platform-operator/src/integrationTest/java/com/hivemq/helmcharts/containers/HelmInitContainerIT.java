@@ -6,6 +6,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -22,16 +23,18 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withOverrideInitContainer_hivemqRunningWithVolumeMounts() throws Exception {
+    @Disabled("Re-enable once Helm Java client supports .setFile feature")
+    void withOverrideInitContainer_hivemqRunningWithVolumeMounts() {
         final var additionalVolumeFile = "/files/init-container-additional-volumes-values.yaml";
         final var additionalInitContainerFile = "/files/init-containers-spec.yaml";
 
         final var mountName = "init-container-volume";
 
-        installPlatformChartAndWaitToBeRunning("--set-file",
-                "config.overrideInitContainers=" + additionalInitContainerFile,
-                "-f",
-                additionalVolumeFile);
+        //TODO: uncomment it out, once Helm Java client supports .setFile feature
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve(additionalVolumeFile))
+                //.setFile("config.overrideInitContainers", additionalInitContainerFile)
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         await().untilAsserted(() -> {
             final var statefulSet =
@@ -56,9 +59,9 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
     @EnabledIfSystemProperty(named = "k3s.version.type",
                              matches = "LATEST",
                              disabledReason = "spec.templates.spec.initContainers[].restartPolicy was added in K8s 1.28")
-    void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() throws Exception {
+    void whenAdditionalInitContainer_withConsulTemplate_thenLicenseUpdated() {
         K8sUtil.createConfigMap(client, platformNamespace, "consul-template-config-map.yml");
-        installPlatformChartAndWaitToBeRunning("/files/additional-init-containers-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("additional-init-containers-values.yaml")).call();
 
         await().atMost(TWO_MINUTES).untilAsserted(() -> {
             final var statefulSet =

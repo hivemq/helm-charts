@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.monitoring;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Helm;
 import io.restassured.RestAssured;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -27,20 +29,24 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
 
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    final void setup() throws Exception {
+    final void setup() {
         RestAssured.baseURI = "http://localhost";
-        helmChartContainer.addHelmRepo("prometheus-community", "https://prometheus-community.github.io/helm-charts");
-        helmChartContainer.installChart(MONITORING_RELEASE,
-                "prometheus-community/kube-prometheus-stack",
-                "--version",
-                "72.9.1",
-                "--set",
-                "prometheus-node-exporter.hostRootFsMount.enabled=false",
-                "--set",
-                "prometheus.prometheusSpec.maximumStartupDurationSeconds=900",
-                "-n",
-                MONITORING_NAMESPACE,
-                "--create-namespace");
+        Helm.repo()
+                .add()
+                .withName("prometheus-community")
+                .withUrl(URI.create("https://prometheus-community.github.io/helm-charts"))
+                .call();
+        Helm.install("prometheus-community/kube-prometheus-stack")
+                .withName(MONITORING_RELEASE)
+                .set("prometheus-node-exporter.hostRootFsMount.enabled", "false")
+                .set("prometheus.prometheusSpec.maximumStartupDurationSeconds", "900")
+                .withNamespace(MONITORING_NAMESPACE)
+                .createNamespace()
+                .withVersion("72.9.1")
+                .atomic()
+                .waitReady()
+                .debug()
+                .call();
         K8sUtil.waitForPodStateRunning(client,
                 MONITORING_NAMESPACE,
                 Map.of("app.kubernetes.io/instance", "monitoring-stack"));
@@ -48,8 +54,9 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
 
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    final void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(MONITORING_RELEASE, MONITORING_NAMESPACE, true);
+    final void tearDown() {
+        Helm.uninstall(MONITORING_RELEASE).withNamespace(MONITORING_NAMESPACE).call();
+        helmChartK3sContainer.deleteNamespace(MONITORING_NAMESPACE);
     }
 
     protected static void assertPrometheusMetrics(

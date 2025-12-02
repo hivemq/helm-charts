@@ -20,20 +20,20 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
 
     @Override
     protected @NotNull String platformChartRootUserValuesFile() {
-        return "/files/platform-pod-security-context-root-user-with-tracing-extension-values.yaml";
+        return "platform-pod-security-context-root-user-with-tracing-extension-values.yaml";
     }
 
     @Override
     protected @NotNull String platformChartNonRootUserValuesFile() {
-        return "/files/platform-pod-security-context-non-root-user-with-tracing-extension-values.yaml";
+        return "platform-pod-security-context-non-root-user-with-tracing-extension-values.yaml";
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("chartValues")
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void updateExtensionConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
-            throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
+    void updateExtensionConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues) {
+        helmUpgradePlatformOperator.withValuesFile(VALUES_PATH.resolve(chartValues.operator().valuesFile())).call();
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
@@ -45,7 +45,8 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
 
-        installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve(chartValues.platform().valuesFile())).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
         assertUidAndGid(platformNamespace,
                 platformLabels,

@@ -1,5 +1,7 @@
 package com.hivemq.helmcharts.monitoring;
 
+import com.hivemq.helmcharts.util.K8sUtil;
+import com.marcnuri.helm.Release;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -27,8 +29,10 @@ class HelmMonitoringOperatorIT extends AbstractHelmMonitoringIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withOperatorMonitoringEnabled_metricsAndDashboardAvailable() throws Exception {
-        installPlatformOperatorChartAndWaitToBeRunning("/files/operator-monitoring-enabled-values.yaml");
+    void withOperatorMonitoringEnabled_metricsAndDashboardAvailable() {
+        final var release = helmUpgradePlatformOperator.withValuesFile(VALUES_PATH.resolve("operator-monitoring-enabled-values.yaml")).call();
+        assertThat(release).returns("deployed", Release::getStatus);
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
         assertPrometheusMetrics("hivemq_platform_operator_custom_resource_count",
                 response -> assertThat(response.data().result()).hasSize(1)
                         .extracting(result -> result.metric().get("__name__"),

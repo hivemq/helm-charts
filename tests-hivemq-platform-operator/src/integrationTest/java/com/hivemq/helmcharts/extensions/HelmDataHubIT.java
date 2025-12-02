@@ -21,7 +21,8 @@ class HelmDataHubIT extends AbstractHelmChartIT {
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withDataHubEnabled_messagesValidated() throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/data-hub-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("data-hub-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,

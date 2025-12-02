@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.extensions;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.extensions.custom.CustomTestExtensionMain;
 import com.hivemq.helmcharts.util.HiveMQExtension;
+import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.NginxUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -29,11 +30,13 @@ class HelmCustomExtensionIT extends AbstractHelmChartIT {
                 "HiveMQ Custom Test Extension",
                 "1.0.0",
                 CustomTestExtensionMain.class);
-        NginxUtil.deployNginx(client, platformNamespace, helmChartContainer, List.of(customExtensionZip), false, false);
+        NginxUtil.deployNginx(client, platformNamespace,
+                helmChartK3sContainer, List.of(customExtensionZip), false, false);
         final var extensionStartedFuture =
                 waitForPlatformLog(".*Extension \"HiveMQ Custom Test Extension\" version 1.0.0 started successfully.");
 
-        installPlatformChartAndWaitToBeRunning("/files/custom-extension-values.yaml");
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("custom-extension-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         await().atMost(ONE_MINUTE).until(extensionStartedFuture::isDone);
     }
 }

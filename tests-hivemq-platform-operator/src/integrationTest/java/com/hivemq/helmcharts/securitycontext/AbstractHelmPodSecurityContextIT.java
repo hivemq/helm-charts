@@ -8,21 +8,21 @@ abstract class AbstractHelmPodSecurityContextIT extends AbstractHelmSecurityCont
 
     @Override
     protected @NotNull String operatorChartRootUserValuesFile() {
-        return "/files/operator-pod-security-context-root-user-values.yaml";
+        return "operator-pod-security-context-root-user-values.yaml";
     }
 
     @Override
     protected @NotNull String platformChartRootUserValuesFile() {
-        return "/files/platform-pod-security-context-root-user-values.yaml";
+        return "platform-pod-security-context-root-user-values.yaml";
     }
 
     @Override
     protected @NotNull String operatorChartNonRootUserValuesFile() {
-        return "/files/operator-pod-security-context-non-root-user-values.yaml";
+        return "operator-pod-security-context-non-root-user-values.yaml";
     }
 
     @Override
     protected @NotNull String platformChartNonRootUserValuesFile() {
-        return "/files/platform-pod-security-context-non-root-user-values.yaml";
+        return "platform-pod-security-context-non-root-user-values.yaml";
     }
 }

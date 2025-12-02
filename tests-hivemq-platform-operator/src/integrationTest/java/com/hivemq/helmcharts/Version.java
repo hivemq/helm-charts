@@ -11,6 +11,17 @@ import java.util.Objects;
 
 public record Version(int major, int minor, int patch) implements Comparable<Version> {
 
+    public static @NotNull Version parse(final @NotNull String versionString) {
+        final var versionParts = versionString.split("\\.");
+        if (versionParts.length != 3) {
+            throw new IllegalArgumentException("Invalid version format: %s".formatted(versionString));
+        }
+        final var major = Integer.parseInt(versionParts[0]);
+        final var minor = Integer.parseInt(versionParts[1]);
+        final var patch = Integer.parseInt(versionParts[2]);
+        return new Version(major, minor, patch);
+    }
+
     @Override
     public int compareTo(final @NotNull Version other) {
         final var majorCompare = Integer.compare(this.major, other.major);
@@ -57,15 +68,7 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
         @Override
         public @NotNull Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
                 throws IOException {
-            final var versionString = parser.getValueAsString();
-            final var versionParts = versionString.split("\\.");
-            if (versionParts.length != 3) {
-                throw new IllegalArgumentException("Invalid version format: %s".formatted(versionString));
-            }
-            final var major = Integer.parseInt(versionParts[0]);
-            final var minor = Integer.parseInt(versionParts[1]);
-            final var patch = Integer.parseInt(versionParts[2]);
-            return new Version(major, minor, patch);
+            return parse(parser.getValueAsString());
         }
     }
 }

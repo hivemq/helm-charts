@@ -22,7 +22,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withDeployedOperator_upgradeUsingNewValues() throws Exception {
+    void withDeployedOperator_upgradeUsingNewValues() {
         final var operatorName = getOperatorName();
         LOG.debug("Operator deployed successfully");
 
@@ -43,12 +43,7 @@ class HelmUpgradeOperatorIT extends AbstractHelmChartIT {
                 .anyMatch(containerPort -> containerPort.getContainerPort() == 8080));
 
         // upgrade chart and wait to be ready
-        helmChartContainer.upgradePlatformOperatorChart(OPERATOR_RELEASE_NAME,
-                "--set",
-                "http.port=8081",
-                "--namespace",
-                operatorNamespace);
-
+        helmUpgradePlatformOperator.set("http.port", "8081").call();
         final var upgradedDeployment = client.apps()
                 .deployments()
                 .inNamespace(operatorNamespace)

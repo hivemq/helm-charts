@@ -15,7 +15,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class AbstractHelmSecurityContextIT extends AbstractHelmChartIT {
 
-    @SuppressWarnings("SameParameterValue")
+    @SuppressWarnings({"SameParameterValue", "ResultOfMethodCallIgnored"})
     protected static void assertUidAndGid(
             final @NotNull String namespace,
             final @NotNull Map<String, String> labels,

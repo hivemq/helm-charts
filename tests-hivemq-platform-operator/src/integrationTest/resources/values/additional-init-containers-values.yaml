@@ -1,5 +1,3 @@
-nodes:
-  replicaCount: 1
 additionalInitContainers:
   - name: consul-template-init-container
     image: hashicorp/consul-template:latest

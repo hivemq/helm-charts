@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.license;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -15,22 +16,22 @@ class HelmBrokerLicensesIT extends AbstractHelmLicensesIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
+    @Disabled("Re-enable once Helm Java client supports .setFile feature")
+    void withBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var brokerLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file license.lic is corrupt.");
-        installPlatformChartAndWaitToBeRunning("--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "license.create=true",
-                "--set-file",
-                "license.overrideLicense=/files/mock-license.lic");
+        //TODO: uncomment it out, once Helm Java client supports .setFile feature
+        helmUpgradePlatform.set("license.create", "true")
+                //.setFile("license.overrideLicense", "mock-license.lic")
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("hivemq-license-test-hivemq-platform");
         await().until(brokerLicenseFuture::isDone);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withExistingBrokerLicenseSecret_statefulSetWithLicenseSecretMounted() throws Exception {
+    void withExistingBrokerLicenseSecret_statefulSetWithLicenseSecretMounted() {
         final var brokerLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file license.lic is corrupt.");
         K8sUtil.createSecret(client,
@@ -38,7 +39,8 @@ class HelmBrokerLicensesIT extends AbstractHelmLicensesIT {
                 "test-license",
                 Map.of("license.lic",
                         Base64.getEncoder().encodeToString("license data".getBytes(StandardCharsets.UTF_8))));
-        installPlatformChartAndWaitToBeRunning("--set", "nodes.replicaCount=1", "--set", "license.name=test-license");
+        helmUpgradePlatform.set("license.name", "test-license").call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("test-license");
         await().until(brokerLicenseFuture::isDone);
     }

@@ -3,7 +3,6 @@ migration:
 restApi:
   authEnabled: true
 nodes:
-  replicaCount: 1
   podSecurityContext:
     enabled: true
     fsGroup: 0

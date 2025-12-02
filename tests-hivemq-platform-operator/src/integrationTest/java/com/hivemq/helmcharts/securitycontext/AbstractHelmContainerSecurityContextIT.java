@@ -8,21 +8,21 @@ abstract class AbstractHelmContainerSecurityContextIT extends AbstractHelmSecuri
 
     @Override
     protected @NotNull String operatorChartRootUserValuesFile() {
-        return "/files/operator-container-security-context-root-user-values.yaml";
+        return "operator-container-security-context-root-user-values.yaml";
     }
 
     @Override
     protected @NotNull String platformChartRootUserValuesFile() {
-        return "/files/platform-container-security-context-root-user-values.yaml";
+        return "platform-container-security-context-root-user-values.yaml";
     }
 
     @Override
     protected @NotNull String operatorChartNonRootUserValuesFile() {
-        return "/files/operator-container-security-context-non-root-user-values.yaml";
+        return "operator-container-security-context-non-root-user-values.yaml";
     }
 
     @Override
     protected @NotNull String platformChartNonRootUserValuesFile() {
-        return "/files/platform-container-security-context-non-root-user-values.yaml";
+        return "platform-container-security-context-non-root-user-values.yaml";
     }
 }

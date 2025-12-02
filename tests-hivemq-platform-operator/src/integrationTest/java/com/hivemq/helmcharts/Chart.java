@@ -3,46 +3,54 @@ package com.hivemq.helmcharts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.marcnuri.helm.SearchResult;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Chart {
 
     @JsonProperty("name")
-    private @Nullable String name;
+    private @NotNull String name;
 
     @JsonProperty("description")
-    private @Nullable String description;
+    private @NotNull String description;
 
     @JsonProperty("appVersion")
-    private @Nullable String appVersion;
+    private @NotNull String appVersion;
 
     @JsonProperty("version")
     @JsonDeserialize(using = Version.Deserializer.class)
-    private @Nullable Version version;
+    private @NotNull Version chartVersion;
 
-    public @Nullable String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public @Nullable String getDescription() {
+    public @NotNull String getDescription() {
         return description;
     }
 
-    public @Nullable String getAppVersion() {
+    public @NotNull String getAppVersion() {
         return appVersion;
     }
 
-    public @Nullable Version getVersion() {
-        return version;
+    public @NotNull Version getChartVersion() {
+        return chartVersion;
     }
 
     @Override
     public @NotNull String toString() {
         return "Chart{name='%s', description='%s', appVersion='%s', version=%s}".formatted(name,
                 description,
-                appVersion,
-                version);
+                appVersion, chartVersion);
+    }
+
+    public static @NotNull Chart of(final @NotNull SearchResult result) {
+        final var chart = new Chart();
+        chart.name = result.getName();
+        chart.description = result.getDescription();
+        chart.appVersion = result.getAppVersion();
+        chart.chartVersion = Version.parse(result.getChartVersion());
+        return chart;
     }
 }

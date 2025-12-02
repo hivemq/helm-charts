@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.license;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -15,22 +16,22 @@ class HelmDataHubLicensesIT extends AbstractHelmLicensesIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withDataHubLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
+    @Disabled("Re-enable once Helm Java client supports .setFile feature")
+    void withDataHubLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var dataHubLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file dataHub1.plic is corrupt.");
-        installPlatformChartAndWaitToBeRunning("--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "license.create=true",
-                "--set-file",
-                "license.dataHub.dataHub1.overrideLicense=/files/mock-data-hub-license.plic");
+        helmUpgradePlatform.set("license.create", "true")
+                //TODO: uncomment it out, once Helm Java client supports .setFile feature
+                //.setFile("license.dataHub.dataHub1.overrideLicense", "mock-data-hub-license.plic")
+                .call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("hivemq-license-test-hivemq-platform");
         await().until(dataHubLicenseFuture::isDone);
     }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withExistingDataHubLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
+    void withExistingDataHubLicenseFileContent_statefulSetWithLicenseSecretMounted() {
         final var dataHubLicenseFuture =
                 logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file dataHub.plic is corrupt.");
         K8sUtil.createSecret(client,
@@ -38,10 +39,8 @@ class HelmDataHubLicensesIT extends AbstractHelmLicensesIT {
                 "test-data-hub-license",
                 Map.of("dataHub.plic",
                         Base64.getEncoder().encodeToString("data hub license data".getBytes(StandardCharsets.UTF_8))));
-        installPlatformChartAndWaitToBeRunning("--set",
-                "nodes.replicaCount=1",
-                "--set",
-                "license.name=test-data-hub-license");
+        helmUpgradePlatform.set("license.name", "test-data-hub-license").call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
         assertLicense("test-data-hub-license");
         await().until(dataHubLicenseFuture::isDone);
     }

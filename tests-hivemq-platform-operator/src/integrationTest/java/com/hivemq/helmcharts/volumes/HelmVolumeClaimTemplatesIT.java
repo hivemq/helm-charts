@@ -28,9 +28,9 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
     @EnabledIfSystemProperty(named = "k3s.version.type",
                              matches = "LATEST",
                              disabledReason = "there are various PVC related bugfixes in K8s that probably cause issues with older versions")
-    void platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()
-            throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/volumes-claim-templates-values.yaml");
+    void platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated() {
+        helmUpgradePlatform.withValuesFile(VALUES_PATH.resolve("volumes-claim-templates-values.yaml")).call();
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
 
         // assert StatefulSet
         await().untilAsserted(() -> {

@@ -1,6 +1,6 @@
 package com.hivemq.helmcharts.util;
 
-import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
+import com.hivemq.helmcharts.testcontainer.HelmChartK3sContainer;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
@@ -54,7 +54,7 @@ public class NginxUtil {
     public static void deployNginx(
             final @NotNull KubernetesClient client,
             final @NotNull String namespace,
-            final @NotNull HelmChartContainer container,
+            final @NotNull HelmChartK3sContainer container,
             final @NotNull List<Path> localPaths,
             final boolean withHttps,
             final boolean withBasicAuth) {
@@ -199,7 +199,7 @@ public class NginxUtil {
                 .withVolumes(volumes)
                 .addNewContainer()
                 .withName(NGINX_CONTAINER_NAME)
-                .withImage(HelmChartContainer.resolveLocalImage("nginx"))
+                .withImage(HelmChartK3sContainer.resolveLocalImage("nginx"))
                 .addNewPort()
                 .withName("http")
                 .withContainerPort(80)

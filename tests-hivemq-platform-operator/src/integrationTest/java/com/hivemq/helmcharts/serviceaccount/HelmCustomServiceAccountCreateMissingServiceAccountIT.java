@@ -13,15 +13,9 @@ class HelmCustomServiceAccountCreateMissingServiceAccountIT extends AbstractHelm
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformCharts_withNonExistingCustomServiceAccountThenCreate_hivemqRunning() throws Exception {
-        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
-                "--set",
-                "nodes.serviceAccountName=" + SERVICE_ACCOUNT_NAME,
-                "--set",
-                "nodes.replicaCount=1",
-                "--namespace",
-                platformNamespace);
+    void platformCharts_withNonExistingCustomServiceAccountThenCreate_hivemqRunning() {
+        helmUpgradePlatformOperator.call();
+        helmUpgradePlatform.set("nodes.serviceAccountName", SERVICE_ACCOUNT_NAME).call();
 
         final var hivemqCustomResource =
                 K8sUtil.waitForHiveMQPlatformState(client, platformNamespace, PLATFORM_RELEASE_NAME, "ERROR");
