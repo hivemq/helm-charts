@@ -56,7 +56,9 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 "--set",
                 "image.tag=%s".formatted(currentPlatformChart.getAppVersion()),
                 "--namespace",
-                platformNamespace);
+                platformNamespace,
+                // needed to avoid SSA conflicts on label changes in the platform that are managed by the operator
+                "--force-conflicts");
 
         final var platform = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
         final var requiresRollingRestart =
