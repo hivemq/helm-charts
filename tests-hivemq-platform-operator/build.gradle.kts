@@ -134,7 +134,7 @@ val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
     platform = oci.platform("linux", "amd64")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
+                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 && " +
                 "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
     destinationDirectory = layout.buildDirectory.dir("oci/layers")
     classifier = "helm@linux,amd64"
@@ -145,7 +145,7 @@ val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
     platform = oci.platform("linux", "arm64", "v8")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && " +
+                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 && " +
                 "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
     destinationDirectory = layout.buildDirectory.dir("oci/layers")
     classifier = "helm@linux,arm64,v8"
