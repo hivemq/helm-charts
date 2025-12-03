@@ -320,7 +320,7 @@ public class HelmChartContainer extends K3sContainer {
                     releaseName,
                     null,
                     true,
-                    Stream.concat(Stream.of("--cascade", "foreground", "--namespace", namespace),
+                    Stream.concat(Stream.of("--ignore-not-found", "--cascade", "foreground", "--namespace", namespace),
                             Stream.of(additionalCommands)),
                     true);
         } finally {
