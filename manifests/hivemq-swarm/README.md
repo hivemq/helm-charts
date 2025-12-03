@@ -4,7 +4,7 @@ This folder contains the manifest files that can be customized to install HiveMQ
 
 ## Prerequisites
 
-- Helm 3.10.x
+- Helm 3.10.x or later (including Helm 4.x)
 
 ## Update manifest files
 
