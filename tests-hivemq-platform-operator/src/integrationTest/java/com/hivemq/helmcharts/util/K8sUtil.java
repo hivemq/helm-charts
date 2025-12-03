@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -209,6 +210,21 @@ public class K8sUtil {
                         .withNewMetadata().withNamespace(namespace).withName(serviceAccountName).endMetadata().build())
                 .create();
         assertThat(serviceAccount).isNotNull();
+    }
+
+    /**
+     * Deletes a Custom Resource Definition (CRD) and waits for the deletion to complete.
+     * <p>
+     * This method is idempotent - if the CRD does not exist, the delete operation is a no-op.
+     * The method will wait up to 10 seconds for the CRD to be fully removed from the cluster.
+     *
+     * @param client  the Kubernetes client to use
+     * @param crdName the name of the CRD to delete
+     */
+    public static void deleteCrd(final @NotNull KubernetesClient client, final @NotNull String crdName) {
+        final var crd = client.apiextensions().v1().customResourceDefinitions().withName(crdName);
+        crd.delete();
+        crd.waitUntilCondition(Objects::isNull, 10, TimeUnit.SECONDS);
     }
 
     /**

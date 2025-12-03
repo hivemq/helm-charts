@@ -31,6 +31,12 @@ import static org.awaitility.Durations.TWO_SECONDS;
 @SuppressWarnings("NotNullFieldNotInitialized")
 public abstract class AbstractHelmChartIT {
 
+    @RegisterExtension
+    private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
+            new HelmChartContainerExtension(false);
+
+    protected static final @NotNull String PLATFORM_CRD = "hivemq-platforms.hivemq.com";
+
     protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq";
     protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
     protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
@@ -43,10 +49,6 @@ public abstract class AbstractHelmChartIT {
     protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
     protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX =
             "%s-%s-.*".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
-
-    @RegisterExtension
-    private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
-            new HelmChartContainerExtension(false);
 
     protected static @NotNull HelmChartContainer helmChartContainer;
     protected static @NotNull Network network;
@@ -98,6 +100,7 @@ public abstract class AbstractHelmChartIT {
             if (uninstallPlatformOperatorChart()) {
                 helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
             }
+            K8sUtil.deleteCrd(client, PLATFORM_CRD);
         }
     }
 
@@ -207,6 +210,10 @@ public abstract class AbstractHelmChartIT {
         }
     }
 
+    protected static @NotNull String getOperatorName() {
+        return "%s-%s".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
+    }
+
     private @NotNull String @NotNull [] addDefaultOperatorCommands(final @NotNull String... commands) {
         final var defaultCommands = Stream.of("--namespace", operatorNamespace);
         return Stream.concat(Arrays.stream(commands), defaultCommands).toArray(String[]::new);
@@ -215,9 +222,5 @@ public abstract class AbstractHelmChartIT {
     private @NotNull String @NotNull [] addDefaultPlatformCommands(final @NotNull String... commands) {
         final var defaultCommands = Stream.of("--namespace", platformNamespace);
         return Stream.concat(Arrays.stream(commands), defaultCommands).toArray(String[]::new);
-    }
-
-    protected static @NotNull String getOperatorName() {
-        return "%s-%s".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
     }
 }
