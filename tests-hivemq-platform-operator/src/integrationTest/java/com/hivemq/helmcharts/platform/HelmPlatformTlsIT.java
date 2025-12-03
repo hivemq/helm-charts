@@ -11,10 +11,9 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -48,13 +47,11 @@ class HelmPlatformTlsIT extends AbstractHelmChartIT {
     private @NotNull Path tmp;
 
     @Container
-    @SuppressWarnings("resource")
-    private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
+    private static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
+            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new FirefoxOptions());
+                    .withExtraHost("host.docker.internal", "host-gateway");
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)

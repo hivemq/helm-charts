@@ -14,10 +14,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,13 +56,11 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     private static final @NotNull String CLUSTER_SERVICE_NAME = "hivemq-%s-cluster".formatted(LEGACY_RELEASE_NAME);
 
     @Container
-    @SuppressWarnings("resource")
-    private static final @NotNull BrowserWebDriverContainer<?> WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer<>(OciImages.getImageName("selenium/standalone-firefox")) //
+    private static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
+            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
                     .withNetwork(network) //
                     // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway") //
-                    .withCapabilities(new FirefoxOptions());
+                    .withExtraHost("host.docker.internal", "host-gateway");
 
     @Override
     protected boolean uninstallPlatformChart() {
