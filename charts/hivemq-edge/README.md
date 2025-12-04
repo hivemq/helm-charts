@@ -2,9 +2,7 @@
 
 This Helm chart bootstraps HiveMQ Edge deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. 
 
-
-See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-edge/) for 
-more details.
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-edge/) for more details.
 
 ## Prerequisites
 
@@ -55,7 +53,8 @@ _See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-edge/) for more d
 
 ## Configuration
 
-See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-edge/) on configuration options. To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/tree/main/charts/hivemq-edge/values.yaml), or run this command:
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-edge/) on configuration options.
+To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/tree/main/charts/hivemq-edge/values.yaml), or run this command:
 
 ```console
 helm show values hivemq/hivemq-edge

@@ -1,11 +1,12 @@
-# HiveMQ Platform (new)
+# HiveMQ Platform
 
-This Helm chart bootstraps the HiveMQ Platform deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. With the default settings, the HiveMQ Platform Operator then installs a 2 node HiveMQ Platform cluster that is suitable for testing. 
+This Helm chart bootstraps the HiveMQ Platform deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+With the default settings, the HiveMQ Platform Operator then installs a 2 node HiveMQ Platform cluster that is suitable for testing. 
 
-This chart can be used multiple times to deploy several HiveMQ Platform clusters. One HiveMQ Platform Operator can manage many HiveMQ deployments.
+This chart can be used multiple times to deploy several HiveMQ Platform clusters.
+One HiveMQ Platform Operator can manage many HiveMQ deployments.
 
-See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) for
-more details.
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) for more details.
 
 ## Prerequisites
 
@@ -45,7 +46,8 @@ After installing the chart, you can run Helm tests to verify the release:
 helm test [RELEASE_NAME] -n <namespace>
 ```
 
-This runs a test pod for each exposed MQTT service to verify connectivity to the HiveMQ Platform. Each test pod connects to its respective MQTT service and validates that the connection is working.
+This runs a test pod for each exposed MQTT service to verify connectivity to the HiveMQ Platform.
+Each test pod connects to its respective MQTT service and validates that the connection is working.
 
 To disable test pod creation, set `testing.enabled=false`:
 
@@ -72,7 +74,8 @@ _See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator
 
 ## Configuration
 
-See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) on configuration options. To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/blog/master/charts/hivemq-platform/values.yaml), or run this command:
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) on configuration options.
+To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/blog/master/charts/hivemq-platform/values.yaml), or run this command:
 
 ```console
 helm show values hivemq/hivemq-platform

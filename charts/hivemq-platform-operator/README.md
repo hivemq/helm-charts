@@ -1,11 +1,12 @@
-# HiveMQ Platform Operator (new)
+# HiveMQ Platform Operator
 
-This Helm chart bootstraps the HiveMQ Platform Operator deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager. This chart also installs the HiveMQ Platform Custom Resource Definition (CRD).
+This Helm chart bootstraps the HiveMQ Platform Operator deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart also installs the HiveMQ Platform Custom Resource Definition (CRD).
 
-The HiveMQ Platform Operator installs, updates and manages HiveMQ Platform clusters. The HiveMQ MQTT Platform makes it easy to move data to and from connected devices in a fast, efficient, and reliable manner.
+The HiveMQ Platform Operator installs, updates and manages HiveMQ Platform clusters.
+The HiveMQ MQTT Platform makes it easy to move data to and from connected devices in a fast, efficient, and reliable manner.
 
-See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) for 
-more details.
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) for more details.
 
 ## Prerequisites
 
@@ -56,7 +57,8 @@ _See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator
 
 ## Configuration
 
-See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) on configuration options. To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/tree/main/charts/hivemq-platform-operator/values.yaml), or run this command:
+See the HiveMQ [documentation](https://docs.hivemq.com/hivemq-platform-operator/) on configuration options.
+To view all configurable options with detailed comments, visit the chart's [values.yaml](https://github.com/hivemq/helm-charts/tree/main/charts/hivemq-platform-operator/values.yaml), or run this command:
 
 ```console
 helm show values hivemq/hivemq-platform-operator

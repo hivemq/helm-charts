@@ -14,7 +14,7 @@ if ! helm plugin list | grep -q 'unittest'; then
   exit 1
 fi
 
-CHARTS="hivemq-edge hivemq-operator hivemq-platform hivemq-platform-operator hivemq-swarm"
+CHARTS="hivemq-edge hivemq-platform hivemq-platform-operator hivemq-swarm"
 for CHART in ${CHARTS}; do
   helm unittest "./charts/$CHART" -f ./tests/**/*_test.yaml
 done
