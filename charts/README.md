@@ -15,6 +15,8 @@ This chart specifies the HiveMQ Platform deployment that the HiveMQ Platform Ope
 ### [hivemq-operator](./hivemq-operator)
 
 This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
+The legacy HiveMQ Operator and its Helm chart were retired in April 2025 and no longer receive updates or support.
+To migrate to the current HiveMQ Platform Operator for Kubernetes, see [HiveMQ Legacy Operator to Platform Operator Migration Guide](https://docs.hivemq.com/hivemq-operator/migration-guide.html).
 
 ### [hivemq-swarm](./hivemq-swarm)
 
