@@ -24,10 +24,10 @@ This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulatio
 
 This chart deploys HiveMQ Edge, a lightweight edge solution for industrial IoT.
 
-
 ## Usage
 
 To deploy a chart, navigate to the respective chart directory and follow the instructions in the corresponding `README.md` file.
 
 ## Documentation
+
 See the [HiveMQ Kubernetes documentation](https://docs.hivemq.com/hivemq-platform-operator/introduction.html) for more detailed information.

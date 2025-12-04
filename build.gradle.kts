@@ -21,28 +21,6 @@ val updateEdgeChartVersion by tasks.registering(Exec::class) {
     commandLine("sh", "./manifests/hivemq-edge/manifests.sh")
 }
 
-val updateOperatorChartVersion by tasks.registering(Exec::class) {
-    group = "version"
-    description =
-        "Bumps Operator Legacy Chart and Platform versions." +
-                "\n\tUsage: ./gradlew updateOperatorChartVersion -PchartVersion=a.b.c -PappVersion=x.y.z" +
-                "\n\t\t- 'chartVersion': Operator Legacy chart version. Optional, if not present, it will automatically be bumped to the next patch version." +
-                "\n\t\t- 'appVersion': Platform version. Optional."
-    doFirst {
-        updateChartAndValueAndTestFilesWithVersion(
-            arrayOf(
-                "charts/hivemq-operator/Chart.yaml",
-                "charts/hivemq-operator/values.yaml"
-            ),
-            """(image:\s+[^:]+:\w+-)(\S+)""",
-            false
-        )
-    }
-    dependsOn(gradle.includedBuild("tests-hivemq-operator").task(":updatePlatformVersion"))
-    workingDir(layout.projectDirectory)
-    commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
-}
-
 val updateSwarmChartVersion by tasks.registering(Exec::class) {
     group = "version"
     description =
@@ -119,7 +97,6 @@ val updateAllPlatformChartVersions by tasks.registering {
         "Bumps all Platform Charts and Platform versions except the HiveMQ Platform Operator and HiveMQ Edge charts.\n\t$usage"
     checkAppVersion = true
     checkAppVersionUsage = usage
-    dependsOn(updateOperatorChartVersion)
     dependsOn(updateSwarmChartVersion)
     dependsOn(updatePlatformChartVersion)
 }
@@ -131,10 +108,6 @@ val updateAllManifestFiles by tasks.registering {
         providers.exec {
             workingDir(layout.projectDirectory)
             commandLine("sh", "./manifests/hivemq-edge/manifests.sh")
-        }.result.get()
-        providers.exec {
-            workingDir(layout.projectDirectory)
-            commandLine("sh", "./manifests/hivemq-operator/manifests.sh")
         }.result.get()
         providers.exec {
             workingDir(layout.projectDirectory)
