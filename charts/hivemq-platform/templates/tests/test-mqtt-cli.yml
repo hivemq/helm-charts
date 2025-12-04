@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
     - name: hivemq-mqtt-cli
-      image: hivemq/mqtt-cli:4.46.0
+      image: hivemq/mqtt-cli:4.47.0
       args: [ "test",
               "-h",
               "{{ $serviceName }}" ]
