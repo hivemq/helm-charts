@@ -8,6 +8,9 @@ modules:
     enabled: true
     storageClassName: "local-storage"
     size: 2Gi
+admin:
+  user: "admin"
+  password: "hivemq2"
 config: |
   <protocol-adapters>
       <protocol-adapter>

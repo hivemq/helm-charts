@@ -12,7 +12,7 @@ kind load docker-image hivemq/hivemq-edge:2025.8-SNAPSHOT #load image from local
 The next command brings up edge with the default config loaded.
 Make sure to have a license locally available if you want to test commercial features.
 ```bash
-helm install edge ./charts/hivemq-edge --set image.tag=2025.8-SNAPSHOT --values=charts/hivemq-edge/test/localdhtesting/values.yaml --set-file modules.dataHub.init=charts/hivemq-edge/test/localdhtesting/dh.json --set-file license.file=<PATH_TO_LICENSE> 
+helm install edge ./charts/hivemq-edge --set image.tag=2025.20-SNAPSHOT --values=charts/hivemq-edge/test/localdhtesting/values.yaml --set-file modules.dataHub.init=charts/hivemq-edge/test/localdhtesting/dh.json --set-file license.file=<PATH_TO_LICENSE> 
 ```
 
 To get a local build of edge execute the following  command in the hivemq-edge repo.
@@ -34,4 +34,9 @@ container-registry (172.12.10.1)
 ```bash
 kubectl apply -f charts/hivemq-edge/test/localdhtesting/openldap.yml
 helm install edge ./charts/hivemq-edge --set image.tag=2025.8-SNAPSHOT --values=charts/hivemq-edge/test/localdhtesting/values.yaml --set-file modules.dataHub.init=charts/hivemq-edge/test/localdhtesting/dh.json --set-file license.file=<PATH_TO_LICENSE>
+```
+## Interact with UI
+
+```bash
+sudo cloud-provider-kind
 ```
