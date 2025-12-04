@@ -11,6 +11,7 @@ This folder contains the manifest files to deploy the HiveMQ Platform.
 
 ### [hivemq-operator](./hivemq-operator)
 This folder contains the manifest files to deploy the HiveMQ Operator (legacy).
+The legacy operator and its manifest files are sunset since April 2025 and no longer receive updates.
 
 ### [hivemq-swarm](./hivemq-swarm)
 This folder contains the manifest files to deploy HiveMQ Swarm.
