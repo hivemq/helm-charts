@@ -3,6 +3,8 @@ set -e
 
 if [ "$#" -ne 3 ]; then
     echo "Usage: wait-for-pods.sh <APP_NAME> <APP_LABEL> <NAMESPACE>"
+    echo ""
+    echo "Example: wait-for-pods.sh hivemq-platform app.kubernetes.io/instance=my-app test"
     return 1
 fi
 
@@ -45,6 +47,26 @@ wait_for_pods() {
     sleep 1
   done
   echo "$APP_NAME pods are ready..."
+
+  echo ""
+  echo "=== Pod Status ==="
+  kubectl get pods -n "$NAMESPACE" -l "$APP_LABEL" -o wide
+
+  echo ""
+  echo "=== Pod Details ==="
+  kubectl describe pods -n "$NAMESPACE" -l "$APP_LABEL" | grep -A 10 "Conditions:"
+
+  echo ""
+  echo "=== Services ==="
+  kubectl get services -n "$NAMESPACE"
+
+  echo ""
+  echo "=== Service Endpoints ==="
+  kubectl get endpoints -n "$NAMESPACE"
+
+  echo ""
+  echo "=== Service Details ==="
+  kubectl describe services -n "$NAMESPACE" | grep -E "(Name:|Selector:|Endpoints:|Port:)" || echo "No services found"
 }
 
 wait_for_pods "$@"
