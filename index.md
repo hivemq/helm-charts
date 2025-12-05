@@ -41,6 +41,9 @@ the [HiveMQ Platform Operator documentation](https://docs.hivemq.com/hivemq-plat
 
 This will install the HiveMQ Operator (legacy) and an example of a HiveMQ cluster with support for HiveMQ LTS version 4.9 and above.
 
+WARNING: The legacy HiveMQ Operator and its Helm chart were retired in April 2025 and no longer receive updates or support.
+  To migrate to the current HiveMQ Platform Operator for Kubernetes, see [HiveMQ Legacy Operator to Platform Operator Migration Guide](https://docs.hivemq.com/hivemq-operator/migration-guide.html).
+
 ```
 helm upgrade --install hivemq hivemq/hivemq-operator
 ```
