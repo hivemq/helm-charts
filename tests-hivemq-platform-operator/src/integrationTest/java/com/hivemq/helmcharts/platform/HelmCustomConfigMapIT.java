@@ -11,20 +11,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
+class HelmCustomConfigMapIT extends AbstractHelmChartIT {
+
+    @Override
+    protected boolean installPlatformOperatorChart() {
+        return false;
+    }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withSecretConfig_hivemqRunning() throws Exception {
-        final var secretName = "hivemq-configuration-" + PLATFORM_RELEASE_NAME;
-        installPlatformChartAndWaitToBeRunning("--set", "config.createAs=Secret");
+    void withExistingConfigMap_customResourceCreated() throws Exception {
+        installPlatformOperatorChartAndWaitToBeRunning();
+        final var configMap = K8sUtil.createConfigMap(client, platformNamespace, "hivemq-config-map.yml");
+        final var configMapName = configMap.getMetadata().getName();
+
+        installPlatformChartAndWaitToBeRunning("--set", "config.create=false", "--set", "config.name=" + configMapName);
+
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var hivemqCustomResource =
                     K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME).get();
             assertThat(hivemqCustomResource.getAdditionalProperties().get("spec")).isNotNull()
                     .asString()
-                    .containsIgnoringCase("secretName=" + secretName);
-
+                    .containsIgnoringCase("configMapName=" + configMapName);
             final var statefulSet =
                     client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
             assertThat(statefulSet).isNotNull();
@@ -32,9 +40,10 @@ class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
                     .anyMatch(volumeMount -> volumeMount.getName().equals("broker-configuration") &&
                             volumeMount.getMountPath().equals("/opt/hivemq/conf-k8s/"));
 
-            assertThat(statefulSet.getSpec().getTemplate().getSpec().getVolumes()).isNotNull() //
+            assertThat(statefulSet.getSpec().getTemplate().getSpec().getVolumes()) //
+                    .isNotNull() //
                     .anyMatch(volume -> volume.getName().equals("broker-configuration") &&
-                            volume.getSecret().getSecretName().equals(secretName));
+                            volume.getConfigMap().getName().equals(configMapName));
         });
     }
 }

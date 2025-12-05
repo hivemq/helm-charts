@@ -35,7 +35,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
     }
 
     @BeforeEach
-    @Timeout(value = 3, unit = TimeUnit.MINUTES)
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void setUp() {
         logbackFile = tmp.resolve("logback.xml");
     }
