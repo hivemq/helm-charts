@@ -15,16 +15,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.hivemq.client.util.KeyStoreUtil.keyManagerFromKeystore;
 import static com.hivemq.client.util.KeyStoreUtil.trustManagerFromKeystore;
-import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSWORD;
-import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_PRIVATE_KEY_PASSWORD;
-import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_TRUSTSTORE_PASSWORD;
+import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_KEYSTORE_PASSWORD;
+import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_PRIVATE_KEY_PASSWORD;
+import static com.hivemq.helmcharts.util.CertificatesUtil.ENV_VAR_TRUSTSTORE_PASSWORD;
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
-class HelmWebsocketsIT extends AbstractHelmChartIT {
+class HelmWebsocketsWithPrivateKeyIT extends AbstractHelmChartIT {
 
     private static final @NotNull String WEBSOCKET_SERVICE_NAME_PORT_8002 = "hivemq-test-hivemq-platform-ws-8002";
     private static final int WEBSOCKET_SERVICE_PORT_8002 = 8002;
@@ -39,8 +40,17 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void platformChart_whenMtlsWebsocketEnabled_thenSendsReceivesMessage() throws Exception {
-        CertificatesUtil.generateCertificates(tmp.toFile());
+    void platformChart_whenMtlsWebsocketEnabledWithDifferentPrivateKey_thenSendsReceivesMessage() throws Exception {
+        final var keystorePassword = "keystore-password";
+        final var privateKeyPassword = "private-key-password";
+        final var truststorePassword = "truststore-password";
+        CertificatesUtil.generateCertificates(tmp.toFile(),
+                Map.of(ENV_VAR_KEYSTORE_PASSWORD,
+                        keystorePassword,
+                        ENV_VAR_PRIVATE_KEY_PASSWORD,
+                        privateKeyPassword,
+                        ENV_VAR_TRUSTSTORE_PASSWORD,
+                        truststorePassword));
         final var encoder = Base64.getEncoder();
         final var keystore = tmp.resolve("keystore.jks");
         final var keystoreContent = Files.readAllBytes(keystore);
@@ -51,8 +61,10 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
         createSecret(client,
                 platformNamespace,
                 "ws-keystore-password-8004",
-                "keystore.password",
-                encoder.encodeToString(DEFAULT_KEYSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+                Map.of("keystore.password",
+                        encoder.encodeToString(keystorePassword.getBytes(StandardCharsets.UTF_8)),
+                        "my-private-key.password",
+                        encoder.encodeToString(privateKeyPassword.getBytes(StandardCharsets.UTF_8))));
 
         final var truststore = tmp.resolve("truststore.jks");
         final var truststoreContent = Files.readAllBytes(truststore);
@@ -63,15 +75,13 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 platformNamespace,
                 "ws-truststore-password-8004",
                 "truststore.password",
-                encoder.encodeToString(DEFAULT_TRUSTSTORE_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+                encoder.encodeToString(truststorePassword.getBytes(StandardCharsets.UTF_8)));
 
-        installPlatformChartAndWaitToBeRunning("/files/tls-ws-values.yaml");
+        installPlatformChartAndWaitToBeRunning("/files/tls-ws-with-private-key-values.yaml");
 
         final var sslConfig = MqttClientSslConfig.builder()
-                .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(),
-                        DEFAULT_KEYSTORE_PASSWORD,
-                        DEFAULT_PRIVATE_KEY_PASSWORD))
-                .trustManagerFactory(trustManagerFromKeystore(truststore.toFile(), DEFAULT_TRUSTSTORE_PASSWORD))
+                .keyManagerFactory(keyManagerFromKeystore(keystore.toFile(), keystorePassword, privateKeyPassword))
+                .trustManagerFactory(trustManagerFromKeystore(truststore.toFile(), truststorePassword))
                 .hostnameVerifier((hostname, session) -> true)
                 .build();
 
