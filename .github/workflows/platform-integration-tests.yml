@@ -4,7 +4,7 @@ on:
   workflow_call:
 env:
   check-prefix: 'Test #'
-  split-total: 19
+  split-total: 25
   CI_RUN: true
 jobs:
   generate-split-index-json:
