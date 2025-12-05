@@ -37,6 +37,9 @@ jobs:
       - name: Wait for pods to be ready
         run: bash ./scripts/wait-for-pods.sh hivemq-edge app.kubernetes.io/instance=$RELEASE_NAME test
 
+      - name: Wait for HiveMQ Edge MQTT listeners to be ready
+        run: sleep 10
+
       - name: Test HiveMQ Edge
         run: helm test $RELEASE_NAME --logs -n test
 
