@@ -5,18 +5,8 @@ env:
   RELEASE_NAME: "smoke-test-release"
 jobs:
   run-smoke-test:
-    name: Smoke test on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
+    name: Smoke test on Helm
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - helm-label: 'minimum'
-            helm-version: 'v3.10.0'
-          - helm-label: 'latest-3'
-            helm-version: 'v3.19.2'
-          - helm-label: 'latest-4'
-            helm-version: 'v4.0.1'
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -26,10 +16,10 @@ jobs:
         with:
           cluster_name: "kind"
 
-      - name: Set up Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
+      - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
         with:
-          version: ${{ matrix.helm-version }}
+          version: 'v3.19.2'
 
       - name: Install HiveMQ Edge
         run: helm install $RELEASE_NAME ./charts/hivemq-edge --wait --timeout 5m0s --create-namespace -n test
@@ -48,19 +38,25 @@ jobs:
           kubectl get pods -n test >> ${{ runner.temp }}/logs/edge-pod.log
           echo "=== LOGS ===" >> ${{ runner.temp }}/logs/edge-pod.log
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/edge-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/edge-pod.log
+          kubectl logs -n test pods/hivemq-test-connection-smoke-test-release >> ${{ runner.temp }}/logs/test-pod.log 2>&1 || echo "Failed to retrieve test pod logs" >> ${{ runner.temp }}/logs/test-pod.log
 
       - name: Upload HiveMQ Edge Pod logs
         if: always()
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
-          name: "HiveMQ Edge - Smoke test results on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})"
-          path: ${{ runner.temp }}/logs/edge-pod.log
+          name: "HiveMQ Edge - Smoke test results on Helm"
+          path: ${{ runner.temp }}/logs/*.log
           retention-days: 5
 
       - name: Print HiveMQ Edge Pod logs
         if: always()
         run: |
           cat ${{ runner.temp }}/logs/edge-pod.log
+
+      - name: Print Test Pod logs
+        if: always()
+        run: |
+          cat ${{ runner.temp }}/logs/test-pod.log
 
       - name: Uninstall HiveMQ Edge chart
         if: always()

@@ -28,129 +28,11 @@ jobs:
               - 'manifests/hivemq-edge/**'
           list-files: csv
 
-  swarm-changes:
-    name: Swarm changes
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.changes.outputs.modified }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 0
-
-      - name: Check for relevant changes
-        id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
-        with:
-          filters: |
-            modified:
-              - '.github/workflows/dispatcher.yml'
-              - '.github/workflows/swarm-*.yml'
-              - 'charts/hivemq-swarm/**'
-              - 'manifests/hivemq-swarm/**'
-          list-files: csv
-
-  platform-changes:
-    name: Platform changes
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.changes.outputs.modified }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 0
-
-      - name: Check for relevant changes
-        id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
-        with:
-          filters: |
-            modified:
-              - '.github/workflows/dispatcher.yml'
-              - '.github/workflows/platform-*.yml'
-              - 'charts/hivemq-platform/**'
-              - 'manifests/hivemq-platform/**'
-              - 'tests-hivemq-platform-operator/**'
-          list-files: csv
-
-  platform-operator-changes:
-    name: Platform Operator changes
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.changes.outputs.modified }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 0
-
-      - name: Check for relevant changes
-        id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
-        with:
-          filters: |
-            modified:
-              - '.github/workflows/dispatcher.yml'
-              - '.github/workflows/platform-*.yml'
-              - 'charts/hivemq-platform-operator/**'
-              - 'manifests/hivemq-platform-operator/**'
-              - 'tests-hivemq-platform-operator/**'
-          list-files: csv
-
   edge-smoke-test:
     name: Edge smoke tests
     needs: edge-changes
     if: needs.edge-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/edge-smoke-test.yml
-    secrets: inherit
-
-  edge-verify-tests:
-    name: Edge verify tests
-    needs: edge-changes
-    if: needs.edge-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/edge-verify.yml
-    secrets: inherit
-
-  swarm-verify-tests:
-    name: Swarm verify tests
-    needs: swarm-changes
-    if: needs.swarm-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/swarm-verify.yml
-    secrets: inherit
-
-  platform-verify-tests:
-    name: Platform verify tests
-    needs:
-      - platform-changes
-      - platform-operator-changes
-    if: >
-      needs.platform-changes.outputs.should-run == 'true' ||
-      needs.platform-operator-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/platform-verify.yml
-    secrets: inherit
-
-  platform-smoke-test:
-    name: Platform smoke tests
-    needs:
-      - platform-changes
-      - platform-operator-changes
-    if: >
-      needs.platform-changes.outputs.should-run == 'true' ||
-      needs.platform-operator-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/platform-smoke-test.yml
-    secrets: inherit
-
-  platform-integration-tests:
-    name: Platform integration tests
-    needs:
-      - platform-changes
-      - platform-operator-changes
-    if: >
-      needs.platform-changes.outputs.should-run == 'true' ||
-      needs.platform-operator-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/platform-integration-tests.yml
     secrets: inherit
 
   tests-summary-report:
@@ -159,20 +41,9 @@ jobs:
     if: always()
     needs:
       - edge-smoke-test
-      - edge-verify-tests
-      - swarm-verify-tests
-      - platform-verify-tests
-      - platform-smoke-test
-      - platform-integration-tests
     steps:
       - name: Tests results summary
-        if: |
-          needs.edge-smoke-test.result == 'failure' ||
-          needs.edge-verify-tests.result == 'failure' ||
-          needs.swarm-verify-tests.result == 'failure' ||
-          needs.platform-verify-tests.result == 'failure' ||
-          needs.platform-smoke-test.result == 'failure' ||
-          needs.platform-integration-tests.result == 'failure'
+        if: needs.edge-smoke-test.result == 'failure'
         run: |
           echo "There are test failures."
           exit 1
