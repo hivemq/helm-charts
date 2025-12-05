@@ -14,6 +14,7 @@ This repository contains the HiveMQ Helm charts.
 
 - The [HiveMQ Operator Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-operator) (legacy)
   - This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
+    The legacy operator and its Helm chart are sunset since April 2025 and no longer receive updates.
 
 - The [HiveMQ Swarm Helm charts](https://github.com/hivemq/helm-charts/blob/master/charts/hivemq-swarm)
   - This chart deploys a HiveMQ Swarm cluster, an advanced IoT testing and simulation tool.

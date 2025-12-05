@@ -15,6 +15,7 @@ This chart specifies the HiveMQ Platform deployment that the HiveMQ Platform Ope
 ### [hivemq-operator](./hivemq-operator)
 
 This chart deploys the legacy HiveMQ Operator and a HiveMQ cluster.
+The legacy operator is sunset since April 2025 and does not receive updates or further support.
 
 ### [hivemq-swarm](./hivemq-swarm)
 
