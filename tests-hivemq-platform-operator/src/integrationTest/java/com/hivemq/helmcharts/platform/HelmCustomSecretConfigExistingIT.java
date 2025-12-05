@@ -11,13 +11,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
-class HelmCustomSecretConfigIT extends AbstractHelmChartIT {
+class HelmCustomSecretConfigExistingIT extends AbstractHelmChartIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withSecretConfig_hivemqRunning() throws Exception {
-        final var secretName = "hivemq-configuration-" + PLATFORM_RELEASE_NAME;
-        installPlatformChartAndWaitToBeRunning("--set", "config.createAs=Secret");
+    void withExistingSecret_hivemqRunning() throws Exception {
+        final var secret = K8sUtil.createSecret(client,
+                platformNamespace,
+                "hivemq-configuration",
+                readResourceFile("hivemq-config.xml"));
+        final var secretName = secret.getMetadata().getName();
+
+        installPlatformChartAndWaitToBeRunning("--set",
+                "config.create=false",
+                "--set",
+                "config.name=" + secretName,
+                "--set",
+                "config.createAs=Secret");
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var hivemqCustomResource =
                     K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME).get();
