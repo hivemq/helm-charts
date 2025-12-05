@@ -5,7 +5,7 @@
 image:
   repository: hivemq/hivemq-edge
   pullPolicy: IfNotPresent
-  tag: "2025.20"
+  tag: "2025.19"
 
 refresh: 1000
 
@@ -62,7 +62,7 @@ mqttsClientauth:
     truststorePassword: changeit
 
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
-logLevel: INFO
+logLevel: DEBUG
 
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"

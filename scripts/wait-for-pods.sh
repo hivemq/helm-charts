@@ -45,6 +45,31 @@ wait_for_pods() {
     sleep 1
   done
   echo "$APP_NAME pods are ready..."
+
+  # Debug output: Show pod status
+  echo ""
+  echo "=== Pod Status ==="
+  kubectl get pods -n "$NAMESPACE" -l "$APP_LABEL" -o wide
+
+  # Debug output: Show pod details
+  echo ""
+  echo "=== Pod Details ==="
+  kubectl describe pods -n "$NAMESPACE" -l "$APP_LABEL" | grep -A 10 "Conditions:"
+
+  # Debug output: Show services
+  echo ""
+  echo "=== Services ==="
+  kubectl get services -n "$NAMESPACE"
+
+  # Debug output: Show service endpoints
+  echo ""
+  echo "=== Service Endpoints ==="
+  kubectl get endpoints -n "$NAMESPACE"
+
+  # Debug output: Show service details for services matching the app
+  echo ""
+  echo "=== Service Details ==="
+  kubectl describe services -n "$NAMESPACE" | grep -E "(Name:|Selector:|Endpoints:|Port:)" || echo "No services found"
 }
 
 wait_for_pods "$@"
