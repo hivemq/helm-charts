@@ -22,12 +22,13 @@ import static com.hivemq.helmcharts.util.MqttUtil.getBlockingClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-class HelmBridgeExtensionIT extends AbstractHelmChartIT {
+@SuppressWarnings("NotNullFieldNotInitialized")
+class AbstractHelmBridgeExtensionIT extends AbstractHelmChartIT {
 
-    private static final byte @NotNull [] PAYLOAD = "test".getBytes();
-    private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmBridgeExtensionIT.class);
+    static final byte @NotNull [] PAYLOAD = "test".getBytes();
+    static final @NotNull Logger LOG = LoggerFactory.getLogger(AbstractHelmBridgeExtensionIT.class);
 
-    private @NotNull String ipAddress;
+    @NotNull String ipAddress;
 
     @Container
     private final @NotNull HiveMQContainer hivemqContainer =
@@ -37,6 +38,7 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
                     .withLogLevel(Level.DEBUG);
 
     @BeforeEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void setUp() {
         final var hivemqContainerNetwork = hivemqContainer.getContainerInfo()
                 .getNetworkSettings()
@@ -48,33 +50,7 @@ class HelmBridgeExtensionIT extends AbstractHelmChartIT {
         ipAddress = Objects.requireNonNull(hivemqContainerNetwork.getIpAddress());
     }
 
-    @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withBridgeConfiguration_messageBridged() throws Exception {
-        // create bridge extension configuration as a ConfigMap
-        final var bridgeConfiguration =
-                readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
-        K8sUtil.createConfigMap(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
-
-        // deploy chart and wait to be ready
-        installPlatformChartAndWaitToBeRunning("/files/bridge-values.yaml");
-        assertMessagesBridged();
-    }
-
-    @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
-    void withBridgeSecretConfiguration_messageBridged() throws Exception {
-        // create bridge extension configuration as a Secret
-        final var bridgeConfiguration =
-                readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
-        K8sUtil.createSecret(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
-
-        // deploy chart and wait to be ready
-        installPlatformChartAndWaitToBeRunning("/files/bridge-with-secret-config-values.yaml");
-        assertMessagesBridged();
-    }
-
-    private void assertMessagesBridged() {
+    void assertMessagesBridged() {
         // assert MQTT messages are bridged
         MqttUtil.execute(client,
                 platformNamespace,
