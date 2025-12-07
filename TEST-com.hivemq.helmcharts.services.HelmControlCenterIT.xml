@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.services.HelmControlCenterIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-12-05T15:51:59" hostname="runnervmoqczp" time="90.202">
+<testsuite name="com.hivemq.helmcharts.services.HelmControlCenterIT" tests="6" skipped="0" failures="0" errors="0" timestamp="2025-12-07T01:21:37" hostname="runnervmoqczp" time="571.947">
   <properties/>
-  <testcase name="platformChart_whenControlCenterEnabled_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="90.202"/>
+  <testcase name="platformChart_withCustomControlCenterCredentialsSecret_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="91.716"/>
+  <testcase name="platformChart_withCustomControlCenterUsernameAndPassword_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="88.545"/>
+  <testcase name="platformChart_withCustomServiceName_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="91.087"/>
+  <testcase name="platformChart_whenTlsEnabledWithDifferentPrivateKey_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="105.784"/>
+  <testcase name="platformChart_whenTlsEnabled_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="103.959"/>
+  <testcase name="platformChart_whenControlCenterEnabled_thenAbleToLogin()" classname="com.hivemq.helmcharts.services.HelmControlCenterIT" time="90.856"/>
 </testsuite>
