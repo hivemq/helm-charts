@@ -19,10 +19,10 @@ wait_for_log_in_pods() {
   local MARKER_FILE="/tmp/app-started-marker"
 
   # wait until the specified pod are started
-  local start_time=$(date +%s)
+  local pod_start_time=$(date +%s)
   while [[ -z "$(kubectl get pods -l "$APP_LABEL" -n "$NAMESPACE" -o name)" ]]; do
     local current_time=$(date +%s)
-    local elapsed=$((current_time - start_time))
+    local elapsed=$((current_time - pod_start_time))
 
     if [[ $elapsed -ge $TIMEOUT ]]; then
       echo "Timeout reached while waiting for pods to start. Exiting with failure."
@@ -36,10 +36,10 @@ wait_for_log_in_pods() {
   # wait until the pods are ready
   echo "$APP_NAME pods are started. Checking readiness..."
   local pod_name=$(kubectl get pods -n "$NAMESPACE" -l "$APP_LABEL" -o jsonpath='{.items[0].metadata.name}')
-  local start_time=$(date +%s)
+  local readiness_start_time=$(date +%s)
   until kubectl get pod "$pod_name" -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Running"; do
     local current_time=$(date +%s)
-    local elapsed=$((current_time - start_time))
+    local elapsed=$((current_time - readiness_start_time))
 
     if [[ $elapsed -ge $TIMEOUT ]]; then
       echo "Timeout reached while waiting for pods to become ready. Exiting with failure."
@@ -60,12 +60,12 @@ wait_for_log_in_pods() {
     echo "Waiting for log message: '$LOG_MESSAGE'..."
 
     # wait for the log message to appear
-    local start_time=$(date +%s)
+    local log_wait_start_time=$(date +%s)
     local found_startup_message=false
 
     until [ "$found_startup_message" = true ]; do
       local current_time=$(date +%s)
-      local elapsed=$((current_time - start_time))
+      local elapsed=$((current_time - log_wait_start_time))
 
       if [[ $elapsed -ge $TIMEOUT ]]; then
         echo "Timeout reached while waiting for log message. Last 50 lines of logs:"

@@ -17,10 +17,10 @@ wait_for_pods() {
   local TIMEOUT=120  # 2 minutes timeout
 
   # wait until the specified pod are started
-  local start_time=$(date +%s)
+  local pod_start_time=$(date +%s)
   while [[ -z "$(kubectl get pods -l "$APP_LABEL" -n "$NAMESPACE" -o name)" ]]; do
     local current_time=$(date +%s)
-    local elapsed=$((current_time - start_time))
+    local elapsed=$((current_time - pod_start_time))
 
     if [[ $elapsed -ge $TIMEOUT ]]; then
       echo "Timeout reached while waiting for pods to start. Exiting with failure."
@@ -33,10 +33,10 @@ wait_for_pods() {
 
   # wait until the pods are ready
   echo "$APP_NAME pods are started. Checking readiness..."
-  local start_time=$(date +%s)
+  local readiness_start_time=$(date +%s)
   until kubectl get pods -n "$NAMESPACE" -l "$APP_LABEL" -o jsonpath='{.items[0].status.containerStatuses[0].ready}' | grep -q "true"; do
     local current_time=$(date +%s)
-    local elapsed=$((current_time - start_time))
+    local elapsed=$((current_time - readiness_start_time))
 
     if [[ $elapsed -ge $TIMEOUT ]]; then
       echo "Timeout reached while waiting for pods to become ready. Exiting with failure."
