@@ -9,6 +9,7 @@ if [ "$#" -ne 4 ]; then
 fi
 
 # function to wait until a specific log message appears in pod logs
+# shellcheck disable=SC2155
 wait_for_log_in_pods() {
   local APP_NAME=$1
   local APP_LABEL=$2
