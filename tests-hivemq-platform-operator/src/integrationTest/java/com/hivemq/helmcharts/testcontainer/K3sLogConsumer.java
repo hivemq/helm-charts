@@ -56,6 +56,7 @@ class K3sLogConsumer implements Consumer<OutputFrame> {
                     line.contains("certificate CN") ||
                     line.contains("generated self-signed CA certificate") ||
                     line.contains("alloc.go") ||
+                    line.contains("api_enablement.go") ||
                     line.contains("cache.go") ||
                     line.contains("cidrallocator.go") ||
                     line.contains("controller.go") ||
@@ -73,6 +74,7 @@ class K3sLogConsumer implements Consumer<OutputFrame> {
                     line.contains("pod_startup_latency_tracker.go") ||
                     line.contains("reconciler_common.go") ||
                     line.contains("resource_quota_monitor.go") ||
+                    line.contains("retry_interceptor.go") ||
                     line.contains("scope.go") ||
                     line.contains("shared_informer.go")) {
                 return;

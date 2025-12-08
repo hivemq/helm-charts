@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.util;
 
 import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
+import com.hivemq.helmcharts.testcontainer.OciUtil;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
@@ -199,7 +200,7 @@ public class NginxUtil {
                 .withVolumes(volumes)
                 .addNewContainer()
                 .withName(NGINX_CONTAINER_NAME)
-                .withImage(HelmChartContainer.resolveLocalImage("nginx"))
+                .withImage(OciUtil.resolveLocalImage("nginx"))
                 .addNewPort()
                 .withName("http")
                 .withContainerPort(80)
