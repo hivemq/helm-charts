@@ -69,12 +69,12 @@ wait_for_log_in_pods() {
 
       if [[ $elapsed -ge $TIMEOUT ]]; then
         echo "Timeout reached while waiting for log message. Last 50 lines of logs:"
-        kubectl logs "$pod_name" -n "$NAMESPACE" --tail=50 2>/dev/null || echo "Could not retrieve logs"
+        kubectl logs "$pod_name" -n "$NAMESPACE" --since=30s --tail=50 2>/dev/null || echo "Could not retrieve logs"
         exit 1
       fi
 
       # check if the log message is in the logs
-      if kubectl logs "$pod_name" -n "$NAMESPACE" 2>/dev/null | grep -qF "$LOG_MESSAGE"; then
+      if kubectl logs "$pod_name" -n "$NAMESPACE" --since=30s 2>/dev/null | grep -qF "$LOG_MESSAGE"; then
         echo "✓ Found '$LOG_MESSAGE' message in logs"
         found_startup_message=true
 
