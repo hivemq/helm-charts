@@ -54,7 +54,7 @@ import static org.awaitility.Durations.FIVE_MINUTES;
 import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
-public class HelmChartContainer extends K3sContainer implements AutoCloseable {
+public class HelmChartContainer extends K3sContainer {
 
     public static final @NotNull String MANIFEST_FILES = "manifests";
 
@@ -80,9 +80,9 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
     private final @NotNull ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
-    private @Nullable Chart platformChart;
-    private @Nullable Chart legacyChart;
     private @Nullable KubernetesClient client;
+    private @Nullable Chart legacyChart;
+    private @Nullable Chart platformChart;
 
     public HelmChartContainer(final boolean withK3sDebugging) {
         this(withK3sDebugging, List.of());
@@ -114,6 +114,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
                 "--kube-apiserver-arg=etcd-compaction-interval=0s",
                 "--tls-san=" + getHost()));
         if (Objects.equals(System.getenv("K8S_VERSION_TYPE"), "LATEST")) {
+            k3sCommands.add("--disable=traefik");
             k3sCommands.add("--disable-default-registry-endpoint");
         }
         if (!additionalCommands.isEmpty()) {
@@ -127,42 +128,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
             k3sCommands.add("4");
         }
         super.withCommand(k3sCommands.toArray(new String[0]));
-    }
-
-    public static @NotNull String resolveLocalImage(final @NotNull String imageName) {
-        final var ociImage = OciImages.getImageName(imageName);
-        return "host.docker.internal/%s:%s".formatted(ociImage.getRepository(), ociImage.getVersionPart());
-    }
-
-    public @NotNull Chart getLegacyOperatorChart() {
-        if (legacyChart != null) {
-            return legacyChart;
-        }
-        legacyChart = getLocalChart(LEGACY_OPERATOR_CHART);
-        return legacyChart;
-    }
-
-    public @NotNull Chart getPlatformChart() {
-        if (platformChart != null) {
-            return platformChart;
-        }
-        platformChart = getLocalChart(PLATFORM_CHART);
-        return platformChart;
-    }
-
-    public @NotNull Chart getPreviousPlatformChart() throws Exception {
-        final var currentChart = getPlatformChart();
-        final var regex = "*.%s*".formatted(currentChart.getDescription());
-        final var platformCharts = executeHelmSearchCommand("hivemq/hivemq-platform",
-                Stream.of("--versions", "--regexp", regex, "--output", "yaml"));
-        final var platformChartsList = objectMapper.readValue(platformCharts.replaceAll("app_version", "appVersion"),
-                new TypeReference<List<Chart>>() {
-                });//
-        return platformChartsList.stream()
-                .filter(chart -> chart.getVersion() != null)
-                .filter(chart -> !Objects.equals(chart.getVersion(), currentChart.getVersion()))
-                .max(Comparator.comparing(Chart::getVersion))
-                .orElseThrow();
+        LOG.info("HelmChartContainer created");
     }
 
     @Override
@@ -201,13 +167,52 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
     }
 
     @Override
-    public void close() {
-        stop();
-    }
-
     public @NotNull HelmChartContainer withNetwork(final @NotNull Network network) {
         super.withNetwork(network);
         return this;
+    }
+
+    public @NotNull LogWaiterUtil getLogWaiter() {
+        return logWaiter;
+    }
+
+    public synchronized @NotNull KubernetesClient getKubernetesClient() {
+        if (client == null) {
+            final var config = Config.fromKubeconfig(getKubeConfigYaml());
+            client = new KubernetesClientBuilder().withConfig(config).build();
+        }
+        return client;
+    }
+
+    public @NotNull Chart getLegacyOperatorChart() {
+        if (legacyChart != null) {
+            return legacyChart;
+        }
+        legacyChart = getLocalChart(LEGACY_OPERATOR_CHART);
+        return legacyChart;
+    }
+
+    public @NotNull Chart getPlatformChart() {
+        if (platformChart != null) {
+            return platformChart;
+        }
+        platformChart = getLocalChart(PLATFORM_CHART);
+        return platformChart;
+    }
+
+    public @NotNull Chart getPreviousPlatformChart() throws Exception {
+        final var currentChart = getPlatformChart();
+        final var regex = "*.%s*".formatted(currentChart.getDescription());
+        final var platformCharts = executeHelmSearchCommand("hivemq/hivemq-platform",
+                Stream.of("--versions", "--regexp", regex, "--output", "yaml"));
+        final var platformChartsList = objectMapper.readValue(platformCharts.replaceAll("app_version", "appVersion"),
+                new TypeReference<List<Chart>>() {
+                });//
+        return platformChartsList.stream()
+                .filter(chart -> chart.getVersion() != null)
+                .filter(chart -> !Objects.equals(chart.getVersion(), currentChart.getVersion()))
+                .max(Comparator.comparing(Chart::getVersion))
+                .orElseThrow();
     }
 
     public void createNamespace(final @NotNull String name) {
@@ -229,23 +234,11 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
         LOG.info("Namespace '{}' deleted", name);
     }
 
-    public @NotNull LogWaiterUtil getLogWaiter() {
-        return logWaiter;
-    }
-
-    public synchronized @NotNull KubernetesClient getKubernetesClient() {
-        if (client == null) {
-            final var config = Config.fromKubeconfig(getKubeConfigYaml());
-            client = new KubernetesClientBuilder().withConfig(config).build();
-        }
-        return client;
-    }
-
     public void addHelmRepo(final @NotNull String name, final @NotNull String url) {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml repo add <name> <url>
         final var helmCommandList =
                 new ArrayList<>(List.of("helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", "repo", "add", name, url));
-        LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
+        LOG.debug("Executing helm repo command: {}", String.join(" ", helmCommandList));
         try {
             final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
             assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s",
@@ -427,7 +420,7 @@ public class HelmChartContainer extends K3sContainer implements AutoCloseable {
                 chartName));
         helmCommandList.addAll(additionalCommands.toList());
 
-        LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
+        LOG.debug("Executing helm search command: {}", String.join(" ", helmCommandList));
         final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
         assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s", execResult.getStdout(), execResult.getStderr())
                 .isEmpty();
