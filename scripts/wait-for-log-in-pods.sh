@@ -18,7 +18,7 @@ wait_for_log_in_pods() {
   local TIMEOUT=120  # 2 minutes timeout
   local MARKER_FILE="/tmp/app-started-marker"
 
-  # wait until the specified pod are started
+  # wait until the specified pods are started
   local pod_start_time=$(date +%s)
   while [[ -z "$(kubectl get pods -l "$APP_LABEL" -n "$NAMESPACE" -o name)" ]]; do
     local current_time=$(date +%s)
