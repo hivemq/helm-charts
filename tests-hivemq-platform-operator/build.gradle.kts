@@ -115,7 +115,9 @@ testing {
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
                 val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
-                platformSelector = if (System.getenv("CI_RUN") != null) linuxAmd64 else linuxAmd64.and(linuxArm64v8)
+                platformSelector = if (System.getenv("CI_RUN") != null //
+                    || System.getProperty("os.arch", "").equals("amd64")
+                ) linuxAmd64 else linuxAmd64.and(linuxArm64v8)
             }
         }
     }
