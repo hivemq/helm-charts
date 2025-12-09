@@ -84,7 +84,6 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         installLegacyOperatorChartAndWaitToBeRunning("/files/migration-legacy-stateful-set-values.yaml");
 
         // assert service annotations and labels
-        final var hiveMQVersion = System.getProperty("hivemq.tag", "latest");
         final var mqttAnnotations = Map.of("service.spec.externalTrafficPolicy", "Local");
         final var metricsAnnotations = Map.of("prometheus.io/scrape", "true");
         final var legacyLabels = Map.of("app", "hivemq", "hivemq-cluster", LEGACY_RELEASE_NAME);
@@ -128,7 +127,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                                 "app.kubernetes.io/name",
                                 "hivemq-operator",
                                 "app.kubernetes.io/version",
-                                hiveMQVersion,
+                                "4.47.0",
                                 "helm.sh/chart",
                                 "hivemq-operator-%s".formatted(legacyChartVersion),
                                 "hivemq-cluster",
@@ -222,6 +221,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         K8sUtil.waitForHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
 
         // assert service annotations and labels
+        final var hiveMQVersion = System.getProperty("hivemq.tag", "latest");
         final var platformLabels = Map.of("app.kubernetes.io/instance",
                 LEGACY_RELEASE_NAME,
                 "app.kubernetes.io/managed-by",
