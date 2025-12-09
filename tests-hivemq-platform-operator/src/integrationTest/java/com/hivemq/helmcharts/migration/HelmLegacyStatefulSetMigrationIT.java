@@ -127,7 +127,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                                 "app.kubernetes.io/name",
                                 "hivemq-operator",
                                 "app.kubernetes.io/version",
-                                "4.47.0",
+                                "4.47.1",
                                 "helm.sh/chart",
                                 "hivemq-operator-%s".formatted(legacyChartVersion),
                                 "hivemq-cluster",
