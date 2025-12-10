@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
 
+    private static final @NotNull String STS_REVISION_HASH = "controller-revision-hash";
+
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmRollingUpgradePlatformIT.class);
 
     @Test
@@ -40,12 +42,13 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 "--namespace",
                 platformNamespace);
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
-        final var currentPodResourceVersion = client.pods()
+        final var currentPodRevisionHash = client.pods()
                 .inNamespace(platformNamespace)
                 .withName(PLATFORM_RELEASE_NAME + "-0")
                 .get()
                 .getMetadata()
-                .getResourceVersion();
+                .getLabels()
+                .get(STS_REVISION_HASH);
 
         helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
                 true,
@@ -70,18 +73,19 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     TimeUnit.MINUTES);
         }
         platform.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 3, TimeUnit.MINUTES);
-        final var updatedPodResourceVersion = client.pods()
+        final var updatedPodRevisionHash = client.pods()
                 .inNamespace(platformNamespace)
                 .withName(PLATFORM_RELEASE_NAME + "-0")
                 .get()
                 .getMetadata()
-                .getResourceVersion();
+                .getLabels()
+                .get(STS_REVISION_HASH);
 
         if (requiresRollingRestart) {
             // make sure the pod was restarted
-            assertThat(updatedPodResourceVersion).as(
-                            "Expected new Pod resource version field to be different than previous one, as a rolling restart was expected")
-                    .isNotEqualTo(currentPodResourceVersion);
+            assertThat(updatedPodRevisionHash).as(
+                            "Expected new Pod revision hash label to be different than previous one, as a rolling restart was expected")
+                    .isNotEqualTo(currentPodRevisionHash);
             assertThat(client.pods()
                     .inNamespace(platformNamespace)
                     .withName(PLATFORM_RELEASE_NAME + "-0")
@@ -92,9 +96,9 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     .getImage()).isEqualTo("docker.io/hivemq/hivemq4:" + currentPlatformChart.getAppVersion());
         } else {
             // make sure no rolling restart was executed
-            assertThat(updatedPodResourceVersion).as(
-                            "Expected new Pod resource version field to be equal as previous one, as no rolling restart/upgrade was expected")
-                    .isEqualTo(currentPodResourceVersion);
+            assertThat(updatedPodRevisionHash).as(
+                            "Expected new Pod revision hash label to be equal as previous one, as no rolling restart/upgrade was expected")
+                    .isEqualTo(currentPodRevisionHash);
             assertThat(client.pods()
                     .inNamespace(platformNamespace)
                     .withName(PLATFORM_RELEASE_NAME + "-0")
