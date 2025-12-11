@@ -25,7 +25,6 @@ jobs:
         if: always()
         uses: d3adb5/helm-unittest-action@66140cd099aa6c4f2ebc59735b8e421135a6d4e3 # v2.4
         with:
-          helm-version: 'v3.19.2'
           charts: charts/hivemq-swarm
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flags: --file './tests/**/*_test.yaml'
