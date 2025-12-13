@@ -135,7 +135,7 @@ jobs:
 
       - name: Upload test results
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: "HiveMQ Platform Operator - Integration test results #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
           path: |
@@ -145,7 +145,7 @@ jobs:
 
       - name: Upload JUnit report artifact
         if: matrix.k8s-version-type == 'LATEST'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: junit-xml-reports-platform-${{ matrix.split-index }}
           path: |
