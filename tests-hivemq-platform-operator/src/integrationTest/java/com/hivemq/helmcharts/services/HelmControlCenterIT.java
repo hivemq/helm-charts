@@ -13,6 +13,6 @@ class HelmControlCenterIT extends AbstractHelmControlCenterIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_whenControlCenterEnabled_thenAbleToLogin() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/control-center-values.yaml");
-        assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
+        assertLogin(client, platformNamespace, webDriverContainer, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
     }
 }

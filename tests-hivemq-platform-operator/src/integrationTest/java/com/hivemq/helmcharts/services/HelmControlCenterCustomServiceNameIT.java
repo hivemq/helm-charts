@@ -13,6 +13,6 @@ class HelmControlCenterCustomServiceNameIT extends AbstractHelmControlCenterIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformChart_withCustomServiceName_thenAbleToLogin() throws Exception {
         installPlatformChartAndWaitToBeRunning("/files/custom-service-names-values.yaml");
-        assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_CUSTOM_SERVICE_NAME, CC_SERVICE_PORT_8081);
+        assertLogin(client, platformNamespace, webDriverContainer, CC_CUSTOM_SERVICE_NAME, CC_SERVICE_PORT_8081);
     }
 }

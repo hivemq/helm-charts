@@ -15,7 +15,7 @@ class HelmControlCenterCustomCredentialsIT extends AbstractHelmControlCenterIT {
         installPlatformChartAndWaitToBeRunning("/files/control-center-basic-credentials-values.yaml");
         assertLogin(client,
                 platformNamespace,
-                WEB_DRIVER_CONTAINER,
+                webDriverContainer,
                 CC_SERVICE_NAME_8081,
                 CC_SERVICE_PORT_8081,
                 "test-username",

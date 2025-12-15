@@ -41,8 +41,8 @@ class HelmControlCenterTlsWithPrivateKeyIT extends AbstractHelmControlCenterIT {
 
         installPlatformChartAndWaitToBeRunning("/files/tls-cc-with-private-key-values.yaml");
 
-        assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
-        assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8443, CC_SERVICE_PORT_8443, true);
-        assertLogin(client, platformNamespace, WEB_DRIVER_CONTAINER, CC_SERVICE_NAME_8444, CC_SERVICE_PORT_8444, true);
+        assertLogin(client, platformNamespace, webDriverContainer, CC_SERVICE_NAME_8081, CC_SERVICE_PORT_8081);
+        assertLogin(client, platformNamespace, webDriverContainer, CC_SERVICE_NAME_8443, CC_SERVICE_PORT_8443, true);
+        assertLogin(client, platformNamespace, webDriverContainer, CC_SERVICE_NAME_8444, CC_SERVICE_PORT_8444, true);
     }
 }
