@@ -1,17 +1,21 @@
 package com.hivemq.helmcharts.services;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
-import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
+import com.hivemq.helmcharts.testcontainer.WebDriverContainerExtension;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.nio.file.Path;
 
-@Testcontainers
+@SuppressWarnings("NotNullFieldNotInitialized")
 class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
+
+    @RegisterExtension
+    private static final @NotNull WebDriverContainerExtension HELM_CHART_CONTAINER_EXTENSION =
+            new WebDriverContainerExtension(network);
 
     static final int CC_SERVICE_PORT_8081 = 8081;
     static final int CC_SERVICE_PORT_8443 = 8443;
@@ -24,10 +28,10 @@ class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
     @TempDir
     @NotNull Path tmp;
 
-    @Container
-    static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
-                    .withNetwork(network) //
-                    // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway");
+    static @NotNull BrowserWebDriverContainer webDriverContainer;
+
+    @BeforeAll
+    static void setupWebDriverContainer() {
+        webDriverContainer = HELM_CHART_CONTAINER_EXTENSION.getWebDriverContainer();
+    }
 }
