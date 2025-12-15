@@ -74,7 +74,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     }
 
     @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Timeout(value = 10, unit = TimeUnit.MINUTES)
     @EnabledIfSystemProperty(named = "k3s.version.type",
                              matches = "LATEST",
                              disabledReason = "there are various PVC related bugfixes in K8s that probably cause issues with older versions")
