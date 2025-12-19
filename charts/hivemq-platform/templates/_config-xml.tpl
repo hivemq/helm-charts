@@ -381,16 +381,17 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     </listeners>
   </rest-api>
   {{- end }}
-  {{- if and .Values.config.dataHub (or .Values.config.dataHub.behaviorValidationEnabled .Values.config.dataHub.dataValidationEnabled) }}
+  {{- $dataHub := .Values.config.dataHub }}
+  {{- if or (hasKey $dataHub "dataValidationEnabled") (hasKey $dataHub "behaviorValidationEnabled") }}
   <data-hub>
-    {{- if .Values.config.dataHub.dataValidationEnabled }}
+    {{- if hasKey $dataHub "dataValidationEnabled" }}
     <data-validation>
-      <enabled>true</enabled>
+      <enabled>{{ $dataHub.dataValidationEnabled }}</enabled>
     </data-validation>
     {{- end }}
-    {{- if .Values.config.dataHub.behaviorValidationEnabled }}
+    {{- if hasKey $dataHub "behaviorValidationEnabled" }}
     <behavior-validation>
-      <enabled>true</enabled>
+      <enabled>{{ $dataHub.behaviorValidationEnabled }}</enabled>
     </behavior-validation>
     {{- end }}
   </data-hub>

@@ -42,11 +42,28 @@ tests:
     asserts:
       - exists:
           path: data["config.xml"]
-      - notMatchRegex:
+      - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-hub>.*?</data-hub>"
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>false</enabled>.*?</data-validation>.*?</data-hub>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>false</enabled>.*?</behavior-validation>.*?</data-hub>"
 
   - it: with Data Hub - Data validation enabled only
+    template: hivemq-configuration.yml
+    set:
+      config.dataHub.dataValidationEnabled: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?</data-hub>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<behavior-validation>.*?</behavior-validation>.*?</data-hub>"
+
+  - it: with Data Hub - Data validation enabled, behavior validation disabled
     template: hivemq-configuration.yml
     set:
       config.dataHub.dataValidationEnabled: true
@@ -57,11 +74,25 @@ tests:
       - matchRegex:
           path: data["config.xml"]
           pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?</data-hub>"
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>false</enabled>.*?</behavior-validation>.*?</data-hub>"
+
+  - it: with Data Hub - Behavior validation enabled only
+    template: hivemq-configuration.yml
+    set:
+      config.dataHub.behaviorValidationEnabled: true
+    asserts:
+      - exists:
+          path: data["config.xml"]
       - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>false</enabled>.*?</data-validation>.*?</data-hub>"
+      - matchRegex:
           path: data["config.xml"]
           pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
 
-  - it: with Data Hub - Behavior validation enabled only
+  - it: with Data Hub - Behavior validation enabled, data validation disabled
     template: hivemq-configuration.yml
     set:
       config.dataHub.dataValidationEnabled: false
@@ -69,9 +100,9 @@ tests:
     asserts:
       - exists:
           path: data["config.xml"]
-      - notMatchRegex:
+      - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>true</enabled>.*?</data-validation>.*?</data-hub>"
+          pattern: "(?s)<data-hub>.*?<data-validation>.*?<enabled>false</enabled>.*?</data-validation>.*?</data-hub>"
       - matchRegex:
           path: data["config.xml"]
           pattern: "(?s)<data-hub>.*?<behavior-validation>.*?<enabled>true</enabled>.*?</behavior-validation>.*?</data-hub>"
