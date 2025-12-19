@@ -4,11 +4,13 @@ import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.testcontainer.WebDriverContainerExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
@@ -31,6 +33,7 @@ class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
     static @NotNull BrowserWebDriverContainer webDriverContainer;
 
     @BeforeAll
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     static void setupWebDriverContainer() {
         webDriverContainer = WEB_DRIVER_CONTAINER_EXTENSION.getWebDriverContainer();
     }
