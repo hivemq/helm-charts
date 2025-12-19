@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.migration;
 
 import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.testcontainer.WebDriverContainerExtension;
 import com.hivemq.helmcharts.util.ControlCenterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import com.hivemq.helmcharts.util.MonitoringUtil;
@@ -8,14 +9,13 @@ import com.hivemq.helmcharts.util.MqttUtil;
 import com.hivemq.helmcharts.util.RestAPIUtil;
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.util.HashMap;
@@ -42,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *  <li>Install the HiveMQ Platform Helm chart with same release name as Legacy HiveMQ Operator chart.</li>
  * </ol>
  */
-@Testcontainers
 class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT = 1883;
@@ -55,16 +54,21 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-%s-api".formatted(LEGACY_RELEASE_NAME);
     private static final @NotNull String CLUSTER_SERVICE_NAME = "hivemq-%s-cluster".formatted(LEGACY_RELEASE_NAME);
 
-    @Container
-    private static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
-                    .withNetwork(network) //
-                    // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway");
+    @RegisterExtension
+    private static final @NotNull WebDriverContainerExtension WEB_DRIVER_CONTAINER_EXTENSION =
+            new WebDriverContainerExtension(network);
+
+    private @NotNull BrowserWebDriverContainer webDriverContainer;
 
     @Override
     protected boolean uninstallPlatformChart() {
         return false;
+    }
+
+    @BeforeEach
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    final void baseSetUp() {
+        webDriverContainer = WEB_DRIVER_CONTAINER_EXTENSION.getWebDriverContainer();
     }
 
     @AfterEach
@@ -144,11 +148,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 Map.of(),
                 mergeMaps(legacyLabels, Map.of("hivemq.com/node-offline", "false")));
         // assert Control Center login
-        ControlCenterUtil.assertLogin(client,
-                operatorNamespace,
-                WEB_DRIVER_CONTAINER,
-                CC_SERVICE_NAME,
-                CC_SERVICE_PORT);
+        ControlCenterUtil.assertLogin(client, operatorNamespace, webDriverContainer, CC_SERVICE_NAME, CC_SERVICE_PORT);
         // publish retained messages
         final var topicList =
                 MqttUtil.publishRetainedMessages(client, operatorNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
@@ -277,11 +277,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 statefulSetMetadata.getAnnotations(),
                 platformLabels);
         // assert Control Center login
-        ControlCenterUtil.assertLogin(client,
-                operatorNamespace,
-                WEB_DRIVER_CONTAINER,
-                CC_SERVICE_NAME,
-                CC_SERVICE_PORT);
+        ControlCenterUtil.assertLogin(client, operatorNamespace, webDriverContainer, CC_SERVICE_NAME, CC_SERVICE_PORT);
         // assert retained messages
         MqttUtil.assertRetainedMessages(client, operatorNamespace, topicList, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
         // assert RestAPI service and authorization with ESE extension

@@ -14,7 +14,7 @@ import java.nio.file.Path;
 class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
 
     @RegisterExtension
-    private static final @NotNull WebDriverContainerExtension HELM_CHART_CONTAINER_EXTENSION =
+    private static final @NotNull WebDriverContainerExtension WEB_DRIVER_CONTAINER_EXTENSION =
             new WebDriverContainerExtension(network);
 
     static final int CC_SERVICE_PORT_8081 = 8081;
@@ -32,6 +32,6 @@ class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
 
     @BeforeAll
     static void setupWebDriverContainer() {
-        webDriverContainer = HELM_CHART_CONTAINER_EXTENSION.getWebDriverContainer();
+        webDriverContainer = WEB_DRIVER_CONTAINER_EXTENSION.getWebDriverContainer();
     }
 }
