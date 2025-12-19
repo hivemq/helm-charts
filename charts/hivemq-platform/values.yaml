@@ -561,6 +561,8 @@ config:
     # dataValidationEnabled: false
     # # Optional setting to enable behavior validation.
     # behaviorValidationEnabled: false
+    # # Optional setting to enable scripting functionality.
+    # scripting: false
   # Inlines a custom HiveMQ Platform tracing configuration (tracing.xml) from a file:
   # --set-file config.customTracingConfig=your-tracing.xml
   customTracingConfig: ""
