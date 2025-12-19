@@ -58,7 +58,7 @@ class HelmPlatformTlsIT extends AbstractHelmPlatformTlsIT {
         assertMqttListener(MQTT_SERVICE_NAME_1884, MQTT_SERVICE_PORT_1884, sslConfig);
         assertLogin(client,
                 platformNamespace,
-                WEB_DRIVER_CONTAINER,
+                webDriverContainer,
                 HIVEMQ_CC_SERVICE_NAME,
                 HIVEMQ_CC_SERVICE_PORT,
                 true);

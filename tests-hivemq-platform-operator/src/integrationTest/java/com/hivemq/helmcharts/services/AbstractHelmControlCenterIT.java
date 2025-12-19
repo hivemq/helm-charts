@@ -4,17 +4,19 @@ import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.testcontainer.WebDriverContainerExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
 
     @RegisterExtension
-    private static final @NotNull WebDriverContainerExtension HELM_CHART_CONTAINER_EXTENSION =
+    private static final @NotNull WebDriverContainerExtension WEB_DRIVER_CONTAINER_EXTENSION =
             new WebDriverContainerExtension(network);
 
     static final int CC_SERVICE_PORT_8081 = 8081;
@@ -31,7 +33,8 @@ class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
     static @NotNull BrowserWebDriverContainer webDriverContainer;
 
     @BeforeAll
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     static void setupWebDriverContainer() {
-        webDriverContainer = HELM_CHART_CONTAINER_EXTENSION.getWebDriverContainer();
+        webDriverContainer = WEB_DRIVER_CONTAINER_EXTENSION.getWebDriverContainer();
     }
 }

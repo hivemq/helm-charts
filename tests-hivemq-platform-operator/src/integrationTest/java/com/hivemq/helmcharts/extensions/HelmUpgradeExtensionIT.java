@@ -1,42 +1,22 @@
 package com.hivemq.helmcharts.extensions;
 
-import com.hivemq.helmcharts.AbstractHelmChartIT;
 import com.hivemq.helmcharts.util.K8sUtil;
-import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.slf4j.event.Level;
-import org.testcontainers.hivemq.HiveMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Testcontainers
-class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
-
-    @Container
-    private static final @NotNull HiveMQContainer HIVEMQ_CONTAINER =
-            new HiveMQContainer(OciImages.getImageName("hivemq/hivemq4")) //
-                    .withNetwork(network) //
-                    .withNetworkAliases("remote") //
-                    .withLogLevel(Level.DEBUG);
+class HelmUpgradeExtensionIT extends AbstractHelmBridgeExtensionIT {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withBridgeConfiguration_enableDisableBridge() throws Exception {
-        final var hivemqContainerNetwork =
-                HIVEMQ_CONTAINER.getContainerInfo().getNetworkSettings().getNetworks().values().stream().findFirst();
-        assertThat(hivemqContainerNetwork).isPresent();
-
         // setup bridge configuration
-        final var bridgeConfiguration = readResourceFile("bridge-config.xml").replace("<host>remote</host>",
-                "<host>" + hivemqContainerNetwork.get().getIpAddress() + "</host>");
+        final var bridgeConfiguration =
+                readResourceFile("bridge-config.xml").replace("<host>remote</host>", "<host>" + ipAddress + "</host>");
         K8sUtil.createConfigMap(client, platformNamespace, "test-bridge-configuration", bridgeConfiguration);
 
         // deploy chart and wait to be ready
@@ -70,27 +50,5 @@ class HelmUpgradeExtensionIT extends AbstractHelmChartIT {
         // check that extensions are disabled
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=false,.*?id=hivemq-bridge-extension,.*?].*");
-    }
-
-    private @NotNull CompletableFuture<String> brokerExtensionStartedFuture() {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX,
-                ".*Extension \"HiveMQ Enterprise Bridge Extension\" version .* started successfully.");
-    }
-
-    private @NotNull CompletableFuture<String> brokerExtensionStoppedFuture() {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX,
-                ".*Extension \"HiveMQ Enterprise Bridge Extension\" version .* stopped successfully.");
-    }
-
-    private @NotNull CompletableFuture<String> initAppExtensionEnabledFuture() {
-        return waitForInitAppLog("Successfully enabled extension hivemq-bridge-extension");
-    }
-
-    private @NotNull CompletableFuture<String> initAppExtensionStoppedFuture() {
-        return waitForInitAppLog("Successfully stopped extension hivemq-bridge-extension");
-    }
-
-    private @NotNull CompletableFuture<String> initAppExtensionUpdateDoneFuture() {
-        return waitForInitAppLog("Extension update is done \\(0 errors\\)");
     }
 }

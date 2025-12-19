@@ -2,23 +2,29 @@ package com.hivemq.helmcharts.platform;
 
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
+import com.hivemq.helmcharts.testcontainer.WebDriverContainerExtension;
 import com.hivemq.helmcharts.util.MqttUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.selenium.BrowserWebDriverContainer;
 
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
+@SuppressWarnings("NotNullFieldNotInitialized")
 class AbstractHelmPlatformTlsIT extends AbstractHelmChartIT {
+
+    @RegisterExtension
+    private static final @NotNull WebDriverContainerExtension WEB_DRIVER_CONTAINER_EXTENSION =
+            new WebDriverContainerExtension(network);
 
     static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
     static final int MQTT_SERVICE_PORT_1884 = 1884;
@@ -32,12 +38,13 @@ class AbstractHelmPlatformTlsIT extends AbstractHelmChartIT {
     @TempDir
     @NotNull Path tmp;
 
-    @Container
-    static final @NotNull BrowserWebDriverContainer WEB_DRIVER_CONTAINER =
-            new BrowserWebDriverContainer(OciImages.getImageName("selenium/standalone-firefox")) //
-                    .withNetwork(network) //
-                    // needed for Docker on Linux
-                    .withExtraHost("host.docker.internal", "host-gateway");
+    static @NotNull BrowserWebDriverContainer webDriverContainer;
+
+    @BeforeAll
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    static void setupWebDriverContainer() {
+        webDriverContainer = WEB_DRIVER_CONTAINER_EXTENSION.getWebDriverContainer();
+    }
 
     @SuppressWarnings("SameParameterValue")
     void assertMqttListener(final @NotNull String serviceName, final int servicePort) {
