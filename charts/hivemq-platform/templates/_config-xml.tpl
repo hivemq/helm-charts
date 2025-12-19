@@ -382,7 +382,7 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
   </rest-api>
   {{- end }}
   {{- $dataHub := .Values.config.dataHub }}
-  {{- if or (hasKey $dataHub "dataValidationEnabled") (hasKey $dataHub "behaviorValidationEnabled") }}
+  {{- if or (hasKey $dataHub "dataValidationEnabled") (hasKey $dataHub "behaviorValidationEnabled") (hasKey $dataHub "scripting") }}
   <data-hub>
     {{- if hasKey $dataHub "dataValidationEnabled" }}
     <data-validation>
@@ -393,6 +393,11 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <behavior-validation>
       <enabled>{{ $dataHub.behaviorValidationEnabled }}</enabled>
     </behavior-validation>
+    {{- end }}
+    {{- if hasKey $dataHub "scripting" }}
+    <scripting>
+      <enabled>{{ $dataHub.scripting }}</enabled>
+    </scripting>
     {{- end }}
   </data-hub>
   {{- end }}
