@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-01-03T00:51:44" hostname="runnervmh13bl" time="242.229">
+<testsuite name="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-01-03T18:33:41" hostname="runnervmh13bl" time="260.858">
   <properties/>
-  <testcase name="installPlatform_withRandomNonRootUsers_hivemqRunning()" classname="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" time="77.396"/>
-  <testcase name="Operator values: (UID=0, GID=0, valuesFile='/files/operator-pod-security-context-root-user-values.yaml') and Platform values: (UID=0, GID=0, valuesFile='/files/platform-pod-security-context-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" time="82.938"/>
-  <testcase name="Operator values: (UID=185, GID=0, valuesFile='/files/operator-pod-security-context-non-root-user-values.yaml') and Platform values: (UID=10000, GID=0, valuesFile='/files/platform-pod-security-context-non-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" time="81.85"/>
+  <testcase name="installPlatform_withRandomNonRootUsers_hivemqRunning()" classname="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" time="91.196"/>
+  <testcase name="Operator values: (UID=0, GID=0, valuesFile='/files/operator-pod-security-context-root-user-values.yaml') and Platform values: (UID=0, GID=0, valuesFile='/files/platform-pod-security-context-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" time="85.32"/>
+  <testcase name="Operator values: (UID=185, GID=0, valuesFile='/files/operator-pod-security-context-non-root-user-values.yaml') and Platform values: (UID=10000, GID=0, valuesFile='/files/platform-pod-security-context-non-root-user-values.yaml')" classname="com.hivemq.helmcharts.securitycontext.HelmPodSecurityContextInstallPlatformIT" time="84.298"/>
 </testsuite>
