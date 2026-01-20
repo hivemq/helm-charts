@@ -382,21 +382,21 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
   </rest-api>
   {{- end }}
   {{- $dataHub := .Values.config.dataHub }}
-  {{- if or (hasKey $dataHub "dataValidationEnabled") (hasKey $dataHub "behaviorValidationEnabled") (hasKey $dataHub "scripting") }}
+  {{- if or (and (hasKey $dataHub "dataValidationEnabled") (eq $dataHub.dataValidationEnabled true)) (and (hasKey $dataHub "behaviorValidationEnabled") (eq $dataHub.behaviorValidationEnabled true)) (and (hasKey $dataHub "scripting") (eq $dataHub.scripting true)) }}
   <data-hub>
-    {{- if hasKey $dataHub "dataValidationEnabled" }}
+    {{- if and (hasKey $dataHub "dataValidationEnabled") (eq $dataHub.dataValidationEnabled true) }}
     <data-validation>
-      <enabled>{{ $dataHub.dataValidationEnabled }}</enabled>
+      <enabled>true</enabled>
     </data-validation>
     {{- end }}
-    {{- if hasKey $dataHub "behaviorValidationEnabled" }}
+    {{- if and (hasKey $dataHub "behaviorValidationEnabled") (eq $dataHub.behaviorValidationEnabled true) }}
     <behavior-validation>
-      <enabled>{{ $dataHub.behaviorValidationEnabled }}</enabled>
+      <enabled>true</enabled>
     </behavior-validation>
     {{- end }}
-    {{- if hasKey $dataHub "scripting" }}
+    {{- if and (hasKey $dataHub "scripting") (eq $dataHub.scripting true) }}
     <scripting>
-      <enabled>{{ $dataHub.scripting }}</enabled>
+      <enabled>true</enabled>
     </scripting>
     {{- end }}
   </data-hub>

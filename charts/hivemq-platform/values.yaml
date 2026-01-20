@@ -556,13 +556,13 @@ config:
   #          Please, consider using `additionalInitContainers` value instead.
   overrideInitContainers: ""
   # Optional setting to enable HiveMQ Data Hub functionality.
-  dataHub: {}
-    # # Optional setting to enable data validation.
-    # dataValidationEnabled: false
-    # # Optional setting to enable behavior validation.
-    # behaviorValidationEnabled: false
-    # # Optional setting to enable scripting functionality.
-    # scripting: false
+  dataHub:
+    # Optional setting to enable data validation.
+    dataValidationEnabled: false
+    # Optional setting to enable behavior validation.
+    behaviorValidationEnabled: false
+    # Optional setting to enable scripting functionality.
+    scripting: false
   # Inlines a custom HiveMQ Platform tracing configuration (tracing.xml) from a file:
   # --set-file config.customTracingConfig=your-tracing.xml
   customTracingConfig: ""
