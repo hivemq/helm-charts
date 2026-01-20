@@ -15,6 +15,10 @@ if ! helm plugin list | grep -q 'unittest'; then
 fi
 
 CHARTS="hivemq-edge hivemq-platform hivemq-platform-operator hivemq-swarm"
+CHART_FILTER="$1"
+
 for CHART in ${CHARTS}; do
-  helm unittest "./charts/$CHART" -f ./tests/**/*_test.yaml
+  if [ -z "$CHART_FILTER" ] || [ "$CHART" = "$CHART_FILTER" ]; then
+    helm unittest "./charts/$CHART" -f ./tests/**/*_test.yaml
+  fi
 done
