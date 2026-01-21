@@ -132,15 +132,19 @@
           "description" : "Optional setting to enable HiveMQ Data Hub functionality.",
           "properties" : {
             "behaviorValidationEnabled" : {
-              "description" : "Optional setting to enable data validation.",
+              "description" : "Optional setting to enable behavior validation. The default setting is `false`.",
               "type" : "boolean"
             },
             "dataValidationEnabled" : {
-              "description" : "Optional setting to enable behavior validation.",
+              "description" : "Optional setting to enable data validation. The default setting is `false`.",
               "type" : "boolean"
             },
-            "scripting" :  {
-              "description" : "Optional setting to enable scripting functionality.",
+            "includeDisabled" : {
+              "description" : "Defines whether all Data Hub options are rendered in HiveMQ Platform configuration, including features set to `false`. This allows explicitly disabling DataHub. The default setting is `false`.",
+              "type" : "boolean"
+            },
+            "scriptingEnabled" :  {
+              "description" : "Optional setting to enable scripting functionality. The default setting is `false`.",
               "type" : "boolean"
             }
           },
