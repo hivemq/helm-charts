@@ -30,7 +30,7 @@ tests:
     set:
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -42,7 +42,7 @@ tests:
     set:
       config.dataHub.dataValidationEnabled: true
       config.dataHub.behaviorValidationEnabled: true
-      config.dataHub.scripting: true
+      config.dataHub.scriptingEnabled: true
     asserts:
       - exists:
           path: data["config.xml"]
@@ -76,7 +76,7 @@ tests:
     set:
       config.dataHub.dataValidationEnabled: true
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -110,7 +110,7 @@ tests:
     set:
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: true
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -126,7 +126,7 @@ tests:
 
   - it: with Data Hub - Scripting enabled only
     set:
-      config.dataHub.scripting: true
+      config.dataHub.scriptingEnabled: true
     asserts:
       - exists:
           path: data["config.xml"]
@@ -144,7 +144,7 @@ tests:
     set:
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: true
+      config.dataHub.scriptingEnabled: true
     asserts:
       - exists:
           path: data["config.xml"]
@@ -163,7 +163,7 @@ tests:
       config.dataHub.includeDisabled: true
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -182,7 +182,7 @@ tests:
       config.dataHub.includeDisabled: true
       config.dataHub.dataValidationEnabled: true
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -201,7 +201,7 @@ tests:
       config.dataHub.includeDisabled: true
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: true
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -220,7 +220,7 @@ tests:
       config.dataHub.includeDisabled: true
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: true
+      config.dataHub.scriptingEnabled: true
     asserts:
       - exists:
           path: data["config.xml"]
@@ -239,7 +239,7 @@ tests:
       config.dataHub.includeDisabled: false
       config.dataHub.dataValidationEnabled: false
       config.dataHub.behaviorValidationEnabled: false
-      config.dataHub.scripting: false
+      config.dataHub.scriptingEnabled: false
     asserts:
       - exists:
           path: data["config.xml"]
@@ -261,7 +261,7 @@ tests:
 
   - it: with invalid Scripting, schema validation fails
     set:
-      config.dataHub.scripting: invalid-value
+      config.dataHub.scriptingEnabled: invalid-value
     asserts:
       - failedTemplate: {}
 
