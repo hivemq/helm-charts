@@ -557,12 +557,15 @@ config:
   overrideInitContainers: ""
   # Optional setting to enable HiveMQ Data Hub functionality.
   dataHub:
-    # Optional setting to enable data validation.
+    # Defines whether all Data Hub options are rendered in HiveMQ Platform configuration, including features set to `false`.
+    # This allows explicitly disabling DataHub. The default setting is `false`.
+    includeDisabled: false
+    # Optional setting to enable data validation. The default setting is `false`.
     dataValidationEnabled: false
-    # Optional setting to enable behavior validation.
+    # Optional setting to enable behavior validation. The default setting is `false`.
     behaviorValidationEnabled: false
-    # Optional setting to enable scripting functionality.
-    scripting: false
+    # Optional setting to enable scripting functionality. The default setting is `false`.
+    scriptingEnabled: false
   # Inlines a custom HiveMQ Platform tracing configuration (tracing.xml) from a file:
   # --set-file config.customTracingConfig=your-tracing.xml
   customTracingConfig: ""
