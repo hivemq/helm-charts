@@ -110,8 +110,8 @@ testing {
                     runtime("hivemq:hivemq-operator:4.7.10").tag("latest")
                     runtime("hivemq:init-dns-wait:1.0.1").tag("latest")
                     runtime("library:busybox:1.37.0").name("busybox").tag("latest")
-                    runtime("library:nginx:1.29.3").name("nginx").tag("latest")
-                    runtime("selenium:standalone-firefox:144.0").tag("latest")
+                    runtime("library:nginx:1.29.4").name("nginx").tag("latest")
+                    runtime("selenium:standalone-firefox:147.0").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
                 val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
@@ -130,7 +130,7 @@ tasks.register("integrationTestPrepare") {
 /* ******************** OCI images ******************** */
 
 val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc" // noble
+    from = "library/ubuntu@sha256:cd1dba651b3080c3686ecf4e3c4220f026b521fb76978881737d24f200828b2b" // noble
     platform = oci.platform("linux", "amd64")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
@@ -141,7 +141,7 @@ val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
 }
 
 val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
-    from = "library/ubuntu@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc" // noble
+    from = "library/ubuntu@sha256:cd1dba651b3080c3686ecf4e3c4220f026b521fb76978881737d24f200828b2b" // noble
     platform = oci.platform("linux", "arm64", "v8")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
