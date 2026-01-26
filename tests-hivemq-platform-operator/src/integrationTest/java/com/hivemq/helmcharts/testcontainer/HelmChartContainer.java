@@ -40,10 +40,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -373,16 +376,17 @@ public class HelmChartContainer extends K3sContainer {
             final boolean withLocalCharts,
             final @NotNull Stream<String> additionalCommands,
             final boolean debugOnFailure) throws Exception {
-        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --wait --timeout 5m0s
+        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --debug --wait --timeout 3m0s
         final var helmCommandList = new ArrayList<>(List.of("helm",
                 "--kubeconfig",
                 "/etc/rancher/k3s/k3s.yaml",
                 helmCommand,
                 releaseName,
                 chartName != null ? chartName : "",
+                "--debug",
                 "--wait",
                 "--timeout",
-                "5m0s"));
+                "3m0s"));
         final var additionalCommandsList = additionalCommands.toList();
         helmCommandList.addAll(additionalCommandsList);
         if (chartName != null && withLocalCharts) {
@@ -394,6 +398,8 @@ public class HelmChartContainer extends K3sContainer {
 
         LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
         final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
+        LOG.debug("Helm stdout: {}", execResult.getStdout());
+        LOG.debug("Helm stderr: {}", execResult.getStderr());
         assertThat(execResult.getStdout()).as(() -> describeHelmCommand(execResult,
                 helmCommandList,
                 helmCommand,
@@ -440,17 +446,44 @@ public class HelmChartContainer extends K3sContainer {
             return "Helm command: %s\nstdout: %s\nstderr: %s\nyaml:\n%s".formatted(helmCommandList,
                     execDeploy.getStdout(),
                     execDeploy.getStderr(),
-                    // execute Helm command with --debug and --dry-run to get additional error information
+                    // execute Helm command with --dry-run to get additional information
                     debugOnFailure ?
                             executeHelmCommand(helmCommand,
                                     releaseName,
                                     chartName,
                                     withLocalCharts,
-                                    Stream.concat(Stream.of("--debug", "--dry-run"), additionalCommands),
+                                    Stream.concat(Stream.of("--dry-run"), additionalCommands),
                                     false) :
                             "n/a");
         } catch (final Exception e) {
             return "Could not describe Helm command: " + e;
+        }
+    }
+
+    /**
+     * Executes a command in the container with a timeout to prevent indefinite hangs.
+     * This is a workaround for Testcontainers' execInContainer occasionally not returning
+     * even after the command completes.
+     */
+    private @NotNull ExecResult executeWithTimeout(final @NotNull String @NotNull ... commands) throws Exception {
+        final var timeout = Duration.ofMinutes(4);
+        try {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return execInContainer(commands);
+                } catch (final Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (final TimeoutException e) {
+            LOG.error("Command execution timed out after {}: {}", timeout, String.join(" ", commands));
+            throw new AssertionError("Command execution timed out after " + timeout + ": " + String.join(" ", commands),
+                    e);
+        } catch (final ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException re && re.getCause() != null) {
+                throw (Exception) re.getCause();
+            }
+            throw e;
         }
     }
 
