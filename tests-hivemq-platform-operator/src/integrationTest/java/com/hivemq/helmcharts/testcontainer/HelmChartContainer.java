@@ -40,13 +40,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -457,33 +454,6 @@ public class HelmChartContainer extends K3sContainer {
                             "n/a");
         } catch (final Exception e) {
             return "Could not describe Helm command: " + e;
-        }
-    }
-
-    /**
-     * Executes a command in the container with a timeout to prevent indefinite hangs.
-     * This is a workaround for Testcontainers' execInContainer occasionally not returning
-     * even after the command completes.
-     */
-    private @NotNull ExecResult executeWithTimeout(final @NotNull String @NotNull ... commands) throws Exception {
-        final var timeout = Duration.ofMinutes(4);
-        try {
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    return execInContainer(commands);
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (final TimeoutException e) {
-            LOG.error("Command execution timed out after {}: {}", timeout, String.join(" ", commands));
-            throw new AssertionError("Command execution timed out after " + timeout + ": " + String.join(" ", commands),
-                    e);
-        } catch (final ExecutionException e) {
-            if (e.getCause() instanceof RuntimeException re && re.getCause() != null) {
-                throw (Exception) re.getCause();
-            }
-            throw e;
         }
     }
 
