@@ -381,7 +381,7 @@ public class HelmChartContainer extends K3sContainer {
                 releaseName,
                 chartName != null ? chartName : "",
                 "--debug",
-                "--wait",
+                "--wait=legacy",
                 "--timeout",
                 "3m0s"));
         final var additionalCommandsList = additionalCommands.toList();
