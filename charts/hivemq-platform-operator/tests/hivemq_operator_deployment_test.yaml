@@ -62,7 +62,7 @@ tests:
             - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
               value: "PT10S"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
-              value: "docker.io/hivemq/hivemq-platform-operator-init:2.1.1"
+              value: "docker.io/hivemq/hivemq-platform-operator-init:2.1.2"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY
               value: "IfNotPresent"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
