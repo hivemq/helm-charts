@@ -98,7 +98,11 @@ public abstract class AbstractHelmChartIT {
             }
         } finally {
             if (uninstallPlatformOperatorChart()) {
+                // Log finalizers before uninstall
+                K8sUtil.logOperatorResourceFinalizers(client, operatorNamespace, OPERATOR_RELEASE_NAME);
                 helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
+                // Log finalizers after uninstall (to see if resources are stuck)
+                K8sUtil.logOperatorResourceFinalizers(client, operatorNamespace, OPERATOR_RELEASE_NAME);
             }
             K8sUtil.deleteCrd(client, PLATFORM_CRD);
         }

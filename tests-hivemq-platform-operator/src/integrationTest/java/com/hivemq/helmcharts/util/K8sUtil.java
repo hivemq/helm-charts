@@ -228,6 +228,95 @@ public class K8sUtil {
     }
 
     /**
+     * Logs detailed metadata (finalizers, labels, annotations) of the Platform Operator chart resources.
+     * This is useful for debugging why resources might be stuck in Terminating state during uninstall.
+     *
+     * @param client      the Kubernetes client to use
+     * @param namespace   the namespace where the operator is installed
+     * @param releaseName the Helm release name used for the operator
+     */
+    public static void logOperatorResourceFinalizers(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String releaseName) {
+        final var serviceAccountName = "hivemq-platform-operator-" + releaseName;
+        final var serviceName = "hivemq-platform-operator-" + releaseName;
+        final var clusterRoleName = "hivemq-platform-operator-role-" + releaseName;
+        final var clusterRoleBindingName = "hivemq-platform-operator-role-binding-" + releaseName;
+        final var roleBindingName = "hivemq-platform-operator-view-binding-" + releaseName;
+
+        // Log ServiceAccount
+        final var serviceAccount = client.serviceAccounts().inNamespace(namespace).withName(serviceAccountName).get();
+        if (serviceAccount != null) {
+            final var meta = serviceAccount.getMetadata();
+            LOG.info("[DEBUG] ServiceAccount '{}' - finalizers: {}, deletionTimestamp: {}, labels: {}, annotations: {}",
+                    serviceAccountName,
+                    meta.getFinalizers(),
+                    meta.getDeletionTimestamp(),
+                    meta.getLabels(),
+                    meta.getAnnotations());
+        } else {
+            LOG.info("[DEBUG] ServiceAccount '{}' - not found", serviceAccountName);
+        }
+
+        // Log Service
+        final var service = client.services().inNamespace(namespace).withName(serviceName).get();
+        if (service != null) {
+            final var meta = service.getMetadata();
+            LOG.info("[DEBUG] Service '{}' - finalizers: {}, deletionTimestamp: {}, labels: {}, annotations: {}",
+                    serviceName,
+                    meta.getFinalizers(),
+                    meta.getDeletionTimestamp(),
+                    meta.getLabels(),
+                    meta.getAnnotations());
+        } else {
+            LOG.info("[DEBUG] Service '{}' - not found", serviceName);
+        }
+
+        // Log ClusterRole
+        final var clusterRole = client.rbac().clusterRoles().withName(clusterRoleName).get();
+        if (clusterRole != null) {
+            final var meta = clusterRole.getMetadata();
+            LOG.info("[DEBUG] ClusterRole '{}' - finalizers: {}, deletionTimestamp: {}, labels: {}, annotations: {}",
+                    clusterRoleName,
+                    meta.getFinalizers(),
+                    meta.getDeletionTimestamp(),
+                    meta.getLabels(),
+                    meta.getAnnotations());
+        } else {
+            LOG.info("[DEBUG] ClusterRole '{}' - not found", clusterRoleName);
+        }
+
+        // Log ClusterRoleBinding
+        final var clusterRoleBinding = client.rbac().clusterRoleBindings().withName(clusterRoleBindingName).get();
+        if (clusterRoleBinding != null) {
+            final var meta = clusterRoleBinding.getMetadata();
+            LOG.info("[DEBUG] ClusterRoleBinding '{}' - finalizers: {}, deletionTimestamp: {}, labels: {}, annotations: {}",
+                    clusterRoleBindingName,
+                    meta.getFinalizers(),
+                    meta.getDeletionTimestamp(),
+                    meta.getLabels(),
+                    meta.getAnnotations());
+        } else {
+            LOG.info("[DEBUG] ClusterRoleBinding '{}' - not found", clusterRoleBindingName);
+        }
+
+        // Log RoleBinding
+        final var roleBinding = client.rbac().roleBindings().inNamespace(namespace).withName(roleBindingName).get();
+        if (roleBinding != null) {
+            final var meta = roleBinding.getMetadata();
+            LOG.info("[DEBUG] RoleBinding '{}' - finalizers: {}, deletionTimestamp: {}, labels: {}, annotations: {}",
+                    roleBindingName,
+                    meta.getFinalizers(),
+                    meta.getDeletionTimestamp(),
+                    meta.getLabels(),
+                    meta.getAnnotations());
+        } else {
+            LOG.info("[DEBUG] RoleBinding '{}' - not found", roleBindingName);
+        }
+    }
+
+    /**
      * Executes the the given command in the HiveMQ platform pod for the HiveMQ container
      * and asserts the output, error results and exit code
      *
