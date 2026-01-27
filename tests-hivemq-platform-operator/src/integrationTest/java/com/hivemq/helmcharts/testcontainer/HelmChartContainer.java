@@ -373,16 +373,17 @@ public class HelmChartContainer extends K3sContainer {
             final boolean withLocalCharts,
             final @NotNull Stream<String> additionalCommands,
             final boolean debugOnFailure) throws Exception {
-        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --wait --timeout 5m0s
+        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --debug --wait=legacy --timeout 3m0s
         final var helmCommandList = new ArrayList<>(List.of("helm",
                 "--kubeconfig",
                 "/etc/rancher/k3s/k3s.yaml",
                 helmCommand,
                 releaseName,
                 chartName != null ? chartName : "",
+                "--debug",
                 "--wait=legacy",
                 "--timeout",
-                "5m0s"));
+                "3m0s"));
         final var additionalCommandsList = additionalCommands.toList();
         helmCommandList.addAll(additionalCommandsList);
         if (chartName != null && withLocalCharts) {
@@ -394,6 +395,8 @@ public class HelmChartContainer extends K3sContainer {
 
         LOG.debug("Executing helm command: {}", String.join(" ", helmCommandList));
         final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
+        LOG.debug("Helm stdout: {}", execResult.getStdout());
+        LOG.debug("Helm stderr: {}", execResult.getStderr());
         assertThat(execResult.getStdout()).as(() -> describeHelmCommand(execResult,
                 helmCommandList,
                 helmCommand,
@@ -440,13 +443,13 @@ public class HelmChartContainer extends K3sContainer {
             return "Helm command: %s\nstdout: %s\nstderr: %s\nyaml:\n%s".formatted(helmCommandList,
                     execDeploy.getStdout(),
                     execDeploy.getStderr(),
-                    // execute Helm command with --debug and --dry-run to get additional error information
+                    // execute Helm command with --dry-run to get additional information
                     debugOnFailure ?
                             executeHelmCommand(helmCommand,
                                     releaseName,
                                     chartName,
                                     withLocalCharts,
-                                    Stream.concat(Stream.of("--debug", "--dry-run"), additionalCommands),
+                                    Stream.concat(Stream.of("--dry-run"), additionalCommands),
                                     false) :
                             "n/a");
         } catch (final Exception e) {
