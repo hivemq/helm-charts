@@ -33,7 +33,7 @@ public abstract class AbstractHelmChartIT {
 
     @RegisterExtension
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
-            new HelmChartContainerExtension(false);
+            new HelmChartContainerExtension(true);
 
     protected static final @NotNull String PLATFORM_CRD = "hivemq-platforms.hivemq.com";
 
