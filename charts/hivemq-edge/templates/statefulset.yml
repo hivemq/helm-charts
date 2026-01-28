@@ -327,6 +327,11 @@ spec:
           - mountPath: /pulse
             name: pulse
           {{- end }}
+          {{- if .Values.customLogbackConfig }}
+          - mountPath: /opt/hivemq/conf-k8s/logback.xml
+            name: logback
+            subPath: logback.xml
+          {{- end }}
       {{- with .Values.podScheduling.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -346,6 +351,11 @@ spec:
         - name: datahubinit
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "datahub" "releaseName" .Release.Name) }}
+      {{- end }}
+      {{- if .Values.customLogbackConfig }}
+        - name: logback
+          configMap:
+            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "logback" "releaseName" .Release.Name) }}
       {{- end }}
       {{- range .Values.volumes }}
         {{- toYaml .definition | nindent 8 }}

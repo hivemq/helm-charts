@@ -1,0 +1,46 @@
+suite: HiveMQ Edge - Custom Logback ConfigMap tests
+templates:
+  - configmap-logback.yml
+release:
+  name: test-edge
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with default values, no logback ConfigMap is created
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: with custom logback config, logback ConfigMap is created
+    set:
+      customLogbackConfig: |
+        <configuration>
+          <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+              <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+          </appender>
+          <root level="DEBUG">
+            <appender-ref ref="STDOUT" />
+          </root>
+        </configuration>
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: ConfigMap
+          name: hivemq-edge-logback-test-edge
+      - equal:
+          path: data["logback.xml"]
+          value: |
+            <configuration>
+              <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                  <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                </encoder>
+              </appender>
+              <root level="DEBUG">
+                <appender-ref ref="STDOUT" />
+              </root>
+            </configuration>

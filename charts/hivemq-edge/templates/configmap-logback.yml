@@ -1,0 +1,13 @@
+{{- /* Creates a ConfigMap with custom logback.xml when customLogbackConfig is set (inline or from file) */ -}}
+{{- if .Values.customLogbackConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "hivemq-edge.labels" . | nindent 4 }}
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "logback" "releaseName" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+data:
+  logback.xml: |
+    {{- .Values.customLogbackConfig | nindent 4 }}
+{{- end }}
