@@ -400,7 +400,7 @@
       "type" : "string"
     },
     "customLogbackConfig" : {
-      "description" : "Optional setting to provide a custom HiveMQ Edge logging configuration (logback.xml) from a file using --set-file customLogbackConfig=your-logback.xml.",
+      "description" : "Optional setting to provide a custom HiveMQ Edge logging configuration (logback.xml) from a file using --set-file customLogbackConfig=your-logback.xml. NOTE: When set, this overrides the default logging configuration and the logLevel setting will be ignored unless your custom config references the HIVEMQ_LOG_LEVEL environment variable.",
       "type" : "string"
     },
     "serviceAccountName" : {
