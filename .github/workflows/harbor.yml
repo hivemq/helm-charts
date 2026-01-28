@@ -20,7 +20,7 @@ jobs:
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
 
       - name: Login to Harbor
-        uses: docker/login-action@0567fa5ae8c9a197cb207537dc5cbb43ca3d803f
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
           registry: ${{ secrets.HARBOR_REGISTRY_URL }}
           username: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_USER }}
