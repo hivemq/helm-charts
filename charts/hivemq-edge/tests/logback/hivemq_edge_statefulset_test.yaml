@@ -1,0 +1,51 @@
+suite: HiveMQ Edge - Custom Logback StatefulSet tests
+templates:
+  - statefulset.yml
+release:
+  name: test-edge
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with default values, no logback volume mount in StatefulSet
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            mountPath: /opt/hivemq/conf-k8s/logback.xml
+            name: logback
+            subPath: logback.xml
+
+  - it: with default values, no logback volume in StatefulSet
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: logback
+          any: true
+
+  - it: with custom logback config, logback volume mount is added to StatefulSet
+    set:
+      customLogbackConfig: |
+        <configuration></configuration>
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            mountPath: /opt/hivemq/conf-k8s/logback.xml
+            name: logback
+            subPath: logback.xml
+
+  - it: with custom logback config, logback volume is added to StatefulSet
+    set:
+      customLogbackConfig: |
+        <configuration></configuration>
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: logback
+            configMap:
+              name: hivemq-edge-logback-test-edge
+

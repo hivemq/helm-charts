@@ -64,6 +64,19 @@ mqttsClientauth:
 # Configures the log level, possible values are: "TRACE", "DEBUG", "INFO", "WARN", "ERROR"
 logLevel: INFO
 
+# Custom HiveMQ Edge logging configuration (logback.xml).
+# Can be provided inline or from a file:
+#   --set customLogbackConfig='<configuration>...</configuration>'
+#   --set-file customLogbackConfig=your-logback.xml
+#
+# NOTE: When set, this overrides the default logging configuration and the
+# logLevel setting above will be ignored unless your custom config references
+# the HIVEMQ_LOG_LEVEL environment variable. Example:
+#   <root level="${HIVEMQ_LOG_LEVEL:-INFO}">
+#     <appender-ref ref="CONSOLE"/>
+#   </root>
+customLogbackConfig: ""
+
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
 
