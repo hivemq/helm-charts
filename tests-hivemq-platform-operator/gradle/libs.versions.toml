@@ -10,7 +10,6 @@ jackson = "2.21.0"
 javassist = "3.30.2-GA"
 junit-jupiter = "6.0.2"
 logback = "1.5.27"
-netty = "4.2.9.Final"
 rest-assured = "6.0.0"
 selenium = "4.40.0"
 shrinkwrap = "1.2.6"
@@ -31,7 +30,6 @@ jackson-dataformat-toml = { module = "com.fasterxml.jackson.dataformat:jackson-d
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-jupiter" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-netty-codec-http = { module = "io.netty:netty-codec-http", version.ref = "netty" }
 rest-assured = { module = "io.rest-assured:rest-assured", version.ref = "rest-assured" }
 selenium-java = { module = "org.seleniumhq.selenium:selenium-java", version.ref = "selenium" }
 selenium-remote-driver = { module = "org.seleniumhq.selenium:selenium-remote-driver", version.ref = "selenium" }
