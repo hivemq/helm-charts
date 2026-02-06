@@ -73,7 +73,6 @@ testing {
                 implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.hivemq.mqttClient)
                 runtimeOnly(libs.logback.classic)
-                implementation(libs.netty.codec.http)
                 implementation(libs.rest.assured)
                 implementation(libs.slf4j.api)
             }
