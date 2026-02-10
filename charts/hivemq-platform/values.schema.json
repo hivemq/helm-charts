@@ -63,36 +63,86 @@
       "type" : "array"
     },
     "additionalVolumes" : {
+      "description" : "Provides configuration options to mount additional volumes to specific directories in the HiveMQ container as a list.",
       "items" : {
         "properties" : {
           "containerName" : {
+            "description" : "The optional name of the container to which the volume is mounted. The default container name is `hivemq`.",
             "type" : "string"
           },
           "mountName" : {
+            "description" : "Defines the name of the volume mount to be used for the StatefulSet spec.",
             "type" : "string"
           },
           "name" : {
+            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this is used as the PersistentVolumeClaim name. Ignored for types `emptyDir` and `projected`.",
             "type" : "string"
           },
           "path" : {
+            "description" : "Configures the path of the directory to which the volume is mounted in the container. If the directory already exists then the contents are overwritten!",
+            "minLength" : 1,
+            "pattern" : "^/[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
             "type" : "string"
           },
           "projectedSources" : {
+            "description" : "Configures sources for additional volumes of type `projected`. This entry must contain a list of the volume source configurations that the Kubernetes Projected Volumes support.",
             "items" : {
               "type" : "object"
             },
             "type" : "array"
           },
           "subPath" : {
+            "description" : "Optional name for a subPath for a file to be mounted. The generated volume mount path is the concatenation of the `path` and `subPath` values. If a volume is mounted with subPath, the contents of the directory are not overwritten. However, changes to a ConfigMap that are mounted via subPath are not propagated to the container. In such cases, the pods must be restarted. Not applicable for the `sharedPersistentVolumeClaim` type.",
+            "minLength" : 1,
+            "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._-]*$",
             "type" : "string"
           },
+          "hivemqFolders" : {
+            "additionalProperties" : false,
+            "description" : "Redirects specific HiveMQ platform directories into named subfolders within the same PersistentVolumeClaim mount path. Each key selects a HiveMQ directory type and each value defines the subfolder name where that directory content is stored. The chart automatically sets the corresponding environment variable for each configured key.",
+            "properties" : {
+              "audit" : {
+                "description" : "Configures the subfolder name for the HiveMQ audit log directory. Sets the `HIVEMQ_AUDIT_FOLDER` environment variable.",
+                "minLength" : 1,
+                "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
+                "type" : "string"
+              },
+              "backup" : {
+                "description" : "Configures the subfolder name for the HiveMQ backup directory. Sets the `HIVEMQ_BACKUP_FOLDER` environment variable.",
+                "minLength" : 1,
+                "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
+                "type" : "string"
+              },
+              "data" : {
+                "description" : "Configures the subfolder name for the HiveMQ data directory. Sets the `HIVEMQ_DATA_FOLDER` environment variable.",
+                "minLength" : 1,
+                "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
+                "type" : "string"
+              },
+              "heapDump" : {
+                "description" : "Configures the subfolder name for the HiveMQ heap dump directory. Sets the `HIVEMQ_HEAPDUMP_FOLDER` environment variable.",
+                "minLength" : 1,
+                "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
+                "type" : "string"
+              },
+              "log" : {
+                "description" : "Configures the subfolder name for the HiveMQ log directory. Sets the `HIVEMQ_LOG_FOLDER` environment variable.",
+                "minLength" : 1,
+                "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._/-]*$",
+                "type" : "string"
+              }
+            },
+            "type" : "object"
+          },
           "type" : {
+            "description" : "Defines the type of volume to be mounted.",
             "enum" : [
               "configMap",
               "emptyDir",
               "persistentVolumeClaim",
               "projected",
-              "secret"
+              "secret",
+              "sharedPersistentVolumeClaim"
             ],
             "type" : "string"
           }
@@ -143,7 +193,7 @@
               "description" : "Defines whether all Data Hub options are rendered in HiveMQ Platform configuration, including features set to `false`. This allows explicitly disabling DataHub. The default setting is `false`.",
               "type" : "boolean"
             },
-            "scriptingEnabled" :  {
+            "scriptingEnabled" : {
               "description" : "Optional setting to enable scripting functionality. The default setting is `false`.",
               "type" : "boolean"
             }

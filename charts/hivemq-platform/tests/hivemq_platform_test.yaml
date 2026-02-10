@@ -630,7 +630,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.volumes
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.volumes
-          count: 7
+          count: 8
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -695,7 +695,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
-          count: 6
+          count: 7
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
@@ -734,6 +734,42 @@ tests:
           content:
             name: test-projected-volume
             mountPath: /additional-projected-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-shared-pvc-volume
+            persistentVolumeClaim:
+              claimName: test-shared-pvc-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-shared-pvc-volume
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pvc/my-data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: "/opt/hivemq/pvc/my-log"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: "/opt/hivemq/pvc/my-dump"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: "/opt/hivemq/pvc/my-backup"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+            value: "/opt/hivemq/pvc/my-audit"
 
   - it: with duplicated additionalVolumes `mountName` value in same `hivemq` container, then fails
     set:
@@ -1105,7 +1141,7 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
+            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
 
   - it: with additional volume type `secret` but missing `name`, then fails
     set:
@@ -1116,7 +1152,7 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
+            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
 
   - it: with additional volume type `persistentVolumeClaim` but missing `name`, then fails
     set:
@@ -1127,7 +1163,7 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `name` value is required for types "configMap", "secret" and "persistentVolumeClaim"
+            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
 
   - it: with additional volume type `emptyDir` but missing `name`, then succeeds
     set:
@@ -1435,3 +1471,1074 @@ tests:
     asserts:
       - notExists:
           path: spec.statefulSetMigration
+
+  ## additionalVolumes path and subPath schema validation tests
+
+  - it: with additionalVolumes path starting with space, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: " /opt/hivemq/config"
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes path not starting with slash, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: opt/hivemq/config
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes path containing special characters, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/con@fig
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes path containing spaces, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/my config
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes path with valid characters, then succeeds
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/config-v1.0_test
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-config
+            mountPath: /opt/hivemq/config-v1.0_test
+
+  - it: with additionalVolumes subPath starting with slash, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/config
+          subPath: /my-file.xml
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes subPath starting with dot, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/config
+          subPath: .hidden
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes subPath containing special characters, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/config
+          subPath: my@file
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes subPath containing spaces, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/config
+          subPath: my file
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with additionalVolumes subPath with valid characters, then succeeds
+    set:
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /opt/hivemq/config
+          subPath: my-file_v1.0
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-config
+            mountPath: /opt/hivemq/config/my-file_v1.0
+            subPath: my-file_v1.0
+
+  ## sharedPersistentVolumeClaim tests
+
+  - it: with sharedPersistentVolumeClaim and data, log and heapDump hivemqFolders, volume and env vars created
+    values:
+      - shared-pvc-volumes-values.yaml
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: hivemqpvc
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: hivemqpvc
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pvc/data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: "/opt/hivemq/pvc/log"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: "/opt/hivemq/pvc/dump"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+          any: true
+
+  - it: with sharedPersistentVolumeClaim and custom hivemqFolders, env vars use custom names
+    values:
+      - shared-pvc-custom-subpaths-values.yaml
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: hivemqpvc
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: hivemqpvc
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pvc/my-data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: "/opt/hivemq/pvc/my-log"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: "/opt/hivemq/pvc/my-dump"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: "/opt/hivemq/pvc/my-backup"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+            value: "/opt/hivemq/pvc/my-audit"
+
+  - it: with sharedPersistentVolumeClaim and only data subPath, only HIVEMQ_DATA_FOLDER env var created
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: my-data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: hivemqpvc
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: hivemqpvc
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pvc/my-data"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+          any: true
+
+  - it: with sharedPersistentVolumeClaim and subset of hivemqFolders, only listed env vars created
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: my-data
+            heapDump: my-dump
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: hivemqpvc
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: hivemqpvc
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pvc/my-data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: "/opt/hivemq/pvc/my-dump"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+          any: true
+
+  - it: with sharedPersistentVolumeClaim and backup and audit hivemqFolders, only listed env vars created
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            backup: my-backup
+            audit: my-audit
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: hivemqpvc
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: hivemqpvc
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: "/opt/hivemq/pvc/my-backup"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+            value: "/opt/hivemq/pvc/my-audit"
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+          any: true
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+          any: true
+
+  - it: with sharedPersistentVolumeClaim alongside other volume types, all work together
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: my-data
+        - type: configMap
+          name: test-configmap
+          path: /opt/hivemq/configmap
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: hivemqpvc
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: hivemqpvc
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-configmap
+            configMap:
+              name: test-configmap
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-configmap
+            mountPath: /opt/hivemq/configmap
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pvc/my-data"
+
+  - it: with sharedPersistentVolumeClaim missing `name`, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          mountName: hivemqpvc
+          path: /opt/hivemq/pvc
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
+
+  - it: with `hivemqFolders` on non-sharedPersistentVolumeClaim type, then fails
+    set:
+      additionalVolumes:
+        - type: persistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `hivemqFolders` value is only available for type "sharedPersistentVolumeClaim"
+
+  - it: with `subPath` on sharedPersistentVolumeClaim, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          subPath: data
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `subPath` value is not allowed for type "sharedPersistentVolumeClaim". Use `hivemqFolders` instead
+
+  - it: with sharedPersistentVolumeClaim and non-hivemq containerName, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          containerName: foobar
+          path: /opt/hivemq/pvc
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `sharedPersistentVolumeClaim` volume type is only allowed for the `hivemq` container
+
+  - it: with sharedPersistentVolumeClaim and mountName matching volumeClaimTemplates, then succeeds
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          mountName: custom-mount
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: custom-mount
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: custom-mount
+            persistentVolumeClaim:
+              claimName: hivemqpvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: custom-mount
+            mountPath: /opt/hivemq/pvc
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: /opt/hivemq/pvc/data
+
+  - it: with sharedPersistentVolumeClaim and mountName not matching volumeClaimTemplates, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          mountName: custom-mount
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `custom-mount`
+
+  - it: with sharedPersistentVolumeClaim without volumeClaimTemplates, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `hivemqpvc`
+
+  - it: with sharedPersistentVolumeClaim without matching volumeClaimTemplates name, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: other-pvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `hivemqpvc`
+
+  - it: with sharedPersistentVolumeClaim path set to /opt/hivemq, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `path` value `/opt/hivemq` is not allowed for `sharedPersistentVolumeClaim` volume type. Use a subdirectory instead
+
+  - it: with HIVEMQ_DATA_FOLDER in nodes.env and hivemqFolders.data, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+      nodes.env:
+        - name: HIVEMQ_DATA_FOLDER
+          value: /custom/path
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `HIVEMQ_DATA_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+
+  - it: with HIVEMQ_LOG_FOLDER in nodes.env and hivemqFolders.log, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            log: log
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+      nodes.env:
+        - name: HIVEMQ_LOG_FOLDER
+          value: /custom/path
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `HIVEMQ_LOG_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+
+  - it: with HIVEMQ_HEAPDUMP_FOLDER in nodes.env and hivemqFolders.heapDump, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            heapDump: dump
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+      nodes.env:
+        - name: HIVEMQ_HEAPDUMP_FOLDER
+          value: /custom/path
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `HIVEMQ_HEAPDUMP_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+
+  - it: with HIVEMQ_BACKUP_FOLDER in nodes.env and hivemqFolders.backup, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            backup: backup
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+      nodes.env:
+        - name: HIVEMQ_BACKUP_FOLDER
+          value: /custom/path
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `HIVEMQ_BACKUP_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+
+  - it: with HIVEMQ_AUDIT_FOLDER in nodes.env and hivemqFolders.audit, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            audit: audit
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+      nodes.env:
+        - name: HIVEMQ_AUDIT_FOLDER
+          value: /custom/path
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `HIVEMQ_AUDIT_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+
+  - it: with HIVEMQ_DATA_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
+    set:
+      nodes.env:
+        - name: HIVEMQ_DATA_FOLDER
+          value: /custom/data
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: /custom/data
+
+  - it: with HIVEMQ_LOG_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
+    set:
+      nodes.env:
+        - name: HIVEMQ_LOG_FOLDER
+          value: /custom/logs
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: /custom/logs
+
+  - it: with HIVEMQ_HEAPDUMP_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
+    set:
+      nodes.env:
+        - name: HIVEMQ_HEAPDUMP_FOLDER
+          value: /custom/dumps
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: /custom/dumps
+
+  - it: with HIVEMQ_BACKUP_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
+    set:
+      nodes.env:
+        - name: HIVEMQ_BACKUP_FOLDER
+          value: /custom/backup
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: /custom/backup
+
+  - it: with HIVEMQ_AUDIT_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
+    set:
+      nodes.env:
+        - name: HIVEMQ_AUDIT_FOLDER
+          value: /custom/audit
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+            value: /custom/audit
+
+  - it: with sharedPersistentVolumeClaim without hivemqFolders, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `hivemqFolders` is required for `sharedPersistentVolumeClaim` volume type
+
+  - it: with sharedPersistentVolumeClaim with empty hivemqFolders, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders: {}
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            `hivemqFolders` must contain at least one key (data, log, heapDump, backup, audit) for `sharedPersistentVolumeClaim` volume type
+
+  - it: with sharedPersistentVolumeClaim with unknown hivemqFolders key, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            foo: bar
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim with empty string hivemqFolders value, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with multiple sharedPersistentVolumeClaim entries, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc1
+          path: /opt/hivemq/pvc1
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc2
+          path: /opt/hivemq/pvc2
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            Only one `sharedPersistentVolumeClaim` volume type is allowed but 2 were defined
+
+  - it: with duplicate hivemqFolders values in sharedPersistentVolumeClaim, then fails
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: shared
+            log: shared
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            Duplicate subfolder name `shared` in `hivemqFolders` for `sharedPersistentVolumeClaim`
+
+  - it: with sharedPersistentVolumeClaim subPath starting with slash, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: /my-data
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim subPath containing spaces, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            log: my data
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim subPath starting with dot, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            heapDump: .hidden
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim subPath starting with hyphen, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            backup: -backup
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim subPath containing special characters, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            audit: my@data
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim nested subPath containing special characters, then fails schema validation
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: foo/@invalid
+    asserts:
+      - failedTemplate:
+          errorPattern: |-
+            values don't meet the specifications of the schema
+
+  - it: with sharedPersistentVolumeClaim subPath with valid characters (dots, underscores, hyphens), then succeeds
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: my-data_v1.0
+            log: my.logs
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: /opt/hivemq/pvc/my-data_v1.0
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: /opt/hivemq/pvc/my.logs
+
+  - it: with sharedPersistentVolumeClaim subPath with nested subfolders, then succeeds
+    set:
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: hivemqpvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: foo/bar
+            log: baz/qux
+            heapDump: deep/nested/path
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: hivemqpvc
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            volumeMode: Filesystem
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: /opt/hivemq/pvc/foo/bar
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: /opt/hivemq/pvc/baz/qux
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: /opt/hivemq/pvc/deep/nested/path

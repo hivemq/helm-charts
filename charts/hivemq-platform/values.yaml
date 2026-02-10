@@ -745,7 +745,7 @@ extensions:
 #    # skipHttpsCertificateValidation: true
 #    # skipHttpsHostnameVerification: true
 
-# Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim", "projected".
+# Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim", "projected", "sharedPersistentVolumeClaim".
 additionalVolumes: []
 ## Example of an additional volume using a ConfigMap:
 #  - type: configMap
@@ -773,6 +773,27 @@ additionalVolumes: []
 #          audience: api
 #          expirationSeconds: 3600
 #          path: token
+## Example of a shared PersistentVolumeClaim that mounts a single PersistentVolume per pod and redirects HiveMQ directories into subfolders.
+## A matching `volumeClaimTemplates` entry with the same `name` is required. This ensures each pod in the StatefulSet
+## gets its own PersistentVolume, which prevents data conflicts when multiple pods run simultaneously.
+## The `hivemqFolders` field is required and must contain at least one key. Only listed keys generate environment variables.
+## With all hivemqFolders:
+#  - type: sharedPersistentVolumeClaim
+#    name: hivemqpvc
+#    path: /opt/hivemq/pvc
+#    hivemqFolders:
+#      data: my-data                    # → HIVEMQ_DATA_FOLDER=/opt/hivemq/pvc/my-data
+#      log: my-log                      # → HIVEMQ_LOG_FOLDER=/opt/hivemq/pvc/my-log
+#      heapDump: my-dump                # → HIVEMQ_HEAPDUMP_FOLDER=/opt/hivemq/pvc/my-dump
+#      backup: my-backup                # → HIVEMQ_BACKUP_FOLDER=/opt/hivemq/pvc/my-backup
+#      audit: my-audit                  # → HIVEMQ_AUDIT_FOLDER=/opt/hivemq/pvc/my-audit
+## With a subset of hivemqFolders:
+#  - type: sharedPersistentVolumeClaim
+#    name: hivemqpvc
+#    path: /opt/hivemq/pvc
+#    hivemqFolders:
+#      data: my-data                    # → HIVEMQ_DATA_FOLDER=/opt/hivemq/pvc/my-data
+#      heapDump: my-dump                # → HIVEMQ_HEAPDUMP_FOLDER=/opt/hivemq/pvc/my-dump
 
 # type: Choose a type of volume that you want to mount.
 # name: The name used for the Secret, the ConfigMap or the PersistentVolumeClaim to be mounted.
@@ -787,10 +808,18 @@ additionalVolumes: []
 #       If a volume is mounted with subPath, then the contents of the directory are not overwritten.
 #       However, note that changes to a configmap, for example, mounted via subPath will not be propagated to the container.
 #       Therefore, pods have to be restarted.
+# hivemqFolders: Required for type "sharedPersistentVolumeClaim". Maps HiveMQ platform directories to subfolders within the mount path.
+#       Must contain at least one key. Only listed keys generate the corresponding environment variables. Values must be a valid folder name.
+#       Keys: "data"     → HIVEMQ_DATA_FOLDER,
+#             "log"      → HIVEMQ_LOG_FOLDER,
+#             "heapDump" → HIVEMQ_HEAPDUMP_FOLDER,
+#             "backup"   → HIVEMQ_BACKUP_FOLDER,
+#             "audit"    → HIVEMQ_AUDIT_FOLDER.
+#       A matching `volumeClaimTemplates` entry is required when using "sharedPersistentVolumeClaim".
 
 # List of PersistentVolumeClaims that pods are allowed to reference. Every claim in this list must have at least one matching (by name)
-# volumeMount in one container in the StatefulSet template. This can be achieved by defining an `additionalVolumes` entry of type `persistentVolumeClaim`
-# with a matching name.
+# volumeMount in one container in the StatefulSet template. This can be achieved by defining an `additionalVolumes` entry of type
+# `persistentVolumeClaim` or `sharedPersistentVolumeClaim` with a matching name.
 # A claim in this list takes precedence over any volumes in the StatefulSet template with the same name.
 # Note: A PersistentVolume is mounted with file permissions that depend on the `nodes.podSecurityContext` configuration.
 # Enable the `podSecurityContext` and add an `fsGroup` field to allow the HiveMQ process to write to the mounted volume.

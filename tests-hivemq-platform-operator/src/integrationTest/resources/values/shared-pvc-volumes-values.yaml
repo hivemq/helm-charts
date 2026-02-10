@@ -1,0 +1,27 @@
+nodes:
+  replicaCount: 2
+  podSecurityContext:
+    enabled: true
+    fsGroup: 0
+additionalVolumes:
+  - type: sharedPersistentVolumeClaim
+    name: shared-pvc
+    path: /opt/hivemq/pvc
+    hivemqFolders:
+      data: data
+      log: log
+      heapDump: dump
+      backup: backup
+      audit: audit
+volumeClaimTemplates:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: shared-pvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      volumeMode: Filesystem
