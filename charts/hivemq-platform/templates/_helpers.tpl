@@ -736,6 +736,17 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- $volumeMountPathList := list }}
 {{- $volumeTypesDict := dict }}
 
+{{- /* validate at most one sharedPersistentVolumeClaim is defined as we cannot have duplicated EnvVars for the same */ -}}
+{{- $sharedPvcCount := 0 }}
+{{- range $additionalVolumes }}
+  {{- if eq (.type | default "") "sharedPersistentVolumeClaim" }}
+    {{- $sharedPvcCount = add $sharedPvcCount 1 }}
+  {{- end }}
+{{- end }}
+{{- if gt (int $sharedPvcCount) 1 }}
+  {{- fail (printf "\nOnly one `sharedPersistentVolumeClaim` volume type is allowed but %d were defined" (int $sharedPvcCount)) }}
+{{- end }}
+
 {{- /* add default volume mounts for license, pulse and TLS to validation lists */ -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- if $hasLicense }}
@@ -768,14 +779,63 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{- if and (not (hasKey $additionalVolume "name")) (not (hasKey $additionalVolume "mountName")) }}
         {{- fail (printf "\nAt least one of `name` or `mountName` values must be defined") }}
     {{- end -}}
-    {{- if and (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "persistentVolumeClaim")) (not (hasKey $additionalVolume "name")) }}
-        {{- fail (printf "\n`name` value is required for types \"configMap\", \"secret\" and \"persistentVolumeClaim\"") }}
+    {{- if and (or (eq $additionalVolume.type "configMap") (eq $additionalVolume.type "secret") (eq $additionalVolume.type "persistentVolumeClaim") (eq $additionalVolume.type "sharedPersistentVolumeClaim")) (not (hasKey $additionalVolume "name")) }}
+        {{- fail (printf "\n`name` value is required for types \"configMap\", \"secret\", \"persistentVolumeClaim\" and \"sharedPersistentVolumeClaim\"") }}
     {{- end -}}
     {{- if and (eq $additionalVolume.type "projected") (not (hasKey $additionalVolume "projectedSources")) }}
         {{- fail (printf "\n`projectedSources` value is required for type \"projected\"") }}
     {{- end -}}
     {{- if and (not (eq $additionalVolume.type "projected")) (hasKey $additionalVolume "projectedSources") }}
         {{- fail (printf "\n`projectedSources` value is only available for type \"projected\"") }}
+    {{- end -}}
+    {{- if and (not (eq $additionalVolume.type "sharedPersistentVolumeClaim")) (hasKey $additionalVolume "hivemqFolders") }}
+        {{- fail (printf "\n`hivemqFolders` value is only available for type \"sharedPersistentVolumeClaim\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "sharedPersistentVolumeClaim") (hasKey $additionalVolume "subPath") }}
+        {{- fail (printf "\n`subPath` value is not allowed for type \"sharedPersistentVolumeClaim\". Use `hivemqFolders` instead") }}
+    {{- end -}}
+    {{- if eq $additionalVolume.type "sharedPersistentVolumeClaim" }}
+        {{- $sharedPvcContainerName := $additionalVolume.containerName | default "hivemq" }}
+        {{- if ne $sharedPvcContainerName "hivemq" }}
+            {{- fail (printf "\n`sharedPersistentVolumeClaim` volume type is only allowed for the `hivemq` container") }}
+        {{- end -}}
+        {{- $effectiveVolumeName := $additionalVolume.mountName | default $additionalVolume.name }}
+        {{- $matchingVCT := false }}
+        {{- range $.Values.volumeClaimTemplates }}
+            {{- if eq (.metadata.name | default "") $effectiveVolumeName }}
+                {{- $matchingVCT = true }}
+            {{- end }}
+        {{- end }}
+        {{- if not $matchingVCT }}
+            {{- fail (printf "\n`sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `%s`" $effectiveVolumeName) }}
+        {{- end -}}
+        {{- if eq $additionalVolume.path "/opt/hivemq" }}
+            {{- fail (printf "\n`path` value `/opt/hivemq` is not allowed for `sharedPersistentVolumeClaim` volume type. Use a subdirectory instead (e.g. `/opt/hivemq/pvc`)") }}
+        {{- end -}}
+        {{- if not (hasKey $additionalVolume "hivemqFolders") }}
+            {{- fail (printf "\n`hivemqFolders` is required for `sharedPersistentVolumeClaim` volume type. Define at least one key (data, log, heapDump, backup, audit)") }}
+        {{- else }}
+            {{- $subPathKeys := list "data" "log" "heapDump" "backup" "audit" }}
+            {{- $hasAnyKey := false }}
+            {{- range $subPathKeys }}
+                {{- if hasKey $additionalVolume.hivemqFolders . }}
+                    {{- $hasAnyKey = true }}
+                {{- end }}
+            {{- end }}
+            {{- if not $hasAnyKey }}
+                {{- fail (printf "\n`hivemqFolders` must contain at least one key (data, log, heapDump, backup, audit) for `sharedPersistentVolumeClaim` volume type") }}
+            {{- end }}
+            {{- $resolvedSubPaths := list }}
+            {{- range $subPathKeys }}
+                {{- if hasKey $additionalVolume.hivemqFolders . }}
+                    {{- $subPathValue := index $additionalVolume.hivemqFolders . }}
+                    {{- if has $subPathValue $resolvedSubPaths }}
+                        {{- fail (printf "\nDuplicate subfolder name `%s` in `hivemqFolders` for `sharedPersistentVolumeClaim`" $subPathValue) }}
+                    {{- end }}
+                    {{- $resolvedSubPaths = $subPathValue | append $resolvedSubPaths }}
+                {{- end }}
+            {{- end }}
+        {{- end }}
     {{- end -}}
 
     {{- $volumeName := "" }}
@@ -923,12 +983,65 @@ Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 {{- define "hivemq-platform.validate-default-env-vars" -}}
 {{- $defaultEnvs := list "JAVA_OPTS"}}
 {{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) }}
+{{- $sharedPvcEnvVars := list "HIVEMQ_DATA_FOLDER" "HIVEMQ_LOG_FOLDER" "HIVEMQ_HEAPDUMP_FOLDER" "HIVEMQ_BACKUP_FOLDER" "HIVEMQ_AUDIT_FOLDER" }}
+{{- $hasSharedPvc := ( include "hivemq-platform.has-shared-pvc" . ) }}
 {{- range .Values.nodes.env }}
   {{- if and (eq .name "HIVEMQ_PULSE_FOLDER") $hasPulseConfig }}
     {{- fail (printf "\nHIVEMQ_PULSE_FOLDER environment variable cannot be set") }}
   {{- end }}
+  {{- if and $hasSharedPvc (has .name $sharedPvcEnvVars) }}
+    {{- fail (printf "\n`%s` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type" .name) }}
+  {{- end }}
   {{- if has .name $defaultEnvs }}
     {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead" .name) }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Checks if any `sharedPersistentVolumeClaim` additional volume is configured.
+Returns: "true" if found, empty string otherwise.
+Usage: {{ include "hivemq-platform.has-shared-pvc" . }}
+*/}}
+{{- define "hivemq-platform.has-shared-pvc" -}}
+{{- $found := "" }}
+{{- range .Values.additionalVolumes }}
+  {{- if eq (.type | default "") "sharedPersistentVolumeClaim" }}
+    {{- $found = "true" }}
+  {{- end }}
+{{- end }}
+{{- $found }}
+{{- end -}}
+
+{{/*
+Generates environment variables for `sharedPersistentVolumeClaim` volumes.
+Only the keys listed in `hivemqFolders` generate the corresponding environment variables.
+Usage: {{ include "hivemq-platform.get-shared-pvc-env-vars" . }}
+*/}}
+{{- define "hivemq-platform.get-shared-pvc-env-vars" -}}
+{{- range .Values.additionalVolumes }}
+  {{- if and (eq (.type | default "") "sharedPersistentVolumeClaim") (hasKey . "hivemqFolders") }}
+    {{- $basePath := .path }}
+    {{- if hasKey .hivemqFolders "data" }}
+- name: HIVEMQ_DATA_FOLDER
+  value: {{ printf "%s/%s" $basePath .hivemqFolders.data | quote }}
+    {{- end }}
+    {{- if hasKey .hivemqFolders "log" }}
+- name: HIVEMQ_LOG_FOLDER
+  value: {{ printf "%s/%s" $basePath .hivemqFolders.log | quote }}
+    {{- end }}
+    {{- if hasKey .hivemqFolders "heapDump" }}
+- name: HIVEMQ_HEAPDUMP_FOLDER
+  value: {{ printf "%s/%s" $basePath .hivemqFolders.heapDump | quote }}
+    {{- end }}
+    {{- if hasKey .hivemqFolders "backup" }}
+- name: HIVEMQ_BACKUP_FOLDER
+  value: {{ printf "%s/%s" $basePath .hivemqFolders.backup | quote }}
+    {{- end }}
+    {{- if hasKey .hivemqFolders "audit" }}
+- name: HIVEMQ_AUDIT_FOLDER
+  value: {{ printf "%s/%s" $basePath .hivemqFolders.audit | quote }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -1368,7 +1481,7 @@ Usage: {{ include "hivemq-platform.get-additional-volumes" . }}
     secretName: {{ $volume.name }}
   {{- else if eq $volumeType "emptyDir" }}
   emptyDir: {}
-  {{- else if eq $volumeType "persistentVolumeClaim" }}
+  {{- else if or (eq $volumeType "persistentVolumeClaim") (eq $volumeType "sharedPersistentVolumeClaim") }}
   persistentVolumeClaim:
     claimName: {{ $volume.name }}
   {{- else if eq $volumeType "projected" }}

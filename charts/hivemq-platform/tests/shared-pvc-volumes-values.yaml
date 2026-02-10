@@ -1,0 +1,20 @@
+additionalVolumes:
+  - type: sharedPersistentVolumeClaim
+    name: hivemqpvc
+    path: /opt/hivemq/pvc
+    hivemqFolders:
+      data: data
+      log: log
+      heapDump: dump
+volumeClaimTemplates:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: hivemqpvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      volumeMode: Filesystem
