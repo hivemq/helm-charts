@@ -25,6 +25,15 @@ additionalVolumes:
     containerName: foobar
     path: /additional-configmap-volume-3
     subPath: subpath-configmap
+  - type: sharedPersistentVolumeClaim
+    name: test-shared-pvc-volume
+    path: /opt/hivemq/pvc
+    hivemqFolders:
+      data: my-data
+      log: my-log
+      heapDump: my-dump
+      backup: my-backup
+      audit: my-audit
   - type: projected
     mountName: test-projected-volume
     path: /additional-projected-volume
@@ -43,3 +52,15 @@ additionalVolumes:
           audience: api
           expirationSeconds: 3600
           path: token
+volumeClaimTemplates:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: test-shared-pvc-volume
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      volumeMode: Filesystem

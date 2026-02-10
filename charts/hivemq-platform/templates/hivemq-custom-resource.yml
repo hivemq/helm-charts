@@ -161,6 +161,10 @@ spec:
                     {{- end }}
                   {{- end }}
                 {{- end }}
+                {{- $sharedPvcEnvVars := include "hivemq-platform.get-shared-pvc-env-vars" . }}
+                {{- if $sharedPvcEnvVars }}
+                {{- $sharedPvcEnvVars | nindent 16 }}
+                {{- end }}
                 {{- with .Values.nodes.env }}
                   {{- toYaml . | nindent 16 }}
                 {{- end }}
