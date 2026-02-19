@@ -58,7 +58,9 @@ jobs:
 
   run-integration-tests:
     name: "Test #${{ matrix.split-index }} (${{ matrix.k8s-version-type }})"
-    runs-on: ubuntu-latest
+    # TODO: Switch to ubuntu-latest once the HiveMQ Platform runs on JDK 21.0.10+.
+    # See https://bugs.openjdk.org/browse/JDK-8349988
+    runs-on: ubuntu-22.04
     needs:
       - generate-split-index-json
       - compile-integration-test
