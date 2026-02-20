@@ -7,7 +7,7 @@ env:
 jobs:
   run-smoke-test:
     name: Smoke test on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
