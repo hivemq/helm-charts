@@ -86,7 +86,7 @@ jobs:
           helm install $RELEASE_NAME \
             --set image.repository=afalhambrahivemq \
             --set image.name=hivemq-server \
-            --set image.tag=debug-jdk-8348566 \
+            --set image.tag=4.49.0-SNAPSHOT-unobfuscated \
             --set nodes.replicaCount=1,nodes.resources.cpu=512m \
             ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test || true
 
