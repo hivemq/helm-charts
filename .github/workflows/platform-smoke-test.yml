@@ -7,9 +7,7 @@ env:
 jobs:
   run-smoke-test:
     name: Smoke test on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
-    # TODO: Switch to ubuntu-latest once the HiveMQ Platform runs on JDK 21.0.10+.
-    # See https://bugs.openjdk.org/browse/JDK-8349988
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +19,11 @@ jobs:
           - helm-label: 'latest-4'
             helm-version: 'v4.1.0'
     steps:
+      - name: Configure Docker daemon for compatibility
+        run: |
+          echo '{"features": {"containerd-snapshotter": false}}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -75,9 +78,17 @@ jobs:
         working-directory: helm-charts
         run: helm install operator-test --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=snapshot ./charts/hivemq-platform-operator --wait --timeout 2m0s
 
+      # Use debug image with fix for swallowed exceptions (BCD-116) to verify the error is now logged.
+      # No -Xmx workaround applied so the JDK-8348566 crash is visible in logs.
       - name: Install HiveMQ Platform
         working-directory: helm-charts
-        run: helm install $RELEASE_NAME --set image.repository=${{ steps.kind.outputs.LOCAL_REGISTRY }}/hivemq --set image.tag=latest --set nodes.replicaCount=1,nodes.resources.cpu=512m ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test
+        run: |
+          helm install $RELEASE_NAME \
+            --set image.repository=afalhambrahivemq \
+            --set image.name=hivemq-server \
+            --set image.tag=debug-jdk-8348566 \
+            --set nodes.replicaCount=1,nodes.resources.cpu=512m \
+            ./charts/hivemq-platform --wait --timeout 3m0s --create-namespace -n test || true
 
       - name: Wait for pods to be ready
         working-directory: helm-charts
@@ -99,6 +110,8 @@ jobs:
           kubectl get pods -n test >> ${{ runner.temp }}/logs/platform-pod.log
           echo "=== LOGS ===" >> ${{ runner.temp }}/logs/platform-pod.log
           kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 -n test >> ${{ runner.temp }}/logs/platform-pod.log 2>&1 || echo "Failed to retrieve pod logs" >> ${{ runner.temp }}/logs/platform-pod.log
+          echo "=== PREVIOUS CONTAINER LOGS ===" >> ${{ runner.temp }}/logs/platform-pod.log
+          kubectl logs -l app.kubernetes.io/instance=$RELEASE_NAME --tail -1 --previous -n test >> ${{ runner.temp }}/logs/platform-pod.log 2>&1 || echo "No previous container logs" >> ${{ runner.temp }}/logs/platform-pod.log
 
       - name: Upload HiveMQ Platform Pod logs
         if: always()
