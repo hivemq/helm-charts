@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Create K8s Kind Cluster
-        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1
         with:
           cluster_name: "kind"
 
