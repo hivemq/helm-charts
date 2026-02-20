@@ -9,7 +9,7 @@ jobs:
     name: Smoke test on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
     # TODO: Switch to ubuntu-latest once the HiveMQ Platform runs on JDK 21.0.10+.
     # See https://bugs.openjdk.org/browse/JDK-8349988
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
