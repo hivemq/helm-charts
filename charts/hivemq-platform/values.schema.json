@@ -71,11 +71,11 @@
             "type" : "string"
           },
           "mountName" : {
-            "description" : "Defines the name of the volume mount to be used for the StatefulSet spec.",
+            "description" : "Defines the name of the volume mount to be used for the StatefulSet spec. For type `sharedPersistentVolumeClaim`, the `mountName` (or `name`, if not set) must match a `volumeClaimTemplates` entry.",
             "type" : "string"
           },
           "name" : {
-            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this is used as the PersistentVolumeClaim name. Ignored for types `emptyDir` and `projected`.",
+            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this entry is used as the PersistentVolumeClaim name. The `name` field is ignored for types `emptyDir` and `projected`.",
             "type" : "string"
           },
           "path" : {
@@ -92,7 +92,7 @@
             "type" : "array"
           },
           "subPath" : {
-            "description" : "Optional name for a subPath for a file to be mounted. The generated volume mount path is the concatenation of the `path` and `subPath` values. If a volume is mounted with subPath, the contents of the directory are not overwritten. However, changes to a ConfigMap that are mounted via subPath are not propagated to the container. In such cases, the pods must be restarted. Not applicable for the `sharedPersistentVolumeClaim` type.",
+            "description" : "Optional name for a subPath for a file to be mounted. The generated volume mount path is the concatenation of the `path` and `subPath` values. If a volume is mounted with subPath, the contents of the directory are not overwritten. However, changes to a ConfigMap that are mounted via subPath are not propagated to the container. In such cases, a pod restart is required to apply changes. Not applicable for the `sharedPersistentVolumeClaim` type.",
             "minLength" : 1,
             "pattern" : "^[a-zA-Z0-9][a-zA-Z0-9._-]*$",
             "type" : "string"
