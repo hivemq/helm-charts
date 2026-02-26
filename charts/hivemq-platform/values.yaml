@@ -807,7 +807,7 @@ additionalVolumes: []
 # subPath: Optional name for the subPath. The generated volume mount path will be a result of concatenating `path` and the `subPath` values together.
 #       If a volume is mounted with subPath, then the contents of the directory are not overwritten.
 #       However, note that changes to a configmap, for example, mounted via subPath will not be propagated to the container.
-#       Therefore, pods have to be restarted.
+#       Therefore, a pod restart is required to apply changes.
 # hivemqFolders: Required for type "sharedPersistentVolumeClaim". Maps HiveMQ platform directories to subfolders within the mount path.
 #       Must contain at least one key. Only listed keys generate the corresponding environment variables. Values must be a valid folder name.
 #       Keys: "data"     → HIVEMQ_DATA_FOLDER,
