@@ -19,7 +19,7 @@ jobs:
           - helm-label: 'latest-3'
             helm-version: 'v3.20.0'
           - helm-label: 'latest-4'
-            helm-version: 'v4.1.0'
+            helm-version: 'v4.1.1'
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
