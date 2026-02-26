@@ -57,7 +57,7 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git add .
+          git add charts/hivemq-edge/ manifests/hivemq-edge/
           git commit -m "Release HiveMQ Edge ${{ inputs.app_version }}"
 
       - name: 🚀 Push and create PR
