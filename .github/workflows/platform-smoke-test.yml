@@ -9,7 +9,7 @@ jobs:
     name: Smoke test on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
     # TODO: Switch to ubuntu-latest once the HiveMQ Platform runs on JDK 21.0.10+.
     # See https://bugs.openjdk.org/browse/JDK-8349988
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload HiveMQ Platform Pod logs
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: "HiveMQ Platform Operator - Smoke test results on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})"
           path: ${{ runner.temp }}/logs/*.log
