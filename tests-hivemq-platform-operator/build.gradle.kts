@@ -129,10 +129,7 @@ tasks.register("integrationTestPrepare") {
 /* ******************** OCI images ******************** */
 
 val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
-    dependencies(oci.parentImageDependencies.create("noble") {
-        // https://hub.docker.com/layers/library/ubuntu/noble/
-        runtime("library:ubuntu:sha256!d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9") // noble
-    })
+    dependencies(oci.parentImageDependencies["noble"])
     platform = oci.platform("linux", "amd64")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
@@ -143,10 +140,7 @@ val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
 }
 
 val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
-    dependencies(oci.parentImageDependencies.create("noble") {
-        // https://hub.docker.com/layers/library/ubuntu/noble/
-        runtime("library:ubuntu:sha256!d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9") // noble
-    })
+    dependencies(oci.parentImageDependencies["noble"])
     platform = oci.platform("linux", "arm64", "v8")
     command =
         "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
@@ -168,6 +162,12 @@ oci {
         }
         mapModule("com.hivemq", "hivemq-enterprise-k8s") {
             toImage("hivemq/hivemq4").withTag(version.prefix("k8s-"))
+        }
+    }
+    parentImageDependencies {
+        create("noble") {
+            // https://hub.docker.com/layers/library/ubuntu/noble/
+            runtime("library:ubuntu:sha256!d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9") // noble
         }
     }
     imageDefinitions {
