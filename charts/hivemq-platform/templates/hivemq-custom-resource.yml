@@ -315,7 +315,7 @@ spec:
         {{- if $service.externalTrafficPolicy }}
         externalTrafficPolicy: {{ $service.externalTrafficPolicy }}
         {{- end }}
-        {{- if and (eq $service.type "control-center") (not (hasKey $service "sessionAffinity")) }}
+        {{- if and (eq $service.type "control-center") (not (hasKey $service "sessionAffinity")) (ne $service.serviceType "LoadBalancer") }}
         sessionAffinity: ClientIP
         {{- else if hasKey $service "sessionAffinity" }}
         sessionAffinity: {{ $service.sessionAffinity.type }}
