@@ -100,6 +100,75 @@ tests:
                   port: 8081
               sessionAffinity: ClientIP
 
+  - it: with Control Center service enabled and serviceType LoadBalancer, then no sessionAffinity is set
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          serviceType: LoadBalancer
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              type: LoadBalancer
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+
+  - it: with Control Center service enabled and serviceType NodePort, then no sessionAffinity is set
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          serviceType: NodePort
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              type: NodePort
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+
+  - it: with Control Center service enabled, serviceType LoadBalancer and explicit sessionAffinity None, then service session affinity is None
+    set:
+      services:
+        - type: control-center
+          exposed: true
+          containerPort: 8081
+          serviceType: LoadBalancer
+          sessionAffinity:
+            type: None
+    asserts:
+      - exists:
+          path: spec.services
+      - contains:
+          path: spec.services
+          content:
+            metadata:
+              name: hivemq-test-hivemq-platform-cc-8081
+            spec:
+              type: LoadBalancer
+              ports:
+                - name: cc-8081
+                  targetPort: cc-8081
+                  port: 8081
+              sessionAffinity: None
+
   - it: with Control Center service enabled and session affinity `None`, then service session affinity is `None`
     set:
       services:
