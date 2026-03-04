@@ -123,7 +123,9 @@ testing {
 }
 
 tasks.register("integrationTestPrepare") {
-    dependsOn(tasks.named("integrationTest").get().taskDependencies.getDependencies(null))
+    dependsOn(provider {
+        tasks.named("integrationTest").get().taskDependencies.getDependencies(null)
+    })
 }
 
 /* ******************** OCI images ******************** */
