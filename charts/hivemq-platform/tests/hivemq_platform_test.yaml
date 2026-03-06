@@ -736,7 +736,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.volumes
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.volumes
-          count: 8
+          count: 9
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -801,7 +801,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
-          count: 7
+          count: 8
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
@@ -840,6 +840,20 @@ tests:
           content:
             name: test-projected-volume
             mountPath: /additional-projected-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+              volumeAttributes:
+                secretProviderClass: my-secret-provider
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-csi-volume
+            mountPath: /additional-csi-volume
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -1368,6 +1382,254 @@ tests:
       - failedTemplate:
           errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499  
             `projectedSources` value is only available for type "projected"
+
+  - it: with additional volume type `csi` but missing `name`, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-csi-mount-volume
+            mountPath: /additional-csi-volume
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+
+  - it: with additional volume type `csi` with volumeAttributes, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            volumeAttributes:
+              secretProviderClass: my-provider
+              key1: value1
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              volumeAttributes:
+                secretProviderClass: my-provider
+                key1: value1
+
+  - it: with additional volume type `csi` and string `volumeAttributes` values that look like YAML booleans or numbers, then they are preserved as strings
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            volumeAttributes:
+              boolean: "true"
+              number: "123"
+              string: "yes"
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              volumeAttributes:
+                boolean: "true"
+                number: "123"
+                string: "yes"
+
+  - it: with additional volume type `csi` and non-string `volumeAttributes` values, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            volumeAttributes:
+              boolean: true
+              number: 123
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
+            got boolean, want string
+
+  - it: with additional volume type `csi` with readOnly true, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+
+  - it: with additional volume type `csi` with readOnly false, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: false
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: false
+
+  - it: with additional volume type `csi` with fsType, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: my-csi-driver
+            fsType: ext4
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: my-csi-driver
+              fsType: ext4
+
+  - it: with additional volume type `csi` with nodePublishSecretRef, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: my-csi-driver
+            nodePublishSecretRef: my-secret
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: my-csi-driver
+              nodePublishSecretRef:
+                name: my-secret
+
+  - it: with additional volume type `csi` but missing `csi` field, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
+            `csi` value is required for type "csi"
+
+  - it: with additional volume type `csi` but missing `csi.driver`, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+          csi:
+            readOnly: true
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
+            `csi.driver` value is required for type "csi"
+
+  - it: with additional volume type different than `csi` but `csi` is present, then fails
+    set:
+      additionalVolumes:
+        - type: emptyDir
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
+            `csi` value is only available for type "csi"
+
+  - it: with multiple additional volumes of type `csi` sharing the same `mountName` and identical `csi` config, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: shared-csi-volume
+          path: /mnt/primary
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: my-provider
+        - type: csi
+          mountName: shared-csi-volume
+          containerName: sidecar-container
+          path: /mnt/secondary
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: my-provider
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: shared-csi-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+              volumeAttributes:
+                secretProviderClass: my-provider
+          count: 1
+
+  - it: with multiple additional volumes of type `csi` sharing the same `mountName` but with different `csi` configurations, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: shared-csi-volume
+          path: /mnt/primary
+          csi:
+            driver: driver-a
+        - type: csi
+          mountName: shared-csi-volume
+          containerName: sidecar-container
+          path: /mnt/secondary
+          csi:
+            driver: driver-b
+    asserts:
+      - failedTemplate:
+          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
+            `csi` configuration for volume "shared-csi-volume" must be identical across all `additionalVolumes` entries that share the same `mountName`
 
   - it: with default settings, no volume claim template is set
     asserts:
