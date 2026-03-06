@@ -70,12 +70,44 @@
             "description" : "The optional name of the container to which the volume is mounted. The default container name is `hivemq`.",
             "type" : "string"
           },
+          "csi" : {
+            "description" : "Configures the Container Storage Interface (CSI) volume source. Required for type `csi`.",
+            "properties" : {
+              "driver" : {
+                "description" : "The name of the CSI driver to use (e.g. `secrets-store.csi.k8s.io`).",
+                "minLength" : 1,
+                "type" : "string"
+              },
+              "fsType" : {
+                "description" : "The filesystem type to mount (e.g. `ext4`, `xfs`, `ntfs`). The value is passed through to the CSI driver and the supported types depend on the driver and the host operating system.",
+                "minLength" : 1,
+                "type" : "string"
+              },
+              "nodePublishSecretRef" : {
+                "description" : "The name of the Kubernetes Secret to pass to the CSI driver for `NodePublishVolume`.",
+                "minLength" : 1,
+                "type" : "string"
+              },
+              "readOnly" : {
+                "description" : "Mounts the CSI volume as read-only.",
+                "type" : "boolean"
+              },
+              "volumeAttributes" : {
+                "additionalProperties" : {
+                  "type" : "string"
+                },
+                "description" : "Driver-specific key-value attributes passed through to the CSI driver.",
+                "type" : "object"
+              }
+            },
+            "type" : "object"
+          },
           "mountName" : {
             "description" : "Defines the name of the volume mount to be used for the StatefulSet spec. For type `sharedPersistentVolumeClaim`, the `mountName` (or `name`, if not set) must match a `volumeClaimTemplates` entry.",
             "type" : "string"
           },
           "name" : {
-            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this entry is used as the PersistentVolumeClaim name. The `name` field is ignored for types `emptyDir` and `projected`.",
+            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this entry is used as the PersistentVolumeClaim name. For types `csi`, `emptyDir` and `projected`, `name` is used as the volume identifier only when `mountName` is not set (prefer setting `mountName`).",
             "type" : "string"
           },
           "path" : {
@@ -138,6 +170,7 @@
             "description" : "Defines the type of volume to be mounted.",
             "enum" : [
               "configMap",
+              "csi",
               "emptyDir",
               "persistentVolumeClaim",
               "projected",
