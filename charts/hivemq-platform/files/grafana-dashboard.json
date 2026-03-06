@@ -801,7 +801,7 @@
           "editorMode": "code",
           "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_(.*)_read_bytes\"}, \"disk\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.*)_read_bytes\")[5m:${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} {{interface}} bytes.read",
+          "legendFormat": "{{instance}} {{disk}} bytes.read",
           "range": true,
           "refId": "A"
         }
@@ -889,10 +889,10 @@
             "uid": "${Prometheus}"
           },
           "editorMode": "code",
-          "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_.+_write_bytes\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.+)_write_bytes\")[5m:${intervalSeconds}s])",
+          "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_.+_write_bytes\"}, \"disk\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.+)_write_bytes\")[5m:${intervalSeconds}s])",
           "hide": false,
           "instant": false,
-          "legendFormat": "{{instance}} {{interface}} bytes.written",
+          "legendFormat": "{{instance}} {{disk}} bytes.written",
           "range": true,
           "refId": "A"
         }
@@ -7310,7 +7310,7 @@
                 "uid": "${Prometheus}"
               },
               "editorMode": "code",
-              "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\")[5m:${intervalSeconds}s])",
+              "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\")[5m:${intervalSeconds}s])",
               "hide": false,
               "instant": false,
               "legendFormat": "{{instance}} {{route}}",
@@ -7775,7 +7775,7 @@
                 "uid": "${Prometheus}"
               },
               "editorMode": "code",
-              "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\")[5m:${intervalSeconds}s])",
+              "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\")[5m:${intervalSeconds}s])",
               "hide": false,
               "instant": false,
               "legendFormat": "{{instance}} {{route}}",
@@ -8885,7 +8885,7 @@
                 "uid": "${Prometheus}"
               },
               "editorMode": "code",
-              "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\")[5m:${intervalSeconds}s])",
+              "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\")[5m:${intervalSeconds}s])",
               "hide": false,
               "instant": false,
               "legendFormat": "{{instance}} {{route}}",
