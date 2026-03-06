@@ -766,6 +766,7 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- $volumeMountNameList := list }}
 {{- $volumeMountPathList := list }}
 {{- $volumeTypesDict := dict }}
+{{- $csiConfigs := dict }}
 
 {{- /* validate at most one sharedPersistentVolumeClaim is defined as we cannot have duplicated EnvVars for the same */ -}}
 {{- $sharedPvcCount := 0 }}
@@ -818,6 +819,25 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{- end -}}
     {{- if and (not (eq $additionalVolume.type "projected")) (hasKey $additionalVolume "projectedSources") }}
         {{- fail (printf "\n`projectedSources` value is only available for type \"projected\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "csi") (not (hasKey $additionalVolume "csi")) }}
+        {{- fail (printf "\n`csi` value is required for type \"csi\"") }}
+    {{- end -}}
+    {{- if and (not (eq $additionalVolume.type "csi")) (hasKey $additionalVolume "csi") }}
+        {{- fail (printf "\n`csi` value is only available for type \"csi\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "csi") (hasKey $additionalVolume "csi") (not (hasKey $additionalVolume.csi "driver")) }}
+        {{- fail (printf "\n`csi.driver` value is required for type \"csi\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "csi") (hasKey $additionalVolume "csi") }}
+        {{- $csiVolumeName := $additionalVolume.mountName | default $additionalVolume.name }}
+        {{- if hasKey $csiConfigs $csiVolumeName }}
+            {{- if ne (toJson (get $csiConfigs $csiVolumeName)) (toJson $additionalVolume.csi) }}
+                {{- fail (printf "\n`csi` configuration for volume %q must be identical across all `additionalVolumes` entries that share the same `mountName`" $csiVolumeName) }}
+            {{- end }}
+        {{- else }}
+            {{- $_ := set $csiConfigs $csiVolumeName $additionalVolume.csi }}
+        {{- end }}
     {{- end -}}
     {{- if and (not (eq $additionalVolume.type "sharedPersistentVolumeClaim")) (hasKey $additionalVolume "hivemqFolders") }}
         {{- fail (printf "\n`hivemqFolders` value is only available for type \"sharedPersistentVolumeClaim\"") }}
@@ -1521,6 +1541,23 @@ Usage: {{ include "hivemq-platform.get-additional-volumes" . }}
       {{- with $volume.projectedSources }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
+  {{- else if eq $volumeType "csi" }}
+  csi:
+    driver: {{ $volume.csi.driver }}
+    {{- if hasKey $volume.csi "readOnly" }}
+    readOnly: {{ $volume.csi.readOnly }}
+    {{- end }}
+    {{- if $volume.csi.fsType }}
+    fsType: {{ $volume.csi.fsType }}
+    {{- end }}
+    {{- if $volume.csi.volumeAttributes }}
+    volumeAttributes:
+      {{- toYaml $volume.csi.volumeAttributes | nindent 6 }}
+    {{- end }}
+    {{- if $volume.csi.nodePublishSecretRef }}
+    nodePublishSecretRef:
+      name: {{ $volume.csi.nodePublishSecretRef }}
+    {{- end }}
   {{- end }}
 {{- $volumeList = $volumeKey | append $volumeList}}
 {{- end }}
