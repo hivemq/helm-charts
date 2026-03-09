@@ -21,9 +21,9 @@ adminLdap:
   rdns: "ou=people"
   baseDn: "dc=example,dc=org"
   userRolesEnabled: true
-  userRoleAdminQuery: "(&(entryDN={userDn})(memberOf=cn=administrators,ou=groups,dc=example,dc=org))"
-  userRoleSuperQuery: "(&(entryDN={userDn})(memberOf=cn=developers,ou=groups,dc=example,dc=org))"
-  userRoleUserQuery: "(&(entryDN={userDn})(memberOf=cn=data-scientists,ou=groups,dc=example,dc=org))"
+  userRoleAdminQuery: "(&amp;(entryDN={userDn})(memberOf=cn=administrators,ou=groups,dc=example,dc=org))"
+  userRoleSuperQuery: "(&amp;(entryDN={userDn})(memberOf=cn=developers,ou=groups,dc=example,dc=org))"
+  userRoleUserQuery: "(&amp;(entryDN={userDn})(memberOf=cn=data-scientists,ou=groups,dc=example,dc=org))"
   directoryDescent: true
   maxConnections: 10
   connectionTimeoutMillis: 5000
