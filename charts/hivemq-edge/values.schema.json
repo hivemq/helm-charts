@@ -214,6 +214,26 @@
         "searchTimeoutSeconds" : {
           "type" : "integer",
           "description" : "Timeout for LDAP searches."
+        },
+        "baseDn" : {
+          "type" : "string",
+          "description" : "Optional Base DN. When specified, both rdns and service account rdns are relative to this."
+        },
+        "userRolesEnabled" : {
+          "type" : "boolean",
+          "description" : "Enable LDAP user role queries."
+        },
+        "userRoleAdminQuery" : {
+          "type" : "string",
+          "description" : "LDAP query to determine if a user has the ADMIN role."
+        },
+        "userRoleSuperQuery" : {
+          "type" : "string",
+          "description" : "LDAP query to determine if a user has the SUPER role."
+        },
+        "userRoleUserQuery" : {
+          "type" : "string",
+          "description" : "LDAP query to determine if a user has the USER role."
         }
       },
       "type" : "object"

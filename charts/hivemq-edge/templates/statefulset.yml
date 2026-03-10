@@ -202,6 +202,10 @@ spec:
               value: "{{ .Values.adminLdap.uid }}"
             - name: HIVEMQ_LDAP_RDNS
               value: "{{ .Values.adminLdap.rdns }}"
+            {{- if .Values.adminLdap.baseDn }}
+            - name: HIVEMQ_LDAP_BASE_DN
+              value: "{{ .Values.adminLdap.baseDn }}"
+            {{- end }}
             - name: HIVEMQ_LDAP_DIRECTORY_DESCENT
               value: "{{ .Values.adminLdap.directoryDescent }}"
             - name: HIVEMQ_LDAP_MAX_CONNECTION
@@ -217,6 +221,22 @@ spec:
               value: "true"
             - name: HIVEMQ_LDAP_OBJECT_CLASS
               value: "{{ .Values.adminLdap.objectClass }}"
+              {{- end }}
+              {{- if .Values.adminLdap.userRolesEnabled }}
+            - name: HIVEMQ_LDAP_USER_ROLES_ENABLED
+              value: "true"
+              {{- if .Values.adminLdap.userRoleAdminQuery }}
+            - name: HIVEMQ_LDAP_USER_ROLE_ADMIN_QUERY
+              value: "{{ .Values.adminLdap.userRoleAdminQuery }}"
+              {{- end }}
+              {{- if .Values.adminLdap.userRoleSuperQuery }}
+            - name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
+              value: "{{ .Values.adminLdap.userRoleSuperQuery }}"
+              {{- end }}
+              {{- if .Values.adminLdap.userRoleUserQuery }}
+            - name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
+              value: "{{ .Values.adminLdap.userRoleUserQuery }}"
+              {{- end }}
               {{- end }}
             - name: HIVEMQ_LDAP_SERVER1_HOST
               value: "{{ (index .Values.adminLdap.servers 0).host }}"

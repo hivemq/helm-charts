@@ -339,3 +339,92 @@ tests:
           content:
             mountPath: /ldap-trust
             name: ldap-truststore-jks
+
+  - it: Should set HIVEMQ_LDAP_BASE_DN when baseDn is provided
+    set:
+      adminLdap:
+        baseDn: "dc=example,dc=org"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_BASE_DN
+            value: "dc=example,dc=org"
+
+  - it: Should not set HIVEMQ_LDAP_BASE_DN when baseDn is not provided
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_BASE_DN
+
+  - it: Should set user roles environment variables when userRolesEnabled is true
+    set:
+      adminLdap:
+        userRolesEnabled: true
+        userRoleAdminQuery: "(&amp;(entryDN={userDn})(memberOf=cn=administrators,ou=groups,dc=example,dc=org))"
+        userRoleSuperQuery: "(&amp;(entryDN={userDn})(memberOf=cn=developers,ou=groups,dc=example,dc=org))"
+        userRoleUserQuery: "(&amp;(entryDN={userDn})(memberOf=cn=data-scientists,ou=groups,dc=example,dc=org))"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLES_ENABLED
+            value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_ADMIN_QUERY
+            value: "(&amp;(entryDN={userDn})(memberOf=cn=administrators,ou=groups,dc=example,dc=org))"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
+            value: "(&amp;(entryDN={userDn})(memberOf=cn=developers,ou=groups,dc=example,dc=org))"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
+            value: "(&amp;(entryDN={userDn})(memberOf=cn=data-scientists,ou=groups,dc=example,dc=org))"
+
+  - it: Should set HIVEMQ_LDAP_USER_ROLES_ENABLED without role queries when none are provided
+    set:
+      adminLdap:
+        userRolesEnabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLES_ENABLED
+            value: "true"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_ADMIN_QUERY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
+
+  - it: Should not set user roles environment variables when userRolesEnabled is not set
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLES_ENABLED
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_ADMIN_QUERY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
