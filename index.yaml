@@ -2850,6 +2850,33 @@ entries:
         url: https://www.hivemq.com/public.pgp
     apiVersion: v2
     appVersion: 4.49.0
+    created: "2026-03-10T10:01:35.582301525Z"
+    description: HiveMQ Platform Helm Chart
+    digest: e740548b6117ebab83828ad098977fdaff35fe2c6845df07f0a2c597047bba30
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform
+    - Broker
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-0.2.64/hivemq-platform-0.2.64.tgz
+    version: 0.2.64
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
+    appVersion: 4.49.0
     created: "2026-03-03T18:23:46.17288494Z"
     description: HiveMQ Platform Helm Chart
     digest: 1ef7a6a83cb5196c3994f4fcdc88dcc1ea5ddcc9e79698a75108b4a373b6f791
@@ -4430,6 +4457,33 @@ entries:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-0.2.0/hivemq-platform-0.2.0.tgz
     version: 0.2.0
   hivemq-platform-operator:
+  - annotations:
+      artifacthub.io/signKey: |
+        fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
+        url: https://www.hivemq.com/public.pgp
+    apiVersion: v2
+    appVersion: 2.1.4
+    created: "2026-03-10T10:01:35.795612391Z"
+    description: HiveMQ Platform Operator Helm Chart
+    digest: 75d33d5eb8c6f08b862ceca895c1da7ab5ccd16bdb55fb59c84ee44f655a6dfa
+    icon: https://www.hivemq.com/img/svg/hivemq-bee.svg
+    keywords:
+    - HiveMQ
+    - HiveMQ Platform Operator
+    - Operator
+    - MQTT
+    - IoT
+    - Java
+    - distributed
+    - messaging
+    maintainers:
+    - email: support@hivemq.com
+      name: HiveMQ
+    name: hivemq-platform-operator
+    type: application
+    urls:
+    - https://github.com/hivemq/helm-charts/releases/download/hivemq-platform-operator-0.2.23/hivemq-platform-operator-0.2.23.tgz
+    version: 0.2.23
   - annotations:
       artifacthub.io/signKey: |
         fingerprint: 62EA05AEB2030F932532F8D96B695D55352A7E7D
@@ -6544,4 +6598,4 @@ entries:
     urls:
     - https://github.com/hivemq/helm-charts/releases/download/hivemq-swarm-0.1.0/hivemq-swarm-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-03T18:23:46.33879965Z"
+generated: "2026-03-10T10:01:35.796164694Z"
