@@ -30,19 +30,34 @@ jobs:
       - name: Check if same branch exists
         id: check-branch
         run: |
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on ${{ matrix.repository }}"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
-          if [[ -n "${BRANCH}" ]]; then
+          BRANCH_NAME="${GITHUB_HEAD_REF}"
+          echo "Checking if branch \"${BRANCH_NAME}\" exists on ${{ matrix.repository }}"
+          REMOTE_BRANCH=$(git ls-remote origin "${BRANCH_NAME}")
+          if [[ -n "${REMOTE_BRANCH}" ]]; then
             echo "Same branch exists on ${{ matrix.repository }}"
             echo "branch_exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Same branch does not exists on ${{ matrix.repository }}"
+            echo "Same branch does not exist on ${{ matrix.repository }}"
             echo "branch_exists=false" >> "$GITHUB_OUTPUT"
           fi
+          if [[ "${BRANCH_NAME}" == renovate/* ]]; then
+            echo "Branch is a Renovate branch"
+            echo "is_renovate=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Branch is not a Renovate branch"
+            echo "is_renovate=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Delete existing Renovate branch
+        if: steps.check-branch.outputs.branch_exists == 'true' && steps.check-branch.outputs.is_renovate == 'true'
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Deleting existing Renovate branch \"${BRANCH}\" on ${{ matrix.repository }}"
+          git push origin --delete "${BRANCH}"
 
       - name: Create new branch based on next-operator-release
-        if: steps.check-branch.outputs.branch_exists == 'false'
+        if: steps.check-branch.outputs.branch_exists == 'false' || steps.check-branch.outputs.is_renovate == 'true'
         run: |
-          BRANCH=${{ github.event.pull_request.head.ref }}
-          git checkout -b $BRANCH
-          git push origin $BRANCH
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          git checkout -b "${BRANCH}"
+          git push origin "${BRANCH}"

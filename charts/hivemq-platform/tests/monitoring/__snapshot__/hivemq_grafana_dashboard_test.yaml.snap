@@ -620,7 +620,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "${Prometheus}"
                 },
                 "editorMode": "code",
-                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_network_interface_.+_bytes_received\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_system_os_network_interface_(.+)_bytes_received\")[${intervalSeconds}s:${intervalSeconds}s])",
+                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_network_interface_.+_bytes_received\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_system_os_network_interface_(.+)_bytes_received\")[5m:${intervalSeconds}s])",
                 "hide": false,
                 "instant": false,
                 "legendFormat": "{{instance}} {{interface}} bytes.incoming",
@@ -711,7 +711,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "${Prometheus}"
                 },
                 "editorMode": "code",
-                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_network_interface_.+_bytes_sent\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_system_os_network_interface_(.+)_bytes_sent\")[${intervalSeconds}s:${intervalSeconds}s])",
+                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_network_interface_.+_bytes_sent\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_system_os_network_interface_(.+)_bytes_sent\")[5m:${intervalSeconds}s])",
                 "hide": false,
                 "instant": false,
                 "legendFormat": "{{instance}} {{interface}} bytes.outgoing",
@@ -802,9 +802,9 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "${Prometheus}"
                 },
                 "editorMode": "code",
-                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_(.*)_read_bytes\"}, \"disk\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.*)_read_bytes\")[${intervalSeconds}s:${intervalSeconds}s])",
+                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_(.*)_read_bytes\"}, \"disk\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.*)_read_bytes\")[5m:${intervalSeconds}s])",
                 "instant": false,
-                "legendFormat": "{{instance}} {{interface}} bytes.read",
+                "legendFormat": "{{instance}} {{disk}} bytes.read",
                 "range": true,
                 "refId": "A"
               }
@@ -892,10 +892,10 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "${Prometheus}"
                 },
                 "editorMode": "code",
-                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_.+_write_bytes\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.+)_write_bytes\")[${intervalSeconds}s:${intervalSeconds}s])",
+                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_system_os_disks_.+_write_bytes\"}, \"disk\", \"$1\", \"__name__\", \"com_hivemq_system_os_disks_(.+)_write_bytes\")[5m:${intervalSeconds}s])",
                 "hide": false,
                 "instant": false,
-                "legendFormat": "{{instance}} {{interface}} bytes.written",
+                "legendFormat": "{{instance}} {{disk}} bytes.written",
                 "range": true,
                 "refId": "A"
               }
@@ -982,7 +982,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "${Prometheus}"
                 },
                 "editorMode": "code",
-                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_persistence_executor_(.*)_tasks\",  __name__!\u003d\"(.*)total(.*)\"}, \"executor\", \"$1\", \"__name__\", \"com_hivemq_persistence_executor_(.*)_tasks\")[${intervalSeconds}s:${intervalSeconds}s])",
+                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_persistence_executor_(.*)_tasks\",  __name__!\u003d\"(.*)total(.*)\"}, \"executor\", \"$1\", \"__name__\", \"com_hivemq_persistence_executor_(.*)_tasks\")[5m:${intervalSeconds}s])",
                 "hide": false,
                 "instant": false,
                 "legendFormat": "{{executor}} tasks.count",
@@ -1530,7 +1530,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "${Prometheus}"
                 },
                 "editorMode": "code",
-                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_messages_dropped_(.+)_count\", __name__!~\"(.*)total(.*)\", __name__!~\"(.*)dropped_topic(.*)\"}, \"reason\", \"$1\", \"__name__\", \"com_hivemq_messages_dropped_(.+)_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_messages_dropped_(.+)_count\", __name__!~\"(.*)total(.*)\", __name__!~\"(.*)dropped_topic(.*)\"}, \"reason\", \"$1\", \"__name__\", \"com_hivemq_messages_dropped_(.+)_count\")[5m:${intervalSeconds}s])",
                 "hide": false,
                 "instant": false,
                 "legendFormat": "__auto",
@@ -3874,7 +3874,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -3964,7 +3964,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4054,7 +4054,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_sent_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_sent_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_sent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_sent_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_sent_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_sent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4144,7 +4144,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_resent_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_resent_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_resent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_resent_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_resent_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_resent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4234,7 +4234,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_ignored_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_ignored_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_ignored_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_ignored_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_ignored_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_ignored_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4324,7 +4324,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_dropped_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_dropped_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_dropped_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_dropped_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_total_dropped_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_mqtt_to_kinesis_(.+)_dropped_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4414,7 +4414,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4504,7 +4504,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4594,7 +4594,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_sent_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_sent_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_sent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_sent_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_sent_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_sent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4684,7 +4684,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_ignored_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_ignored_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_ignored_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_ignored_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_ignored_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_ignored_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4774,7 +4774,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_dropped_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_dropped_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_dropped_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_dropped_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_dropped_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_dropped_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4864,7 +4864,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_rate_limit_exceeded_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_rate_limit_exceeded_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_rate_limit_exceeded_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_rate_limit_exceeded_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_rate_limit_exceeded_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_rate_limit_exceeded_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -4954,7 +4954,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_received_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_received_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_received_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_received_count\", __name__!\u003d\"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_total_received_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_amazon_kinesis_kinesis_to_mqtt_(.+)_received_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5058,7 +5058,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_publish_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_publish_meter_total\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_publish_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_publish_meter_total\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5148,7 +5148,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_publish_failed_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_publish_failed_meter_total\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_publish_failed_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_publish_failed_meter_total\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5238,7 +5238,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_subscribed_message_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_subscribed_message_meter_total\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_subscribed_message_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_subscribed_message_meter_total\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5328,7 +5328,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_subscribed_message_failed_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_subscribed_message_failed_meter_total\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_bridge_extension_(.+)_subscribed_message_failed_meter_total\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_bridge_extension_(.+)_subscribed_message_failed_meter_total\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5432,7 +5432,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_data_lake_mqtt_to_s3_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_data_lake_mqtt_to_s3_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5522,7 +5522,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_data_lake_mqtt_to_s3_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_data_lake_mqtt_to_s3_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5626,7 +5626,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5716,7 +5716,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_failed_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_failed_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5806,7 +5806,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_sent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5896,7 +5896,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_resent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_resent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_resent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_resent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -5986,7 +5986,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_ignored_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_ignored_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_ignored_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_ignored_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6076,7 +6076,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_dropped_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_dropped_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_dropped_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_mqtt_to_pubsub_(transformer|mapping)_(.+)_dropped_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6166,7 +6166,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_success_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_success_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6256,7 +6256,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_failed_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_failed_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6346,7 +6346,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_received_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_received_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_received_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_received_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6436,7 +6436,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_sent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_sent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_sent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_sent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6526,7 +6526,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_resent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_resent_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_resent_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_resent_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6616,7 +6616,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_ignored_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_ignored_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_ignored_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_ignored_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6706,7 +6706,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_dropped_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_dropped_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_dropped_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_dropped_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6796,7 +6796,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_rate_limit_exceeded_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_rate_limit_exceeded_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_rate_limit_exceeded_count\", __name__!~\".*total.*\"}, \"route\", \"$2\", \"__name__\", \"com_hivemq_extensions_google_cloud_pubsub_pubsub_to_mqtt_(transformer|mapping)_(.+)_rate_limit_exceeded_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6900,7 +6900,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_topic_mapping_(.+)_success_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_topic_mapping_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_topic_mapping_(.+)_success_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_topic_mapping_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{mapping}} success.count",
@@ -6913,7 +6913,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_transformer_(.+)_success_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_transformer_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_transformer_(.+)_success_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_transformer_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{transformer}} success.count",
@@ -7003,7 +7003,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{mapping}} polled-record",
@@ -7016,7 +7016,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{transformer}} polled-record",
@@ -7106,7 +7106,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{mapping}} publish.sent",
@@ -7119,7 +7119,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{transformer}} publish.sent",
@@ -7223,7 +7223,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -7313,7 +7313,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -7403,7 +7403,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_consumer_incoming_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_mongodb_mqtt_to_mongodb_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mongodb_mqtt_to_mongodb_(.+)_consumer_incoming_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -7688,7 +7688,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -7778,7 +7778,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -7868,7 +7868,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_consumer_incoming_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_mysql_mqtt_to_mysql_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mysql_mqtt_to_mysql_(.+)_consumer_incoming_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -8243,7 +8243,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -8333,7 +8333,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -8423,7 +8423,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_consumer_incoming_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_postgresql_mqtt_to_postgresql_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_postgresql_mqtt_to_postgresql_(.+)_consumer_incoming_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -8798,7 +8798,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -8888,7 +8888,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_total_failed_count\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_snowflake_mqtt_to_snowflake_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_snowflake_mqtt_to_snowflake_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -8993,7 +8993,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_mssql_mqtt_to_mssql_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_success_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_success_count\", __name__!\u003d\"com_hivemq_extensions_mssql_mqtt_to_mssql_total_success_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -9084,7 +9084,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mssql_mqtt_to_mssql_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_failed_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_failed_count\", __name__!\u003d\"com_hivemq_extensions_mssql_mqtt_to_mssql_total_failed_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -9175,7 +9175,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_mssql_mqtt_to_mssql_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_consumer_incoming_count\")[${intervalSeconds}s:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__\u003d~\"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_consumer_incoming_count\", __name__!\u003d\"com_hivemq_extensions_mssql_mqtt_to_mssql_total_consumer_incoming_count\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_mssql_mqtt_to_mssql_(.+)_consumer_incoming_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{route}}",
@@ -9382,8 +9382,8 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
             {
               "current": {
                 "selected": false,
-                "text": "Localhost Prometheus",
-                "value": "f145a4fd-8610-49e4-9ece-047355e078c7"
+                "text": "Prometheus",
+                "value": "prometheus"
               },
               "hide": 0,
               "includeAll": false,
@@ -9472,6 +9472,6 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
         "timepicker": {},
         "timezone": "",
         "title": "HiveMQ Platform (Prometheus)",
-        "version": "4",
+        "version": "5",
         "weekStart": ""
       }

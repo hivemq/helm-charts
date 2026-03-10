@@ -20,7 +20,7 @@ jobs:
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
 
       - name: Login to Harbor
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
         with:
           registry: ${{ secrets.HARBOR_REGISTRY_URL }}
           username: ${{ secrets.HARBOR_ROBOT_ACCOUNT_API_USER }}
@@ -77,9 +77,9 @@ jobs:
 
       - name: Install Sigstore
         if: ${{ env.sign_chart == 'true' }}
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
         with:
-          cosign-release: v2.6.1
+          cosign-release: v2.6.2
 
       - name: Sign HiveMQ Platform Operator Helm chart
         if: ${{ env.sign_chart == 'true' }}
