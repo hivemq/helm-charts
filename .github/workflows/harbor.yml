@@ -6,6 +6,9 @@ on:
       - next-operator-release
     paths:
       - charts/hivemq-platform-operator/**
+concurrency:
+  group: publish-harbor-${{ github.ref }}
+  cancel-in-progress: true
 env:
   operator_chart_name: helm-charts/hivemq-platform-operator
 jobs:
