@@ -5522,7 +5522,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\", __name__!=\"com_hivemq_extensions_data_lake_mqtt_to_s3_total_failed_count\", namespace=~\"$namespace\"}, \"interface\", \"$1\", \"__name__\", \"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\", __name__!=\"com_hivemq_extensions_data_lake_mqtt_to_s3_total_failed_count\", namespace=~\"$namespace\"}, \"route\", \"$1\", \"__name__\", \"com_hivemq_extensions_data_lake_mqtt_to_s3_(.+)_failed_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{route}}",
@@ -6900,7 +6900,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"kafka_extension_topic_mapping_(.+)_success_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_topic_mapping_(.+)_success_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"kafka_extension_topic_mapping_(.+)_success_count\", namespace=~\"$namespace\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_topic_mapping_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{mapping}} success.count",
@@ -6913,7 +6913,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"kafka_extension_transformer_(.+)_success_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_transformer_(.+)_success_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"kafka_extension_transformer_(.+)_success_count\", namespace=~\"$namespace\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_transformer_(.+)_success_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{transformer}} success.count",
@@ -7003,7 +7003,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\", namespace=~\"$namespace\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_polled_record_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{mapping}} polled-record",
@@ -7016,7 +7016,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\", namespace=~\"$namespace\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_polled_record_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{transformer}} polled-record",
@@ -7106,7 +7106,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\", namespace=~\"$namespace\"}, \"mapping\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_mapping_(.+)_send_publishes_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{mapping}} publish.sent",
@@ -7119,7 +7119,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\")[5m:${intervalSeconds}s])",
+                    "expr": "rate(label_replace({__name__=~\"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\", namespace=~\"$namespace\"}, \"transformer\", \"$1\", \"__name__\", \"kafka_extension_kafka_to_mqtt_transformer_(.+)_send_publishes_count\")[5m:${intervalSeconds}s])",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{instance}} {{transformer}} publish.sent",
@@ -7584,7 +7584,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "com_hivemq_extensions_mongodb_mqtt_to_mongodb_{namespace=~\"$namespace\"}${Route}_latency * 1000",
+                    "expr": "com_hivemq_extensions_mongodb_mqtt_to_mongodb_${Route}_latency{namespace=~\"$namespace\"} * 1000",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{quantile}} ",
@@ -8139,7 +8139,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "com_hivemq_extensions_mysql_mqtt_to_mysql_{namespace=~\"$namespace\"}${Route}_latency * 1000",
+                    "expr": "com_hivemq_extensions_mysql_mqtt_to_mysql_${Route}_latency{namespace=~\"$namespace\"} * 1000",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{quantile}} ",
@@ -8694,7 +8694,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "com_hivemq_extensions_postgresql_mqtt_to_postgresql_{namespace=~\"$namespace\"}${Route}_latency * 1000",
+                    "expr": "com_hivemq_extensions_postgresql_mqtt_to_postgresql_${Route}_latency{namespace=~\"$namespace\"} * 1000",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{quantile}} ",
@@ -9358,7 +9358,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                       "uid": "${Prometheus}"
                     },
                     "editorMode": "code",
-                    "expr": "com_hivemq_extensions_mssql_mqtt_to_mssql_{namespace=~\"$namespace\"}${Route}_latency * 1000",
+                    "expr": "com_hivemq_extensions_mssql_mqtt_to_mssql_${Route}_latency{namespace=~\"$namespace\"} * 1000",
                     "hide": false,
                     "instant": false,
                     "legendFormat": "{{job}} {{quantile}} ",
