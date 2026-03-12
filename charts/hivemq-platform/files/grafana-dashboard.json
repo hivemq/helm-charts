@@ -516,7 +516,7 @@
           "editorMode": "code",
           "expr": "com_hivemq_cluster_nodes_count{namespace=~\"$namespace\"}",
           "instant": false,
-          "legendFormat": "{{instance}} connections",
+          "legendFormat": "{{instance}} nodes",
           "range": true,
           "refId": "A"
         }
@@ -1632,7 +1632,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_incoming_publish_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{job}} outgoing.publish",
+          "legendFormat": "{{job}} incoming.publish",
           "range": true,
           "refId": "A"
         }
@@ -1810,7 +1810,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_incoming_puback_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} outgoing.publish",
+          "legendFormat": "{{instance}} incoming.puback",
           "range": true,
           "refId": "A"
         }
@@ -1988,7 +1988,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_incoming_pubrec_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} outgoing.publish",
+          "legendFormat": "{{instance}} incoming.pubrec",
           "range": true,
           "refId": "A"
         }
@@ -2166,7 +2166,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_incoming_pubrel_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} outgoing.publish",
+          "legendFormat": "{{instance}} incoming.pubrel",
           "range": true,
           "refId": "A"
         }
@@ -2344,7 +2344,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_incoming_pubcomp_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} outgoing.publish",
+          "legendFormat": "{{instance}} incoming.pubcomp",
           "range": true,
           "refId": "A"
         }
@@ -3069,7 +3069,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_incoming_pingreq_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} incoming.unsubscribe",
+          "legendFormat": "{{instance}} incoming.pingreq",
           "range": true,
           "refId": "A"
         }
@@ -3158,7 +3158,7 @@
           "editorMode": "code",
           "expr": "rate(com_hivemq_messages_outgoing_pingresp_count{namespace=~\"$namespace\"}[${intervalSeconds}s])",
           "instant": false,
-          "legendFormat": "{{instance}} incoming.unsubscribe",
+          "legendFormat": "{{instance}} outgoing.pingresp",
           "range": true,
           "refId": "A"
         }
@@ -3260,7 +3260,7 @@
           "editorMode": "code",
           "expr": "com_hivemq_cluster_nodes_count{namespace=~\"$namespace\"}",
           "instant": false,
-          "legendFormat": "{{instance}} connections",
+          "legendFormat": "{{instance}} nodes",
           "range": true,
           "refId": "A"
         }
