@@ -18,7 +18,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c # v4
         with:
           filters: |
             modified:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c # v4
         with:
           filters: |
             modified:
@@ -65,7 +65,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c # v4
         with:
           filters: |
             modified:
@@ -89,7 +89,7 @@ jobs:
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c # v4
         with:
           filters: |
             modified:
