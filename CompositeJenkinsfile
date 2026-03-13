@@ -7,26 +7,50 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
     }
+    environment {
+        GITHUB_TOKEN = credentials('JENKINS_GITHUB_TOKEN')
+    }
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Trigger build') {
             steps {
                 script {
-                    def multiBranchJobPath = '../../hivemq4-composite'
-                    def branchJobName = BRANCH_NAME.replace('/', '%2F')
-                    try {
-                        build job: "${multiBranchJobPath}/${branchJobName}", wait: false
-                    } catch (e) {
+                    def changes = sh(script: "git diff --name-only origin/${MASTER_BRANCH}...HEAD", returnStdout: true).trim()
+                    def onlyEdge = changes.split('\n').every { it.startsWith('charts/hivemq-edge/') || it.startsWith('manifests/hivemq-edge/') }
+
+                    if (onlyEdge) {
+                        echo "Only Edge chart changes detected, skipping hivemq4-composite build"
+                        def commitSha = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                        httpRequest(
+                                url: "https://api.github.com/repos/hivemq/helm-charts/statuses/${commitSha}",
+                                httpMode: 'POST',
+                                contentType: 'APPLICATION_JSON',
+                                requestBody: '{"state":"success","context":"continuous-integration/jenkins/branch","description":"Skipped - Edge only changes"}',
+                                customHeaders: [[name: 'Authorization', value: 'token ' + GITHUB_TOKEN, maskValue: true]],
+                                validResponseCodes: '100:599',
+                        )
+                    } else {
+                        def multiBranchJobPath = '../../hivemq4-composite'
+                        def branchJobName = BRANCH_NAME.replace('/', '%2F')
                         try {
-                            withCredentials([gitUsernamePassword(credentialsId: 'hivemq-jenkins')]) {
-                                sh("git clone https://github.com/hivemq/hivemq.git --branch=${MASTER_BRANCH} --single-branch --depth 1 .")
-                                try {
-                                    sh("git push origin HEAD:${BRANCH_NAME}")
-                                } catch (e2) { // if push failed, branch already exists
+                            build job: "${multiBranchJobPath}/${branchJobName}", wait: false
+                        } catch (e) {
+                            try {
+                                withCredentials([gitUsernamePassword(credentialsId: 'hivemq-jenkins')]) {
+                                    sh("git clone https://github.com/hivemq/hivemq.git --branch=${MASTER_BRANCH} --single-branch --depth 1 .")
+                                    try {
+                                        sh("git push origin HEAD:${BRANCH_NAME}")
+                                    } catch (e2) { // if push failed, branch already exists
+                                    }
                                 }
+                            } finally {
+                                cleanWs()
+                                build job: multiBranchJobPath, wait: false
                             }
-                        } finally {
-                            cleanWs()
-                            build job: multiBranchJobPath, wait: false
                         }
                     }
                 }
