@@ -11,6 +11,11 @@ modules:
 admin:
   user: "admin"
   password: "hivemq2"
+preLoginNotice:
+  enabled: true
+  title: "Test Title"
+  message: "Test Message"
+  consent: "Test Consent"
 config: |
   <protocol-adapters>
       <protocol-adapter>
