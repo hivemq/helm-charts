@@ -228,14 +228,23 @@ spec:
               {{- if .Values.adminLdap.userRoleAdminQuery }}
             - name: HIVEMQ_LDAP_USER_ROLE_ADMIN_QUERY
               value: "{{ .Values.adminLdap.userRoleAdminQuery }}"
+              {{- else }}
+            - name: HIVEMQ_LDAP_USER_ROLE_ADMIN_QUERY
+              value: ""
               {{- end }}
               {{- if .Values.adminLdap.userRoleSuperQuery }}
             - name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
               value: "{{ .Values.adminLdap.userRoleSuperQuery }}"
+              {{- else }}
+            - name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
+              value: ""
               {{- end }}
               {{- if .Values.adminLdap.userRoleUserQuery }}
             - name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
               value: "{{ .Values.adminLdap.userRoleUserQuery }}"
+              {{- else }}
+            - name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
+              value: ""
               {{- end }}
               {{- end }}
             - name: HIVEMQ_LDAP_SERVER1_HOST
