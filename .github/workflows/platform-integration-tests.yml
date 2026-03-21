@@ -153,7 +153,7 @@ jobs:
 
       - name: Publish test report
         if: ${{ !cancelled() }}
-        uses: dorny/test-reporter@3d76b34a4535afbd0600d347b09a6ee5deb3ed7f # v2
+        uses: dorny/test-reporter@df6247429542221bc30d46a036ee47af1102c451 # v2
         with:
           name: Integration tests report
           path: '**/build/test-results/integrationTest/TEST-*.xml'
