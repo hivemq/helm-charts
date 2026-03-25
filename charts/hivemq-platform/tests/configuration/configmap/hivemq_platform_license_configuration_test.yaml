@@ -1,0 +1,68 @@
+suite: HiveMQ Platform Configuration as ConfigMap - Platform License Configuration tests
+templates:
+  - hivemq-configuration.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+set:
+  config.createAs: ConfigMap
+tests:
+
+  - it: with default values, no license.xml is created
+    template: hivemq-configuration.yml
+    asserts:
+      - notExists:
+          path: data["license.xml"]
+
+  - it: with platformLicense.licenseKey set, license.xml is created with correct content
+    set:
+      config.platformLicense.licenseKey: my-license-key-123
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["license.xml"]
+      - equal:
+          path: data["license.xml"]
+          value: |-
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="license.xsd">
+              <license-key>my-license-key-123</license-key>
+            </license>
+
+  - it: with platformLicense.overrideLicenseConfig set, custom license.xml is used
+    set:
+      config.platformLicense.overrideLicenseConfig: |-
+        <license>
+          <custom-config/>
+        </license>
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["license.xml"]
+      - equal:
+          path: data["license.xml"]
+          value: |-
+            <license>
+              <custom-config/>
+            </license>
+
+  - it: with both licenseKey and overrideLicenseConfig set, overrideLicenseConfig takes precedence
+    set:
+      config.platformLicense.licenseKey: my-license-key-123
+      config.platformLicense.overrideLicenseConfig: |-
+        <license>
+          <override/>
+        </license>
+    template: hivemq-configuration.yml
+    asserts:
+      - exists:
+          path: data["license.xml"]
+      - equal:
+          path: data["license.xml"]
+          value: |-
+            <license>
+              <override/>
+            </license>

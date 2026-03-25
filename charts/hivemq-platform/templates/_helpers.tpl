@@ -1570,6 +1570,45 @@ Usage: {{ include "hivemq-platform.generate-hivemq-logback-configuration" . }}
 {{- end -}}
 
 {{/*
+Checks whether a platform license configuration (license.xml) should be generated.
+Returns `true` if either `config.platformLicense.licenseKey` or `config.platformLicense.overrideLicenseConfig` is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-platform-license-config" . }}
+*/}}
+{{- define "hivemq-platform.has-platform-license-config" -}}
+{{- if or .Values.config.platformLicense.licenseKey .Values.config.platformLicense.overrideLicenseConfig -}}
+    {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generates the default HiveMQ Platform license configuration (license.xml) content.
+Usage: {{ include "hivemq-platform.default-platform-license-configuration" . }}
+*/}}
+{{- define "hivemq-platform.default-platform-license-configuration" -}}
+<?xml version="1.0" encoding="UTF-8" ?>
+<license xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="license.xsd">
+  <license-key>{{ .Values.config.platformLicense.licenseKey }}</license-key>
+</license>
+{{- end -}}
+
+{{/*
+Generates the HiveMQ Platform license configuration (license.xml) content based on whether a ConfigMap or a Secret is used.
+Usage: {{ include "hivemq-platform.generate-platform-license-configuration" . }}
+*/}}
+{{- define "hivemq-platform.generate-platform-license-configuration" -}}
+{{- $isSecret := (eq .Values.config.createAs "Secret") -}}
+{{- if and .Values.config.platformLicense.overrideLicenseConfig $isSecret -}}
+    {{- range (.Values.config.platformLicense.overrideLicenseConfig | b64enc) | toStrings }}
+        {{- . | nindent 4 }}
+    {{- end }}
+{{- else if .Values.config.platformLicense.overrideLicenseConfig }}
+    {{- .Values.config.platformLicense.overrideLicenseConfig | nindent 4 }}
+{{- else }}
+    {{- ternary (include "hivemq-platform.default-platform-license-configuration" . | b64enc | nindent 4) (include "hivemq-platform.default-platform-license-configuration" . | nindent 4) $isSecret }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Validates that Prometheus Operator CRDs (monitoring.coreos.com/v1) are installed in the cluster.
 
 Skips validation during 'helm template' by checking if 'hivemq.com/v1' API is available.
