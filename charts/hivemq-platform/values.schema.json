@@ -215,6 +215,20 @@
         "overrideStatefulSet" : {
           "description" : "Optional setting to provide the StatefulSetSpec configuration from a file using --set-file config.overrideStateFulSet=your-statefulsetspec.yml.",
           "type" : "string"
+        },
+        "platformLicense" : {
+          "description" : "Configures the HiveMQ Platform license configuration (license.xml).",
+          "properties" : {
+            "licenseKey" : {
+              "description" : "The platform license key identifier. When non-empty, a license.xml is generated and included in the configuration.",
+              "type" : "string"
+            },
+            "overrideLicenseConfig" : {
+              "description" : "Optional setting to provide a custom license.xml from a file using --set-file config.platformLicense.overrideLicenseConfig=your-license.xml. When set, licenseKey is ignored.",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
         }
       },
       "type" : "object"
