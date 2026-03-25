@@ -1581,6 +1581,17 @@ Usage: {{ include "hivemq-platform.has-platform-license-config" . }}
 {{- end -}}
 
 {{/*
+Validates the platform license configuration values:
+ - Only one of `licenseKey` or `overrideLicenseConfig` are set, and not both.
+Usage: {{ include "hivemq-platform.validate-platform-license-config" . }}
+*/}}
+{{- define "hivemq-platform.validate-platform-license-config" -}}
+{{- if and .Values.config.platformLicense.licenseKey .Values.config.platformLicense.overrideLicenseConfig -}}
+    {{- fail (printf "\nBoth `licenseKey` and `overrideLicenseConfig` values are set for the HiveMQ Platform license configuration. Please, use only one of them") -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Generates the default HiveMQ Platform license configuration (license.xml) content.
 Usage: {{ include "hivemq-platform.default-platform-license-configuration" . }}
 */}}
