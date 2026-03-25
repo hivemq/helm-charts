@@ -572,6 +572,15 @@ config:
   # Inlines a custom HiveMQ Platform logging configuration (logback.xml) from a file:
   # --set-file config.customLogbackConfig=your-logback.xml
   customLogbackConfig: ""
+  # Configures the HiveMQ Platform license configuration (license.xml).
+  # When set, the license.xml file is included in the HiveMQ Platform configuration ConfigMap or Secret.
+  platformLicense:
+    # The platform license key identifier.
+    licenseKey: ""
+    # Inlines the HiveMQ Platform license configuration (license.xml) from a file:
+    # --set-file config.platformLicense.overrideLicenseConfig=your-license.xml
+    # WARNING: When this configuration option is used, the licenseKey value is ignored.
+    overrideLicenseConfig: ""
 
 # Custom init containers to be added to the HiveMQ platform StatefulSet
 additionalInitContainers: []
