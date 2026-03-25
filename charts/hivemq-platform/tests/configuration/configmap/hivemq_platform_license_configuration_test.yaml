@@ -17,6 +17,16 @@ tests:
       - notExists:
           path: data["license.xml"]
 
+  - it: with config.create disabled and licenseKey set, no ConfigMap is rendered
+    set:
+      config.create: false
+      config.name: my-external-config
+      config.platformLicense.licenseKey: my-license-key-123
+    template: hivemq-configuration.yml
+    asserts:
+      - hasDocuments:
+          count: 0
+
   - it: with platformLicense.licenseKey set, license.xml is created with correct content
     set:
       config.platformLicense.licenseKey: my-license-key-123
