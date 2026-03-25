@@ -23,4 +23,8 @@ data:
   logback.xml: |-
     {{- include "hivemq-platform.generate-hivemq-logback-configuration" . }}
   {{- end }}
+  {{- if (include "hivemq-platform.has-platform-license-config" .) }}
+  license.xml: |-
+    {{- include "hivemq-platform.generate-platform-license-configuration" . }}
+  {{- end }}
 {{- end }}
