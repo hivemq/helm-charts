@@ -224,7 +224,7 @@
               "type" : "string"
             },
             "overrideLicenseConfig" : {
-              "description" : "Optional setting to provide a custom license.xml from a file using --set-file config.platformLicense.overrideLicenseConfig=your-license.xml. When set, licenseKey is ignored.",
+              "description" : "Optional setting to provide a custom license.xml from a file using --set-file config.platformLicense.overrideLicenseConfig=your-license.xml.",
               "type" : "string"
             }
           },
@@ -645,22 +645,22 @@
       "type" : "object"
     },
     "license" : {
-      "description" : "Defines all HiveMQ licenses to be used for the HiveMQ Platform.",
+      "description" : "Defines all HiveMQ file based licenses to be used for the HiveMQ Platform.",
       "properties" : {
         "additionalLicenses" : {
-          "description" : "Adds additional main HiveMQ licenses to the Kubernetes Secret as .lic files, if needed.",
+          "description" : "Adds additional main HiveMQ file based licenses to the Kubernetes Secret as .lic files, if needed.",
           "type" : "object"
         },
         "annotations" : {
-          "description" : "Defines specific annotations to be applied to the Kubernetes Secret that contains the HiveMQ licenses.",
+          "description" : "Defines specific annotations to be applied to the Kubernetes Secret that contains the HiveMQ file based licenses.",
           "type" : "object"
         },
         "create" : {
-          "description" : "Creates a Kubernetes Secret for all configured HiveMQ licenses.",
+          "description" : "Creates a Kubernetes Secret for all configured HiveMQ file based licenses.",
           "type" : "boolean"
         },
         "data" : {
-          "description" : "The main HiveMQ license as a string. By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.",
+          "description" : "The main HiveMQ file based license as a string. By default, this data must be a Base64 encoded string. Otherwise, set isLicenseBase64Encoded=false to use a clear string.",
           "type" : "string"
         },
         "dataHub" : {
@@ -672,15 +672,15 @@
           "type" : "object"
         },
         "labels" : {
-          "description" : "Defines specific labels to be applied to the Kubernetes Secret that contains the HiveMQ licenses.",
+          "description" : "Defines specific labels to be applied to the Kubernetes Secret that contains the HiveMQ file based licenses.",
           "type" : "object"
         },
         "name" : {
-          "description" : "Defines the name of the Kubernetes Secret that contains the HiveMQ licenses.",
+          "description" : "Defines the name of the Kubernetes Secret that contains the HiveMQ file based licenses.",
           "type" : "string"
         },
         "overrideLicense" : {
-          "description" : "Sets the main HiveMQ license with your own file from a specified license path.",
+          "description" : "Sets the main HiveMQ file based license with your own file from a specified license path.",
           "type" : "string"
         },
         "isLicenseBase64Encoded" : {
