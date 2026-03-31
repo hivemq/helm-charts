@@ -1,15 +1,5 @@
-import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.jackson.dataformat.toml)
-    }
-}
 
 plugins {
     java
@@ -106,11 +96,11 @@ testing {
                     runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
                     runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
                     runtime("com.hivemq:hivemq-enterprise-k8s:4.47.1").tag("k8s-latest")
-                    runtime("hivemq:hivemq-operator:4.7.10").tag("latest")
-                    runtime("hivemq:init-dns-wait:1.0.1").tag("latest")
-                    runtime("library:busybox:1.37.0").name("busybox").tag("latest")
-                    runtime("library:nginx:1.29.7").name("nginx").tag("latest")
-                    runtime("selenium:standalone-firefox:148.0-20260222").tag("latest")
+                    runtime(ociImages.hivemq.operator.oci).tag("latest")
+                    runtime(ociImages.init.dns.wait.oci).tag("latest")
+                    runtime(ociImages.busybox.oci).name("busybox").tag("latest")
+                    runtime(ociImages.nginx.oci).name("nginx").tag("latest")
+                    runtime(ociImages.selenium.standalone.firefox.oci).tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
                 val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
@@ -168,8 +158,7 @@ oci {
     }
     parentImageDependencies {
         create("noble") {
-            // https://hub.docker.com/layers/library/ubuntu/noble/
-            runtime("library:ubuntu:sha256!186072bba1b2f436cbb91ef2567abca677337cfc786c86e107d25b7072feef0c") // noble
+            runtime(ociImages.ubuntu.noble.oci)
         }
     }
     imageDefinitions {
@@ -239,12 +228,8 @@ val updatePlatformVersion by tasks.registering {
 }
 
 fun resolveK3sTag(): String {
-    val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
-    val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
-
     val k8sVersionType = System.getenv("K8S_VERSION_TYPE") ?: "LATEST"
-    val key = if (k8sVersionType == "MINIMUM") "k3s-minimum" else "k3s-latest"
-    val tag = tomlDocker.path(key).path("tag").asText()
+    val tag = if (k8sVersionType == "MINIMUM") ociImages.k3s.minimum.tag else ociImages.k3s.latest.tag
     println("Resolving test OCI image k3s:$tag ($k8sVersionType)")
-    return tag
+    return tag!!
 }
