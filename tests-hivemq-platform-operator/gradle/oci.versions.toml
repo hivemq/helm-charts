@@ -1,0 +1,47 @@
+# https://hub.docker.com/_/ubuntu/tags?name=noble
+[[oci]]
+name = "ubuntu-noble"
+image = "library/ubuntu"
+reference = "noble@sha256:186072bba1b2f436cbb91ef2567abca677337cfc786c86e107d25b7072feef0c"
+
+# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.24
+[[oci]]
+name = "k3s-minimum"
+image = "rancher/k3s"
+pinnedReference = "v1.24.17-k3s1@sha256:9e034931999854c6210b86a0708fde66b91370459fa077a4f9d008e7f51fc51d"
+
+# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.35
+[[oci]]
+name = "k3s-latest"
+image = "rancher/k3s"
+reference = "v1.35.3-k3s1@sha256:4607083d3cac07e1ccde7317297271d13ed5f60f35a78f33fcef84858a9f1d69"
+
+# https://hub.docker.com/_/busybox/tags?name=latest
+[[oci]]
+name = "busybox"
+image = "library/busybox"
+reference = "latest@sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e"
+
+# https://hub.docker.com/_/nginx/tags?name=latest
+[[oci]]
+name = "nginx"
+image = "library/nginx"
+reference = "latest@sha256:7150b3a39203cb5bee612ff4a9d18774f8c7caf6399d6e8985e97e28eb751c18"
+
+# https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
+[[oci]]
+name = "selenium-standalone-firefox"
+image = "selenium/standalone-firefox"
+reference = "148.0-20260222@sha256:14fde146732a1bab99f1423ac171eb61a38706710ffe8b71c887a8ada6052631"
+
+# https://hub.docker.com/r/hivemq/hivemq-operator/tags
+[[oci]]
+name = "hivemq-operator"
+image = "hivemq/hivemq-operator"
+pinnedReference = "4.7.10@sha256:241d6a8e1963968ebafb7f63396c56e1d8e41fc4065ee6257679ba5e3cf127f0"
+
+# https://hub.docker.com/r/hivemq/init-dns-wait/tags
+[[oci]]
+name = "init-dns-wait"
+image = "hivemq/init-dns-wait"
+pinnedReference = "1.0.1@sha256:96f972c3029a2bab716c43c5404280030ecd98d199bd9cbe5de0f495a8f06945"
