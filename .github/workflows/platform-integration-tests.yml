@@ -112,6 +112,7 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
           ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
+          K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
         run: ./gradlew :tests-hivemq-platform-operator:integrationTestPrepare
 
       - name: Split tests
