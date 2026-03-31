@@ -11,18 +11,16 @@
     addLabels: [
         'integrations-team-coordination',
     ],
-    customManagers: [
+    packageRules: [
         {
-            customType: 'regex',
-            datasourceTemplate: 'docker',
-            description: 'Custom Manager for Docker images',
-            managerFilePatterns: [
-                '(^|/)docker.versions.toml$',
+            description: 'OCI image dependency is not a real Maven package (gradle-oci plugin)',
+            matchManagers: [
+                'gradle',
             ],
-            matchStrings: [
-                '.* = \\{ image = "(?<packageName>.+)", tag = "(?<currentValue>.+)" \\}',
+            matchPackageNames: [
+                'com.hivemq:hivemq-enterprise-k8s',
             ],
-            versioningTemplate: 'docker',
+            enabled: false,
         },
     ],
 }
