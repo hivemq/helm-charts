@@ -6,7 +6,6 @@ kubernetes = "7.6.1"
 gradleOci-junitJupiter = "0.8.0"
 hivemq-mqttClient = "1.3.13"
 hivemq-platform = "4.50.0"
-jackson = "2.21.2"
 javassist = "3.30.2-GA"
 junit-jupiter = "6.0.3"
 logback = "1.5.32"
@@ -26,7 +25,6 @@ kubernetes-client-jdk = { module = "io.fabric8:kubernetes-httpclient-jdk", versi
 gradleOci-junitJupiter = { module = "io.github.sgtsilvio:gradle-oci-junit-jupiter", version.ref = "gradleOci-junitJupiter" }
 hivemq-extensionSdk = { module = "com.hivemq:hivemq-extension-sdk", version.ref = "hivemq-platform" }
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
-jackson-dataformat-toml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-toml", version.ref = "jackson" }
 javassist = { module = "org.javassist:javassist", version.ref = "javassist" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-jupiter" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
