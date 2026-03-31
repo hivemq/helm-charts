@@ -1,4 +1,5 @@
 [docker]
-# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.35
+# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.24
 k3s-minimum = { image = "rancher/k3s", tag = "v1.24.17-k3s1", update = false }
-k3s-latest = { image = "rancher/k3s", tag = "v1.35.2-k3s1" }
+# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.35
+k3s-latest = { image = "rancher/k3s", tag = "v1.35.3-k3s1" }
