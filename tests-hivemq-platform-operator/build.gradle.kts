@@ -109,7 +109,7 @@ testing {
                     runtime("hivemq:hivemq-operator:4.7.10").tag("latest")
                     runtime("hivemq:init-dns-wait:1.0.1").tag("latest")
                     runtime("library:busybox:1.37.0").name("busybox").tag("latest")
-                    runtime("library:nginx:1.29.5").name("nginx").tag("latest")
+                    runtime("library:nginx:1.29.7").name("nginx").tag("latest")
                     runtime("selenium:standalone-firefox:148.0-20260222").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
@@ -169,7 +169,7 @@ oci {
     parentImageDependencies {
         create("noble") {
             // https://hub.docker.com/layers/library/ubuntu/noble/
-            runtime("library:ubuntu:sha256!d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9") // noble
+            runtime("library:ubuntu:sha256!186072bba1b2f436cbb91ef2567abca677337cfc786c86e107d25b7072feef0c") // noble
         }
     }
     imageDefinitions {
