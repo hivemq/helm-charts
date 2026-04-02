@@ -162,9 +162,17 @@ public class HelmChartContainer extends K3sContainer {
             client.close();
             this.client = null;
         }
-        executorService.shutdownNow();
         super.stop();
         LOG.info("HelmChartContainer is stopped");
+    }
+
+    @Override
+    public void close() {
+        try {
+            super.close();
+        } finally {
+            executorService.shutdownNow();
+        }
     }
 
     @Override
