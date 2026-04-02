@@ -58,7 +58,7 @@ public class HelmChartContainerExtension implements BeforeAllCallback, AfterAllC
         if (stopInstances.getAndSet(false)) {
             final var container = helmChartContainerRef.getAndSet(null);
             if (container != null) {
-                container.stop();
+                container.close();
             }
             final var network = networkRef.getAndSet(null);
             if (network != null) {
