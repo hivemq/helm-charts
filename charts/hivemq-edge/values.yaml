@@ -77,6 +77,12 @@ logLevel: INFO
 #   </root>
 customLogbackConfig: ""
 
+# Compiled config JSON produced by the Knappogue compiler.
+# When set, the content is stored in a ConfigMap, mounted into the container at
+# /compiled-config/compiled-config.json, and watched by HiveMQ Edge for hot-reloading.
+# Deploy via: helm upgrade --set-file compiledConfig=build/wolery/compiled-config.json
+compiledConfig: ""
+
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
 

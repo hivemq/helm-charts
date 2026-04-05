@@ -301,6 +301,10 @@ spec:
             - name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
               value: "{{ .Values.preLoginNotice.consent }}"
             {{- end }}
+            {{- if .Values.compiledConfig }}
+            - name: HIVEMQ_COMPILED_CONFIG_PATH
+              value: "/compiled-config/compiled-config.json"
+            {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -355,6 +359,10 @@ spec:
             name: logback
             subPath: logback.xml
           {{- end }}
+          {{- if .Values.compiledConfig }}
+          - mountPath: /compiled-config
+            name: compiled-config
+          {{- end }}
       {{- with .Values.podScheduling.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -379,6 +387,11 @@ spec:
         - name: logback
           configMap:
             name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "logback" "releaseName" .Release.Name) }}
+      {{- end }}
+      {{- if .Values.compiledConfig }}
+        - name: compiled-config
+          configMap:
+            name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "compiled-config" "releaseName" .Release.Name) }}
       {{- end }}
       {{- range .Values.volumes }}
         {{- toYaml .definition | nindent 8 }}

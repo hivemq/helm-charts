@@ -1,0 +1,13 @@
+{{- /* Creates a ConfigMap with compiled-config.json when compiledConfig is set (inline or from file) */ -}}
+{{- if .Values.compiledConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "hivemq-edge.labels" . | nindent 4 }}
+  name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "compiled-config" "releaseName" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+data:
+  compiled-config.json: |
+    {{- .Values.compiledConfig | nindent 4 }}
+{{- end }}
