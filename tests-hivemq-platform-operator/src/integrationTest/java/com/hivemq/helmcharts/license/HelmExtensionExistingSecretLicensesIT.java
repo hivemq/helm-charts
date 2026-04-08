@@ -21,7 +21,7 @@ class HelmExtensionExistingSecretLicensesIT extends AbstractHelmLicensesIT {
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
         final var extensionLicenseFuture =
-                logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file tracing.elic is corrupt.");
+                logWaiter.waitFor(platformLogWaiterPrefix, ".*License file tracing.elic is corrupt.");
 
         K8sUtil.createSecret(client,
                 platformNamespace,
