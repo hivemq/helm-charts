@@ -45,14 +45,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT = 1883;
-    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-%s-mqtt".formatted(LEGACY_RELEASE_NAME);
     private static final int CC_SERVICE_PORT = 8080;
-    private static final @NotNull String CC_SERVICE_NAME = "hivemq-%s-cc".formatted(LEGACY_RELEASE_NAME);
     private static final int METRICS_SERVICE_PORT = 9399;
-    private static final @NotNull String METRICS_SERVICE_NAME = "hivemq-%s-metrics".formatted(LEGACY_RELEASE_NAME);
     private static final int REST_API_SERVICE_PORT = 8888;
-    private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-%s-api".formatted(LEGACY_RELEASE_NAME);
-    private static final @NotNull String CLUSTER_SERVICE_NAME = "hivemq-%s-cluster".formatted(LEGACY_RELEASE_NAME);
+
+    private final @NotNull String mqttServiceName = "hivemq-%s-mqtt".formatted(legacyReleaseName);
+    private final @NotNull String ccServiceName = "hivemq-%s-cc".formatted(legacyReleaseName);
+    private final @NotNull String metricsServiceName = "hivemq-%s-metrics".formatted(legacyReleaseName);
+    private final @NotNull String restApiServiceName = "hivemq-%s-api".formatted(legacyReleaseName);
+    private final @NotNull String clusterServiceName = "hivemq-%s-cluster".formatted(legacyReleaseName);
 
     @RegisterExtension
     private static final @NotNull WebDriverContainerExtension WEB_DRIVER_CONTAINER_EXTENSION =
@@ -74,7 +75,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace);
+        helmChartContainer.uninstallRelease(legacyReleaseName, operatorNamespace);
     }
 
     @Test
@@ -90,31 +91,31 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         // assert service annotations and labels
         final var mqttAnnotations = Map.of("service.spec.externalTrafficPolicy", "Local");
         final var metricsAnnotations = Map.of("prometheus.io/scrape", "true");
-        final var legacyLabels = Map.of("app", "hivemq", "hivemq-cluster", LEGACY_RELEASE_NAME);
+        final var legacyLabels = Map.of("app", "hivemq", "hivemq-cluster", legacyReleaseName);
         assertAnnotationsAndLabels("Legacy MQTT Service",
-                client.services().inNamespace(operatorNamespace).withName(MQTT_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(mqttServiceName).get().getMetadata(),
                 mqttAnnotations,
                 legacyLabels);
         assertAnnotationsAndLabels("Legacy Control Center Service",
-                client.services().inNamespace(operatorNamespace).withName(CC_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(ccServiceName).get().getMetadata(),
                 Map.of(),
                 legacyLabels);
         assertAnnotationsAndLabels("Legacy Metrics Service",
-                client.services().inNamespace(operatorNamespace).withName(METRICS_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(metricsServiceName).get().getMetadata(),
                 metricsAnnotations,
                 legacyLabels);
         assertAnnotationsAndLabels("Legacy REST API Service",
-                client.services().inNamespace(operatorNamespace).withName(REST_API_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(restApiServiceName).get().getMetadata(),
                 Map.of(),
                 legacyLabels);
         assertAnnotationsAndLabels("Legacy Cluster Service",
-                client.services().inNamespace(operatorNamespace).withName(CLUSTER_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(clusterServiceName).get().getMetadata(),
                 Map.of(),
                 legacyLabels);
         final var legacyStatefulSetMetadata = client.apps()
                 .statefulSets()
                 .inNamespace(operatorNamespace)
-                .withName(LEGACY_RELEASE_NAME)
+                .withName(legacyReleaseName)
                 .get()
                 .getMetadata();
         assertThat(legacyStatefulSetMetadata.getAnnotations()).containsOnlyKeys("hivemq.com/resource-spec",
@@ -125,7 +126,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 legacyStatefulSetMetadata.getAnnotations(),
                 mergeMaps(legacyLabels,
                         Map.of("app.kubernetes.io/instance",
-                                LEGACY_RELEASE_NAME,
+                                legacyReleaseName,
                                 "app.kubernetes.io/managed-by",
                                 "Helm",
                                 "app.kubernetes.io/name",
@@ -135,12 +136,12 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                                 "helm.sh/chart",
                                 "hivemq-operator-%s".formatted(legacyChartVersion),
                                 "hivemq-cluster",
-                                LEGACY_RELEASE_NAME)));
+                                legacyReleaseName)));
         assertAnnotationsAndLabels("Legacy StatefulSet Template",
                 client.apps()
                         .statefulSets()
                         .inNamespace(operatorNamespace)
-                        .withName(LEGACY_RELEASE_NAME)
+                        .withName(legacyReleaseName)
                         .get()
                         .getSpec()
                         .getTemplate()
@@ -148,20 +149,20 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 Map.of(),
                 mergeMaps(legacyLabels, Map.of("hivemq.com/node-offline", "false")));
         // assert Control Center login
-        ControlCenterUtil.assertLogin(client, operatorNamespace, webDriverContainer, CC_SERVICE_NAME, CC_SERVICE_PORT);
+        ControlCenterUtil.assertLogin(client, operatorNamespace, webDriverContainer, ccServiceName, CC_SERVICE_PORT);
         // publish retained messages
         final var topicList =
-                MqttUtil.publishRetainedMessages(client, operatorNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
+                MqttUtil.publishRetainedMessages(client, operatorNamespace, mqttServiceName, MQTT_SERVICE_PORT);
         // assert RestAPI service and authorization with ESE extension
-        RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT, false);
+        RestAPIUtil.assertAuth(client, operatorNamespace, restApiServiceName, REST_API_SERVICE_PORT, false);
         // assert publishes metrics
-        MonitoringUtil.assertPublishesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
+        MonitoringUtil.assertPublishesMetrics(client, operatorNamespace, metricsServiceName, METRICS_SERVICE_PORT);
 
         // scale down the legacy operator
         // kubectl scale deployment <release-name>-hivemq-operator-operator --replicas=0 -n <namespace>
-        final var legacyOperatorDeploymentName = "%s-hivemq-operator-operator".formatted(LEGACY_RELEASE_NAME);
+        final var legacyOperatorDeploymentName = "%s-hivemq-operator-operator".formatted(legacyReleaseName);
         K8sUtil.scaleDeployment(client, operatorNamespace, legacyOperatorDeploymentName, 0);
-        var legacyOperatorLabels = K8sUtil.getHiveMQLegacyOperatorLabels(LEGACY_RELEASE_NAME);
+        var legacyOperatorLabels = K8sUtil.getHiveMQLegacyOperatorLabels(legacyReleaseName);
         client.pods()
                 .inNamespace(operatorNamespace)
                 .withLabels(legacyOperatorLabels)
@@ -174,14 +175,14 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
         // delete custom resource with orphan
         // kubectl delete hivemq-clusters.hivemq.com <release-name> --cascade=orphan -n <namespace>
-        final var legacyPlatform = K8sUtil.getLegacyHiveMQPlatform(client, operatorNamespace, LEGACY_RELEASE_NAME);
+        final var legacyPlatform = K8sUtil.getLegacyHiveMQPlatform(client, operatorNamespace, legacyReleaseName);
         legacyPlatform.withPropagationPolicy(DeletionPropagation.ORPHAN).withTimeoutInMillis(5000).delete();
-        assertThat(K8sUtil.getLegacyHiveMQPlatform(client, operatorNamespace, LEGACY_RELEASE_NAME).get()).isNull();
+        assertThat(K8sUtil.getLegacyHiveMQPlatform(client, operatorNamespace, legacyReleaseName).get()).isNull();
 
         // scale up the legacy operator
         // kubectl scale deployment <release-name>-hivemq-operator-operator --replicas=1 -n <namespace>
         K8sUtil.scaleDeployment(client, operatorNamespace, legacyOperatorDeploymentName, 1);
-        K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
+        K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, legacyReleaseName);
         assertThat(client.pods()
                 .inNamespace(operatorNamespace)
                 .withLabels(legacyOperatorLabels)
@@ -192,13 +193,13 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         // we need to uninstall the legacy release with orphan option so existing resources can be taken over by the platform Helm install
         // TODO: We cannot execute `helm uninstall my-release --cascade orphan` because this will delete resources
         //  without an owner reference, that are still needed - See: https://github.com/helm/helm/issues/13279
-        //helmChartContainer.uninstallRelease(LEGACY_RELEASE_NAME, operatorNamespace, "--cascade", "orphan");
+        //helmChartContainer.uninstallRelease(legacyReleaseName, operatorNamespace, "--cascade", "orphan");
 
         // as a workaround we need to delete all the corresponding Helm versioned Secrets installed for each of the possible Helm releases
         // we may have. These will be named with a format like "sh.helm.release.v1.<release-name>.v<release-version>" and we will delete them
         // based on the labels instead as follows:
         // kubectl delete secret -l owner=helm,name=<release-name> -n <namespace>
-        final var helmSecretLabels = Map.of("owner", "helm", "name", LEGACY_RELEASE_NAME);
+        final var helmSecretLabels = Map.of("owner", "helm", "name", legacyReleaseName);
         client.secrets().inNamespace(operatorNamespace).withLabels(helmSecretLabels).withTimeoutInMillis(5000).delete();
         assertThat(client.secrets()
                 .inNamespace(operatorNamespace)
@@ -210,20 +211,22 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         // ConfigMap by adding a new entry for `config.xml`.
         K8sUtil.updateConfigMap(client, operatorNamespace, "ese-legacy-config-map-update.yml");
 
-        helmChartContainer.installPlatformChart(LEGACY_RELEASE_NAME,
+        helmChartContainer.installPlatformChart(legacyReleaseName,
                 "-f",
                 "/files/migration-platform-stateful-set-values.yaml",
+                "--set",
+                "services[0].name=" + mqttServiceName,
                 "--namespace",
                 operatorNamespace);
 
-        K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, LEGACY_RELEASE_NAME, "STATEFULSET_MIGRATION");
-        K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, LEGACY_RELEASE_NAME, "ROLLING_RESTART");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
+        K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, legacyReleaseName, "STATEFULSET_MIGRATION");
+        K8sUtil.waitForHiveMQPlatformState(client, operatorNamespace, legacyReleaseName, "ROLLING_RESTART");
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, operatorNamespace, legacyReleaseName);
 
         // assert service annotations and labels
         final var hiveMQVersion = System.getProperty("hivemq.tag", "latest");
         final var platformLabels = Map.of("app.kubernetes.io/instance",
-                LEGACY_RELEASE_NAME,
+                legacyReleaseName,
                 "app.kubernetes.io/managed-by",
                 "Helm",
                 "app.kubernetes.io/name",
@@ -231,34 +234,34 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 "app.kubernetes.io/version",
                 hiveMQVersion,
                 "hivemq-platform",
-                LEGACY_RELEASE_NAME);
+                legacyReleaseName);
         final var platformServiceLabels = mergeMaps(platformLabels, Map.of("hivemq/platform-service", "true"));
         final var clusterServiceLabels = mergeMaps(platformLabels, Map.of("hivemq/cluster-service", "true"));
         assertAnnotationsAndLabels("Migrated MQTT Service",
-                client.services().inNamespace(operatorNamespace).withName(MQTT_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(mqttServiceName).get().getMetadata(),
                 mqttAnnotations,
                 platformServiceLabels);
         assertAnnotationsAndLabels("Migrated Control Center Service",
-                client.services().inNamespace(operatorNamespace).withName(CC_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(ccServiceName).get().getMetadata(),
                 Map.of(),
                 platformServiceLabels);
         assertAnnotationsAndLabels("Migrated Metrics Service",
-                client.services().inNamespace(operatorNamespace).withName(METRICS_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(metricsServiceName).get().getMetadata(),
                 metricsAnnotations,
                 platformServiceLabels);
         assertAnnotationsAndLabels("Migrated REST API Service",
-                client.services().inNamespace(operatorNamespace).withName(REST_API_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(restApiServiceName).get().getMetadata(),
                 Map.of(),
                 platformServiceLabels);
         assertAnnotationsAndLabels("Migrated Cluster Service",
-                client.services().inNamespace(operatorNamespace).withName(CLUSTER_SERVICE_NAME).get().getMetadata(),
+                client.services().inNamespace(operatorNamespace).withName(clusterServiceName).get().getMetadata(),
                 Map.of(),
                 clusterServiceLabels);
         assertAnnotationsAndLabels("Migrated StatefulSet",
                 client.apps()
                         .statefulSets()
                         .inNamespace(operatorNamespace)
-                        .withName(LEGACY_RELEASE_NAME)
+                        .withName(legacyReleaseName)
                         .get()
                         .getMetadata(),
                 Map.of("operator.platform.hivemq.com/last-controller-revision-hash", ""),
@@ -266,7 +269,7 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         final var statefulSetMetadata = client.apps()
                 .statefulSets()
                 .inNamespace(operatorNamespace)
-                .withName(LEGACY_RELEASE_NAME)
+                .withName(legacyReleaseName)
                 .get()
                 .getSpec()
                 .getTemplate()
@@ -277,13 +280,13 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
                 statefulSetMetadata.getAnnotations(),
                 platformLabels);
         // assert Control Center login
-        ControlCenterUtil.assertLogin(client, operatorNamespace, webDriverContainer, CC_SERVICE_NAME, CC_SERVICE_PORT);
+        ControlCenterUtil.assertLogin(client, operatorNamespace, webDriverContainer, ccServiceName, CC_SERVICE_PORT);
         // assert retained messages
-        MqttUtil.assertRetainedMessages(client, operatorNamespace, topicList, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT);
+        MqttUtil.assertRetainedMessages(client, operatorNamespace, topicList, mqttServiceName, MQTT_SERVICE_PORT);
         // assert RestAPI service and authorization with ESE extension
-        RestAPIUtil.assertAuth(client, operatorNamespace, REST_API_SERVICE_NAME, REST_API_SERVICE_PORT, false);
+        RestAPIUtil.assertAuth(client, operatorNamespace, restApiServiceName, REST_API_SERVICE_PORT, false);
         // assert subscribe and publishes metrics
-        MonitoringUtil.assertSubscribesMetrics(client, operatorNamespace, METRICS_SERVICE_NAME, METRICS_SERVICE_PORT);
+        MonitoringUtil.assertSubscribesMetrics(client, operatorNamespace, metricsServiceName, METRICS_SERVICE_PORT);
     }
 
     private void assertAnnotationsAndLabels(

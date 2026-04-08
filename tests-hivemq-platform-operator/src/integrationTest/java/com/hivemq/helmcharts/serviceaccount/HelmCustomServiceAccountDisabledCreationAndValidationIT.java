@@ -1,12 +1,18 @@
 package com.hivemq.helmcharts.serviceaccount;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.util.concurrent.TimeUnit;
 
 class HelmCustomServiceAccountDisabledCreationAndValidationIT extends AbstractHelmCustomServiceAccountIT {
+
+    @Override
+    protected @NotNull String getReleaseBaseName() {
+        return "custom-sa-disabled-validation";
+    }
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -16,7 +22,7 @@ class HelmCustomServiceAccountDisabledCreationAndValidationIT extends AbstractHe
         createRole();
         createRoleBinding();
 
-        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME,
+        helmChartContainer.installPlatformOperatorChart(operatorReleaseName,
                 "--set",
                 "hivemqPlatformServiceAccount.create=false",
                 "--set",
@@ -27,7 +33,7 @@ class HelmCustomServiceAccountDisabledCreationAndValidationIT extends AbstractHe
                 "hivemqPlatformServiceAccount.permissions.validate=false",
                 "--namespace",
                 operatorNamespace);
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
+        helmChartContainer.installPlatformChart(platformReleaseName,
                 "--set",
                 "nodes.serviceAccountName=" + SERVICE_ACCOUNT_NAME,
                 "--set",
@@ -35,7 +41,7 @@ class HelmCustomServiceAccountDisabledCreationAndValidationIT extends AbstractHe
                 "--namespace",
                 platformNamespace);
 
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
 
         // assert that the ServiceAccount and permissions are working
         assertPlatformPodAnnotations();
