@@ -26,7 +26,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmBridgeExtensionIT {
         await().until(extensionEnabledInitAppFuture::isDone);
         await().until(extensionStartedBrokerFuture::isDone);
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
         // check that extensions are enabled
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=true,.*?id=hivemq-bridge-extension,.*?].*");
@@ -35,7 +35,7 @@ class HelmUpgradeExtensionIT extends AbstractHelmBridgeExtensionIT {
         final var extensionStoppedBrokerFuture = brokerExtensionStoppedFuture();
         final var extensionStoppedInitAppFuture = initAppExtensionStoppedFuture();
         final var extensionUpdateDoneInitAppFuture = initAppExtensionUpdateDoneFuture();
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "-f", "/files/disable-bridge-values.yaml");
+        upgradePlatformChart(platformReleaseName, "-f", "/files/disable-bridge-values.yaml");
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 1,
