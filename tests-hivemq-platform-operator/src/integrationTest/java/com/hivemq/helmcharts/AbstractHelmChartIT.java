@@ -112,46 +112,46 @@ public abstract class AbstractHelmChartIT {
     }
 
     @SuppressWarnings("SameParameterValue")
-    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
+    protected final void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
             throws Exception {
         installLegacyOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String... commands)
+    protected final void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String... commands)
             throws Exception {
         helmChartContainer.installLegacyOperatorChart(legacyReleaseName, addDefaultOperatorCommands(commands));
         K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, legacyReleaseName);
         K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, legacyReleaseName);
     }
 
-    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
+    protected final void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
             throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String... commands)
+    protected final void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String... commands)
             throws Exception {
         helmChartContainer.installPlatformOperatorChart(operatorReleaseName, addDefaultOperatorCommands(commands));
         K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, operatorReleaseName);
     }
 
-    protected void installPlatformChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
+    protected final void installPlatformChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
             throws Exception {
         installPlatformChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installPlatformChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
+    protected final void installPlatformChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
         installPlatformChart(platformReleaseName, commands);
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
     }
 
-    protected void installPlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
+    protected final void installPlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
             throws Exception {
         helmChartContainer.installPlatformChart(releaseName, addDefaultPlatformCommands(commands));
     }
 
     @SuppressWarnings("SameParameterValue")
-    protected void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
+    protected final void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
             throws Exception {
         helmChartContainer.upgradePlatformChart(releaseName, addDefaultPlatformCommands(commands));
     }
@@ -229,7 +229,7 @@ public abstract class AbstractHelmChartIT {
         }
     }
 
-    protected @NotNull String getOperatorName() {
+    protected final @NotNull String getOperatorName() {
         return "%s-%s".formatted(DEFAULT_OPERATOR_NAME_PREFIX, operatorReleaseName);
     }
 
