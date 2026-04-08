@@ -50,8 +50,8 @@ class HelmPlatformTlsWithPrivateKeyIT extends AbstractHelmPlatformTlsIT {
                 .hostnameVerifier((hostname, session) -> true)
                 .build();
 
-        assertMqttListener(MQTT_SERVICE_NAME_1884, MQTT_SERVICE_PORT_1884, sslConfig);
-        assertMqttListener(MQTT_SERVICE_NAME_1885, MQTT_SERVICE_PORT_1885, sslConfig);
-        assertMqttListener(MQTT_SERVICE_NAME_1886, MQTT_SERVICE_PORT_1886);
+        assertMqttListener(mqttServiceName1884, MQTT_SERVICE_PORT_1884, sslConfig);
+        assertMqttListener(mqttServiceName1885, MQTT_SERVICE_PORT_1885, sslConfig);
+        assertMqttListener(mqttServiceName1886, MQTT_SERVICE_PORT_1886);
     }
 }

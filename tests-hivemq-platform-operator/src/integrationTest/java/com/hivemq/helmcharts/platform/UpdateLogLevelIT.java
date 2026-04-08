@@ -50,7 +50,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
             installPlatformOperatorChartAndWaitToBeRunning();
         }
         installPlatformChartAndWaitToBeRunning("/files/platform-values.yaml");
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
 
         await().untilAsserted(() -> {
             LOG.info("Assert original logback.xml in pods");
@@ -59,12 +59,12 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
                     .list()
                     .getItems()
                     .stream()
-                    .filter(pod -> pod.getMetadata().getName().startsWith(PLATFORM_RELEASE_NAME + "-"))) //
+                    .filter(pod -> pod.getMetadata().getName().startsWith(platformReleaseName + "-"))) //
                     .allSatisfy(pod -> assertThatLogbackXmlContains(pod, "<root level=\"${HIVEMQ_LOG_LEVEL:-INFO}\">"));
         });
 
         LOG.info("Trigger update of log level");
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.replicaCount=1", "--set", "nodes.logLevel=WARN");
+        upgradePlatformChart(platformReleaseName, "--set", "nodes.replicaCount=1", "--set", "nodes.logLevel=WARN");
 
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SET_LOG_LEVEL"),
                 1,
@@ -80,7 +80,7 @@ class UpdateLogLevelIT extends AbstractHelmChartIT {
                     .list()
                     .getItems()
                     .stream()
-                    .filter(pod -> pod.getMetadata().getName().startsWith(PLATFORM_RELEASE_NAME + "-"))) //
+                    .filter(pod -> pod.getMetadata().getName().startsWith(platformReleaseName + "-"))) //
                     .allSatisfy(pod -> assertThatLogbackXmlContains(pod, "<root level=\"WARN\">"));
         });
     }

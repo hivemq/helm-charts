@@ -28,10 +28,12 @@ import static org.awaitility.Durations.ONE_MINUTE;
 
 class HelmExtensionPriorityIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String MQTT_SERVICE_NAME = "hivemq-test-hivemq-platform-mqtt-1884";
     private static final int MQTT_SERVICE_PORT = 1884;
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmExtensionPriorityIT.class);
+
+    private final @NotNull String mqttServiceName =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT);
 
     @TempDir
     private @NotNull Path tmp;
@@ -75,7 +77,7 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
         await().atMost(ONE_MINUTE).until(bazExtensionStartedFuture::isDone);
         await().untilAsserted(() -> assertThat(client.pods()
                 .inNamespace(platformNamespace)
-                .withName(PLATFORM_RELEASE_NAME + "-0")
+                .withName(platformReleaseName + "-0")
                 .get()) //
                 .isNotNull() //
                 .satisfies(pod -> {
@@ -93,11 +95,11 @@ class HelmExtensionPriorityIT extends AbstractHelmChartIT {
                             "<start-priority>3000</start-priority>");
                 }));
 
-        K8sUtil.assertMqttService(client, platformNamespace, MQTT_SERVICE_NAME);
+        K8sUtil.assertMqttService(client, platformNamespace, mqttServiceName);
 
         MqttUtil.execute(client,
                 platformNamespace,
-                MQTT_SERVICE_NAME,
+                mqttServiceName,
                 MQTT_SERVICE_PORT,
                 (publishClient, subscribeClient, publishes) -> {
                     subscribeClient.subscribeWith().topicFilter("topic").send();
