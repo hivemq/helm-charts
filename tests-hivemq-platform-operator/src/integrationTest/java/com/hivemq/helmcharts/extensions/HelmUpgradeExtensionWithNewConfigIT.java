@@ -31,7 +31,7 @@ class HelmUpgradeExtensionWithNewConfigIT extends AbstractHelmBridgeExtensionIT 
         await().until(extensionStartedBrokerFuture1::isDone);
 
         // check that extensions are enabled
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
         assertThat(hivemqCustomResource.get().getAdditionalProperties().get("spec").toString()).matches(
                 ".*extensions=\\[.*?enabled=true,.*?id=hivemq-bridge-extension,.*?].*");
 
@@ -41,13 +41,13 @@ class HelmUpgradeExtensionWithNewConfigIT extends AbstractHelmBridgeExtensionIT 
         K8sUtil.createConfigMap(client, platformNamespace, "updated-test-bridge-configuration", bridgeConfiguration);
 
         // upgrade chart and wait to be ready
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "-f", "/files/bridge-updated-values.yaml");
-        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        upgradePlatformChart(platformReleaseName, "-f", "/files/bridge-updated-values.yaml");
+        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, platformReleaseName);
         await().until(extensionEnabledInitAppFuture2::isDone);
         await().until(extensionStartedBrokerFuture2::isDone);
 
         final var upgradedStatefulSet =
-                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
         assertThat(upgradedStatefulSet.getStatus().getAvailableReplicas()).isEqualTo(1);
     }
 }

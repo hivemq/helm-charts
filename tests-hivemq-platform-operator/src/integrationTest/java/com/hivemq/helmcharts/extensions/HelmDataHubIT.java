@@ -15,8 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HelmDataHubIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String REST_API_SERVICE_NAME = "hivemq-test-hivemq-platform-rest-8890";
     private static final int REST_API_SERVICE_PORT = 8890;
+
+    private final @NotNull String restApiServiceName =
+            "hivemq-%s-rest-%s".formatted(platformReleaseName, REST_API_SERVICE_PORT);
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -26,7 +28,7 @@ class HelmDataHubIT extends AbstractHelmChartIT {
         // forward the port from the service
         try (final var forwarded = K8sUtil.getPortForward(client,
                 platformNamespace,
-                REST_API_SERVICE_NAME,
+                restApiServiceName,
                 REST_API_SERVICE_PORT)) {
             final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();
 
