@@ -22,10 +22,11 @@ class AbstractHelmControlCenterIT extends AbstractHelmChartIT {
     static final int CC_SERVICE_PORT_8081 = 8081;
     static final int CC_SERVICE_PORT_8443 = 8443;
     static final int CC_SERVICE_PORT_8444 = 8444;
-    static final @NotNull String CC_SERVICE_NAME_8081 = "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8081;
-    static final @NotNull String CC_SERVICE_NAME_8443 = "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8443;
-    static final @NotNull String CC_SERVICE_NAME_8444 = "hivemq-test-hivemq-platform-cc-" + CC_SERVICE_PORT_8444;
     static final @NotNull String CC_CUSTOM_SERVICE_NAME = "control-center-service";
+
+    final @NotNull String ccServiceName8081 = "hivemq-%s-cc-%s".formatted(platformReleaseName, CC_SERVICE_PORT_8081);
+    final @NotNull String ccServiceName8443 = "hivemq-%s-cc-%s".formatted(platformReleaseName, CC_SERVICE_PORT_8443);
+    final @NotNull String ccServiceName8444 = "hivemq-%s-cc-%s".formatted(platformReleaseName, CC_SERVICE_PORT_8444);
 
     @TempDir
     @NotNull Path tmp;

@@ -26,7 +26,7 @@ class HelmCustomConfigIT extends AbstractHelmChartIT {
 
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
             final var foundContainer = statefulSet.getSpec()
                     .getTemplate()
