@@ -18,7 +18,7 @@ class HelmExtensionLicensesIT extends AbstractHelmLicensesIT {
         final var extensionStartedFuture = waitForPlatformLog(
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
         final var extensionLicenseFuture =
-                logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file tracing.elic is corrupt.");
+                logWaiter.waitFor(platformLogWaiterPrefix, ".*License file tracing.elic is corrupt.");
 
         installPlatformChartAndWaitToBeRunning("-f",
                 "/files/distributed-tracing-extension-values.yaml",
@@ -26,7 +26,7 @@ class HelmExtensionLicensesIT extends AbstractHelmLicensesIT {
                 "license.create=true",
                 "--set-file",
                 "license.extensions.tracing.overrideLicense=/files/mock-extension-license.elic");
-        assertLicense("hivemq-license-test-hivemq-platform");
+        assertLicense("hivemq-license-" + platformReleaseName);
         await().until(extensionStartedFuture::isDone);
         await().until(extensionLicenseFuture::isDone);
     }

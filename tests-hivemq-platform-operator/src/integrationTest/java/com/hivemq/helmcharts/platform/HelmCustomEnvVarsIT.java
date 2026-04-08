@@ -36,7 +36,7 @@ class HelmCustomEnvVarsIT extends AbstractHelmChartIT {
                         platformNamespace.equals(envVar.getValue()));
 
         // assert the custom platform configuration
-        final var statefulSet = K8sUtil.getStatefulSet(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var statefulSet = K8sUtil.getStatefulSet(client, platformNamespace, platformReleaseName);
         assertThat(K8sUtil.getHiveMQContainer(statefulSet.getSpec())
                 .getEnv()).anyMatch(envVar -> "MY_CUSTOM_ENV_VAR".equals(envVar.getName()) &&
                 "mycustomvalue".equals(envVar.getValue()));
