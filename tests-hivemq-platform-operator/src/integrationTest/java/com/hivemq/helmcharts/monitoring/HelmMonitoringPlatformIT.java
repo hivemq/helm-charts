@@ -17,8 +17,8 @@ class HelmMonitoringPlatformIT extends AbstractHelmMonitoringIT {
         assertPrometheusMetrics("com_hivemq_cluster_nodes_count",
                 response -> assertThat(response.data().result()).hasSize(2)
                         .extracting(result -> result.metric().get("pod"), result -> result.value().get(1))
-                        .containsExactlyInAnyOrder(tuple(PLATFORM_RELEASE_NAME + "-0", "2"),
-                                tuple(PLATFORM_RELEASE_NAME + "-1", "2")));
+                        .containsExactlyInAnyOrder(tuple(platformReleaseName + "-0", "2"),
+                                tuple(platformReleaseName + "-1", "2")));
         assertGrafanaDashboard("HiveMQ Platform (Prometheus)");
     }
 }

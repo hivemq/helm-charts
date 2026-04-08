@@ -22,9 +22,9 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
         installPlatformChartAndWaitToBeRunning("--set", "nodes.replicaCount=1");
         LOG.debug("Platform ready");
 
-        upgradePlatformChart(PLATFORM_RELEASE_NAME, "--set", "nodes.replicaCount=2");
+        upgradePlatformChart(platformReleaseName, "--set", "nodes.replicaCount=2");
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("SCALING"),
                 2,
                 TimeUnit.MINUTES);
@@ -36,7 +36,7 @@ class HelmUpgradePlatformIT extends AbstractHelmChartIT {
         LOG.debug("Platform upgraded");
 
         final var upgradedStatefulSet =
-                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
         assertThat(upgradedStatefulSet.getStatus().getAvailableReplicas()).isEqualTo(2);
     }
 }
