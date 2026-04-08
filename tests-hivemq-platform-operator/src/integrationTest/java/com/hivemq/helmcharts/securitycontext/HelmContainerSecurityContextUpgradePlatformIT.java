@@ -11,6 +11,11 @@ import java.util.concurrent.TimeUnit;
 class HelmContainerSecurityContextUpgradePlatformIT extends AbstractHelmContainerSecurityContextIT {
 
     @Override
+    protected @NotNull String getReleaseBaseName() {
+        return "container-sc-upgrade-platform";
+    }
+
+    @Override
     protected boolean installPlatformOperatorChart() {
         return false;
     }
@@ -21,7 +26,7 @@ class HelmContainerSecurityContextUpgradePlatformIT extends AbstractHelmContaine
     void updateConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
             throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
-        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
+        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(operatorReleaseName);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
                 "hivemq-platform-operator",
@@ -29,14 +34,17 @@ class HelmContainerSecurityContextUpgradePlatformIT extends AbstractHelmContaine
                 chartValues.operator().gid());
 
         installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
-        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         assertUidAndGid(platformNamespace,
                 platformLabels,
                 "hivemq",
                 chartValues.platform().uid(),
                 chartValues.platform().gid());
 
-        K8sUtil.updateConfigMap(client, platformNamespace, "hivemq-config-map-update.yml");
-        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        K8sUtil.updateConfigMap(client,
+                platformNamespace,
+                "hivemq-config-map-update.yml",
+                "hivemq-configuration-" + platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, platformReleaseName);
     }
 }

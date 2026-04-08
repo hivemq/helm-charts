@@ -23,10 +23,11 @@ class HelmRestApiTlsIT extends AbstractHelmChartIT {
 
     private static final int REST_API_SERVICE_PORT_8890 = 8890;
     private static final int REST_API_SERVICE_PORT_8891 = 8891;
-    private static final @NotNull String REST_API_SERVICE_NAME_8890 =
-            "hivemq-test-hivemq-platform-rest-" + REST_API_SERVICE_PORT_8890;
-    private static final @NotNull String REST_API_SERVICE_NAME_8891 =
-            "hivemq-test-hivemq-platform-rest-" + REST_API_SERVICE_PORT_8891;
+
+    private final @NotNull String restApiServiceName8890 =
+            "hivemq-%s-rest-%s".formatted(platformReleaseName, REST_API_SERVICE_PORT_8890);
+    private final @NotNull String restApiServiceName8891 =
+            "hivemq-%s-rest-%s".formatted(platformReleaseName, REST_API_SERVICE_PORT_8891);
 
     @TempDir
     private @NotNull Path tmp;
@@ -53,12 +54,12 @@ class HelmRestApiTlsIT extends AbstractHelmChartIT {
 
         assertThat(RestAPIUtil.getAllMqttClients(client,
                 platformNamespace,
-                REST_API_SERVICE_NAME_8890,
+                restApiServiceName8890,
                 REST_API_SERVICE_PORT_8890,
                 true)).isEmpty();
         assertThat(RestAPIUtil.getAllMqttClients(client,
                 platformNamespace,
-                REST_API_SERVICE_NAME_8891,
+                restApiServiceName8891,
                 REST_API_SERVICE_PORT_8891,
                 true)).isEmpty();
     }

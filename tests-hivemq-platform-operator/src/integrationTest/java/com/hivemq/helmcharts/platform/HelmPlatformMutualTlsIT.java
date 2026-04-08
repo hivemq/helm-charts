@@ -30,12 +30,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
+    private static final int MQTT_SERVICE_PORT_1884 = 1884;
+    private static final int MQTT_SERVICE_PORT_1885 = 1885;
+
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmPlatformMutualTlsIT.class);
 
-    private static final int MQTT_SERVICE_PORT_1884 = 1884;
-    private static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
-    private static final int MQTT_SERVICE_PORT_1885 = 1885;
-    private static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
+    private final @NotNull String mqttServiceName1884 =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT_1884);
+    private final @NotNull String mqttServiceName1885 =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT_1885);
 
     @TempDir
     private @NotNull Path tmp;
@@ -85,11 +88,11 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
         installPlatformChartAndWaitToBeRunning("/files/mtls-mqtt-values.yaml");
 
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
         assertThat(statefulSet).isNotNull();
 
         LOG.info("Connecting to MQTT listener with no mTLS/SSL on port {}", DEFAULT_MQTT_SERVICE_PORT);
-        assertMqttListener(DEFAULT_MQTT_SERVICE_NAME, DEFAULT_MQTT_SERVICE_PORT);
+        assertMqttListener(defaultMqttServiceName, DEFAULT_MQTT_SERVICE_PORT);
 
         final var sslConfig = MqttClientSslConfig.builder()
                 .keyManagerFactory(keyManagerFromKeystore(brokerCertificateStore.toFile(),
@@ -103,12 +106,12 @@ class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
         LOG.info("Connecting to MQTT listener mTLS/SSL on port {}", MQTT_SERVICE_PORT_1884);
         assertSecretMounted(statefulSet, "mqtts-keystore-1884");
         assertSecretMounted(statefulSet, "mqtts-truststore-1884");
-        assertMqttListener(MQTT_SERVICE_NAME_1884, MQTT_SERVICE_PORT_1884, sslConfig);
+        assertMqttListener(mqttServiceName1884, MQTT_SERVICE_PORT_1884, sslConfig);
 
         LOG.info("Connecting to MQTT listener mTLS/SSL on port {}", MQTT_SERVICE_PORT_1885);
         assertSecretMounted(statefulSet, "mqtts-keystore-1885");
         assertSecretMounted(statefulSet, "mqtts-truststore-1885");
-        assertMqttListener(MQTT_SERVICE_NAME_1885, MQTT_SERVICE_PORT_1885, sslConfig);
+        assertMqttListener(mqttServiceName1885, MQTT_SERVICE_PORT_1885, sslConfig);
     }
 
     @SuppressWarnings("SameParameterValue")
