@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static com.hivemq.helmcharts.util.K8sUtil.MAX_RELEASE_NAME_LENGTH;
 import static com.hivemq.helmcharts.util.K8sUtil.getNamespaceName;
 import static com.hivemq.helmcharts.util.K8sUtil.getOperatorNamespaceName;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,17 +39,8 @@ public abstract class AbstractHelmChartIT {
     protected static final @NotNull String PLATFORM_CRD = "hivemq-platforms.hivemq.com";
 
     protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq";
-    protected static final @NotNull String PLATFORM_RELEASE_NAME = "test-hivemq-platform";
-    protected static final @NotNull String OPERATOR_RELEASE_NAME = "test-hivemq-platform-operator";
-    protected static final @NotNull String LEGACY_RELEASE_NAME = "test-hivemq-legacy-platform";
 
     protected static final int DEFAULT_MQTT_SERVICE_PORT = 1883;
-    protected static final @NotNull String DEFAULT_MQTT_SERVICE_NAME =
-            "hivemq-%s-mqtt-%s".formatted(PLATFORM_RELEASE_NAME, DEFAULT_MQTT_SERVICE_PORT);
-
-    protected static final @NotNull String PLATFORM_LOG_WAITER_PREFIX = PLATFORM_RELEASE_NAME + "-0";
-    protected static final @NotNull String OPERATOR_LOG_WAITER_PREFIX =
-            "%s-%s-.*".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
 
     protected static @NotNull HelmChartContainer helmChartContainer;
     protected static @NotNull Network network;
@@ -57,6 +49,18 @@ public abstract class AbstractHelmChartIT {
 
     protected final @NotNull String platformNamespace = getNamespaceName(getClass());
     protected final @NotNull String operatorNamespace = getOperatorNamespaceName(getClass());
+
+    protected final @NotNull String releaseBaseName = getReleaseBaseName();
+    protected final @NotNull String platformReleaseName = releaseBaseName + "-pf";
+    protected final @NotNull String operatorReleaseName = releaseBaseName + "-op";
+    protected final @NotNull String legacyReleaseName = releaseBaseName + "-lg";
+
+    protected final @NotNull String defaultMqttServiceName =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, DEFAULT_MQTT_SERVICE_PORT);
+
+    protected final @NotNull String platformLogWaiterPrefix = platformReleaseName + "-0";
+    protected final @NotNull String operatorLogWaiterPrefix =
+            "%s-%s-.*".formatted(DEFAULT_OPERATOR_NAME_PREFIX, operatorReleaseName);
 
     @BeforeAll
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -78,6 +82,9 @@ public abstract class AbstractHelmChartIT {
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     final void baseSetUp() throws Exception {
+        assertThat(platformReleaseName).as("platformReleaseName").hasSizeLessThanOrEqualTo(MAX_RELEASE_NAME_LENGTH);
+        assertThat(operatorReleaseName).as("operatorReleaseName").hasSizeLessThanOrEqualTo(MAX_RELEASE_NAME_LENGTH);
+        assertThat(legacyReleaseName).as("legacyReleaseName").hasSizeLessThanOrEqualTo(MAX_RELEASE_NAME_LENGTH);
         if (createOperatorNamespace()) {
             helmChartContainer.createNamespace(operatorNamespace);
         }
@@ -85,7 +92,7 @@ public abstract class AbstractHelmChartIT {
             helmChartContainer.createNamespace(platformNamespace);
         }
         if (installPlatformOperatorChart()) {
-            helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
+            helmChartContainer.installPlatformOperatorChart(operatorReleaseName, "--namespace", operatorNamespace);
         }
     }
 
@@ -94,11 +101,11 @@ public abstract class AbstractHelmChartIT {
     final void baseTearDown() throws Exception {
         try {
             if (uninstallPlatformChart()) {
-                helmChartContainer.uninstallRelease(PLATFORM_RELEASE_NAME, platformNamespace, true);
+                helmChartContainer.uninstallRelease(platformReleaseName, platformNamespace, true);
             }
         } finally {
             if (uninstallPlatformOperatorChart()) {
-                helmChartContainer.uninstallRelease(OPERATOR_RELEASE_NAME, operatorNamespace, true);
+                helmChartContainer.uninstallRelease(operatorReleaseName, operatorNamespace, true);
             }
             K8sUtil.deleteCrd(client, PLATFORM_CRD);
         }
@@ -110,10 +117,11 @@ public abstract class AbstractHelmChartIT {
         installLegacyOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        helmChartContainer.installLegacyOperatorChart(LEGACY_RELEASE_NAME, addDefaultOperatorCommands(commands));
-        K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
-        K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, LEGACY_RELEASE_NAME);
+    protected void installLegacyOperatorChartAndWaitToBeRunning(final @NotNull String... commands)
+            throws Exception {
+        helmChartContainer.installLegacyOperatorChart(legacyReleaseName, addDefaultOperatorCommands(commands));
+        K8sUtil.waitForLegacyOperatorPodStateRunning(client, operatorNamespace, legacyReleaseName);
+        K8sUtil.waitForLegacyHiveMQPlatformStateRunning(client, operatorNamespace, legacyReleaseName);
     }
 
     protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
@@ -121,18 +129,20 @@ public abstract class AbstractHelmChartIT {
         installPlatformOperatorChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
-    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, addDefaultOperatorCommands(commands));
-        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, OPERATOR_RELEASE_NAME);
+    protected void installPlatformOperatorChartAndWaitToBeRunning(final @NotNull String... commands)
+            throws Exception {
+        helmChartContainer.installPlatformOperatorChart(operatorReleaseName, addDefaultOperatorCommands(commands));
+        K8sUtil.waitForPlatformOperatorPodStateRunning(client, operatorNamespace, operatorReleaseName);
     }
 
-    protected void installPlatformChartAndWaitToBeRunning(final @NotNull String valuesResourceFile) throws Exception {
+    protected void installPlatformChartAndWaitToBeRunning(final @NotNull String valuesResourceFile)
+            throws Exception {
         installPlatformChartAndWaitToBeRunning("-f", valuesResourceFile);
     }
 
     protected void installPlatformChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
-        installPlatformChart(PLATFORM_RELEASE_NAME, commands);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        installPlatformChart(platformReleaseName, commands);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
     }
 
     protected void installPlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
@@ -144,6 +154,15 @@ public abstract class AbstractHelmChartIT {
     protected void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
             throws Exception {
         helmChartContainer.upgradePlatformChart(releaseName, addDefaultPlatformCommands(commands));
+    }
+
+    /**
+     * Override to provide a custom release base name, e.g. when the default truncated name would collide with
+     * another test class. The suffixes {@code -pf}, {@code -op}, and {@code -lg} are appended automatically.
+     * The returned base name must not exceed {@value K8sUtil#MAX_RELEASE_BASE_NAME_LENGTH} characters.
+     */
+    protected @NotNull String getReleaseBaseName() {
+        return K8sUtil.getReleaseBaseName(getClass());
     }
 
     /**
@@ -187,15 +206,15 @@ public abstract class AbstractHelmChartIT {
     }
 
     protected final @NotNull CompletableFuture<String> waitForOperatorLog(final @NotNull String log) {
-        return logWaiter.waitFor(OPERATOR_LOG_WAITER_PREFIX, log);
+        return logWaiter.waitFor(operatorLogWaiterPrefix, log);
     }
 
     protected final @NotNull CompletableFuture<String> waitForPlatformLog(final @NotNull String log) {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, log);
+        return logWaiter.waitFor(platformLogWaiterPrefix, log);
     }
 
     protected final @NotNull CompletableFuture<String> waitForInitAppLog(final @NotNull String log) {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX,
+        return logWaiter.waitFor(platformLogWaiterPrefix,
                 ".*\\[HiveMQ Platform Operator Init App [A-Z0-9.-]+\\] " + log);
     }
 
@@ -210,8 +229,8 @@ public abstract class AbstractHelmChartIT {
         }
     }
 
-    protected static @NotNull String getOperatorName() {
-        return "%s-%s".formatted(DEFAULT_OPERATOR_NAME_PREFIX, OPERATOR_RELEASE_NAME);
+    protected @NotNull String getOperatorName() {
+        return "%s-%s".formatted(DEFAULT_OPERATOR_NAME_PREFIX, operatorReleaseName);
     }
 
     private @NotNull String @NotNull [] addDefaultOperatorCommands(final @NotNull String... commands) {

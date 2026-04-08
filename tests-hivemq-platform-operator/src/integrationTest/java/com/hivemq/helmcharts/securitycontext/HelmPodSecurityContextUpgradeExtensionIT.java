@@ -34,7 +34,7 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
     void updateExtensionConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
             throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
-        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
+        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(operatorReleaseName);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
                 "hivemq-platform-operator",
@@ -46,7 +46,7 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
 
         installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
-        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         assertUidAndGid(platformNamespace,
                 platformLabels,
                 "hivemq",
@@ -58,7 +58,7 @@ class HelmPodSecurityContextUpgradeExtensionIT extends AbstractHelmPodSecurityCo
         final var configurationUpdatedFuture = waitForPlatformLog(
                 ".*HiveMQ Enterprise Distributed Tracing Extension: Successfully updated configuration from '/opt/hivemq/extensions/hivemq-distributed-tracing-extension/conf/config.xml'.");
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);
