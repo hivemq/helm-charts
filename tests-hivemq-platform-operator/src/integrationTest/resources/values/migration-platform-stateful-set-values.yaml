@@ -29,7 +29,6 @@ volumeClaimTemplates:
      volumeMode: Filesystem
 services:
   - type: "mqtt"
-    name: "hivemq-test-hivemq-legacy-platform-mqtt"
     annotations:
       service.spec.externalTrafficPolicy: Local
     exposed: true
