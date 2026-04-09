@@ -216,8 +216,6 @@ class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
         helmChartContainer.installPlatformChart(legacyReleaseName,
                 "-f",
                 "/files/migration-platform-stateful-set-values.yaml",
-                "--set",
-                "services[0].name=" + mqttServiceName,
                 "--namespace",
                 operatorNamespace);
 
