@@ -1054,7 +1054,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(operator_sdk_controllers_execution_reconcile_success_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1068,7 +1068,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(operator_sdk_controllers_execution_reconcile_failure_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_failure_total{instance=\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1170,7 +1170,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(operator_sdk_reconciliations_started_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_started_total{instance=\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1271,7 +1271,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(operator_sdk_reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1373,7 +1373,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(operator_sdk_reconciliations_failed_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_failure_total{instance=\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1457,7 +1457,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(rate(operator_sdk_controllers_execution_reconcile_seconds_bucket{instance=\"$instance\"}[1m])) by (le)",
+          "expr": "sum(rate(reconciliations_execution_duration_seconds_bucket{instance=\"$instance\"}[1m])) by (le)",
           "format": "heatmap",
           "hide": false,
           "instant": false,
@@ -1560,7 +1560,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "operator_sdk_controllers_execution_reconcile_seconds_max{instance=\"$instance\"}",
+          "expr": "reconciliations_execution_duration_seconds_max{instance=\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -3719,7 +3719,7 @@
         "label": "Instance",
         "name": "instance",
         "options": [],
-        "query": "label_values(operator_sdk_reconciliations_executions_hivemq_controller, instance)",
+        "query": "label_values(reconciliations_started_total{controller_name=\"hivemq-controller\"}, instance)",
         "refresh": 2,
         "regex": "",
         "type": "query"
@@ -3759,6 +3759,6 @@
   "timepicker": {},
   "timezone": "",
   "title": "HiveMQ Platform Operator (Prometheus)",
-  "version": 4,
+  "version": 5,
   "weekStart": ""
 }
