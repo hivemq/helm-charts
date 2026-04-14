@@ -1,0 +1,49 @@
+suite: HiveMQ Platform - Rolling Restart Configuration tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+chart:
+  version: 0.0.1
+tests:
+
+  - it: should not render rollingRestart field when not defined
+    asserts:
+      - notExists:
+          path: spec.rollingRestart
+
+  - it: should not render rollingRestart field when empty object
+    set:
+      rollingRestart: {}
+    asserts:
+      - notExists:
+          path: spec.rollingRestart
+
+  - it: should render rollingRestart with lastPodMinAgeSeconds
+    set:
+      rollingRestart:
+        lastPodMinAgeSeconds: 300
+    asserts:
+      - exists:
+          path: spec.rollingRestart
+      - equal:
+          path: spec.rollingRestart.lastPodMinAgeSeconds
+          value: 300
+
+  - it: should render rollingRestart with lastPodMinAgeSeconds set to zero
+    set:
+      rollingRestart:
+        lastPodMinAgeSeconds: 0
+    asserts:
+      - exists:
+          path: spec.rollingRestart
+      - equal:
+          path: spec.rollingRestart.lastPodMinAgeSeconds
+          value: 0
+
+  - it: should fail when lastPodMinAgeSeconds is negative
+    set:
+      rollingRestart:
+        lastPodMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}
