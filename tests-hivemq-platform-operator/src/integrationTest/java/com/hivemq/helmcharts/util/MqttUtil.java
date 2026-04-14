@@ -6,7 +6,6 @@ import com.hivemq.client.mqtt.exceptions.MqttClientStateException;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient.Mqtt5Publishes;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
-import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.LocalPortForward;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +50,7 @@ public class MqttUtil {
                 namespace,
                 mqttServiceName,
                 mqttServicePort,
-                (publishClient) -> IntStream.range(0, DEFAULT_TOPIC_COUNT).parallel().forEach(i -> {
+                (publishClient) -> IntStream.range(0, DEFAULT_TOPIC_COUNT).parallel().forEach(_ -> {
                     final var topic = random.ints(RANDOM_STRING_LEFT_LIMIT, RANDOM_STRING_RIGHT_LIMIT + 1)
                             .limit(RANDOM_STRING_LENGTH)
                             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
@@ -121,28 +119,26 @@ public class MqttUtil {
                 mqttServicePort,
                 portForward -> getBlockingClient(portForward, "PublishClient", mqttClientModifier),
                 portForward -> getBlockingClient(portForward, "SubscribeClient", mqttClientModifier),
-                (publishClient, subscribeClient, publishes) -> {
-                    IntStream.range(0, DEFAULT_TOPIC_COUNT).parallel().forEach(i -> {
-                        final var topic = random.ints(RANDOM_STRING_LEFT_LIMIT, RANDOM_STRING_RIGHT_LIMIT + 1)
-                                .limit(RANDOM_STRING_LENGTH)
-                                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                                .toString();
-                        subscribeClient.subscribeWith().topicFilter(topic).send();
+                (publishClient, subscribeClient, publishes) -> IntStream.range(0, DEFAULT_TOPIC_COUNT)
+                        .parallel()
+                        .forEach(_ -> {
+                            final var topic = random.ints(RANDOM_STRING_LEFT_LIMIT, RANDOM_STRING_RIGHT_LIMIT + 1)
+                                    .limit(RANDOM_STRING_LENGTH)
+                                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                                    .toString();
+                            subscribeClient.subscribeWith().topicFilter(topic).send();
 
-                        final var publishResult = publishClient.publishWith().topic(topic).payload(PAYLOAD).send();
-                        assertThat(publishResult.getError()).isEmpty();
-
-                        final Optional<Mqtt5Publish> publish;
-                        try {
-                            publish = publishes.receive(1, TimeUnit.MINUTES);
-                        } catch (final InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new AssertionError(e);
-                        }
-                        assertThat(publish).isPresent();
-                        assertThat(publish.get().getPayloadAsBytes()).isEqualTo(PAYLOAD);
-                    });
-                });
+                            final var publishResult = publishClient.publishWith().topic(topic).payload(PAYLOAD).send();
+                            assertThat(publishResult.getError()).isEmpty();
+                            try {
+                                final var publish = publishes.receive(1, TimeUnit.MINUTES);
+                                assertThat(publish).isPresent();
+                                assertThat(publish.get().getPayloadAsBytes()).isEqualTo(PAYLOAD);
+                            } catch (final InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                throw new AssertionError(e);
+                            }
+                        }));
     }
 
     public static void execute(
