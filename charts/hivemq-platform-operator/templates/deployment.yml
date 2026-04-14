@@ -166,15 +166,15 @@ spec:
           image: "{{ .Values.image.repository}}/{{ .Values.image.name }}:{{.Values.image.tag}}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             httpGet:
               path: /health/liveness
               port: {{ .Values.http.port }}
               scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             successThreshold: 1
-            timeoutSeconds: 10
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
           ports:
             - name: {{ printf "http-%s" .Release.Name | lower | trunc 15 | trimSuffix "-" }}
               containerPort: {{ .Values.http.port }}
@@ -183,15 +183,15 @@ spec:
               containerPort: {{ .Values.https.port }}
               protocol: TCP
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             httpGet:
               path: /health/readiness
               port: {{ .Values.http.port }}
               scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 10
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
           resources:
             {{- if hasKey .Values.resources "overrideLimits" }}
             {{- with .Values.resources.overrideLimits }}
