@@ -714,6 +714,17 @@
       },
       "type" : "object"
     },
+    "rollingRestart" : {
+      "description" : "Configures the rolling restart behavior for this HiveMQ Platform.",
+      "properties" : {
+        "lastPodMinAgeSeconds" : {
+          "description" : "The minimum age in seconds that the last restarted Pod must have before the next Pod can be restarted during a rolling restart. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
+          "type" : "integer",
+          "minimum" : 0
+        }
+      },
+      "type" : "object"
+    },
     "monitoredResources" : {
       "description" : "Configures Kubernetes resources (ConfigMaps and Secrets) to monitor for changes. When one of the files in a monitored resource changes, the HiveMQ Platform pods will perform a rolling restart.",
       "items" : {
