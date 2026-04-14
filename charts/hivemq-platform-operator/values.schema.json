@@ -166,6 +166,32 @@
     "javaOpts" : {
       "type" : "string"
     },
+    "livenessProbe" : {
+      "description" : "Configures the liveness probe for the HiveMQ Platform Operator container.",
+      "properties" : {
+        "failureThreshold" : {
+          "description" : "Number of consecutive failures before the container is considered unhealthy.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "initialDelaySeconds" : {
+          "description" : "Number of seconds after the container has started before the probe is initiated.",
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "periodSeconds" : {
+          "description" : "How often (in seconds) to perform the probe.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "timeoutSeconds" : {
+          "description" : "Number of seconds after which the probe times out.",
+          "minimum" : 1,
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
+    },
     "logConfiguration" : {
       "description" : "Logs the configuration values at operator startup. Sensitive values are redacted.",
       "type" : "boolean"
@@ -287,6 +313,37 @@
       "properties" : {
         "create" : {
           "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "readinessProbe" : {
+      "description" : "Configures the readiness probe for the HiveMQ Platform Operator container.",
+      "properties" : {
+        "failureThreshold" : {
+          "description" : "Number of consecutive failures before the container is considered not ready.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "initialDelaySeconds" : {
+          "description" : "Number of seconds after the container has started before the probe is initiated.",
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "periodSeconds" : {
+          "description" : "How often (in seconds) to perform the probe.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "successThreshold" : {
+          "description" : "Minimum consecutive successes for the probe to be considered successful after having failed.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "timeoutSeconds" : {
+          "description" : "Number of seconds after which the probe times out.",
+          "minimum" : 1,
+          "type" : "integer"
         }
       },
       "type" : "object"
