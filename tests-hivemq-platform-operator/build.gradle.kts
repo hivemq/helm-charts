@@ -11,7 +11,7 @@ group = "com.hivemq.helmcharts"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -69,6 +69,13 @@ testing {
             }
             targets.configureEach {
                 testTask {
+                    jvmArgumentProviders.add(CommandLineArgumentProvider {
+                        listOf(
+                            // see https://netty.io/wiki/java-24-and-sun.misc.unsafe.html
+                            "--enable-native-access=ALL-UNNAMED",
+                            "--sun-misc-unsafe-memory-access=allow",
+                        )
+                    })
                     systemProperty("k3s.version.type", environment["K8S_VERSION_TYPE"] ?: "LATEST")
                     systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
                     systemProperty("junit.jupiter.execution.timeout.mode", "disabled_on_debug")
@@ -232,5 +239,5 @@ fun resolveK3sTag(): String {
     val k8sVersionType = System.getenv("K8S_VERSION_TYPE") ?: "LATEST"
     val tag = if (k8sVersionType == "MINIMUM") ociImages.k3s.minimum.tag else ociImages.k3s.latest.tag
     println("Resolving test OCI image k3s:$tag ($k8sVersionType)")
-    return tag!!
+    return tag
 }
