@@ -141,6 +141,15 @@ spec:
                 type: "array"
               operatorRestApiPort:
                 type: "integer"
+              rollingRestart:
+                properties:
+                  lastPodMinAgeSeconds:
+                    description: "The minimum age in seconds that the last restarted\
+                      \ Pod must have before the next Pod can be restarted during\
+                      \ a rolling restart. Overrides the global operator configuration.\
+                      \ If not set, the global operator configuration is used."
+                    type: "integer"
+                type: "object"
               secretName:
                 type: "string"
               services:
