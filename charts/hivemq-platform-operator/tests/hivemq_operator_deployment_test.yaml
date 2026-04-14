@@ -1479,3 +1479,85 @@ tests:
           content:
             name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
             value: "false"
+
+  - it: with default values, default livenessProbe values are set
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe
+          value:
+            failureThreshold: 3
+            httpGet:
+              path: /health/liveness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+
+  - it: with default values, default readinessProbe values are set
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe
+          value:
+            failureThreshold: 3
+            httpGet:
+              path: /health/readiness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+
+  - it: with custom livenessProbe values
+    set:
+      livenessProbe.initialDelaySeconds: 15
+      livenessProbe.periodSeconds: 30
+      livenessProbe.timeoutSeconds: 20
+      livenessProbe.failureThreshold: 5
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe
+          value:
+            failureThreshold: 5
+            httpGet:
+              path: /health/liveness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 20
+
+  - it: with custom readinessProbe values
+    set:
+      readinessProbe.initialDelaySeconds: 10
+      readinessProbe.periodSeconds: 20
+      readinessProbe.timeoutSeconds: 15
+      readinessProbe.successThreshold: 1
+      readinessProbe.failureThreshold: 6
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe
+          value:
+            failureThreshold: 6
+            httpGet:
+              path: /health/readiness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 15
+
+  - it: with custom http port, probe port is updated
+    set:
+      http.port: 9090
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: 9090
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: 9090
