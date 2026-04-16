@@ -3,6 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
+    alias(libs.plugins.hivemq.oci.version.catalog)
     alias(libs.plugins.oci)
 }
 
