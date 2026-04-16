@@ -934,11 +934,22 @@
       "type" : "object"
     },
     "podScheduling" : {
+      "description" : "Configures how the HiveMQ Platform pods are placed on your Kubernetes nodes.",
       "properties" : {
         "affinity" : {
+          "description" : "Optional setting that defines the affinity configuration for your HiveMQ Platform pods. Any valid `affinity` Kubernetes configuration can be used.",
           "type" : "object"
         },
+        "nodeSelector" : {
+          "description" : "Optional setting that defines the node selector configuration for your HiveMQ Platform pods. Constrains the HiveMQ Platform pods to run on Kubernetes nodes with matching labels.",
+          "type" : "object"
+        },
+        "priorityClassName" : {
+          "description" : "Optional setting that defines the priority class name for your HiveMQ Platform pods. The referenced Kubernetes `PriorityClass` must already exist in the cluster. Protects HiveMQ Platform pods from being preempted during cluster events such as node upgrades or autoscaling.",
+          "type" : "string"
+        },
         "tolerations" : {
+          "description" : "Optional setting that defines the pod tolerations configuration for your HiveMQ Platform pods.",
           "items" : {
             "type" : "object"
           },

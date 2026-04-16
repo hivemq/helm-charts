@@ -1,0 +1,171 @@
+suite: HiveMQ Platform - Pod Scheduling tests
+templates:
+  - hivemq-custom-resource.yml
+tests:
+
+  - it: with defaults, no priorityClassName is set
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.priorityClassName
+
+  - it: with defaults, no nodeSelector is set
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.nodeSelector
+
+  - it: with defaults, no affinity is set
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.affinity
+
+  - it: with defaults, no tolerations are set
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.tolerations
+
+  - it: with priorityClassName set, priorityClassName is rendered
+    set:
+      podScheduling.priorityClassName: "high-priority"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.priorityClassName
+      - equal:
+          path: spec.statefulSet.spec.template.spec.priorityClassName
+          value: "high-priority"
+
+  - it: with empty priorityClassName, priorityClassName is not rendered
+    set:
+      podScheduling.priorityClassName: ""
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.priorityClassName
+
+  - it: with nodeSelector set, nodeSelector is rendered
+    set:
+      podScheduling:
+        nodeSelector:
+          disktype: ssd
+          workload: hivemq
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.nodeSelector
+      - equal:
+          path: spec.statefulSet.spec.template.spec.nodeSelector.disktype
+          value: "ssd"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.nodeSelector.workload
+          value: "hivemq"
+
+  - it: with empty nodeSelector, nodeSelector is not rendered
+    set:
+      podScheduling.nodeSelector: {}
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.nodeSelector
+
+  - it: with affinity set, affinity is rendered
+    set:
+      podScheduling:
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - my-app
+                topologyKey: "kubernetes.io/hostname"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.affinity
+      - isSubset:
+          path: spec.statefulSet.spec.template.spec.affinity
+          content:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - my-app
+                  topologyKey: "kubernetes.io/hostname"
+
+  - it: with empty affinity, affinity is not rendered
+    set:
+      podScheduling.affinity: {}
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.affinity
+
+  - it: with tolerations set, tolerations are rendered
+    set:
+      podScheduling:
+        tolerations:
+          - key: "my-key"
+            operator: "Exists"
+            effect: "NoSchedule"
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.tolerations
+      - contains:
+          path: spec.statefulSet.spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: my-key
+            operator: Exists
+
+  - it: with empty tolerations, tolerations are not rendered
+    set:
+      podScheduling.tolerations: []
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.tolerations
+
+  - it: with both priorityClassName and nodeSelector set, both are rendered
+    set:
+      podScheduling:
+        priorityClassName: "critical"
+        nodeSelector:
+          kubernetes.io/os: linux
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.priorityClassName
+          value: "critical"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.nodeSelector["kubernetes.io/os"]
+          value: "linux"
+
+  - it: with all pod scheduling values set
+    values:
+      - pod-scheduling-values.yaml
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.affinity
+      - isSubset:
+          path: spec.statefulSet.spec.template.spec.affinity
+          content:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - my-app
+                  topologyKey: "kubernetes.io/hostname"
+      - exists:
+          path: spec.statefulSet.spec.template.spec.tolerations
+      - contains:
+          path: spec.statefulSet.spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: my-key
+            operator: Exists
+      - equal:
+          path: spec.statefulSet.spec.template.spec.nodeSelector.disktype
+          value: "ssd"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.priorityClassName
+          value: "high-priority"

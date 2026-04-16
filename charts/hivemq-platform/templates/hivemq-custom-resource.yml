@@ -297,6 +297,13 @@ spec:
           tolerations:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with .Values.podScheduling.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.podScheduling.priorityClassName }}
+          priorityClassName: {{ . }}
+          {{- end }}
       {{- with .Values.volumeClaimTemplates }}
       volumeClaimTemplates:
         {{- toYaml . | nindent 12 }}
