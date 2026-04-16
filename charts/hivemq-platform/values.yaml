@@ -190,9 +190,9 @@ operator:
   # Annotations to add to the HiveMQ Platform custom resource.
   annotations: {}
 
-# Configures how the HiveMQ platform pods should be scheduled on the Kubernetes worker nodes.
+# Configures how the HiveMQ Platform pods are placed on your Kubernetes nodes.
 podScheduling:
-  # Configures the affinity for the Platform pods
+  # Optional setting that defines the affinity configuration for your HiveMQ Platform pods. Any valid `affinity` Kubernetes configuration can be used.
   affinity: {}
   # podAffinity:
   #    requiredDuringSchedulingIgnoredDuringExecution:
@@ -204,11 +204,22 @@ podScheduling:
   #                - my-app
   #        topologyKey: "kubernetes.io/hostname"
 
-  # Configures the tolerations for the Platform pods
+  # Optional setting that defines the pod tolerations configuration for your HiveMQ Platform pods.
   tolerations: []
   #  - key: "example-key"
   #    operator: "Exists"
   #    effect: "NoSchedule"
+
+  # Optional setting that defines the node selector configuration for your HiveMQ Platform pods.
+  # Constrains the HiveMQ Platform pods to run on Kubernetes nodes with matching labels.
+  nodeSelector: {}
+  #  disktype: "ssd"
+  #  kubernetes.io/os: "linux"
+
+  # Optional setting that defines the priority class name for your HiveMQ Platform pods.
+  # The referenced Kubernetes `PriorityClass` must already exist in the cluster.
+  # Protects HiveMQ Platform pods from being preempted during cluster events such as node upgrades or autoscaling.
+  priorityClassName: ""
 
 # Monitoring settings used by the HiveMQ Prometheus extension.
 metrics:
