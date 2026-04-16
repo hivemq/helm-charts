@@ -728,8 +728,7 @@ tests:
         runAsUser: 185
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499 
-            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)'
 
   - it: with pod security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
@@ -739,8 +738,7 @@ tests:
         runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)'
 
   - it: with defaults, no container security context set
     asserts:
@@ -975,8 +973,7 @@ tests:
         runAsUser: 185
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)'
 
   - it: with container security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
@@ -985,8 +982,7 @@ tests:
         runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)'
 
 
   - it: with pod scheduling values set
