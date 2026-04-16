@@ -13,3 +13,6 @@ podScheduling:
     - key: "my-key"
       operator: "Exists"
       effect: "NoSchedule"
+  nodeSelector:
+    disktype: ssd
+  priorityClassName: "high-priority"
