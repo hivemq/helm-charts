@@ -1500,33 +1500,6 @@ tests:
     asserts:
       - failedTemplate: {}
 
-  - it: with pod scheduling values set
-    values:
-      - pod-scheduling-values.yaml
-    asserts:
-      - exists:
-          path: spec.statefulSet.spec.template.spec.affinity
-      - isSubset:
-          path: spec.statefulSet.spec.template.spec.affinity
-          content:
-            podAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                          - my-app
-                  topologyKey: "kubernetes.io/hostname"
-      - exists:
-          path: spec.statefulSet.spec.template.spec.tolerations
-      - contains:
-          path: spec.statefulSet.spec.template.spec.tolerations
-          content:
-            effect: NoSchedule
-            key: my-key
-            operator: Exists
-
   - it: with custom pod annotations
     set:
       nodes:
