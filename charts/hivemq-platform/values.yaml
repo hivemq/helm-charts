@@ -221,6 +221,23 @@ podScheduling:
   # Protects HiveMQ Platform pods from being preempted during cluster events such as node upgrades or autoscaling.
   priorityClassName: ""
 
+# Configures a PodDisruptionBudget for the HiveMQ Platform pods to control voluntary disruptions such as node drains or cluster autoscaler scale-down events.
+podDisruptionBudget:
+  # Defines whether the PodDisruptionBudget resource is created for the HiveMQ Platform pods.
+  # Requires either minAvailable or maxUnavailable (but not both) to also be set.
+  enabled: false
+  # Minimum number of HiveMQ Platform pods that must remain available during voluntary disruptions.
+  # Accepts an integer or a percentage string (for example, `2` or `"50%"`). Mutually exclusive with `maxUnavailable`.
+  # minAvailable: 2
+  # Maximum number of HiveMQ Platform pods that can be unavailable during voluntary disruptions.
+  # Accepts an integer or a percentage string (for example, `1` or `"25%"`). Mutually exclusive with `minAvailable`.
+  # maxUnavailable: "25%"
+  # Controls how the PodDisruptionBudget treats unhealthy HiveMQ Platform pods.
+  # Requires Kubernetes 1.26 or newer. Leave empty to use the cluster default:
+  #   - `IfHealthyBudget` only allows eviction of unhealthy pods if the budget is satisfied (can deadlock if pods crashloop).
+  #   - `AlwaysAllow` always allows eviction of unhealthy pods.
+  # unhealthyPodEvictionPolicy: "AlwaysAllow"
+
 # Monitoring settings used by the HiveMQ Prometheus extension.
 metrics:
   # Set to disable or enable the HiveMQ Prometheus extension.

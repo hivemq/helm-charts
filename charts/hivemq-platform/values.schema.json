@@ -933,6 +933,33 @@
       },
       "type" : "object"
     },
+    "podDisruptionBudget" : {
+      "description" : "Configures a PodDisruptionBudget for the HiveMQ Platform pods to control voluntary disruptions such as node drains or cluster autoscaler scale-down events.",
+      "properties" : {
+        "enabled" : {
+          "description" : "Defines whether the PodDisruptionBudget resource is created for the HiveMQ Platform pods. Requires either minAvailable or maxUnavailable (but not both) to also be set.",
+          "type" : "boolean"
+        },
+        "maxUnavailable" : {
+          "description" : "Maximum number of HiveMQ Platform pods that can be unavailable during voluntary disruptions. Accepts an integer or a percentage string (for example, `1` or `\"25%\"`). Mutually exclusive with `minAvailable`.",
+          "minimum" : 0,
+          "pattern" : "^[0-9]+%$",
+          "type" : ["integer", "string"]
+        },
+        "minAvailable" : {
+          "description" : "Minimum number of HiveMQ Platform pods that must remain available during voluntary disruptions. Accepts an integer or a percentage string (for example, `2` or `\"50%\"`). Mutually exclusive with `maxUnavailable`.",
+          "minimum" : 1,
+          "pattern" : "^[0-9]+%$",
+          "type" : ["integer", "string"]
+        },
+        "unhealthyPodEvictionPolicy" : {
+          "description" : "Controls how the PodDisruptionBudget treats unhealthy HiveMQ Platform pods. Requires Kubernetes 1.26 or newer. Leave empty to use the cluster default. `IfHealthyBudget` only allows eviction of unhealthy pods if the budget is satisfied (can deadlock if pods crashloop). `AlwaysAllow` always allows eviction of unhealthy pods.",
+          "enum" : ["", "IfHealthyBudget", "AlwaysAllow"],
+          "type" : "string"
+        }
+      },
+      "type" : "object"
+    },
     "podScheduling" : {
       "description" : "Configures how the HiveMQ Platform pods are placed on your Kubernetes nodes.",
       "properties" : {
