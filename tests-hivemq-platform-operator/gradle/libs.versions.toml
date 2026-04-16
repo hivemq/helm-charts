@@ -41,4 +41,5 @@ testcontainers-k3s = { module = "org.testcontainers:testcontainers-k3s", version
 testcontainers-selenium = { module = "org.testcontainers:testcontainers-selenium", version.ref = "testcontainers" }
 
 [plugins]
+hivemq-oci-version-catalog = { id = "com.hivemq.tools.oci-version-catalog", version = "0.3.0" }
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.25.0" }
