@@ -373,6 +373,37 @@ Usage: {{ include "hivemq-platform.validate-extensions" . }}
 {{- end -}}
 
 {{/*
+Checks whether a PodDisruptionBudget value is set (key exists in the map and value is non-empty).
+Returns "true" if the value is set, empty string otherwise.
+Usage: {{ include "hivemq-platform.has-pdb-value" (dict "pdb" .Values.podDisruptionBudget "field" "minAvailable") }}
+*/}}
+{{- define "hivemq-platform.has-pdb-value" -}}
+{{- if and (hasKey .pdb .field) (ne (toString (get .pdb .field)) "") -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the podDisruptionBudget configuration:
+- If enabled, at least one of minAvailable/maxUnavailable must be set.
+- minAvailable and maxUnavailable are mutually exclusive (K8s policy API requirement).
+Usage: {{ include "hivemq-platform.validate-pod-disruption-budget" . }}
+*/}}
+{{- define "hivemq-platform.validate-pod-disruption-budget" -}}
+{{- $pdb := .Values.podDisruptionBudget -}}
+{{- if $pdb.enabled -}}
+  {{- $hasMin := include "hivemq-platform.has-pdb-value" (dict "pdb" $pdb "field" "minAvailable") -}}
+  {{- $hasMax := include "hivemq-platform.has-pdb-value" (dict "pdb" $pdb "field" "maxUnavailable") -}}
+  {{- if and (not $hasMin) (not $hasMax) -}}
+    {{- fail "`podDisruptionBudget.enabled` is `true` but neither `minAvailable` nor `maxUnavailable` was set. Set exactly one." -}}
+  {{- end -}}
+  {{- if and $hasMin $hasMax -}}
+    {{- fail "`podDisruptionBudget.minAvailable` and `podDisruptionBudget.maxUnavailable` are mutually exclusive. Set exactly one." -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Validates there is no duplicated extension names defined.
 Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
 */}}
