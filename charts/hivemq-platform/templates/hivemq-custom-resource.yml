@@ -212,11 +212,15 @@ spec:
                   containerPort: {{ printf "%d" (int64 $metricsPort) }}
                 {{- end }}
               resources:
-                {{- if hasKey .Values.nodes.resources "overrideLimits" }}
-                {{- with .Values.nodes.resources.overrideLimits }}
+                {{- if .Values.nodes.resources.overrideLimits }}
                 limits:
-                  {{- toYaml . | nindent 18 }}
-                {{- end }}
+                  cpu: {{ (.Values.nodes.resources.overrideLimits.cpu | default .Values.nodes.resources.cpu) | toString | trim | quote }}
+                  memory: {{ (.Values.nodes.resources.overrideLimits.memory | default .Values.nodes.resources.memory) | toString | trim | quote }}
+                  {{- $ephemeralStorageOverride := index .Values.nodes.resources.overrideLimits "ephemeral-storage" }}
+                  {{- $ephemeralStorage := .Values.nodes.resources.ephemeralStorage }}
+                  {{- with ($ephemeralStorageOverride | default $ephemeralStorage) }}
+                  ephemeral-storage: {{ . | toString | trim | quote }}
+                  {{- end }}
                 {{- else }}
                 limits:
                   cpu: {{ .Values.nodes.resources.cpu | toString | trim | quote }}
