@@ -1,5 +1,8 @@
 <configuration>
     <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
         <encoder>
             <pattern>%-30(%d %level)- %msg%n%ex</pattern>
         </encoder>
