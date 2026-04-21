@@ -1609,6 +1609,37 @@ tests:
       - failedTemplate:
           errorPattern: '`csi` configuration for volume "shared-csi-volume" must be identical across all `additionalVolumes` entries that share the same `mountName`'
 
+  - it: with additional volume type `csi` and HiveMQ Platform CRD present but CSI driver not installed, then fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: test-csi-mount-volume
+          path: /additional-csi-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - failedTemplate:
+          errorPattern: 'CSI driver "secrets-store.csi.k8s.io" is not installed in the cluster. Ensure the CSI driver is deployed before installing the HiveMQ Platform.'
+
+  - it: with additional volume type `csi` and HiveMQ Platform CRD not present, then CSI driver check is skipped
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: test-csi-mount-volume
+          path: /additional-csi-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+
   - it: with default settings, no volume claim template is set
     asserts:
       - notExists:
