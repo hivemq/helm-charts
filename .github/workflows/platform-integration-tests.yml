@@ -47,6 +47,8 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+        with:
+          cache-disabled: true
 
       - name: Warmup Gradle cache
         if: steps.setup-java.outputs.cache-hit == 'false'
@@ -105,6 +107,8 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+        with:
+          cache-disabled: true
 
       - name: Compile integration tests
         working-directory: helm-charts
