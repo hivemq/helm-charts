@@ -838,6 +838,15 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
         {{- else }}
             {{- $_ := set $csiConfigs $csiVolumeName $additionalVolume.csi }}
         {{- end }}
+        {{- if hasKey $additionalVolume.csi "driver" }}
+            {{- $isHiveMQPlatformCRDPresent := $.Capabilities.APIVersions.Has "hivemq.com/v1" }}
+            {{- if $isHiveMQPlatformCRDPresent }}
+                {{- $csiDriver := lookup "storage.k8s.io/v1" "CSIDriver" "" $additionalVolume.csi.driver }}
+                {{- if not $csiDriver }}
+                    {{- fail (printf "\nCSI driver %q is not installed in the cluster. Ensure the CSI driver is deployed before installing the HiveMQ Platform." $additionalVolume.csi.driver) }}
+                {{- end }}
+            {{- end }}
+        {{- end }}
     {{- end -}}
     {{- if and (not (eq $additionalVolume.type "sharedPersistentVolumeClaim")) (hasKey $additionalVolume "hivemqFolders") }}
         {{- fail (printf "\n`hivemqFolders` value is only available for type \"sharedPersistentVolumeClaim\"") }}
