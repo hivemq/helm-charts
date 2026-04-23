@@ -362,10 +362,47 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 {{- end -}}
 
 {{/*
+Normalizes extension input into a list.
+- Starts with the `extensions` array as the base list.
+- For each `extensionMap` entry with a matching array extension, merges the map entry on top (map wins per-field).
+- For each `extensionMap` entry with no match in the array, appends it as a new extension (in alphabetical order of the map key).
+- Null-valued fields in the merged result are removed to avoid rendering empty values.
+Usage: {{ include "hivemq-platform.normalize-extensions" . }}
+*/}}
+{{- define "hivemq-platform.normalize-extensions" -}}
+  {{- $extensionMap := default (dict) .Values.extensionMap -}}
+  {{- $extensions := list -}}
+  {{- $processedExtensions := list -}}
+  {{- range $extension := .Values.extensions -}}
+    {{- if hasKey $extensionMap $extension.name -}}
+      {{- $overriddenExtension := deepCopy $extension -}}
+      {{- range $key, $val := index $extensionMap $extension.name -}}
+        {{- if kindIs "invalid" $val -}}
+          {{- $_ := unset $overriddenExtension $key -}}
+        {{- else -}}
+          {{- $_ := set $overriddenExtension $key $val -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $extensions = append $extensions $overriddenExtension -}}
+    {{- else -}}
+      {{- $extensions = append $extensions $extension -}}
+    {{- end -}}
+    {{- $processedExtensions = append $processedExtensions $extension.name -}}
+  {{- end -}}
+  {{- range $name, $extension := $extensionMap -}}
+    {{- if not (has $name $processedExtensions) -}}
+      {{- $extensions = append $extensions (merge (dict "name" $name) $extension) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $extensions | toYaml -}}
+{{- end -}}
+
+{{/*
 Validates all the exposed extensions.
-- No duplicated extension names are defined as part of the `.Values.extensions` values list.
+- No duplicated extension names are defined.
 - No extension contains `configMapName` and `secretName` defined simultaneously.
-Usage: {{ include "hivemq-platform.validate-extensions" . }}
+Expects the normalized extensions list as input.
+Usage: {{ include "hivemq-platform.validate-extensions" $extensions }}
 */}}
 {{- define "hivemq-platform.validate-extensions" -}}
 {{- include "hivemq-platform.validate-duplicated-extension-names" . -}}
@@ -405,12 +442,12 @@ Usage: {{ include "hivemq-platform.validate-pod-disruption-budget" . }}
 
 {{/*
 Validates there is no duplicated extension names defined.
-Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
+Expects the normalized extensions list as input.
+Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" $extensions }}
 */}}
 {{- define "hivemq-platform.validate-duplicated-extension-names" -}}
-{{- $extensions := .Values.extensions }}
 {{- $extensionNamesList := list }}
-{{- range $extension := $extensions }}
+{{- range $extension := . }}
   {{- if (has $extension.name $extensionNamesList) }}
     {{- fail (printf "\nFound duplicated extension name `%s`" $extension.name) }}
   {{- else }}
@@ -421,11 +458,11 @@ Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
 
 {{/*
 Validates there is no enabled extension which defines both `configMapName` and `secretName` simultaneously.
-Usage: {{ include "hivemq-platform.validate-configmap-secret-extensions" . }}
+Expects the normalized extensions list as input.
+Usage: {{ include "hivemq-platform.validate-configmap-secret-extensions" $extensions }}
 */}}
 {{- define "hivemq-platform.validate-configmap-secret-extensions" -}}
-{{- $extensions := .Values.extensions }}
-{{- range $extension := $extensions }}
+{{- range $extension := . }}
   {{- if and $extension.configMapName $extension.secretName }}
     {{- fail (printf "\nBoth `configMapName` and `secretName` values are set for extension `%s`. Only one can be defined at a time" $extension.name) }}
   {{- end }}
