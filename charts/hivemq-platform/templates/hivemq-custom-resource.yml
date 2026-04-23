@@ -359,10 +359,11 @@ spec:
             targetPort: {{ $metricsContainerPortName }}
             port: {{ printf "%d" (int64 $metricsPort) }}
     {{- end }}
-  {{- if hasKey .Values "extensions" }}
+  {{- $extensions := include "hivemq-platform.normalize-extensions" . | fromYamlArray }}
+  {{- if $extensions }}
   extensions:
-    {{- include "hivemq-platform.validate-extensions" . -}}
-    {{- range $extension := .Values.extensions }}
+    {{- include "hivemq-platform.validate-extensions" $extensions -}}
+    {{- range $extension := $extensions }}
     - id: {{ $extension.name }}
       {{- if hasKey $extension "enabled" }}
       enabled: {{ printf "%t" $extension.enabled | default false }}
