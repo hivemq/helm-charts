@@ -302,50 +302,58 @@
       "items" : {
         "properties" : {
           "configMapName" : {
+            "description" : "Configures the name of the Kubernetes ConfigMap that contains the extension configuration.",
             "maxLength" : 253,
             "type" : "string"
           },
           "customizationUri" : {
+            "description" : "The HTTP URL from which to load the extension customization.",
             "type" : "string"
           },
           "enabled" : {
+            "description" : "Boolean value that defines whether the extension is enabled.",
             "type" : "boolean"
           },
           "extensionUri" : {
+            "description" : "The location from which to load the extension. Possible values are: preinstalled or an HTTP URL.",
             "type" : "string"
           },
           "name" : {
+            "description" : "The defined name of the extension from the extensions.xml file.",
             "type" : "string"
           },
           "priority" : {
-            "description" : "Dynamically configures the extension priority value in the hivemq-extension.xml file.",
+            "description" : "The priority of the extension.",
             "type" : "integer"
           },
           "requestHeaderSecretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains headers for HTTP requests for custom extension and extension customization downloads.",
             "maxLength" : 253,
             "type" : "string"
           },
           "secretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains the extension configuration.",
             "maxLength" : 253,
             "type" : "string"
           },
           "skipHttpsCertificateValidation" : {
-            "description" : "Configures if certificate validation should be skipped for downloads of custom extensions or extension customizations.",
+            "description" : "Boolean value to skip certificate validation when downloading a custom extension and extension customizations via the HTTPS protocol.",
             "type" : "boolean"
           },
           "skipHttpsHostnameVerification" : {
-            "description" : "Configures if hostname verification should be skipped for downloads of custom extensions or extension customizations.",
+            "description" : "Boolean value to skip hostname verification when downloading a custom extension and extension customizations via the HTTPS protocol.",
             "type" : "boolean"
           },
           "startMandatory" : {
-            "description" : "Dynamically configures the extension start-mandatory value in the hivemq-extension.xml file.",
+            "description" : "Determines how the HiveMQ broker behaves if the startup of the extension fails.",
             "type" : "boolean"
           },
           "startPriority" : {
-            "description" : "Dynamically configures the extension start-priority value in the hivemq-extension.xml file.",
+            "description" : "The start priority of the extension.",
             "type" : "integer"
           },
           "supportsHotReload" : {
+            "description" : "Boolean value that specifies whether the extension configuration is hot-reloadable. The extension must explicitly support hot-reload.",
             "type" : "boolean"
           }
         },
@@ -355,6 +363,67 @@
         "type" : "object"
       },
       "type" : "array"
+    },
+    "extensionMap" : {
+      "description" : "Map-based extension configuration. Keys are extension names. Entries override matching extensions by name. Extensions defined only in extensionMap are added as new entries. Supports hierarchical value file overrides.",
+      "type" : "object",
+      "additionalProperties" : {
+        "type" : ["object", "null"],
+        "properties" : {
+          "configMapName" : {
+            "description" : "Configures the name of the Kubernetes ConfigMap that contains the extension configuration.",
+            "maxLength" : 253,
+            "type" : ["string", "null"]
+          },
+          "customizationUri" : {
+            "description" : "The HTTP URL from which to load the extension customization.",
+            "type" : ["string", "null"]
+          },
+          "enabled" : {
+            "description" : "Boolean value that defines whether the extension is enabled.",
+            "type" : ["boolean", "null"]
+          },
+          "extensionUri" : {
+            "description" : "The location from which to load the extension. Possible values are: preinstalled or an HTTP URL.",
+            "type" : ["string", "null"]
+          },
+          "priority" : {
+            "description" : "The priority of the extension.",
+            "type" : ["integer", "null"]
+          },
+          "requestHeaderSecretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains headers for HTTP requests for custom extension and extension customization downloads.",
+            "maxLength" : 253,
+            "type" : ["string", "null"]
+          },
+          "secretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains the extension configuration.",
+            "maxLength" : 253,
+            "type" : ["string", "null"]
+          },
+          "skipHttpsCertificateValidation" : {
+            "description" : "Boolean value to skip certificate validation when downloading a custom extension and extension customizations via the HTTPS protocol.",
+            "type" : ["boolean", "null"]
+          },
+          "skipHttpsHostnameVerification" : {
+            "description" : "Boolean value to skip hostname verification when downloading a custom extension and extension customizations via the HTTPS protocol.",
+            "type" : ["boolean", "null"]
+          },
+          "startMandatory" : {
+            "description" : "Determines how the HiveMQ broker behaves if the startup of the extension fails.",
+            "type" : ["boolean", "null"]
+          },
+          "startPriority" : {
+            "description" : "The start priority of the extension.",
+            "type" : ["integer", "null"]
+          },
+          "supportsHotReload" : {
+            "description" : "Boolean value that specifies whether the extension configuration is hot-reloadable. The extension must explicitly support hot-reload.",
+            "type" : ["boolean", "null"]
+          }
+        },
+        "additionalProperties" : false
+      }
     },
     "hivemqClientEventHistory" : {
       "description" : "Configures HiveMQ Client Event History options.",
