@@ -366,12 +366,12 @@ spec:
     {{- range $extension := $extensions }}
     - id: {{ $extension.name }}
       {{- if hasKey $extension "enabled" }}
-      enabled: {{ printf "%t" $extension.enabled | default false }}
+      enabled: {{ printf "%t" $extension.enabled }}
       {{- else }}
       enabled: false
       {{- end }}
       {{- if hasKey $extension "supportsHotReload" }}
-      supportsHotReload: {{ printf "%t" $extension.supportsHotReload | default false }}
+      supportsHotReload: {{ printf "%t" $extension.supportsHotReload }}
       {{- else }}
       supportsHotReload: false
       {{- end }}
@@ -386,13 +386,13 @@ spec:
       customizationUri: {{ $extension.customizationUri | quote }}
       {{- end }}
       {{- if hasKey $extension "priority" }}
-      extensionPriority: {{ $extension.priority | default -1 }}
+      extensionPriority: {{ $extension.priority }}
       {{- end }}
       {{- if hasKey $extension "startPriority" }}
-      extensionStartPriority: {{ $extension.startPriority | default -1 }}
+      extensionStartPriority: {{ $extension.startPriority }}
       {{- end }}
       {{- if hasKey $extension "startMandatory" }}
-      extensionStartMandatory: {{ $extension.startMandatory | default false }}
+      extensionStartMandatory: {{ $extension.startMandatory }}
       {{- end }}
       {{- if hasKey $extension "secretName" }}
       secretName: {{ $extension.secretName | quote }}
