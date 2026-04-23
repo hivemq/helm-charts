@@ -573,7 +573,8 @@ additionalContainers: []
 #      - name: broker-configuration
 #        mountPath: /opt/hivemq/conf-k8s/
 
-# HiveMQ Platform extension configuration
+# HiveMQ Platform extension configuration (array form).
+# For map-based configuration that supports hierarchical value file overrides, see `extensionMap` below.
 extensions:
 
 # HiveMQ Allow All Extension
@@ -715,6 +716,21 @@ extensions:
 #    # Configures if certificate validation and hostname verification should be skipped for downloading the custom extension.
 #    # skipHttpsCertificateValidation: true
 #    # skipHttpsHostnameVerification: true
+
+# Map-based extension configuration. Keys are extension names.
+# Entries override matching extensions by name. Extensions defined only in extensionMap are added as new entries.
+# Supports hierarchical value file overrides.
+# Example:
+# extensionMap:
+#   hivemq-enterprise-security-extension:
+#     enabled: true
+#     configMapName: hivemq-platform-ese-config
+#     supportsHotReload: true
+#   hivemq-distributed-tracing-extension:
+#     enabled: false
+#     supportsHotReload: true
+#     configMapName: hivemq-platform-tracing-config
+extensionMap: {}
 
 # Map additional volumes from possible types: "configMap", "secret", "emptyDir", "persistentVolumeClaim", "projected", "sharedPersistentVolumeClaim".
 additionalVolumes: []
