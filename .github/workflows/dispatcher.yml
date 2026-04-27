@@ -114,7 +114,7 @@ jobs:
     secrets: inherit
 
   edge-integration-tests:
-    name: Platform integration tests
+    name: Edge integration tests
     needs:
       - edge-changes
     if: needs.edge-changes.outputs.should-run == 'true'
