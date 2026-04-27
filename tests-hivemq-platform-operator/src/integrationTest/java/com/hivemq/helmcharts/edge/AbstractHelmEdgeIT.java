@@ -18,6 +18,7 @@ import org.testcontainers.containers.Network;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.hivemq.helmcharts.util.K8sUtil.getNamespaceName;
@@ -87,6 +88,15 @@ public abstract class AbstractHelmEdgeIT {
      */
     protected final @NotNull CompletableFuture<String> waitForEdgeStartupLog() {
         return logWaiter.waitFor(EDGE_POD_NAME, ".*Started HiveMQ Edge in.*");
+    }
+
+    /**
+     * Returns a future that completes when the Edge pod logs its version banner ({@code HiveMQ Edge Version: X}) for
+     * the given expected version. Use this to assert that the deployed pod is running the version declared in
+     * {@code libs.versions.toml}.
+     */
+    protected final @NotNull CompletableFuture<String> waitForEdgeVersionLog(final @NotNull String version) {
+        return logWaiter.waitFor(EDGE_POD_NAME, ".*HiveMQ Edge Version: " + Pattern.quote(version) + ".*");
     }
 
     private @NotNull String @NotNull [] addDefaultEdgeCommands(final @NotNull String... commands) {

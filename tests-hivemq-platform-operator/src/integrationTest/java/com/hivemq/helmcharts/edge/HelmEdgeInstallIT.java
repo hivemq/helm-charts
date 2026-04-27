@@ -8,13 +8,20 @@ import java.util.concurrent.TimeUnit;
 class HelmEdgeInstallIT extends AbstractHelmEdgeIT {
 
     /**
-     * Smoke test: install the {@code hivemq-edge} chart, wait for the StatefulSet pod to be Ready, then run the
-     * chart's built-in {@code helm test} hook (mqtt-cli connectivity check).
+     * Smoke test: install the {@code hivemq-edge} chart, assert that the deployed pod runs the Edge version declared
+     * in {@code libs.versions.toml} (passed in via the {@code hivemq.edge.tag} system property), then run the chart's
+     * built-in {@code helm test} hook (mqtt-cli connectivity check).
      */
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withLocalCharts_edgeRunningAndMqttReachable() throws Exception {
+        // Register the version-log waiter BEFORE install so the line cannot be missed if Edge boots fast.
+        final var expectedVersion = System.getProperty("hivemq.edge.tag");
+        final var versionLogged = waitForEdgeVersionLog(expectedVersion);
+
         installEdgeChartAndWaitToBeRunning();
+        versionLogged.get(2, TimeUnit.MINUTES);
+
         helmChartContainer.helmTest(EDGE_RELEASE_NAME, edgeNamespace);
     }
 }

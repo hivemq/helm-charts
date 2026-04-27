@@ -81,6 +81,7 @@ testing {
                 testTask {
                     systemProperty("k3s.version.type", environment["K8S_VERSION_TYPE"] ?: "LATEST")
                     systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
+                    systemProperty("hivemq.edge.tag", libs.versions.hivemq.edge.get())
                     systemProperty("junit.jupiter.execution.timeout.mode", "disabled_on_debug")
                     systemProperty("junit.jupiter.execution.timeout.threaddump.enabled", "true")
                     testLogging {
