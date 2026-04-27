@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.Network;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -35,6 +36,7 @@ public abstract class AbstractHelmEdgeIT {
             new HelmChartContainerExtension(false);
 
     protected static final @NotNull String EDGE_RELEASE_NAME = "test-hivemq-edge";
+    protected static final @NotNull String EDGE_POD_NAME = "hivemq-" + EDGE_RELEASE_NAME + "-0";
 
     protected static @NotNull HelmChartContainer helmChartContainer;
     protected static @NotNull Network network;
@@ -75,6 +77,16 @@ public abstract class AbstractHelmEdgeIT {
     protected void installEdgeChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
         helmChartContainer.installEdgeChart(EDGE_RELEASE_NAME, addDefaultEdgeCommands(commands));
         K8sUtil.waitForHiveMQEdgePodStateRunning(client, edgeNamespace, EDGE_RELEASE_NAME);
+    }
+
+    /**
+     * Returns a future that completes when the Edge pod logs the standard startup-complete message. The Edge chart
+     * has only a {@code livenessProbe} (no {@code readinessProbe}), so the K8s {@code ready} status flips before the
+     * application has finished booting and bound its listeners. Tests that need to interact with Edge (e.g. opening
+     * an MQTT connection) should wait on this future after {@link #installEdgeChartAndWaitToBeRunning} returns.
+     */
+    protected final @NotNull CompletableFuture<String> waitForEdgeStartupLog() {
+        return logWaiter.waitFor(EDGE_POD_NAME, ".*Started HiveMQ Edge in.*");
     }
 
     private @NotNull String @NotNull [] addDefaultEdgeCommands(final @NotNull String... commands) {
