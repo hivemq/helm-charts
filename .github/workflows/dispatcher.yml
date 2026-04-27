@@ -113,6 +113,14 @@ jobs:
     uses: ./.github/workflows/edge-verify.yml
     secrets: inherit
 
+  edge-integration-tests:
+    name: Platform integration tests
+    needs:
+      - edge-changes
+    if: needs.edge-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/edge-integration-tests.yml
+    secrets: inherit
+
   swarm-verify-tests:
     name: Swarm verify tests
     needs: swarm-changes
