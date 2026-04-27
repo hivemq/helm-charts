@@ -33,6 +33,7 @@ configurations.all {
 }
 
 val hivemqVersion = libs.versions.hivemq.platform.get()
+val hivemqEdgeVersion = libs.versions.hivemq.edge.get()
 val k3sTag = resolveK3sTag()
 
 @Suppress("UnstableApiUsage")
@@ -106,6 +107,7 @@ testing {
                     runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
                     runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
                     runtime("com.hivemq:hivemq-enterprise-k8s:4.47.1").tag("k8s-latest")
+                    runtime("com.hivemq:hivemq-edge:$hivemqEdgeVersion").tag("latest")
                     runtime("hivemq:hivemq-operator:4.7.10").tag("latest")
                     runtime("hivemq:init-dns-wait:1.0.1").tag("latest")
                     runtime("library:busybox:1.37.0").name("busybox").tag("latest")

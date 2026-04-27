@@ -367,6 +367,16 @@ public class K8sUtil {
     }
 
     /**
+     * Returns the default labels defined for a HiveMQ Edge pod (matches the chart's selector-labels helper).
+     *
+     * @param releaseName the release name of the Edge chart
+     * @return Map containing the selector labels expected for an Edge pod.
+     */
+    public static @NotNull Map<String, String> getHiveMQEdgeLabels(final @NotNull String releaseName) {
+        return Map.of("app.kubernetes.io/instance", releaseName, "app.kubernetes.io/name", "hivemq-edge");
+    }
+
+    /**
      * Returns the expected init container with as per the given initContainerName from the given
      * {@link StatefulSetSpec}
      * instance.
@@ -623,6 +633,16 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String releaseName) {
         waitForPodStateRunning(client, namespace, getHiveMQPlatformOperatorLabels(releaseName));
+    }
+
+    /**
+     * Waits for the HiveMQ Edge pod based on the given release name to be in a running status.
+     */
+    public static void waitForHiveMQEdgePodStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String releaseName) {
+        waitForPodStateRunning(client, namespace, getHiveMQEdgeLabels(releaseName));
     }
 
     /**

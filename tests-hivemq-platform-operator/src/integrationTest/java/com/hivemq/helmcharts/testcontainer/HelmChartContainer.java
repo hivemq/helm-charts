@@ -63,11 +63,16 @@ public class HelmChartContainer extends K3sContainer {
     private static final @NotNull String LEGACY_OPERATOR_CHART = "hivemq-operator";
     private static final @NotNull String PLATFORM_OPERATOR_CHART = "hivemq-platform-operator";
     private static final @NotNull String PLATFORM_CHART = "hivemq-platform";
+    private static final @NotNull String EDGE_CHART = "hivemq-edge";
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
-    private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS =
-            Set.of("hivemq", "hivemq-platform-operator", "operator", "consul-template", NGINX_CONTAINER_NAME);
+    private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS = Set.of("hivemq",
+            "hivemq-edge",
+            "hivemq-platform-operator",
+            "operator",
+            "consul-template",
+            NGINX_CONTAINER_NAME);
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
     private static final @NotNull String POD_CPU_LIMIT = "512m";
@@ -97,6 +102,8 @@ public class HelmChartContainer extends K3sContainer {
                 "/charts/" + PLATFORM_OPERATOR_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_CHART),
                 "/charts/" + PLATFORM_CHART);
+        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + EDGE_CHART),
+                "/charts/" + EDGE_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../" + MANIFEST_FILES), "/" + MANIFEST_FILES);
         super.withCopyFileToContainer(MountableFile.forHostPath("../scripts/test.sh"), "/bin/test.sh");
 
@@ -300,6 +307,45 @@ public class HelmChartContainer extends K3sContainer {
     public void installPlatformChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
             throws Exception {
         installPlatformChart(releaseName, true, additionalCommands);
+    }
+
+    public void installEdgeChart(
+            final @NotNull String releaseName,
+            final boolean withLocalCharts,
+            final @NotNull String... additionalCommands) throws Exception {
+        executeHelmCommand("install",
+                releaseName,
+                resolveChartLocation(EDGE_CHART, withLocalCharts),
+                withLocalCharts,
+                Stream.concat(getEdgeFixedValues(withLocalCharts), Stream.of(additionalCommands)),
+                true);
+    }
+
+    public void installEdgeChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
+            throws Exception {
+        installEdgeChart(releaseName, true, additionalCommands);
+    }
+
+    /**
+     * Runs {@code helm test <release> --namespace <ns> --logs} against an installed release. Asserts that the helm
+     * command exits with a zero status — i.e. all chart test pods passed.
+     */
+    public void helmTest(final @NotNull String releaseName, final @NotNull String namespace) throws Exception {
+        final var helmCommandList = List.of("helm",
+                "--kubeconfig",
+                "/etc/rancher/k3s/k3s.yaml",
+                "test",
+                releaseName,
+                "--namespace",
+                namespace,
+                "--logs");
+        LOG.debug("Executing helm test command: {}", String.join(" ", helmCommandList));
+        final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
+        LOG.debug("Helm test stdout: {}", execResult.getStdout());
+        LOG.debug("Helm test stderr: {}", execResult.getStderr());
+        assertThat(execResult.getExitCode()).as("helm test failed.\nstdout: %s\nstderr: %s",
+                execResult.getStdout(),
+                execResult.getStderr()).isZero();
     }
 
     public void uninstallRelease(
@@ -521,6 +567,13 @@ public class HelmChartContainer extends K3sContainer {
         return getPlatformFixedValues();
     }
 
+    private static @NotNull Stream<String> getEdgeFixedValues(final boolean withLocalCharts) {
+        if (withLocalCharts) {
+            return Stream.concat(getLocalEdgeRepositoryValues(), getEdgeFixedValues());
+        }
+        return getEdgeFixedValues();
+    }
+
     private static @NotNull Stream<String> getLocalOperatorRepositoryValues() {
         // fixed values, loaded locally
         return Stream.of("--set", "image.repository=host.docker.internal/hivemq", "--set", "image.tag=snapshot");
@@ -529,6 +582,14 @@ public class HelmChartContainer extends K3sContainer {
     private static @NotNull Stream<String> getLocalPlatformRepositoryValues() {
         // fixed values, loaded locally
         return Stream.of("--set", "image.repository=host.docker.internal/hivemq", "--set", "image.tag=latest");
+    }
+
+    private static @NotNull Stream<String> getLocalEdgeRepositoryValues() {
+        // fixed values, loaded locally — edge chart concatenates repository:tag (no separate image.name)
+        return Stream.of("--set",
+                "image.repository=host.docker.internal/hivemq/hivemq-edge",
+                "--set",
+                "image.tag=latest");
     }
 
     private static @NotNull Stream<String> getOperatorFixedValues() {
@@ -543,6 +604,12 @@ public class HelmChartContainer extends K3sContainer {
                 "--set", "nodes.resources.cpu=" + POD_CPU_LIMIT,
                 // disable usage statistics for CI jobs
                 "--set", "telemetry.anonymousUsageStatistics.enabled=false");
+    }
+
+    private static @NotNull Stream<String> getEdgeFixedValues() {
+        return Stream.of(
+                // need to limit cpu resource value for CI jobs
+                "--set", "resources.cpu=" + POD_CPU_LIMIT);
     }
 
     private class EventWatcher implements Watcher<Event> {
