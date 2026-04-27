@@ -1,7 +1,9 @@
 package com.hivemq.helmcharts.edge;
 
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -57,22 +59,9 @@ class HelmEdgeApiIT extends AbstractHelmEdgeIT {
                 .portForward(EDGE_HTTP_PORT)) {
             final var baseUri = "http://localhost:" + portForward.getLocalPort();
 
-            final var bearerToken = given().contentType(JSON)
-                    .body(Map.of("userName", EDGE_ADMIN_USER, "password", EDGE_ADMIN_PASSWORD))
-                    .when()
-                    .post(baseUri + AUTH_PATH)
-                    .then()
-                    .statusCode(HttpStatus.SC_OK)
-                    .log()
-                    .ifError()
-                    .extract()
-                    .jsonPath()
-                    .getString("token");
-            assertThat(bearerToken).as("auth token").isNotBlank();
+            final var bearerToken = getBearerToken(baseUri);
 
-            final var adapterTypes = given().header("Authorization", "Bearer " + bearerToken)
-                    .when()
-                    .get(baseUri + ADAPTER_TYPES_PATH)
+            final var adapterTypes = getPathAuthenticated(bearerToken, baseUri)
                     .then()
                     .statusCode(HttpStatus.SC_OK)
                     .log()
@@ -88,5 +77,25 @@ class HelmEdgeApiIT extends AbstractHelmEdgeIT {
                     .as("available protocol adapter types")
                     .containsExactlyInAnyOrderElementsOf(AVAILABLE_ADAPTER_TYPES);
         }
+    }
+
+    private static Response getPathAuthenticated(String bearerToken, String baseUri) {
+        return given().header("Authorization", "Bearer " + bearerToken).when().get(baseUri + ADAPTER_TYPES_PATH);
+    }
+
+    private static @NonNull String getBearerToken(String baseUri) {
+        final var bearerToken = given().contentType(JSON)
+                .body(Map.of("userName", EDGE_ADMIN_USER, "password", EDGE_ADMIN_PASSWORD))
+                .when()
+                .post(baseUri + AUTH_PATH)
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .log()
+                .ifError()
+                .extract()
+                .jsonPath()
+                .getString("token");
+        assertThat(bearerToken).as("auth token").isNotBlank();
+        return bearerToken;
     }
 }
