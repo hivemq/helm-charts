@@ -81,6 +81,8 @@ tests:
               value: "plain"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
               value: "0"
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+              value: "10"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
@@ -200,6 +202,32 @@ tests:
   - it: with invalid concurrentRollingRestartLimit, schema validation fails
     set:
       concurrentRollingRestartLimit: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom concurrentInitAppUpdateLimit, operator container EnvVar created
+    set:
+      concurrentInitAppUpdateLimit: 5
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+            value: "5"
+
+  - it: with empty concurrentInitAppUpdateLimit, operator container EnvVar created empty
+    set:
+      concurrentInitAppUpdateLimit:
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+            value: ""
+
+  - it: with invalid concurrentInitAppUpdateLimit, schema validation fails
+    set:
+      concurrentInitAppUpdateLimit: -1
     asserts:
       - failedTemplate: {}
 
@@ -383,6 +411,15 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with duplicated custom environment variables for the init-app update concurrency limit, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+          value: "20"
+    asserts:
+      - failedTemplate:
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
 
   - it: with duplicated custom environment variables, validation fails
     set:
