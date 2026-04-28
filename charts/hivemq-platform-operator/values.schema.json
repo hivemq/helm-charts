@@ -38,6 +38,11 @@
       "minimum" : 0,
       "type" : "integer"
     },
+    "concurrentInitAppUpdateLimit" : {
+      "description" : "This value configures the maximum number of HiveMQ Platforms that can perform an init app update at the same time.",
+      "minimum" : 0,
+      "type" : "integer"
+    },
     "env" : {
       "description" : "Specifies environment variables to be added to the operator container.",
       "items" : {
