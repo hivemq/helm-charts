@@ -27,6 +27,10 @@ logLevel: INFO
 # If set to `0`, no limit is applied.
 concurrentRollingRestartLimit: 0
 
+# This value configures the maximum number of HiveMQ Platforms that can perform an init app update at the same time.
+# If set to `0`, no limit is applied.
+concurrentInitAppUpdateLimit: 10
+
 # Configures the Operator ports for http/s. These ports provide access to metrics and other services.
 http:
   port: 8080
