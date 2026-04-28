@@ -357,16 +357,6 @@ public class K8sUtil {
     }
 
     /**
-     * Returns the default labels defined for a Platform Operator pod.
-     *
-     * @param releaseName the release name of the Platform Operator chart
-     * @return {@link Map}  Map containing some of the fixed labels expected for a Platform Operator pod.
-     */
-    public static @NotNull Map<String, String> getHiveMQPlatformOperatorLabels(final @NotNull String releaseName) {
-        return Map.of("app.kubernetes.io/instance", releaseName, "app.kubernetes.io/name", "hivemq-platform-operator");
-    }
-
-    /**
      * Returns the default labels defined for a HiveMQ Edge pod (matches the chart's selector-labels helper).
      *
      * @param releaseName the release name of the Edge chart
@@ -623,16 +613,6 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String releaseName) {
         waitForPodStateRunning(client, namespace, getHiveMQLegacyOperatorLabels(releaseName));
-    }
-
-    /**
-     * Waits for the Platform Operator pod based on the given name to be in a running status.
-     */
-    public static void waitForPlatformOperatorPodStateRunning(
-            final @NotNull KubernetesClient client,
-            final @NotNull String namespace,
-            final @NotNull String releaseName) {
-        waitForPodStateRunning(client, namespace, getHiveMQPlatformOperatorLabels(releaseName));
     }
 
     /**

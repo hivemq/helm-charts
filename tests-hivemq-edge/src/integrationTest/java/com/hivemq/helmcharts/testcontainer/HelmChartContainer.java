@@ -1,6 +1,5 @@
 package com.hivemq.helmcharts.testcontainer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.dockerjava.api.DockerClient;
@@ -35,7 +34,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,18 +58,12 @@ public class HelmChartContainer extends K3sContainer {
 
     private static final @NotNull DockerImageName K3S_DOCKER_IMAGE =
             OciImages.getImageName("hivemq/helm-charts").asCompatibleSubstituteFor("rancher/k3s");
-    private static final @NotNull String LEGACY_OPERATOR_CHART = "hivemq-operator";
-    private static final @NotNull String PLATFORM_OPERATOR_CHART = "hivemq-platform-operator";
-    private static final @NotNull String PLATFORM_CHART = "hivemq-platform";
     private static final @NotNull String EDGE_CHART = "hivemq-edge";
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
     private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS = Set.of("hivemq",
             "hivemq-edge",
-            "hivemq-platform-operator",
-            "operator",
-            "consul-template",
             NGINX_CONTAINER_NAME);
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
@@ -96,12 +88,6 @@ public class HelmChartContainer extends K3sContainer {
     public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
         super(K3S_DOCKER_IMAGE);
         super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + LEGACY_OPERATOR_CHART),
-                "/charts/" + LEGACY_OPERATOR_CHART);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_OPERATOR_CHART),
-                "/charts/" + PLATFORM_OPERATOR_CHART);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + PLATFORM_CHART),
-                "/charts/" + PLATFORM_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + EDGE_CHART),
                 "/charts/" + EDGE_CHART);
         super.withCopyFileToContainer(MountableFile.forHostPath("../" + MANIFEST_FILES), "/" + MANIFEST_FILES);
@@ -191,37 +177,6 @@ public class HelmChartContainer extends K3sContainer {
         return client;
     }
 
-    public @NotNull Chart getLegacyOperatorChart() {
-        if (legacyChart != null) {
-            return legacyChart;
-        }
-        legacyChart = getLocalChart(LEGACY_OPERATOR_CHART);
-        return legacyChart;
-    }
-
-    public @NotNull Chart getPlatformChart() {
-        if (platformChart != null) {
-            return platformChart;
-        }
-        platformChart = getLocalChart(PLATFORM_CHART);
-        return platformChart;
-    }
-
-    public @NotNull Chart getPreviousPlatformChart() throws Exception {
-        final var currentChart = getPlatformChart();
-        final var regex = "*.%s*".formatted(currentChart.getDescription());
-        final var platformCharts = executeHelmSearchCommand("hivemq/hivemq-platform",
-                Stream.of("--versions", "--regexp", regex, "--output", "yaml"));
-        final var platformChartsList = objectMapper.readValue(platformCharts.replaceAll("app_version", "appVersion"),
-                new TypeReference<List<Chart>>() {
-                });//
-        return platformChartsList.stream()
-                .filter(chart -> chart.getVersion() != null)
-                .filter(chart -> !Objects.equals(chart.getVersion(), currentChart.getVersion()))
-                .max(Comparator.comparing(Chart::getVersion))
-                .orElseThrow();
-    }
-
     public void createNamespace(final @NotNull String name) {
         LOG.info("Creating namespace '{}'...", name);
         final var client = getKubernetesClient();
@@ -254,59 +209,6 @@ public class HelmChartContainer extends K3sContainer {
         } catch (final Exception e) {
             throw new AssertionError(e);
         }
-    }
-
-    public void installChart(
-            final @NotNull String release,
-            final @NotNull String chart,
-            final @NotNull String... additionalCommands) throws Exception {
-        executeHelmCommand("install", release, chart, false, Stream.of(additionalCommands), true);
-    }
-
-    public void installLegacyOperatorChart(
-            final @NotNull String releaseName,
-            final @NotNull String... additionalCommands) throws Exception {
-        executeHelmCommand("install",
-                releaseName,
-                resolveChartLocation(LEGACY_OPERATOR_CHART, true),
-                true,
-                Stream.of(additionalCommands),
-                true);
-    }
-
-    public void installPlatformOperatorChart(
-            final @NotNull String releaseName,
-            final boolean withLocalCharts,
-            final @NotNull String... additionalCommands) throws Exception {
-        executeHelmCommand("install",
-                releaseName,
-                resolveChartLocation(PLATFORM_OPERATOR_CHART, withLocalCharts),
-                withLocalCharts,
-                Stream.concat(getOperatorFixedValues(withLocalCharts), Stream.of(additionalCommands)),
-                true);
-    }
-
-    public void installPlatformOperatorChart(
-            final @NotNull String releaseName,
-            final @NotNull String... additionalCommands) throws Exception {
-        installPlatformOperatorChart(releaseName, true, additionalCommands);
-    }
-
-    public void installPlatformChart(
-            final @NotNull String releaseName,
-            final boolean withLocalCharts,
-            final @NotNull String... additionalCommands) throws Exception {
-        executeHelmCommand("install",
-                releaseName,
-                resolveChartLocation(PLATFORM_CHART, withLocalCharts),
-                withLocalCharts,
-                Stream.concat(getPlatformFixedValues(withLocalCharts), Stream.of(additionalCommands)),
-                true);
-    }
-
-    public void installPlatformChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
-            throws Exception {
-        installPlatformChart(releaseName, true, additionalCommands);
     }
 
     public void installEdgeChart(
@@ -351,13 +253,6 @@ public class HelmChartContainer extends K3sContainer {
     public void uninstallRelease(
             final @NotNull String releaseName,
             final @NotNull String namespace,
-            final @NotNull String... additionalCommands) throws Exception {
-        uninstallRelease(releaseName, namespace, false, additionalCommands);
-    }
-
-    public void uninstallRelease(
-            final @NotNull String releaseName,
-            final @NotNull String namespace,
             final boolean deleteNamespace,
             final @NotNull String... additionalCommands) throws Exception {
         LOG.info("Uninstalling release '{}' in namespace '{}'...", releaseName, namespace);
@@ -375,41 +270,6 @@ public class HelmChartContainer extends K3sContainer {
             }
             LOG.info("Release '{}' in namespace '{}' is uninstalled", releaseName, namespace);
         }
-    }
-
-    public void upgradePlatformOperatorChart(
-            final @NotNull String releaseName,
-            final boolean withLocalCharts,
-            final @NotNull String... additionalCommands) throws Exception {
-        executeHelmCommand("upgrade",
-                releaseName,
-                resolveChartLocation(PLATFORM_OPERATOR_CHART, withLocalCharts),
-                withLocalCharts,
-                Stream.concat(getOperatorFixedValues(withLocalCharts), Stream.of(additionalCommands)),
-                true);
-    }
-
-    public void upgradePlatformOperatorChart(
-            final @NotNull String releaseName,
-            final @NotNull String... additionalCommands) throws Exception {
-        upgradePlatformOperatorChart(releaseName, true, additionalCommands);
-    }
-
-    public void upgradePlatformChart(
-            final @NotNull String releaseName,
-            final boolean withLocalCharts,
-            final @NotNull String... additionalCommands) throws Exception {
-        executeHelmCommand("upgrade",
-                releaseName,
-                resolveChartLocation(PLATFORM_CHART, withLocalCharts),
-                withLocalCharts,
-                Stream.concat(getPlatformFixedValues(withLocalCharts), Stream.of(additionalCommands)),
-                true);
-    }
-
-    public void upgradePlatformChart(final @NotNull String releaseName, final @NotNull String... additionalCommands)
-            throws Exception {
-        upgradePlatformChart(releaseName, true, additionalCommands);
     }
 
     private @NotNull String executeHelmCommand(
@@ -455,27 +315,6 @@ public class HelmChartContainer extends K3sContainer {
         return execResult.getStdout();
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private @NotNull String executeHelmSearchCommand(
-            final @NotNull String chartName,
-            final @NotNull Stream<String> additionalCommands)
-            throws Exception {
-        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml search repo <repo|chart>
-        final var helmCommandList = new ArrayList<>(List.of("helm",
-                "--kubeconfig",
-                "/etc/rancher/k3s/k3s.yaml",
-                "search",
-                "repo",
-                chartName));
-        helmCommandList.addAll(additionalCommands.toList());
-
-        LOG.debug("Executing helm search command: {}", String.join(" ", helmCommandList));
-        final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
-        assertThat(execResult.getStderr()).as("stdout: %s\nstderr: %s", execResult.getStdout(), execResult.getStderr())
-                .isEmpty();
-        return execResult.getStdout();
-    }
-
     private @NotNull String describeHelmCommand(
             final @NotNull ExecResult execDeploy,
             final @NotNull List<String> helmCommandList,
@@ -501,11 +340,6 @@ public class HelmChartContainer extends K3sContainer {
         } catch (final Exception e) {
             return "Could not describe Helm command: " + e;
         }
-    }
-
-    private @NotNull Chart getLocalChart(final @NotNull String chart) {
-        return copyFileFromContainer("/charts/" + chart + "/Chart.yaml",
-                inputStream -> objectMapper.readValue(inputStream, Chart.class));
     }
 
     private static @NotNull String resolveChartLocation(
@@ -551,20 +385,6 @@ public class HelmChartContainer extends K3sContainer {
         }
 
         return registryConfig.toString();
-    }
-
-    private static @NotNull Stream<String> getOperatorFixedValues(final boolean withLocalCharts) {
-        if (withLocalCharts) {
-            return Stream.concat(getLocalOperatorRepositoryValues(), getOperatorFixedValues());
-        }
-        return getOperatorFixedValues();
-    }
-
-    private static @NotNull Stream<String> getPlatformFixedValues(final boolean withLocalCharts) {
-        if (withLocalCharts) {
-            return Stream.concat(getLocalPlatformRepositoryValues(), getPlatformFixedValues());
-        }
-        return getPlatformFixedValues();
     }
 
     private static @NotNull Stream<String> getEdgeFixedValues(final boolean withLocalCharts) {

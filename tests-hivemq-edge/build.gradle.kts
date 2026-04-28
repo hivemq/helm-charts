@@ -104,13 +104,7 @@ testing {
             oci.of(this) {
                 imageDependencies {
                     runtime(project).name("hivemq/helm-charts").tag("latest")
-                    runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
-                    runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
-                    runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
-                    runtime("com.hivemq:hivemq-enterprise-k8s:4.47.1").tag("k8s-latest")
                     runtime("com.hivemq:hivemq-edge:$hivemqEdgeVersion").tag("latest")
-                    runtime("hivemq:hivemq-operator:4.7.10").tag("latest")
-                    runtime("hivemq:init-dns-wait:1.0.1").tag("latest")
                     runtime("library:busybox:1.37.0").name("busybox").tag("latest")
                     runtime("library:nginx:1.29.5").name("nginx").tag("latest")
                     runtime("selenium:standalone-firefox:148.0-20260222").tag("latest")
@@ -195,14 +189,6 @@ oci {
             }
         }
     }
-}
-
-val pushAllImagesForTesting by tasks.registering(oci.pushImageTaskClass) {
-    val imageDeps = oci.imageDependencies.create("imagesForTesting")
-    imageDeps.runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
-    imageDeps.runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
-    imageDeps.runtime("hivemq:hivemq4:$hivemqVersion").tag("latest")
-    from(imageDeps)
 }
 
 /* ******************** update versions ******************** */
