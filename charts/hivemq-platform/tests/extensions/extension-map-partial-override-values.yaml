@@ -1,0 +1,10 @@
+extensions:
+  - name: hivemq-kafka-extension
+    enabled: true
+    configMapName: base-kafka-config
+    supportsHotReload: true
+    requestHeaderSecretName: base-headers
+extensionMap:
+  hivemq-kafka-extension:
+    enabled: false
+    requestHeaderSecretName: override-headers
