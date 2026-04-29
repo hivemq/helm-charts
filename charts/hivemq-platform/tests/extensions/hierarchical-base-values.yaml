@@ -1,0 +1,13 @@
+extensionMap:
+  hivemq-enterprise-security-extension:
+    enabled: true
+    configMapName: ese-config
+    supportsHotReload: true
+  hivemq-kafka-extension:
+    enabled: true
+    configMapName: kafka-config
+    supportsHotReload: true
+  hivemq-distributed-tracing-extension:
+    enabled: true
+    supportsHotReload: true
+    configMapName: tracing-config
