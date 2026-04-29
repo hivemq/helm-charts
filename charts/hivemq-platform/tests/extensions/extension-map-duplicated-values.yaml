@@ -1,0 +1,9 @@
+extensionMap:
+  hivemq-tracing-extension:
+    enabled: true
+    supportsHotReload: true
+    configMapName: my-tracing-extension-configmap-name
+  hivemq-tracing-extension:
+    enabled: false
+    supportsHotReload: false
+    secretName: my-tracing-extension-secret-name
