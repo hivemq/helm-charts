@@ -22,6 +22,8 @@ class HelmEdgeInstallIT extends AbstractHelmEdgeIT {
         installEdgeChartAndWaitToBeRunning();
         versionLogged.get(5, TimeUnit.MINUTES);
 
+        waitForEdgeStartupLog();
+
         helmChartContainer.helmTest(EDGE_RELEASE_NAME, edgeNamespace);
     }
 }
