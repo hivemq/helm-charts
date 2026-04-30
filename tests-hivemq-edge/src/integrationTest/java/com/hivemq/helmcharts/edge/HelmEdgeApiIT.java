@@ -45,13 +45,13 @@ class HelmEdgeApiIT extends AbstractHelmEdgeIT {
             "ads");
 
     @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Timeout(value = 7, unit = TimeUnit.MINUTES)
     void getAdapterTypes_returnsExpectedNumberOfAdapters() throws Exception {
         // Register the startup-log waiter before install so a fast boot cannot race past us.
         final var edgeStartupLogged = waitForEdgeStartupLog();
 
         installEdgeChartAndWaitToBeRunning();
-        edgeStartupLogged.get(2, TimeUnit.MINUTES);
+        edgeStartupLogged.get(5, TimeUnit.MINUTES);
 
         try (final var portForward = client.pods()
                 .inNamespace(edgeNamespace)

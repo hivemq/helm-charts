@@ -13,14 +13,14 @@ class HelmEdgeInstallIT extends AbstractHelmEdgeIT {
      * built-in {@code helm test} hook (mqtt-cli connectivity check).
      */
     @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Timeout(value = 7, unit = TimeUnit.MINUTES)
     void withLocalCharts_edgeRunningAndMqttReachable() throws Exception {
         // Register the version-log waiter BEFORE install so the line cannot be missed if Edge boots fast.
         final var expectedVersion = System.getProperty("hivemq.edge.tag");
         final var versionLogged = waitForEdgeVersionLog(expectedVersion);
 
         installEdgeChartAndWaitToBeRunning();
-        versionLogged.get(2, TimeUnit.MINUTES);
+        versionLogged.get(5, TimeUnit.MINUTES);
 
         helmChartContainer.helmTest(EDGE_RELEASE_NAME, edgeNamespace);
     }

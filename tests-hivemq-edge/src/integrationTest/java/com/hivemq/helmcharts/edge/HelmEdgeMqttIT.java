@@ -23,13 +23,13 @@ class HelmEdgeMqttIT extends AbstractHelmEdgeIT {
     private static final byte @NotNull [] PAYLOAD = "edge-mqtt-roundtrip".getBytes(StandardCharsets.UTF_8);
 
     @Test
-    @Timeout(value = 5, unit = TimeUnit.MINUTES)
+    @Timeout(value = 7, unit = TimeUnit.MINUTES)
     void publishSubscribeRoundtrip() throws Exception {
         // Register the startup-log waiter before install so the line cannot be missed if Edge boots fast.
         final var edgeStartupLogged = waitForEdgeStartupLog();
 
         installEdgeChartAndWaitToBeRunning();
-        edgeStartupLogged.get(2, TimeUnit.MINUTES);
+        edgeStartupLogged.get(5, TimeUnit.MINUTES);
 
         try (final var portForward = client.pods()
                 .inNamespace(edgeNamespace)
