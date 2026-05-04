@@ -75,8 +75,7 @@ public class HelmChartContainer extends K3sContainer {
 
     public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
         super(K3S_DOCKER_IMAGE);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + EDGE_CHART),
-                "/charts/" + EDGE_CHART);
+        super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + EDGE_CHART), "/charts/" + EDGE_CHART);
 
         super.withCopyToContainer(Transferable.of(getRegistriesContent()), "/etc/rancher/k3s/registries.yaml");
         super.withExtraHost("host.docker.internal", "host-gateway");
@@ -202,9 +201,10 @@ public class HelmChartContainer extends K3sContainer {
             final @NotNull String... additionalCommands) throws Exception {
         executeHelmCommand("install",
                 releaseName,
-                resolveChartLocation(EDGE_CHART, withLocalCharts),
+                resolveChartLocation(withLocalCharts),
                 withLocalCharts,
-                Stream.concat(getEdgeFixedValues(withLocalCharts), Stream.of(additionalCommands)),
+                Stream.concat(Stream.of("--debug", "--wait=legacy", "--timeout", "3m0s"),
+                        Stream.concat(getEdgeFixedValues(withLocalCharts), Stream.of(additionalCommands))),
                 true);
     }
 
@@ -217,22 +217,8 @@ public class HelmChartContainer extends K3sContainer {
      * Runs {@code helm test <release> --namespace <ns> --logs} against an installed release. Asserts that the helm
      * command exits with a zero status — i.e. all chart test pods passed.
      */
-    public void helmTest(final @NotNull String releaseName, final @NotNull String namespace) throws Exception {
-        final var helmCommandList = List.of("helm",
-                "--kubeconfig",
-                "/etc/rancher/k3s/k3s.yaml",
-                "test",
-                releaseName,
-                "--namespace",
-                namespace,
-                "--logs");
-        LOG.debug("Executing helm test command: {}", String.join(" ", helmCommandList));
-        final var execResult = execInContainer(helmCommandList.toArray(new String[0]));
-        LOG.debug("Helm test stdout: {}", execResult.getStdout());
-        LOG.debug("Helm test stderr: {}", execResult.getStderr());
-        assertThat(execResult.getExitCode()).as("helm test failed.\nstdout: %s\nstderr: %s",
-                execResult.getStdout(),
-                execResult.getStderr()).isZero();
+    public void testRelease(final @NotNull String releaseName, final @NotNull String namespace) throws Exception {
+        executeHelmCommand("test", releaseName, null, false, Stream.of("--namespace", namespace, "--logs"), false);
     }
 
     public void uninstallRelease(
@@ -246,8 +232,15 @@ public class HelmChartContainer extends K3sContainer {
                     releaseName,
                     null,
                     true,
-                    Stream.concat(Stream.of("--ignore-not-found", "--cascade", "foreground", "--namespace", namespace),
-                            Stream.of(additionalCommands)),
+                    Stream.concat(Stream.of("--debug",
+                            "--wait=legacy",
+                            "--timeout",
+                            "3m0s",
+                            "--ignore-not-found",
+                            "--cascade",
+                            "foreground",
+                            "--namespace",
+                            namespace), Stream.of(additionalCommands)),
                     true);
         } finally {
             if (deleteNamespace) {
@@ -264,17 +257,12 @@ public class HelmChartContainer extends K3sContainer {
             final boolean withLocalCharts,
             final @NotNull Stream<String> additionalCommands,
             final boolean debugOnFailure) throws Exception {
-        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --debug --wait=legacy --timeout 3m0s
-        final var helmCommandList = new ArrayList<>(List.of("helm",
-                "--kubeconfig",
-                "/etc/rancher/k3s/k3s.yaml",
-                helmCommand,
-                releaseName,
-                chartName != null ? chartName : "",
-                "--debug",
-                "--wait=legacy",
-                "--timeout",
-                "3m0s"));
+        // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <command> <release> [chartName] [additional flags]
+        final var helmCommandList =
+                new ArrayList<>(List.of("helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", helmCommand, releaseName));
+        if (chartName != null) {
+            helmCommandList.add(chartName);
+        }
         final var additionalCommandsList = additionalCommands.toList();
         helmCommandList.addAll(additionalCommandsList);
         if (chartName != null && withLocalCharts) {
@@ -327,13 +315,11 @@ public class HelmChartContainer extends K3sContainer {
         }
     }
 
-    private static @NotNull String resolveChartLocation(
-            final @NotNull String chartName,
-            final boolean withLocalCharts) {
+    private static @NotNull String resolveChartLocation(final boolean withLocalCharts) {
         if (withLocalCharts) {
-            return "/charts/" + chartName;
+            return "/charts/" + EDGE_CHART;
         }
-        return "hivemq/" + chartName;
+        return "hivemq/" + EDGE_CHART;
     }
 
     @SuppressWarnings("HttpUrlsUsage")

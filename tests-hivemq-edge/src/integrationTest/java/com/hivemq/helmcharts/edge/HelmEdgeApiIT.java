@@ -3,7 +3,6 @@ package com.hivemq.helmcharts.edge;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -28,8 +27,6 @@ class HelmEdgeApiIT extends AbstractHelmEdgeIT {
 
     private static final @NotNull String AUTH_PATH = "/api/v1/auth/authenticate";
     private static final @NotNull String ADAPTER_TYPES_PATH = "/api/v1/management/protocol-adapters/types";
-
-
 
     private static final @NotNull List<String> AVAILABLE_ADAPTER_TYPES = List.of(
             "mtconnect",
@@ -79,11 +76,11 @@ class HelmEdgeApiIT extends AbstractHelmEdgeIT {
         }
     }
 
-    private static Response getPathAuthenticated(String bearerToken, String baseUri) {
+    private static @NotNull Response getPathAuthenticated(final @NotNull String bearerToken, final @NotNull String baseUri) {
         return given().header("Authorization", "Bearer " + bearerToken).when().get(baseUri + ADAPTER_TYPES_PATH);
     }
 
-    private static @NonNull String getBearerToken(String baseUri) {
+    private static @NotNull String getBearerToken(final @NotNull String baseUri) {
         final var bearerToken = given().contentType(JSON)
                 .body(Map.of("userName", EDGE_ADMIN_USER, "password", EDGE_ADMIN_PASSWORD))
                 .when()

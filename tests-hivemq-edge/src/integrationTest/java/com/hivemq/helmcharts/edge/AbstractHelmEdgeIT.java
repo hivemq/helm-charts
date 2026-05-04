@@ -29,7 +29,7 @@ import static org.awaitility.Durations.TWO_SECONDS;
  * no CRD), so this base class only manages a namespace and the chart release lifecycle.
  */
 @SuppressWarnings("NotNullFieldNotInitialized")
-public abstract class AbstractHelmEdgeIT {
+abstract class AbstractHelmEdgeIT {
 
     @RegisterExtension
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
