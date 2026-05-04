@@ -155,14 +155,6 @@ oci {
             optionalCredentials()
         }
     }
-    imageMapping {
-        mapModule("com.hivemq", "hivemq-enterprise") {
-            toImage("hivemq/hivemq4").withTag(version)
-        }
-        mapModule("com.hivemq", "hivemq-enterprise-k8s") {
-            toImage("hivemq/hivemq4").withTag(version.prefix("k8s-"))
-        }
-    }
     parentImageDependencies {
         create("noble") {
             // https://hub.docker.com/layers/library/ubuntu/noble/
@@ -186,42 +178,6 @@ oci {
                 layer("helm") {
                     contents(helmOciLayerLinuxArm64)
                 }
-            }
-        }
-    }
-}
-
-/* ******************** update versions ******************** */
-
-@Suppress("unused")
-val updatePlatformVersion by tasks.registering {
-    group = "version"
-    val appVersion = project.properties["appVersion"]
-    if (appVersion != null) {
-        doLast {
-            val filesToUpdate = fileTree(projectDir).matching {
-                include("**/*.yml")
-                include("**/*.yaml")
-                include("**/*.json")
-                include("**/*.sh")
-                include("**/*.toml")
-                include("**/*.java")
-                // include test hivemq/mqtt-cli image to update, which is part of the hivemq-platform and hivemq-edge charts
-            }.plus(
-                files(
-                    "../charts/hivemq-platform/templates/tests/test-mqtt-cli.yml",
-                    "../charts/hivemq-edge/templates/tests/test-mqtt-cli.yml"
-                )
-            )
-            filesToUpdate.forEach { file ->
-                val text = file.readText()
-                file.writeText(text.replace("""^hivemq-platform = \"(.*)\"$""".toRegex(RegexOption.MULTILINE)) {
-                    "hivemq-platform = \"${appVersion}\""
-                }.replace("""(?i)(hivemq/hivemq4:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
-                    "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
-                }.replace("""(?i)(hivemq/mqtt-cli:)(\d+\.\d+\.\d+(-snapshot)?)$""".toRegex(RegexOption.MULTILINE)) {
-                    "${it.groupValues[1]}${appVersion}${it.groupValues[3]}"
-                })
             }
         }
     }

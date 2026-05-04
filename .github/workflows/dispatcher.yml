@@ -26,6 +26,7 @@ jobs:
               - '.github/workflows/edge-*.yml'
               - 'charts/hivemq-edge/**'
               - 'manifests/hivemq-edge/**'
+              - 'tests-hivemq-edge/**'
           list-files: csv
 
   swarm-changes:
