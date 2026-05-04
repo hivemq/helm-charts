@@ -1,20 +1,16 @@
-# HiveMQ Platform Operator (new) Integration Tests
+# HiveMQ Edge Integration Tests
 
-This submodule contains integration tests for validating the functionality and behavior of the HiveMQ Platform Operator (new) Helm Charts. The Kubernetes environment used extends the [K3S module](https://java.testcontainers.org/modules/k3s/) available within the Testcontainer framework.
+This submodule contains integration tests for validating the functionality and behavior of the HiveMQ Edge Helm Chart. The Kubernetes environment used extends the [K3S module](https://java.testcontainers.org/modules/k3s/) available within the Testcontainer framework.
 
 ## Overview
 
 The integration tests in this submodule are designed to:
 
-- Install a HiveMQ platform by using the HiveMQ Platform (new) chart.
-- Verify the successful deployment and initialization of the HiveMQ Platform Operator (new).
-- Validate the proper functioning of HiveMQ when including some HiveMQ extension within a Kubernetes cluster.
-- Test a successful rolling restart of a HiveMQ Platform. 
-- Test an installation using a custom configuration chart values.
-- Verify after each installation of the HiveMQ platform, all HiveMQ components are working properly such as Rest API, WebSocket and MQTT listeners, DataHub, etc.
-- Validate installation of the HiveMQ platform through non-root users.
-- Test successfully upgrades of the HiveMQ platform with custom configuration values.
-- Verify installation of the HiveMQ platform when using custom extension or transformations.
+- Install the HiveMQ Edge chart and verify the deployed pod starts up successfully.
+- Validate that the deployed Edge image matches the expected version declared in `gradle/libs.versions.toml`.
+- Run the chart's built-in `helm test` hook to verify MQTT connectivity through the `mqtt-cli` test pod.
+- Verify a successful MQTT publish/subscribe round-trip against the deployed Edge instance.
+- Verify the HiveMQ Edge REST API by authenticating and querying the available protocol adapter types.
 
 ## Prerequisites
 
@@ -30,7 +26,7 @@ Before running the integration tests, make sure you meet the following prerequis
 
    ```bash
    git clone https://github.com/hivemq/helm-charts.git
-   cd helm-charts/tests-hivemq-platform-operator
+   cd helm-charts/tests-hivemq-edge
    ```
 
 2. Run the tests:
@@ -39,4 +35,4 @@ Before running the integration tests, make sure you meet the following prerequis
    ./gradlew integrationTest
    ```
 
-**NOTE:** At the moment, these integration tests can only be executed on the [`HiveMQ Platform Operator Integration Tests`](../.github/workflows/hivemq-platform-operator-integration-test.yml) GitHub Actions Workflow. Cannot be executed locally.
+**NOTE:** At the moment, these integration tests can only be executed on the [`HiveMQ Edge Helm Chart Integration Tests`](../.github/workflows/edge-integration-tests.yml) GitHub Actions Workflow. Cannot be executed locally.
