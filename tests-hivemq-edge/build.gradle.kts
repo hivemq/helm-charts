@@ -32,7 +32,6 @@ configurations.all {
     exclude("io.fabric8", "kubernetes-httpclient-vertx")
 }
 
-val hivemqVersion = libs.versions.hivemq.platform.get()
 val hivemqEdgeVersion = libs.versions.hivemq.edge.get()
 val k3sTag = resolveK3sTag()
 
@@ -49,28 +48,16 @@ testing {
                 implementation(libs.kubernetes.client)
                 implementation(libs.kubernetes.client.jdk)
 
-                // custom extension
-                implementation(libs.hivemq.extensionSdk)
-                implementation(libs.javassist)
-                implementation(libs.shrinkwrap.api)
-                runtimeOnly(libs.shrinkwrap.impl)
-
                 // testcontainers
                 implementation(libs.testcontainers)
-                implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.testcontainers.k3s)
-                implementation(libs.testcontainers.selenium)
 
                 // testing
                 implementation(libs.assertj)
                 implementation(libs.awaitility)
-                implementation(libs.selenium.java)
-                implementation(libs.selenium.remote.driver)
 
                 // misc
-                runtimeOnly(libs.bouncycastle.pkix)
-                runtimeOnly(libs.bouncycastle.prov)
                 implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.hivemq.mqttClient)
                 runtimeOnly(libs.logback.classic)
@@ -80,7 +67,6 @@ testing {
             targets.configureEach {
                 testTask {
                     systemProperty("k3s.version.type", environment["K8S_VERSION_TYPE"] ?: "LATEST")
-                    systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
                     systemProperty("hivemq.edge.tag", libs.versions.hivemq.edge.get())
                     systemProperty("junit.jupiter.execution.timeout.mode", "disabled_on_debug")
                     systemProperty("junit.jupiter.execution.timeout.threaddump.enabled", "true")
@@ -105,9 +91,6 @@ testing {
                 imageDependencies {
                     runtime(project).name("hivemq/helm-charts").tag("latest")
                     runtime("com.hivemq:hivemq-edge:$hivemqEdgeVersion").tag("latest")
-                    runtime("library:busybox:1.37.0").name("busybox").tag("latest")
-                    runtime("library:nginx:1.29.5").name("nginx").tag("latest")
-                    runtime("selenium:standalone-firefox:148.0-20260222").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
                 val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
