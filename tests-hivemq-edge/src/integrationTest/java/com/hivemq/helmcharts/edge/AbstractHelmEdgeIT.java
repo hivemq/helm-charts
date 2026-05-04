@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.testcontainers.containers.Network;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +39,6 @@ public abstract class AbstractHelmEdgeIT {
     protected static final @NotNull String EDGE_POD_NAME = "hivemq-" + EDGE_RELEASE_NAME + "-0";
 
     protected static @NotNull HelmChartContainer helmChartContainer;
-    protected static @NotNull Network network;
     protected static @NotNull KubernetesClient client;
     protected static @NotNull LogWaiterUtil logWaiter;
 
@@ -52,7 +50,6 @@ public abstract class AbstractHelmEdgeIT {
         Awaitility.setDefaultPollInterval(TWO_SECONDS);
         Awaitility.setDefaultTimeout(FIVE_MINUTES);
         helmChartContainer = HELM_CHART_CONTAINER_EXTENSION.getHelmChartContainer();
-        network = HELM_CHART_CONTAINER_EXTENSION.getNetwork();
         client = helmChartContainer.getKubernetesClient();
         logWaiter = helmChartContainer.getLogWaiter();
     }

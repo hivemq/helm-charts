@@ -1,9 +1,6 @@
 package com.hivemq.helmcharts.testcontainer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.dockerjava.api.DockerClient;
-import com.hivemq.helmcharts.Chart;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
@@ -19,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 import org.testcontainers.images.builder.Transferable;
@@ -45,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.hivemq.helmcharts.util.NginxUtil.NGINX_CONTAINER_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.FIVE_MINUTES;
@@ -54,17 +49,13 @@ import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR
 
 public class HelmChartContainer extends K3sContainer {
 
-    public static final @NotNull String MANIFEST_FILES = "manifests";
-
     private static final @NotNull DockerImageName K3S_DOCKER_IMAGE =
             OciImages.getImageName("hivemq/helm-charts").asCompatibleSubstituteFor("rancher/k3s");
     private static final @NotNull String EDGE_CHART = "hivemq-edge";
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
-    private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS = Set.of("hivemq",
-            "hivemq-edge",
-            NGINX_CONTAINER_NAME);
+    private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS = Set.of("hivemq-edge");
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
     private static final @NotNull String POD_CPU_LIMIT = "512m";
@@ -75,11 +66,8 @@ public class HelmChartContainer extends K3sContainer {
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
-    private final @NotNull ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
     private @Nullable KubernetesClient client;
-    private @Nullable Chart legacyChart;
-    private @Nullable Chart platformChart;
 
     public HelmChartContainer(final boolean withK3sDebugging) {
         this(withK3sDebugging, List.of());
@@ -87,11 +75,8 @@ public class HelmChartContainer extends K3sContainer {
 
     public HelmChartContainer(final boolean withK3sDebugging, final @NotNull List<String> additionalCommands) {
         super(K3S_DOCKER_IMAGE);
-        super.withClasspathResourceMapping("values", "/files/", BindMode.READ_ONLY);
         super.withCopyFileToContainer(MountableFile.forHostPath("../charts/" + EDGE_CHART),
                 "/charts/" + EDGE_CHART);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../" + MANIFEST_FILES), "/" + MANIFEST_FILES);
-        super.withCopyFileToContainer(MountableFile.forHostPath("../scripts/test.sh"), "/bin/test.sh");
 
         super.withCopyToContainer(Transferable.of(getRegistriesContent()), "/etc/rancher/k3s/registries.yaml");
         super.withExtraHost("host.docker.internal", "host-gateway");
@@ -394,36 +379,12 @@ public class HelmChartContainer extends K3sContainer {
         return getEdgeFixedValues();
     }
 
-    private static @NotNull Stream<String> getLocalOperatorRepositoryValues() {
-        // fixed values, loaded locally
-        return Stream.of("--set", "image.repository=host.docker.internal/hivemq", "--set", "image.tag=snapshot");
-    }
-
-    private static @NotNull Stream<String> getLocalPlatformRepositoryValues() {
-        // fixed values, loaded locally
-        return Stream.of("--set", "image.repository=host.docker.internal/hivemq", "--set", "image.tag=latest");
-    }
-
     private static @NotNull Stream<String> getLocalEdgeRepositoryValues() {
         // fixed values, loaded locally — edge chart concatenates repository:tag (no separate image.name)
         return Stream.of("--set",
                 "image.repository=host.docker.internal/hivemq/hivemq-edge",
                 "--set",
                 "image.tag=latest");
-    }
-
-    private static @NotNull Stream<String> getOperatorFixedValues() {
-        return Stream.of("--set", "logLevel=DEBUG",
-                // need to limit cpu resource value for CI jobs
-                "--set", "resources.cpu=" + POD_CPU_LIMIT);
-    }
-
-    private static @NotNull Stream<String> getPlatformFixedValues() {
-        return Stream.of(
-                // need to limit cpu resource value for CI jobs
-                "--set", "nodes.resources.cpu=" + POD_CPU_LIMIT,
-                // disable usage statistics for CI jobs
-                "--set", "telemetry.anonymousUsageStatistics.enabled=false");
     }
 
     private static @NotNull Stream<String> getEdgeFixedValues() {
