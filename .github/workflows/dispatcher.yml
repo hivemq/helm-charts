@@ -26,6 +26,7 @@ jobs:
               - '.github/workflows/edge-*.yml'
               - 'charts/hivemq-edge/**'
               - 'manifests/hivemq-edge/**'
+              - 'tests-hivemq-edge/**'
           list-files: csv
 
   swarm-changes:
@@ -111,6 +112,14 @@ jobs:
     needs: edge-changes
     if: needs.edge-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/edge-verify.yml
+    secrets: inherit
+
+  edge-integration-tests:
+    name: Edge integration tests
+    needs:
+      - edge-changes
+    if: needs.edge-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/edge-integration-tests.yml
     secrets: inherit
 
   swarm-verify-tests:
