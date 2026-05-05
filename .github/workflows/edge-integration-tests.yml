@@ -29,13 +29,13 @@ jobs:
           path: helm-charts
           fetch-depth: 0
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         id: setup-java
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           cache: gradle
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
@@ -79,12 +79,12 @@ jobs:
           artifact-name: junit-xml-reports-edge-sha
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           cache: gradle
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5

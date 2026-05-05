@@ -16,7 +16,7 @@ The integration tests in this submodule are designed to:
 
 Before running the integration tests, make sure you meet the following prerequisites:
 
-- Java 21+.
+- Java 25+.
 - Docker installed for building necessary Docker images.
 - Gradle installed for running the tests.
 

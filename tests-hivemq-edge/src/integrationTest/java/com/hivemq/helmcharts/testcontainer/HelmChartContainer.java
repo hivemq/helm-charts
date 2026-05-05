@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class HelmChartContainer extends K3sContainer {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(HelmChartContainer.class);
 
-    private final @NotNull ExecutorService executorService = Executors.newCachedThreadPool();
+    private final @NotNull ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
@@ -428,7 +429,7 @@ public class HelmChartContainer extends K3sContainer {
             LOG.info("Received {} event for container {} in pod {} [{}]", reason, containerName, podName, podUid);
             try {
                 if (reason.equals("Created")) {
-                    logWatches.computeIfAbsent(podUid + "-" + podName + "-" + containerName, key -> {
+                    logWatches.computeIfAbsent(podUid + "-" + podName + "-" + containerName, _ -> {
                         // create log watcher for container
                         final var logWatch = client.pods()
                                 .inNamespace(namespace)
@@ -444,7 +445,8 @@ public class HelmChartContainer extends K3sContainer {
                         executorService.submit(() -> {
                             LOG.info("Started log watcher for {} in pod {} [{}]", containerName, podName, podUid);
                             try (final var inputStream = logWatch.getOutput();
-                                 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                                 final var reader = new BufferedReader(new InputStreamReader(inputStream,
+                                         StandardCharsets.UTF_8))) {
                                 reader.lines().forEach(line -> {
                                     // skip the ISO8601 prefix for logging
                                     final var matcher = LOGBACK_DATE_PREFIX.matcher(line);
