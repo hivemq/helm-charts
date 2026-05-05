@@ -12,6 +12,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -42,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *  <li>Install the HiveMQ Platform Helm chart with same release name as Legacy HiveMQ Operator chart.</li>
  * </ol>
  */
+@Disabled("The latest k8s image doesn't run with JDK 21.0.10+, so this test breaks due to https://bugs.openjdk.org/browse/JDK-8349988")
 class HelmLegacyStatefulSetMigrationIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT = 1883;
