@@ -11,6 +11,12 @@ pipeline {
         stage('Trigger build') {
             steps {
                 script {
+                    if (isEdgeOnlyChange()) {
+                        currentBuild.description = 'Skipped: Edge-only changes'
+                        echo 'Edge-only changes detected; skipping composite build.'
+                        return
+                    }
+
                     def multiBranchJobPath = '../../hivemq-composite'
                     def branchJobName = BRANCH_NAME.replace('/', '%2F')
                     try {
@@ -32,4 +38,33 @@ pipeline {
             }
         }
     }
+}
+
+boolean isEdgeOnlyChange() {
+    if (!env.CHANGE_TARGET) {
+        return false
+    }
+    def edgeOnly = false
+    dir('.scope-check') {
+        try {
+            checkout scm
+            sh "git fetch origin ${env.CHANGE_TARGET} --depth=50"
+            def changedFiles = sh(
+                script: "git diff --name-only origin/${env.CHANGE_TARGET}...HEAD",
+                returnStdout: true
+            ).trim().split('\n').findAll { it }
+            echo "Changed files (${changedFiles.size()}):\n${changedFiles.join('\n')}"
+            if (changedFiles) {
+                edgeOnly = changedFiles.every { f ->
+                    f.startsWith('charts/hivemq-edge/') ||
+                    f.startsWith('manifests/hivemq-edge/') ||
+                    f.startsWith('tests-hivemq-edge/') ||
+                    f.startsWith('.github/workflows/edge-')
+                }
+            }
+        } finally {
+            deleteDir()
+        }
+    }
+    return edgeOnly
 }
