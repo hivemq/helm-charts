@@ -14,6 +14,9 @@ pipeline {
                     if (isEdgeOnlyChange()) {
                         currentBuild.description = 'Skipped: Edge-only changes'
                         echo 'Edge-only changes detected; skipping composite build.'
+                        githubNotify context: 'continuous-integration/jenkins/branch',
+                                     status: 'SUCCESS',
+                                     description: 'Skipped: Edge-only PR, no platform composite needed'
                         return
                     }
 
