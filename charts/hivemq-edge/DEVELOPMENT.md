@@ -224,4 +224,5 @@ In order to run them, just simply execute the following Gradle command:
 ```
 
 <!-- INT-185 Edge-only validation marker -->
+<!-- INT-185 retest: Jenkinsfile now includes githubNotify on skip path -->
 
