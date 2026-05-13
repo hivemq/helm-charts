@@ -217,11 +217,23 @@ jobs:
           fi
 
       - name: Trigger Jenkins composite build
+        id: trigger
         if: steps.jenkins-build.outputs.needed == 'true'
         uses: distributhor/workflow-webhook@2381f0e9c7b6bf061fb1405bd0804b8706116369 # v3
         with:
           webhook_url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
           webhook_secret: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
+          verbose: true
+
+      - name: Print Jenkins webhook response
+        if: steps.jenkins-build.outputs.needed == 'true'
+        env:
+          RESPONSE_STATUS: ${{ steps.trigger.outputs.response-status }}
+          RESPONSE_BODY: ${{ steps.trigger.outputs.response-body }}
+        run: |
+          echo "response-status: $RESPONSE_STATUS"
+          echo "response-body:"
+          echo "$RESPONSE_BODY"
 
       - name: Skip Jenkins composite build
         if: steps.jenkins-build.outputs.needed == 'false'
