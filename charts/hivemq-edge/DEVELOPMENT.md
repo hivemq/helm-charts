@@ -222,3 +222,6 @@ In order to run them, just simply execute the following Gradle command:
 ```bash
 ./gradlew integrationTest
 ```
+
+<!-- INT-185 skip-path validation marker -->
+
