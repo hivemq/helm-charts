@@ -216,25 +216,108 @@ jobs:
             echo "needed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Build Jenkins webhook payload
+        id: payload
+        if: steps.jenkins-build.outputs.needed == 'true'
+        env:
+          REPO_FULL_NAME: ${{ github.repository }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BEFORE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '0000000000000000000000000000000000000000' }}
+          JENKINS_WEBHOOK_SECRET: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          PAYLOAD=$(jq -nc \
+            --arg ref "refs/heads/$BRANCH" \
+            --arg before "$BEFORE_SHA" \
+            --arg after "$HEAD_SHA" \
+            --arg full_name "$REPO_FULL_NAME" \
+            '{
+              ref: $ref,
+              before: $before,
+              after: $after,
+              repository: {
+                id: 273000293,
+                node_id: "MDEwOlJlcG9zaXRvcnkyNzMwMDAyOTM=",
+                name: "helm-charts",
+                full_name: $full_name,
+                private: false,
+                owner: {
+                  name: "hivemq",
+                  login: "hivemq",
+                  id: 4578332,
+                  node_id: "MDEyOk9yZ2FuaXphdGlvbjQ1NzgzMzI=",
+                  type: "Organization",
+                  html_url: "https://github.com/hivemq",
+                  url: "https://api.github.com/users/hivemq"
+                },
+                html_url: ("https://github.com/" + $full_name),
+                url: ("https://api.github.com/repos/" + $full_name),
+                clone_url: ("https://github.com/" + $full_name + ".git"),
+                git_url: ("git://github.com/" + $full_name + ".git"),
+                ssh_url: ("git@github.com:" + $full_name + ".git"),
+                svn_url: ("https://github.com/" + $full_name),
+                default_branch: "master",
+                master_branch: "master",
+                organization: "hivemq"
+              },
+              pusher: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com" },
+              sender: { login: "github-actions[bot]", id: 41898282, type: "Bot" },
+              organization: { login: "hivemq", id: 4578332 },
+              forced: false,
+              created: false,
+              deleted: false,
+              base_ref: null,
+              compare: ("https://github.com/" + $full_name + "/compare/" + ($before[0:7]) + "..." + ($after[0:7])),
+              commits: [],
+              head_commit: {
+                id: $after,
+                tree_id: $after,
+                distinct: true,
+                message: "GHA-dispatched build",
+                timestamp: (now | todateiso8601),
+                url: ("https://github.com/" + $full_name + "/commit/" + $after),
+                author: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com", username: "github-actions[bot]" },
+                committer: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com", username: "github-actions[bot]" },
+                added: [],
+                removed: [],
+                modified: []
+              }
+            }')
+          SIGNATURE_256="sha256=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$JENKINS_WEBHOOK_SECRET" -hex | awk '{print $NF}')"
+          DELIVERY=$(cat /proc/sys/kernel/random/uuid)
+          echo "Delivery ID: $DELIVERY"
+          echo "Payload:"; echo "$PAYLOAD" | jq .
+          {
+            echo "body<<__END__"
+            echo "$PAYLOAD"
+            echo "__END__"
+            echo "signature=$SIGNATURE_256"
+            echo "delivery=$DELIVERY"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Trigger Jenkins composite build
         id: trigger
         if: steps.jenkins-build.outputs.needed == 'true'
-        uses: distributhor/workflow-webhook@2381f0e9c7b6bf061fb1405bd0804b8706116369 # v3
+        uses: joelwmale/webhook-action@cc1a66f987e1591785273fd6f9d2f7a9d8d7c9cd # v2.4.1
         with:
-          webhook_url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
-          webhook_secret: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
-          event_name: 'push'
-          verbose: true
+          url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
+          body: ${{ steps.payload.outputs.body }}
+          headers: |
+            {
+              "Content-Type": "application/json",
+              "X-GitHub-Event": "push",
+              "X-Hub-Signature-256": "${{ steps.payload.outputs.signature }}",
+              "X-GitHub-Delivery": "${{ steps.payload.outputs.delivery }}",
+              "User-Agent": "GitHub-Hookshot/gha-dispatcher"
+            }
 
-      - name: Print Jenkins webhook response
+      - name: Print Jenkins webhook status
         if: steps.jenkins-build.outputs.needed == 'true'
         env:
-          RESPONSE_STATUS: ${{ steps.trigger.outputs.response-status }}
-          RESPONSE_BODY: ${{ steps.trigger.outputs.response-body }}
+          STATUS: ${{ steps.trigger.outputs.status }}
         run: |
-          echo "response-status: $RESPONSE_STATUS"
-          echo "response-body:"
-          echo "$RESPONSE_BODY"
+          echo "Jenkins webhook HTTP status: $STATUS"
 
       - name: Skip Jenkins composite build
         if: steps.jenkins-build.outputs.needed == 'false'
