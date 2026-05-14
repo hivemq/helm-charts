@@ -90,4 +90,5 @@ jobs:
           )" \
               --base master \
               --head next-edge-release
+            gh pr merge next-edge-release --auto --squash
           fi
