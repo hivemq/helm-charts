@@ -216,12 +216,80 @@ jobs:
             echo "needed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Trigger Jenkins composite build
+      - name: Build Jenkins webhook payload
+        id: payload
         if: steps.jenkins-build.outputs.needed == 'true'
-        uses: distributhor/workflow-webhook@2381f0e9c7b6bf061fb1405bd0804b8706116369 # v3
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BEFORE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '0000000000000000000000000000000000000000' }}
+          REPOSITORY_JSON: ${{ toJSON(github.event.repository) }}
+          ORGANIZATION_JSON: ${{ toJSON(github.event.organization) }}
+          JENKINS_WEBHOOK_SECRET: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          PAYLOAD=$(jq -nc \
+            --arg ref "refs/heads/$BRANCH" \
+            --arg before "$BEFORE_SHA" \
+            --arg after "$HEAD_SHA" \
+            --argjson repository "$REPOSITORY_JSON" \
+            --argjson organization "$ORGANIZATION_JSON" \
+            '{
+              ref: $ref,
+              before: $before,
+              after: $after,
+              repository: $repository,
+              pusher: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com" },
+              sender: { login: "github-actions[bot]", id: 41898282, type: "Bot" },
+              organization: $organization,
+              forced: false,
+              created: false,
+              deleted: false,
+              base_ref: null,
+              compare: ($repository.html_url + "/compare/" + ($before[0:7]) + "..." + ($after[0:7])),
+              commits: [],
+              head_commit: {
+                id: $after,
+                tree_id: $after,
+                distinct: true,
+                message: "GHA-dispatched build",
+                timestamp: (now | todateiso8601),
+                url: ($repository.html_url + "/commit/" + $after),
+                author: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com", username: "github-actions[bot]" },
+                committer: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com", username: "github-actions[bot]" },
+                added: [],
+                removed: [],
+                modified: []
+              }
+            }')
+          SIGNATURE_256="sha256=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$JENKINS_WEBHOOK_SECRET" -hex | awk '{print $NF}')"
+          echo "::add-mask::$SIGNATURE_256"
+          DELIVERY=$(cat /proc/sys/kernel/random/uuid)
+          echo "::add-mask::$DELIVERY"
+          {
+            echo "body<<__END__"
+            echo "$PAYLOAD"
+            echo "__END__"
+            echo "signature=$SIGNATURE_256"
+            echo "delivery=$DELIVERY"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Jenkins composite build
+        id: trigger
+        if: steps.jenkins-build.outputs.needed == 'true'
+        uses: fjogeleit/http-request-action@551353b829c3646756b2ec2b3694f819d7957495 # v2
         with:
-          webhook_url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
-          webhook_secret: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
+          url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
+          method: 'POST'
+          contentType: 'application/json'
+          data: ${{ steps.payload.outputs.body }}
+          customHeaders: |
+            {
+              "X-GitHub-Event": "push",
+              "X-Hub-Signature-256": "${{ steps.payload.outputs.signature }}",
+              "X-GitHub-Delivery": "${{ steps.payload.outputs.delivery }}",
+              "User-Agent": "GitHub-Hookshot/gha-dispatcher"
+            }
 
       - name: Skip Jenkins composite build
         if: steps.jenkins-build.outputs.needed == 'false'
