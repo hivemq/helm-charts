@@ -1,3 +1,4 @@
+<-- Trigger a platform integration tests run -->
 ## Development
 
 Generate templates with custom values
