@@ -295,7 +295,7 @@ jobs:
 
       - name: Skip Jenkins composite build
         if: steps.jenkins-build.outputs.needed == 'false'
-        uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1.2.4
+        uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
           context: "continuous-integration/jenkins/branch"
