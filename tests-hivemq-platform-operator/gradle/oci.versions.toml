@@ -10,11 +10,11 @@ name = "k3s-minimum"
 image = "rancher/k3s"
 pinnedReference = "v1.24.17-k3s1@sha256:9e034931999854c6210b86a0708fde66b91370459fa077a4f9d008e7f51fc51d"
 
-# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.35
+# https://hub.docker.com/r/rancher/k3s/tags?page=1&name=v1.36
 [[oci]]
 name = "k3s-latest"
 image = "rancher/k3s"
-reference = "v1.36.0-k3s1@sha256:38069dc4a22a056f427f4f37c887303697cc817f7735e57dd142e169af7f398f"
+reference = "v1.36.1-k3s1@sha256:08fdebd14db9ab7d5ea821d5bfa95d02341a6ef886842fcc8d9dfd0e9fa9e0cd"
 
 # https://hub.docker.com/_/busybox/tags?name=latest
 [[oci]]
