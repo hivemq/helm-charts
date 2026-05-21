@@ -1,0 +1,25 @@
+# Used by HelmPvcRetentionPolicyIT to install the platform with a real PVC + the new retention policy.
+nodes:
+  replicaCount: 2
+  podSecurityContext:
+    enabled: true
+    fsGroup: 0
+additionalVolumes:
+  - type: persistentVolumeClaim
+    name: hivemq-pvc-data
+    path: /opt/hivemq/data
+volumeClaimTemplates:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: hivemq-pvc-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      volumeMode: Filesystem
+persistentVolumeClaimRetentionPolicy:
+  whenDeleted: Retain
+  whenScaled: Delete
