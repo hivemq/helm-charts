@@ -1035,6 +1035,23 @@
       },
       "type" : "object"
     },
+    "persistentVolumeClaimRetentionPolicy" : {
+      "additionalProperties" : false,
+      "description" : "Controls the lifecycle of PersistentVolumeClaims created from volumeClaimTemplates. Maps to StatefulSet.spec.persistentVolumeClaimRetentionPolicy.",
+      "properties" : {
+        "whenDeleted" : {
+          "description" : "Applies when the StatefulSet is deleted. `Retain` (default) keeps the PVCs; `Delete` deletes them.",
+          "enum" : ["Retain", "Delete"],
+          "type" : "string"
+        },
+        "whenScaled" : {
+          "description" : "Applies when the StatefulSet is scaled down, including the surge pod during a rolling restart. `Retain` (default) keeps the PVCs; `Delete` deletes them.",
+          "enum" : ["Retain", "Delete"],
+          "type" : "string"
+        }
+      },
+      "type" : "object"
+    },
     "podDisruptionBudget" : {
       "description" : "Configures a PodDisruptionBudget for the HiveMQ Platform pods to control voluntary disruptions such as node drains or cluster autoscaler scale-down events.",
       "properties" : {

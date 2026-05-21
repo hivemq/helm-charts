@@ -304,6 +304,10 @@ spec:
           {{- with .Values.podScheduling.priorityClassName }}
           priorityClassName: {{ . }}
           {{- end }}
+      {{- with .Values.persistentVolumeClaimRetentionPolicy }}
+      persistentVolumeClaimRetentionPolicy:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.volumeClaimTemplates }}
       volumeClaimTemplates:
         {{- toYaml . | nindent 12 }}
