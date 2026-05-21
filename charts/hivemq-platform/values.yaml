@@ -839,6 +839,20 @@ volumeClaimTemplates: []
 #         storage: 100Gi
 #     volumeMode: Filesystem
 
+# Retention policy controlling the lifecycle of PersistentVolumeClaims created from `volumeClaimTemplates`.
+# Maps directly to `StatefulSet.spec.persistentVolumeClaimRetentionPolicy` (Kubernetes >= 1.23 alpha,
+# beta default-on from 1.27, GA in 1.32).
+# - `whenDeleted`: applies when the StatefulSet itself is deleted.
+# - `whenScaled`:  applies when the StatefulSet is scaled down (this includes the surge pod created
+#                  during a rolling restart, so setting `whenScaled: Delete` removes the surge PV
+#                  automatically once the rolling restart completes).
+# Both default to `Retain`, matching the upstream Kubernetes default.
+# Note: on Kubernetes 1.24-1.26 the field is accepted but only honored when the `StatefulSetAutoDeletePVC`
+# feature gate is enabled, which is typically not possible on managed Kubernetes (EKS/GKE/AKS).
+persistentVolumeClaimRetentionPolicy:
+  whenDeleted: Retain
+  whenScaled: Retain
+
 # Defines the HiveMQ Pulse configuration options.
 pulse:
   # Creates a Kubernetes Secret for the HiveMQ Pulse configuration.

@@ -1,0 +1,44 @@
+suite: HiveMQ Platform - PVC Retention Policy tests
+templates:
+  - hivemq-custom-resource.yml
+tests:
+
+  - it: with defaults, persistentVolumeClaimRetentionPolicy renders both fields as Retain
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Retain
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Retain
+
+  - it: with whenScaled set to Delete, field is rendered and whenDeleted default is preserved
+    set:
+      persistentVolumeClaimRetentionPolicy.whenScaled: Delete
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Delete
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Retain
+
+  - it: with whenDeleted set to Delete, field is rendered and whenScaled default is preserved
+    set:
+      persistentVolumeClaimRetentionPolicy.whenDeleted: Delete
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Delete
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Retain
+
+  - it: with an invalid whenScaled value, schema validation rejects the values
+    set:
+      persistentVolumeClaimRetentionPolicy.whenScaled: Bogus
+    asserts:
+      - failedTemplate:
+          errorPattern: "persistentVolumeClaimRetentionPolicy/whenScaled.*value must be one of 'Retain', 'Delete'"
