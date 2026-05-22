@@ -78,6 +78,15 @@ nodes:
   # If not set or empty, a default service account is created.
   serviceAccountName: ""
 
+  # Optional setting that defines the retention policy controlling the lifecycle of PersistentVolumeClaims created from `volumeClaimTemplates`
+  # for your HiveMQ Platform pods. Any valid `persistentVolumeClaimRetentionPolicy` Kubernetes configuration can be used.
+  # Note: on Kubernetes 1.24-1.26 the API server drops the StatefulSet `persistentVolumeClaimRetentionPolicy` field
+  # when the `StatefulSetAutoDeletePVC` feature gate is off, so the field has no effect on those versions.
+  persistentVolumeClaimRetentionPolicy: {}
+  # persistentVolumeClaimRetentionPolicy:
+  #   whenDeleted: Retain
+  #   whenScaled: Delete
+
 # Configuration options for the default provided HiveMQ configuration (config.xml)
 #
 # Control Center configuration
