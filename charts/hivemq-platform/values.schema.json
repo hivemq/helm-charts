@@ -963,6 +963,10 @@
             "WARN"
           ]
         },
+        "persistentVolumeClaimRetentionPolicy" : {
+          "description" : "Optional setting that defines the retention policy controlling the lifecycle of PersistentVolumeClaims created from `volumeClaimTemplates` for your HiveMQ Platform pods. Any valid `persistentVolumeClaimRetentionPolicy` Kubernetes configuration can be used.",
+          "type" : "object"
+        },
         "podSecurityContext" : {
           "description" : "Configures pod-level security for the HiveMQ Platform pod. Some fields are also present in container.securityContext. Field values of container.securityContext take precedence over field values of PodSecurityContext.",
           "properties" : {
