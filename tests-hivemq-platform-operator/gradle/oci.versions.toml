@@ -20,13 +20,13 @@ reference = "v1.36.1-k3s1@sha256:08fdebd14db9ab7d5ea821d5bfa95d02341a6ef886842fc
 [[oci]]
 name = "busybox"
 image = "library/busybox"
-reference = "latest@sha256:1487d0af5f52b4ba31c7e465126ee2123fe3f2305d638e7827681e7cf6c83d5e"
+reference = "latest@sha256:32015ee641bfecc97161986c9d24957068175444f66fbcbe08a664b6cf5c1c2e"
 
 # https://hub.docker.com/_/nginx/tags?name=latest
 [[oci]]
 name = "nginx"
 image = "library/nginx"
-reference = "latest@sha256:800e7c98538c6bf725f5177e841aa720ae0ed1c378bbea368b6330bfe18a36b3"
+reference = "latest@sha256:5aca99593157f4ae539a5dec1092a0ad8762f8e2eb1789085a13a0f5622369f6"
 
 # https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
 [[oci]]
