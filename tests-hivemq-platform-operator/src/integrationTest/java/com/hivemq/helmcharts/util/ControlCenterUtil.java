@@ -18,10 +18,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ControlCenterUtil {
 
     private static final int MAX_LOGIN_RETRIES = 5;
-    private static final @NotNull String LOGIN_BUTTON = ".v-button-hmq-login-button";
-    private static final @NotNull String LOGOUT_BUTTON = ".v-button-hmq-logout-button";
-    private static final @NotNull String TEXT_INPUT_XPATH = "//input[@type='text']";
-    private static final @NotNull String PASSWORD_INPUT_XPATH = "//input[@type='password']";
+    private static final @NotNull Duration FORM_READY_TIMEOUT = Duration.ofSeconds(30);
+    private static final @NotNull Duration LOGIN_SUCCESS_TIMEOUT = Duration.ofSeconds(30);
+    private static final @NotNull By LOGIN_FORM = By.cssSelector("[data-testid='login-form']");
+    private static final @NotNull By USERNAME_INPUT = By.cssSelector("[data-testid='username']");
+    private static final @NotNull By PASSWORD_INPUT = By.cssSelector("[data-testid='password']");
+    private static final @NotNull By LOGIN_BUTTON = By.cssSelector("[data-testid='login-button']");
+    private static final @NotNull By USER_MENU_BUTTON = By.cssSelector("[data-testid='ccv2-user-menu-button']");
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(ControlCenterUtil.class);
 
@@ -85,15 +88,17 @@ public class ControlCenterUtil {
                         forwarded.getLocalPort()));
 
                 try {
-                    webDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).click();
-                    webDriver.findElement(By.xpath(TEXT_INPUT_XPATH)).sendKeys(username);
-                    webDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).click();
-                    webDriver.findElement(By.xpath(PASSWORD_INPUT_XPATH)).sendKeys(password);
-                    webDriver.findElement(By.cssSelector(LOGIN_BUTTON)).click();
+                    final var formWait = new WebDriverWait(webDriver, FORM_READY_TIMEOUT);
+                    formWait.until(ExpectedConditions.visibilityOfElementLocated(LOGIN_FORM));
 
-                    final var wait = new WebDriverWait(webDriver, Duration.ofSeconds(10));
-                    wait.until(webWaitDriver -> ExpectedConditions.visibilityOfElementLocated(By.cssSelector(
-                            LOGOUT_BUTTON)).apply(webWaitDriver));
+                    webDriver.findElement(USERNAME_INPUT).click();
+                    webDriver.findElement(USERNAME_INPUT).sendKeys(username);
+                    webDriver.findElement(PASSWORD_INPUT).click();
+                    webDriver.findElement(PASSWORD_INPUT).sendKeys(password);
+                    webDriver.findElement(LOGIN_BUTTON).click();
+
+                    final var loggedInWait = new WebDriverWait(webDriver, LOGIN_SUCCESS_TIMEOUT);
+                    loggedInWait.until(ExpectedConditions.visibilityOfElementLocated(USER_MENU_BUTTON));
                 } catch (final Exception e) {
                     if (loginAttempt == MAX_LOGIN_RETRIES) {
                         LOG.error("Login attempt {} of {} failed, giving up", loginAttempt, MAX_LOGIN_RETRIES);
