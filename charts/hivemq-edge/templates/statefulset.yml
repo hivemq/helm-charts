@@ -320,11 +320,6 @@ spec:
           - name: datahubinit
             mountPath: /datahubinit
           {{- end }}
-          # /persistence is always mounted so Pulse's eager File field initializers
-          # can mkdirs() without throwing PulseFatalPersistenceException. When the
-          # full persistence module is enabled, the volume is backed by the
-          # volumeClaimTemplates PVC below; otherwise an emptyDir fallback is
-          # declared in the volumes: block. See EDG-672 / EDG-610.
           - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
             mountPath: /persistence
           {{- range .Values.volumes }}
@@ -467,10 +462,6 @@ spec:
                 path: tokenbase64.jwt
       {{- end }}
       {{- if not (and .Values.modules.persistence.enabled .Values.license.enabled) }}
-        # Ephemeral fallback so /persistence is always writable, even when the
-        # full persistence module / license combo isn't active. Pulse's eager
-        # InformationModelPersistence init throws PulseFatalPersistenceException
-        # otherwise. See EDG-672 / EDG-610.
         - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
           emptyDir: {}
       {{- end }}
