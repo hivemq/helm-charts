@@ -9,6 +9,26 @@ set -e
 # export TARGET_FOLDER="${HOME}/custom/deployment" # optional
 # export HELM_VALUES="${HOME}/custom/values.yaml" # optional
 # . "${HELM_CHARTS_BASE_FOLDER}/manifests/manifests.sh"
+check_helm_version() {
+  EXPECTED_HELM_VERSION_FILE="${HELM_CHARTS_BASE_FOLDER}/.helm-version"
+  if [ ! -f "${EXPECTED_HELM_VERSION_FILE}" ]; then
+    echo "Missing pinned Helm version file at ${EXPECTED_HELM_VERSION_FILE}"
+    exit 1
+  fi
+  EXPECTED_HELM_VERSION=$(tr -d '[:space:]' < "${EXPECTED_HELM_VERSION_FILE}")
+  ACTUAL_HELM_VERSION=$(helm version --short 2>/dev/null | sed 's/+.*//')
+  if [ "${ACTUAL_HELM_VERSION}" != "${EXPECTED_HELM_VERSION}" ]; then
+    echo "Helm version mismatch:"
+    echo "  expected: ${EXPECTED_HELM_VERSION} (from .helm-version)"
+    echo "  found:    ${ACTUAL_HELM_VERSION}"
+    echo ""
+    echo "Manifest generation must use the pinned Helm version so the output matches CI."
+    echo "Install ${EXPECTED_HELM_VERSION} (e.g. download from https://github.com/helm/helm/releases/tag/${EXPECTED_HELM_VERSION})"
+    echo "and re-run, or set SKIP_HELM_VERSION_CHECK=true to bypass at your own risk."
+    exit 1
+  fi
+}
+
 update_manifests() {
   IS_HELM_INSTALLED=$(which helm >/dev/null 2>&1 || echo "Helm is not installed")
   if [ -n "$IS_HELM_INSTALLED" ]; then
@@ -30,6 +50,9 @@ update_manifests() {
   if [ -z "${HELM_CHARTS_BASE_FOLDER}" ]; then
     echo "No helm-charts base folder set"
     exit 1
+  fi
+  if [ -z "${SKIP_HELM_VERSION_CHECK}" ]; then
+    check_helm_version
   fi
   if [ -z "${TARGET_FOLDER}" ]; then
     TARGET_FOLDER="${HELM_CHARTS_BASE_FOLDER}/manifests"
