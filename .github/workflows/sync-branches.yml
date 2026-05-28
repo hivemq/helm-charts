@@ -33,9 +33,11 @@ jobs:
 
       - name: Check if same branch exists
         id: check-branch
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          echo "Checking if branch \"${GITHUB_HEAD_REF}\" exists on ${{ matrix.repository }}"
-          BRANCH=$(git ls-remote origin ${GITHUB_HEAD_REF})
+          echo "Checking if branch \"${BRANCH_NAME}\" exists on ${{ matrix.repository }}"
+          BRANCH=$(git ls-remote origin "${BRANCH_NAME}")
           if [[ -n "${BRANCH}" ]]; then
             echo "Same branch exists on ${{ matrix.repository }}"
             echo "branch_exists=true" >> "$GITHUB_OUTPUT"
@@ -46,10 +48,11 @@ jobs:
 
       - name: Create new branch based on next-operator-release
         if: steps.check-branch.outputs.branch_exists == 'false'
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH=${{ github.event.pull_request.head.ref }}
-          git checkout -b $BRANCH
-          git push origin $BRANCH
+          git checkout -b "${BRANCH_NAME}"
+          git push origin "${BRANCH_NAME}"
 
   cleanup-synced-branches:
     name: Cleanup synced branches on hivemq-platform-operator and hivemq-k8s-testsuite repos
@@ -73,8 +76,9 @@ jobs:
 
       - name: Check if branch exists and has no unique commits
         id: check-branch
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
           echo "Checking branch \"${BRANCH_NAME}\" on ${{ matrix.repository }}"
           REMOTE_BRANCH=$(git ls-remote origin "${BRANCH_NAME}")
           if [[ -z "${REMOTE_BRANCH}" ]]; then
@@ -83,7 +87,7 @@ jobs:
             exit 0
           fi
           git fetch origin "${BRANCH_NAME}"
-          AHEAD=$(git rev-list --count origin/next-operator-release..origin/"${BRANCH_NAME}")
+          AHEAD=$(git rev-list --count origin/next-operator-release..FETCH_HEAD)
           if [[ "${AHEAD}" -eq 0 ]]; then
             echo "Branch has no unique commits, safe to delete"
             echo "should_delete=true" >> "$GITHUB_OUTPUT"
@@ -94,7 +98,8 @@ jobs:
 
       - name: Delete synced branch
         if: steps.check-branch.outputs.should_delete == 'true'
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
           echo "Deleting branch \"${BRANCH_NAME}\" on ${{ matrix.repository }}"
           git push origin --delete "${BRANCH_NAME}"
