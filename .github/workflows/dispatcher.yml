@@ -100,18 +100,18 @@ jobs:
               - 'tests-hivemq-platform-operator/**'
           list-files: csv
 
-  edge-smoke-test:
-    name: Edge smoke tests
-    needs: edge-changes
-    if: needs.edge-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/edge-smoke-test.yml
-    secrets: inherit
-
   edge-verify-tests:
     name: Edge verify tests
     needs: edge-changes
     if: needs.edge-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/edge-verify.yml
+    secrets: inherit
+
+  edge-smoke-test:
+    name: Edge smoke tests
+    needs: edge-changes
+    if: needs.edge-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/edge-smoke-test.yml
     secrets: inherit
 
   edge-integration-tests:
@@ -167,8 +167,9 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
-      - edge-smoke-test
       - edge-verify-tests
+      - edge-smoke-test
+      - edge-integration-tests
       - swarm-verify-tests
       - platform-verify-tests
       - platform-smoke-test
@@ -176,8 +177,9 @@ jobs:
     steps:
       - name: Tests results summary
         if: |
-          needs.edge-smoke-test.result == 'failure' ||
           needs.edge-verify-tests.result == 'failure' ||
+          needs.edge-smoke-test.result == 'failure' ||
+          needs.edge-integration-tests.result == 'failure' ||
           needs.swarm-verify-tests.result == 'failure' ||
           needs.platform-verify-tests.result == 'failure' ||
           needs.platform-smoke-test.result == 'failure' ||
