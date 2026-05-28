@@ -128,6 +128,8 @@ tests:
               mountPath: /fragment
             - mountPath: /opt/hivemq/conf-secondary
               name: topicfilters
+            - name: hivemq-edge-persistence-edge
+              mountPath: /persistence
             - name: license
               mountPath: /license.edgelic
 
@@ -148,4 +150,6 @@ tests:
                   - key: "keyy"
                     path: "keyy"
                 secretName: secrety
+            - name: hivemq-edge-persistence-edge
+              emptyDir: {}
 

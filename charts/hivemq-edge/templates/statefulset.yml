@@ -320,10 +320,8 @@ spec:
           - name: datahubinit
             mountPath: /datahubinit
           {{- end }}
-          {{- if and .Values.modules.persistence.enabled .Values.license.enabled }}
           - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
             mountPath: /persistence
-          {{- end }}
           {{- range .Values.volumes }}
           {{- with (index .definition 0) }}
           - name: {{ .name }}
@@ -462,6 +460,10 @@ spec:
             items:
               - key: tokenbase64.jwt
                 path: tokenbase64.jwt
+      {{- end }}
+      {{- if not (and .Values.modules.persistence.enabled .Values.license.enabled) }}
+        - name: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "persistence" "releaseName" .Release.Name) }}
+          emptyDir: {}
       {{- end }}
   {{- if and .Values.modules.persistence.enabled .Values.license.enabled }}
   volumeClaimTemplates:
