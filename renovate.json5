@@ -22,5 +22,15 @@
             ],
             enabled: false,
         },
+        {
+            description: 'Stay on k3s v1.35 - upstream regression on v1.36+',
+            matchFileNames: [
+                'gradle/oci.versions.toml',
+            ],
+            matchPackageNames: [
+                'rancher/k3s',
+            ],
+            allowedVersions: '/^v1\\.35\\./',
+        },
     ],
 }
