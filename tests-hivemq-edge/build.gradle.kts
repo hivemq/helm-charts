@@ -1,18 +1,9 @@
-import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.jackson.dataformat.toml)
-    }
-}
-
 plugins {
     java
+    alias(libs.plugins.hivemq.oci.version.catalog)
     alias(libs.plugins.oci)
 }
 
@@ -147,8 +138,7 @@ oci {
     }
     parentImageDependencies {
         create("noble") {
-            // https://hub.docker.com/layers/library/ubuntu/noble/
-            runtime("library:ubuntu:sha256!d1e2e92c075e5ca139d51a140fff46f84315c0fdce203eab2807c7e495eff4f9") // noble
+            runtime(ociImages.ubuntu.noble.oci)
         }
     }
     imageDefinitions {
@@ -174,12 +164,8 @@ oci {
 }
 
 fun resolveK3sTag(): String {
-    val tomlFile = projectDir.resolve("gradle").resolve("docker.versions.toml")
-    val tomlDocker = TomlMapper().readTree(tomlFile).path("docker")
-
     val k8sVersionType = System.getenv("K8S_VERSION_TYPE") ?: "LATEST"
-    val key = if (k8sVersionType == "MINIMUM") "k3s-minimum" else "k3s-latest"
-    val tag = tomlDocker.path(key).path("tag").asText()
+    val tag = if (k8sVersionType == "MINIMUM") ociImages.k3s.minimum.tag else ociImages.k3s.latest.tag
     println("Resolving test OCI image k3s:$tag ($k8sVersionType)")
     return tag
 }
