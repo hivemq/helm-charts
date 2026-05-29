@@ -1009,7 +1009,7 @@
               }
             ]
           },
-          "unit": "eps"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -1041,16 +1041,30 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (gate) (rate(hivemq_platform_operator_reconciliation_throttled_count{instance=\"$instance\"}[$__rate_interval]))",
+          "expr": "hivemq_platform_operator_concurrency_limit_active_count{instance=\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{gate}}",
+          "legendFormat": "{{concurrency_limit}} active",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "hivemq_platform_operator_concurrency_limit_blocked_count{instance=\"$instance\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{concurrency_limit}} blocked",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "Concurrent Gate Throttled",
+      "title": "Concurrency limit (active / blocked)",
       "type": "timeseries"
     },
     {
