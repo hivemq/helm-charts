@@ -177,6 +177,42 @@ tests:
       - exists:
           path: spec.template.spec.containers[0].resources
 
+  - it: with image digest overrides
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: test-tag
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.initImageName: test-init-image
+      image.initImageDigest: sha256:2222222222222222222222222222222222222222222222222222222222222222
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image:test-tag@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+            value: "test-repo/test-init-image:test-tag@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
+  - it: with image digest overrides and empty tag
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: ""
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.initImageName: test-init-image
+      image.initImageDigest: sha256:2222222222222222222222222222222222222222222222222222222222222222
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+            value: "test-repo/test-init-image@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
   - it: with custom concurrentRollingRestartLimit, operator container EnvVar created
     set:
       concurrentRollingRestartLimit: 5

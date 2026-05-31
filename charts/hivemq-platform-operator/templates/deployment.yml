@@ -77,7 +77,7 @@ spec:
             - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
               value: "{{ .Values.crd.waitTimeout }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
-              value: "{{ .Values.image.repository}}/{{ .Values.image.initImageName}}:{{.Values.image.tag}}"
+              value: "{{ include "hivemq-platform-operator.imageReference" (dict "repository" .Values.image.repository "name" .Values.image.initImageName "tag" .Values.image.tag "digest" .Values.image.initImageDigest) }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY
               value: "{{ .Values.image.pullPolicy }}"
             {{- with .Values.hivemqPlatformInitContainer }}
@@ -163,7 +163,7 @@ spec:
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          image: "{{ .Values.image.repository}}/{{ .Values.image.name }}:{{.Values.image.tag}}"
+          image: "{{ include "hivemq-platform-operator.imageReference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           livenessProbe:
             failureThreshold: 3

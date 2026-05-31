@@ -27,7 +27,7 @@ Usage: {{ include "hivemq-platform-operator.name" (dict "prefix" "my-custom-pref
 Common labels
 */}}
 {{- define "hivemq-platform-operator.labels" -}}
-helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
+helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{ include "hivemq-platform-operator.selector-labels" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -50,6 +50,25 @@ Creates the name of the service account to use for the HiveMQ Platform Operator
 {{- else }}
 {{- include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "releaseName" .Release.Name) }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Builds a container image reference.
+Params:
+- repository: The image repository path.
+- name:       The image name.
+- tag:        The image tag.
+- digest:     The optional image digest.
+Usage: {{ include "hivemq-platform-operator.imageReference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}
+*/}}
+{{- define "hivemq-platform-operator.imageReference" -}}
+{{- $repository := required "image repository is required" .repository -}}
+{{- $name := required "image name is required" .name -}}
+{{- $tag := .tag | default "" -}}
+{{- $digest := .digest | default "" -}}
+{{- printf "%s/%s" $repository $name -}}
+{{- if $tag -}}:{{ $tag }}{{- end -}}
+{{- if $digest -}}@{{ $digest }}{{- end -}}
 {{- end -}}
 
 {{/*

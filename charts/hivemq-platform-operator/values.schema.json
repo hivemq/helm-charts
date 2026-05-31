@@ -131,6 +131,12 @@
     },
     "image" : {
       "properties" : {
+        "digest" : {
+          "type" : "string"
+        },
+        "initImageDigest" : {
+          "type" : "string"
+        },
         "initImageName" : {
           "type" : "string"
         },
