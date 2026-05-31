@@ -53,6 +53,27 @@ Creates the name of the service account to use for the HiveMQ Platform Operator
 {{- end -}}
 
 {{/*
+Builds a container image reference.
+Params:
+- repository: The image repository path.
+- name:       The image name.
+- tag:        The image tag.
+- digest:     The optional image digest.
+Usage: {{ include "hivemq-platform-operator.image-reference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}
+*/}}
+{{- define "hivemq-platform-operator.image-reference" -}}
+{{- if not .repository -}}
+{{- fail (printf "\n`repository` is required to build the HiveMQ Platform Operator container image reference.") -}}
+{{- end -}}
+{{- if not .name -}}
+{{- fail (printf "\n`name` is required to build the HiveMQ Platform Operator container image reference.") -}}
+{{- end -}}
+{{- printf "%s/%s" .repository .name -}}
+{{- with .tag }}:{{ . }}{{- end -}}
+{{- with .digest }}@{{ . }}{{- end -}}
+{{- end -}}
+
+{{/*
 Creates the HiveMQ Platform Operator HTTP service port name.
 Usage: {{ include "hivemq-platform-operator.http-service-port-name" . }}
 */}}

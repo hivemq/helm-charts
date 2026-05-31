@@ -6,7 +6,15 @@ image:
   repository: docker.io/hivemq
   name: hivemq-platform-operator
   tag: 2.1.4
+  # Optional digest for the HiveMQ Platform Operator image.
+  # If set, the rendered image reference is <repository>/<name>:<tag>@<digest>,
+  # or <repository>/<name>@<digest> when tag is empty.
+  digest: ""
   initImageName: hivemq-platform-operator-init
+  # Optional digest for the HiveMQ Platform Operator Init image.
+  # If set, the rendered image reference is <repository>/<initImageName>:<tag>@<initImageDigest>,
+  # or <repository>/<initImageName>@<initImageDigest> when tag is empty.
+  initImageDigest: ""
   pullPolicy: IfNotPresent
   pullSecretName: ""
 

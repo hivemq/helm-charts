@@ -179,6 +179,87 @@ tests:
       - exists:
           path: spec.template.spec.containers[0].resources
 
+  - it: with image digest overrides
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: test-tag
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.initImageName: test-init-image
+      image.initImageDigest: sha256:2222222222222222222222222222222222222222222222222222222222222222
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image:test-tag@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+            value: "test-repo/test-init-image:test-tag@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
+  - it: with image digest overrides and empty tag
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: ""
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.initImageName: test-init-image
+      image.initImageDigest: sha256:2222222222222222222222222222222222222222222222222222222222222222
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+            value: "test-repo/test-init-image@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
+  - it: with empty image repository, validation fails
+    set:
+      image.repository: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`repository` is required to build the HiveMQ Platform Operator container image reference'
+
+  - it: with empty image name, validation fails
+    set:
+      image.name: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`name` is required to build the HiveMQ Platform Operator container image reference'
+
+  - it: with empty image init image name, validation fails
+    set:
+      image.initImageName: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`name` is required to build the HiveMQ Platform Operator container image reference'
+
+  - it: with invalid image digest type, schema validation fails
+    set:
+      image.digest: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with image digest not matching OCI format, schema validation fails
+    set:
+      image.digest: not-a-valid-digest
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid image init digest type, schema validation fails
+    set:
+      image.initImageDigest: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with image init digest not matching OCI format, schema validation fails
+    set:
+      image.initImageDigest: not-a-valid-digest
+    asserts:
+      - failedTemplate: {}
+
   - it: with custom concurrentRollingRestartLimit, operator container EnvVar created
     set:
       concurrentRollingRestartLimit: 5
