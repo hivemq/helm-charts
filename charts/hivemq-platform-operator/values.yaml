@@ -7,13 +7,15 @@ image:
   name: hivemq-platform-operator
   tag: 2.1.4
   # Optional digest for the HiveMQ Platform Operator image.
-  # If set, the rendered image reference is <repository>/<name>:<tag>@<digest>,
-  # or <repository>/<name>@<digest> when tag is empty.
+  # When set, the digest pins the image to an exact version.
+  # The rendered image reference is <repository>/<name>:<tag>@<digest>.
+  # If tag is empty, the reference is <repository>/<name>@<digest>.
   digest: ""
   initImageName: hivemq-platform-operator-init
   # Optional digest for the HiveMQ Platform Operator Init image.
-  # If set, the rendered image reference is <repository>/<initImageName>:<tag>@<initImageDigest>,
-  # or <repository>/<initImageName>@<initImageDigest> when tag is empty.
+  # When set, the digest pins the image to an exact version.
+  # The rendered image reference is <repository>/<initImageName>:<tag>@<initImageDigest>.
+  # If tag is empty, the reference is <repository>/<initImageName>@<initImageDigest>.
   initImageDigest: ""
   pullPolicy: IfNotPresent
   pullSecretName: ""
@@ -32,11 +34,11 @@ logLevel: INFO
 
 # One HiveMQ Platform Operator can manage many HiveMQ Platforms.
 # This value configures the maximum number of HiveMQ Platforms that can perform a rolling restart at the same time.
-# If set to `0`, no limit is applied.
+# The default setting is 0, which disables the limit.
 concurrentRollingRestartLimit: 0
 
 # This value configures the maximum number of HiveMQ Platforms that can perform an init app update at the same time.
-# If set to `0`, no limit is applied.
+# The default setting is 10. To disable the limit, set the value to 0.
 concurrentInitAppUpdateLimit: 10
 
 # Configures the Operator ports for http/s. These ports provide access to metrics and other services.
