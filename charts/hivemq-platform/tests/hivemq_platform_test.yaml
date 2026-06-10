@@ -115,6 +115,54 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
+  - it: with image digest override, container image rendered with tag and digest
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: snapshot
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].image
+          value: "test-repo/test-image:snapshot@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+
+  - it: with image digest override and empty tag, container image rendered with digest only
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: ""
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].image
+          value: "test-repo/test-image@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+
+  - it: with empty image repository, validation fails
+    set:
+      image.repository: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`repository` is required to build the HiveMQ Platform container image reference'
+
+  - it: with empty image name, validation fails
+    set:
+      image.name: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`name` is required to build the HiveMQ Platform container image reference'
+
+  - it: with invalid image digest type, schema validation fails
+    set:
+      image.digest: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with image digest not matching OCI format, schema validation fails
+    set:
+      image.digest: not-a-valid-digest
+    asserts:
+      - failedTemplate: {}
+
   - it: with override init containers
     set:
       config.overrideInitContainers: |-
