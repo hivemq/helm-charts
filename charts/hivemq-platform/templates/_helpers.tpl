@@ -22,6 +22,27 @@ Usage: {{ include "hivemq-platform.name" (dict "name" "my-custom-name" "releaseN
 {{- end -}}
 
 {{/*
+Builds a container image reference.
+Params:
+- repository: The image repository path.
+- name:       The image name.
+- tag:        The image tag.
+- digest:     The optional image digest.
+Usage: {{ include "hivemq-platform.image-reference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}
+*/}}
+{{- define "hivemq-platform.image-reference" -}}
+{{- if not .repository -}}
+{{- fail (printf "\n`repository` is required to build the HiveMQ Platform container image reference.") -}}
+{{- end -}}
+{{- if not .name -}}
+{{- fail (printf "\n`name` is required to build the HiveMQ Platform container image reference.") -}}
+{{- end -}}
+{{- printf "%s/%s" .repository .name -}}
+{{- with .tag }}:{{ . }}{{- end -}}
+{{- with .digest }}@{{ . }}{{- end -}}
+{{- end -}}
+
+{{/*
 Returns a string containing the HiveMQ configuration ConfigMap or Secret name, depending on the `.Values.config.create` value.
 It will return the default ConfigMap or Secret name for the HiveMQ Platform configuration or will reuse the ConfigMap or Secret name defined in the `.Values.config.name` if present.
 Otherwise, an validation error will displayed.
