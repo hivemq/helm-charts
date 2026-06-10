@@ -192,7 +192,7 @@ spec:
                       key: {{ .passwordKey }}
                 {{- end }}
                 {{- end }}
-              image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+              image: "{{ include "hivemq-platform.image-reference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               ports:
                 {{- $containerPortNameList := list }}
