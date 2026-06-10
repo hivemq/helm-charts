@@ -44,7 +44,7 @@ app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{/*
 Creates the name of the service account to use for the HiveMQ Platform Operator
 */}}
-{{- define "hivemq-platform-operator.serviceAccountName" -}}
+{{- define "hivemq-platform-operator.service-account-name" -}}
 {{- if .Values.serviceAccount.name }}
 {{- printf "%s" .Values.serviceAccount.name }}
 {{- else }}
