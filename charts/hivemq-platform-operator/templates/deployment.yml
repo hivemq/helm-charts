@@ -235,7 +235,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.pullSecretName }}
       {{- end }}
-      serviceAccountName: {{ include "hivemq-platform-operator.serviceAccountName" . }}
+      serviceAccountName: {{ include "hivemq-platform-operator.service-account-name" . }}
       {{- /* `nil` check needed for backward compatibility */ -}}
       {{- if and (ne .Values.tls.secretName "nil") (.Values.tls.secretName) }}
       volumes:

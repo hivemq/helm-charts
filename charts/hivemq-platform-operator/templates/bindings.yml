@@ -1,6 +1,6 @@
 {{- if .Values.rbac.create -}}
 {{- $labels := include "hivemq-platform-operator.labels" . }}
-{{- $serviceAccountName := include "hivemq-platform-operator.serviceAccountName" . }}
+{{- $serviceAccountName := include "hivemq-platform-operator.service-account-name" . }}
 {{- $roleBindingName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role-binding" "releaseName" .Release.Name) }}
 {{- $roleName := include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "name" "role" "releaseName" .Release.Name) }}
 ---
