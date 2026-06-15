@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -25,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MqttUtil {
 
     public static final int DEFAULT_TOPIC_COUNT = 30;
+
+    private static final long DRAIN_TIMEOUT_SECONDS = 30;
+
     private static final byte @NotNull [] PAYLOAD = "test".getBytes(StandardCharsets.UTF_8);
 
     // generate strings from a to z
@@ -50,7 +54,7 @@ public class MqttUtil {
                 namespace,
                 mqttServiceName,
                 mqttServicePort,
-                (publishClient) -> IntStream.range(0, DEFAULT_TOPIC_COUNT).parallel().forEach(_ -> {
+                publishClient -> IntStream.range(0, DEFAULT_TOPIC_COUNT).parallel().forEach(_ -> {
                     final var topic = random.ints(RANDOM_STRING_LEFT_LIMIT, RANDOM_STRING_RIGHT_LIMIT + 1)
                             .limit(RANDOM_STRING_LENGTH)
                             .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
@@ -76,25 +80,55 @@ public class MqttUtil {
             final @NotNull String mqttServiceName,
             final int mqttServicePort) {
         final var started = System.nanoTime();
-        LOG.info("Asserting retained messages on {} topics...", topicList.size());
-        execute(client,
-                namespace,
-                mqttServiceName,
-                mqttServicePort,
-                (subscribeClient, publishes) -> topicList.parallelStream().forEach(topic -> {
-                    try {
-                        final var subAck = subscribeClient.subscribeWith().topicFilter(topic).send();
-                        assertThat(subAck.getReasonString()).isEmpty();
+        final var expectedTopics = new TreeSet<>(topicList);
+        LOG.info("Asserting retained messages on {} topics: {}", expectedTopics.size(), expectedTopics);
+        execute(client, namespace, mqttServiceName, mqttServicePort, (subscribeClient, publishes) -> {
+            // subscribe to all topics so the broker (re-)delivers every retained message to this single client
+            for (final var topic : expectedTopics) {
+                try {
+                    final var subAck = subscribeClient.subscribeWith().topicFilter(topic).send();
+                    assertThat(subAck.getReasonString()).isEmpty();
+                } catch (final Exception e) {
+                    throw new AssertionError("Could not subscribe to topic " + topic, e);
+                }
+            }
+            LOG.info("Subscribed to {} topics, draining retained messages...", expectedTopics.size());
 
-                        final var publish = publishes.receive(30, TimeUnit.SECONDS);
-                        assertThat(publish).as("Publish for topic %s", topic)
-                                .isPresent()
-                                .get()
-                                .satisfies(p -> assertThat(p.getPayloadAsBytes()).isEqualTo(PAYLOAD));
-                    } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
+            // drain the publish queue within an overall deadline, attributing each publish to its actual topic
+            final var receivedTopics = new TreeSet<String>();
+            final var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(DRAIN_TIMEOUT_SECONDS);
+            while (receivedTopics.size() < expectedTopics.size()) {
+                final var remaining = deadline - System.nanoTime();
+                if (remaining <= 0) {
+                    // overall drain deadline reached
+                    break;
+                }
+                try {
+                    final var received = publishes.receive(remaining, TimeUnit.NANOSECONDS);
+                    if (received.isEmpty()) {
+                        // no further retained message arrived before the deadline
+                        break;
                     }
-                }));
+                    final var publish = received.get();
+                    final var topic = publish.getTopic().toString();
+                    LOG.info("Received publish on topic {} (retained: {})", topic, publish.isRetain());
+                    assertThat(publish.getPayloadAsBytes()).as("Payload for topic %s", topic).isEqualTo(PAYLOAD);
+                    receivedTopics.add(topic);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError("Interrupted while draining retained messages", e);
+                }
+            }
+
+            final var missingTopics = new TreeSet<>(expectedTopics);
+            missingTopics.removeAll(receivedTopics);
+            LOG.info("Received retained messages on {}/{} topics. Received: {}. Missing: {}",
+                    receivedTopics.size(),
+                    expectedTopics.size(),
+                    receivedTopics,
+                    missingTopics);
+            assertThat(missingTopics).as("Missing retained messages for topics").isEmpty();
+        });
         LOG.info("Asserted retained messages ({} ms)", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
     }
 
