@@ -50,12 +50,21 @@ jobs:
         with:
           cache-disabled: true
 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8 # v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:cicd-harvester
+
       - name: Warmup Gradle cache
         if: steps.setup-java.outputs.cache-hit == 'false'
         working-directory: helm-charts
         env:
           ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
           ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
+          DEVELOCITY_SERVER_URL: ${{ secrets.DEVELOCITY_SERVER_URL }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         run: ./gradlew :tests-hivemq-platform-operator:integrationTestPrepare
 
   run-integration-tests:
@@ -64,7 +73,7 @@ jobs:
     needs:
       - generate-split-index-json
       - compile-integration-test
-    timeout-minutes: 25
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -110,12 +119,21 @@ jobs:
         with:
           cache-disabled: true
 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8 # v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:cicd-harvester
+
       - name: Compile integration tests
         working-directory: helm-charts
         env:
           ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
           ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
           K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
+          DEVELOCITY_SERVER_URL: ${{ secrets.DEVELOCITY_SERVER_URL }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         run: ./gradlew :tests-hivemq-platform-operator:integrationTestPrepare
 
       - name: Split tests
@@ -139,6 +157,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
           K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
+          DEVELOCITY_SERVER_URL: ${{ secrets.DEVELOCITY_SERVER_URL }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         run: ./gradlew :tests-hivemq-platform-operator:integrationTest ${{ steps.split-tests.outputs.test-suite }}
 
       - name: Upload test results

@@ -94,6 +94,13 @@ testing {
                     reports {
                         junitXml.isOutputPerTestCase = true
                     }
+                    if (System.getenv("CI_RUN") == "true") {
+                        develocity.testRetry {
+                            maxRetries = 2
+                            maxFailures = 6
+                            failOnPassedAfterRetry = false
+                        }
+                    }
                     maxHeapSize = "3g"
                 }
             }
