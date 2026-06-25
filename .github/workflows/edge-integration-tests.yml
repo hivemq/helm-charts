@@ -31,7 +31,7 @@ jobs:
 
       - name: Set up JDK 25
         id: setup-java
-        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
         with:
           cache: gradle
           distribution: temurin
@@ -89,7 +89,7 @@ jobs:
           upload-artifact: ${{ matrix.k8s-version-type == 'LATEST' }}
 
       - name: Set up JDK 25
-        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
+        uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
         with:
           cache: gradle
           distribution: temurin
