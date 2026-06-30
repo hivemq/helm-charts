@@ -78,6 +78,7 @@ public class HelmChartContainer extends K3sContainer {
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
+    private final @NotNull K3sRuntimeStallDetector stallDetector = new K3sRuntimeStallDetector();
     private final @NotNull ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
     private @Nullable KubernetesClient client;
@@ -107,6 +108,7 @@ public class HelmChartContainer extends K3sContainer {
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
+        super.withLogConsumer(outputFrame -> stallDetector.accept(outputFrame.getUtf8String()));
         final var k3sCommands = new ArrayList<>(List.of("server",
                 "--etcd-arg=unsafe-no-fsync",
                 "--etcd-arg=snapshot-count=10000",

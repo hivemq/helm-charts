@@ -142,7 +142,7 @@ jobs:
         with:
           split-index: ${{ matrix.split-index }}
           split-total: ${{ env.split-total }}
-          glob: '**/helm-charts/tests-hivemq-platform-operator/**/*IT.java'
+          glob: '**/helm-charts/tests-hivemq-platform-operator/**/*{IT,Test}.java'
           junit-glob: '**/junit-reports/*.xml'
           format: 'gradle'
           new-test-time: 'average'
