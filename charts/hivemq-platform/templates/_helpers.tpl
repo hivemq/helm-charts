@@ -1104,6 +1104,9 @@ Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 {{- $sharedPvcEnvVars := list "HIVEMQ_DATA_FOLDER" "HIVEMQ_LOG_FOLDER" "HIVEMQ_HEAPDUMP_FOLDER" "HIVEMQ_BACKUP_FOLDER" "HIVEMQ_AUDIT_FOLDER" }}
 {{- $hasSharedPvc := ( include "hivemq-platform.has-shared-pvc" . ) }}
 {{- range .Values.nodes.env }}
+  {{- if eq .name "HIVEMQ_CLUSTERING_BOOTSTRAP" }}
+    {{- fail (printf "\nHIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set") }}
+  {{- end }}
   {{- if and (eq .name "HIVEMQ_PULSE_FOLDER") $hasPulseConfig }}
     {{- fail (printf "\nHIVEMQ_PULSE_FOLDER environment variable cannot be set") }}
   {{- end }}

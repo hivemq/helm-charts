@@ -426,6 +426,15 @@ tests:
       - failedTemplate:
           errorMessage: "Default environment variable `JAVA_OPTS` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead"
 
+  - it: with HIVEMQ_CLUSTERING_BOOTSTRAP defined in nodes.env, validation fails
+    set:
+      nodes.env:
+        - name: HIVEMQ_CLUSTERING_BOOTSTRAP
+          value: "true"
+    asserts:
+      - failedTemplate:
+          errorMessage: "HIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set"
+
   - it: with default resource requests
     asserts:
       - exists:
