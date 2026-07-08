@@ -279,7 +279,7 @@ jobs:
       - name: Trigger Jenkins composite build
         id: trigger
         if: steps.jenkins-build.outputs.needed == 'true'
-        uses: fjogeleit/http-request-action@551353b829c3646756b2ec2b3694f819d7957495 # v2
+        uses: fjogeleit/http-request-action@f98bb26551cd1af7d3eb2674578a80754ece88db # v2
         with:
           url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
           method: 'POST'
