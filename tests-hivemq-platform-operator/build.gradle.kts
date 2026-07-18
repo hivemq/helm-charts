@@ -106,7 +106,7 @@ testing {
             }
             oci.of(this) {
                 imageDependencies {
-                    runtime(project).name("hivemq/helm-charts").tag("latest")
+                    runtime(project()).name("hivemq/helm-charts").tag("latest")
                     runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
                     runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
                     runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
