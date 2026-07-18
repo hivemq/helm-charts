@@ -94,7 +94,7 @@ testing {
             }
             oci.of(this) {
                 imageDependencies {
-                    runtime(project).name("hivemq/helm-charts").tag("latest")
+                    runtime(project()).name("hivemq/helm-charts").tag("latest")
                     runtime("com.hivemq:hivemq-edge:$hivemqEdgeVersion").tag("latest")
                 }
                 val linuxAmd64 = platformSelector(platform("linux", "amd64"))
