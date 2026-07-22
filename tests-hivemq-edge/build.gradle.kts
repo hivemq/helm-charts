@@ -125,6 +125,15 @@ oci {
                 includeModule("hivemq", "helm-test-image")
             }
         }
+        registry("ecrPublic") {
+            url = uri("https://public.ecr.aws")
+            exclusiveContent { includeGroup("hivemq.library") }
+        }
+    }
+    imageMapping {
+        mapGroup("hivemq.library") {
+            toImage(nameSpec("hivemq/library/") + name)
+        }
     }
     imageDefinitions {
         register("main") {
