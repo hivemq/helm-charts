@@ -142,6 +142,15 @@ oci {
         dockerHub {
             optionalCredentials()
         }
+        registry("ecrPublic") {
+            url = uri("https://public.ecr.aws")
+            exclusiveContent { includeGroup("hivemq.base-images") }
+        }
+    }
+    imageMapping {
+        mapGroup("hivemq.base-images") {
+            toImage(nameSpec("hivemq/base-images/") + name)
+        }
     }
     parentImageDependencies {
         create("noble") {
