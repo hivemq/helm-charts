@@ -227,6 +227,10 @@ oci {
                 includeModule("hivemq", "helm-test-image")
             }
         }
+        registry("ecrPublic") {
+            url = uri("https://public.ecr.aws")
+            exclusiveContent { includeGroup("hivemq.library") }
+        }
     }
     imageMapping {
         mapModule("com.hivemq", "hivemq-enterprise") {
@@ -239,6 +243,9 @@ oci {
             mapModule(jreBaseImageGroup, variant) {
                 toImage(jreBaseImage.repository).withTag(version)
             }
+        }
+        mapGroup("hivemq.library") {
+            toImage(nameSpec("hivemq/library/") + name)
         }
     }
     imageDefinitions {
