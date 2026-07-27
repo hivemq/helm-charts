@@ -227,10 +227,9 @@ jobs:
           BEFORE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '0000000000000000000000000000000000000000' }}
           REPOSITORY_JSON: ${{ toJSON(github.event.repository) }}
           ORGANIZATION_JSON: ${{ toJSON(github.event.organization) }}
-          JENKINS_WEBHOOK_SECRET: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
         run: |
           set -euo pipefail
-          PAYLOAD=$(jq -nc \
+          jq -nc \
             --arg ref "refs/heads/$BRANCH" \
             --arg before "$BEFORE_SHA" \
             --arg after "$HEAD_SHA" \
@@ -263,35 +262,41 @@ jobs:
                 removed: [],
                 modified: []
               }
-            }')
-          SIGNATURE_256="sha256=$(printf '%s' "$PAYLOAD" | openssl dgst -sha256 -hmac "$JENKINS_WEBHOOK_SECRET" -hex | awk '{print $NF}')"
-          echo "::add-mask::$SIGNATURE_256"
-          DELIVERY=$(cat /proc/sys/kernel/random/uuid)
-          echo "::add-mask::$DELIVERY"
-          {
-            echo "body<<__END__"
-            echo "$PAYLOAD"
-            echo "__END__"
-            echo "signature=$SIGNATURE_256"
-            echo "delivery=$DELIVERY"
-          } >> "$GITHUB_OUTPUT"
+            }' > "$RUNNER_TEMP/jenkins-payload.json"
 
       - name: Trigger Jenkins composite build
         id: trigger
         if: steps.jenkins-build.outputs.needed == 'true'
-        uses: fjogeleit/http-request-action@f98bb26551cd1af7d3eb2674578a80754ece88db # v2
-        with:
-          url: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
-          method: 'POST'
-          contentType: 'application/json'
-          data: ${{ steps.payload.outputs.body }}
-          customHeaders: |
-            {
-              "X-GitHub-Event": "push",
-              "X-Hub-Signature-256": "${{ steps.payload.outputs.signature }}",
-              "X-GitHub-Delivery": "${{ steps.payload.outputs.delivery }}",
-              "User-Agent": "GitHub-Hookshot/gha-dispatcher"
-            }
+        env:
+          JENKINS_WEBHOOK_PAYLOAD_URL: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
+          JENKINS_WEBHOOK_SECRET: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          PAYLOAD_FILE="$RUNNER_TEMP/jenkins-payload.json"
+          # The signature covers the exact request body, so sign the file that is posted verbatim.
+          # Both signature headers are sent, matching a GitHub webhook delivery.
+          SIGNATURE_1="sha1=$(openssl dgst -sha1 -hmac "$JENKINS_WEBHOOK_SECRET" -hex < "$PAYLOAD_FILE" | awk '{print $NF}')"
+          SIGNATURE_256="sha256=$(openssl dgst -sha256 -hmac "$JENKINS_WEBHOOK_SECRET" -hex < "$PAYLOAD_FILE" | awk '{print $NF}')"
+          echo "::add-mask::$SIGNATURE_1"
+          echo "::add-mask::$SIGNATURE_256"
+          DELIVERY=$(cat /proc/sys/kernel/random/uuid)
+          echo "::add-mask::$DELIVERY"
+          RESPONSE_FILE="$RUNNER_TEMP/jenkins-response.txt"
+          HTTP_CODE=$(curl --silent --show-error --max-time 30 \
+            --output "$RESPONSE_FILE" --write-out '%{http_code}' \
+            --request POST "$JENKINS_WEBHOOK_PAYLOAD_URL" \
+            --header 'Content-Type: application/json' \
+            --header 'X-GitHub-Event: push' \
+            --header "X-Hub-Signature: $SIGNATURE_1" \
+            --header "X-Hub-Signature-256: $SIGNATURE_256" \
+            --header "X-GitHub-Delivery: $DELIVERY" \
+            --header 'User-Agent: GitHub-Hookshot/gha-dispatcher' \
+            --data-binary @"$PAYLOAD_FILE")
+          echo "Jenkins responded with HTTP $HTTP_CODE"
+          if [[ "$HTTP_CODE" != 2* ]]; then
+            cat "$RESPONSE_FILE"
+            exit 1
+          fi
 
       - name: Skip Jenkins composite build
         if: steps.jenkins-build.outputs.needed == 'false'
