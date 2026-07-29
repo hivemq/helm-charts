@@ -173,11 +173,15 @@ restApi:
 
 # Configures Log-Based Clustering initial members mode.
 # When enabled, the HIVEMQ_CLUSTERING_INITIAL_MEMBERS environment variable is automatically generated
-# from the replica count and StatefulSet naming convention, allowing the Raft cluster to bootstrap
-# without a designated bootstrap node. Additional nodes added by scaling the StatefulSet will
-# automatically join the existing cluster.
+# from the StatefulSet naming convention, allowing the Raft cluster to bootstrap without a designated
+# bootstrap node. Additional nodes added by scaling the StatefulSet will automatically join the
+# existing cluster via JoinOperation.
+# The `count` field controls how many pods are in the initial members list. It defaults to
+# `nodes.replicaCount` but should be set explicitly and kept fixed after initial deployment,
+# so that scaling does not change the env var and trigger an unnecessary rolling restart.
 #clusterInitialMembers:
 #  enabled: true
+#  count: 3
 
 # Configures HiveMQ Cluster failure detection options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#failure-detection
