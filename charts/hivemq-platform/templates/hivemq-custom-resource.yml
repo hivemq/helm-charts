@@ -62,6 +62,9 @@ spec:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:
       replicas: {{.Values.nodes.replicaCount}}
+      {{- if and .Values.clusterInitialMembers .Values.clusterInitialMembers.enabled }}
+      podManagementPolicy: Parallel
+      {{- end }}
       template:
         {{- if or .Values.nodes.annotations .Values.nodes.labels }}
         metadata:
