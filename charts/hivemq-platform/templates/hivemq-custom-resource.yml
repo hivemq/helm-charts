@@ -115,6 +115,11 @@ spec:
                 {{- include "hivemq-platform.validate-env-vars" . }}
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
+                {{- $initialMembers := include "hivemq-platform.initial-members-env" . }}
+                {{- if $initialMembers }}
+                - name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+                  value: {{ $initialMembers | quote }}
+                {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
                   {{- $envNamesKeyStorePrivatePasswordList := list }}

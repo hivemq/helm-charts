@@ -171,6 +171,14 @@ restApi:
 #hivemqOverloadProtection:
 #  enabled: true
 
+# Configures Log-Based Clustering initial members mode.
+# When enabled, the HIVEMQ_CLUSTERING_INITIAL_MEMBERS environment variable is automatically generated
+# from the replica count and StatefulSet naming convention, allowing the Raft cluster to bootstrap
+# without a designated bootstrap node. Additional nodes added by scaling the StatefulSet will
+# automatically join the existing cluster.
+#clusterInitialMembers:
+#  enabled: true
+
 # Configures HiveMQ Cluster failure detection options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/cluster.html#failure-detection
 #hivemqClusterFailureDetection:
