@@ -385,20 +385,23 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 {{/*
 Generates the HIVEMQ_CLUSTERING_INITIAL_MEMBERS env var value when clusterInitialMembers is enabled.
 Produces a comma-separated list of <pod>.<headless-svc>.<namespace>.svc:<pulse-port> for the initial members.
-Uses clusterInitialMembers.count if set, otherwise defaults to nodes.replicaCount.
-The count should stay fixed after initial deployment so that scaling does not trigger a rolling restart.
+The count field is required and must stay fixed after initial deployment so that scaling does not
+change the env var and trigger an unnecessary rolling restart of existing pods.
 The Pulse clustering transport port is the cluster transport port + 10.
 Usage: {{ include "hivemq-platform.initial-members-env" . }}
 */}}
 {{- define "hivemq-platform.initial-members-env" -}}
 {{- if .Values.clusterInitialMembers -}}
 {{- if .Values.clusterInitialMembers.enabled -}}
+{{- if not .Values.clusterInitialMembers.count -}}
+{{- fail "\nclusterInitialMembers.count is required when clusterInitialMembers.enabled is true. Set it to the number of nodes in the initial cluster (e.g. count: 2)." -}}
+{{- end -}}
 {{- $releaseName := .Release.Name -}}
 {{- $namespace := .Release.Namespace -}}
 {{- $serviceName := printf "hivemq-%s-cluster" $releaseName -}}
 {{- $clusterPort := include "hivemq-platform.cluster-transport-port" . | int -}}
 {{- $pulsePort := add $clusterPort 10 -}}
-{{- $count := .Values.clusterInitialMembers.count | default .Values.nodes.replicaCount | int -}}
+{{- $count := .Values.clusterInitialMembers.count | int -}}
 {{- $members := list -}}
 {{- range $i := until $count -}}
 {{- $members = append $members (printf "%s-%d.%s.%s.svc:%d" $releaseName $i $serviceName $namespace $pulsePort) -}}

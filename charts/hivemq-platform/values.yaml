@@ -176,9 +176,9 @@ restApi:
 # from the StatefulSet naming convention, allowing the Raft cluster to bootstrap without a designated
 # bootstrap node. Additional nodes added by scaling the StatefulSet will automatically join the
 # existing cluster via JoinOperation.
-# The `count` field controls how many pods are in the initial members list. It defaults to
-# `nodes.replicaCount` but should be set explicitly and kept fixed after initial deployment,
-# so that scaling does not change the env var and trigger an unnecessary rolling restart.
+# The `count` field is required and controls how many pods are in the initial members list.
+# It must be kept fixed after initial deployment so that scaling does not change the env var
+# and trigger an unnecessary rolling restart.
 #clusterInitialMembers:
 #  enabled: true
 #  count: 3
