@@ -32,5 +32,19 @@
             ],
             allowedVersions: '/^v1\\.35\\./',
         },
+        {
+            description: 'Stay on Cosign 2.x - Cosign 3.x signs exclusively via the OCI 1.1 referrers API, which our registry does not support',
+            matchPackageNames: [
+                'sigstore/cosign',
+            ],
+            allowedVersions: '/^v2\\./',
+        },
+        {
+            description: 'The cosign-release input takes a release tag, not a commit SHA, so it cannot be pinned to a digest',
+            matchPackageNames: [
+                'sigstore/cosign',
+            ],
+            pinDigests: false,
+        },
     ],
 }
