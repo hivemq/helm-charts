@@ -154,19 +154,10 @@ class HelmDataHubModuleIT extends AbstractHelmChartIT {
 
     private void restartPlatformPod() {
         final var podName = platformReleaseName + "-0";
-        final var pods = client.pods().inNamespace(platformNamespace);
-        final var podUid = pods.withName(podName).get().getMetadata().getUid();
-        pods.withName(podName).delete();
-        pods.withName(podName)
-                .waitUntilCondition(pod -> pod != null &&
-                                !podUid.equals(pod.getMetadata().getUid()) &&
-                                !pod.getStatus().getContainerStatuses().isEmpty() &&
-                                pod.getStatus()
-                                        .getContainerStatuses()
-                                        .stream()
-                                        .allMatch(containerStatus -> Boolean.TRUE.equals(containerStatus.getReady())),
-                        3,
-                        TimeUnit.MINUTES);
+        final var podResource = client.pods().inNamespace(platformNamespace).withName(podName);
+        final var podUid = podResource.get().getMetadata().getUid();
+        podResource.delete();
+        K8sUtil.waitForPodStateRunning(client, platformNamespace, podName, podUid);
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
     }
 
