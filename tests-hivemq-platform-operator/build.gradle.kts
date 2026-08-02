@@ -1,8 +1,10 @@
+import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
+    alias(libs.plugins.download)
     alias(libs.plugins.hivemq.oci.version.catalog)
     alias(libs.plugins.oci)
 }
@@ -25,6 +27,48 @@ configurations.all {
 
 val hivemqVersion = libs.versions.hivemq.platform.get()
 val k3sTag = resolveK3sTag()
+
+/*
+ * Tests the HiveMQ Platform on a Java runtime other than the one of the official image.
+ *
+ * When the `customPlatformImageVariant` property is set, a HiveMQ Platform image is built from the latest platform
+ * distribution on top of the Java runtime base image of that variant, and the integration tests run against that image
+ * instead of the official one. Only the tests tagged with `custom-platform-image` are executed.
+ *
+ * Without the property, the build behaves as it does for every regular test run.
+ */
+val customPlatformImageVariant: String? = providers.gradleProperty("customPlatformImageVariant").orNull
+
+val jreBaseImages = mapOf(
+    "temurin21-resolute" to ociImages.jre.temurin21.resolute,
+    "temurin21-ubi9" to ociImages.jre.temurin21.ubi9,
+    "temurin25-ubi10" to ociImages.jre.temurin25.ubi10,
+    "semeru21-noble" to ociImages.jre.semeru21.noble,
+    "semeru25-noble" to ociImages.jre.semeru25.noble,
+    "corretto21-al2023" to ociImages.jre.corretto21.al2023,
+    "corretto25-al2023" to ociImages.jre.corretto25.al2023,
+)
+
+/*
+ * The Java runtime base image is declared under its own module coordinate and resolved through an image mapping.
+ *
+ * The HiveMQ Platform Operator image builds on a Java runtime image of the same module. Declaring that module a second
+ * time, with a different reference, would let Gradle's conflict resolution pick a single version for both images, so
+ * the operator would silently run on the Java runtime of the variant under test.
+ */
+val jreBaseImageGroup = "custom-platform-image-jre"
+
+val customPlatformImageTag = "custom-platform-image"
+
+@Suppress("unused")
+val printCustomPlatformImageVariants by tasks.registering {
+    group = "verification"
+    description = "Prints the custom platform image variants as a JSON array, used to build the workflow matrix"
+    val variants = jreBaseImages.keys.sorted()
+    doLast {
+        println(variants.joinToString("\", \"", "[\"", "\"]"))
+    }
+}
 
 @Suppress("UnstableApiUsage")
 testing {
@@ -76,6 +120,9 @@ testing {
                             "--sun-misc-unsafe-memory-access=allow",
                         )
                     })
+                    if (customPlatformImageVariant != null) {
+                        options { (this as JUnitPlatformOptions).includeTags(customPlatformImageTag) }
+                    }
                     systemProperty("k3s.version.type", environment["K8S_VERSION_TYPE"] ?: "LATEST")
                     systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
                     systemProperty("junit.jupiter.execution.timeout.mode", "disabled_on_debug")
@@ -109,7 +156,13 @@ testing {
                     runtime(project()).name("hivemq/helm-charts").tag("latest")
                     runtime("com.hivemq:hivemq-platform-operator").tag("snapshot")
                     runtime("com.hivemq:hivemq-platform-operator-init").tag("snapshot")
-                    runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
+                    if (customPlatformImageVariant == null) {
+                        runtime("com.hivemq:hivemq-enterprise:$hivemqVersion").tag("latest")
+                    } else {
+                        // the image definition is registered further below, so it is looked up lazily
+                        runtime(provider { oci.imageDefinitions["customPlatformImage"].dependency.get() }) //
+                            .name("hivemq/hivemq4").tag("latest")
+                    }
                     runtime("com.hivemq:hivemq-enterprise-k8s:4.47.1").tag("k8s-latest")
                     runtime(ociImages.hivemq.operator.oci).tag("latest")
                     runtime(ociImages.init.dns.wait.oci).tag("latest")
@@ -157,6 +210,15 @@ val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
     classifier = "helm@linux,arm64,v8"
 }
 
+val downloadPlatformDistribution by tasks.registering(Download::class) {
+    group = "distribution"
+    description = "Downloads the latest HiveMQ Platform distribution"
+    src("https://www.hivemq.com/releases/hivemq-latest.zip")
+    dest(layout.buildDirectory.file("platform/hivemq-latest.zip"))
+    onlyIfModified(true)
+    retries(3)
+}
+
 oci {
     registries {
         dockerHub {
@@ -169,6 +231,11 @@ oci {
         }
         mapModule("com.hivemq", "hivemq-enterprise-k8s") {
             toImage("hivemq/hivemq4").withTag(version.prefix("k8s-"))
+        }
+        jreBaseImages.forEach { (variant, jreBaseImage) ->
+            mapModule(jreBaseImageGroup, variant) {
+                toImage(jreBaseImage.repository).withTag(version)
+            }
         }
     }
     parentImageDependencies {
@@ -193,6 +260,69 @@ oci {
                 layer("helm") {
                     contents(helmOciLayerLinuxArm64)
                 }
+            }
+        }
+        if (customPlatformImageVariant != null) {
+            val jreBaseImage = jreBaseImages[customPlatformImageVariant]
+                ?: throw GradleException(
+                    "Unknown custom platform image variant '$customPlatformImageVariant', " +
+                            "expected one of ${jreBaseImages.keys.sorted()}"
+                )
+            val jreBaseImageReference = jreBaseImage.digest?.replace("sha256:", "sha256!") ?: jreBaseImage.tag
+            register("customPlatformImage") {
+                imageName = "hivemq/hivemq4"
+                imageTag = "latest"
+                allPlatforms {
+                    dependencies {
+                        runtime("$jreBaseImageGroup:$customPlatformImageVariant:$jreBaseImageReference")
+                    }
+                    config {
+                        user = "10000"
+                        workingDirectory = "/opt/hivemq"
+                        ports = setOf(
+                            "1883", // MQTT
+                            "8000", // cluster transport
+                            "8080", // Control Center HTTP
+                        )
+                        environment = mapOf(
+                            // the user ID that runs the container has no entry in /etc/passwd, so HOME has to be set
+                            // explicitly, otherwise it defaults to "/"
+                            "HOME" to "/opt/hivemq",
+                            "JAVA_OPTS" to "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA",
+                            "LANG" to "en_US.UTF-8",
+                        )
+                        // no entry point, the HiveMQ Platform Operator sets the container command itself
+                    }
+                    layer("hivemq") {
+                        contents {
+                            // the distribution is added with the permissions of the official image, as the container
+                            // runs as user 10000 in group 0 and has to write to these directories
+                            permissions("opt/hivemq/", 0b111_111_101)
+                            permissions("opt/hivemq/**/*.sh", 0b111_101_101)
+                            permissions("opt/hivemq/bin/init-script/hivemq*", 0b111_101_101)
+                            permissions("opt/hivemq/audit/", 0b111_111_101)
+                            permissions("opt/hivemq/backup/", 0b111_111_101)
+                            permissions("opt/hivemq/conf/", 0b111_111_101)
+                            permissions("opt/hivemq/conf/*.xml", 0b110_110_100)
+                            permissions("opt/hivemq/data/", 0b111_111_101)
+                            permissions("opt/hivemq/extensions/", 0b111_111_101)
+                            permissions("opt/hivemq/extensions/*/", 0b111_111_101)
+                            permissions("opt/hivemq/extensions/*/DISABLED", 0b110_110_100)
+                            permissions("opt/hivemq/extensions/*/hivemq-extension.xml", 0b110_110_100)
+                            permissions("opt/hivemq/license/", 0b111_111_101)
+                            permissions("opt/hivemq/log/", 0b111_111_101)
+                            into("opt") {
+                                from(zipTree(downloadPlatformDistribution.map { it.outputFiles.first() })) {
+                                    // the tools are not used by any test
+                                    filter { exclude("*/tools/**") }
+                                    move("", "hivemq-.*", "hivemq")
+                                }
+                            }
+                        }
+                    }
+                }
+                specificPlatform(platform("linux", "amd64"))
+                specificPlatform(platform("linux", "arm64", "v8"))
             }
         }
     }

@@ -45,3 +45,48 @@ pinnedReference = "4.7.10@sha256:241d6a8e1963968ebafb7f63396c56e1d8e41fc4065ee62
 name = "init-dns-wait"
 image = "hivemq/init-dns-wait"
 pinnedReference = "1.0.1@sha256:96f972c3029a2bab716c43c5404280030ecd98d199bd9cbe5de0f495a8f06945"
+
+# Java runtime base images for the custom HiveMQ Platform images, see the `customPlatformImageVariant` property.
+# Only used by the scheduled workflow that tests the HiveMQ Platform on different operating systems and Java runtimes.
+
+# https://hub.docker.com/_/eclipse-temurin/tags?name=21-jre-resolute
+[[oci]]
+name = "jre-temurin21-resolute"
+image = "library/eclipse-temurin"
+reference = "21-jre-resolute@sha256:0e9bce1bf5edd280a5778fef32fcc91eddc69bad98a0b1b2bafecdbed1f4272f"
+
+# https://hub.docker.com/_/eclipse-temurin/tags?name=21-jre-ubi9-minimal
+[[oci]]
+name = "jre-temurin21-ubi9"
+image = "library/eclipse-temurin"
+reference = "21-jre-ubi9-minimal@sha256:3c624d2b86ddcf884f2ea01355da5c0eefaeb93904c61bc0d3a775b176f04947"
+
+# https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-ubi10-minimal
+[[oci]]
+name = "jre-temurin25-ubi10"
+image = "library/eclipse-temurin"
+reference = "25-jre-ubi10-minimal@sha256:6031e5480f5d5818252a348980a192af0eab09e3380a55f75927e019f4d8136c"
+
+# https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-21-jre-noble
+[[oci]]
+name = "jre-semeru21-noble"
+image = "library/ibm-semeru-runtimes"
+reference = "open-21-jre-noble@sha256:a01161941ceae7ab4ab1d0214c72f611d0326469011328b7ff8aa245f2ee4239"
+
+# https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-25-jre-noble
+[[oci]]
+name = "jre-semeru25-noble"
+image = "library/ibm-semeru-runtimes"
+reference = "open-25-jre-noble@sha256:43ec947fee9c4c2ed880620ae9e78911ac5eef66391e5a2c43f956dcc9000491"
+
+# https://hub.docker.com/_/amazoncorretto/tags?name=21-al2023-jdk
+[[oci]]
+name = "jre-corretto21-al2023"
+image = "library/amazoncorretto"
+reference = "21-al2023-jdk@sha256:c2774297045ef040228973e4092efbb61f195b136954474f512b0d0272246fe2"
+
+# https://hub.docker.com/_/amazoncorretto/tags?name=25-al2023-jdk
+[[oci]]
+name = "jre-corretto25-al2023"
+image = "library/amazoncorretto"
+reference = "25-al2023-jdk@sha256:1ca76f292dac51289fc44c29ff7f265c7bd1e7077bea94e2e2d340c540abc63d"
