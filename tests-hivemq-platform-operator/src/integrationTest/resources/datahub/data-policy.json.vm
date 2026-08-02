@@ -1,0 +1,78 @@
+{
+    "id": "my-custom-policy-${instanceId}",
+    "matching": {
+        "topicFilter": "${topicFilter}"
+    },
+    "validation": {
+        "validators": [
+            {
+                "type": "schema",
+                "arguments": {
+                    "strategy": "ALL_OF",
+                    "schemas": [
+                        {
+                            "schemaId": "simple-json-${instanceId}",
+                            "version": "latest"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "onSuccess": {
+        "pipeline": [
+            {
+                "id": "success-log-operation",
+                "functionId": "System.log",
+                "arguments": {
+                    "level": "INFO",
+                    "message": "The client ${clientId} sent a valid JSON message."
+                }
+            }
+            #if( ${addsTimestampToPayload} == true),
+                {
+                    "id": "operation-2eng0",
+                    "functionId": "Serdes.deserialize",
+                    "arguments": {
+                        "schemaId": "simple-json-${instanceId}",
+                        "schemaVersion": "latest"
+                    }
+                },
+                {
+                    "id": "operation-ek2Mx",
+                    "functionId": "fn:adds-timestamp-script-${instanceId}:latest",
+                    "arguments": {}
+                },
+                {
+                    "id": "operation-4DBF3",
+                    "functionId": "Serdes.serialize",
+                    "arguments": {
+                        "schemaId": "simple-json-${instanceId}",
+                        "schemaVersion": "latest"
+                    }
+                }
+            #end
+        ]
+    },
+    "onFailure": {
+        "pipeline": [
+            {
+                "id": "fail-log-operation",
+                "functionId": "System.log",
+                "arguments": {
+                    "level": "ERROR",
+                    "message": "The client ${clientId} sent an invalid message: ${validationResult}"
+                }
+            }
+            #if ( ${dropFailedMessages} == "true" ),
+                {
+                    "id": "fail-drop-operation",
+                    "functionId": "Mqtt.drop",
+                    "arguments": {
+                        "reasonString": "The message you sent was not in JSON format."
+                    }
+                }
+            #end
+        ]
+    }
+}
