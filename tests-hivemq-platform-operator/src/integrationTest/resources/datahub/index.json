@@ -1,0 +1,32 @@
+{
+  "name" : "hello-world-module",
+  "description" : "This is a hello world module to demonstrate",
+  "maintainers" : [
+    {
+      "name" : "hello-world-maintainer"
+    }
+  ],
+  "version" : "1.0.0",
+  "requiredSystemVersions" : [
+    "hivemq-enterprise/4.34.0"
+  ],
+  "resources" : {
+    "files" : [
+      {
+        "type" : "application/vnd+hivemq.data-policy+json",
+        "path" : "data-policy.json.vm",
+        "name" : "Data Policy to handle non-JSON messages"
+      },
+      {
+        "type" : "application/vnd+hivemq.schema+json",
+        "path" : "schema.json",
+        "name" : "Simple JSON schema"
+      },
+      {
+        "type" : "application/vnd+hivemq.script+json",
+        "path" : "script.json",
+        "name" : "Script to add timestamp"
+      }
+    ]
+  }
+}
