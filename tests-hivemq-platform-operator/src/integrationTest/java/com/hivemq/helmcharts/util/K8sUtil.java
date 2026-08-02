@@ -689,18 +689,56 @@ public class K8sUtil {
         client.pods()
                 .inNamespace(namespace)
                 .withLabels(labels)
-                .waitUntilCondition(pod -> pod != null &&
-                        pod.getStatus().getContainerStatuses().stream().allMatch(containerStatus -> {
-                            final var ready = containerStatus.getReady() && containerStatus.getStarted();
-                            if (ready) {
-                                LOG.info("Pod '{}' is ready", pod.getMetadata().getName());
-                            } else {
-                                LOG.debug("Waiting for Pod '{}' to be ready: {}",
-                                        pod.getMetadata().getName(),
-                                        containerStatus);
-                            }
-                            return ready;
-                        }), 3, TimeUnit.MINUTES);
+                .waitUntilCondition(podRunningCondition(), 3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Waits for the pod with the given name to be in a running status, ignoring the pod with the given previous UID.
+     * <p>
+     * This waits for a pod with a different UID than the one given, so it can be used to wait for the recreated pod
+     * after a restart, rather than matching the terminating pod that still reports ready.
+     */
+    public static void waitForPodStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String podName,
+            final @NotNull String previousUid) {
+        client.pods()
+                .inNamespace(namespace)
+                .withName(podName)
+                .waitUntilCondition(recreatedPodCondition(previousUid).and(podRunningCondition()), 3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Returns a condition that is met once a pod is ready.
+     */
+    private static @NotNull Predicate<Pod> podRunningCondition() {
+        return pod -> {
+            if (pod == null || pod.getStatus() == null) {
+                return false;
+            }
+            final var containerStatuses = pod.getStatus().getContainerStatuses();
+            if (containerStatuses.isEmpty()) {
+                return false;
+            }
+            return containerStatuses.stream().allMatch(containerStatus -> {
+                final var ready = Boolean.TRUE.equals(containerStatus.getReady()) &&
+                        Boolean.TRUE.equals(containerStatus.getStarted());
+                if (ready) {
+                    LOG.info("Pod '{}' is ready", pod.getMetadata().getName());
+                } else {
+                    LOG.debug("Waiting for Pod '{}' to be ready: {}", pod.getMetadata().getName(), containerStatus);
+                }
+                return ready;
+            });
+        };
+    }
+
+    /**
+     * Returns a condition that is met once the pod has a different UID than the given one, i.e. it has been recreated.
+     */
+    private static @NotNull Predicate<Pod> recreatedPodCondition(final @NotNull String previousUid) {
+        return pod -> pod != null && !previousUid.equals(pod.getMetadata().getUid());
     }
 
     private static <T extends HasMetadata> @NotNull Resource<T> loadResource(
