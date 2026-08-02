@@ -5,6 +5,7 @@ import com.hivemq.helmcharts.extensions.custom.CustomTestExtensionMain;
 import com.hivemq.helmcharts.util.HiveMQExtension;
 import com.hivemq.helmcharts.util.NginxUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
+@Tag("custom-platform-image")
 class HelmCustomExtensionIT extends AbstractHelmChartIT {
 
     @TempDir
