@@ -94,7 +94,7 @@ Usage: {{ include "hivemq-platform.has-license" . }}
 {{- end -}}
 
 {{/*
-Checks whether a HiveMQ Pulse configuration is in use by the platform.
+Checks whether a HiveMQ Data Intelligence configuration is in use by the platform.
 Returns:
 - `true` if it's reusing an existing Pulse configuration created in a separate Secret or if it's creating a new one. Empty string otherwise.
 Usage: {{ include "hivemq-platform.has-pulse-config" . }}
@@ -1050,7 +1050,7 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
 {{- end -}}
 
 {{/*
-Validates the HiveMQ Pulse configuration so:
+Validates the HiveMQ Data Intelligence configuration so:
  - When the `pulse.create` value is `true`, at least one configuration content is defined.
  - Only one of `data` or `overridePulseConfig` are set, but not both.
  - When `isPulseConfigBase64Encoded` is set to `true`, `data` is Base64 encoded.
@@ -1059,10 +1059,10 @@ Usage: {{ include "hivemq-platform.validate-pulse" . }}
 {{- define "hivemq-platform.validate-pulse" -}}
 {{- if .Values.pulse.create -}}
     {{- if and (not .Values.pulse.overridePulseConfig) (not .Values.pulse.data) -}}
-        {{- fail (printf "\nHiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values") -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values") -}}
     {{- end -}}
     {{- if and .Values.pulse.data .Values.pulse.overridePulseConfig -}}
-        {{- fail (printf "\nBoth `data` and `overridePulseConfig` values are set for the HiveMQ Pulse configuration content. Please, use only one of them") -}}
+        {{- fail (printf "\nBoth `data` and `overridePulseConfig` values are set for the HiveMQ Data Intelligence configuration content. Please, use only one of them") -}}
     {{- end -}}
     {{- include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) -}}
 {{- end -}}
@@ -1168,7 +1168,7 @@ Usage: {{ include "hivemq-platform.get-shared-pvc-env-vars" . }}
 {{- end -}}
 
 {{/*
-Validates the data passed as parameter is a valid Base64 encoded string for HiveMQ Pulse configuration.
+Validates the data passed as parameter is a valid Base64 encoded string for HiveMQ Data Intelligence configuration.
 Usage: {{ include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) }}
 */}}
 {{- define "hivemq-platform.validate-base64-encoded-pulse-data" -}}
@@ -1176,7 +1176,7 @@ Usage: {{ include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "da
     {{- $original := .data -}}
     {{- $reencoded := $original | b64dec | b64enc -}}
     {{- if not (eq $original $reencoded) -}}
-        {{- fail (printf "\nHiveMQ Pulse configuration data content is not a Base64 encoded string") }}
+        {{- fail (printf "\nHiveMQ Data Intelligence configuration data content is not a Base64 encoded string") }}
     {{- end -}}
 {{- end -}}
 {{- end -}}

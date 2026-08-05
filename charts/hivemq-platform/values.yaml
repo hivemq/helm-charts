@@ -852,18 +852,18 @@ volumeClaimTemplates: []
 #         storage: 100Gi
 #     volumeMode: Filesystem
 
-# Defines the HiveMQ Pulse configuration options.
+# Defines the HiveMQ Data Intelligence configuration options.
 pulse:
-  # Creates a Kubernetes Secret for the HiveMQ Pulse configuration.
+  # Creates a Kubernetes Secret for the HiveMQ Data Intelligence configuration.
   create: false
-  # The name of the Kubernetes Secret containing the HiveMQ Pulse configuration.
+  # The name of the Kubernetes Secret containing the HiveMQ Data Intelligence configuration.
   # To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.
   name: ""
-  # Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Pulse configuration.
+  # Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.
   annotations: {}
-  # Defines custom labels for the Kubernetes Secret that contains the HiveMQ Pulse configuration.
+  # Defines custom labels for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.
   labels: {}
-  # Indicates whether the HiveMQ Pulse configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret.
+  # Indicates whether the HiveMQ Data Intelligence configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret.
   # This is useful for third party tools that handle content through placeholders, such as the ArgoCD Vault plugin.
   # For example, the following Helm command:
   #   `helm template platform hivemq/hivemq-platform --set pulse.create=true --set pulse.isPulseConfigBase64Encoded=false --set pulse.data=<hivemq-pulse-configuration-placeholder>`
@@ -875,10 +875,10 @@ pulse:
   #   stringData:
   #     config.xml: <hivemq-pulse-configuration-placeholder>
   isPulseConfigBase64Encoded: true
-  # Inlines the HiveMQ Pulse configuration as a string.
+  # Inlines the HiveMQ Data Intelligence configuration as a string.
   # By default, this data is expected as Base64 encoded string. Set "isPulseConfigBase64Encoded=false" to provide a plain string.
   data: ""
-  # Overrides the HiveMQ Pulse configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.
+  # Overrides the HiveMQ Data Intelligence configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.
   overridePulseConfig: ""
 
 # Configures the rolling restart behavior for this HiveMQ Platform.
