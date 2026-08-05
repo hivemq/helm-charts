@@ -37,9 +37,9 @@ public abstract class AbstractHelmChartIT {
             new HelmChartContainerExtension(false);
 
     protected static final @NotNull String PLATFORM_CRD = "hivemq-platforms.hivemq.com";
-
     protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq";
-
+    protected static final @NotNull String CUSTOM_PLATFORM_IMAGE_VARIANT =
+            System.getProperty("custom.platform.image.variant", "");
     protected static final int DEFAULT_MQTT_SERVICE_PORT = 1883;
 
     protected static @NotNull HelmChartContainer helmChartContainer;
