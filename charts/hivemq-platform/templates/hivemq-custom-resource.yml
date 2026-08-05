@@ -58,6 +58,9 @@ spec:
     lastPodMinAgeSeconds: {{ .lastPodMinAgeSeconds }}
   {{- end }}
   {{- end }}
+  {{- if and .Values.clusterInitialMembers .Values.clusterInitialMembers.enabled }}
+  dataIntelligenceEnabled: true
+  {{- end }}
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:
