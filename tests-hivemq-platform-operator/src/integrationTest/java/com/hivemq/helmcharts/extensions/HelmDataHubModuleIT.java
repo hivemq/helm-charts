@@ -33,6 +33,7 @@ class HelmDataHubModuleIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT = 1883;
     private static final int REST_API_SERVICE_PORT = 8890;
+    private static final @NotNull String VALUES_FILE = "/files/data-hub-values.yaml";
 
     // https://github.com/hivemq/hivemq-hello-world-datahub-module
     private static final @NotNull String @NotNull [] MODULE_FILES = {
@@ -53,7 +54,7 @@ class HelmDataHubModuleIT extends AbstractHelmChartIT {
     @Timeout(value = 10, unit = TimeUnit.MINUTES)
     void platformChart_whenDataHubModuleIsApplied_thenTransformsMessagesAndRestartsWithoutLinkerError()
             throws Exception {
-        installPlatformChartAndWaitToBeRunning("/files/data-hub-values.yaml");
+        installPlatformChartAndWaitToBeRunning(platformChartCommands());
 
         // the trial enables the custom modules of Data Hub
         startDataHubTrial();
@@ -105,6 +106,24 @@ class HelmDataHubModuleIT extends AbstractHelmChartIT {
         final var linkerErrorLog = waitForPlatformLog(".*(symbol lookup error|undefined symbol).*");
         restartPlatformPod();
         assertThat(linkerErrorLog).isNotDone();
+    }
+
+    /**
+     * The native library of the script engine resolves its math symbols through the JVM. HotSpot links the math library
+     * and loads it into the global symbol scope, OpenJ9 does not, so the library needs it preloaded there.
+     */
+    // TODO: Remove once Javet adds the missing compiler flag
+    private @NotNull String[] platformChartCommands() {
+        if (CUSTOM_PLATFORM_IMAGE_VARIANT.startsWith("semeru")) {
+            return new String[]{
+                    "-f",
+                    VALUES_FILE,
+                    "--set",
+                    "nodes.env[0].name=LD_PRELOAD",
+                    "--set",
+                    "nodes.env[0].value=libm.so.6"};
+        }
+        return new String[]{"-f", VALUES_FILE};
     }
 
     private void startDataHubTrial() {

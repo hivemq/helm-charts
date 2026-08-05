@@ -122,6 +122,7 @@ testing {
                     })
                     if (customPlatformImageVariant != null) {
                         options { (this as JUnitPlatformOptions).includeTags(customPlatformImageTag) }
+                        systemProperty("custom.platform.image.variant", customPlatformImageVariant)
                     }
                     systemProperty("k3s.version.type", environment["K8S_VERSION_TYPE"] ?: "LATEST")
                     systemProperty("hivemq.tag", libs.versions.hivemq.platform.get())
