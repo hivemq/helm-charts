@@ -1,4 +1,4 @@
-suite: HiveMQ Platform - HiveMQ Pulse configuration tests
+suite: HiveMQ Platform - HiveMQ Data Intelligence configuration tests
 templates:
   - hivemq-pulse-configuration.yml
   - hivemq-custom-resource.yml
@@ -327,7 +327,7 @@ tests:
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate:
-          errorMessage: "Both `data` and `overridePulseConfig` values are set for the HiveMQ Pulse configuration content. Please, use only one of them"
+          errorMessage: "Both `data` and `overridePulseConfig` values are set for the HiveMQ Data Intelligence configuration content. Please, use only one of them"
 
   - it: should fail validation when neither `data` nor `overridePulseConfig` are set
     set:
@@ -336,7 +336,7 @@ tests:
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate:
-          errorMessage: "HiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
+          errorMessage: "HiveMQ Data Intelligence configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
 
   - it: should fail validation when `data` is empty
     set:
@@ -346,7 +346,7 @@ tests:
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate:
-          errorMessage: "HiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
+          errorMessage: "HiveMQ Data Intelligence configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
 
   - it: should fail validation when `overridePulseConfig` is empty
     set:
@@ -356,7 +356,7 @@ tests:
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate:
-          errorMessage: "HiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
+          errorMessage: "HiveMQ Data Intelligence configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values"
 
   - it: should fail validation when `isPulseConfigBase64Encoded` is true but `data` is not valid base64
     set:
@@ -367,7 +367,7 @@ tests:
     template: hivemq-pulse-configuration.yml
     asserts:
       - failedTemplate:
-          errorMessage: "HiveMQ Pulse configuration data content is not a Base64 encoded string"
+          errorMessage: "HiveMQ Data Intelligence configuration data content is not a Base64 encoded string"
 
   - it: should fail schema validation when `annotations` is not a map
     set:
