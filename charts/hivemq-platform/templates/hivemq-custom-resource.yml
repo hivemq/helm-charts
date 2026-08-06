@@ -58,10 +58,16 @@ spec:
     lastPodMinAgeSeconds: {{ .lastPodMinAgeSeconds }}
   {{- end }}
   {{- end }}
+  {{- if and .Values.clusterInitialMembers .Values.clusterInitialMembers.enabled }}
+  dataIntelligenceEnabled: true
+  {{- end }}
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:
       replicas: {{.Values.nodes.replicaCount}}
+      {{- if and .Values.clusterInitialMembers .Values.clusterInitialMembers.enabled }}
+      podManagementPolicy: Parallel
+      {{- end }}
       template:
         {{- if or .Values.nodes.annotations .Values.nodes.labels }}
         metadata:
@@ -115,6 +121,11 @@ spec:
                 {{- include "hivemq-platform.validate-env-vars" . }}
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
+                {{- $initialMembers := include "hivemq-platform.initial-members-env" . }}
+                {{- if $initialMembers }}
+                - name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+                  value: {{ $initialMembers | quote }}
+                {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
                   {{- $envNamesKeyStorePrivatePasswordList := list }}
