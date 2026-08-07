@@ -1,0 +1,17 @@
+[versions]
+assertj = "3.27.7"
+gradleOci-junitJupiter = "0.8.0"
+junit-jupiter = "6.1.3"
+logback = "1.6.1"
+testcontainers = "2.0.5"
+
+[libraries]
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+gradleOci-junitJupiter = { module = "io.github.sgtsilvio:gradle-oci-junit-jupiter", version.ref = "gradleOci-junitJupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-jupiter" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+
+[plugins]
+download = { id = "de.undercouch.download", version = "5.7.0" }
+oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.30.0" }
