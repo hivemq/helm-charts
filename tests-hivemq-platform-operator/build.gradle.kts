@@ -189,28 +189,6 @@ tasks.register("integrationTestPrepare") {
 
 /* ******************** OCI images ******************** */
 
-val helmOciLayerLinuxAmd64 by tasks.registering(oci.dockerLayerTaskClass) {
-    dependencies(oci.parentImageDependencies["noble"])
-    platform = oci.platform("linux", "amd64")
-    command =
-        "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 && " +
-                "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
-    destinationDirectory = layout.buildDirectory.dir("oci/layers")
-    classifier = "helm@linux,amd64"
-}
-
-val helmOciLayerLinuxArm64 by tasks.registering(oci.dockerLayerTaskClass) {
-    dependencies(oci.parentImageDependencies["noble"])
-    platform = oci.platform("linux", "arm64", "v8")
-    command =
-        "apt-get update && apt-get install --no-install-recommends curl apt-transport-https ca-certificates -yq && " +
-                "curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 && " +
-                "bash get_helm.sh && rm -rf /var/lib/apt/lists/* get_helm.sh"
-    destinationDirectory = layout.buildDirectory.dir("oci/layers")
-    classifier = "helm@linux,arm64,v8"
-}
-
 val downloadPlatformDistribution by tasks.registering(Download::class) {
     group = "distribution"
     description = "Downloads the latest HiveMQ Platform distribution"
@@ -224,6 +202,11 @@ oci {
     registries {
         dockerHub {
             optionalCredentials()
+        }
+        gitHubContainerRegistry {
+            exclusiveContent {
+                includeModule("hivemq", "helm-test-image")
+            }
         }
     }
     imageMapping {
@@ -239,27 +222,13 @@ oci {
             }
         }
     }
-    parentImageDependencies {
-        create("noble") {
-            runtime(ociImages.ubuntu.noble.oci)
-        }
-    }
     imageDefinitions {
         register("main") {
             imageTag = provider { project.version.toString().lowercase() }
             allPlatforms {
                 dependencies {
                     runtime("rancher:k3s:$k3sTag")
-                }
-            }
-            specificPlatform(platform("linux", "amd64")) {
-                layer("helm") {
-                    contents(helmOciLayerLinuxAmd64)
-                }
-            }
-            specificPlatform(platform("linux", "arm64", "v8")) {
-                layer("helm") {
-                    contents(helmOciLayerLinuxArm64)
+                    runtime(ociImages.helm.oci)
                 }
             }
         }
