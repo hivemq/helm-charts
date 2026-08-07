@@ -3,12 +3,7 @@ plugins {
     id("com.gradle.develocity") version "4.5.0"
 }
 
-rootProject.name = "helm-charts"
-
-includeBuild("github-release-note-updater")
-includeBuild("helm-image")
-includeBuild("tests-hivemq-platform-operator")
-includeBuild("tests-hivemq-edge")
+rootProject.name = "helm-image"
 
 develocity {
     server = System.getenv("DEVELOCITY_SERVER_URL")
