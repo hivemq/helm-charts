@@ -100,6 +100,29 @@ jobs:
               - 'tests-hivemq-platform-operator/**'
           list-files: csv
 
+  helm-image-changes:
+    name: Helm test image changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
+        with:
+          filters: |
+            modified:
+              - '.github/workflows/dispatcher.yml'
+              - '.github/workflows/helm-image*.yml'
+              - 'helm-image/**'
+              - '.helm-version'
+          list-files: csv
+
   edge-verify-tests:
     name: Edge verify tests
     needs: edge-changes
@@ -162,6 +185,13 @@ jobs:
     uses: ./.github/workflows/platform-integration-tests.yml
     secrets: inherit
 
+  helm-image-verify-tests:
+    name: Helm test image verify tests
+    needs: helm-image-changes
+    if: needs.helm-image-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/helm-image-verify.yml
+    secrets: inherit
+
   tests-summary-report:
     name: Tests Summary Report
     runs-on: ubuntu-latest
@@ -174,6 +204,7 @@ jobs:
       - platform-verify-tests
       - platform-smoke-test
       - platform-integration-tests
+      - helm-image-verify-tests
     steps:
       - name: Tests results summary
         if: |
@@ -183,7 +214,8 @@ jobs:
           needs.swarm-verify-tests.result == 'failure' ||
           needs.platform-verify-tests.result == 'failure' ||
           needs.platform-smoke-test.result == 'failure' ||
-          needs.platform-integration-tests.result == 'failure'
+          needs.platform-integration-tests.result == 'failure' ||
+          needs.helm-image-verify-tests.result == 'failure'
         run: |
           echo "There are test failures."
           exit 1
