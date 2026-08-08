@@ -18,8 +18,9 @@ testcontainers = "2.0.5"
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
-bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
-bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-bom = { module = "org.bouncycastle:bc-jdk18on-bom", version.ref = "bouncycastle" }
+bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on" }
+bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on" }
 kubernetes-client = { module = "io.fabric8:kubernetes-client", version.ref = "kubernetes" }
 kubernetes-client-jdk = { module = "io.fabric8:kubernetes-httpclient-jdk", version.ref = "kubernetes" }
 gradleOci-junitJupiter = { module = "io.github.sgtsilvio:gradle-oci-junit-jupiter", version.ref = "gradleOci-junitJupiter" }
