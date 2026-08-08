@@ -53,40 +53,40 @@ pinnedReference = "1.0.1@sha256:96f972c3029a2bab716c43c5404280030ecd98d199bd9cbe
 [[oci]]
 name = "jre-temurin21-resolute"
 image = "library/eclipse-temurin"
-reference = "21-jre-resolute@sha256:0e9bce1bf5edd280a5778fef32fcc91eddc69bad98a0b1b2bafecdbed1f4272f"
+reference = "21-jre-resolute@sha256:b3598c584b6f797ee2324baac2ae5ceb6c8fb3a97f3b11e5a6ee4fd47308bc58"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=21-jre-ubi9-minimal
 [[oci]]
 name = "jre-temurin21-ubi9"
 image = "library/eclipse-temurin"
-reference = "21-jre-ubi9-minimal@sha256:3c624d2b86ddcf884f2ea01355da5c0eefaeb93904c61bc0d3a775b176f04947"
+reference = "21-jre-ubi9-minimal@sha256:e5b7fd44a069446516ea076a62d97850e28768b9c5473b8409646cd338ebdd8d"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-ubi10-minimal
 [[oci]]
 name = "jre-temurin25-ubi10"
 image = "library/eclipse-temurin"
-reference = "25-jre-ubi10-minimal@sha256:6031e5480f5d5818252a348980a192af0eab09e3380a55f75927e019f4d8136c"
+reference = "25-jre-ubi10-minimal@sha256:af00454c15baafc7b80e907d3b8734c3cbc41536e48628dc26bd136e5e06bd64"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-21-jre-noble
 [[oci]]
 name = "jre-semeru21-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-21-jre-noble@sha256:a01161941ceae7ab4ab1d0214c72f611d0326469011328b7ff8aa245f2ee4239"
+reference = "open-21-jre-noble@sha256:fdd833957bf78bb9e3147cb4e2302dcb2b5129fb536dad4c79bb19ea1f90606e"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-25-jre-noble
 [[oci]]
 name = "jre-semeru25-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-25-jre-noble@sha256:43ec947fee9c4c2ed880620ae9e78911ac5eef66391e5a2c43f956dcc9000491"
+reference = "open-25-jre-noble@sha256:8bc5a045ebd08792c58181a6f77f3df32727b1e3db28d41c8ecbded4d7888815"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=21-al2023-jdk
 [[oci]]
 name = "jre-corretto21-al2023"
 image = "library/amazoncorretto"
-reference = "21-al2023-jdk@sha256:c2774297045ef040228973e4092efbb61f195b136954474f512b0d0272246fe2"
+reference = "21-al2023-jdk@sha256:ff30d87dbb7b21774b003ad16ec233b3173be069e861803008f87ff829a4e706"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=25-al2023-jdk
 [[oci]]
 name = "jre-corretto25-al2023"
 image = "library/amazoncorretto"
-reference = "25-al2023-jdk@sha256:1ca76f292dac51289fc44c29ff7f265c7bd1e7077bea94e2e2d340c540abc63d"
+reference = "25-al2023-jdk@sha256:397edfaaa0fdfc95001d4c4a4ab82174073277a5d630fd9375c94dca25b5991d"
