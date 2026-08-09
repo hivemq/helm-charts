@@ -103,6 +103,7 @@ testing {
                 implementation(libs.selenium.remote.driver)
 
                 // misc
+                implementation(platform(libs.bouncycastle.bom))
                 runtimeOnly(libs.bouncycastle.pkix)
                 runtimeOnly(libs.bouncycastle.prov)
                 implementation(libs.gradleOci.junitJupiter)
