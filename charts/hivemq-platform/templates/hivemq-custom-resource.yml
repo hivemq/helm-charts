@@ -1,6 +1,13 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
+{{- $hasPulseClustering := ( include "hivemq-platform.has-pulse-clustering" . ) -}}
+{{- if $hasPulseClustering -}}
+  {{- include "hivemq-platform.validate-pulse-clustering" . -}}
+  {{- /* mutates .Values, must run before the additional volumes variables below are computed */ -}}
+  {{- include "hivemq-platform.append-pulse-clustering-volumes" . -}}
+{{- end -}}
+{{- include "hivemq-platform.validate-pulse-clustering-unchanged" . -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
@@ -62,6 +69,9 @@ spec:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:
       replicas: {{.Values.nodes.replicaCount}}
+      {{- if $hasPulseClustering }}
+      podManagementPolicy: Parallel
+      {{- end }}
       template:
         {{- if or .Values.nodes.annotations .Values.nodes.labels }}
         metadata:
@@ -115,6 +125,11 @@ spec:
                 {{- include "hivemq-platform.validate-env-vars" . }}
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
+                {{- $initialMembers := include "hivemq-platform.initial-members-env" . }}
+                {{- if $initialMembers }}
+                - name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+                  value: {{ $initialMembers | quote }}
+                {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
                   {{- $envNamesKeyStorePrivatePasswordList := list }}

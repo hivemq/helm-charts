@@ -193,6 +193,9 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
       <tcp>
         <bind-address>0.0.0.0</bind-address>
         <bind-port>{{- include "hivemq-platform.cluster-transport-port" . -}}</bind-port>
+        {{- if include "hivemq-platform.has-pulse-clustering" . }}
+        <log-based-clustering-bind-port>{{- include "hivemq-platform.log-based-clustering-port" . -}}</log-based-clustering-bind-port>
+        {{- end }}
       </tcp>
     </transport>
     <enabled>true</enabled>
