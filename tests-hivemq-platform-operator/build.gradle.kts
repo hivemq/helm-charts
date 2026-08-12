@@ -1,10 +1,8 @@
-import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
-    alias(libs.plugins.download)
     alias(libs.plugins.hivemq.oci.version.catalog)
     alias(libs.plugins.oci)
 }
@@ -19,6 +17,15 @@ java {
 
 repositories {
     mavenCentral()
+    exclusiveContent {
+        forRepository {
+            ivy("https://www.hivemq.com/releases") {
+                patternLayout { artifact("[module]-[revision].[ext]") }
+                metadataSources { artifact() }
+            }
+        }
+        filter { includeModule("com.hivemq", "hivemq") }
+    }
 }
 
 configurations.all {
@@ -31,9 +38,10 @@ val k3sTag = resolveK3sTag()
 /*
  * Tests the HiveMQ Platform on a Java runtime other than the one of the official image.
  *
- * When the `customPlatformImageVariant` property is set, a HiveMQ Platform image is built from the latest platform
- * distribution on top of the Java runtime base image of that variant, and the integration tests run against that image
- * instead of the official one. Only the tests tagged with `custom-platform-image` are executed.
+ * When the `customPlatformImageVariant` property is set, a HiveMQ Platform image is built from the platform
+ * distribution of the `hivemq-platform` version on top of the Java runtime base image of that variant, and the
+ * integration tests run against that image instead of the official one. Only the tests tagged with
+ * `custom-platform-image` are executed.
  *
  * Without the property, the build behaves as it does for every regular test run.
  */
@@ -190,13 +198,13 @@ tasks.register("integrationTestPrepare") {
 
 /* ******************** OCI images ******************** */
 
-val downloadPlatformDistribution by tasks.registering(Download::class) {
-    group = "distribution"
-    description = "Downloads the latest HiveMQ Platform distribution"
-    src("https://www.hivemq.com/releases/hivemq-latest.zip")
-    dest(layout.buildDirectory.file("platform/hivemq-latest.zip"))
-    onlyIfModified(true)
-    retries(3)
+val platformDistribution: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+
+dependencies {
+    platformDistribution("com.hivemq:hivemq:$hivemqVersion@zip")
 }
 
 oci {
@@ -283,7 +291,7 @@ oci {
                             permissions("opt/hivemq/license/", 0b111_111_101)
                             permissions("opt/hivemq/log/", 0b111_111_101)
                             into("opt") {
-                                from(zipTree(downloadPlatformDistribution.map { it.outputFiles.first() })) {
+                                from(zipTree(platformDistribution.elements.map { it.single() })) {
                                     // the tools are not used by any test
                                     filter { exclude("*/tools/**") }
                                     move("", "hivemq-.*", "hivemq")

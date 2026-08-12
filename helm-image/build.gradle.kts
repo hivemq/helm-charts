@@ -1,4 +1,3 @@
-import de.undercouch.gradle.tasks.download.Download
 import io.github.sgtsilvio.gradle.oci.OciCopySpec
 import io.github.sgtsilvio.gradle.oci.image.PushOciImageTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
@@ -7,7 +6,6 @@ import java.security.MessageDigest
 
 plugins {
     java
-    alias(libs.plugins.download)
     alias(libs.plugins.oci)
 }
 
@@ -24,6 +22,15 @@ java {
 
 repositories {
     mavenCentral()
+    exclusiveContent {
+        forRepository {
+            ivy("https://get.helm.sh") {
+                patternLayout { artifact("[module]-[revision]-[classifier].[ext]") }
+                metadataSources { artifact() }
+            }
+        }
+        filter { includeModule("sh.helm", "helm") }
+    }
 }
 
 val imageAnnotations = mapOf(
@@ -127,29 +134,22 @@ tasks.named<PushOciImageTask>("pushOciImage") {
 
 fun registerHelmDistributionTasks(platform: String): TaskProvider<Sync> {
     val taskSuffix = platform.split('-').joinToString("") { it.replaceFirstChar(Char::titlecase) }
-    val archiveName = "helm-$helmVersion-$platform.tar.gz"
-    val downloadDirectory = layout.buildDirectory.dir("helm/download/$platform")
-    val archiveFile = downloadDirectory.map { it.file(archiveName) }
-    val checksumFile = downloadDirectory.map { it.file("$archiveName.sha256sum") }
-
-    val download = tasks.register<Download>("downloadHelm$taskSuffix") {
-        group = "distribution"
-        description = "Downloads the Helm $helmVersion distribution for $platform."
-        src(
-            listOf(
-                "https://get.helm.sh/$archiveName",
-                "https://get.helm.sh/$archiveName.sha256sum",
-            )
-        )
-        dest(downloadDirectory)
-        overwrite(false)
-        retries(3)
+    val archive = configurations.create("helmDistribution$taskSuffix") {
+        isCanBeConsumed = false
+        isCanBeResolved = true
     }
+    val checksum = configurations.create("helmChecksum$taskSuffix") {
+        isCanBeConsumed = false
+        isCanBeResolved = true
+    }
+    dependencies.add(archive.name, "sh.helm:helm:$helmVersion:$platform@tar.gz")
+    dependencies.add(checksum.name, "sh.helm:helm:$helmVersion:$platform@tar.gz.sha256sum")
+    val archiveFile = archive.elements.map { it.single() }
+    val checksumFile = checksum.elements.map { it.single() }
 
     return tasks.register<Sync>("extractHelm$taskSuffix") {
         group = "distribution"
         description = "Verifies and extracts the Helm $helmVersion binary for $platform."
-        dependsOn(download)
         inputs.file(archiveFile)
         inputs.file(checksumFile)
         doFirst {

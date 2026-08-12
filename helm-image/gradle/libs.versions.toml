@@ -13,5 +13,4 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 
 [plugins]
-download = { id = "de.undercouch.download", version = "5.7.0" }
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.30.0" }
