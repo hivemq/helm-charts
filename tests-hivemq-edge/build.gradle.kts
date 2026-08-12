@@ -127,6 +127,7 @@ oci {
         }
         registry("ecrPublic") {
             url = uri("https://public.ecr.aws")
+            optionalCredentials()
             exclusiveContent { includeGroup("hivemq.library") }
         }
     }
