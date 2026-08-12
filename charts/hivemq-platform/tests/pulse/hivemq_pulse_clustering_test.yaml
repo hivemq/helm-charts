@@ -1,0 +1,983 @@
+suite: HiveMQ Platform - HiveMQ Data Intelligence clustering tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-platform
+  namespace: test-namespace
+tests:
+
+  - it: should not render any Data Intelligence clustering configuration by default
+    asserts:
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+          any: true
+      - notExists:
+          path: spec.statefulSet.spec.podManagementPolicy
+      - notExists:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+          any: true
+
+  - it: should render the initial members env var, data folder volume and log-based clustering port when enabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+            value: "test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:7557,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:7557"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/pulse-data/data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: pulse-data
+            mountPath: /opt/hivemq/pulse-data
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: pulse-data
+            persistentVolumeClaim:
+              claimName: pulse-data
+      - equal:
+          path: spec.statefulSet.spec.podManagementPolicy
+          value: Parallel
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].metadata.name
+          value: pulse-data
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].spec.storageClassName
+          value: my-storage-class
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 10Gi
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].spec.accessModes[0]
+          value: ReadWriteOnce
+
+  - it: should only include the initial member count in the env var when the replica count is higher
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 3
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+            value: "test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:7557,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:7557"
+
+  - it: should not render the initial members env var with a custom port when clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          port: 9999
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+          any: true
+
+  - it: should fail when enabled without a HiveMQ Data Intelligence configuration
+    set:
+      pulse:
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.enabled` requires a HiveMQ Data Intelligence configuration.
+            Set `pulse.create=true` or `pulse.name`
+
+  - it: should not fail without a HiveMQ Data Intelligence configuration when clustering is disabled
+    set:
+      pulse:
+        clustering:
+          enabled: false
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when enabled without the initialMemberCount value
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          storageClass: my-storage-class
+          storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.initialMemberCount` value is required when `pulse.clustering.enabled` is true.
+            Set it to the number of nodes in the initial cluster (e.g. initialMemberCount: 2) and keep it fixed
+            after the initial deployment
+
+  - it: should not fail without the initialMemberCount value when clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when enabled without the storageClass value
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.storageClass` value is required when `pulse.clustering.enabled` is true.
+            Set it to a StorageClass available in your Kubernetes cluster
+
+  - it: should not fail without the storageClass value when clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when enabled without the storageSize value
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.storageSize` value is required when `pulse.clustering.enabled` is true.
+            Set it to the persistent storage size for the HiveMQ data folder (e.g. storageSize: 10Gi)
+
+  - it: should not fail without the storageSize value when clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when the initial member count exceeds the replica count
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 5
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.initialMemberCount` value (5) cannot exceed `nodes.replicaCount` value (2),
+            as the initial members wait for each other on startup
+
+  - it: should not fail when the initial member count exceeds the replica count and clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 5
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when combined with a user-defined sharedPersistentVolumeClaim volume
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: mypvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: mypvc
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 1Gi
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.enabled` generates a `sharedPersistentVolumeClaim` volume for the HiveMQ data
+            folder and cannot be combined with a user-defined `sharedPersistentVolumeClaim` volume
+
+  - it: should not fail with a user-defined sharedPersistentVolumeClaim volume when clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: mypvc
+          path: /opt/hivemq/pvc
+          hivemqFolders:
+            data: data
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: mypvc
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 1Gi
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when the HIVEMQ_CLUSTERING_INITIAL_MEMBERS env var is set directly
+    set:
+      nodes:
+        env:
+          - name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+            value: "some-host:7010"
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            HIVEMQ_CLUSTERING_INITIAL_MEMBERS environment variable cannot be set directly.
+            Use `pulse.clustering.enabled: true` instead
+
+  - it: should not render any Data Intelligence clustering configuration when explicitly disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+    asserts:
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+          any: true
+      - notExists:
+          path: spec.statefulSet.spec.podManagementPolicy
+      - notExists:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+
+  - it: should support a Data Intelligence configuration from an existing Secret
+    set:
+      pulse:
+        name: my-pulse-secret
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+          any: true
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].metadata.name
+          value: pulse-data
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: pulse-config
+            secret:
+              secretName: my-pulse-secret
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-pulse-secret
+            type: SECRET
+            files:
+              - config.xml
+
+  - it: should keep user-defined additional volumes and volume claim templates
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      additionalVolumes:
+        - type: configMap
+          name: my-config
+          path: /my/config/path
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: my-claim
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 1Gi
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: my-config
+          any: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: pulse-data
+          any: true
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].metadata.name
+          value: my-claim
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[1].metadata.name
+          value: pulse-data
+
+  - it: should fail when combined with an overridden StatefulSet spec
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      config:
+        overrideStatefulSet: |
+          spec:
+            replicas: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering` cannot be combined with `config.overrideStatefulSet`. Either remove the
+            `config.overrideStatefulSet` value so the chart manages the StatefulSet, or disable `pulse.clustering`
+            and configure the Data Intelligence clustering in your StatefulSet override
+
+  - it: should not fail with an overridden StatefulSet spec when clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      config:
+        overrideStatefulSet: |
+          spec:
+            replicas: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with storageSize as invalid Kubernetes quantity, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10GB
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'does not match pattern'
+
+  - it: with storageClass as invalid StorageClass name, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: My_Storage
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'does not match pattern'
+
+  - it: should support a StorageClass name with dots
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: gp3.csi.aws.com
+          storageSize: 100Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].spec.storageClassName
+          value: gp3.csi.aws.com
+      - equal:
+          path: spec.statefulSet.spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 100Gi
+
+  - it: with storageClass as empty string, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: ""
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'minLength: got 0, want 1'
+
+  - it: with storageSize as empty string, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: ""
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'minLength: got 0, want 1'
+
+  - it: should fail when a service container port matches the default log-based clustering port
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7557
+    asserts:
+      - failedTemplate:
+          errorPattern: 'Container port 7557 in service `mqtt` is already used as the HiveMQ Data Intelligence clustering port \(`pulse.clustering.port` value: 7557\)'
+
+  - it: should fail when a service container port matches a custom log-based clustering port
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9999
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 9999
+    asserts:
+      - failedTemplate:
+          errorPattern: 'Container port 9999 in service `mqtt` is already used as the HiveMQ Data Intelligence clustering port \(`pulse.clustering.port` value: 9999\)'
+
+  - it: should allow the default log-based clustering port as service container port when a custom port is configured
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9999
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7557
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 7557
+          any: true
+
+  - it: should allow the log-based clustering port as service container port when pulse clustering is disabled
+    set:
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7557
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].ports
+          content:
+            containerPort: 7557
+          any: true
+
+  - it: with initialMemberCount as zero, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 0
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'minimum: got 0, want 1'
+
+  - it: with initialMemberCount as string, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: "three"
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'got string, want integer'
+
+  - it: should fail when an additional volume uses the reserved pulse-data name
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      additionalVolumes:
+        - type: configMap
+          name: pulse-data
+          path: /my/config/path
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse-data` is a reserved volume name for the `pulse.clustering` storage.
+            Rename the `additionalVolumes` entry
+
+  - it: should not fail when an additional volume uses the pulse-data name and clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      additionalVolumes:
+        - type: configMap
+          name: pulse-data
+          path: /my/config/path
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when a volume claim template uses the reserved pulse-data name
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: pulse-data
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 1Gi
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse-data` is a reserved PersistentVolumeClaim name for the `pulse.clustering` storage.
+            Rename the `volumeClaimTemplates` entry
+
+  - it: should not fail when a volume claim template uses the pulse-data name and clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: pulse-data
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 1Gi
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should use the custom port for the initial members env var
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9999
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+            value: "test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:9999,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:9999"
+
+  - it: should fail when combined with an overridden HiveMQ configuration
+    set:
+      config:
+        overrideHiveMQConfig: "<?xml version=\"1.0\"?><hivemq></hivemq>"
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering` cannot be combined with a user-provided HiveMQ configuration, as the chart renders
+            the HiveMQ Data Intelligence clustering port into the `config.xml` file. Either remove the
+            `config.overrideHiveMQConfig` value and set `config.create=true` so the chart manages the HiveMQ
+            configuration, or disable `pulse.clustering`
+
+  - it: should not fail with an overridden HiveMQ configuration when clustering is disabled
+    set:
+      config:
+        overrideHiveMQConfig: "<?xml version=\"1.0\"?><hivemq></hivemq>"
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when combined with an existing HiveMQ configuration
+    set:
+      config:
+        create: false
+        name: my-existing-configuration
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering` cannot be combined with a user-provided HiveMQ configuration, as the chart renders
+            the HiveMQ Data Intelligence clustering port into the `config.xml` file. Either remove the
+            `config.overrideHiveMQConfig` value and set `config.create=true` so the chart manages the HiveMQ
+            configuration, or disable `pulse.clustering`
+
+  - it: should not fail with an existing HiveMQ configuration when clustering is disabled
+    set:
+      config:
+        create: false
+        name: my-existing-configuration
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when the port conflicts with a predefined port
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 7000
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.port` value (7000) already exists as part of one of the predefined ports (7979, 8889, 7000, 9399)
+
+  - it: should fail when the port conflicts with the operator REST API port
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 7979
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.port` value (7979) already exists as part of one of the predefined ports (7979, 8889, 7000, 9399)
+
+  - it: should fail when the port conflicts with the health API port
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 8889
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.port` value (8889) already exists as part of one of the predefined ports (7979, 8889, 7000, 9399)
+
+  - it: should fail when the port conflicts with the metrics port
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9399
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.port` value (9399) already exists as part of one of the predefined ports (7979, 8889, 7000, 9399)
+
+  - it: should allow the metrics port as clustering port when metrics are disabled
+    set:
+      metrics:
+        enabled: false
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9399
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+            value: "test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:9399,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:9399"
+
+  - it: should not fail when the port conflicts with a predefined port and clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          initialMemberCount: 2
+          port: 7000
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with port above the valid port range, schema validation fails
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 70000
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: 'maximum: got 70,000, want 65,535'
