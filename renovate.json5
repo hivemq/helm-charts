@@ -11,7 +11,43 @@
     addLabels: [
         'integrations-team-coordination',
     ],
+    customManagers: [
+        {
+            customType: 'regex',
+            description: 'Pinned Helm version used by the verify, harbor, release and edge release PR workflows',
+            datasourceTemplate: 'github-releases',
+            depNameTemplate: 'helm/helm',
+            versioningTemplate: 'semver',
+            managerFilePatterns: [
+                '/^\\.helm-version$/',
+            ],
+            matchStrings: [
+                '^(?<currentValue>v\\d+\\.\\d+\\.\\d+)',
+            ],
+        },
+        {
+            customType: 'regex',
+            description: 'Helm versions of the latest-3 and latest-4 smoke test matrix entries',
+            datasourceTemplate: 'github-releases',
+            depNameTemplate: 'helm/helm',
+            versioningTemplate: 'semver',
+            managerFilePatterns: [
+                '/^\\.github/workflows/(edge|platform)-smoke-test\\.yml$/',
+            ],
+            matchStrings: [
+                "helm-label: 'latest-\\d+'\\s+helm-version: '(?<currentValue>v\\d+\\.\\d+\\.\\d+)'",
+            ],
+        },
+    ],
     packageRules: [
+        {
+            description: 'Keep the latest-3 smoke test matrix entry on the Helm v3 line. The pinned version and the latest-4 entry stay unconstrained, so a new Helm major surfaces on the dependency dashboard',
+            matchPackageNames: [
+                'helm/helm',
+            ],
+            matchCurrentValue: '/^v3\\./',
+            allowedVersions: '/^v3\\./',
+        },
         {
             description: 'OCI image dependency is not a real Maven package (gradle-oci plugin)',
             matchManagers: [
