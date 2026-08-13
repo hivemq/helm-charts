@@ -207,6 +207,16 @@ dependencies {
     platformDistribution("com.hivemq:hivemq:$hivemqVersion@zip")
 }
 
+@Suppress("unused")
+val resolvePlatformDistribution by tasks.registering {
+    group = "distribution"
+    description = "Resolves the HiveMQ Platform distribution into the Gradle dependency cache"
+    val distribution = platformDistribution.elements
+    doLast {
+        logger.lifecycle("Resolved {}", distribution.get().single())
+    }
+}
+
 oci {
     registries {
         dockerHub {
