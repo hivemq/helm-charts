@@ -117,15 +117,10 @@ jobs:
       - name: Add the tested HiveMQ Platform version to the summary
         if: ${{ !cancelled() }}
         env:
-          DISTRIBUTION_ZIP: helm-charts/tests-hivemq-platform-operator/build/platform/hivemq-latest.zip
+          VERSION_CATALOG: helm-charts/tests-hivemq-platform-operator/gradle/libs.versions.toml
         run: |
-          if [[ -f "$DISTRIBUTION_ZIP" ]]; then
-            # the distribution unpacks into a hivemq-<version> directory, which is the version that was tested
-            version=$(unzip -Z1 "$DISTRIBUTION_ZIP" | head -1 | sed 's|^hivemq-||;s|/$||')
-            echo "${{ matrix.variant }}: HiveMQ Platform $version" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "${{ matrix.variant }}: the HiveMQ Platform distribution was not downloaded" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          version=$(sed -n 's/^hivemq-platform = "\(.*\)"$/\1/p' "$VERSION_CATALOG")
+          echo "${{ matrix.variant }}: HiveMQ Platform ${version:-unknown}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test results
         if: ${{ !cancelled() }}

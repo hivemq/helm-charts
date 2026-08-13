@@ -53,7 +53,7 @@ Set the `customPlatformImageVariant` property to build such an image and run the
 ./gradlew integrationTest -PcustomPlatformImageVariant=temurin21-ubi9
 ```
 
-The image is built from the latest platform distribution (`https://www.hivemq.com/releases/hivemq-latest.zip`) on top of the Java runtime base image of the variant. It is only served to the K3s cluster of the test run and is never published to a registry.
+The image is built from the platform distribution of the `hivemq-platform` version in `gradle/libs.versions.toml` on top of the Java runtime base image of the variant. It is only served to the K3s cluster of the test run and is never published to a registry.
 
 The following variants are available:
 
