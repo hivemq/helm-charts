@@ -16,6 +16,7 @@ subjects:
   - kind: ServiceAccount
     name: hivemq-platform-operator-my-operator
     namespace: default
+
 ---
 # Source: hivemq-platform-operator/templates/bindings.yml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -34,3 +35,4 @@ subjects:
   - kind: ServiceAccount
     name: hivemq-platform-operator-my-operator
     namespace: default
+
