@@ -144,9 +144,14 @@ spec:
                 rollingRestart:
                   properties:
                     lastPodMinAgeSeconds:
-                      description: "The minimum age in seconds that the last restarted\
-                      \ Pod must have before the next Pod can be restarted during\
-                      \ a rolling restart. Overrides the global operator configuration.\
+                      description: "[DEPRECATED since HiveMQ Platform Operator 2.3.0]\
+                      \ Use lastPodReadyMinAgeSeconds instead. It is only used when\
+                      \ lastPodReadyMinAgeSeconds is not set."
+                      type: "integer"
+                    lastPodReadyMinAgeSeconds:
+                      description: "The minimum time in seconds that the last restarted\
+                      \ Pod must have been ready before the next Pod can be restarted\
+                      \ during a rolling restart. Overrides the global operator configuration.\
                       \ If not set, the global operator configuration is used."
                       type: "integer"
                   type: "object"
@@ -3863,4 +3868,4 @@ spec:
       served: true
       storage: true
       subresources:
-        status: {}
+        status: { }
