@@ -52,9 +52,12 @@ spec:
     {{- end }}
   {{- end }}
   {{- with .Values.rollingRestart }}
-  {{- if hasKey . "lastPodMinAgeSeconds" }}
+  {{- if hasKey . "lastPodReadyMinAgeSeconds" }}
   rollingRestart:
-    lastPodMinAgeSeconds: {{ .lastPodMinAgeSeconds }}
+    lastPodReadyMinAgeSeconds: {{ .lastPodReadyMinAgeSeconds }}
+  {{- else if hasKey . "lastPodMinAgeSeconds" }}
+  rollingRestart:
+    lastPodReadyMinAgeSeconds: {{ .lastPodMinAgeSeconds }}
   {{- end }}
   {{- end }}
   statefulSet:
