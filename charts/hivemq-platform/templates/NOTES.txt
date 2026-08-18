@@ -13,4 +13,10 @@ Please, consider using `additionalInitContainers` value instead.
 *** Warning ***
 `nodes.resources.overrideLimits` is not recommended for production use cases and may lead to unpredictable memory and cpu allocation for pods.
 {{- end }}
+{{- if hasKey (.Values.rollingRestart | default dict) "lastPodMinAgeSeconds" }}
+
+*** Warning ***
+`rollingRestart.lastPodMinAgeSeconds` value is deprecated and will be removed in future releases.
+Please, consider using `rollingRestart.lastPodReadyMinAgeSeconds` value instead.
+{{- end }}
 -----
