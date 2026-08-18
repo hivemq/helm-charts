@@ -19,7 +19,38 @@ tests:
       - notExists:
           path: spec.rollingRestart
 
-  - it: should render rollingRestart with lastPodMinAgeSeconds
+  - it: should render rollingRestart with lastPodReadyMinAgeSeconds
+    set:
+      rollingRestart:
+        lastPodReadyMinAgeSeconds: 300
+    asserts:
+      - exists:
+          path: spec.rollingRestart
+      - equal:
+          path: spec.rollingRestart.lastPodReadyMinAgeSeconds
+          value: 300
+      - notExists:
+          path: spec.rollingRestart.lastPodMinAgeSeconds
+
+  - it: should render rollingRestart with lastPodReadyMinAgeSeconds set to zero
+    set:
+      rollingRestart:
+        lastPodReadyMinAgeSeconds: 0
+    asserts:
+      - exists:
+          path: spec.rollingRestart
+      - equal:
+          path: spec.rollingRestart.lastPodReadyMinAgeSeconds
+          value: 0
+
+  - it: should fail when lastPodReadyMinAgeSeconds is negative
+    set:
+      rollingRestart:
+        lastPodReadyMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: should render deprecated lastPodMinAgeSeconds as lastPodReadyMinAgeSeconds
     set:
       rollingRestart:
         lastPodMinAgeSeconds: 300
@@ -27,10 +58,12 @@ tests:
       - exists:
           path: spec.rollingRestart
       - equal:
-          path: spec.rollingRestart.lastPodMinAgeSeconds
+          path: spec.rollingRestart.lastPodReadyMinAgeSeconds
           value: 300
+      - notExists:
+          path: spec.rollingRestart.lastPodMinAgeSeconds
 
-  - it: should render rollingRestart with lastPodMinAgeSeconds set to zero
+  - it: should render deprecated lastPodMinAgeSeconds set to zero as lastPodReadyMinAgeSeconds
     set:
       rollingRestart:
         lastPodMinAgeSeconds: 0
@@ -38,8 +71,10 @@ tests:
       - exists:
           path: spec.rollingRestart
       - equal:
-          path: spec.rollingRestart.lastPodMinAgeSeconds
+          path: spec.rollingRestart.lastPodReadyMinAgeSeconds
           value: 0
+      - notExists:
+          path: spec.rollingRestart.lastPodMinAgeSeconds
 
   - it: should fail when lastPodMinAgeSeconds is negative
     set:
@@ -47,3 +82,17 @@ tests:
         lastPodMinAgeSeconds: -1
     asserts:
       - failedTemplate: {}
+
+  - it: should render lastPodReadyMinAgeSeconds when both fields are set
+    set:
+      rollingRestart:
+        lastPodReadyMinAgeSeconds: 300
+        lastPodMinAgeSeconds: 120
+    asserts:
+      - exists:
+          path: spec.rollingRestart
+      - equal:
+          path: spec.rollingRestart.lastPodReadyMinAgeSeconds
+          value: 300
+      - notExists:
+          path: spec.rollingRestart.lastPodMinAgeSeconds
