@@ -1105,6 +1105,40 @@
           "description" : "Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.",
           "type" : "object"
         },
+        "clustering" : {
+          "description" : "Configures the HiveMQ Data Intelligence cluster (Log-Based Clustering) with a uniform initial members list and persistent storage for the HiveMQ data folder.",
+          "properties" : {
+            "enabled" : {
+              "description" : "Enables the initial members mode for the HiveMQ Data Intelligence cluster. Requires a HiveMQ Data Intelligence configuration and can only be enabled at installation time.",
+              "type" : "boolean"
+            },
+            "initialMemberCount" : {
+              "description" : "The number of pods in the initial members list. Required when enabled. Must be kept fixed after the initial deployment and cannot exceed nodes.replicaCount.",
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "port" : {
+              "description" : "The HiveMQ Data Intelligence clustering port (7557 by default). Must be kept fixed after the initial deployment.",
+              "maximum" : 65535,
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "storageClass" : {
+              "description" : "The StorageClass for the PersistentVolumeClaim of the HiveMQ data folder. Required when enabled.",
+              "maxLength" : 253,
+              "minLength" : 1,
+              "pattern" : "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
+              "type" : "string"
+            },
+            "storageSize" : {
+              "description" : "The persistent storage size for the HiveMQ data folder as a Kubernetes quantity (e.g. 10Gi). Required when enabled.",
+              "minLength" : 1,
+              "pattern" : "^([0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        },
         "create" : {
           "description" : "Creates a Kubernetes Secret for the HiveMQ Data Intelligence configuration.",
           "type" : "boolean"

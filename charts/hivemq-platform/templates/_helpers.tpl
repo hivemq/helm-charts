@@ -383,6 +383,172 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 {{- end -}}
 
 {{/*
+Checks whether the HiveMQ Data Intelligence cluster initial members mode is enabled via `pulse.clustering.enabled`.
+Usage: {{ include "hivemq-platform.has-pulse-clustering" . }}
+*/}}
+{{- define "hivemq-platform.has-pulse-clustering" -}}
+  {{- if and .Values.pulse .Values.pulse.clustering .Values.pulse.clustering.enabled -}}
+    {{- true -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Gets the Log-Based Clustering bind port: the `pulse.clustering.port` value or the HiveMQ default (7557).
+The port is rendered as the `log-based-clustering-bind-port` configuration into the generated HiveMQ
+configuration and used for the initial members list, so that both always match.
+Usage: {{ include "hivemq-platform.log-based-clustering-port" . }}
+*/}}
+{{- define "hivemq-platform.log-based-clustering-port" -}}
+{{- dig "clustering" "port" 7557 .Values.pulse }}
+{{- end -}}
+
+{{/*
+Validates the `pulse.clustering` values when enabled.
+- Rejects the `config.overrideStatefulSet` value, as the chart cannot render the clustering configuration into an overridden StatefulSet spec.
+- Rejects a user-provided HiveMQ configuration (`config.create=false` or `config.overrideHiveMQConfig`), as the chart cannot render the clustering port into the `config.xml` file.
+- Requires a HiveMQ Data Intelligence configuration (`pulse.create` or `pulse.name`).
+- Requires the `initialMemberCount`, `storageClass` and `storageSize` values.
+- Validates `initialMemberCount` does not exceed `nodes.replicaCount`, as the initial members wait for each other on startup.
+- Validates the `port` value does not conflict with one of the predefined ports (7979, 8889, 7000) or the metrics port.
+- Rejects a user-defined `sharedPersistentVolumeClaim` volume, as the chart generates one for the HiveMQ data folder.
+- Rejects the reserved `pulse-data` name in the `additionalVolumes` and `volumeClaimTemplates` values.
+Usage: {{ include "hivemq-platform.validate-pulse-clustering" . }}
+*/}}
+{{- define "hivemq-platform.validate-pulse-clustering" -}}
+  {{- if .Values.config.overrideStatefulSet -}}
+    {{- fail (printf "\n`pulse.clustering` cannot be combined with `config.overrideStatefulSet`. Either remove the `config.overrideStatefulSet` value so the chart manages the StatefulSet, or disable `pulse.clustering` and configure the Data Intelligence clustering in your StatefulSet override") -}}
+  {{- end -}}
+  {{- if or (not .Values.config.create) .Values.config.overrideHiveMQConfig -}}
+    {{- fail (printf "\n`pulse.clustering` cannot be combined with a user-provided HiveMQ configuration, as the chart renders the HiveMQ Data Intelligence clustering port into the `config.xml` file. Either remove the `config.overrideHiveMQConfig` value and set `config.create=true` so the chart manages the HiveMQ configuration, or disable `pulse.clustering`") -}}
+  {{- end -}}
+  {{- if not (include "hivemq-platform.has-pulse-config" .) -}}
+    {{- fail (printf "\n`pulse.clustering.enabled` requires a HiveMQ Data Intelligence configuration. Set `pulse.create=true` or `pulse.name`") -}}
+  {{- end -}}
+  {{- if not .Values.pulse.clustering.initialMemberCount -}}
+    {{- fail (printf "\n`pulse.clustering.initialMemberCount` value is required when `pulse.clustering.enabled` is true. Set it to the number of nodes in the initial cluster (e.g. initialMemberCount: 2) and keep it fixed after the initial deployment") -}}
+  {{- end -}}
+  {{- if not .Values.pulse.clustering.storageClass -}}
+    {{- fail (printf "\n`pulse.clustering.storageClass` value is required when `pulse.clustering.enabled` is true. Set it to a StorageClass available in your Kubernetes cluster") -}}
+  {{- end -}}
+  {{- if not .Values.pulse.clustering.storageSize -}}
+    {{- fail (printf "\n`pulse.clustering.storageSize` value is required when `pulse.clustering.enabled` is true. Set it to the persistent storage size for the HiveMQ data folder (e.g. storageSize: 10Gi)") -}}
+  {{- end -}}
+  {{- if gt (.Values.pulse.clustering.initialMemberCount | int) (.Values.nodes.replicaCount | int) -}}
+    {{- fail (printf "\n`pulse.clustering.initialMemberCount` value (%d) cannot exceed `nodes.replicaCount` value (%d), as the initial members wait for each other on startup" (.Values.pulse.clustering.initialMemberCount | int) (.Values.nodes.replicaCount | int)) -}}
+  {{- end -}}
+  {{- $logBasedClusteringPort := include "hivemq-platform.log-based-clustering-port" . | int64 -}}
+  {{- $predefinedPortsList := list -}}
+  {{- $predefinedPortsList = ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $predefinedPortsList -}}
+  {{- $predefinedPortsList = ( include "hivemq-platform.health-api-port" . | int64 ) | append $predefinedPortsList -}}
+  {{- $predefinedPortsList = ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $predefinedPortsList -}}
+  {{- $metricsPort := include "hivemq-platform.metrics-port" . | int64 -}}
+  {{- if $metricsPort -}}
+    {{- $predefinedPortsList = $metricsPort | append $predefinedPortsList -}}
+  {{- end -}}
+  {{- if has $logBasedClusteringPort $predefinedPortsList -}}
+    {{- fail (printf "\n`pulse.clustering.port` value (%d) already exists as part of one of the predefined ports (%s)" $logBasedClusteringPort (join ", " $predefinedPortsList)) -}}
+  {{- end -}}
+  {{- range .Values.additionalVolumes -}}
+    {{- if eq (.type | default "") "sharedPersistentVolumeClaim" -}}
+      {{- fail (printf "\n`pulse.clustering.enabled` generates a `sharedPersistentVolumeClaim` volume for the HiveMQ data folder and cannot be combined with a user-defined `sharedPersistentVolumeClaim` volume") -}}
+    {{- end -}}
+    {{- if or (eq (.name | default "") "pulse-data") (eq (.mountName | default "") "pulse-data") -}}
+      {{- fail (printf "\n`pulse-data` is a reserved volume name for the `pulse.clustering` storage. Rename the `additionalVolumes` entry") -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range .Values.volumeClaimTemplates -}}
+    {{- if eq (dig "metadata" "name" "" .) "pulse-data" -}}
+      {{- fail (printf "\n`pulse-data` is a reserved PersistentVolumeClaim name for the `pulse.clustering` storage. Rename the `volumeClaimTemplates` entry") -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Validates that `pulse.clustering` does not change on upgrades: it cannot be enabled, disabled or resized on an
+existing installation. Compares the generated HIVEMQ_CLUSTERING_INITIAL_MEMBERS env var and the `pulse-data`
+VolumeClaimTemplate against the deployed StatefulSet. Requires cluster access (helm install/upgrade); client-side
+rendering (helm template, --dry-run=client) skips the check, and the HiveMQ Platform Operator then ignores the
+resulting immutable StatefulSet changes with a warning.
+Usage: {{ include "hivemq-platform.validate-pulse-clustering-unchanged" . }}
+*/}}
+{{- define "hivemq-platform.validate-pulse-clustering-unchanged" -}}
+  {{- $deployedStatefulSet := lookup "apps/v1" "StatefulSet" .Release.Namespace .Release.Name -}}
+  {{- if $deployedStatefulSet -}}
+    {{- $deployedValue := "" -}}
+    {{- range (dig "spec" "template" "spec" "containers" list $deployedStatefulSet) -}}
+      {{- if eq .name "hivemq" -}}
+        {{- range (.env | default list) -}}
+          {{- if eq .name "HIVEMQ_CLUSTERING_INITIAL_MEMBERS" -}}
+            {{- $deployedValue = (.value | default "") -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $desiredValue := include "hivemq-platform.initial-members-env" . -}}
+    {{- if and $desiredValue (not $deployedValue) -}}
+      {{- fail (printf "\n`pulse.clustering` can only be enabled at installation time, not on an existing installation") -}}
+    {{- end -}}
+    {{- if and $deployedValue (not $desiredValue) -}}
+      {{- fail (printf "\n`pulse.clustering` cannot be disabled on an existing installation") -}}
+    {{- end -}}
+    {{- if and $deployedValue $desiredValue (ne $deployedValue $desiredValue) -}}
+      {{- fail (printf "\nThe `pulse.clustering.initialMemberCount` and `pulse.clustering.port` values cannot change after the initial deployment (deployed initial members: %s)" $deployedValue) -}}
+    {{- end -}}
+    {{- if and $deployedValue $desiredValue -}}
+      {{- range $volumeClaimTemplate := (dig "spec" "volumeClaimTemplates" list $deployedStatefulSet) -}}
+        {{- if eq (dig "metadata" "name" "" $volumeClaimTemplate) "pulse-data" -}}
+          {{- $deployedStorageClass := dig "spec" "storageClassName" "" $volumeClaimTemplate -}}
+          {{- if ne (printf "%v" $deployedStorageClass) (printf "%v" $.Values.pulse.clustering.storageClass) -}}
+            {{- fail (printf "\nThe `pulse.clustering.storageClass` value cannot change after the initial deployment (deployed StorageClass: %v)" $deployedStorageClass) -}}
+          {{- end -}}
+          {{- $deployedStorageSize := dig "spec" "resources" "requests" "storage" "" $volumeClaimTemplate -}}
+          {{- if ne (printf "%v" $deployedStorageSize) (printf "%v" $.Values.pulse.clustering.storageSize) -}}
+            {{- fail (printf "\nThe `pulse.clustering.storageSize` value cannot change after the initial deployment (deployed storage size: %v)" $deployedStorageSize) -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Appends a `pulse-data` sharedPersistentVolumeClaim volume for the HiveMQ data folder and its matching
+PersistentVolumeClaim template to `.Values` (mutating it), so that each pod gets its own PersistentVolume
+and the Raft cluster state survives pod restarts. Both entries are rendered by the regular
+`additionalVolumes` and `volumeClaimTemplates` handling, as if the user had configured them.
+Usage: {{ include "hivemq-platform.append-pulse-clustering-volumes" . }}
+*/}}
+{{- define "hivemq-platform.append-pulse-clustering-volumes" -}}
+  {{- $pulseDataVolume := dict "type" "sharedPersistentVolumeClaim" "name" "pulse-data" "path" "/opt/hivemq/pulse-data" "hivemqFolders" (dict "data" "data") -}}
+  {{- $_ := set .Values "additionalVolumes" (append (.Values.additionalVolumes | default list) $pulseDataVolume) -}}
+  {{- $pulseDataClaim := dict "kind" "PersistentVolumeClaim" "apiVersion" "v1" "metadata" (dict "name" "pulse-data") "spec" (dict "accessModes" (list "ReadWriteOnce") "storageClassName" .Values.pulse.clustering.storageClass "resources" (dict "requests" (dict "storage" .Values.pulse.clustering.storageSize))) -}}
+  {{- $_ := set .Values "volumeClaimTemplates" (append (.Values.volumeClaimTemplates | default list) $pulseDataClaim) -}}
+{{- end -}}
+
+{{/*
+Generates the HIVEMQ_CLUSTERING_INITIAL_MEMBERS env var value when `pulse.clustering` is enabled.
+Produces a comma-separated list of <pod>.<headless-svc>.<namespace>.svc:<log-based-clustering-port> for the initial members.
+The `initialMemberCount` value must stay fixed after the initial deployment so that scaling does not
+change the env var and trigger an unnecessary rolling restart of existing pods. Nodes above the initial
+member count join the existing cluster instead of bootstrapping it.
+Usage: {{ include "hivemq-platform.initial-members-env" . }}
+*/}}
+{{- define "hivemq-platform.initial-members-env" -}}
+  {{- if include "hivemq-platform.has-pulse-clustering" . -}}
+    {{- $releaseName := .Release.Name -}}
+    {{- $namespace := .Release.Namespace -}}
+    {{- $serviceName := printf "hivemq-%s-cluster" $releaseName -}}
+    {{- $port := include "hivemq-platform.log-based-clustering-port" . | int -}}
+    {{- $count := .Values.pulse.clustering.initialMemberCount | int -}}
+    {{- $members := list -}}
+    {{- range $i := until $count -}}
+      {{- $members = append $members (printf "%s-%d.%s.%s.svc:%d" $releaseName $i $serviceName $namespace $port) -}}
+    {{- end -}}
+    {{- join "," $members -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
 Normalizes extension input into a list.
 - Starts with the `extensions` array as the base list.
 - For each `extensionMap` entry with a matching array extension, merges the map entry on top (map wins per-field).
@@ -495,6 +661,7 @@ Validates all the exposed services.
 - No duplicated service names are defined as part of the `.Values.services` values list.
 - No duplicated HiveMQ listener names are defined as part of the `.Values.services` values list.
 - No default ports (7979, 8889, 7000) are defined as part of the `containerPort` defined in the `.Values.services` values list.
+- When the pulse clustering is enabled, no `containerPort` matches the HiveMQ Data Intelligence clustering port (`pulse.clustering.port` value, 7557 by default).
 - When migration.statefulSet flag is enabled, `.Values.services.legacyPortName` is mandatory.
 - TLS/mTLS configuration values.
 Usage: {{ include "hivemq-platform.validate-services" (dict "services" .Values.services "releaseName" $.Release.Name) }}
@@ -584,6 +751,8 @@ Usage: {{ include "hivemq-platform.validate-service-container-ports" . }}
 
 {{/*
 Validates there is no default `containerPort` (7979, 8889, 7000) defined as part of the exposed services ports.
+When the pulse clustering is enabled, also validates no exposed service port matches the Data Intelligence
+clustering port (`pulse.clustering.port` value, 7557 by default).
 Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 */}}
 {{- define "hivemq-platform.validate-default-service-ports" -}}
@@ -592,9 +761,17 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 {{- $defaultPortsList = ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList = ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList = ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
+{{- $hasPulseClustering := include "hivemq-platform.has-pulse-clustering" . }}
+{{- $logBasedClusteringPort := 0 }}
+{{- if $hasPulseClustering }}
+  {{- $logBasedClusteringPort = include "hivemq-platform.log-based-clustering-port" . | int64 }}
+{{- end }}
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
     {{- fail (printf "\nContainer port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
+  {{- end }}
+  {{- if and $hasPulseClustering $service.exposed (eq (int64 $service.containerPort) $logBasedClusteringPort) }}
+    {{- fail (printf "\nContainer port %d in service `%s` is already used as the HiveMQ Data Intelligence clustering port (`pulse.clustering.port` value: %d)" (int64 $service.containerPort) $service.type $logBasedClusteringPort) }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -1106,6 +1283,9 @@ Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 {{- range .Values.nodes.env }}
   {{- if eq .name "HIVEMQ_CLUSTERING_BOOTSTRAP" }}
     {{- fail (printf "\nHIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set") }}
+  {{- end }}
+  {{- if eq .name "HIVEMQ_CLUSTERING_INITIAL_MEMBERS" }}
+    {{- fail (printf "\nHIVEMQ_CLUSTERING_INITIAL_MEMBERS environment variable cannot be set directly. Use `pulse.clustering.enabled: true` instead") }}
   {{- end }}
   {{- if and (eq .name "HIVEMQ_PULSE_FOLDER") $hasPulseConfig }}
     {{- fail (printf "\nHIVEMQ_PULSE_FOLDER environment variable cannot be set") }}

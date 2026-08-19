@@ -880,6 +880,23 @@ pulse:
   data: ""
   # Overrides the HiveMQ Data Intelligence configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.
   overridePulseConfig: ""
+  # Configures the HiveMQ Data Intelligence cluster with persistent storage: the complete HiveMQ data folder of
+  # each node is stored on its own PersistentVolume, which is kept on scale down and uninstall unless the
+  # `nodes.persistentVolumeClaimRetentionPolicy` value is configured.
+  # Requires a HiveMQ Data Intelligence configuration (see `create` and `name` values above) and can only be
+  # enabled at installation time. The `storageClass` and `storageSize` values are required: choose them
+  # deliberately for your environment and workload, as they cannot be changed later. Enable the `nodes.podSecurityContext`
+  # with an `fsGroup` value so the HiveMQ process can write to the mounted volumes.
+  # The `initialMemberCount` value defines how many nodes form the initial cluster and must be kept fixed after
+  # the initial deployment; it is also the minimum replica count. Scale the replica count down in single steps only.
+  # The optional `port` value sets the HiveMQ Data Intelligence clustering port (7557 by default) and must also
+  # be kept fixed after the initial deployment.
+  #clustering:
+  #  enabled: true
+  #  initialMemberCount: 2
+  #  port: 7557
+  #  storageClass: my-storage-class
+  #  storageSize: 10Gi
 
 # Configures the rolling restart behavior for this HiveMQ Platform.
 rollingRestart: {}

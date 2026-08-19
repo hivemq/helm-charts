@@ -1,0 +1,195 @@
+suite: HiveMQ Platform - HiveMQ Data Intelligence clustering upgrade validation tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-platform
+  namespace: test-namespace
+kubernetesProvider:
+  scheme:
+    "apps/v1/StatefulSet":
+      gvr:
+        group: "apps"
+        version: "v1"
+        resource: "statefulsets"
+      namespaced: true
+  objects:
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: plain-platform
+        namespace: test-namespace
+      spec:
+        template:
+          spec:
+            containers:
+              - name: sidecar
+                env:
+                  - name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+                    value: "decoy-value-on-other-container"
+              - name: hivemq
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: test-platform
+        namespace: test-namespace
+      spec:
+        volumeClaimTemplates:
+          - metadata:
+              name: pulse-data
+            spec:
+              storageClassName: my-storage-class
+              resources:
+                requests:
+                  storage: 10Gi
+        template:
+          spec:
+            containers:
+              - name: hivemq
+                env:
+                  - name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+                    value: "test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:7557,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:7557"
+tests:
+
+  - it: should pass when the deployed initial members list is unchanged
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: should fail when the initial member count changes on an existing installation
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 3
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 3
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            The `pulse.clustering.initialMemberCount` and `pulse.clustering.port` values cannot change after
+            the initial deployment (deployed initial members:
+            test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:7557,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:7557)
+
+  - it: should fail when pulse clustering is disabled on an existing installation
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+    asserts:
+      - failedTemplate:
+          errorMessage: '`pulse.clustering` cannot be disabled on an existing installation'
+
+  - it: should fail when pulse clustering is enabled on an existing installation
+    release:
+      name: plain-platform
+      namespace: test-namespace
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: '`pulse.clustering` can only be enabled at installation time, not on an existing installation'
+
+  - it: should fail when the Data Intelligence configuration is removed completely on an existing installation
+    set:
+      pulse:
+        create: false
+    asserts:
+      - failedTemplate:
+          errorMessage: '`pulse.clustering` cannot be disabled on an existing installation'
+
+  - it: should fail with the missing value message when the initialMemberCount is removed on an existing installation
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            `pulse.clustering.initialMemberCount` value is required when `pulse.clustering.enabled` is true.
+            Set it to the number of nodes in the initial cluster (e.g. initialMemberCount: 2) and keep it fixed
+            after the initial deployment
+
+  - it: should fail when the storageClass changes on an existing installation
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: other-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            The `pulse.clustering.storageClass` value cannot change after the initial deployment
+            (deployed StorageClass: my-storage-class)
+
+  - it: should fail when the storageSize changes on an existing installation
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 20Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            The `pulse.clustering.storageSize` value cannot change after the initial deployment
+            (deployed storage size: 10Gi)
+
+  - it: should fail when the port changes on an existing installation
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9999
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorMessage: >-
+            The `pulse.clustering.initialMemberCount` and `pulse.clustering.port` values cannot change after
+            the initial deployment (deployed initial members:
+            test-platform-0.hivemq-test-platform-cluster.test-namespace.svc:7557,test-platform-1.hivemq-test-platform-cluster.test-namespace.svc:7557)

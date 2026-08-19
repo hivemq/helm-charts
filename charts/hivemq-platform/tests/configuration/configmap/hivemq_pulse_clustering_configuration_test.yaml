@@ -1,0 +1,77 @@
+suite: HiveMQ Platform Configuration as ConfigMap - HiveMQ Data Intelligence clustering configuration tests
+templates:
+  - hivemq-configuration.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+set:
+  config.createAs: ConfigMap
+asserts:
+  - containsDocument:
+      apiVersion: v1
+      kind: ConfigMap
+      name: hivemq-configuration-test-hivemq-platform
+      namespace: test-hivemq-platform-namespace
+    template: hivemq-configuration.yml
+tests:
+
+  - it: should render the log-based clustering port when pulse clustering is enabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: <bind-port>7000</bind-port>\s*<log-based-clustering-bind-port>7557</log-based-clustering-bind-port>\s*</tcp>
+
+  - it: should render the custom log-based clustering port when configured
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: true
+          initialMemberCount: 2
+          port: 9999
+          storageClass: my-storage-class
+          storageSize: 10Gi
+      nodes:
+        replicaCount: 2
+    asserts:
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: <bind-port>7000</bind-port>\s*<log-based-clustering-bind-port>9999</log-based-clustering-bind-port>\s*</tcp>
+
+  - it: should not render the log-based clustering port when pulse clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+    asserts:
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: log-based-clustering-bind-port
+
+  - it: should not render a custom log-based clustering port when pulse clustering is disabled
+    set:
+      pulse:
+        create: true
+        data: "PHB1bHNlPjwvcHVsc2U+" # <pulse></pulse>
+        clustering:
+          enabled: false
+          port: 9999
+    asserts:
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: log-based-clustering-bind-port
