@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-08-21T11:13:45.807Z" hostname="runnervm76f27" time="93.924">
+<testsuite name="com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-08-21T11:42:14.056Z" hostname="runnervm76f27" time="783.448">
   <properties/>
-  <testcase name="withSingleOperator_hivemqRunningThenDelete()" classname="com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT" time="93.923"/>
+  <testcase name="withSingleOperator_hivemqRunningThenDelete()" classname="com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT" time="228.01">
+    <failure message="org.awaitility.core.ConditionTimeoutException: Condition with Lambda expression in com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT was not fulfilled within 2 minutes." type="org.awaitility.core.ConditionTimeoutException">org.awaitility.core.ConditionTimeoutException: Condition with Lambda expression in com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT was not fulfilled within 2 minutes.
+	at org.awaitility.core.ConditionAwaiter.await(ConditionAwaiter.java:167)
+	at org.awaitility.core.CallableCondition.await(CallableCondition.java:78)
+	at org.awaitility.core.CallableCondition.await(CallableCondition.java:26)
+	at org.awaitility.core.ConditionFactory.until(ConditionFactory.java:1160)
+	at org.awaitility.core.ConditionFactory.until(ConditionFactory.java:1129)
+	at com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT.withSingleOperator_hivemqRunningThenDelete(HelmRemoveNamespaceIT.java:38)
+</failure>
+  </testcase>
+  <testcase name="withSingleOperator_hivemqRunningThenDelete()" classname="com.hivemq.helmcharts.operator.HelmRemoveNamespaceIT" time="116.778"/>
 </testsuite>
