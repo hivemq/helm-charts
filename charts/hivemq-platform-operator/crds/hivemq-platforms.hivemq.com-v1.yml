@@ -155,6 +155,21 @@ spec:
                       \ If not set, the global operator configuration is used."
                       type: "integer"
                   type: "object"
+                scaling:
+                  properties:
+                    lastPodReadyMinAgeSeconds:
+                      description: "The minimum time in seconds that the last added\
+                      \ Pod must have been ready before the next Pod can be added\
+                      \ during a scale up. Overrides the global operator configuration.\
+                      \ If not set, the global operator configuration is used."
+                      type: "integer"
+                    lastPodRemovalMinAgeSeconds:
+                      description: "The minimum time in seconds since the last Pod removal\
+                      \ before the next Pod can be removed during a scale down. Overrides\
+                      \ the global operator configuration. If not set, the global\
+                      \ operator configuration is used."
+                      type: "integer"
+                  type: "object"
                 secretName:
                   type: "string"
                 services:
@@ -3733,6 +3748,7 @@ spec:
                     - "V2_0_0"
                     - "V2_1_0"
                     - "V2_2_0"
+                    - "V2_3_0"
                   type: "string"
                 healthDetails:
                   description: "Human readable details of the current health status"
@@ -3746,6 +3762,10 @@ spec:
                     - "OUT_OF_SERVICE"
                     - "UNKNOWN"
                     - "UP"
+                  type: "string"
+                lastPodRemovalTime:
+                  description: "The time the last Pod removal was initiated during a\
+                  \ scale down"
                   type: "string"
                 message:
                   description: "A human readable state message"
@@ -3764,6 +3784,8 @@ spec:
                       - "RECOVER"
                       - "RESTART_EXTENSIONS"
                       - "ROLLING_RESTART"
+                      - "SCALE_DOWN"
+                      - "SCALE_UP"
                       - "SCALING"
                       - "SET_LOG_LEVEL"
                       - "UPDATE_INIT_APP"
@@ -3807,6 +3829,7 @@ spec:
                         - "RESTART_EXTENSIONS"
                         - "RESTART_PODS_IN_PROGRESS"
                         - "SCALE_DOWN_IN_PROGRESS"
+                        - "SCALE_UP_IN_PROGRESS"
                         - "SET_LOG_LEVEL"
                         - "STATEFULSET_MIGRATION_IN_PROGRESS"
                         - "STATEFULSET_MIGRATION_STARTING"
@@ -3853,6 +3876,7 @@ spec:
                     - "RESTART_EXTENSIONS"
                     - "RESTART_PODS_IN_PROGRESS"
                     - "SCALE_DOWN_IN_PROGRESS"
+                    - "SCALE_UP_IN_PROGRESS"
                     - "SET_LOG_LEVEL"
                     - "STATEFULSET_MIGRATION_IN_PROGRESS"
                     - "STATEFULSET_MIGRATION_STARTING"
