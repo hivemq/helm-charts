@@ -94,24 +94,101 @@ Usage: {{ include "hivemq-platform.has-license" . }}
 {{- end -}}
 
 {{/*
-Checks whether a HiveMQ Data Intelligence configuration is in use by the platform.
-Returns:
-- `true` if it's reusing an existing Pulse configuration created in a separate Secret or if it's creating a new one. Empty string otherwise.
-Usage: {{ include "hivemq-platform.has-pulse-config" . }}
-*/}}
-{{- define "hivemq-platform.has-pulse-config" -}}
-{{- $pulseConfigExists := "" -}}
-{{- if or .Values.pulse.create .Values.pulse.name -}}
-    {{- $pulseConfigExists = true -}}
-{{- end -}}
-{{- $pulseConfigExists -}}
-{{- end -}}
-
-{{/*
 Returns the default license name for the platform.
 */}}
 {{- define "hivemq-platform.default-license-name" -}}
 {{- printf "%s-%s" "hivemq-license" .Release.Name }}
+{{- end -}}
+
+{{/*
+Checks whether HiveMQ Data Intelligence log-based clustering is enabled.
+Returns:
+- `true` if the `dataIntelligence.clustering.enabled` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-data-intelligence-clustering" . }}
+*/}}
+{{- define "hivemq-platform.has-data-intelligence-clustering" -}}
+{{- $clusteringEnabled := "" -}}
+{{- if .Values.dataIntelligence.clustering.enabled -}}
+    {{- $clusteringEnabled = true -}}
+{{- end -}}
+{{- $clusteringEnabled -}}
+{{- end -}}
+
+{{/*
+Gets the HiveMQ Data Intelligence log-based clustering port.
+Usage: {{ include "hivemq-platform.data-intelligence-clustering-port" . }}
+*/}}
+{{- define "hivemq-platform.data-intelligence-clustering-port" -}}
+{{- .Values.dataIntelligence.clustering.port | default 7557 -}}
+{{- end -}}
+
+{{/*
+Gets the name of the cluster Service that the HiveMQ Platform Operator creates for the platform.
+Usage: {{ include "hivemq-platform.cluster-service-name" . }}
+*/}}
+{{- define "hivemq-platform.cluster-service-name" -}}
+{{- printf "hivemq-%s-cluster" .Release.Name -}}
+{{- end -}}
+
+{{/*
+Checks whether a HiveMQ Data Intelligence agent connection string Secret is configured.
+Returns:
+- `true` if the `dataIntelligence.agent.connectionStringSecretName` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-data-intelligence-connection-string" . }}
+*/}}
+{{- define "hivemq-platform.has-data-intelligence-connection-string" -}}
+{{- $connectionStringExists := "" -}}
+{{- if .Values.dataIntelligence.agent.connectionStringSecretName -}}
+    {{- $connectionStringExists = true -}}
+{{- end -}}
+{{- $connectionStringExists -}}
+{{- end -}}
+
+{{/*
+Checks whether a HiveMQ Data Intelligence agent truststore Secret is configured.
+Returns:
+- `true` if the `dataIntelligence.agent.truststoreSecretName` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-data-intelligence-truststore" . }}
+*/}}
+{{- define "hivemq-platform.has-data-intelligence-truststore" -}}
+{{- $truststoreExists := "" -}}
+{{- if .Values.dataIntelligence.agent.truststoreSecretName -}}
+    {{- $truststoreExists = true -}}
+{{- end -}}
+{{- $truststoreExists -}}
+{{- end -}}
+
+{{/*
+Gets the mounted HiveMQ Data Intelligence agent truststore path.
+Usage: {{ include "hivemq-platform.data-intelligence-truststore-path" . }}
+*/}}
+{{- define "hivemq-platform.data-intelligence-truststore-path" -}}
+{{- printf "/opt/hivemq/conf/data-intelligence/%s" (.Values.dataIntelligence.agent.truststoreSecretKey | default "truststore.jks") -}}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Data Intelligence configuration so:
+ - The retired `pulse` values are not used anymore.
+ - When clustering is enabled, the default HiveMQ configuration is in use and the `initialMemberCount`
+   value is set and not greater than the `nodes.replicaCount` value.
+Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
+*/}}
+{{- define "hivemq-platform.validate-data-intelligence" -}}
+{{- if .Values.pulse -}}
+    {{- fail (printf "\nThe `pulse` values are retired: the HiveMQ Data Intelligence configuration moved into the HiveMQ configuration (config.xml). Use the `dataIntelligence` values instead and remove the `pulse` values") -}}
+{{- end -}}
+{{- if include "hivemq-platform.has-data-intelligence-clustering" . -}}
+    {{- $clustering := .Values.dataIntelligence.clustering -}}
+    {{- if .Values.config.overrideHiveMQConfig -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.overrideHiveMQConfig` value. Configure log-based clustering directly in your custom HiveMQ configuration instead") -}}
+    {{- end -}}
+    {{- if not $clustering.initialMemberCount -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value is required when HiveMQ Data Intelligence clustering is enabled") -}}
+    {{- end -}}
+    {{- if gt (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount) -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be greater than the `nodes.replicaCount` value (%d)" (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount)) -}}
+    {{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -837,17 +914,17 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
   {{- fail (printf "\nOnly one `sharedPersistentVolumeClaim` volume type is allowed but %d were defined" (int $sharedPvcCount)) }}
 {{- end }}
 
-{{- /* add default volume mounts for license, pulse and TLS to validation lists */ -}}
+{{- /* add default volume mounts for license, Data Intelligence truststore and TLS to validation lists */ -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- if $hasLicense }}
   {{- $volumeMountNameList = "licenses#hivemq" | append $volumeMountNameList }}
   {{- $volumeMountPathList = "/opt/hivemq/license#hivemq" | append $volumeMountPathList }}
 {{- end }}
 
-{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
-{{- if $hasPulseConfig }}
-  {{- $volumeMountNameList = "pulse-config#hivemq" | append $volumeMountNameList }}
-  {{- $volumeMountPathList = "/opt/hivemq/pulse/conf#hivemq" | append $volumeMountPathList }}
+{{- $hasDataIntelligenceTruststore := ( include "hivemq-platform.has-data-intelligence-truststore" . ) -}}
+{{- if $hasDataIntelligenceTruststore }}
+  {{- $volumeMountNameList = "data-intelligence-truststore#hivemq" | append $volumeMountNameList }}
+  {{- $volumeMountPathList = "/opt/hivemq/conf/data-intelligence#hivemq" | append $volumeMountPathList }}
 {{- end }}
 
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
@@ -994,34 +1071,14 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- end -}}
 
 {{/*
-Gets the Pulse configuration Secret name.
-Returns the pulse Secret name if pulse is configured, empty string otherwise.
-Usage: {{- include "hivemq-platform.pulse-secret-name" . -}}
-*/}}
-{{- define "hivemq-platform.pulse-secret-name" -}}
-{{- $pulseSecretName := "" }}
-{{- $hasPulseConfig := include "hivemq-platform.has-pulse-config" . -}}
-{{- if $hasPulseConfig }}
-  {{- if .Values.pulse.name }}
-    {{- $pulseSecretName = .Values.pulse.name }}
-  {{- else }}
-    {{- $pulseSecretName = printf "%s-%s" "hivemq-pulse-configuration" .Release.Name }}
-  {{- end }}
-{{- end }}
-{{- $pulseSecretName }}
-{{- end -}}
-
-{{/*
 Validate monitored resources configuration.
  - Ensures no duplicate ConfigMap or Secret names are defined.
  - Ensures no duplicate files are defined within the same resource.
- - Checks for conflicts with auto-generated Pulse monitored resource.
 Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
 */}}
 {{- define "hivemq-platform.validate-monitored-resources" -}}
 {{- $configMapNamesList := list }}
 {{- $secretNamesList := list }}
-{{- $pulseSecretName := include "hivemq-platform.pulse-secret-name" . -}}
 {{- range $resource := .Values.monitoredResources }}
   {{- if eq $resource.type "ConfigMap" }}
     {{- if has $resource.name $configMapNamesList }}
@@ -1031,9 +1088,6 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
   {{- else }}
     {{- if has $resource.name $secretNamesList }}
       {{- fail (printf "\nFound duplicated Secret name '%s' for `monitoredResources`" $resource.name) }}
-    {{- end }}
-    {{- if eq $resource.name $pulseSecretName }}
-      {{- fail (printf "\nThe Pulse configuration Secret '%s' is automatically monitored when Pulse is enabled. Please remove it from `monitoredResources`" $resource.name) }}
     {{- end }}
     {{- $secretNamesList = $resource.name | append $secretNamesList }}
   {{- end }}
@@ -1047,25 +1101,6 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
     {{- end }}
   {{- end }}
 {{- end }}
-{{- end -}}
-
-{{/*
-Validates the HiveMQ Data Intelligence configuration so:
- - When the `pulse.create` value is `true`, at least one configuration content is defined.
- - Only one of `data` or `overridePulseConfig` are set, but not both.
- - When `isPulseConfigBase64Encoded` is set to `true`, `data` is Base64 encoded.
-Usage: {{ include "hivemq-platform.validate-pulse" . }}
-*/}}
-{{- define "hivemq-platform.validate-pulse" -}}
-{{- if .Values.pulse.create -}}
-    {{- if and (not .Values.pulse.overridePulseConfig) (not .Values.pulse.data) -}}
-        {{- fail (printf "\nHiveMQ Data Intelligence configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values") -}}
-    {{- end -}}
-    {{- if and .Values.pulse.data .Values.pulse.overridePulseConfig -}}
-        {{- fail (printf "\nBoth `data` and `overridePulseConfig` values are set for the HiveMQ Data Intelligence configuration content. Please, use only one of them") -}}
-    {{- end -}}
-    {{- include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) -}}
-{{- end -}}
 {{- end -}}
 
 {{/*
@@ -1100,15 +1135,15 @@ Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 */}}
 {{- define "hivemq-platform.validate-default-env-vars" -}}
 {{- $defaultEnvs := list "JAVA_OPTS"}}
-{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) }}
 {{- $sharedPvcEnvVars := list "HIVEMQ_DATA_FOLDER" "HIVEMQ_LOG_FOLDER" "HIVEMQ_HEAPDUMP_FOLDER" "HIVEMQ_BACKUP_FOLDER" "HIVEMQ_AUDIT_FOLDER" }}
 {{- $hasSharedPvc := ( include "hivemq-platform.has-shared-pvc" . ) }}
+{{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) }}
 {{- range .Values.nodes.env }}
   {{- if eq .name "HIVEMQ_CLUSTERING_BOOTSTRAP" }}
     {{- fail (printf "\nHIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set") }}
   {{- end }}
-  {{- if and (eq .name "HIVEMQ_PULSE_FOLDER") $hasPulseConfig }}
-    {{- fail (printf "\nHIVEMQ_PULSE_FOLDER environment variable cannot be set") }}
+  {{- if and (eq .name "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING") $hasDataIntelligenceConnectionString }}
+    {{- fail (printf "\nHIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING environment variable cannot be set") }}
   {{- end }}
   {{- if and $hasSharedPvc (has .name $sharedPvcEnvVars) }}
     {{- fail (printf "\n`%s` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type" .name) }}
@@ -1165,20 +1200,6 @@ Usage: {{ include "hivemq-platform.get-shared-pvc-env-vars" . }}
     {{- end }}
   {{- end }}
 {{- end }}
-{{- end -}}
-
-{{/*
-Validates the data passed as parameter is a valid Base64 encoded string for HiveMQ Data Intelligence configuration.
-Usage: {{ include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) }}
-*/}}
-{{- define "hivemq-platform.validate-base64-encoded-pulse-data" -}}
-{{- if and .data .isPulseConfigBase64Encoded -}}
-    {{- $original := .data -}}
-    {{- $reencoded := $original | b64dec | b64enc -}}
-    {{- if not (eq $original $reencoded) -}}
-        {{- fail (printf "\nHiveMQ Data Intelligence configuration data content is not a Base64 encoded string") }}
-    {{- end -}}
-{{- end -}}
 {{- end -}}
 
 {{/*
