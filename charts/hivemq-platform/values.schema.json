@@ -298,6 +298,61 @@
       },
       "type" : "object"
     },
+    "dataIntelligence" : {
+      "description" : "Defines the HiveMQ Data Intelligence configuration options.",
+      "properties" : {
+        "clustering" : {
+          "description" : "Configures HiveMQ Data Intelligence log-based clustering.",
+          "properties" : {
+            "enabled" : {
+              "description" : "Enables log-based clustering.",
+              "type" : "boolean"
+            },
+            "initialMemberCount" : {
+              "description" : "The number of nodes that form the initial Raft group. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value.",
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "port" : {
+              "description" : "The log-based clustering port (7557 by default).",
+              "maximum" : 65535,
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "dataLayerEnabled" : {
+              "description" : "Disables the log-based clustering data layer when set to false (enabled by default).",
+              "type" : "boolean"
+            }
+          },
+          "type" : "object"
+        },
+        "agent" : {
+          "description" : "Configures the HiveMQ Data Intelligence agent.",
+          "properties" : {
+            "connectionStringSecretName" : {
+              "description" : "The name of an existing Kubernetes Secret containing the agent connection string.",
+              "maxLength" : 253,
+              "type" : "string"
+            },
+            "connectionStringSecretKey" : {
+              "description" : "The key within the connection string Secret (\"connection-string\" by default).",
+              "type" : "string"
+            },
+            "truststoreSecretName" : {
+              "description" : "The name of an existing Kubernetes Secret containing the agent truststore.",
+              "maxLength" : 253,
+              "type" : "string"
+            },
+            "truststoreSecretKey" : {
+              "description" : "The key within the truststore Secret (\"truststore.jks\" by default).",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
+    },
     "extensions" : {
       "items" : {
         "properties" : {
@@ -1099,41 +1154,6 @@
             "type" : "object"
           },
           "type" : "array"
-        }
-      },
-      "type" : "object"
-    },
-    "pulse" : {
-      "description" : "Defines the HiveMQ Data Intelligence configuration options.",
-      "properties" : {
-        "annotations" : {
-          "description" : "Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.",
-          "type" : "object"
-        },
-        "create" : {
-          "description" : "Creates a Kubernetes Secret for the HiveMQ Data Intelligence configuration.",
-          "type" : "boolean"
-        },
-        "data" : {
-          "description" : "Inlines the HiveMQ Data Intelligence configuration as a string. By default, this data is expected as Base64 encoded string. Set \"isPulseConfigBase64Encoded=false\" to provide a plain string.",
-          "type" : "string"
-        },
-        "isPulseConfigBase64Encoded" : {
-          "description" : "Indicates whether the HiveMQ Data Intelligence configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret. This is useful for third party tools that handle content through placeholders, such as the ArgoCD Vault plugin.",
-          "type" : "boolean"
-        },
-        "labels" : {
-          "description" : "Defines custom labels for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.",
-          "type" : "object"
-        },
-        "name" : {
-          "description" : "The name of the Kubernetes Secret containing the HiveMQ Data Intelligence configuration. To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.",
-          "maxLength" : 253,
-          "type" : "string"
-        },
-        "overridePulseConfig" : {
-          "description" : "Overrides the HiveMQ Data Intelligence configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.",
-          "type" : "string"
         }
       },
       "type" : "object"
