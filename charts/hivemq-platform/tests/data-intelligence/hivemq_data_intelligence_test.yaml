@@ -1,0 +1,227 @@
+suite: HiveMQ Platform - Data Intelligence tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with default values, no Data Intelligence environment variable and no truststore volume
+    asserts:
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+          any: true
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+
+  - it: with an agent connection string Secret, the environment variable is set from the Secret
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: my-connection-string-secret
+                key: connection-string
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+
+  - it: with an agent connection string Secret and a custom key, the environment variable uses the custom key
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      dataIntelligence.agent.connectionStringSecretKey: my-connection-string
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: my-connection-string-secret
+                key: my-connection-string
+
+  - it: with an agent truststore Secret, the truststore is mounted into the configuration folder
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: data-intelligence-truststore
+            secret:
+              secretName: my-truststore-secret
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data-intelligence-truststore
+            mountPath: /opt/hivemq/conf/data-intelligence
+
+  - it: with clustering enabled, no additional StatefulSet changes
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.podManagementPolicy
+      - notExists:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_CLUSTERING_INITIAL_MEMBERS
+          any: true
+
+  - it: with the retired pulse values, validation fails
+    set:
+      pulse.create: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "The `pulse` values are retired"
+
+  - it: with clustering enabled without initial member count, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "`dataIntelligence.clustering.initialMemberCount` value is required"
+
+  - it: with an initial member count greater than the replica count, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 3
+      nodes.replicaCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be greater than the `nodes.replicaCount` value"
+
+  - it: with clustering enabled and a custom HiveMQ configuration override, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      config.overrideHiveMQConfig: "<hivemq></hivemq>"
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be combined with the `config.overrideHiveMQConfig` value"
+
+  - it: with the connection string environment variable set manually, validation fails
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      nodes.env:
+        - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+          value: my-connection-string
+    asserts:
+      - failedTemplate:
+          errorPattern: "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING environment variable cannot be set"
+
+  - it: with an additional volume mounted on the truststore path, validation fails
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      additionalVolumes:
+        - type: emptyDir
+          name: data-intelligence-truststore
+          path: /opt/hivemq/conf/data-intelligence
+    asserts:
+      - failedTemplate:
+          errorPattern: "is duplicated for container `hivemq`"
+
+  - it: with clustering disabled and no initial member count, no validation error
+    set:
+      dataIntelligence.clustering.enabled: false
+    asserts:
+      - exists:
+          path: spec.statefulSet
+
+  - it: with clustering disabled and an initial member count greater than the replica count, no validation error
+    set:
+      dataIntelligence.clustering.enabled: false
+      dataIntelligence.clustering.initialMemberCount: 5
+      nodes.replicaCount: 2
+    asserts:
+      - exists:
+          path: spec.statefulSet
+
+  - it: with clustering disabled and a custom HiveMQ configuration override, no validation error
+    set:
+      dataIntelligence.clustering.enabled: false
+      config.overrideHiveMQConfig: "<hivemq></hivemq>"
+    asserts:
+      - exists:
+          path: spec.statefulSet
+
+  - it: with the connection string environment variable set manually and no connection string Secret, no validation error
+    set:
+      nodes.env:
+        - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+          value: my-connection-string
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+            value: my-connection-string
+
+  - it: with an additional volume on a different path than the truststore, no validation error
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      additionalVolumes:
+        - type: emptyDir
+          name: my-additional-volume
+          path: /opt/hivemq/my-volume
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data-intelligence-truststore
+            mountPath: /opt/hivemq/conf/data-intelligence
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-additional-volume
+            mountPath: /opt/hivemq/my-volume
+
+  - it: with an agent truststore Secret and a license, both volumes are rendered
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      license.create: true
+      license.data: bXktbGljZW5zZQ==
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: licenses
+            secret:
+              secretName: hivemq-license-test-hivemq-platform
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: data-intelligence-truststore
+            secret:
+              secretName: my-truststore-secret
+
+  - it: with a custom HiveMQ configuration override and agent Secrets, the environment variable and the truststore are still rendered
+    set:
+      config.overrideHiveMQConfig: "<hivemq></hivemq>"
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: my-connection-string-secret
+                key: connection-string
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: data-intelligence-truststore
+            mountPath: /opt/hivemq/conf/data-intelligence

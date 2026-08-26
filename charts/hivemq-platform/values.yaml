@@ -853,33 +853,37 @@ volumeClaimTemplates: []
 #     volumeMode: Filesystem
 
 # Defines the HiveMQ Data Intelligence configuration options.
-pulse:
-  # Creates a Kubernetes Secret for the HiveMQ Data Intelligence configuration.
-  create: false
-  # The name of the Kubernetes Secret containing the HiveMQ Data Intelligence configuration.
-  # To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.
-  name: ""
-  # Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.
-  annotations: {}
-  # Defines custom labels for the Kubernetes Secret that contains the HiveMQ Data Intelligence configuration.
-  labels: {}
-  # Indicates whether the HiveMQ Data Intelligence configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret.
-  # This is useful for third party tools that handle content through placeholders, such as the ArgoCD Vault plugin.
-  # For example, the following Helm command:
-  #   `helm template platform hivemq/hivemq-platform --set pulse.create=true --set pulse.isPulseConfigBase64Encoded=false --set pulse.data=<hivemq-pulse-configuration-placeholder>`
-  # renders the following Kubernetes Secret:
-  #   apiVersion: v1
-  #   kind: Secret
-  #   metadata:
-  #     name: hivemq-pulse-configuration
-  #   stringData:
-  #     config.xml: <hivemq-pulse-configuration-placeholder>
-  isPulseConfigBase64Encoded: true
-  # Inlines the HiveMQ Data Intelligence configuration as a string.
-  # By default, this data is expected as Base64 encoded string. Set "isPulseConfigBase64Encoded=false" to provide a plain string.
-  data: ""
-  # Overrides the HiveMQ Data Intelligence configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.
-  overridePulseConfig: ""
+# All options are rendered into the HiveMQ configuration (config.xml) and are applied at node start,
+# so changing them triggers a rolling restart of the HiveMQ Platform cluster.
+dataIntelligence:
+  # Configures HiveMQ Data Intelligence log-based clustering.
+  clustering:
+    # Enables log-based clustering.
+    enabled: false
+    # The number of nodes that form the initial Raft group, rendered as an identical initial member list
+    # into the configuration of all nodes. Required when clustering is enabled and must not exceed the
+    # `nodes.replicaCount` value.
+    #initialMemberCount: 2
+    # The log-based clustering port (7557 by default).
+    #port: 7557
+    # Disables the log-based clustering data layer (enabled by default).
+    #dataLayerEnabled: false
+  # Configures the HiveMQ Data Intelligence agent. All values are optional: without a connection string
+  # configured here, the connection string of the HiveMQ Platform license is used.
+  agent: {}
+    # The name of an existing Kubernetes Secret containing the agent connection string. The connection
+    # string is injected as an environment variable, so it is never stored in the HiveMQ configuration
+    # ConfigMap.
+    #connectionStringSecretName: ""
+    # The key within the connection string Secret ("connection-string" by default).
+    #connectionStringSecretKey: "connection-string"
+    # The name of an existing Kubernetes Secret containing the agent truststore. The Secret is mounted
+    # into the HiveMQ configuration folder and configured as the agent truststore path. The truststore
+    # file is watched, so updating the Secret content applies without a restart (the key and the
+    # passphrase must stay the same).
+    #truststoreSecretName: ""
+    # The key within the truststore Secret ("truststore.jks" by default).
+    #truststoreSecretKey: "truststore.jks"
 
 # Configures the rolling restart behavior for this HiveMQ Platform.
 rollingRestart: {}
