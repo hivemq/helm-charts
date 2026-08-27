@@ -2,7 +2,6 @@
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- include "hivemq-platform.validate-data-intelligence" . -}}
 {{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) -}}
-{{- $hasDataIntelligenceTruststore := ( include "hivemq-platform.has-data-intelligence-truststore" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
@@ -33,9 +32,13 @@ spec:
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
   metricsPort: {{ $metricsPort }}
   metricsPath: {{ .Values.metrics.path }}
-  {{- if .Values.monitoredResources }}
+  {{- $dataIntelligenceMonitoredResources := include "hivemq-platform.data-intelligence-monitored-resources" . -}}
+  {{- if or $dataIntelligenceMonitoredResources .Values.monitoredResources }}
   {{- include "hivemq-platform.validate-monitored-resources" . }}
   monitoredResources:
+    {{- with $dataIntelligenceMonitoredResources }}
+    {{- . | trim | nindent 4 }}
+    {{- end }}
     {{- range .Values.monitoredResources }}
     - name: {{ .name | quote }}
       type: {{ ternary "CONFIG_MAP" "SECRET" (eq .type "ConfigMap") | quote }}
@@ -114,8 +117,8 @@ spec:
                 - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.dataIntelligence.agent.connectionStringSecretName }}
-                      key: {{ .Values.dataIntelligence.agent.connectionStringSecretKey | default "connection-string" }}
+                      name: {{ .Values.dataIntelligence.server.connectionStringSecretName | quote }}
+                      key: {{ .Values.dataIntelligence.server.connectionStringSecretKey | default "connection-string" | quote }}
                 {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
@@ -238,15 +241,11 @@ spec:
                   ephemeral-storage: {{ . | trim | quote }}
                   {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
-              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore $hasDataIntelligenceTruststore }}
+              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore }}
               volumeMounts:
                 {{- if $hasLicense }}
                 - name: licenses
                   mountPath: /opt/hivemq/license
-                {{- end }}
-                {{- if $hasDataIntelligenceTruststore }}
-                - name: data-intelligence-truststore
-                  mountPath: /opt/hivemq/conf/data-intelligence
                 {{- end }}
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
@@ -268,7 +267,7 @@ spec:
             {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore $hasDataIntelligenceTruststore }}
+          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore }}
           volumes:
             {{- if $hasLicense }}
             - name: licenses
@@ -278,11 +277,6 @@ spec:
                 {{- else }}
                 secretName: {{ include "hivemq-platform.default-license-name" . }}
                 {{- end }}
-            {{- end }}
-            {{- if $hasDataIntelligenceTruststore }}
-            - name: data-intelligence-truststore
-              secret:
-                secretName: {{ .Values.dataIntelligence.agent.truststoreSecretName }}
             {{- end }}
             {{- if $hasKeystore }}
               {{- (include "hivemq-platform.get-tls-secret-volumes" .) | indent 12 -}}
