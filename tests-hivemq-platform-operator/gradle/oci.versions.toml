@@ -26,7 +26,7 @@ reference = "latest@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d
 [[oci]]
 name = "nginx"
 image = "library/nginx"
-reference = "latest@sha256:0d4374c710a9649200e84f8ef8dbdd4fa76c0c107839cd50f1e42a63916b0f2e"
+reference = "latest@sha256:b34848eff6db786b6b1282d3a9c3fd0b5563dfb6d261df4923378b419e0d24f0"
 
 # https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
 [[oci]]
@@ -59,13 +59,13 @@ reference = "21-jre-resolute@sha256:097b5c0e8b5c9cc402e871a87a35f20e9413af915941
 [[oci]]
 name = "jre-temurin21-ubi9"
 image = "library/eclipse-temurin"
-reference = "21-jre-ubi9-minimal@sha256:0489c9acba7b7a32735e6ced08f459470748cb60aa0fa9adfc2d7e98f3716571"
+reference = "21-jre-ubi9-minimal@sha256:303903ac5a77a7efe42a0ccd7f158458c472ac4426fc0e49816f1d904933c8df"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-ubi10-minimal
 [[oci]]
 name = "jre-temurin25-ubi10"
 image = "library/eclipse-temurin"
-reference = "25-jre-ubi10-minimal@sha256:c956421c11635e8c38e273d688907424ed39e07c8fbe6eaf596fe55c915e8908"
+reference = "25-jre-ubi10-minimal@sha256:c472bd239805ed1354f710c585b5dbec0c1997a65eaaaa95676c343517ed80c7"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-21-jre-noble
 [[oci]]
