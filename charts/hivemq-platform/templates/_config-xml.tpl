@@ -422,16 +422,11 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     {{- end }}
   </data-hub>
   {{- end }}
-  {{- if or (include "hivemq-platform.has-data-intelligence-connection-string" .) (include "hivemq-platform.has-data-intelligence-truststore" .) }}
+  {{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
   <data-intelligence>
-    <agent>
-      {{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
+    <server>
       <connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string>
-      {{- end }}
-      {{- if include "hivemq-platform.has-data-intelligence-truststore" . }}
-      <truststore-path>{{ include "hivemq-platform.data-intelligence-truststore-path" . }}</truststore-path>
-      {{- end }}
-    </agent>
+    </server>
   </data-intelligence>
   {{- end }}
   {{- $internalOptionsConfig := .Values.hivemqInternalOptions }}
