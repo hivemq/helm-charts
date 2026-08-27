@@ -121,16 +121,71 @@ tests:
       - failedTemplate:
           errorPattern: "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING environment variable cannot be set"
 
-  - it: with an additional volume mounted on the truststore path, validation fails
+  - it: with the log-based clustering environment variable set manually and clustering enabled, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      nodes.env:
+        - name: LOG_BASED_CLUSTERING_ENABLED
+          value: "false"
+    asserts:
+      - failedTemplate:
+          errorPattern: "LOG_BASED_CLUSTERING_ENABLED environment variable cannot be set when HiveMQ Data Intelligence clustering is enabled"
+
+  - it: with an internal option duplicating the connection string option, validation fails
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      hivemqInternalOptions:
+        - key: data-intelligence.connection-string
+          value: my-connection-string
+    asserts:
+      - failedTemplate:
+          errorPattern: "The `data-intelligence.connection-string` internal option cannot be set via the `hivemqInternalOptions` value"
+
+  - it: with an internal option duplicating the truststore path option, validation fails
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      hivemqInternalOptions:
+        - key: data-intelligence.truststore-path
+          value: /some/other/truststore.p12
+    asserts:
+      - failedTemplate:
+          errorPattern: "The `data-intelligence.truststore-path` internal option cannot be set via the `hivemqInternalOptions` value"
+
+  - it: with an additional volume clashing with the truststore volume name, validation fails
     set:
       dataIntelligence.agent.truststoreSecretName: my-truststore-secret
       additionalVolumes:
         - type: emptyDir
           name: data-intelligence-truststore
+          path: /some/other/path
+    asserts:
+      - failedTemplate:
+          errorPattern: "VolumeMount `data-intelligence-truststore` \\(name: `data-intelligence-truststore` value, mountName: `` value\\) is duplicated for container `hivemq`"
+
+  - it: with an additional volume clashing with the truststore mount path, validation fails
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      additionalVolumes:
+        - type: emptyDir
+          name: my-additional-volume
           path: /opt/hivemq/conf/data-intelligence
     asserts:
       - failedTemplate:
           errorPattern: "is duplicated for container `hivemq`"
+
+  - it: with an additional volume on the truststore path for a different container, no validation error
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      additionalVolumes:
+        - type: emptyDir
+          name: my-additional-volume
+          containerName: foobar
+          path: /opt/hivemq/conf/data-intelligence
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
 
   - it: with clustering disabled and no initial member count, no validation error
     set:
@@ -167,6 +222,39 @@ tests:
           content:
             name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
             value: my-connection-string
+
+  - it: with the log-based clustering environment variable set manually and clustering disabled, no validation error
+    set:
+      nodes.env:
+        - name: LOG_BASED_CLUSTERING_ENABLED
+          value: "true"
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: LOG_BASED_CLUSTERING_ENABLED
+            value: "true"
+
+  - it: with an internal option for the connection string and no connection string Secret, no validation error
+    set:
+      hivemqInternalOptions:
+        - key: data-intelligence.connection-string
+          value: my-connection-string
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with an unrelated internal option and an agent connection string Secret, no validation error
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      hivemqInternalOptions:
+        - key: foo
+          value: bar
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
 
   - it: with an additional volume on a different path than the truststore, no validation error
     set:
@@ -225,3 +313,253 @@ tests:
           content:
             name: data-intelligence-truststore
             mountPath: /opt/hivemq/conf/data-intelligence
+
+  - it: with clustering enabled and an overridden StatefulSet, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      config.overrideStatefulSet: "spec: {}"
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be combined with the `config.overrideStatefulSet` value"
+
+  - it: with clustering disabled and an overridden StatefulSet, no validation error
+    set:
+      dataIntelligence.clustering.enabled: false
+      config.overrideStatefulSet: "spec: {}"
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with clustering enabled and an existing HiveMQ configuration, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      config.create: false
+      config.name: my-existing-config
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be combined with the `config.create=false` value"
+
+  - it: with clustering disabled and an existing HiveMQ configuration, no validation error
+    set:
+      dataIntelligence.clustering.enabled: false
+      config.create: false
+      config.name: my-existing-config
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with a clustering port clashing with the cluster transport port, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      dataIntelligence.clustering.port: 7000
+    asserts:
+      - failedTemplate:
+          errorPattern: "already exists as part of one of the predefined ports"
+
+  - it: with an exposed service on the clustering port, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7557
+    asserts:
+      - failedTemplate:
+          errorPattern: "already exists as part of one of the predefined ports"
+
+  - it: with an agent connection string Secret, the Secret is automatically monitored
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+    asserts:
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-connection-string-secret
+            type: SECRET
+            files:
+              - connection-string
+
+  - it: with an agent truststore Secret, the Secret is automatically monitored
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+    asserts:
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-truststore-secret
+            type: SECRET
+            files:
+              - truststore.p12
+
+  - it: with the connection string and truststore in the same Secret, the Secret is monitored once with both files
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-agent-secret
+      dataIntelligence.agent.truststoreSecretName: my-agent-secret
+    asserts:
+      - lengthEqual:
+          path: spec.monitoredResources
+          count: 1
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-agent-secret
+            type: SECRET
+            files:
+              - connection-string
+              - truststore.p12
+
+  - it: with an agent Secret listed in the monitored resources, validation fails
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      monitoredResources:
+        - name: my-truststore-secret
+          type: Secret
+    asserts:
+      - failedTemplate:
+          errorPattern: "is automatically monitored"
+
+  - it: with the retired pulse create value disabled, no validation error
+    set:
+      pulse.create: false
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with the retired pulse name value, validation fails
+    set:
+      pulse.name: my-pulse-secret
+    asserts:
+      - failedTemplate:
+          errorPattern: "The `pulse` values are retired"
+
+  - it: with clustering enabled and a release name longer than 48 characters, validation fails
+    release:
+      name: release-name-longer-than-forty-eight-characters-x
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - failedTemplate:
+          errorPattern: "exceeds 48 characters"
+
+  - it: with an out-of-range clustering port, schema validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      dataIntelligence.clustering.port: 70000
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a zero initial member count, schema validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 0
+    asserts:
+      - failedTemplate: {}
+
+  - it: with an unknown clustering value, schema validation fails
+    set:
+      dataIntelligence.clustering.enable: true
+    asserts:
+      - failedTemplate: {}
+
+  - it: with an unknown agent value, schema validation fails
+    set:
+      dataIntelligence.agent.connectionString: my-connection-string
+    asserts:
+      - failedTemplate: {}
+
+  - it: with a truststore Secret key containing XML characters, schema validation fails
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      dataIntelligence.agent.truststoreSecretKey: "a<b&c"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with clustering enabled and a release name of exactly 48 characters, no validation error
+    release:
+      name: release-name-with-exactly-forty-eight-characters
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with clustering disabled and a release name longer than 48 characters, no validation error
+    release:
+      name: release-name-longer-than-forty-eight-characters-x
+    set:
+      dataIntelligence.clustering.enabled: false
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with the retired pulse data value, validation fails
+    set:
+      pulse.data: "PHB1bHNlPjwvcHVsc2U+"
+    asserts:
+      - failedTemplate:
+          errorPattern: "The `pulse` values are retired"
+
+  - it: with the retired pulse override config value, validation fails
+    set:
+      pulse.overridePulseConfig: "<pulse></pulse>"
+    asserts:
+      - failedTemplate:
+          errorPattern: "The `pulse` values are retired"
+
+  - it: with clustering disabled and an exposed service on the clustering port, no validation error
+    set:
+      dataIntelligence.clustering.enabled: false
+      services:
+        - type: mqtt
+          exposed: true
+          containerPort: 7557
+    asserts:
+      - notFailedTemplate: {}
+
+  - it: with an agent Secret and an unrelated monitored resource, both are rendered
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      monitoredResources:
+        - name: my-other-secret
+          type: Secret
+    asserts:
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-truststore-secret
+            type: SECRET
+            files:
+              - truststore.p12
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-other-secret
+            type: SECRET
+
+  - it: with an agent truststore Secret and a custom key, the custom key is monitored
+    set:
+      dataIntelligence.agent.truststoreSecretName: my-truststore-secret
+      dataIntelligence.agent.truststoreSecretKey: backend-ca.p12
+    asserts:
+      - contains:
+          path: spec.monitoredResources
+          content:
+            name: my-truststore-secret
+            type: SECRET
+            files:
+              - backend-ca.p12
+
+  - it: with a connection string Secret key containing invalid characters, schema validation fails
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      dataIntelligence.agent.connectionStringSecretKey: "invalid/key"
+    asserts:
+      - failedTemplate: {}
+
+  - it: with an unknown Data Intelligence value, schema validation fails
+    set:
+      dataIntelligence.cluster.enabled: true
+    asserts:
+      - failedTemplate: {}

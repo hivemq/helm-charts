@@ -159,34 +159,87 @@ Usage: {{ include "hivemq-platform.has-data-intelligence-truststore" . }}
 {{- end -}}
 
 {{/*
+Gets the automatically monitored HiveMQ Data Intelligence Secrets as rendered `monitoredResources` entries.
+The configured agent Secrets are grouped by Secret name, so a Secret shared by the connection string and the
+truststore is monitored once with both keys. Returns an empty string when no agent Secret is configured.
+Usage: {{ include "hivemq-platform.data-intelligence-monitored-resources" . }}
+*/}}
+{{- define "hivemq-platform.data-intelligence-monitored-resources" -}}
+{{- $monitoredSecrets := dict -}}
+{{- if include "hivemq-platform.has-data-intelligence-connection-string" . -}}
+  {{- $secretName := .Values.dataIntelligence.agent.connectionStringSecretName -}}
+  {{- $_ := set $monitoredSecrets $secretName (list (.Values.dataIntelligence.agent.connectionStringSecretKey | default "connection-string")) -}}
+{{- end -}}
+{{- if include "hivemq-platform.has-data-intelligence-truststore" . -}}
+  {{- $secretName := .Values.dataIntelligence.agent.truststoreSecretName -}}
+  {{- $files := append (get $monitoredSecrets $secretName | default list) (.Values.dataIntelligence.agent.truststoreSecretKey | default "truststore.p12") -}}
+  {{- $_ := set $monitoredSecrets $secretName $files -}}
+{{- end -}}
+{{- range $secretName, $files := $monitoredSecrets }}
+- name: {{ $secretName | quote }}
+  type: "SECRET"
+  files:
+    {{- range $files }}
+    - {{ . | quote }}
+    {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Gets the mounted HiveMQ Data Intelligence agent truststore path.
 Usage: {{ include "hivemq-platform.data-intelligence-truststore-path" . }}
 */}}
 {{- define "hivemq-platform.data-intelligence-truststore-path" -}}
-{{- printf "/opt/hivemq/conf/data-intelligence/%s" (.Values.dataIntelligence.agent.truststoreSecretKey | default "truststore.jks") -}}
+{{- printf "/opt/hivemq/conf/data-intelligence/%s" (.Values.dataIntelligence.agent.truststoreSecretKey | default "truststore.p12") -}}
 {{- end -}}
 
 {{/*
 Validates the HiveMQ Data Intelligence configuration so:
  - The retired `pulse` values are not used anymore.
- - When clustering is enabled, the default HiveMQ configuration is in use and the `initialMemberCount`
-   value is set and not greater than the `nodes.replicaCount` value.
+ - The `hivemqInternalOptions` value does not duplicate the `data-intelligence.*` internal options
+   rendered from the `dataIntelligence.agent` values.
+ - When clustering is enabled, the default HiveMQ configuration and StatefulSet are in use and the
+   `initialMemberCount` value is set and not greater than the `nodes.replicaCount` value.
+ - The clustering port does not conflict with any of the predefined HiveMQ Platform ports.
+ - The release name fits the DNS label limit of the cluster Service used for the initial member list.
 Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
 */}}
 {{- define "hivemq-platform.validate-data-intelligence" -}}
-{{- if .Values.pulse -}}
-    {{- fail (printf "\nThe `pulse` values are retired: the HiveMQ Data Intelligence configuration moved into the HiveMQ configuration (config.xml). Use the `dataIntelligence` values instead and remove the `pulse` values") -}}
+{{- if or (.Values.pulse).create (.Values.pulse).name (.Values.pulse).data (.Values.pulse).overridePulseConfig -}}
+    {{- fail (printf "\nThe `pulse` values are retired: the HiveMQ Data Intelligence configuration moved into the HiveMQ configuration (config.xml). Use the `dataIntelligence` values instead and remove the `pulse` values (`--set pulse=null` when reusing values)") -}}
+{{- end -}}
+{{- range .Values.hivemqInternalOptions -}}
+    {{- if and (eq (.key | default "") "data-intelligence.connection-string") (include "hivemq-platform.has-data-intelligence-connection-string" $) -}}
+        {{- fail (printf "\nThe `data-intelligence.connection-string` internal option cannot be set via the `hivemqInternalOptions` value when the `dataIntelligence.agent.connectionStringSecretName` value is set") -}}
+    {{- end -}}
+    {{- if and (eq (.key | default "") "data-intelligence.truststore-path") (include "hivemq-platform.has-data-intelligence-truststore" $) -}}
+        {{- fail (printf "\nThe `data-intelligence.truststore-path` internal option cannot be set via the `hivemqInternalOptions` value when the `dataIntelligence.agent.truststoreSecretName` value is set") -}}
+    {{- end -}}
 {{- end -}}
 {{- if include "hivemq-platform.has-data-intelligence-clustering" . -}}
     {{- $clustering := .Values.dataIntelligence.clustering -}}
     {{- if .Values.config.overrideHiveMQConfig -}}
         {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.overrideHiveMQConfig` value. Configure log-based clustering directly in your custom HiveMQ configuration instead") -}}
     {{- end -}}
+    {{- if .Values.config.overrideStatefulSet -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.overrideStatefulSet` value. The initial member list is rendered from the default StatefulSet") -}}
+    {{- end -}}
+    {{- if not .Values.config.create -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.create=false` value. Configure log-based clustering directly in your existing HiveMQ configuration instead") -}}
+    {{- end -}}
     {{- if not $clustering.initialMemberCount -}}
         {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value is required when HiveMQ Data Intelligence clustering is enabled") -}}
     {{- end -}}
     {{- if gt (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount) -}}
         {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be greater than the `nodes.replicaCount` value (%d)" (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount)) -}}
+    {{- end -}}
+    {{- $clusteringPort := include "hivemq-platform.data-intelligence-clustering-port" . | int64 -}}
+    {{- $predefinedPortsList := list (include "hivemq-platform.operator-rest-api-port" . | int64) (include "hivemq-platform.health-api-port" . | int64) (include "hivemq-platform.cluster-transport-port" . | int64) -}}
+    {{- if has $clusteringPort $predefinedPortsList -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.port` value (%d) already exists as part of one of the predefined ports (%s)" $clusteringPort (join ", " $predefinedPortsList)) -}}
+    {{- end -}}
+    {{- if gt (len .Release.Name) 48 -}}
+        {{- fail (printf "\nThe release name `%s` exceeds 48 characters, so the cluster Service name `hivemq-%s-cluster` of the initial member list would exceed the DNS label limit of 63 characters" .Release.Name .Release.Name) -}}
     {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -669,6 +722,9 @@ Usage: {{ include "hivemq-platform.validate-default-service-ports" . }}
 {{- $defaultPortsList = ( include "hivemq-platform.operator-rest-api-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList = ( include "hivemq-platform.health-api-port" . | int64 ) | append $defaultPortsList }}
 {{- $defaultPortsList = ( include "hivemq-platform.cluster-transport-port" . | int64 ) | append $defaultPortsList }}
+{{- if include "hivemq-platform.has-data-intelligence-clustering" . }}
+{{- $defaultPortsList = ( include "hivemq-platform.data-intelligence-clustering-port" . | int64 ) | append $defaultPortsList }}
+{{- end }}
 {{- range $service := $services }}
   {{- if and $service.exposed (has (int64 $service.containerPort) $defaultPortsList) }}
     {{- fail (printf "\nContainer port %d in service `%s` already exists as part of one of the predefined ports (%s)" (int64 $service.containerPort) $service.type (join ", " $defaultPortsList)) }}
@@ -1074,11 +1130,19 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 Validate monitored resources configuration.
  - Ensures no duplicate ConfigMap or Secret names are defined.
  - Ensures no duplicate files are defined within the same resource.
+ - Checks for conflicts with the automatically monitored HiveMQ Data Intelligence Secrets.
 Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
 */}}
 {{- define "hivemq-platform.validate-monitored-resources" -}}
 {{- $configMapNamesList := list }}
 {{- $secretNamesList := list }}
+{{- $dataIntelligenceSecretNamesList := list }}
+{{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
+  {{- $dataIntelligenceSecretNamesList = .Values.dataIntelligence.agent.connectionStringSecretName | append $dataIntelligenceSecretNamesList }}
+{{- end }}
+{{- if include "hivemq-platform.has-data-intelligence-truststore" . }}
+  {{- $dataIntelligenceSecretNamesList = .Values.dataIntelligence.agent.truststoreSecretName | append $dataIntelligenceSecretNamesList }}
+{{- end }}
 {{- range $resource := .Values.monitoredResources }}
   {{- if eq $resource.type "ConfigMap" }}
     {{- if has $resource.name $configMapNamesList }}
@@ -1088,6 +1152,9 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
   {{- else }}
     {{- if has $resource.name $secretNamesList }}
       {{- fail (printf "\nFound duplicated Secret name '%s' for `monitoredResources`" $resource.name) }}
+    {{- end }}
+    {{- if has $resource.name $dataIntelligenceSecretNamesList }}
+      {{- fail (printf "\nThe HiveMQ Data Intelligence Secret '%s' is automatically monitored. Please remove it from `monitoredResources`" $resource.name) }}
     {{- end }}
     {{- $secretNamesList = $resource.name | append $secretNamesList }}
   {{- end }}
@@ -1138,12 +1205,16 @@ Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 {{- $sharedPvcEnvVars := list "HIVEMQ_DATA_FOLDER" "HIVEMQ_LOG_FOLDER" "HIVEMQ_HEAPDUMP_FOLDER" "HIVEMQ_BACKUP_FOLDER" "HIVEMQ_AUDIT_FOLDER" }}
 {{- $hasSharedPvc := ( include "hivemq-platform.has-shared-pvc" . ) }}
 {{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) }}
+{{- $hasDataIntelligenceClustering := ( include "hivemq-platform.has-data-intelligence-clustering" . ) }}
 {{- range .Values.nodes.env }}
   {{- if eq .name "HIVEMQ_CLUSTERING_BOOTSTRAP" }}
     {{- fail (printf "\nHIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set") }}
   {{- end }}
   {{- if and (eq .name "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING") $hasDataIntelligenceConnectionString }}
     {{- fail (printf "\nHIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING environment variable cannot be set") }}
+  {{- end }}
+  {{- if and (eq .name "LOG_BASED_CLUSTERING_ENABLED") $hasDataIntelligenceClustering }}
+    {{- fail (printf "\nLOG_BASED_CLUSTERING_ENABLED environment variable cannot be set when HiveMQ Data Intelligence clustering is enabled, as it overrides the rendered log-based clustering configuration") }}
   {{- end }}
   {{- if and $hasSharedPvc (has .name $sharedPvcEnvVars) }}
     {{- fail (printf "\n`%s` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type" .name) }}

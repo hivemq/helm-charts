@@ -299,11 +299,44 @@
       "type" : "object"
     },
     "dataIntelligence" : {
+      "additionalProperties" : false,
       "description" : "Defines the HiveMQ Data Intelligence configuration options.",
       "properties" : {
+        "agent" : {
+          "additionalProperties" : false,
+          "description" : "Configures the HiveMQ Data Intelligence agent.",
+          "properties" : {
+            "connectionStringSecretKey" : {
+              "description" : "The key within the connection string Secret (\"connection-string\" by default).",
+              "pattern" : "^[-._a-zA-Z0-9]+$",
+              "type" : "string"
+            },
+            "connectionStringSecretName" : {
+              "description" : "The name of an existing Kubernetes Secret containing the agent connection string.",
+              "maxLength" : 253,
+              "type" : "string"
+            },
+            "truststoreSecretKey" : {
+              "description" : "The key within the truststore Secret (\"truststore.p12\" by default).",
+              "pattern" : "^[-._a-zA-Z0-9]+$",
+              "type" : "string"
+            },
+            "truststoreSecretName" : {
+              "description" : "The name of an existing Kubernetes Secret containing the agent truststore in PKCS12 format created without a password (a password-protected truststore is loaded as empty).",
+              "maxLength" : 253,
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        },
         "clustering" : {
+          "additionalProperties" : false,
           "description" : "Configures HiveMQ Data Intelligence log-based clustering.",
           "properties" : {
+            "dataLayerEnabled" : {
+              "description" : "Disables the log-based clustering data layer when set to false (enabled by default).",
+              "type" : "boolean"
+            },
             "enabled" : {
               "description" : "Enables log-based clustering.",
               "type" : "boolean"
@@ -318,34 +351,6 @@
               "maximum" : 65535,
               "minimum" : 1,
               "type" : "integer"
-            },
-            "dataLayerEnabled" : {
-              "description" : "Disables the log-based clustering data layer when set to false (enabled by default).",
-              "type" : "boolean"
-            }
-          },
-          "type" : "object"
-        },
-        "agent" : {
-          "description" : "Configures the HiveMQ Data Intelligence agent.",
-          "properties" : {
-            "connectionStringSecretName" : {
-              "description" : "The name of an existing Kubernetes Secret containing the agent connection string.",
-              "maxLength" : 253,
-              "type" : "string"
-            },
-            "connectionStringSecretKey" : {
-              "description" : "The key within the connection string Secret (\"connection-string\" by default).",
-              "type" : "string"
-            },
-            "truststoreSecretName" : {
-              "description" : "The name of an existing Kubernetes Secret containing the agent truststore.",
-              "maxLength" : 253,
-              "type" : "string"
-            },
-            "truststoreSecretKey" : {
-              "description" : "The key within the truststore Secret (\"truststore.jks\" by default).",
-              "type" : "string"
             }
           },
           "type" : "object"

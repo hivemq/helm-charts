@@ -33,9 +33,13 @@ spec:
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
   metricsPort: {{ $metricsPort }}
   metricsPath: {{ .Values.metrics.path }}
-  {{- if .Values.monitoredResources }}
+  {{- $dataIntelligenceMonitoredResources := include "hivemq-platform.data-intelligence-monitored-resources" . -}}
+  {{- if or $dataIntelligenceMonitoredResources .Values.monitoredResources }}
   {{- include "hivemq-platform.validate-monitored-resources" . }}
   monitoredResources:
+    {{- with $dataIntelligenceMonitoredResources }}
+    {{- . | trim | nindent 4 }}
+    {{- end }}
     {{- range .Values.monitoredResources }}
     - name: {{ .name | quote }}
       type: {{ ternary "CONFIG_MAP" "SECRET" (eq .type "ConfigMap") | quote }}
@@ -114,8 +118,8 @@ spec:
                 - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Values.dataIntelligence.agent.connectionStringSecretName }}
-                      key: {{ .Values.dataIntelligence.agent.connectionStringSecretKey | default "connection-string" }}
+                      name: {{ .Values.dataIntelligence.agent.connectionStringSecretName | quote }}
+                      key: {{ .Values.dataIntelligence.agent.connectionStringSecretKey | default "connection-string" | quote }}
                 {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
@@ -282,7 +286,7 @@ spec:
             {{- if $hasDataIntelligenceTruststore }}
             - name: data-intelligence-truststore
               secret:
-                secretName: {{ .Values.dataIntelligence.agent.truststoreSecretName }}
+                secretName: {{ .Values.dataIntelligence.agent.truststoreSecretName | quote }}
             {{- end }}
             {{- if $hasKeystore }}
               {{- (include "hivemq-platform.get-tls-secret-volumes" .) | indent 12 -}}

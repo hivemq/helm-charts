@@ -27,7 +27,7 @@ tests:
           pattern: "(?s)<log-based>.*?</log-based>"
       - notMatchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-intelligence>.*?</data-intelligence>"
+          pattern: "(?s)<internal>.*?</internal>"
 
   - it: with clustering disabled explicitly, no log-based clustering configuration
     set:
@@ -97,10 +97,10 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-intelligence>.*?<agent>.*?<connection-string>\\$\\{HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING\\}</connection-string>.*?</agent>.*?</data-intelligence>"
+          pattern: "(?s)<internal>.*?<option>.*?<key>data-intelligence\\.connection-string</key>.*?<value>\\$\\{HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING\\}</value>.*?</option>.*?</internal>"
       - notMatchRegex:
           path: data["config.xml"]
-          pattern: "<truststore-path>"
+          pattern: "data-intelligence\\.truststore-path"
 
   - it: with an agent truststore Secret, the truststore path points to the mounted Secret
     set:
@@ -108,10 +108,10 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-intelligence>.*?<agent>.*?<truststore-path>/opt/hivemq/conf/data-intelligence/truststore.jks</truststore-path>.*?</agent>.*?</data-intelligence>"
+          pattern: "(?s)<internal>.*?<option>.*?<key>data-intelligence\\.truststore-path</key>.*?<value>/opt/hivemq/conf/data-intelligence/truststore.p12</value>.*?</option>.*?</internal>"
       - notMatchRegex:
           path: data["config.xml"]
-          pattern: "<connection-string>"
+          pattern: "data-intelligence\\.connection-string"
 
   - it: with an agent truststore Secret and a custom key, the truststore path uses the custom key
     set:
@@ -120,7 +120,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.xml"]
-          pattern: "<truststore-path>/opt/hivemq/conf/data-intelligence/my-truststore.p12</truststore-path>"
+          pattern: "(?s)<key>data-intelligence\\.truststore-path</key>.*?<value>/opt/hivemq/conf/data-intelligence/my-truststore.p12</value>"
 
   - it: with an agent connection string and truststore Secret, both agent options are rendered
     set:
@@ -129,7 +129,21 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-intelligence>.*?<agent>.*?<connection-string>\\$\\{HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING\\}</connection-string>.*?<truststore-path>/opt/hivemq/conf/data-intelligence/truststore.jks</truststore-path>.*?</agent>.*?</data-intelligence>"
+          pattern: "(?s)<internal>.*?<key>data-intelligence\\.connection-string</key>.*?<value>\\$\\{HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING\\}</value>.*?<key>data-intelligence\\.truststore-path</key>.*?<value>/opt/hivemq/conf/data-intelligence/truststore.p12</value>.*?</internal>"
+
+  - it: with an agent connection string Secret and custom internal options, the agent options are merged into the internal block
+    set:
+      dataIntelligence.agent.connectionStringSecretName: my-connection-string-secret
+      hivemqInternalOptions:
+        - key: foo
+          value: bar
+    asserts:
+      - matchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)<internal>.*?<key>data-intelligence\\.connection-string</key>.*?<key>foo</key>.*?<value>bar</value>.*?</internal>"
+      - notMatchRegex:
+          path: data["config.xml"]
+          pattern: "(?s)</internal>.*?<internal>"
 
   - it: with clustering and agent configured, both blocks are rendered
     set:
@@ -142,7 +156,7 @@ tests:
           pattern: "(?s)<log-based>.*?</log-based>"
       - matchRegex:
           path: data["config.xml"]
-          pattern: "(?s)<data-intelligence>.*?</data-intelligence>"
+          pattern: "(?s)<internal>.*?<key>data-intelligence\\.connection-string</key>.*?</internal>"
 
   - it: with clustering enabled and a single initial member, one member is rendered
     set:

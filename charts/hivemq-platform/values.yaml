@@ -870,6 +870,8 @@ dataIntelligence:
     #dataLayerEnabled: false
   # Configures the HiveMQ Data Intelligence agent. All values are optional: without a connection string
   # configured here, the connection string of the HiveMQ Platform license is used.
+  # Both Secrets are automatically monitored, so changing their content triggers a rolling restart of the
+  # HiveMQ Platform cluster to apply the new content.
   agent: {}
     # The name of an existing Kubernetes Secret containing the agent connection string. The connection
     # string is injected as an environment variable, so it is never stored in the HiveMQ configuration
@@ -877,13 +879,12 @@ dataIntelligence:
     #connectionStringSecretName: ""
     # The key within the connection string Secret ("connection-string" by default).
     #connectionStringSecretKey: "connection-string"
-    # The name of an existing Kubernetes Secret containing the agent truststore. The Secret is mounted
-    # into the HiveMQ configuration folder and configured as the agent truststore path. The truststore
-    # file is watched, so updating the Secret content applies without a restart (the key and the
-    # passphrase must stay the same).
+    # The name of an existing Kubernetes Secret containing the agent truststore in PKCS12 format created
+    # without a password (a password-protected truststore is loaded as empty). The Secret is mounted into
+    # the container and configured as the agent truststore path.
     #truststoreSecretName: ""
-    # The key within the truststore Secret ("truststore.jks" by default).
-    #truststoreSecretKey: "truststore.jks"
+    # The key within the truststore Secret ("truststore.p12" by default).
+    #truststoreSecretKey: "truststore.p12"
 
 # Configures the rolling restart behavior for this HiveMQ Platform.
 rollingRestart: {}

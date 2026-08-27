@@ -422,21 +422,23 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     {{- end }}
   </data-hub>
   {{- end }}
-  {{- if or (include "hivemq-platform.has-data-intelligence-connection-string" .) (include "hivemq-platform.has-data-intelligence-truststore" .) }}
-  <data-intelligence>
-    <agent>
-      {{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
-      <connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string>
-      {{- end }}
-      {{- if include "hivemq-platform.has-data-intelligence-truststore" . }}
-      <truststore-path>{{ include "hivemq-platform.data-intelligence-truststore-path" . }}</truststore-path>
-      {{- end }}
-    </agent>
-  </data-intelligence>
-  {{- end }}
   {{- $internalOptionsConfig := .Values.hivemqInternalOptions }}
-  {{- if $internalOptionsConfig }}
+  {{- $hasDataIntelligenceConnectionString := include "hivemq-platform.has-data-intelligence-connection-string" . }}
+  {{- $hasDataIntelligenceTruststore := include "hivemq-platform.has-data-intelligence-truststore" . }}
+  {{- if or $internalOptionsConfig $hasDataIntelligenceConnectionString $hasDataIntelligenceTruststore }}
   <internal>
+    {{- if $hasDataIntelligenceConnectionString }}
+    <option>
+      <key>data-intelligence.connection-string</key>
+      <value>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</value>
+    </option>
+    {{- end }}
+    {{- if $hasDataIntelligenceTruststore }}
+    <option>
+      <key>data-intelligence.truststore-path</key>
+      <value>{{ include "hivemq-platform.data-intelligence-truststore-path" . }}</value>
+    </option>
+    {{- end }}
     {{- range $internalOption := $internalOptionsConfig }}
     <option>
       <key>{{ $internalOption.key }}</key>
