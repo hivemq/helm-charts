@@ -84,7 +84,7 @@ tests:
       nodes.replicaCount: 2
     asserts:
       - failedTemplate:
-          errorPattern: "cannot be greater than the `nodes.replicaCount` value"
+          errorPattern: "cannot be greater than the `nodes.replicaCount` value \\(2\\). Increase `nodes.replicaCount`, or lower `initialMemberCount` before the initial installation"
 
   - it: with a single initial member and more than one replica, validation fails
     set:
@@ -179,7 +179,7 @@ tests:
             name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
             value: my-connection-string
 
-  - it: with the log-based clustering environment variable set manually and clustering disabled, no validation error
+  - it: with the log-based clustering environment variable set manually and clustering disabled, the manual override is rendered
     set:
       nodes.env:
         - name: HIVEMQ_LOG_BASED_CLUSTERING_ENABLED
@@ -269,7 +269,7 @@ tests:
           containerPort: 7557
     asserts:
       - failedTemplate:
-          errorPattern: "already exists as part of one of the predefined ports"
+          errorPattern: "already exists as the container port of the exposed service type `mqtt`"
 
   - it: with a connection string Secret, the Secret is automatically monitored
     set:
@@ -599,7 +599,7 @@ tests:
         - apiVersion: v1
           kind: ConfigMap
           metadata:
-            name: hivemq-configuration-test-hivemq-platform
+            name: my-existing-configuration
             namespace: test-hivemq-platform-namespace
           data:
             config.xml: "<hivemq><cluster><log-based><enabled>true</enabled><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster></hivemq>"
@@ -610,3 +610,108 @@ tests:
       - notFailedTemplate: {}
       - hasDocuments:
           count: 1
+
+  - it: with a connection string Secret and an overridden StatefulSet without the environment variable, validation fails
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.overrideStatefulSet: "spec: {}"
+    asserts:
+      - failedTemplate:
+          errorPattern: "which the `config.overrideStatefulSet` value does not define"
+
+  - it: with a connection string Secret and an overridden StatefulSet defining the environment variable, no validation error
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.overrideStatefulSet: |
+        spec:
+          template:
+            spec:
+              containers:
+                - name: hivemq
+                  env:
+                    - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+                      valueFrom:
+                        secretKeyRef:
+                          name: my-connection-string-secret
+                          key: connection-string
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a null dataIntelligence value, no rendering error
+    set:
+      dataIntelligence: null
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a null clustering value, no rendering error
+    set:
+      dataIntelligence.clustering: null
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a null server value, no rendering error
+    set:
+      dataIntelligence.server: null
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with the clustering port clashing with the metrics port, validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      dataIntelligence.clustering.port: 9399
+    asserts:
+      - failedTemplate:
+          errorPattern: "already exists as part of one of the predefined ports \\(7979, 8889, 7000, 9399\\)"
+
+  - it: with a stale deployed ConfigMap next to the current Secret configuration, the Secret wins
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+        "v1/Secret":
+          gvr:
+            version: "v1"
+            resource: "secrets"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><initial-members><member><host>a</host></member><member><host>b</host></member><member><host>c</host></member></initial-members></log-based></cluster></hivemq>"
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "PGhpdmVtcT48Y2x1c3Rlcj48bG9nLWJhc2VkPjxpbml0aWFsLW1lbWJlcnM+PG1lbWJlcj48aG9zdD5hPC9ob3N0PjwvbWVtYmVyPjxtZW1iZXI+PGhvc3Q+YjwvaG9zdD48L21lbWJlcj48L2luaXRpYWwtbWVtYmVycz48L2xvZy1iYXNlZD48L2NsdXN0ZXI+PC9oaXZlbXE+"
+    set:
+      config.createAs: Secret
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a blank connection string Secret name, schema validation fails
+    set:
+      dataIntelligence.server.connectionStringSecretName: " "
+    asserts:
+      - failedTemplate:
+          errorPattern: "connectionStringSecretName"
