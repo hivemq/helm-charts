@@ -21,6 +21,8 @@ tests:
             kind: PersistentVolumeClaim
             metadata:
               name: persistence
+              labels:
+                hivemq/platform-persistence: "true"
             spec:
               accessModes:
                 - ReadWriteOnce
@@ -204,6 +206,8 @@ tests:
             kind: PersistentVolumeClaim
             metadata:
               name: persistence
+              labels:
+                hivemq/platform-persistence: "true"
             spec:
               accessModes:
                 - ReadWriteOnce
@@ -239,6 +243,8 @@ tests:
             kind: PersistentVolumeClaim
             metadata:
               name: persistence
+              labels:
+                hivemq/platform-persistence: "true"
             spec:
               accessModes:
                 - ReadWriteOnce
@@ -259,6 +265,8 @@ tests:
             kind: PersistentVolumeClaim
             metadata:
               name: persistence
+              labels:
+                hivemq/platform-persistence: "true"
             spec:
               accessModes:
                 - ReadWriteOnce
@@ -314,6 +322,8 @@ tests:
                     kind: PersistentVolumeClaim
                     metadata:
                       name: persistence
+                      labels:
+                        hivemq/platform-persistence: "true"
                     spec:
                       accessModes:
                         - ReadWriteOnce
@@ -352,6 +362,8 @@ tests:
                     kind: PersistentVolumeClaim
                     metadata:
                       name: persistence
+                      labels:
+                        hivemq/platform-persistence: "true"
                     spec:
                       accessModes:
                         - ReadWriteOnce
@@ -389,6 +401,8 @@ tests:
                     kind: PersistentVolumeClaim
                     metadata:
                       name: persistence
+                      labels:
+                        hivemq/platform-persistence: "true"
                     spec:
                       accessModes:
                         - ReadWriteOnce
@@ -426,6 +440,8 @@ tests:
                     kind: PersistentVolumeClaim
                     metadata:
                       name: persistence
+                      labels:
+                        hivemq/platform-persistence: "true"
                     spec:
                       accessModes:
                         - ReadWriteOnce
@@ -498,3 +514,98 @@ tests:
       - lengthEqual:
           path: spec.statefulSet.spec.volumeClaimTemplates
           count: 1
+
+  - it: with persistence and an overridden StatefulSet, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      config.overrideStatefulSet: "spec: {}"
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence` value cannot be combined with the `config.overrideStatefulSet` value"
+
+  - it: with a user-defined deployed claim named persistence and no persistence values, no validation error
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: user-class
+                      resources:
+                        requests:
+                          storage: 5Gi
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a volume claim template already carrying the generated label, the persistence storage is not added again
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: persistence
+            labels:
+              hivemq/platform-persistence: "true"
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          count: 1
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+          any: true
+
+  - it: with persistence and a manually set heap dump folder environment variable, the variable is rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      nodes.env:
+        - name: HIVEMQ_HEAPDUMP_FOLDER
+          value: /opt/hivemq/dumps
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_HEAPDUMP_FOLDER
+            value: /opt/hivemq/dumps
+
+  - it: with a zero persistence storage size, schema validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 0Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "storageSize"

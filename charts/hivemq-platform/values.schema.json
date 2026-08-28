@@ -314,6 +314,8 @@
             "connectionStringSecretName" : {
               "description" : "The name of an existing Kubernetes Secret containing the connection string.",
               "maxLength" : 253,
+              "minLength" : 1,
+              "pattern" : ".*\\S.*",
               "type" : "string"
             }
           },
@@ -324,7 +326,7 @@
           "description" : "Configures HiveMQ Data Intelligence log-based clustering.",
           "properties" : {
             "dataLayerEnabled" : {
-              "description" : "Disables the log-based clustering data layer (enabled by default).",
+              "description" : "Enables the log-based clustering data layer (true by default). Set to false to disable it.",
               "type" : "boolean"
             },
             "enabled" : {
@@ -1155,7 +1157,7 @@
         },
         "storageSize" : {
           "description" : "The size of the PersistentVolumeClaim as a Kubernetes quantity (e.g. `10Gi`). Required when persistence is configured.",
-          "pattern" : "^[0-9]+(\\.[0-9]+)?(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E)?$",
+          "pattern" : "^([0-9]*[1-9][0-9]*(\\.[0-9]+)?|[0-9]+\\.[0-9]*[1-9][0-9]*)(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E)?$",
           "type" : "string"
         }
       },
