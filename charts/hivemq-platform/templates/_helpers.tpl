@@ -162,8 +162,8 @@ Usage: {{ include "hivemq-platform.data-intelligence-monitored-resources" . }}
 Validates the HiveMQ Data Intelligence configuration so:
  - The retired `pulse` values are not used anymore.
  - When clustering is enabled, the default HiveMQ configuration and StatefulSet are in use and the
-   `initialMemberCount` value is set and not greater than the
-   `nodes.replicaCount` value.
+   `initialMemberCount` value is set, not greater than the `nodes.replicaCount` value, and at least
+   2 when more than one replica runs.
  - The clustering port does not conflict with any of the predefined HiveMQ Platform ports.
  - The release name fits the DNS label limit of the cluster Service used for the initial member list.
 Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
@@ -188,6 +188,9 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
     {{- end -}}
     {{- if gt (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount) -}}
         {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be greater than the `nodes.replicaCount` value (%d)" (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount)) -}}
+    {{- end -}}
+    {{- if and (eq (int $clustering.initialMemberCount) 1) (gt (int .Values.nodes.replicaCount) 1) -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value must be at least 2 when the `nodes.replicaCount` value (%d) is greater than 1. Set `initialMemberCount` to at least 2, or run a single replica" (int .Values.nodes.replicaCount)) -}}
     {{- end -}}
     {{- $clusteringPort := include "hivemq-platform.data-intelligence-clustering-port" . | int64 -}}
     {{- $predefinedPortsList := list (include "hivemq-platform.operator-rest-api-port" . | int64) (include "hivemq-platform.health-api-port" . | int64) (include "hivemq-platform.cluster-transport-port" . | int64) -}}
