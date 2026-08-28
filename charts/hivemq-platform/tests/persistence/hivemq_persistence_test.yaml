@@ -290,3 +290,211 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "storageSize"
+
+  - it: with unchanged persistence values on an existing installation, no validation error
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: standard
+                      resources:
+                        requests:
+                          storage: 10Gi
+    set:
+      persistence.storageClass: standard
+      persistence.storageSize: 10Gi
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a changed persistence storage class on an existing installation, validation fails
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: standard
+                      resources:
+                        requests:
+                          storage: 10Gi
+    set:
+      persistence.storageClass: other-class
+      persistence.storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence.storageClass` value cannot be changed on an existing installation \\(deployed StorageClass: standard\\)"
+
+  - it: with a changed persistence storage size on an existing installation, validation fails
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: standard
+                      resources:
+                        requests:
+                          storage: 10Gi
+    set:
+      persistence.storageClass: standard
+      persistence.storageSize: 20Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence.storageSize` value cannot be changed on an existing installation \\(deployed storage size: 10Gi\\)"
+
+  - it: with persistence removed on an existing persistent installation, validation fails
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: standard
+                      resources:
+                        requests:
+                          storage: 10Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence` value cannot be removed on an existing installation"
+
+  - it: with persistence enabled on an existing installation without persistence, validation fails
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                serviceName: hivemq-test-hivemq-platform-cluster
+    set:
+      persistence.storageClass: standard
+      persistence.storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence` value cannot be enabled on an existing installation"
+
+  - it: with an existing installation without persistence and no persistence values, no validation error
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                serviceName: hivemq-test-hivemq-platform-cluster
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with persistence configured, exactly one volume and one PersistentVolumeClaim template are generated
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+    asserts:
+      - lengthEqual:
+          path: spec.statefulSet.spec.template.spec.volumes
+          count: 1
+      - lengthEqual:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          count: 1

@@ -873,7 +873,7 @@ dataIntelligence:
     # Enables log-based clustering.
     enabled: false
     # The number of nodes that form the initial cluster. Required when clustering is enabled and must
-    # not exceed the `nodes.replicaCount` value.
+    # not exceed the `nodes.replicaCount` value. Cannot be changed on an existing installation.
     #initialMemberCount: 2
     # The log-based clustering port (7557 by default).
     #port: 7557

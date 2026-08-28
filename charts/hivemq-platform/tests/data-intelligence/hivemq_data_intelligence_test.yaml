@@ -425,3 +425,188 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "initialMembersConnectTimeoutSeconds"
+
+  - it: with a changed initial member count on an existing installation, validation fails
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster></hivemq>"
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 3
+      nodes.replicaCount: 3
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be changed on an existing installation \\(deployed with 2 initial members\\)"
+
+  - it: with an unchanged initial member count on an existing installation, no validation error
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster></hivemq>"
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with clustering enabled for the first time on an existing installation, no validation error
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><enabled>true</enabled></cluster></hivemq>"
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a changed initial member count against a deployed Secret configuration, validation fails
+    kubernetesProvider:
+      scheme:
+        "v1/Secret":
+          gvr:
+            version: "v1"
+            resource: "secrets"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "PGhpdmVtcT48Y2x1c3Rlcj48bG9nLWJhc2VkPjxpbml0aWFsLW1lbWJlcnM+PG1lbWJlcj48aG9zdD5hPC9ob3N0PjwvbWVtYmVyPjxtZW1iZXI+PGhvc3Q+YjwvaG9zdD48L21lbWJlcj48L2luaXRpYWwtbWVtYmVycz48L2xvZy1iYXNlZD48L2NsdXN0ZXI+PC9oaXZlbXE+"
+    set:
+      config.createAs: Secret
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 3
+      nodes.replicaCount: 3
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be changed on an existing installation \\(deployed with 2 initial members\\)"
+
+  - it: with clustering disabled on an existing clustered installation, validation fails
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><enabled>true</enabled><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster></hivemq>"
+    asserts:
+      - failedTemplate:
+          errorPattern: "clustering cannot be disabled on an existing installation"
+
+  - it: with clustering disabled and a deployed configuration without clustering, no validation error
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><enabled>true</enabled></cluster></hivemq>"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with clustering disabled, a clustered deployed configuration and a configuration override, no validation error
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><enabled>true</enabled><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster></hivemq>"
+    set:
+      config.overrideHiveMQConfig: "<hivemq></hivemq>"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with clustering disabled, a clustered deployed configuration and an existing HiveMQ configuration, no validation error
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><enabled>true</enabled><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster></hivemq>"
+    set:
+      config.create: false
+      config.name: my-existing-configuration
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
