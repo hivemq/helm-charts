@@ -336,6 +336,11 @@
               "minimum" : 1,
               "type" : "integer"
             },
+            "initialMembersConnectTimeoutSeconds" : {
+              "description" : "The time budget in seconds that one cluster formation attempt waits for the other initial members before it retries (60 by default).",
+              "minimum" : 1,
+              "type" : "integer"
+            },
             "port" : {
               "description" : "The log-based clustering port (7557 by default).",
               "maximum" : 65535,
