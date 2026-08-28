@@ -166,6 +166,10 @@ Validates the HiveMQ Data Intelligence configuration so:
    2 when more than one replica runs.
  - The clustering port does not conflict with any of the predefined HiveMQ Platform ports.
  - The release name fits the DNS label limit of the cluster Service used for the initial member list.
+ - The `initialMemberCount` value is not changed and the clustering is not disabled on an existing
+   installation, compared against the deployed HiveMQ configuration via `lookup`. Both checks only
+   apply to chart-managed configurations and are skipped by client-side rendering such as
+   `helm template`, where `lookup` returns nothing.
 Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
 */}}
 {{- define "hivemq-platform.validate-data-intelligence" -}}
@@ -199,6 +203,38 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
     {{- end -}}
     {{- if gt (len .Release.Name) 48 -}}
         {{- fail (printf "\nThe release name `%s` exceeds 48 characters, so the cluster Service name `hivemq-%s-cluster` of the initial member list would exceed the DNS label limit of 63 characters" .Release.Name .Release.Name) -}}
+    {{- end -}}
+    {{- $deployedConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
+    {{- if contains "<initial-members>" $deployedConfig -}}
+        {{- $deployedMemberCount := len (regexFindAll "<member>" $deployedConfig -1) -}}
+        {{- if ne $deployedMemberCount (int $clustering.initialMemberCount) -}}
+            {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be changed on an existing installation (deployed with %d initial members)" (int $clustering.initialMemberCount) $deployedMemberCount) -}}
+        {{- end -}}
+    {{- end -}}
+{{- else if and .Values.config.create (not .Values.config.overrideHiveMQConfig) -}}
+    {{- $deployedConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
+    {{- if contains "<log-based>" $deployedConfig -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be disabled on an existing installation") -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Gets the HiveMQ configuration (config.xml) of the deployed installation via `lookup`, checking the
+configuration ConfigMap first and the Secret as fallback, so a switched `config.createAs` value is
+still found. Returns an empty string when no configuration is deployed or when rendering client-side
+(`helm template`), where `lookup` returns nothing.
+Usage: {{ include "hivemq-platform.deployed-hivemq-configuration" . }}
+*/}}
+{{- define "hivemq-platform.deployed-hivemq-configuration" -}}
+{{- $configName := include "hivemq-platform.configuration-name" . -}}
+{{- $configMap := lookup "v1" "ConfigMap" .Release.Namespace $configName -}}
+{{- if $configMap -}}
+    {{- dig "data" "config.xml" "" $configMap -}}
+{{- else -}}
+    {{- $secret := lookup "v1" "Secret" .Release.Namespace $configName -}}
+    {{- if $secret -}}
+        {{- dig "data" "config.xml" "" $secret | b64dec -}}
     {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -241,9 +277,37 @@ Validates the HiveMQ Platform persistence configuration so:
  - The `storageClass` and `storageSize` values are set.
  - No user-defined `sharedPersistentVolumeClaim` volume conflicts with the generated one.
  - The reserved `persistence` name is not used in the `additionalVolumes` and `volumeClaimTemplates` values.
+ - The persistence is not enabled, removed or changed on an existing installation, as Kubernetes
+   does not allow changing the PersistentVolumeClaims of an existing StatefulSet. Compared against
+   the deployed HiveMQPlatform resource via `lookup`, so the check runs on `helm install` and
+   `helm upgrade` with cluster access, and is skipped by client-side rendering (`helm template`).
 Usage: {{ include "hivemq-platform.validate-persistence" . }}
 */}}
 {{- define "hivemq-platform.validate-persistence" -}}
+{{- $deployedPlatform := lookup "hivemq.com/v1" "HiveMQPlatform" .Release.Namespace .Release.Name -}}
+{{- if $deployedPlatform -}}
+    {{- $deployedClaim := dict -}}
+    {{- range $volumeClaimTemplate := (dig "spec" "statefulSet" "spec" "volumeClaimTemplates" list $deployedPlatform) -}}
+        {{- if eq (dig "metadata" "name" "" $volumeClaimTemplate) "persistence" -}}
+            {{- $deployedClaim = $volumeClaimTemplate -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if include "hivemq-platform.has-persistence" . -}}
+        {{- if not $deployedClaim -}}
+            {{- fail (printf "\nThe `persistence` value cannot be enabled on an existing installation, as the PersistentVolumeClaims of an existing StatefulSet cannot be changed") -}}
+        {{- end -}}
+        {{- $deployedStorageClass := dig "spec" "storageClassName" "" $deployedClaim -}}
+        {{- if ne (printf "%v" $deployedStorageClass) (printf "%v" .Values.persistence.storageClass) -}}
+            {{- fail (printf "\nThe `persistence.storageClass` value cannot be changed on an existing installation (deployed StorageClass: %v)" $deployedStorageClass) -}}
+        {{- end -}}
+        {{- $deployedStorageSize := dig "spec" "resources" "requests" "storage" "" $deployedClaim -}}
+        {{- if ne (printf "%v" $deployedStorageSize) (printf "%v" .Values.persistence.storageSize) -}}
+            {{- fail (printf "\nThe `persistence.storageSize` value cannot be changed on an existing installation (deployed storage size: %v)" $deployedStorageSize) -}}
+        {{- end -}}
+    {{- else if $deployedClaim -}}
+        {{- fail (printf "\nThe `persistence` value cannot be removed on an existing installation, as the PersistentVolumeClaims of an existing StatefulSet cannot be changed") -}}
+    {{- end -}}
+{{- end -}}
 {{- if include "hivemq-platform.has-persistence" . -}}
     {{- if not .Values.persistence.storageClass -}}
         {{- fail (printf "\nThe `persistence.storageClass` value is required when the HiveMQ Platform persistence is configured. Set it to a StorageClass available in your Kubernetes cluster") -}}
