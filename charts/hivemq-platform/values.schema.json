@@ -423,58 +423,97 @@
       "description" : "Map-based extension configuration. Keys are extension names. Entries override matching extensions by name. Extensions defined only in extensionMap are added as new entries. Supports hierarchical value file overrides.",
       "type" : "object",
       "additionalProperties" : {
-        "type" : ["object", "null"],
+        "type" : [
+          "object",
+          "null"
+        ],
         "properties" : {
           "configMapName" : {
             "description" : "Configures the name of the Kubernetes ConfigMap that contains the extension configuration.",
             "maxLength" : 253,
-            "type" : ["string", "null"]
+            "type" : [
+              "string",
+              "null"
+            ]
           },
           "customizationUri" : {
             "description" : "The HTTP URL from which to load the extension customization.",
-            "type" : ["string", "null"]
+            "type" : [
+              "string",
+              "null"
+            ]
           },
           "enabled" : {
             "description" : "Boolean value that defines whether the extension is enabled.",
-            "type" : ["boolean", "null"]
+            "type" : [
+              "boolean",
+              "null"
+            ]
           },
           "extensionUri" : {
             "description" : "The location from which to load the extension. Possible values are: preinstalled or an HTTP URL.",
-            "type" : ["string", "null"]
+            "type" : [
+              "string",
+              "null"
+            ]
           },
           "priority" : {
             "description" : "The priority of the extension.",
-            "type" : ["integer", "null"]
+            "type" : [
+              "integer",
+              "null"
+            ]
           },
           "requestHeaderSecretName" : {
             "description" : "Configures the name of the Kubernetes Secret that contains headers for HTTP requests for custom extension and extension customization downloads.",
             "maxLength" : 253,
-            "type" : ["string", "null"]
+            "type" : [
+              "string",
+              "null"
+            ]
           },
           "secretName" : {
             "description" : "Configures the name of the Kubernetes Secret that contains the extension configuration.",
             "maxLength" : 253,
-            "type" : ["string", "null"]
+            "type" : [
+              "string",
+              "null"
+            ]
           },
           "skipHttpsCertificateValidation" : {
             "description" : "Boolean value to skip certificate validation when downloading a custom extension and extension customizations via the HTTPS protocol.",
-            "type" : ["boolean", "null"]
+            "type" : [
+              "boolean",
+              "null"
+            ]
           },
           "skipHttpsHostnameVerification" : {
             "description" : "Boolean value to skip hostname verification when downloading a custom extension and extension customizations via the HTTPS protocol.",
-            "type" : ["boolean", "null"]
+            "type" : [
+              "boolean",
+              "null"
+            ]
           },
           "startMandatory" : {
             "description" : "Determines how the HiveMQ broker behaves if the startup of the extension fails.",
-            "type" : ["boolean", "null"]
+            "type" : [
+              "boolean",
+              "null"
+            ]
           },
           "startPriority" : {
             "description" : "The start priority of the extension.",
-            "type" : ["integer", "null"]
+            "type" : [
+              "integer",
+              "null"
+            ]
           },
           "supportsHotReload" : {
             "description" : "Boolean value that specifies whether the extension configuration is hot-reloadable. The extension must explicitly support hot-reload.",
-            "type" : ["boolean", "null"]
+            "type" : [
+              "boolean",
+              "null"
+            ]
           }
         },
         "additionalProperties" : false
@@ -1106,6 +1145,22 @@
       },
       "type" : "object"
     },
+    "persistence" : {
+      "additionalProperties" : false,
+      "description" : "Stores the HiveMQ data, log, backup and audit folders on a PersistentVolumeClaim per HiveMQ Platform pod.",
+      "properties" : {
+        "storageClass" : {
+          "description" : "The StorageClass of the PersistentVolumeClaim. Required when persistence is configured.",
+          "type" : "string"
+        },
+        "storageSize" : {
+          "description" : "The size of the PersistentVolumeClaim as a Kubernetes quantity (e.g. `10Gi`). Required when persistence is configured.",
+          "pattern" : "^[0-9]+(\\.[0-9]+)?(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E)?$",
+          "type" : "string"
+        }
+      },
+      "type" : "object"
+    },
     "podDisruptionBudget" : {
       "description" : "Configures a PodDisruptionBudget for the HiveMQ Platform pods to control voluntary disruptions such as node drains or cluster autoscaler scale-down events.",
       "properties" : {
@@ -1117,17 +1172,27 @@
           "description" : "Maximum number of HiveMQ Platform pods that can be unavailable during voluntary disruptions. Accepts an integer or a percentage string (for example, `1` or `\"25%\"`). Mutually exclusive with `minAvailable`.",
           "minimum" : 0,
           "pattern" : "^[0-9]+%$",
-          "type" : ["integer", "string"]
+          "type" : [
+            "integer",
+            "string"
+          ]
         },
         "minAvailable" : {
           "description" : "Minimum number of HiveMQ Platform pods that must remain available during voluntary disruptions. Accepts an integer or a percentage string (for example, `2` or `\"50%\"`). Mutually exclusive with `maxUnavailable`.",
           "minimum" : 1,
           "pattern" : "^[0-9]+%$",
-          "type" : ["integer", "string"]
+          "type" : [
+            "integer",
+            "string"
+          ]
         },
         "unhealthyPodEvictionPolicy" : {
           "description" : "Controls how the PodDisruptionBudget treats unhealthy HiveMQ Platform pods. Requires Kubernetes 1.26 or newer. Leave empty to use the cluster default. `IfHealthyBudget` only allows eviction of unhealthy pods if the budget is satisfied (can deadlock if pods crashloop). `AlwaysAllow` always allows eviction of unhealthy pods.",
-          "enum" : ["", "IfHealthyBudget", "AlwaysAllow"],
+          "enum" : [
+            "",
+            "IfHealthyBudget",
+            "AlwaysAllow"
+          ],
           "type" : "string"
         }
       },

@@ -1,0 +1,292 @@
+suite: HiveMQ Platform - Persistence tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with persistence configured, the four folders are backed by a generated PersistentVolumeClaim
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          content:
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: persistence
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              storageClassName: my-storage-class
+              resources:
+                requests:
+                  storage: 10Gi
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: persistence
+            mountPath: /opt/hivemq/persistence
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: persistence
+            persistentVolumeClaim:
+              claimName: persistence
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/persistence/data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: "/opt/hivemq/persistence/log"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: "/opt/hivemq/persistence/backup"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+            value: "/opt/hivemq/persistence/audit"
+
+  - it: without persistence, no PersistentVolumeClaim and no folder environment variables are generated
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+          any: true
+
+  - it: with a persistence storage size but no storage class, validation fails
+    set:
+      persistence.storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence.storageClass` value is required"
+
+  - it: with a persistence storage class but no storage size, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence.storageSize` value is required"
+
+  - it: with persistence and a user-defined shared PersistentVolumeClaim, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      additionalVolumes:
+        - type: sharedPersistentVolumeClaim
+          name: my-pvc
+          path: /opt/hivemq/my-pvc
+          hivemqFolders:
+            data: data
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be combined with a user-defined `sharedPersistentVolumeClaim` volume"
+
+  - it: with persistence and the reserved volume name, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      additionalVolumes:
+        - type: emptyDir
+          name: persistence
+          path: /some/other/path
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence` is a reserved volume name"
+
+  - it: with persistence and the reserved mount name, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      additionalVolumes:
+        - type: emptyDir
+          name: my-additional-volume
+          mountName: persistence
+          path: /some/other/path
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence` is a reserved volume name"
+
+  - it: with persistence and the reserved PersistentVolumeClaim name, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      volumeClaimTemplates:
+        - kind: PersistentVolumeClaim
+          apiVersion: v1
+          metadata:
+            name: persistence
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 5Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "reserved PersistentVolumeClaim name"
+
+  - it: with persistence and an unrelated additional volume, both are rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      additionalVolumes:
+        - type: emptyDir
+          name: my-additional-volume
+          path: /opt/hivemq/my-volume
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: persistence
+            mountPath: /opt/hivemq/persistence
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-additional-volume
+            mountPath: /opt/hivemq/my-volume
+
+  - it: with persistence and an additional volume on the generated mount path, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      additionalVolumes:
+        - type: emptyDir
+          name: my-additional-volume
+          path: /opt/hivemq/persistence
+    asserts:
+      - failedTemplate:
+          errorPattern: "is duplicated for container `hivemq`"
+
+  - it: with persistence and a manually set data folder environment variable, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      nodes.env:
+        - name: HIVEMQ_DATA_FOLDER
+          value: /some/other/data
+    asserts:
+      - failedTemplate:
+          errorPattern: "HIVEMQ_DATA_FOLDER"
+
+  - it: with persistence and Data Intelligence clustering, both are rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/persistence/data"
+      - contains:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          content:
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: persistence
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              storageClassName: my-storage-class
+              resources:
+                requests:
+                  storage: 10Gi
+
+  - it: with an unknown persistence value, schema validation fails
+    set:
+      persistence.unknownValue: foobar
+    asserts:
+      - failedTemplate:
+          errorPattern: "unknownValue"
+
+  - it: with an invalid persistence storage size format, schema validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10GB
+    asserts:
+      - failedTemplate:
+          errorPattern: "storageSize"
+
+  - it: with a decimal persistence storage size, the size is rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 1.5Ti
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          content:
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: persistence
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              storageClassName: my-storage-class
+              resources:
+                requests:
+                  storage: 1.5Ti
+
+  - it: with a persistence storage size in plain bytes, the size is rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: "1073741824"
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          content:
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: persistence
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              storageClassName: my-storage-class
+              resources:
+                requests:
+                  storage: "1073741824"
+
+  - it: with a persistence storage size without a number, schema validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "storageSize"
+
+  - it: with a negative persistence storage size, schema validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: -5Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "storageSize"
+
+  - it: with a persistence storage size containing whitespace, schema validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: "10 Gi"
+    asserts:
+      - failedTemplate:
+          errorPattern: "storageSize"
