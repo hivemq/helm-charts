@@ -853,37 +853,31 @@ volumeClaimTemplates: []
 #     volumeMode: Filesystem
 
 # Defines the HiveMQ Data Intelligence configuration options.
-# All options are rendered into the HiveMQ configuration (config.xml) and are applied at node start,
-# so changing them triggers a rolling restart of the HiveMQ Platform cluster.
+# All options are part of the HiveMQ configuration (config.xml), so changing them triggers a rolling
+# restart of the HiveMQ Platform cluster.
 dataIntelligence:
   # Configures HiveMQ Data Intelligence log-based clustering.
   clustering:
     # Enables log-based clustering.
     enabled: false
-    # The number of nodes that form the initial Raft group, rendered as an identical initial member list
-    # into the configuration of all nodes. Required when clustering is enabled and must not exceed the
-    # `nodes.replicaCount` value.
+    # The number of nodes that form the initial cluster. Required when clustering is enabled and must
+    # not exceed the `nodes.replicaCount` value.
     #initialMemberCount: 2
     # The log-based clustering port (7557 by default).
     #port: 7557
     # Disables the log-based clustering data layer (enabled by default).
     #dataLayerEnabled: false
-    # The time budget in seconds that one cluster formation attempt waits for the other initial members
-    # before it retries (60 by default, lower than the HiveMQ default of 600). Formation retries
-    # indefinitely and a timeout can never cause a premature cluster formation, so a low value only
-    # surfaces formation problems faster in the HiveMQ Health API and shortens the wait of a restarted
-    # node that faces a member entry that no longer exists.
+    # The time in seconds that a cluster formation attempt waits for the other initial members before
+    # it retries (60 by default).
     #initialMembersConnectTimeoutSeconds: 60
-  # Configures the connection to the HiveMQ Data Intelligence server. All values are optional: without a
-  # connection string configured here, the connection string of the HiveMQ Platform license is used.
-  # The Secret is automatically monitored, so changing its content triggers a rolling restart of the
-  # HiveMQ Platform cluster to apply the new content.
+  # Configures the connection to the HiveMQ Data Intelligence server. Without a connection string
+  # configured here, the connection string of the HiveMQ Platform license is used.
   server: {}
-    # The name of an existing Kubernetes Secret containing the connection string. The connection
-    # string is injected as an environment variable, so it is never stored in the HiveMQ configuration
-    # ConfigMap.
+    # The name of an existing Kubernetes Secret containing the connection string. The connection string
+    # is never stored in the HiveMQ configuration, and content changes trigger a rolling restart of the
+    # HiveMQ Platform cluster.
     #connectionStringSecretName: ""
-    # The key within the connection string Secret ("connection-string" by default).
+    # The key within the Secret ("connection-string" by default).
     #connectionStringSecretKey: "connection-string"
 
 # Configures the rolling restart behavior for this HiveMQ Platform.
