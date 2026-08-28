@@ -324,7 +324,7 @@
           "description" : "Configures HiveMQ Data Intelligence log-based clustering.",
           "properties" : {
             "dataLayerEnabled" : {
-              "description" : "Disables the log-based clustering data layer when set to false (enabled by default).",
+              "description" : "Disables the log-based clustering data layer (enabled by default).",
               "type" : "boolean"
             },
             "enabled" : {
@@ -332,12 +332,12 @@
               "type" : "boolean"
             },
             "initialMemberCount" : {
-              "description" : "The number of nodes that form the initial Raft group. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value.",
+              "description" : "The number of nodes that form the initial cluster. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value.",
               "minimum" : 1,
               "type" : "integer"
             },
             "initialMembersConnectTimeoutSeconds" : {
-              "description" : "The time budget in seconds that one cluster formation attempt waits for the other initial members before it retries (60 by default).",
+              "description" : "The time in seconds that a cluster formation attempt waits for the other initial members before it retries (60 by default).",
               "minimum" : 1,
               "type" : "integer"
             },
