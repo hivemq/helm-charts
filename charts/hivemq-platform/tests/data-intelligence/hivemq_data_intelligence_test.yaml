@@ -389,3 +389,12 @@ tests:
       dataIntelligence.cluster.enabled: true
     asserts:
       - failedTemplate: {}
+
+  - it: with a zero connect timeout, schema validation fails
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      dataIntelligence.clustering.initialMembersConnectTimeoutSeconds: 0
+    asserts:
+      - failedTemplate:
+          errorPattern: "initialMembersConnectTimeoutSeconds"

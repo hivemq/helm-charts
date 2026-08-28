@@ -217,6 +217,7 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
         </member>
         {{- end }}
       </initial-members>
+      <initial-members-connect-timeout-secs>{{ $clustering.initialMembersConnectTimeoutSeconds | default 60 }}</initial-members-connect-timeout-secs>
     </log-based>
     {{- end }}
     {{- $clusterFailureDetectionConfig := .Values.hivemqClusterFailureDetection }}
