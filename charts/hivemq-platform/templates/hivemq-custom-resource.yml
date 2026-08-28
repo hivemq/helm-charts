@@ -1,6 +1,7 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- include "hivemq-platform.validate-data-intelligence" . -}}
+{{- include "hivemq-platform.add-persistence-volumes" . -}}
 {{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}

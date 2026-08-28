@@ -852,11 +852,23 @@ volumeClaimTemplates: []
 #         storage: 100Gi
 #     volumeMode: Filesystem
 
+# Stores the HiveMQ data, log, backup and audit folders on a PersistentVolumeClaim per HiveMQ Platform
+# pod, so their content survives pod restarts. Both values are required and cannot be changed on an
+# existing installation. For a custom setup, use the `additionalVolumes` and `volumeClaimTemplates`
+# values instead.
+persistence: {}
+  # The StorageClass of the PersistentVolumeClaim.
+  #storageClass: ""
+  # The size of the PersistentVolumeClaim as a Kubernetes quantity ("10Gi" for example), sized for
+  # the combined content of the stored folders.
+  #storageSize: ""
+
 # Defines the HiveMQ Data Intelligence configuration options.
 # All options are part of the HiveMQ configuration (config.xml), so changing them triggers a rolling
 # restart of the HiveMQ Platform cluster.
 dataIntelligence:
   # Configures HiveMQ Data Intelligence log-based clustering.
+  # To keep the clustering state when all pods restart at the same time, configure the `persistence` value.
   clustering:
     # Enables log-based clustering.
     enabled: false

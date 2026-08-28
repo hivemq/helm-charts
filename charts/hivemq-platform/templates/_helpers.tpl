@@ -162,7 +162,8 @@ Usage: {{ include "hivemq-platform.data-intelligence-monitored-resources" . }}
 Validates the HiveMQ Data Intelligence configuration so:
  - The retired `pulse` values are not used anymore.
  - When clustering is enabled, the default HiveMQ configuration and StatefulSet are in use and the
-   `initialMemberCount` value is set and not greater than the `nodes.replicaCount` value.
+   `initialMemberCount` value is set and not greater than the
+   `nodes.replicaCount` value.
  - The clustering port does not conflict with any of the predefined HiveMQ Platform ports.
  - The release name fits the DNS label limit of the cluster Service used for the initial member list.
 Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
@@ -195,6 +196,70 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
     {{- end -}}
     {{- if gt (len .Release.Name) 48 -}}
         {{- fail (printf "\nThe release name `%s` exceeds 48 characters, so the cluster Service name `hivemq-%s-cluster` of the initial member list would exceed the DNS label limit of 63 characters" .Release.Name .Release.Name) -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Checks whether the HiveMQ Platform persistence is configured.
+Returns:
+- `true` if any `persistence` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-persistence" . }}
+*/}}
+{{- define "hivemq-platform.has-persistence" -}}
+{{- $persistenceConfigured := "" -}}
+{{- if .Values.persistence -}}
+    {{- $persistenceConfigured = true -}}
+{{- end -}}
+{{- $persistenceConfigured -}}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Platform persistence configuration, then adds the generated storage to the
+`additionalVolumes` and `volumeClaimTemplates` values, so the existing volume handling renders them
+as if the user had configured them. The generated `sharedPersistentVolumeClaim` volume redirects the
+HiveMQ data, log, backup and audit folders into the PersistentVolume of each Pod.
+Validation runs first, so the user values are checked before the generated volume is added.
+Must be included before the volumes are rendered.
+Usage: {{ include "hivemq-platform.add-persistence-volumes" . }}
+*/}}
+{{- define "hivemq-platform.add-persistence-volumes" -}}
+{{- include "hivemq-platform.validate-persistence" . -}}
+{{- if include "hivemq-platform.has-persistence" . -}}
+    {{- $volume := dict "type" "sharedPersistentVolumeClaim" "name" "persistence" "path" "/opt/hivemq/persistence" "hivemqFolders" (dict "data" "data" "log" "log" "backup" "backup" "audit" "audit") -}}
+    {{- $_ := set .Values "additionalVolumes" (append (.Values.additionalVolumes | default list) $volume) -}}
+    {{- $claim := dict "kind" "PersistentVolumeClaim" "apiVersion" "v1" "metadata" (dict "name" "persistence") "spec" (dict "accessModes" (list "ReadWriteOnce") "storageClassName" .Values.persistence.storageClass "resources" (dict "requests" (dict "storage" .Values.persistence.storageSize))) -}}
+    {{- $_ := set .Values "volumeClaimTemplates" (append (.Values.volumeClaimTemplates | default list) $claim) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Platform persistence configuration so:
+ - The `storageClass` and `storageSize` values are set.
+ - No user-defined `sharedPersistentVolumeClaim` volume conflicts with the generated one.
+ - The reserved `persistence` name is not used in the `additionalVolumes` and `volumeClaimTemplates` values.
+Usage: {{ include "hivemq-platform.validate-persistence" . }}
+*/}}
+{{- define "hivemq-platform.validate-persistence" -}}
+{{- if include "hivemq-platform.has-persistence" . -}}
+    {{- if not .Values.persistence.storageClass -}}
+        {{- fail (printf "\nThe `persistence.storageClass` value is required when the HiveMQ Platform persistence is configured. Set it to a StorageClass available in your Kubernetes cluster") -}}
+    {{- end -}}
+    {{- if not .Values.persistence.storageSize -}}
+        {{- fail (printf "\nThe `persistence.storageSize` value is required when the HiveMQ Platform persistence is configured (`storageSize: 10Gi` for example)") -}}
+    {{- end -}}
+    {{- range .Values.additionalVolumes -}}
+        {{- if eq (.type | default "") "sharedPersistentVolumeClaim" -}}
+            {{- fail (printf "\nThe HiveMQ Platform persistence generates a `sharedPersistentVolumeClaim` volume and cannot be combined with a user-defined `sharedPersistentVolumeClaim` volume") -}}
+        {{- end -}}
+        {{- if or (eq (.name | default "") "persistence") (eq (.mountName | default "") "persistence") -}}
+            {{- fail (printf "\n`persistence` is a reserved volume name for the HiveMQ Platform persistence. Rename the `additionalVolumes` entry") -}}
+        {{- end -}}
+    {{- end -}}
+    {{- range .Values.volumeClaimTemplates -}}
+        {{- if eq (dig "metadata" "name" "" .) "persistence" -}}
+            {{- fail (printf "\n`persistence` is a reserved PersistentVolumeClaim name for the HiveMQ Platform persistence. Rename the `volumeClaimTemplates` entry") -}}
+        {{- end -}}
     {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -925,7 +990,7 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
   {{- fail (printf "\nOnly one `sharedPersistentVolumeClaim` volume type is allowed but %d were defined" (int $sharedPvcCount)) }}
 {{- end }}
 
-{{- /* add default volume mounts for license, Data Intelligence truststore and TLS to validation lists */ -}}
+{{- /* add default volume mounts for license and TLS to validation lists */ -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- if $hasLicense }}
   {{- $volumeMountNameList = "licenses#hivemq" | append $volumeMountNameList }}
