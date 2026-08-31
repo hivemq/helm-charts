@@ -86,6 +86,17 @@ tests:
       - failedTemplate:
           errorPattern: "cannot be greater than the `nodes.replicaCount` value \\(2\\). Increase `nodes.replicaCount`, or lower `initialMemberCount` before the initial installation"
 
+  - it: with clustering enabled and zero replicas, no validation error
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+      nodes.replicaCount: 0
+    asserts:
+      - notFailedTemplate: {}
+      - equal:
+          path: spec.statefulSet.spec.replicas
+          value: 0
+
   - it: with a single initial member and more than one replica, validation fails
     set:
       dataIntelligence.clustering.enabled: true
@@ -202,9 +213,9 @@ tests:
       - hasDocuments:
           count: 1
 
-  - it: with a custom HiveMQ configuration override and a connection string Secret, the environment variable is still rendered
+  - it: with a custom HiveMQ configuration override referencing the connection string, the environment variable is still rendered
     set:
-      config.overrideHiveMQConfig: "<hivemq></hivemq>"
+      config.overrideHiveMQConfig: "<hivemq><data-intelligence><server><connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string></server></data-intelligence></hivemq>"
       dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
     asserts:
       - contains:
@@ -634,6 +645,82 @@ tests:
                         secretKeyRef:
                           name: my-connection-string-secret
                           key: connection-string
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a connection string Secret and an overridden HiveMQ configuration without the environment variable, validation fails
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.overrideHiveMQConfig: "<hivemq></hivemq>"
+    asserts:
+      - failedTemplate:
+          errorPattern: "which the `config.overrideHiveMQConfig` value does not reference"
+
+  - it: with a connection string Secret and an overridden HiveMQ configuration referencing the environment variable, no validation error
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.overrideHiveMQConfig: "<hivemq><data-intelligence><server><connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string></server></data-intelligence></hivemq>"
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a connection string Secret and an existing HiveMQ configuration without the environment variable, validation fails
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: my-existing-configuration
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq></hivemq>"
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.create: false
+      config.name: my-existing-configuration
+    asserts:
+      - failedTemplate:
+          errorPattern: "which the existing HiveMQ configuration `my-existing-configuration` does not reference"
+
+  - it: with a connection string Secret and an existing HiveMQ configuration referencing the environment variable, no validation error
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: my-existing-configuration
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><data-intelligence><server><connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string></server></data-intelligence></hivemq>"
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.create: false
+      config.name: my-existing-configuration
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a connection string Secret and an existing HiveMQ configuration that is not deployed, no validation error
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.create: false
+      config.name: my-existing-configuration
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
