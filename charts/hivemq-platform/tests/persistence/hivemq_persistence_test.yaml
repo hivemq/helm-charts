@@ -559,7 +559,7 @@ tests:
       - hasDocuments:
           count: 1
 
-  - it: with a volume claim template already carrying the generated label, the persistence storage is not added again
+  - it: with a volume claim template carrying the generated label, validation still fails on the reserved name
     set:
       persistence.storageClass: my-storage-class
       persistence.storageSize: 10Gi
@@ -577,16 +577,8 @@ tests:
               requests:
                 storage: 10Gi
     asserts:
-      - lengthEqual:
-          path: spec.statefulSet.spec.volumeClaimTemplates
-          count: 1
-      - notExists:
-          path: spec.statefulSet.spec.template.spec.volumes
-      - notContains:
-          path: spec.statefulSet.spec.template.spec.containers[0].env
-          content:
-            name: HIVEMQ_DATA_FOLDER
-          any: true
+      - failedTemplate:
+          errorPattern: "reserved PersistentVolumeClaim name"
 
   - it: with persistence and a manually set heap dump folder environment variable, the variable is rendered
     set:

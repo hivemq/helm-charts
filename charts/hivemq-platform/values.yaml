@@ -15,7 +15,7 @@ image:
 
 # Settings for the HiveMQ Platform nodes
 nodes:
-  # The number of HiveMQ nodes in the cluster
+  # The number of HiveMQ Platform nodes to start.
   replicaCount: 2
   logLevel: INFO
   javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50"
@@ -859,10 +859,13 @@ volumeClaimTemplates: []
 # as used by GitOps tools) cannot run it. For a custom setup, use the `additionalVolumes` and
 # `volumeClaimTemplates` values instead. The volume and PersistentVolumeClaim name `persistence` is
 # reserved for this feature.
+# Note: A PersistentVolume is mounted with file permissions that depend on the `nodes.podSecurityContext`
+# configuration. Enable the `podSecurityContext` and add an `fsGroup` field to allow the HiveMQ
+# process to write to the mounted volume.
 persistence: {}
   # The StorageClass of the PersistentVolumeClaim.
   #storageClass: ""
-  # The size of the PersistentVolumeClaim as a Kubernetes quantity ("10Gi" for example), sized for
+  # The size of the PersistentVolumeClaim as a Kubernetes quantity (for example, `10Gi`), sized for
   # the combined content of the stored folders.
   #storageSize: ""
 
@@ -881,12 +884,12 @@ dataIntelligence:
     # The number of nodes that form the initial cluster. Required when clustering is enabled and must
     # not exceed the `nodes.replicaCount` value. Cannot be changed on an existing installation.
     #initialMemberCount: 2
-    # The log-based clustering port (7557 by default).
+    # The port for the log-based clustering communication between the cluster nodes (`7557` by default).
     #port: 7557
     # Enables the log-based clustering data layer (true by default). Set to false to disable it.
     #dataLayerEnabled: false
     # The time in seconds that a cluster formation attempt waits for the other initial members before
-    # it retries (60 by default, deliberately lower than the HiveMQ default of 600). A timeout only
+    # it retries (`60` by default, deliberately lower than the HiveMQ default of `600`). A timeout only
     # retries the formation and never forms a smaller cluster, so a low value surfaces configuration
     # problems faster without any risk.
     #initialMembersConnectTimeoutSeconds: 60
@@ -897,7 +900,7 @@ dataIntelligence:
     # is never stored in the HiveMQ configuration, and content changes trigger a rolling restart of the
     # HiveMQ Platform cluster.
     #connectionStringSecretName: ""
-    # The key within the Secret ("connection-string" by default).
+    # The key within the Secret (`connection-string` by default).
     #connectionStringSecretKey: "connection-string"
 
 # Configures the rolling restart behavior for this HiveMQ Platform.
