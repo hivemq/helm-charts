@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.volumes.HelmVolumeClaimTemplatesIT" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-09-01T13:40:28.595Z" hostname="runnervmgx7h7" time="972.599">
+<testsuite name="com.hivemq.helmcharts.volumes.HelmVolumeClaimTemplatesIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-01T14:05:19.405Z" hostname="runnervmgx7h7" time="504.676">
   <properties/>
-  <testcase name="platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()" classname="com.hivemq.helmcharts.volumes.HelmVolumeClaimTemplatesIT" time="466.966">
-    <failure message="io.fabric8.kubernetes.client.KubernetesClientTimeoutException: Timed out waiting for [300000] milliseconds for [HiveMQPlatform] with name:[volumeclaimtemplates-pf] in namespace [helmvolumeclaimtemplatesit]." type="io.fabric8.kubernetes.client.KubernetesClientTimeoutException">io.fabric8.kubernetes.client.KubernetesClientTimeoutException: Timed out waiting for [300000] milliseconds for [HiveMQPlatform] with name:[volumeclaimtemplates-pf] in namespace [helmvolumeclaimtemplatesit].
-	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.waitUntilCondition(BaseOperation.java:1051)
-	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.waitUntilCondition(BaseOperation.java:101)
-	at com.hivemq.helmcharts.util.K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(K8sUtil.java:632)
-	at com.hivemq.helmcharts.volumes.HelmVolumeClaimTemplatesIT.platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated(HelmVolumeClaimTemplatesIT.java:79)
-</failure>
-  </testcase>
-  <testcase name="platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()" classname="com.hivemq.helmcharts.volumes.HelmVolumeClaimTemplatesIT" time="481.557"/>
+  <testcase name="platform_whenVolumeClaimTemplateIsConfigured_withAdditionalVolumes_thenPersistentVolumeClaimsCreated()" classname="com.hivemq.helmcharts.volumes.HelmVolumeClaimTemplatesIT" time="476.486"/>
 </testsuite>

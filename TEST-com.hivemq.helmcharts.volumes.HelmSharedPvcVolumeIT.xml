@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.volumes.HelmSharedPvcVolumeIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-01T13:40:30.210Z" hostname="runnervmgx7h7" time="463.943">
+<testsuite name="com.hivemq.helmcharts.volumes.HelmSharedPvcVolumeIT" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-09-01T14:06:46.603Z" hostname="runnervmgx7h7" time="973.505">
   <properties/>
-  <testcase name="withSharedPvcVolume_hivemqRunningWithExpectedFolderStructureAndIsolatedData()" classname="com.hivemq.helmcharts.volumes.HelmSharedPvcVolumeIT" time="463.94"/>
+  <testcase name="withSharedPvcVolume_hivemqRunningWithExpectedFolderStructureAndIsolatedData()" classname="com.hivemq.helmcharts.volumes.HelmSharedPvcVolumeIT" time="471.99">
+    <failure message="io.fabric8.kubernetes.client.KubernetesClientTimeoutException: Timed out waiting for [300000] milliseconds for [HiveMQPlatform] with name:[sharedpvcvolume-pf] in namespace [helmsharedpvcvolumeit]." type="io.fabric8.kubernetes.client.KubernetesClientTimeoutException">io.fabric8.kubernetes.client.KubernetesClientTimeoutException: Timed out waiting for [300000] milliseconds for [HiveMQPlatform] with name:[sharedpvcvolume-pf] in namespace [helmsharedpvcvolumeit].
+	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.waitUntilCondition(BaseOperation.java:1051)
+	at io.fabric8.kubernetes.client.dsl.internal.BaseOperation.waitUntilCondition(BaseOperation.java:101)
+	at com.hivemq.helmcharts.util.K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(K8sUtil.java:632)
+	at com.hivemq.helmcharts.volumes.HelmSharedPvcVolumeIT.withSharedPvcVolume_hivemqRunningWithExpectedFolderStructureAndIsolatedData(HelmSharedPvcVolumeIT.java:115)
+</failure>
+  </testcase>
+  <testcase name="withSharedPvcVolume_hivemqRunningWithExpectedFolderStructureAndIsolatedData()" classname="com.hivemq.helmcharts.volumes.HelmSharedPvcVolumeIT" time="478.531"/>
 </testsuite>
