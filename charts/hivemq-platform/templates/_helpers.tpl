@@ -165,11 +165,11 @@ Validates the HiveMQ Data Intelligence configuration so:
  - The retired `pulse` values are not used anymore.
  - A `config.overrideStatefulSet` value defines the connection string environment variable when a
    connection string Secret is configured.
- - A `config.overrideHiveMQConfig` value or an existing HiveMQ configuration (`config.create=false`)
-   references the connection string environment variable when a connection string Secret is
-   configured, as the connection string is silently ignored otherwise. The existing configuration is
-   read via `lookup`, so this check needs cluster access and is skipped by client-side rendering
-   such as `helm template`, where `lookup` returns nothing.
+ - A `config.overrideHiveMQConfig` value (only rendered with `config.create=true`) or an existing
+   HiveMQ configuration (`config.create=false`) contains the connection string placeholder when a
+   connection string Secret is configured, as the connection string is silently ignored otherwise.
+   The existing configuration is read via `lookup`, so this check needs cluster access and is
+   skipped by client-side rendering such as `helm template`, where `lookup` returns nothing.
  - When clustering is enabled, the default HiveMQ configuration and StatefulSet are in use and the
    `initialMemberCount` value is set, not greater than the `nodes.replicaCount` value, and at least
    2 when more than one replica runs.
@@ -191,15 +191,15 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
         {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING` environment variable, which the `config.overrideStatefulSet` value does not define. Define the environment variable in your custom StatefulSet, or remove one of the two values") -}}
     {{- end -}}
 {{- end -}}
-{{- if and $hasConnectionString .Values.config.overrideHiveMQConfig -}}
-    {{- if not (contains "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING" .Values.config.overrideHiveMQConfig) -}}
-        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING` environment variable, which the `config.overrideHiveMQConfig` value does not reference. Reference it as `${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}` in your custom HiveMQ configuration, or remove one of the two values") -}}
+{{- if and $hasConnectionString .Values.config.create .Values.config.overrideHiveMQConfig -}}
+    {{- if not (contains "${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}" .Values.config.overrideHiveMQConfig) -}}
+        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}` placeholder, which the `config.overrideHiveMQConfig` value does not contain. Reference the placeholder in your custom HiveMQ configuration, or remove one of the two values") -}}
     {{- end -}}
 {{- end -}}
-{{- if and $hasConnectionString (not .Values.config.create) (not .Values.config.overrideHiveMQConfig) -}}
+{{- if and $hasConnectionString (not .Values.config.create) -}}
     {{- $existingConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
-    {{- if and $existingConfig (not (contains "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING" $existingConfig)) -}}
-        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING` environment variable, which the existing HiveMQ configuration `%s` does not reference. Reference it as `${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}` in your existing HiveMQ configuration, or remove the `dataIntelligence.server.connectionStringSecretName` value" (include "hivemq-platform.configuration-name" .)) -}}
+    {{- if and $existingConfig (not (contains "${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}" $existingConfig)) -}}
+        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}` placeholder, which the existing HiveMQ configuration `%s` does not contain. Reference the placeholder in your existing HiveMQ configuration, or remove the `dataIntelligence.server.connectionStringSecretName` value" (include "hivemq-platform.configuration-name" .)) -}}
     {{- end -}}
 {{- end -}}
 {{- if include "hivemq-platform.has-data-intelligence-clustering" . -}}
@@ -220,7 +220,7 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
         {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be greater than the `nodes.replicaCount` value (%d). Increase `nodes.replicaCount`, or lower `initialMemberCount` before the initial installation, as it cannot be changed afterwards" (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount)) -}}
     {{- end -}}
     {{- if and (eq (int $clustering.initialMemberCount) 1) (gt (int .Values.nodes.replicaCount) 1) -}}
-        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value must be at least 2 when the `nodes.replicaCount` value (%d) is greater than 1. Set `initialMemberCount` to at least 2, or run a single replica" (int .Values.nodes.replicaCount)) -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value must be at least 2 when the `nodes.replicaCount` value (%d) is greater than 1. Set `initialMemberCount` to at least 2 before the initial installation, as it cannot be changed afterwards, or keep running a single replica" (int .Values.nodes.replicaCount)) -}}
     {{- end -}}
     {{- $clusteringPort := include "hivemq-platform.data-intelligence-clustering-port" . | int64 -}}
     {{- $predefinedPortsList := list (include "hivemq-platform.operator-rest-api-port" . | int64) (include "hivemq-platform.health-api-port" . | int64) (include "hivemq-platform.cluster-transport-port" . | int64) (include "hivemq-platform.metrics-port" . | int64) -}}
@@ -237,7 +237,8 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
     {{- end -}}
     {{- $deployedConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
     {{- if contains "<initial-members>" $deployedConfig -}}
-        {{- $deployedMemberCount := len (regexFindAll "<member>" $deployedConfig -1) -}}
+        {{- $initialMembers := regexFind "(?s)<initial-members>.*?</initial-members>" $deployedConfig -}}
+        {{- $deployedMemberCount := len (regexFindAll "<member>" $initialMembers -1) -}}
         {{- if ne $deployedMemberCount (int $clustering.initialMemberCount) -}}
             {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be changed on an existing installation (deployed with %d initial members)" (int $clustering.initialMemberCount) $deployedMemberCount) -}}
         {{- end -}}
@@ -252,29 +253,28 @@ Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
 
 {{/*
 Gets the HiveMQ configuration (config.xml) of the deployed installation via `lookup`, preferring the
-kind configured by the `config.createAs` value and falling back to the other kind, so a switched
-`config.createAs` value is still found and a stale leftover of the other kind cannot shadow the
-current configuration. Returns an empty string when no configuration is deployed or when rendering
+kind configured by the `config.createAs` value and only consulting the other kind when the preferred
+one yields no config.xml, so a switched `config.createAs` value is still found, a stale leftover of
+the other kind cannot shadow the current configuration, and the second API read is skipped when the
+preferred kind delivers. Returns an empty string when no configuration is deployed or when rendering
 client-side (`helm template`), where `lookup` returns nothing.
 Usage: {{ include "hivemq-platform.deployed-hivemq-configuration" . }}
 */}}
 {{- define "hivemq-platform.deployed-hivemq-configuration" -}}
 {{- $configName := include "hivemq-platform.configuration-name" . -}}
-{{- $configMap := lookup "v1" "ConfigMap" .Release.Namespace $configName -}}
-{{- $secret := lookup "v1" "Secret" .Release.Namespace $configName -}}
+{{- $configuration := "" -}}
 {{- if eq .Values.config.createAs "Secret" -}}
-    {{- if $secret -}}
-        {{- dig "data" "config.xml" "" $secret | b64dec -}}
-    {{- else if $configMap -}}
-        {{- dig "data" "config.xml" "" $configMap -}}
+    {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "Secret" .Release.Namespace $configName) | b64dec -}}
+    {{- if not $configuration -}}
+        {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "ConfigMap" .Release.Namespace $configName) -}}
     {{- end -}}
 {{- else -}}
-    {{- if $configMap -}}
-        {{- dig "data" "config.xml" "" $configMap -}}
-    {{- else if $secret -}}
-        {{- dig "data" "config.xml" "" $secret | b64dec -}}
+    {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "ConfigMap" .Release.Namespace $configName) -}}
+    {{- if not $configuration -}}
+        {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "Secret" .Release.Namespace $configName) | b64dec -}}
     {{- end -}}
 {{- end -}}
+{{- $configuration -}}
 {{- end -}}
 
 {{/*
@@ -295,7 +295,8 @@ Usage: {{ include "hivemq-platform.has-persistence" . }}
 Validates the HiveMQ Platform persistence configuration, then adds the generated storage to the
 `additionalVolumes` and `volumeClaimTemplates` values, so the existing volume handling renders them
 as if the user had configured them. The generated `sharedPersistentVolumeClaim` volume redirects the
-HiveMQ data, log, backup and audit folders into the PersistentVolume of each Pod.
+HiveMQ data, log and audit folders into the PersistentVolume of each Pod, and the backup folder
+unless `persistence.backupFolder` is `false`.
 Validation runs first, so the user values are checked before the generated volume is added.
 Must be included exactly once, before the volumes are rendered, as it modifies the values.
 Usage: {{ include "hivemq-platform.add-persistence-volumes" . }}
@@ -303,7 +304,11 @@ Usage: {{ include "hivemq-platform.add-persistence-volumes" . }}
 {{- define "hivemq-platform.add-persistence-volumes" -}}
 {{- include "hivemq-platform.validate-persistence" . -}}
 {{- if include "hivemq-platform.has-persistence" . -}}
-    {{- $volume := dict "type" "sharedPersistentVolumeClaim" "name" "persistence" "path" "/opt/hivemq/persistence" "hivemqFolders" (dict "data" "data" "log" "log" "backup" "backup" "audit" "audit") -}}
+    {{- $hivemqFolders := dict "data" "data" "log" "log" "audit" "audit" -}}
+    {{- if ne .Values.persistence.backupFolder false -}}
+        {{- $_ := set $hivemqFolders "backup" "backup" -}}
+    {{- end -}}
+    {{- $volume := dict "type" "sharedPersistentVolumeClaim" "name" "persistence" "path" "/opt/hivemq/persistence" "hivemqFolders" $hivemqFolders -}}
     {{- $_ := set .Values "additionalVolumes" (append (.Values.additionalVolumes | default list) $volume) -}}
     {{- $claim := dict "kind" "PersistentVolumeClaim" "apiVersion" "v1" "metadata" (dict "name" "persistence" "labels" (dict "hivemq/platform-persistence" "true")) "spec" (dict "accessModes" (list "ReadWriteOnce") "storageClassName" .Values.persistence.storageClass "resources" (dict "requests" (dict "storage" .Values.persistence.storageSize))) -}}
     {{- $_ := set .Values "volumeClaimTemplates" (append (.Values.volumeClaimTemplates | default list) $claim) -}}
@@ -318,14 +323,18 @@ Validates the HiveMQ Platform persistence configuration so:
  - The persistence is not enabled, removed or changed on an existing installation, as Kubernetes
    does not allow changing the PersistentVolumeClaims of an existing StatefulSet. Compared against
    the deployed HiveMQPlatform resource via `lookup`, so the check runs on `helm install` and
-   `helm upgrade` with cluster access, and is skipped by client-side rendering (`helm template`).
+   `helm upgrade` with cluster access, and is skipped by client-side rendering (`helm template`)
+   and when the HiveMQ Platform CRD is not installed.
 Usage: {{ include "hivemq-platform.validate-persistence" . }}
 */}}
 {{- define "hivemq-platform.validate-persistence" -}}
 {{- if and (include "hivemq-platform.has-persistence" .) .Values.config.overrideStatefulSet -}}
     {{- fail (printf "\nThe `persistence` value cannot be combined with the `config.overrideStatefulSet` value. Configure the PersistentVolumeClaims and the HiveMQ folder environment variables directly in your custom StatefulSet instead") -}}
 {{- end -}}
-{{- $deployedPlatform := lookup "hivemq.com/v1" "HiveMQPlatform" .Release.Namespace .Release.Name -}}
+{{- $deployedPlatform := dict -}}
+{{- if .Capabilities.APIVersions.Has "hivemq.com/v1" -}}
+    {{- $deployedPlatform = lookup "hivemq.com/v1" "HiveMQPlatform" .Release.Namespace .Release.Name -}}
+{{- end -}}
 {{- if $deployedPlatform -}}
     {{- $deployedClaim := dict -}}
     {{- range $volumeClaimTemplate := (dig "spec" "statefulSet" "spec" "volumeClaimTemplates" list $deployedPlatform) -}}

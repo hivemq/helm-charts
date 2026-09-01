@@ -187,6 +187,108 @@ tests:
       - failedTemplate:
           errorPattern: "HIVEMQ_DATA_FOLDER"
 
+  - it: with persistence and the backup folder excluded, the backup folder stays on the ephemeral storage
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      persistence.backupFolder: false
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.volumeClaimTemplates
+          content:
+            kind: PersistentVolumeClaim
+            apiVersion: v1
+            metadata:
+              name: persistence
+              labels:
+                hivemq/platform-persistence: "true"
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              storageClassName: my-storage-class
+              resources:
+                requests:
+                  storage: 10Gi
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: persistence
+            mountPath: /opt/hivemq/persistence
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+          any: true
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATA_FOLDER
+            value: "/opt/hivemq/persistence/data"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LOG_FOLDER
+            value: "/opt/hivemq/persistence/log"
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_AUDIT_FOLDER
+            value: "/opt/hivemq/persistence/audit"
+
+  - it: with persistence and the backup folder explicitly enabled, the backup folder environment variable is rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      persistence.backupFolder: true
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: "/opt/hivemq/persistence/backup"
+
+  - it: with persistence, the backup folder excluded and a manually set backup folder environment variable, the variable is rendered
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      persistence.backupFolder: false
+      nodes.env:
+        - name: HIVEMQ_BACKUP_FOLDER
+          value: /opt/hivemq/my-backups
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+            value: /opt/hivemq/my-backups
+
+  - it: with persistence and a manually set backup folder environment variable, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      nodes.env:
+        - name: HIVEMQ_BACKUP_FOLDER
+          value: /opt/hivemq/my-backups
+    asserts:
+      - failedTemplate:
+          errorPattern: "HIVEMQ_BACKUP_FOLDER"
+
+  - it: with only the backup folder value set, validation fails
+    set:
+      persistence.backupFolder: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "`persistence.storageClass` value is required"
+
+  - it: with a non-boolean backup folder value, validation fails
+    set:
+      persistence.storageClass: my-storage-class
+      persistence.storageSize: 10Gi
+      persistence.backupFolder: "yes"
+    asserts:
+      - failedTemplate:
+          errorPattern: "backupFolder"
+
   - it: with persistence and Data Intelligence clustering, both are rendered
     set:
       persistence.storageClass: my-storage-class
@@ -299,7 +401,18 @@ tests:
       - failedTemplate:
           errorPattern: "storageSize"
 
+  - it: with a persistence storage class that is not a valid Kubernetes name, schema validation fails
+    set:
+      persistence.storageClass: "My StorageClass"
+      persistence.storageSize: 10Gi
+    asserts:
+      - failedTemplate:
+          errorPattern: "storageClass"
+
   - it: with unchanged persistence values on an existing installation, no validation error
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
@@ -339,7 +452,57 @@ tests:
       - hasDocuments:
           count: 1
 
+  - it: with a changed backup folder value on an existing installation, no validation error
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                      labels:
+                        hivemq/platform-persistence: "true"
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: standard
+                      resources:
+                        requests:
+                          storage: 10Gi
+    set:
+      persistence.storageClass: standard
+      persistence.storageSize: 10Gi
+      persistence.backupFolder: false
+    asserts:
+      - notFailedTemplate: {}
+      - notContains:
+          path: spec.statefulSet.spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_BACKUP_FOLDER
+          any: true
+
   - it: with a changed persistence storage class on an existing installation, validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
@@ -379,6 +542,9 @@ tests:
           errorPattern: "`persistence.storageClass` value cannot be changed on an existing installation \\(deployed StorageClass: standard\\)"
 
   - it: with a changed persistence storage size on an existing installation, validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
@@ -418,6 +584,9 @@ tests:
           errorPattern: "`persistence.storageSize` value cannot be changed on an existing installation \\(deployed storage size: 10Gi\\)"
 
   - it: with persistence removed on an existing persistent installation, validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
@@ -453,7 +622,47 @@ tests:
       - failedTemplate:
           errorPattern: "`persistence` value cannot be removed on an existing installation"
 
+  - it: with persistence removed on an existing persistent installation without the HiveMQ Platform CRD, the check is skipped
+    kubernetesProvider:
+      scheme:
+        "hivemq.com/v1/HiveMQPlatform":
+          gvr:
+            group: "hivemq.com"
+            version: "v1"
+            resource: "hivemqplatforms"
+          namespaced: true
+      objects:
+        - apiVersion: hivemq.com/v1
+          kind: HiveMQPlatform
+          metadata:
+            name: test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          spec:
+            statefulSet:
+              spec:
+                volumeClaimTemplates:
+                  - apiVersion: v1
+                    kind: PersistentVolumeClaim
+                    metadata:
+                      name: persistence
+                      labels:
+                        hivemq/platform-persistence: "true"
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      storageClassName: standard
+                      resources:
+                        requests:
+                          storage: 10Gi
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
   - it: with persistence enabled on an existing installation without persistence, validation fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
@@ -480,6 +689,9 @@ tests:
           errorPattern: "`persistence` value cannot be enabled on an existing installation"
 
   - it: with an existing installation without persistence and no persistence values, no validation error
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
@@ -525,6 +737,9 @@ tests:
           errorPattern: "`persistence` value cannot be combined with the `config.overrideStatefulSet` value"
 
   - it: with a user-defined deployed claim named persistence and no persistence values, no validation error
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
     kubernetesProvider:
       scheme:
         "hivemq.com/v1/HiveMQPlatform":
