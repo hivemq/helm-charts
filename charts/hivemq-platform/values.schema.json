@@ -308,6 +308,7 @@
           "properties" : {
             "connectionStringSecretKey" : {
               "description" : "The key within the Secret (`connection-string` by default).",
+              "maxLength" : 253,
               "pattern" : "^[-._a-zA-Z0-9]+$",
               "type" : "string"
             },
@@ -315,7 +316,7 @@
               "description" : "The name of an existing Kubernetes Secret containing the connection string. The connection string is never stored in the HiveMQ configuration, and content changes trigger a rolling restart of the HiveMQ Platform cluster.",
               "maxLength" : 253,
               "minLength" : 1,
-              "pattern" : ".*\\S.*",
+              "pattern" : "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
               "type" : "string"
             }
           },
@@ -334,7 +335,7 @@
               "type" : "boolean"
             },
             "initialMemberCount" : {
-              "description" : "The number of nodes that form the initial cluster. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value. Cannot be changed on an existing installation.",
+              "description" : "The number of nodes that form the initial cluster. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value. Cannot be changed on an existing installation. A value of `1` permanently limits the installation to a single replica.",
               "minimum" : 1,
               "type" : "integer"
             },
@@ -1145,10 +1146,16 @@
     },
     "persistence" : {
       "additionalProperties" : false,
-      "description" : "Stores the HiveMQ data, log, backup and audit folders on a PersistentVolumeClaim per HiveMQ Platform pod, so their content survives pod restarts. Both values are required and cannot be changed on an existing installation.",
+      "description" : "Stores the HiveMQ data, log and audit folders, and by default the backup folder, on a PersistentVolumeClaim per HiveMQ Platform pod, so their content survives pod restarts. The `storageClass` and `storageSize` values are required and cannot be changed on an existing installation.",
       "properties" : {
+        "backupFolder" : {
+          "description" : "Stores the HiveMQ backup folder on the PersistentVolumeClaim (`true` by default). Set to `false` to keep the backup folder on the ephemeral storage of the HiveMQ container; a previously stored backup folder remains on the PersistentVolumeClaim.",
+          "type" : "boolean"
+        },
         "storageClass" : {
           "description" : "The StorageClass of the PersistentVolumeClaim. Required when persistence is configured.",
+          "maxLength" : 253,
+          "pattern" : "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
           "type" : "string"
         },
         "storageSize" : {

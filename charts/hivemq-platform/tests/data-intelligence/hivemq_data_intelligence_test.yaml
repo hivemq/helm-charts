@@ -104,7 +104,7 @@ tests:
       nodes.replicaCount: 2
     asserts:
       - failedTemplate:
-          errorPattern: "must be at least 2 when the `nodes.replicaCount` value \\(2\\) is greater than 1"
+          errorPattern: "must be at least 2 when the `nodes.replicaCount` value \\(2\\) is greater than 1. Set `initialMemberCount` to at least 2 before the initial installation, as it cannot be changed afterwards"
 
   - it: with a single initial member and a single replica, no validation error
     set:
@@ -420,7 +420,16 @@ tests:
       dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
       dataIntelligence.server.connectionStringSecretKey: "invalid/key"
     asserts:
-      - failedTemplate: {}
+      - failedTemplate:
+          errorPattern: "connectionStringSecretKey"
+
+  - it: with a connection string Secret key longer than the Kubernetes limit, schema validation fails
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      dataIntelligence.server.connectionStringSecretKey: "k-256-characters-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    asserts:
+      - failedTemplate:
+          errorPattern: "connectionStringSecretKey"
 
   - it: with an unknown Data Intelligence value, schema validation fails
     set:
@@ -460,6 +469,30 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "cannot be changed on an existing installation \\(deployed with 2 initial members\\)"
+
+  - it: with a member element outside the initial members of the deployed configuration, the count is not affected
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><cluster><log-based><initial-members><member><host>a</host></member><member><host>b</host></member></initial-members></log-based></cluster><other><member><host>c</host></member></other></hivemq>"
+    set:
+      dataIntelligence.clustering.enabled: true
+      dataIntelligence.clustering.initialMemberCount: 2
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
 
   - it: with an unchanged initial member count on an existing installation, no validation error
     kubernetesProvider:
@@ -650,13 +683,21 @@ tests:
       - hasDocuments:
           count: 1
 
-  - it: with a connection string Secret and an overridden HiveMQ configuration without the environment variable, validation fails
+  - it: with a connection string Secret and an overridden HiveMQ configuration without the placeholder, validation fails
     set:
       dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
       config.overrideHiveMQConfig: "<hivemq></hivemq>"
     asserts:
       - failedTemplate:
-          errorPattern: "which the `config.overrideHiveMQConfig` value does not reference"
+          errorPattern: "which the `config.overrideHiveMQConfig` value does not contain"
+
+  - it: with a connection string Secret and an overridden HiveMQ configuration containing only the bare variable name, validation fails
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.overrideHiveMQConfig: "<hivemq><data-intelligence><server><connection-string>HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING</connection-string></server></data-intelligence></hivemq>"
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires the `\\$\\{HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING\\}` placeholder"
 
   - it: with a connection string Secret and an overridden HiveMQ configuration referencing the environment variable, no validation error
     set:
@@ -667,7 +708,7 @@ tests:
       - hasDocuments:
           count: 1
 
-  - it: with a connection string Secret and an existing HiveMQ configuration without the environment variable, validation fails
+  - it: with a connection string Secret and an existing HiveMQ configuration without the placeholder, validation fails
     kubernetesProvider:
       scheme:
         "v1/ConfigMap":
@@ -689,7 +730,31 @@ tests:
       config.name: my-existing-configuration
     asserts:
       - failedTemplate:
-          errorPattern: "which the existing HiveMQ configuration `my-existing-configuration` does not reference"
+          errorPattern: "which the existing HiveMQ configuration `my-existing-configuration` does not contain"
+
+  - it: with a connection string Secret and an existing HiveMQ configuration containing only the bare variable name, validation fails
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: my-existing-configuration
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq><data-intelligence><server><connection-string>HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING</connection-string></server></data-intelligence></hivemq>"
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.create: false
+      config.name: my-existing-configuration
+    asserts:
+      - failedTemplate:
+          errorPattern: "requires the `\\$\\{HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING\\}` placeholder"
 
   - it: with a connection string Secret and an existing HiveMQ configuration referencing the environment variable, no validation error
     kubernetesProvider:
@@ -721,6 +786,42 @@ tests:
       dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
       config.create: false
       config.name: my-existing-configuration
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with a connection string Secret, an existing HiveMQ configuration and an ignored configuration override, the existing configuration is validated
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: my-existing-configuration
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "<hivemq></hivemq>"
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.create: false
+      config.name: my-existing-configuration
+      config.overrideHiveMQConfig: "<hivemq><data-intelligence><server><connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string></server></data-intelligence></hivemq>"
+    asserts:
+      - failedTemplate:
+          errorPattern: "which the existing HiveMQ configuration `my-existing-configuration` does not contain"
+
+  - it: with a connection string Secret and an ignored configuration override without the placeholder, the override is not validated
+    set:
+      dataIntelligence.server.connectionStringSecretName: my-connection-string-secret
+      config.create: false
+      config.name: my-existing-configuration
+      config.overrideHiveMQConfig: "<hivemq></hivemq>"
     asserts:
       - notFailedTemplate: {}
       - hasDocuments:
@@ -796,9 +897,50 @@ tests:
       - hasDocuments:
           count: 1
 
+  - it: with a deployed ConfigMap without a configuration entry next to the Secret configuration, the Secret is used
+    kubernetesProvider:
+      scheme:
+        "v1/ConfigMap":
+          gvr:
+            version: "v1"
+            resource: "configmaps"
+          namespaced: true
+        "v1/Secret":
+          gvr:
+            version: "v1"
+            resource: "secrets"
+          namespaced: true
+      objects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            other-file.xml: "<hivemq></hivemq>"
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: hivemq-configuration-test-hivemq-platform
+            namespace: test-hivemq-platform-namespace
+          data:
+            config.xml: "PGhpdmVtcT48Y2x1c3Rlcj48bG9nLWJhc2VkPjxpbml0aWFsLW1lbWJlcnM+PG1lbWJlcj48aG9zdD5hPC9ob3N0PjwvbWVtYmVyPjxtZW1iZXI+PGhvc3Q+YjwvaG9zdD48L21lbWJlcj48L2luaXRpYWwtbWVtYmVycz48L2xvZy1iYXNlZD48L2NsdXN0ZXI+PC9oaXZlbXE+"
+    set:
+      dataIntelligence.clustering.enabled: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "cannot be disabled on an existing installation"
+
   - it: with a blank connection string Secret name, schema validation fails
     set:
       dataIntelligence.server.connectionStringSecretName: " "
+    asserts:
+      - failedTemplate:
+          errorPattern: "connectionStringSecretName"
+
+  - it: with a connection string Secret name that is not a valid Kubernetes name, schema validation fails
+    set:
+      dataIntelligence.server.connectionStringSecretName: "My Secret"
     asserts:
       - failedTemplate:
           errorPattern: "connectionStringSecretName"
