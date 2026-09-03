@@ -304,7 +304,7 @@
       "properties" : {
         "server" : {
           "additionalProperties" : false,
-          "description" : "Configures the connection to the HiveMQ Data Intelligence server. Without a connection string configured here, the connection string of the HiveMQ Platform license is used.",
+          "description" : "Configures the connection to the HiveMQ Data Intelligence server. A connection string configured here will take precedence. The connection string can also be automatically set via a self-serve license.",
           "properties" : {
             "connectionStringSecretKey" : {
               "description" : "The key within the Secret (`connection-string` by default).",
@@ -313,7 +313,7 @@
               "type" : "string"
             },
             "connectionStringSecretName" : {
-              "description" : "The name of an existing Kubernetes Secret containing the connection string. The connection string is never stored in the HiveMQ configuration, and content changes trigger a rolling restart of the HiveMQ Platform cluster.",
+              "description" : "The name of an existing Kubernetes Secret containing the connection string. The connection string is never stored in the HiveMQ configuration, and content changes trigger a rolling restart of the HiveMQ cluster.",
               "maxLength" : 253,
               "minLength" : 1,
               "pattern" : "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
@@ -324,23 +324,23 @@
         },
         "clustering" : {
           "additionalProperties" : false,
-          "description" : "Configures HiveMQ Data Intelligence log-based clustering.",
+          "description" : "Configures the log-based clustering for HiveMQ Data Intelligence.",
           "properties" : {
             "dataLayerEnabled" : {
               "description" : "Enables the log-based clustering data layer (`true` by default). Set to `false` to disable it.",
               "type" : "boolean"
             },
             "enabled" : {
-              "description" : "Enables log-based clustering.",
+              "description" : "Enables log-based clustering. This is required for a connection to HiveMQ Data Intelligence.",
               "type" : "boolean"
             },
             "initialMemberCount" : {
-              "description" : "The number of nodes that form the initial cluster. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value. Cannot be changed on an existing installation. A value of `1` permanently limits the installation to a single replica.",
+              "description" : "The number of nodes that form the initial cluster. Required when log-based clustering is enabled and must not exceed the `nodes.replicaCount` value. Cannot be changed for an existing deployment. A value of `1` permanently limits the deployment to a single replica, because running more than one replica requires at least 2 initial members.",
               "minimum" : 1,
               "type" : "integer"
             },
             "initialMembersConnectTimeoutSeconds" : {
-              "description" : "The time in seconds that a cluster formation attempt waits for the other initial members before it retries (`60` by default).",
+              "description" : "The time in seconds that a log-based cluster formation attempt waits for the other initial members before it retries (`60` by default).",
               "minimum" : 1,
               "type" : "integer"
             },
@@ -1151,7 +1151,7 @@
     },
     "persistence" : {
       "additionalProperties" : false,
-      "description" : "Stores the HiveMQ data, log and audit folders, and by default the backup folder, on a PersistentVolumeClaim per HiveMQ Platform pod, so their content survives pod restarts. The `storageClass` and `storageSize` values are required and cannot be changed on an existing installation.",
+      "description" : "Stores the HiveMQ data, log and audit folders, and by default the backup folder, on a PersistentVolumeClaim per HiveMQ Platform pod, so their content survives pod restarts. The `storageClass` and `storageSize` values are required and cannot be changed for an existing deployment.",
       "properties" : {
         "backupFolder" : {
           "description" : "Stores the HiveMQ backup folder on the PersistentVolumeClaim (`true` by default). Set to `false` to keep the backup folder on the ephemeral storage of the HiveMQ container; a previously stored backup folder remains on the PersistentVolumeClaim.",
