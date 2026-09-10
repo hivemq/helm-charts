@@ -49,6 +49,16 @@
             allowedVersions: '/^v3\\./',
         },
         {
+            description: 'The Helm version of the setup-helm action always comes from a workflow expression, the custom managers own the literal versions',
+            matchManagers: [
+                'github-actions',
+            ],
+            matchPackageNames: [
+                'helm/helm',
+            ],
+            enabled: false,
+        },
+        {
             description: 'OCI image dependency is not a real Maven package (gradle-oci plugin)',
             matchManagers: [
                 'gradle',
