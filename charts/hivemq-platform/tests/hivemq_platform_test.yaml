@@ -2496,7 +2496,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: '`HIVEMQ_DATA_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type'
+          errorPattern: '`HIVEMQ_DATA_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_LOG_FOLDER in nodes.env and hivemqFolders.log, then fails
     set:
@@ -2523,7 +2523,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: '`HIVEMQ_LOG_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type'
+          errorPattern: '`HIVEMQ_LOG_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_HEAPDUMP_FOLDER in nodes.env and hivemqFolders.heapDump, then fails
     set:
@@ -2550,7 +2550,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: '`HIVEMQ_HEAPDUMP_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type'
+          errorPattern: '`HIVEMQ_HEAPDUMP_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_BACKUP_FOLDER in nodes.env and hivemqFolders.backup, then fails
     set:
@@ -2577,7 +2577,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: '`HIVEMQ_BACKUP_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type'
+          errorPattern: '`HIVEMQ_BACKUP_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_AUDIT_FOLDER in nodes.env and hivemqFolders.audit, then fails
     set:
@@ -2604,7 +2604,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: '`HIVEMQ_AUDIT_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type'
+          errorPattern: '`HIVEMQ_AUDIT_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_DATA_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
     set:

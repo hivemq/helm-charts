@@ -14,7 +14,7 @@ pinnedReference = "v1.24.17-k3s1@sha256:9e034931999854c6210b86a0708fde66b9137045
 [[oci]]
 name = "k3s-latest"
 image = "rancher/k3s"
-reference = "v1.35.7-k3s1@sha256:eb7156a0bf9867ffac1afc6d55f453175b2f6c785627b786540df863014a56e7"
+reference = "v1.35.8-k3s1@sha256:59fe491fd3b73204e499e40b325240d85c42c7189c3ae50150d37b78243f3b32"
 
 # https://hub.docker.com/_/busybox/tags?name=latest
 [[oci]]
@@ -26,7 +26,7 @@ reference = "latest@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d
 [[oci]]
 name = "nginx"
 image = "library/nginx"
-reference = "latest@sha256:8541484afbc9c8a5a8a99b379568ebbc957f658583ec9448fc43104229c03cf8"
+reference = "latest@sha256:05b8cb60c354a44ab824ea6e7dc69b46d50762cdbe728a347a5b656e6fb3d7c4"
 
 # https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
 [[oci]]
@@ -53,40 +53,40 @@ pinnedReference = "1.0.1@sha256:96f972c3029a2bab716c43c5404280030ecd98d199bd9cbe
 [[oci]]
 name = "jre-temurin21-resolute"
 image = "library/eclipse-temurin"
-reference = "21-jre-resolute@sha256:b3598c584b6f797ee2324baac2ae5ceb6c8fb3a97f3b11e5a6ee4fd47308bc58"
+reference = "21-jre-resolute@sha256:d422afbc2c66d57d5aaf8fc4f51898d1b77941ff42fa12f222950269f42ae3c1"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=21-jre-ubi9-minimal
 [[oci]]
 name = "jre-temurin21-ubi9"
 image = "library/eclipse-temurin"
-reference = "21-jre-ubi9-minimal@sha256:fa0f9137fbfa07281b7445c9a0d0d22027e699e1bf408d4468d745d1dbbc9ab5"
+reference = "21-jre-ubi9-minimal@sha256:fa6a3cd1e88402446002f86e0d06f5202d7d6ec02d525888f9c0ea2eeb5b07ad"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-ubi10-minimal
 [[oci]]
 name = "jre-temurin25-ubi10"
 image = "library/eclipse-temurin"
-reference = "25-jre-ubi10-minimal@sha256:0c0deb48e8a7f1dbf9a082e136a96efd6a62046e0c40975b7136eb04ce0027ff"
+reference = "25-jre-ubi10-minimal@sha256:03fe3017902514cd8ac83c516c9f23659b0a4855f8ae39976fe1cbf441fd4ff3"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-21-jre-noble
 [[oci]]
 name = "jre-semeru21-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-21-jre-noble@sha256:0c6e904e54d26030c949a42230d736315d00f325626c7d646fa0f046f51d4e9c"
+reference = "open-21-jre-noble@sha256:d9a1e40dc8a0ae35dfdacc1b99e0d9d41da971036456ad1276499d090d729c9d"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-25-jre-noble
 [[oci]]
 name = "jre-semeru25-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-25-jre-noble@sha256:4ebb2c5178116c47cc163ce891b184fb1311081e58913ee1b8e0db0e1a333369"
+reference = "open-25-jre-noble@sha256:58131e576742052d6414c0770e1dae2d4a464ade59ec034cedc93038bdf746ba"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=21-al2023-jdk
 [[oci]]
 name = "jre-corretto21-al2023"
 image = "library/amazoncorretto"
-reference = "21-al2023-jdk@sha256:ff30d87dbb7b21774b003ad16ec233b3173be069e861803008f87ff829a4e706"
+reference = "21-al2023-jdk@sha256:de27588c570049ff6c970530cf32f0eb41a082edd3f753e8f923e9c82e2ca97e"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=25-al2023-jdk
 [[oci]]
 name = "jre-corretto25-al2023"
 image = "library/amazoncorretto"
-reference = "25-al2023-jdk@sha256:397edfaaa0fdfc95001d4c4a4ab82174073277a5d630fd9375c94dca25b5991d"
+reference = "25-al2023-jdk@sha256:10a3c794ac57ecfc386938283fba9da351c5f0bda3a155482a1193b9806f1854"

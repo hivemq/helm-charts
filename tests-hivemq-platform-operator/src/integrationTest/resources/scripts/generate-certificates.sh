@@ -22,11 +22,11 @@ function generate_certificates() {
     -subj "/C=CA/CN=$SERVICE_NAME.$NAMESPACE.svc" \
     -reqexts SAN \
     -extensions SAN \
-    -config <(echo "[req]"; echo "distinguished_name=req"; echo "[SAN]"; echo "subjectAltName=DNS:localhost") \
+    -config <(echo "[req]"; echo "distinguished_name=req"; echo "[SAN]"; echo "subjectAltName=DNS:localhost,DNS:host.docker.internal") \
     -out server.csr >/dev/null
 
   openssl x509 -req \
-    -extfile <(printf "subjectAltName=DNS:%s.%s.svc,DNS:localhost" "${SERVICE_NAME}" "${NAMESPACE}") \
+    -extfile <(printf "subjectAltName=DNS:%s.%s.svc,DNS:localhost,DNS:host.docker.internal" "${SERVICE_NAME}" "${NAMESPACE}") \
     -sha256 \
     -days 3650 \
     -in server.csr \

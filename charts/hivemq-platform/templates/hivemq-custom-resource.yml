@@ -1,6 +1,8 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
-{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
+{{- include "hivemq-platform.validate-data-intelligence" . -}}
+{{- include "hivemq-platform.add-persistence-volumes" . -}}
+{{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
@@ -31,15 +33,12 @@ spec:
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
   metricsPort: {{ $metricsPort }}
   metricsPath: {{ .Values.metrics.path }}
-  {{- $pulseSecretName := include "hivemq-platform.pulse-secret-name" . -}}
-  {{- if or $pulseSecretName .Values.monitoredResources }}
+  {{- $dataIntelligenceMonitoredResources := include "hivemq-platform.data-intelligence-monitored-resources" . -}}
+  {{- if or $dataIntelligenceMonitoredResources .Values.monitoredResources }}
   {{- include "hivemq-platform.validate-monitored-resources" . }}
   monitoredResources:
-    {{- if $pulseSecretName }}
-    - name: {{ $pulseSecretName | quote }}
-      type: "SECRET"
-      files:
-        - "config.xml"
+    {{- with $dataIntelligenceMonitoredResources }}
+    {{- . | trim | nindent 4 }}
     {{- end }}
     {{- range .Values.monitoredResources }}
     - name: {{ .name | quote }}
@@ -115,6 +114,13 @@ spec:
                 {{- include "hivemq-platform.validate-env-vars" . }}
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
+                {{- if $hasDataIntelligenceConnectionString }}
+                - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.dataIntelligence.server.connectionStringSecretName | quote }}
+                      key: {{ .Values.dataIntelligence.server.connectionStringSecretKey | default "connection-string" | quote }}
+                {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
                   {{- $envNamesKeyStorePrivatePasswordList := list }}
@@ -236,15 +242,11 @@ spec:
                   ephemeral-storage: {{ . | trim | quote }}
                   {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
-              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore $hasPulseConfig }}
+              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore }}
               volumeMounts:
                 {{- if $hasLicense }}
                 - name: licenses
                   mountPath: /opt/hivemq/license
-                {{- end }}
-                {{- if $hasPulseConfig }}
-                - name: pulse-config
-                  mountPath: /opt/hivemq/pulse/conf
                 {{- end }}
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
@@ -266,7 +268,7 @@ spec:
             {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore $hasPulseConfig }}
+          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore }}
           volumes:
             {{- if $hasLicense }}
             - name: licenses
@@ -276,11 +278,6 @@ spec:
                 {{- else }}
                 secretName: {{ include "hivemq-platform.default-license-name" . }}
                 {{- end }}
-            {{- end }}
-            {{- if $hasPulseConfig }}
-            - name: pulse-config
-              secret:
-                secretName: {{ include "hivemq-platform.pulse-secret-name" . }}
             {{- end }}
             {{- if $hasKeystore }}
               {{- (include "hivemq-platform.get-tls-secret-volumes" .) | indent 12 -}}
