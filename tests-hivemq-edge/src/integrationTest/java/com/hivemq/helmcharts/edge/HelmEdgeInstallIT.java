@@ -15,14 +15,15 @@ class HelmEdgeInstallIT extends AbstractHelmEdgeIT {
     @Test
     @Timeout(value = 7, unit = TimeUnit.MINUTES)
     void withLocalCharts_edgeRunningAndMqttReachable() throws Exception {
-        // Register the version-log waiter BEFORE install so the line cannot be missed if Edge boots fast.
+        // Register both log waiters BEFORE install: the chart's readiness probe means the install returns
+        // only after Edge has logged its start-up, so a waiter registered afterwards never sees the line.
         final var expectedVersion = System.getProperty("hivemq.edge.tag");
         final var versionLogged = waitForEdgeVersionLog(expectedVersion);
+        final var edgeStartupLogged = waitForEdgeStartupLog();
 
         installEdgeChartAndWaitToBeRunning();
         versionLogged.get(5, TimeUnit.MINUTES);
-
-        waitForEdgeStartupLog().get(5, TimeUnit.MINUTES);
+        edgeStartupLogged.get(5, TimeUnit.MINUTES);
 
         helmChartContainer.testRelease(EDGE_RELEASE_NAME, edgeNamespace);
     }
