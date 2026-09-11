@@ -19,6 +19,7 @@ set:
       enabled: true
     persistence:
       enabled: true
+      size: 1Gi
 
 tests:
   - it: Should have the correct metadata
@@ -105,7 +106,7 @@ tests:
           content:
             name: HIVEMQ_DATAHUB_ENABLED
             value: "true"
-      - contains:
+      - notContains:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_DATAHUB_WAIT_BEFORE_DELETE
@@ -141,6 +142,36 @@ tests:
           content:
             name: JAVA_OPTS
             value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+
+  - it: Should refuse Data Hub without the persistence volume
+    set:
+      modules:
+        persistence:
+          enabled: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "modules.dataHub.enabled requires modules.persistence.enabled"
+
+  - it: Should not set the Data Hub variables when the license is missing
+    set:
+      license:
+        enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_SCRIPTSTATE_PATH
+            value: /persistence/scriptstate.db
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
+            value: "5000"
 
   - it: Should set the correct resource limits and requests
     asserts:

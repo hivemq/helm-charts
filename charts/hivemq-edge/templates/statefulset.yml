@@ -8,6 +8,8 @@ spec:
   selector:
     matchLabels:
       {{- include "hivemq-edge.selector-labels" . | nindent 6 }}
+  {{- /* Does not match the Service name, so pods get no per-pod DNS record. Left as is: spec.serviceName is
+       immutable on a StatefulSet, and changing it would make every helm upgrade of an existing release fail. */}}
   serviceName: "hivemq-edge"
   template:
     metadata:
@@ -42,6 +44,11 @@ spec:
               path: /api/v1/health/liveness
               port: 8080
             initialDelaySeconds: {{ .Values.liveness.initialDelaySeconds }}
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 8080
             periodSeconds: 5
           ports:
             {{- if .Values.http.enabled }}
@@ -92,15 +99,20 @@ spec:
             {{- end }}
             - name: HIVEMQ_DATAHUB_ENABLED
               value: "{{ and .Values.modules.dataHub.enabled .Values.license.enabled }}"
-            {{- if and .Values.license.enabled .Values.modules.persistence.enabled .Values.modules.dataHub.enabled }}
+            {{- if and .Values.license.enabled .Values.modules.dataHub.enabled }}
+            {{/* Every variable below is referenced by Edge's conf-k8s/config.xml inside the block that
+                 HIVEMQ_DATAHUB_ENABLED gates, and an unset ${ENV:...} aborts the start. So they are set
+                 exactly when that gate is true, and Data Hub cannot be enabled without the persistence
+                 volume the script state lives on. */}}
+            {{- if not .Values.modules.persistence.enabled }}
+            {{- fail "modules.dataHub.enabled requires modules.persistence.enabled: Data Hub stores its script state on the persistence volume" }}
+            {{- end }}
             - name: HIVEMQ_DATAHUB_SCRIPTSTATE_PATH
               value: /persistence/scriptstate.db
             - name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
               value: "{{ .Values.modules.dataHub.watcher.interval }}"
             - name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
               value: "{{ .Values.modules.dataHub.watcher.initialDelay }}"
-            - name: HIVEMQ_DATAHUB_WAIT_BEFORE_DELETE
-              value: "{{ .Values.modules.dataHub.watcher.waitBeforeDelete }}"
             {{- end }}
             {{- if .Values.mqtt.enabled }}
             - name: HIVEMQ_MQTT_ENABLED
@@ -187,7 +199,10 @@ spec:
                   name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "clientauth" "releaseName" .Release.Name) }}"
                   key: truststore-password
             {{- end }}
-            {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
+            {{- if and (.Values.adminLdap.tls.enabled) (not (dig "create" "enabled" false .Values.adminLdap.tls)) }}
+            {{- if not (dig "truststore" "truststoreSecretName" "" .Values.adminLdap.tls) }}
+            {{- fail "adminLdap.tls.enabled requires either adminLdap.tls.create.enabled or adminLdap.tls.truststore.* naming an existing secret" }}
+            {{- end }}
             - name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
               value: "true"
             - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
@@ -198,7 +213,7 @@ spec:
                   name: "{{ .Values.adminLdap.tls.truststore.passwordSecretName }}"
                   key: "{{ .Values.adminLdap.tls.truststore.passwordSecretKey }}"
             {{- end }}
-            {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+            {{- if and (.Values.adminLdap.tls.enabled) (dig "create" "enabled" false .Values.adminLdap.tls) }}
             - name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
               value: "true"
             - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
@@ -220,7 +235,7 @@ spec:
             - name: HIVEMQ_LDAP_SIMPLEBIND_RDNS
               value: "{{ .Values.adminLdap.simplebind.userDn }}"
             - name: HIVEMQ_LDAP_SIMPLEBIND_PASSWORD
-              value: "{{ .Values.adminLdap.simplebind.password }}"
+              value: {{ .Values.adminLdap.simplebind.password | quote }}
             - name: HIVEMQ_LDAP_UID
               value: "{{ .Values.adminLdap.uid }}"
             - name: HIVEMQ_LDAP_RDNS
@@ -261,7 +276,7 @@ spec:
             - name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
               value: "{{ .Values.adminLdap.userRoleSuperQuery }}"
               {{- else }}
-            - name: HIVEMQ_LDAP_USER_ROLE_USER_QUERY
+            - name: HIVEMQ_LDAP_USER_ROLE_SUPER_QUERY
               value: ""
               {{- end }}
               {{- if .Values.adminLdap.userRoleUserQuery }}
@@ -324,11 +339,11 @@ spec:
             - name: HIVEMQ_PRE_LOGIN_NOTICE_ENABLED
               value: "{{ .Values.preLoginNotice.enabled }}"
             - name: HIVEMQ_PRE_LOGIN_NOTICE_TITLE
-              value: "{{ .Values.preLoginNotice.title }}"
+              value: {{ .Values.preLoginNotice.title | quote }}
             - name: HIVEMQ_PRE_LOGIN_NOTICE_MESSAGE
-              value: "{{ .Values.preLoginNotice.message }}"
+              value: {{ .Values.preLoginNotice.message | quote }}
             - name: HIVEMQ_PRE_LOGIN_NOTICE_CONSENT
-              value: "{{ .Values.preLoginNotice.consent }}"
+              value: {{ .Values.preLoginNotice.consent | quote }}
             {{- end }}
             {{- with .Values.env }}
               {{- toYaml . | nindent 12 }}
@@ -442,7 +457,7 @@ spec:
               - key: truststore.jks
                 path: truststore.jks
       {{- end -}}
-      {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
+      {{- if and (.Values.adminLdap.tls.enabled) (not (dig "create" "enabled" false .Values.adminLdap.tls)) }}
         - name: ldap-truststore-jks
           secret:
             secretName: "{{ .Values.adminLdap.tls.truststore.truststoreSecretName }}"
@@ -450,7 +465,7 @@ spec:
               - key: "{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}"
                 path: "{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}"
       {{- end -}}
-      {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+      {{- if and (.Values.adminLdap.tls.enabled) (dig "create" "enabled" false .Values.adminLdap.tls) }}
         - name: ldap-truststore-jks
           secret:
             secretName: {{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "ldap" "releaseName" .Release.Name) }}
@@ -458,13 +473,22 @@ spec:
               - key: truststore.jks
                 path: truststore.jks
       {{- end -}}
+      {{- if .Values.license.enabled }}
+      {{- if and (not .Values.license.secret) (not .Values.license.file) }}
+      {{- fail "license.enabled requires either license.file or license.secret" }}
+      {{- end }}
+      {{- if and .Values.license.secret .Values.license.file }}
+      {{- fail "license.file and license.secret are mutually exclusive" }}
+      {{- end }}
+      {{- end }}
       {{- if and .Values.license.enabled .Values.license.secret }}
         - name: license
           secret:
             secretName: "{{ .Values.license.secret.secretName }}"
             items:
               - key: "{{ .Values.license.secret.secretKey }}"
-                path: "{{ .Values.license.secret.secretKey }}"
+                {{/* The licence loader reads only files ending in .edgelic, whatever the secret key is called. */}}
+                path: license.edgelic
       {{- end -}}
       {{- if and (.Values.license.enabled) (.Values.license.file) }}
         - name: license
@@ -480,7 +504,8 @@ spec:
             secretName: "{{ .Values.pulse.secret.secretName }}"
             items:
               - key: "{{ .Values.pulse.secret.secretKey }}"
-                path: "{{ .Values.pulse.secret.secretKey }}"
+                {{/* The Pulse agent reads only tokenbase64.jwt, whatever the secret key is called. */}}
+                path: tokenbase64.jwt
       {{- end -}}
       {{- if and (.Values.pulse.enabled) (.Values.pulse.token) }}
         - name: pulse
@@ -503,7 +528,12 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "{{.Values.modules.persistence.storageClassName }}"
+      {{- if not .Values.modules.persistence.size }}
+      {{- fail "modules.persistence.enabled requires modules.persistence.size" }}
+      {{- end }}
+      {{- with .Values.modules.persistence.storageClassName }}
+      storageClassName: {{ . | quote }}
+      {{- end }}
       resources:
         requests:
           storage: "{{.Values.modules.persistence.size }}"

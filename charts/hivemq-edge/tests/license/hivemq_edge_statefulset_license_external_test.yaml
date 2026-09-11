@@ -148,7 +148,7 @@ tests:
               secret:
                 items:
                   - key: "keyy"
-                    path: "keyy"
+                    path: "license.edgelic"
                 secretName: secrety
             - name: hivemq-edge-persistence-edge
               emptyDir: {}
