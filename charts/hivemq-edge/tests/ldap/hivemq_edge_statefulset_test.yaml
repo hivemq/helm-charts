@@ -114,6 +114,16 @@ tests:
           content:
             name: HIVEMQ_LDAP_SERVER1_PORT
             value: "389"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER2_ENABLED
+            value: "true"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER3_ENABLED
+            value: "true"
 
   - it: Should set LDAP server configuration with multiple servers
     set:
@@ -136,6 +146,13 @@ tests:
           content:
             name: HIVEMQ_LDAP_SERVER1_PORT
             value: "389"
+      # Edge drops the server2/server3 blocks from conf-k8s/config.xml unless these are set,
+      # so the host/port variables above would never reach the configuration without them.
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER2_ENABLED
+            value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -146,6 +163,11 @@ tests:
           content:
             name: HIVEMQ_LDAP_SERVER2_PORT
             value: "636"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_SERVER3_ENABLED
+            value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -194,6 +216,12 @@ tests:
           content:
             name: HIVEMQ_LDAP_TLS_MODE
             value: "LDAPS"
+      # Without this gate Edge strips the truststore block, ignoring the path/password below.
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
+            value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -224,6 +252,11 @@ tests:
           content:
             name: HIVEMQ_LDAP_TLS_MODE
             value: "START_TLS"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
+            value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -339,12 +372,24 @@ tests:
           content:
             mountPath: /ldap-trust
             name: ldap-truststore-jks
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
+            value: "true"
 
   - it: Should set HIVEMQ_LDAP_BASE_DN when baseDn is provided
     set:
       adminLdap:
         baseDn: "dc=example,dc=org"
     asserts:
+      # base-dn is optional in Edge's schema, so conf-k8s/config.xml only emits the element
+      # when this gate is set. Without it Edge aborts on the unresolved HIVEMQ_LDAP_BASE_DN.
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_BASE_DN_ENABLED
+            value: "true"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -353,6 +398,11 @@ tests:
 
   - it: Should not set HIVEMQ_LDAP_BASE_DN when baseDn is not provided
     asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_LDAP_BASE_DN_ENABLED
+            value: "true"
       - notContains:
           path: spec.template.spec.containers[0].env
           content:

@@ -55,10 +55,6 @@ spec:
             - containerPort: 1883
               name: mqtt
             {{- end }}
-            {{- if .Values.mqttsn.enabled }}
-            - containerPort: 2442
-              name: mqtt-sn
-            {{- end }}
           env:
             - name: HIVEMQ_CONFIG_WRITEABLE
               value: "false"
@@ -111,8 +107,21 @@ spec:
               value: "true"
             {{- end }}
             {{- if and (.Values.mqtts.enabled) (eq .Values.mqtts.create.enabled false) }}
+            {{/* Edge's conf-k8s/config.xml holds two mutually exclusive TLS listeners on port 8883:
+                 HIVEMQ_MQTTS_ENABLED selects the one without a truststore,
+                 HIVEMQ_MQTTS_CLIENTAUTH_ENABLED the one with it. Setting both binds 8883 twice. */}}
+            {{- if eq .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
             - name: HIVEMQ_MQTTS_ENABLED
               value: "true"
+            {{- else }}
+            - name: HIVEMQ_MQTTS_CLIENTAUTH_ENABLED
+              value: "true"
+            - name: HIVEMQ_MQTTS_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.mqtts.keystore.passwordSecretName }}"
+                  key: "{{ .Values.mqtts.keystore.passwordSecretKey }}"
+            {{- end }}
             - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
               value: "{{ .Values.mqttsClientauth.clientAuthenticationMode }}"
             - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
@@ -131,8 +140,18 @@ spec:
                   key: "{{ .Values.mqtts.keystore.privateKeyPasswordSecretKey }}"
             {{- end }}
             {{- if and (.Values.mqtts.enabled) (.Values.mqtts.create.enabled) }}
+            {{- if eq .Values.mqttsClientauth.clientAuthenticationMode "NONE" }}
             - name: HIVEMQ_MQTTS_ENABLED
               value: "true"
+            {{- else }}
+            - name: HIVEMQ_MQTTS_CLIENTAUTH_ENABLED
+              value: "true"
+            - name: HIVEMQ_MQTTS_KEYSTORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "hivemq-edge.name" (dict "prefix" "hivemq-edge" "name" "mqtts" "releaseName" .Release.Name) }}"
+                  key: keystore-password
+            {{- end }}
             - name: HIVEMQ_MQTTS_CLIENT_AUTH_MODE
               value: "{{ .Values.mqttsClientauth.clientAuthenticationMode }}"
             - name: HIVEMQ_MQTTS_PREFER_SERVER_CIPHER_SUITE
@@ -169,6 +188,8 @@ spec:
                   key: truststore-password
             {{- end }}
             {{- if and (.Values.adminLdap.tls.enabled) (ne .Values.adminLdap.tls.create.enabled true) }}
+            - name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
+              value: "true"
             - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
               value: /ldap-trust/{{ .Values.adminLdap.tls.truststore.truststoreSecretKey }}
             - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
@@ -178,6 +199,8 @@ spec:
                   key: "{{ .Values.adminLdap.tls.truststore.passwordSecretKey }}"
             {{- end }}
             {{- if and (.Values.adminLdap.tls.enabled) (.Values.adminLdap.tls.create.enabled) }}
+            - name: HIVEMQ_LDAP_TLS_TRUSTSTORE_ENABLED
+              value: "true"
             - name: HIVEMQ_LDAP_TRUSTSTORE_PATH
               value: /ldap-trust/truststore.jks
             - name: HIVEMQ_LDAP_TRUSTSTORE_PASSWORD
@@ -203,6 +226,8 @@ spec:
             - name: HIVEMQ_LDAP_RDNS
               value: "{{ .Values.adminLdap.rdns }}"
             {{- if .Values.adminLdap.baseDn }}
+            - name: HIVEMQ_LDAP_BASE_DN_ENABLED
+              value: "true"
             - name: HIVEMQ_LDAP_BASE_DN
               value: "{{ .Values.adminLdap.baseDn }}"
             {{- end }}
@@ -252,12 +277,16 @@ spec:
             - name: HIVEMQ_LDAP_SERVER1_PORT
               value: "{{ (index .Values.adminLdap.servers 0).port }}"
               {{- if ge (len .Values.adminLdap.servers) 2 }}
+            - name: HIVEMQ_LDAP_SERVER2_ENABLED
+              value: "true"
             - name: HIVEMQ_LDAP_SERVER2_HOST
               value: "{{ (index .Values.adminLdap.servers 1).host }}"
             - name: HIVEMQ_LDAP_SERVER2_PORT
               value: "{{ (index .Values.adminLdap.servers 1).port }}"
               {{- end }}
               {{- if ge (len .Values.adminLdap.servers) 3 }}
+            - name: HIVEMQ_LDAP_SERVER3_ENABLED
+              value: "true"
             - name: HIVEMQ_LDAP_SERVER3_HOST
               value: "{{ (index .Values.adminLdap.servers 2).host }}"
             - name: HIVEMQ_LDAP_SERVER3_PORT
