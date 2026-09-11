@@ -206,8 +206,9 @@ modules:
   # DataHub
   dataHub:
     enabled: false
+    # Timings of the preset file watcher: how long after start-up the first check runs, and how often
+    # the file is checked after that. Both in milliseconds.
     watcher:
-      waitBeforeDelete: 5000
       initialDelay: 30000
       interval: 5000
   # Persistence: a volume for persistent state, e.g. rocksdb files

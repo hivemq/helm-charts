@@ -78,10 +78,10 @@ abstract class AbstractHelmEdgeIT {
     }
 
     /**
-     * Returns a future that completes when the Edge pod logs the standard startup-complete message. The Edge chart
-     * has only a {@code livenessProbe} (no {@code readinessProbe}), so the K8s {@code ready} status flips before the
-     * application has finished booting and bound its listeners. Tests that need to interact with Edge (e.g. opening
-     * an MQTT connection) should wait on this future after {@link #installEdgeChartAndWaitToBeRunning} returns.
+     * Returns a future that completes when the Edge pod logs the standard startup-complete message. Register it
+     * BEFORE {@link #installEdgeChartAndWaitToBeRunning}: the chart's {@code readinessProbe} makes the install wait
+     * until Edge has finished booting, so the line has already been logged by the time the install returns and a
+     * waiter registered afterwards never sees it.
      */
     protected final @NotNull CompletableFuture<String> waitForEdgeStartupLog() {
         return logWaiter.waitFor(EDGE_POD_NAME, ".*Started HiveMQ Edge in.*");

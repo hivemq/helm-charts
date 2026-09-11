@@ -16,6 +16,34 @@ set:
     file: "1234"
 
 tests:
+  - it: Should refuse a licence without a source
+    set:
+      license:
+        file: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: "license.enabled requires either license.file or license.secret"
+
+  - it: Should refuse a licence with both sources
+    set:
+      license:
+        secret:
+          secretName: secrety
+          secretKey: keyy
+    asserts:
+      - failedTemplate:
+          errorPattern: "license.file and license.secret are mutually exclusive"
+
+  - it: Should refuse persistence without a size
+    set:
+      modules:
+        persistence:
+          enabled: true
+          size: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: "modules.persistence.enabled requires modules.persistence.size"
+
   - it: Should have the correct metadata
     asserts:
       - equal:

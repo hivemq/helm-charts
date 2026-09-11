@@ -19,6 +19,7 @@ set:
       enabled: true
     persistence:
       enabled: true
+      size: 1Gi
 
 tests:
   - it: Should have the correct metadata
@@ -105,7 +106,7 @@ tests:
           content:
             name: HIVEMQ_DATAHUB_ENABLED
             value: "true"
-      - contains:
+      - notContains:
           path: spec.template.spec.containers[0].env
           content:
             name: HIVEMQ_DATAHUB_WAIT_BEFORE_DELETE
@@ -141,6 +142,36 @@ tests:
           content:
             name: JAVA_OPTS
             value: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"
+
+  - it: Should refuse Data Hub without the persistence volume
+    set:
+      modules:
+        persistence:
+          enabled: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "modules.dataHub.enabled requires modules.persistence.enabled"
+
+  - it: Should not set the Data Hub variables when the license is missing
+    set:
+      license:
+        enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_ENABLED
+            value: "false"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_SCRIPTSTATE_PATH
+            value: /persistence/scriptstate.db
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
+            value: "5000"
 
   - it: Should set the correct resource limits and requests
     asserts:
@@ -184,6 +215,41 @@ tests:
       - equal:
           path: spec.volumeClaimTemplates[0].metadata.labels["app.kubernetes.io/managed-by"]
           value: Helm
+
+  - it: Should keep an empty storage class when none is set, as every existing release has it
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ""
+
+  - it: Should render the configured storage class
+    set:
+      modules:
+        persistence:
+          storageClassName: local-storage
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: local-storage
+
+  - it: Should render watcher timings of a million and more as integers
+    set:
+      modules:
+        dataHub:
+          watcher:
+            interval: 1000000
+            initialDelay: 1800000
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
+            value: "1000000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
+            value: "1800000"
 
   - it: Should define the correct volumes
     asserts:

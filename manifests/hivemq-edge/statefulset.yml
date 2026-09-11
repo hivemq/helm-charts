@@ -31,6 +31,11 @@ spec:
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 8080
+            periodSeconds: 5
           ports:
             - containerPort: 8080
               name: web
