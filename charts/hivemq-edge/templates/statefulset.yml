@@ -109,10 +109,12 @@ spec:
             {{- end }}
             - name: HIVEMQ_DATAHUB_SCRIPTSTATE_PATH
               value: /persistence/scriptstate.db
+            {{/* int64: a values file parses integers as floats, and from 1000000 up they print as 1e+06,
+                 which Edge cannot parse and silently replaces with its default. */}}
             - name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
-              value: "{{ .Values.modules.dataHub.watcher.interval }}"
+              value: "{{ int64 .Values.modules.dataHub.watcher.interval }}"
             - name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
-              value: "{{ .Values.modules.dataHub.watcher.initialDelay }}"
+              value: "{{ int64 .Values.modules.dataHub.watcher.initialDelay }}"
             {{- end }}
             {{- if .Values.mqtt.enabled }}
             - name: HIVEMQ_MQTT_ENABLED
@@ -531,9 +533,9 @@ spec:
       {{- if not .Values.modules.persistence.size }}
       {{- fail "modules.persistence.enabled requires modules.persistence.size" }}
       {{- end }}
-      {{- with .Values.modules.persistence.storageClassName }}
-      storageClassName: {{ . | quote }}
-      {{- end }}
+      {{- /* Rendered even when unset: "" is what every existing release carries here, and the field is
+           immutable on a StatefulSet, so omitting it would make helm upgrade fail for all of them. */}}
+      storageClassName: {{ .Values.modules.persistence.storageClassName | default "" | quote }}
       resources:
         requests:
           storage: "{{.Values.modules.persistence.size }}"

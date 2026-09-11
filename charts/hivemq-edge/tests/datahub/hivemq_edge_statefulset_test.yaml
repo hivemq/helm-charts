@@ -216,6 +216,41 @@ tests:
           path: spec.volumeClaimTemplates[0].metadata.labels["app.kubernetes.io/managed-by"]
           value: Helm
 
+  - it: Should keep an empty storage class when none is set, as every existing release has it
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ""
+
+  - it: Should render the configured storage class
+    set:
+      modules:
+        persistence:
+          storageClassName: local-storage
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: local-storage
+
+  - it: Should render watcher timings of a million and more as integers
+    set:
+      modules:
+        dataHub:
+          watcher:
+            interval: 1000000
+            initialDelay: 1800000
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INTERVAL
+            value: "1000000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_DATAHUB_WATCHER_INITIAL_DELAY
+            value: "1800000"
+
   - it: Should define the correct volumes
     asserts:
       - contains:
