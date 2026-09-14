@@ -22,6 +22,27 @@ Usage: {{ include "hivemq-platform.name" (dict "name" "my-custom-name" "releaseN
 {{- end -}}
 
 {{/*
+Builds a container image reference.
+Params:
+- repository: The image repository path.
+- name:       The image name.
+- tag:        The image tag.
+- digest:     The optional image digest.
+Usage: {{ include "hivemq-platform.image-reference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}
+*/}}
+{{- define "hivemq-platform.image-reference" -}}
+{{- if not .repository -}}
+{{- fail (printf "\n`repository` is required to build the HiveMQ Platform container image reference.") -}}
+{{- end -}}
+{{- if not .name -}}
+{{- fail (printf "\n`name` is required to build the HiveMQ Platform container image reference.") -}}
+{{- end -}}
+{{- printf "%s/%s" .repository .name -}}
+{{- with .tag }}:{{ . }}{{- end -}}
+{{- with .digest }}@{{ . }}{{- end -}}
+{{- end -}}
+
+{{/*
 Returns a string containing the HiveMQ configuration ConfigMap or Secret name, depending on the `.Values.config.create` value.
 It will return the default ConfigMap or Secret name for the HiveMQ Platform configuration or will reuse the ConfigMap or Secret name defined in the `.Values.config.name` if present.
 Otherwise, an validation error will displayed.
@@ -73,24 +94,291 @@ Usage: {{ include "hivemq-platform.has-license" . }}
 {{- end -}}
 
 {{/*
-Checks whether a HiveMQ Pulse configuration is in use by the platform.
-Returns:
-- `true` if it's reusing an existing Pulse configuration created in a separate Secret or if it's creating a new one. Empty string otherwise.
-Usage: {{ include "hivemq-platform.has-pulse-config" . }}
-*/}}
-{{- define "hivemq-platform.has-pulse-config" -}}
-{{- $pulseConfigExists := "" -}}
-{{- if or .Values.pulse.create .Values.pulse.name -}}
-    {{- $pulseConfigExists = true -}}
-{{- end -}}
-{{- $pulseConfigExists -}}
-{{- end -}}
-
-{{/*
 Returns the default license name for the platform.
 */}}
 {{- define "hivemq-platform.default-license-name" -}}
 {{- printf "%s-%s" "hivemq-license" .Release.Name }}
+{{- end -}}
+
+{{/*
+Checks whether HiveMQ Data Intelligence log-based clustering is enabled.
+Returns:
+- `true` if the `dataIntelligence.clustering.enabled` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-data-intelligence-clustering" . }}
+*/}}
+{{- define "hivemq-platform.has-data-intelligence-clustering" -}}
+{{- $clusteringEnabled := "" -}}
+{{- if ((.Values.dataIntelligence).clustering).enabled -}}
+    {{- $clusteringEnabled = true -}}
+{{- end -}}
+{{- $clusteringEnabled -}}
+{{- end -}}
+
+{{/*
+Gets the HiveMQ Data Intelligence log-based clustering port.
+Usage: {{ include "hivemq-platform.data-intelligence-clustering-port" . }}
+*/}}
+{{- define "hivemq-platform.data-intelligence-clustering-port" -}}
+{{- .Values.dataIntelligence.clustering.port | default 7557 -}}
+{{- end -}}
+
+{{/*
+Gets the name of the cluster Service that the HiveMQ Platform Operator creates for the platform.
+The name must match the Service created by the operator, which also requires that the chart never
+sets a StatefulSet `serviceName` of its own.
+Usage: {{ include "hivemq-platform.cluster-service-name" . }}
+*/}}
+{{- define "hivemq-platform.cluster-service-name" -}}
+{{- printf "hivemq-%s-cluster" .Release.Name -}}
+{{- end -}}
+
+{{/*
+Checks whether a HiveMQ Data Intelligence connection string Secret is configured.
+Returns:
+- `true` if the `dataIntelligence.server.connectionStringSecretName` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-data-intelligence-connection-string" . }}
+*/}}
+{{- define "hivemq-platform.has-data-intelligence-connection-string" -}}
+{{- $connectionStringExists := "" -}}
+{{- if ((.Values.dataIntelligence).server).connectionStringSecretName -}}
+    {{- $connectionStringExists = true -}}
+{{- end -}}
+{{- $connectionStringExists -}}
+{{- end -}}
+
+{{/*
+Gets the automatically monitored HiveMQ Data Intelligence Secret as a rendered `monitoredResources`
+entry. Returns an empty string when no connection string Secret is configured.
+Usage: {{ include "hivemq-platform.data-intelligence-monitored-resources" . }}
+*/}}
+{{- define "hivemq-platform.data-intelligence-monitored-resources" -}}
+{{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
+- name: {{ .Values.dataIntelligence.server.connectionStringSecretName | quote }}
+  type: "SECRET"
+  files:
+    - {{ .Values.dataIntelligence.server.connectionStringSecretKey | default "connection-string" | quote }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Data Intelligence configuration so:
+ - The retired `pulse` values are not used anymore.
+ - A `config.overrideStatefulSet` value defines the connection string environment variable when a
+   connection string Secret is configured.
+ - A `config.overrideHiveMQConfig` value (only rendered with `config.create=true`) or an existing
+   HiveMQ configuration (`config.create=false`) contains the connection string placeholder when a
+   connection string Secret is configured, as the connection string is silently ignored otherwise.
+   The existing configuration is read via `lookup`, so this check needs cluster access and is
+   skipped by client-side rendering such as `helm template`, where `lookup` returns nothing.
+ - When clustering is enabled, the default HiveMQ configuration and StatefulSet are in use and the
+   `initialMemberCount` value is set, not greater than the `nodes.replicaCount` value, and at least
+   2 when more than one replica runs.
+ - The clustering port does not conflict with any of the predefined HiveMQ Platform ports.
+ - The release name fits the DNS label limit of the cluster Service used for the initial member list.
+ - The `initialMemberCount` value is not changed and the clustering is not disabled on an existing
+   installation, compared against the deployed HiveMQ configuration via `lookup`. Both checks only
+   apply to chart-managed configurations and are skipped by client-side rendering such as
+   `helm template`, where `lookup` returns nothing.
+Usage: {{ include "hivemq-platform.validate-data-intelligence" . }}
+*/}}
+{{- define "hivemq-platform.validate-data-intelligence" -}}
+{{- if or (.Values.pulse).create (.Values.pulse).name (.Values.pulse).data (.Values.pulse).overridePulseConfig -}}
+    {{- fail (printf "\nThe `pulse` values are retired: the HiveMQ Data Intelligence configuration moved into the HiveMQ configuration (config.xml). Use the `dataIntelligence` values instead and remove the `pulse` values (`--set pulse=null` when reusing values)") -}}
+{{- end -}}
+{{- $hasConnectionString := include "hivemq-platform.has-data-intelligence-connection-string" . -}}
+{{- if and $hasConnectionString .Values.config.overrideStatefulSet -}}
+    {{- if not (contains "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING" .Values.config.overrideStatefulSet) -}}
+        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING` environment variable, which the `config.overrideStatefulSet` value does not define. Define the environment variable in your custom StatefulSet, or remove one of the two values") -}}
+    {{- end -}}
+{{- end -}}
+{{- if and $hasConnectionString .Values.config.create .Values.config.overrideHiveMQConfig -}}
+    {{- if not (contains "${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}" .Values.config.overrideHiveMQConfig) -}}
+        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}` placeholder, which the `config.overrideHiveMQConfig` value does not contain. Reference the placeholder in your custom HiveMQ configuration, or remove one of the two values") -}}
+    {{- end -}}
+{{- end -}}
+{{- if and $hasConnectionString (not .Values.config.create) -}}
+    {{- $existingConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
+    {{- if and $existingConfig (not (contains "${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}" $existingConfig)) -}}
+        {{- fail (printf "\nThe `dataIntelligence.server.connectionStringSecretName` value requires the `${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}` placeholder, which the existing HiveMQ configuration `%s` does not contain. Reference the placeholder in your existing HiveMQ configuration, or remove the `dataIntelligence.server.connectionStringSecretName` value" (include "hivemq-platform.configuration-name" .)) -}}
+    {{- end -}}
+{{- end -}}
+{{- if include "hivemq-platform.has-data-intelligence-clustering" . -}}
+    {{- $clustering := .Values.dataIntelligence.clustering -}}
+    {{- if .Values.config.overrideHiveMQConfig -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.overrideHiveMQConfig` value. Configure log-based clustering directly in your custom HiveMQ configuration instead") -}}
+    {{- end -}}
+    {{- if .Values.config.overrideStatefulSet -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.overrideStatefulSet` value. The initial member list is rendered from the default StatefulSet") -}}
+    {{- end -}}
+    {{- if not .Values.config.create -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be combined with the `config.create=false` value. Configure log-based clustering directly in your existing HiveMQ configuration instead") -}}
+    {{- end -}}
+    {{- if not $clustering.initialMemberCount -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value is required when HiveMQ Data Intelligence clustering is enabled") -}}
+    {{- end -}}
+    {{- if and (gt (int .Values.nodes.replicaCount) 0) (gt (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount)) -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be greater than the `nodes.replicaCount` value (%d). Increase `nodes.replicaCount`, or lower `initialMemberCount` before the initial installation, as it cannot be changed afterwards" (int $clustering.initialMemberCount) (int .Values.nodes.replicaCount)) -}}
+    {{- end -}}
+    {{- if and (eq (int $clustering.initialMemberCount) 1) (gt (int .Values.nodes.replicaCount) 1) -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value must be at least 2 when the `nodes.replicaCount` value (%d) is greater than 1. Set `initialMemberCount` to at least 2 before the initial installation, as it cannot be changed afterwards, or keep running a single replica" (int .Values.nodes.replicaCount)) -}}
+    {{- end -}}
+    {{- $clusteringPort := include "hivemq-platform.data-intelligence-clustering-port" . | int64 -}}
+    {{- $predefinedPortsList := list (include "hivemq-platform.operator-rest-api-port" . | int64) (include "hivemq-platform.health-api-port" . | int64) (include "hivemq-platform.cluster-transport-port" . | int64) (include "hivemq-platform.metrics-port" . | int64) -}}
+    {{- if has $clusteringPort $predefinedPortsList -}}
+        {{- fail (printf "\nThe `dataIntelligence.clustering.port` value (%d) already exists as part of one of the predefined ports (%s)" $clusteringPort (join ", " $predefinedPortsList)) -}}
+    {{- end -}}
+    {{- range $service := .Values.services -}}
+        {{- if and $service.exposed (eq (int64 $service.containerPort) $clusteringPort) -}}
+            {{- fail (printf "\nThe `dataIntelligence.clustering.port` value (%d) already exists as the container port of the exposed service type `%s`" $clusteringPort $service.type) -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if gt (len .Release.Name) 48 -}}
+        {{- fail (printf "\nThe release name `%s` exceeds 48 characters, so the cluster Service name `hivemq-%s-cluster` of the initial member list would exceed the DNS label limit of 63 characters" .Release.Name .Release.Name) -}}
+    {{- end -}}
+    {{- $deployedConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
+    {{- if contains "<initial-members>" $deployedConfig -}}
+        {{- $initialMembers := regexFind "(?s)<initial-members>.*?</initial-members>" $deployedConfig -}}
+        {{- $deployedMemberCount := len (regexFindAll "<member>" $initialMembers -1) -}}
+        {{- if ne $deployedMemberCount (int $clustering.initialMemberCount) -}}
+            {{- fail (printf "\nThe `dataIntelligence.clustering.initialMemberCount` value (%d) cannot be changed on an existing installation (deployed with %d initial members)" (int $clustering.initialMemberCount) $deployedMemberCount) -}}
+        {{- end -}}
+    {{- end -}}
+{{- else if and .Values.config.create (not .Values.config.overrideHiveMQConfig) -}}
+    {{- $deployedConfig := include "hivemq-platform.deployed-hivemq-configuration" . -}}
+    {{- if contains "<log-based>" $deployedConfig -}}
+        {{- fail (printf "\nHiveMQ Data Intelligence clustering cannot be disabled on an existing installation") -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Gets the HiveMQ configuration (config.xml) of the deployed installation via `lookup`, preferring the
+kind configured by the `config.createAs` value and only consulting the other kind when the preferred
+one yields no config.xml, so a switched `config.createAs` value is still found, a stale leftover of
+the other kind cannot shadow the current configuration, and the second API read is skipped when the
+preferred kind delivers. Returns an empty string when no configuration is deployed or when rendering
+client-side (`helm template`), where `lookup` returns nothing.
+Usage: {{ include "hivemq-platform.deployed-hivemq-configuration" . }}
+*/}}
+{{- define "hivemq-platform.deployed-hivemq-configuration" -}}
+{{- $configName := include "hivemq-platform.configuration-name" . -}}
+{{- $configuration := "" -}}
+{{- if eq .Values.config.createAs "Secret" -}}
+    {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "Secret" .Release.Namespace $configName) | b64dec -}}
+    {{- if not $configuration -}}
+        {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "ConfigMap" .Release.Namespace $configName) -}}
+    {{- end -}}
+{{- else -}}
+    {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "ConfigMap" .Release.Namespace $configName) -}}
+    {{- if not $configuration -}}
+        {{- $configuration = dig "data" "config.xml" "" (lookup "v1" "Secret" .Release.Namespace $configName) | b64dec -}}
+    {{- end -}}
+{{- end -}}
+{{- $configuration -}}
+{{- end -}}
+
+{{/*
+Checks whether the HiveMQ Platform persistence is configured.
+Returns:
+- `true` if any `persistence` value is set. Empty string otherwise.
+Usage: {{ include "hivemq-platform.has-persistence" . }}
+*/}}
+{{- define "hivemq-platform.has-persistence" -}}
+{{- $persistenceConfigured := "" -}}
+{{- if .Values.persistence -}}
+    {{- $persistenceConfigured = true -}}
+{{- end -}}
+{{- $persistenceConfigured -}}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Platform persistence configuration, then adds the generated storage to the
+`additionalVolumes` and `volumeClaimTemplates` values, so the existing volume handling renders them
+as if the user had configured them. The generated `sharedPersistentVolumeClaim` volume redirects the
+HiveMQ data, log and audit folders into the PersistentVolume of each Pod, and the backup folder
+unless `persistence.backupFolder` is `false`.
+Validation runs first, so the user values are checked before the generated volume is added.
+Must be included exactly once, before the volumes are rendered, as it modifies the values.
+Usage: {{ include "hivemq-platform.add-persistence-volumes" . }}
+*/}}
+{{- define "hivemq-platform.add-persistence-volumes" -}}
+{{- include "hivemq-platform.validate-persistence" . -}}
+{{- if include "hivemq-platform.has-persistence" . -}}
+    {{- $hivemqFolders := dict "data" "data" "log" "log" "audit" "audit" -}}
+    {{- if ne .Values.persistence.backupFolder false -}}
+        {{- $_ := set $hivemqFolders "backup" "backup" -}}
+    {{- end -}}
+    {{- $volume := dict "type" "sharedPersistentVolumeClaim" "name" "persistence" "path" "/opt/hivemq/persistence" "hivemqFolders" $hivemqFolders -}}
+    {{- $_ := set .Values "additionalVolumes" (append (.Values.additionalVolumes | default list) $volume) -}}
+    {{- $claim := dict "kind" "PersistentVolumeClaim" "apiVersion" "v1" "metadata" (dict "name" "persistence" "labels" (dict "hivemq/platform-persistence" "true")) "spec" (dict "accessModes" (list "ReadWriteOnce") "storageClassName" .Values.persistence.storageClass "resources" (dict "requests" (dict "storage" .Values.persistence.storageSize))) -}}
+    {{- $_ := set .Values "volumeClaimTemplates" (append (.Values.volumeClaimTemplates | default list) $claim) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the HiveMQ Platform persistence configuration so:
+ - The `storageClass` and `storageSize` values are set and the default StatefulSet is in use.
+ - No user-defined `sharedPersistentVolumeClaim` volume conflicts with the generated one.
+ - The reserved `persistence` name is not used in the `additionalVolumes` and `volumeClaimTemplates` values.
+ - The persistence is not enabled, removed or changed on an existing installation, as Kubernetes
+   does not allow changing the PersistentVolumeClaims of an existing StatefulSet. Compared against
+   the deployed HiveMQPlatform resource via `lookup`, so the check runs on `helm install` and
+   `helm upgrade` with cluster access, and is skipped by client-side rendering (`helm template`)
+   and when the HiveMQ Platform CRD is not installed.
+Usage: {{ include "hivemq-platform.validate-persistence" . }}
+*/}}
+{{- define "hivemq-platform.validate-persistence" -}}
+{{- if and (include "hivemq-platform.has-persistence" .) .Values.config.overrideStatefulSet -}}
+    {{- fail (printf "\nThe `persistence` value cannot be combined with the `config.overrideStatefulSet` value. Configure the PersistentVolumeClaims and the HiveMQ folder environment variables directly in your custom StatefulSet instead") -}}
+{{- end -}}
+{{- $deployedPlatform := dict -}}
+{{- if .Capabilities.APIVersions.Has "hivemq.com/v1" -}}
+    {{- $deployedPlatform = lookup "hivemq.com/v1" "HiveMQPlatform" .Release.Namespace .Release.Name -}}
+{{- end -}}
+{{- if $deployedPlatform -}}
+    {{- $deployedClaim := dict -}}
+    {{- range $volumeClaimTemplate := (dig "spec" "statefulSet" "spec" "volumeClaimTemplates" list $deployedPlatform) -}}
+        {{- if eq (dig "metadata" "labels" "hivemq/platform-persistence" "" $volumeClaimTemplate) "true" -}}
+            {{- $deployedClaim = $volumeClaimTemplate -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if include "hivemq-platform.has-persistence" . -}}
+        {{- if not $deployedClaim -}}
+            {{- fail (printf "\nThe `persistence` value cannot be enabled on an existing installation, as the PersistentVolumeClaims of an existing StatefulSet cannot be changed. Reinstall the HiveMQ Platform to add persistence") -}}
+        {{- end -}}
+        {{- $deployedStorageClass := dig "spec" "storageClassName" "" $deployedClaim -}}
+        {{- if ne (printf "%v" $deployedStorageClass) (printf "%v" .Values.persistence.storageClass) -}}
+            {{- fail (printf "\nThe `persistence.storageClass` value cannot be changed on an existing installation (deployed StorageClass: %v)" $deployedStorageClass) -}}
+        {{- end -}}
+        {{- $deployedStorageSize := dig "spec" "resources" "requests" "storage" "" $deployedClaim -}}
+        {{- if ne (printf "%v" $deployedStorageSize) (printf "%v" .Values.persistence.storageSize) -}}
+            {{- fail (printf "\nThe `persistence.storageSize` value cannot be changed on an existing installation (deployed storage size: %v)" $deployedStorageSize) -}}
+        {{- end -}}
+    {{- else if $deployedClaim -}}
+        {{- fail (printf "\nThe `persistence` value cannot be removed on an existing installation, as the PersistentVolumeClaims of an existing StatefulSet cannot be changed") -}}
+    {{- end -}}
+{{- end -}}
+{{- if include "hivemq-platform.has-persistence" . -}}
+    {{- if not .Values.persistence.storageClass -}}
+        {{- fail (printf "\nThe `persistence.storageClass` value is required when the HiveMQ Platform persistence is configured. Set it to a StorageClass available in your Kubernetes cluster") -}}
+    {{- end -}}
+    {{- if not .Values.persistence.storageSize -}}
+        {{- fail (printf "\nThe `persistence.storageSize` value is required when the HiveMQ Platform persistence is configured (`storageSize: 10Gi` for example)") -}}
+    {{- end -}}
+    {{- range .Values.additionalVolumes -}}
+        {{- if eq (.type | default "") "sharedPersistentVolumeClaim" -}}
+            {{- fail (printf "\nThe HiveMQ Platform persistence generates a `sharedPersistentVolumeClaim` volume and cannot be combined with a user-defined `sharedPersistentVolumeClaim` volume") -}}
+        {{- end -}}
+        {{- if or (eq (.name | default "") "persistence") (eq (.mountName | default "") "persistence") -}}
+            {{- fail (printf "\n`persistence` is a reserved volume name for the HiveMQ Platform persistence. Rename the `additionalVolumes` entry") -}}
+        {{- end -}}
+    {{- end -}}
+    {{- range .Values.volumeClaimTemplates -}}
+        {{- if eq (dig "metadata" "name" "" .) "persistence" -}}
+            {{- fail (printf "\n`persistence` is a reserved PersistentVolumeClaim name for the HiveMQ Platform persistence. Rename the `volumeClaimTemplates` entry") -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -362,10 +650,47 @@ Usage: {{ include "hivemq-platform.cluster-transport-port" . }}
 {{- end -}}
 
 {{/*
+Normalizes extension input into a list.
+- Starts with the `extensions` array as the base list.
+- For each `extensionMap` entry with a matching array extension, merges the map entry on top (map wins per-field).
+- For each `extensionMap` entry with no match in the array, appends it as a new extension (in alphabetical order of the map key).
+- Null-valued fields in the merged result are removed to avoid rendering empty values.
+Usage: {{ include "hivemq-platform.normalize-extensions" . }}
+*/}}
+{{- define "hivemq-platform.normalize-extensions" -}}
+  {{- $extensionMap := default (dict) .Values.extensionMap -}}
+  {{- $extensions := list -}}
+  {{- $processedExtensions := list -}}
+  {{- range $extension := .Values.extensions -}}
+    {{- if hasKey $extensionMap $extension.name -}}
+      {{- $overriddenExtension := deepCopy $extension -}}
+      {{- range $key, $val := index $extensionMap $extension.name -}}
+        {{- if kindIs "invalid" $val -}}
+          {{- $_ := unset $overriddenExtension $key -}}
+        {{- else -}}
+          {{- $_ := set $overriddenExtension $key $val -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $extensions = append $extensions $overriddenExtension -}}
+    {{- else -}}
+      {{- $extensions = append $extensions $extension -}}
+    {{- end -}}
+    {{- $processedExtensions = append $processedExtensions $extension.name -}}
+  {{- end -}}
+  {{- range $name, $extension := $extensionMap -}}
+    {{- if not (has $name $processedExtensions) -}}
+      {{- $extensions = append $extensions (merge (dict "name" $name) $extension) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $extensions | toYaml -}}
+{{- end -}}
+
+{{/*
 Validates all the exposed extensions.
-- No duplicated extension names are defined as part of the `.Values.extensions` values list.
+- No duplicated extension names are defined.
 - No extension contains `configMapName` and `secretName` defined simultaneously.
-Usage: {{ include "hivemq-platform.validate-extensions" . }}
+Expects the normalized extensions list as input.
+Usage: {{ include "hivemq-platform.validate-extensions" $extensions }}
 */}}
 {{- define "hivemq-platform.validate-extensions" -}}
 {{- include "hivemq-platform.validate-duplicated-extension-names" . -}}
@@ -373,13 +698,44 @@ Usage: {{ include "hivemq-platform.validate-extensions" . }}
 {{- end -}}
 
 {{/*
+Checks whether a PodDisruptionBudget value is set (key exists in the map and value is non-empty).
+Returns "true" if the value is set, empty string otherwise.
+Usage: {{ include "hivemq-platform.has-pdb-value" (dict "pdb" .Values.podDisruptionBudget "field" "minAvailable") }}
+*/}}
+{{- define "hivemq-platform.has-pdb-value" -}}
+{{- if and (hasKey .pdb .field) (ne (toString (get .pdb .field)) "") -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validates the podDisruptionBudget configuration:
+- If enabled, at least one of minAvailable/maxUnavailable must be set.
+- minAvailable and maxUnavailable are mutually exclusive (K8s policy API requirement).
+Usage: {{ include "hivemq-platform.validate-pod-disruption-budget" . }}
+*/}}
+{{- define "hivemq-platform.validate-pod-disruption-budget" -}}
+{{- $pdb := .Values.podDisruptionBudget -}}
+{{- if $pdb.enabled -}}
+  {{- $hasMin := include "hivemq-platform.has-pdb-value" (dict "pdb" $pdb "field" "minAvailable") -}}
+  {{- $hasMax := include "hivemq-platform.has-pdb-value" (dict "pdb" $pdb "field" "maxUnavailable") -}}
+  {{- if and (not $hasMin) (not $hasMax) -}}
+    {{- fail "`podDisruptionBudget.enabled` is `true` but neither `minAvailable` nor `maxUnavailable` was set. Set exactly one." -}}
+  {{- end -}}
+  {{- if and $hasMin $hasMax -}}
+    {{- fail "`podDisruptionBudget.minAvailable` and `podDisruptionBudget.maxUnavailable` are mutually exclusive. Set exactly one." -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Validates there is no duplicated extension names defined.
-Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
+Expects the normalized extensions list as input.
+Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" $extensions }}
 */}}
 {{- define "hivemq-platform.validate-duplicated-extension-names" -}}
-{{- $extensions := .Values.extensions }}
 {{- $extensionNamesList := list }}
-{{- range $extension := $extensions }}
+{{- range $extension := . }}
   {{- if (has $extension.name $extensionNamesList) }}
     {{- fail (printf "\nFound duplicated extension name `%s`" $extension.name) }}
   {{- else }}
@@ -390,11 +746,11 @@ Usage: {{ include "hivemq-platform.validate-duplicated-extension-names" . }}
 
 {{/*
 Validates there is no enabled extension which defines both `configMapName` and `secretName` simultaneously.
-Usage: {{ include "hivemq-platform.validate-configmap-secret-extensions" . }}
+Expects the normalized extensions list as input.
+Usage: {{ include "hivemq-platform.validate-configmap-secret-extensions" $extensions }}
 */}}
 {{- define "hivemq-platform.validate-configmap-secret-extensions" -}}
-{{- $extensions := .Values.extensions }}
-{{- range $extension := $extensions }}
+{{- range $extension := . }}
   {{- if and $extension.configMapName $extension.secretName }}
     {{- fail (printf "\nBoth `configMapName` and `secretName` values are set for extension `%s`. Only one can be defined at a time" $extension.name) }}
   {{- end }}
@@ -735,6 +1091,7 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- $volumeMountNameList := list }}
 {{- $volumeMountPathList := list }}
 {{- $volumeTypesDict := dict }}
+{{- $csiConfigs := dict }}
 
 {{- /* validate at most one sharedPersistentVolumeClaim is defined as we cannot have duplicated EnvVars for the same */ -}}
 {{- $sharedPvcCount := 0 }}
@@ -747,17 +1104,11 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
   {{- fail (printf "\nOnly one `sharedPersistentVolumeClaim` volume type is allowed but %d were defined" (int $sharedPvcCount)) }}
 {{- end }}
 
-{{- /* add default volume mounts for license, pulse and TLS to validation lists */ -}}
+{{- /* add default volume mounts for license and TLS to validation lists */ -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
 {{- if $hasLicense }}
   {{- $volumeMountNameList = "licenses#hivemq" | append $volumeMountNameList }}
   {{- $volumeMountPathList = "/opt/hivemq/license#hivemq" | append $volumeMountPathList }}
-{{- end }}
-
-{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
-{{- if $hasPulseConfig }}
-  {{- $volumeMountNameList = "pulse-config#hivemq" | append $volumeMountNameList }}
-  {{- $volumeMountPathList = "/opt/hivemq/pulse/conf#hivemq" | append $volumeMountPathList }}
 {{- end }}
 
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
@@ -787,6 +1138,34 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
     {{- end -}}
     {{- if and (not (eq $additionalVolume.type "projected")) (hasKey $additionalVolume "projectedSources") }}
         {{- fail (printf "\n`projectedSources` value is only available for type \"projected\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "csi") (not (hasKey $additionalVolume "csi")) }}
+        {{- fail (printf "\n`csi` value is required for type \"csi\"") }}
+    {{- end -}}
+    {{- if and (not (eq $additionalVolume.type "csi")) (hasKey $additionalVolume "csi") }}
+        {{- fail (printf "\n`csi` value is only available for type \"csi\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "csi") (hasKey $additionalVolume "csi") (not (hasKey $additionalVolume.csi "driver")) }}
+        {{- fail (printf "\n`csi.driver` value is required for type \"csi\"") }}
+    {{- end -}}
+    {{- if and (eq $additionalVolume.type "csi") (hasKey $additionalVolume "csi") }}
+        {{- $csiVolumeName := $additionalVolume.mountName | default $additionalVolume.name }}
+        {{- if hasKey $csiConfigs $csiVolumeName }}
+            {{- if ne (toJson (get $csiConfigs $csiVolumeName)) (toJson $additionalVolume.csi) }}
+                {{- fail (printf "\n`csi` configuration for volume %q must be identical across all `additionalVolumes` entries that share the same `mountName`" $csiVolumeName) }}
+            {{- end }}
+        {{- else }}
+            {{- $_ := set $csiConfigs $csiVolumeName $additionalVolume.csi }}
+        {{- end }}
+        {{- if hasKey $additionalVolume.csi "driver" }}
+            {{- $isHiveMQPlatformCRDPresent := $.Capabilities.APIVersions.Has "hivemq.com/v1" }}
+            {{- if $isHiveMQPlatformCRDPresent }}
+                {{- $csiDriver := lookup "storage.k8s.io/v1" "CSIDriver" "" $additionalVolume.csi.driver }}
+                {{- if not $csiDriver }}
+                    {{- fail (printf "\nCSI driver %q is not installed in the cluster. Ensure the CSI driver is deployed before installing the HiveMQ Platform." $additionalVolume.csi.driver) }}
+                {{- end }}
+            {{- end }}
+        {{- end }}
     {{- end -}}
     {{- if and (not (eq $additionalVolume.type "sharedPersistentVolumeClaim")) (hasKey $additionalVolume "hivemqFolders") }}
         {{- fail (printf "\n`hivemqFolders` value is only available for type \"sharedPersistentVolumeClaim\"") }}
@@ -876,34 +1255,19 @@ Usage: {{- include "hivemq-platform.validate-additional-volumes" . }}
 {{- end -}}
 
 {{/*
-Gets the Pulse configuration Secret name.
-Returns the pulse Secret name if pulse is configured, empty string otherwise.
-Usage: {{- include "hivemq-platform.pulse-secret-name" . -}}
-*/}}
-{{- define "hivemq-platform.pulse-secret-name" -}}
-{{- $pulseSecretName := "" }}
-{{- $hasPulseConfig := include "hivemq-platform.has-pulse-config" . -}}
-{{- if $hasPulseConfig }}
-  {{- if .Values.pulse.name }}
-    {{- $pulseSecretName = .Values.pulse.name }}
-  {{- else }}
-    {{- $pulseSecretName = printf "%s-%s" "hivemq-pulse-configuration" .Release.Name }}
-  {{- end }}
-{{- end }}
-{{- $pulseSecretName }}
-{{- end -}}
-
-{{/*
 Validate monitored resources configuration.
  - Ensures no duplicate ConfigMap or Secret names are defined.
  - Ensures no duplicate files are defined within the same resource.
- - Checks for conflicts with auto-generated Pulse monitored resource.
+ - Checks for conflicts with the automatically monitored HiveMQ Data Intelligence Secrets.
 Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
 */}}
 {{- define "hivemq-platform.validate-monitored-resources" -}}
 {{- $configMapNamesList := list }}
 {{- $secretNamesList := list }}
-{{- $pulseSecretName := include "hivemq-platform.pulse-secret-name" . -}}
+{{- $dataIntelligenceSecretNamesList := list }}
+{{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
+  {{- $dataIntelligenceSecretNamesList = .Values.dataIntelligence.server.connectionStringSecretName | append $dataIntelligenceSecretNamesList }}
+{{- end }}
 {{- range $resource := .Values.monitoredResources }}
   {{- if eq $resource.type "ConfigMap" }}
     {{- if has $resource.name $configMapNamesList }}
@@ -914,8 +1278,8 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
     {{- if has $resource.name $secretNamesList }}
       {{- fail (printf "\nFound duplicated Secret name '%s' for `monitoredResources`" $resource.name) }}
     {{- end }}
-    {{- if eq $resource.name $pulseSecretName }}
-      {{- fail (printf "\nThe Pulse configuration Secret '%s' is automatically monitored when Pulse is enabled. Please remove it from `monitoredResources`" $resource.name) }}
+    {{- if has $resource.name $dataIntelligenceSecretNamesList }}
+      {{- fail (printf "\nThe HiveMQ Data Intelligence Secret '%s' is automatically monitored. Please remove it from `monitoredResources`" $resource.name) }}
     {{- end }}
     {{- $secretNamesList = $resource.name | append $secretNamesList }}
   {{- end }}
@@ -929,25 +1293,6 @@ Usage: {{- include "hivemq-platform.validate-monitored-resources" . -}}
     {{- end }}
   {{- end }}
 {{- end }}
-{{- end -}}
-
-{{/*
-Validates the HiveMQ Pulse configuration so:
- - When the `pulse.create` value is `true`, at least one configuration content is defined.
- - Only one of `data` or `overridePulseConfig` are set, but not both.
- - When `isPulseConfigBase64Encoded` is set to `true`, `data` is Base64 encoded.
-Usage: {{ include "hivemq-platform.validate-pulse" . }}
-*/}}
-{{- define "hivemq-platform.validate-pulse" -}}
-{{- if .Values.pulse.create -}}
-    {{- if and (not .Values.pulse.overridePulseConfig) (not .Values.pulse.data) -}}
-        {{- fail (printf "\nHiveMQ Pulse configuration content cannot be empty. Please use either `data` or `overridePulseConfig` values") -}}
-    {{- end -}}
-    {{- if and .Values.pulse.data .Values.pulse.overridePulseConfig -}}
-        {{- fail (printf "\nBoth `data` and `overridePulseConfig` values are set for the HiveMQ Pulse configuration content. Please, use only one of them") -}}
-    {{- end -}}
-    {{- include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) -}}
-{{- end -}}
 {{- end -}}
 
 {{/*
@@ -982,15 +1327,29 @@ Usage: {{- include "hivemq-platform.validate-default-operator-env-vars" . }}
 */}}
 {{- define "hivemq-platform.validate-default-env-vars" -}}
 {{- $defaultEnvs := list "JAVA_OPTS"}}
-{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) }}
-{{- $sharedPvcEnvVars := list "HIVEMQ_DATA_FOLDER" "HIVEMQ_LOG_FOLDER" "HIVEMQ_HEAPDUMP_FOLDER" "HIVEMQ_BACKUP_FOLDER" "HIVEMQ_AUDIT_FOLDER" }}
-{{- $hasSharedPvc := ( include "hivemq-platform.has-shared-pvc" . ) }}
-{{- range .Values.nodes.env }}
-  {{- if and (eq .name "HIVEMQ_PULSE_FOLDER") $hasPulseConfig }}
-    {{- fail (printf "\nHIVEMQ_PULSE_FOLDER environment variable cannot be set") }}
+{{- $sharedPvcFolderEnvVars := dict "data" "HIVEMQ_DATA_FOLDER" "log" "HIVEMQ_LOG_FOLDER" "heapDump" "HIVEMQ_HEAPDUMP_FOLDER" "backup" "HIVEMQ_BACKUP_FOLDER" "audit" "HIVEMQ_AUDIT_FOLDER" }}
+{{- $generatedFolderEnvVars := list }}
+{{- range .Values.additionalVolumes }}
+  {{- if eq (.type | default "") "sharedPersistentVolumeClaim" }}
+    {{- range $folderKey, $folderName := (.hivemqFolders | default dict) }}
+      {{- $generatedFolderEnvVars = append $generatedFolderEnvVars (get $sharedPvcFolderEnvVars $folderKey) }}
+    {{- end }}
   {{- end }}
-  {{- if and $hasSharedPvc (has .name $sharedPvcEnvVars) }}
-    {{- fail (printf "\n`%s` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type" .name) }}
+{{- end }}
+{{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) }}
+{{- $hasDataIntelligenceClustering := ( include "hivemq-platform.has-data-intelligence-clustering" . ) }}
+{{- range .Values.nodes.env }}
+  {{- if eq .name "HIVEMQ_CLUSTERING_BOOTSTRAP" }}
+    {{- fail (printf "\nHIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set") }}
+  {{- end }}
+  {{- if and (eq .name "HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING") $hasDataIntelligenceConnectionString }}
+    {{- fail (printf "\nHIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING environment variable cannot be set") }}
+  {{- end }}
+  {{- if and (eq .name "HIVEMQ_LOG_BASED_CLUSTERING_ENABLED") $hasDataIntelligenceClustering }}
+    {{- fail (printf "\nHIVEMQ_LOG_BASED_CLUSTERING_ENABLED environment variable cannot be set when HiveMQ Data Intelligence clustering is enabled, as it overrides the rendered log-based clustering configuration") }}
+  {{- end }}
+  {{- if has .name $generatedFolderEnvVars }}
+    {{- fail (printf "\n`%s` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder" .name) }}
   {{- end }}
   {{- if has .name $defaultEnvs }}
     {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead" .name) }}
@@ -1044,20 +1403,6 @@ Usage: {{ include "hivemq-platform.get-shared-pvc-env-vars" . }}
     {{- end }}
   {{- end }}
 {{- end }}
-{{- end -}}
-
-{{/*
-Validates the data passed as parameter is a valid Base64 encoded string for HiveMQ Pulse configuration.
-Usage: {{ include "hivemq-platform.validate-base64-encoded-pulse-data" (dict "data" .Values.pulse.data "isPulseConfigBase64Encoded" .Values.pulse.isPulseConfigBase64Encoded) }}
-*/}}
-{{- define "hivemq-platform.validate-base64-encoded-pulse-data" -}}
-{{- if and .data .isPulseConfigBase64Encoded -}}
-    {{- $original := .data -}}
-    {{- $reencoded := $original | b64dec | b64enc -}}
-    {{- if not (eq $original $reencoded) -}}
-        {{- fail (printf "\nHiveMQ Pulse configuration data content is not a Base64 encoded string") }}
-    {{- end -}}
-{{- end -}}
 {{- end -}}
 
 {{/*
@@ -1490,6 +1835,23 @@ Usage: {{ include "hivemq-platform.get-additional-volumes" . }}
       {{- with $volume.projectedSources }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
+  {{- else if eq $volumeType "csi" }}
+  csi:
+    driver: {{ $volume.csi.driver }}
+    {{- if hasKey $volume.csi "readOnly" }}
+    readOnly: {{ $volume.csi.readOnly }}
+    {{- end }}
+    {{- if $volume.csi.fsType }}
+    fsType: {{ $volume.csi.fsType }}
+    {{- end }}
+    {{- if $volume.csi.volumeAttributes }}
+    volumeAttributes:
+      {{- toYaml $volume.csi.volumeAttributes | nindent 6 }}
+    {{- end }}
+    {{- if $volume.csi.nodePublishSecretRef }}
+    nodePublishSecretRef:
+      name: {{ $volume.csi.nodePublishSecretRef }}
+    {{- end }}
   {{- end }}
 {{- $volumeList = $volumeKey | append $volumeList}}
 {{- end }}

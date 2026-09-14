@@ -199,6 +199,27 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <discovery>
       <extension/>
     </discovery>
+    {{- if include "hivemq-platform.has-data-intelligence-clustering" . }}
+    {{- $clustering := .Values.dataIntelligence.clustering }}
+    {{- $clusteringPort := include "hivemq-platform.data-intelligence-clustering-port" . }}
+    <log-based>
+      <enabled>true</enabled>
+      {{- if and (hasKey $clustering "dataLayerEnabled") (not $clustering.dataLayerEnabled) }}
+      <data-layer-enabled>false</data-layer-enabled>
+      {{- end }}
+      <bind-port>{{ $clusteringPort }}</bind-port>
+      <initial-members>
+        {{- $clusterServiceName := include "hivemq-platform.cluster-service-name" . }}
+        {{- range $i := until (int $clustering.initialMemberCount) }}
+        <member>
+          <host>{{ $.Release.Name }}-{{ $i }}.{{ $clusterServiceName }}.{{ $.Release.Namespace }}.svc</host>
+          <port>{{ $clusteringPort }}</port>
+        </member>
+        {{- end }}
+      </initial-members>
+      <initial-members-connect-timeout-secs>{{ $clustering.initialMembersConnectTimeoutSeconds | default 60 }}</initial-members-connect-timeout-secs>
+    </log-based>
+    {{- end }}
     {{- $clusterFailureDetectionConfig := .Values.hivemqClusterFailureDetection }}
     {{- $hasClusterFailureDetectionConfig := include "hivemq-platform.has-cluster-failure-detection-config" (dict "hivemqClusterFailureDetection" $clusterFailureDetectionConfig) }}
     {{- if $hasClusterFailureDetectionConfig }}
@@ -401,6 +422,13 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     </scripting>
     {{- end }}
   </data-hub>
+  {{- end }}
+  {{- if include "hivemq-platform.has-data-intelligence-connection-string" . }}
+  <data-intelligence>
+    <server>
+      <connection-string>${HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING}</connection-string>
+    </server>
+  </data-intelligence>
   {{- end }}
   {{- $internalOptionsConfig := .Values.hivemqInternalOptions }}
   {{- if $internalOptionsConfig }}

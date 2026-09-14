@@ -46,7 +46,7 @@ class HelmAdditionalVolumesIT extends AbstractHelmChartIT {
 
         await().untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty()

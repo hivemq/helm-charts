@@ -55,3 +55,15 @@ tests:
           path: data["init.json"]
           value: |
             {}
+
+  - it: Should default to a preset Edge accepts when no init is given
+    set:
+      modules:
+        dataHub:
+          init: ""
+    asserts:
+      # Edge validates the preset against a schema that requires all four arrays; a bare {} aborts the start.
+      - equal:
+          path: data["init.json"]
+          value: |
+            {"scripts":[],"schemas":[],"behaviorPolicies":[],"dataPolicies":[]}

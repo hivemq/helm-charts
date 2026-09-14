@@ -22,8 +22,9 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_KEYSTORE_PASSW
 class HelmRestApiAuthIT extends AbstractHelmChartIT {
 
     private static final int REST_API_SERVICE_PORT_8890 = 8890;
-    private static final @NotNull String REST_API_SERVICE_NAME_8890 =
-            "hivemq-test-hivemq-platform-rest-" + REST_API_SERVICE_PORT_8890;
+
+    private final @NotNull String restApiServiceName8890 =
+            "hivemq-%s-rest-%s".formatted(platformReleaseName, REST_API_SERVICE_PORT_8890);
 
     @TempDir
     private @NotNull Path tmp;
@@ -51,10 +52,10 @@ class HelmRestApiAuthIT extends AbstractHelmChartIT {
 
         installPlatformChartAndWaitToBeRunning("/files/rest-api-with-auth-values.yaml");
 
-        RestAPIUtil.assertAuth(client, platformNamespace, REST_API_SERVICE_NAME_8890, REST_API_SERVICE_PORT_8890, true);
+        RestAPIUtil.assertAuth(client, platformNamespace, restApiServiceName8890, REST_API_SERVICE_PORT_8890, true);
         RestAPIUtil.assertAuth(client,
                 platformNamespace,
-                REST_API_SERVICE_NAME_8890,
+                restApiServiceName8890,
                 REST_API_SERVICE_PORT_8890,
                 true,
                 "user",
@@ -62,7 +63,7 @@ class HelmRestApiAuthIT extends AbstractHelmChartIT {
                 HttpStatus.SC_UNAUTHORIZED);
         RestAPIUtil.assertAuth(client,
                 platformNamespace,
-                REST_API_SERVICE_NAME_8890,
+                restApiServiceName8890,
                 REST_API_SERVICE_PORT_8890,
                 true,
                 "/api/v1/management/backups",

@@ -30,13 +30,13 @@ class HelmCustomSecretConfigExistingIT extends AbstractHelmChartIT {
                 "config.createAs=Secret");
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var hivemqCustomResource =
-                    K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME).get();
+                    K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName).get();
             assertThat(hivemqCustomResource.getAdditionalProperties().get("spec")).isNotNull()
                     .asString()
                     .containsIgnoringCase("secretName=" + secretName);
 
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
             assertThat(K8sUtil.getHiveMQContainer(statefulSet.getSpec()).getVolumeMounts()) //
                     .anyMatch(volumeMount -> volumeMount.getName().equals("broker-configuration") &&

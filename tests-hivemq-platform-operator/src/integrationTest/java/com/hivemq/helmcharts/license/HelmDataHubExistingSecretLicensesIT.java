@@ -17,7 +17,7 @@ class HelmDataHubExistingSecretLicensesIT extends AbstractHelmLicensesIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withExistingDataHubLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
         final var dataHubLicenseFuture =
-                logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file dataHub.plic is corrupt.");
+                logWaiter.waitFor(platformLogWaiterPrefix, ".*License file dataHub.plic is corrupt.");
         K8sUtil.createSecret(client,
                 platformNamespace,
                 "test-data-hub-license",

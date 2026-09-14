@@ -1,0 +1,8 @@
+extensions:
+  - name: hivemq-kafka-extension
+    enabled: true
+    configMapName: kafka-config
+    supportsHotReload: true
+  - name: hivemq-ese
+    enabled: true
+    configMapName: ese-config

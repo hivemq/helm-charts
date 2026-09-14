@@ -27,7 +27,7 @@ class HelmCustomConfigXmlIT extends AbstractHelmChartIT {
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var configmap = client.configMaps()
                     .inNamespace(platformNamespace)
-                    .withName("hivemq-configuration-" + PLATFORM_RELEASE_NAME)
+                    .withName("hivemq-configuration-" + platformReleaseName)
                     .get();
             assertThat(configmap).isNotNull();
             final var xmlConfig = configmap.getData().get("config.xml");

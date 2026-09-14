@@ -25,10 +25,6 @@ spec:
     - port: 8883
       name: mqtts
     {{- end }}
-    {{- if .Values.mqttsn.enabled }}
-    - port: 2442
-      name: mqttsn
-    {{- end }}
   clusterIP: None
   selector:
     {{- include "hivemq-edge.selector-labels" . | nindent 4 }}

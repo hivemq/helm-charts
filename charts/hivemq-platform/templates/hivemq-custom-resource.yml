@@ -1,6 +1,8 @@
 {{- $hasKeystore := ( include "hivemq-platform.has-keystore" . ) -}}
 {{- $hasLicense := ( include "hivemq-platform.has-license" . ) -}}
-{{- $hasPulseConfig := ( include "hivemq-platform.has-pulse-config" . ) -}}
+{{- include "hivemq-platform.validate-data-intelligence" . -}}
+{{- include "hivemq-platform.add-persistence-volumes" . -}}
+{{- $hasDataIntelligenceConnectionString := ( include "hivemq-platform.has-data-intelligence-connection-string" . ) -}}
 {{- $hasAdditionalVolumes := ( include "hivemq-platform.has-additional-volumes" . ) -}}
 {{- $hasAdditionalVolumeMounts := ( include "hivemq-platform.has-additional-volume-mounts" . ) -}}
 {{- $metricsPort := ( include "hivemq-platform.metrics-port" . ) -}}
@@ -31,15 +33,12 @@ spec:
   healthApiPort: {{ include "hivemq-platform.health-api-port" . }}
   metricsPort: {{ $metricsPort }}
   metricsPath: {{ .Values.metrics.path }}
-  {{- $pulseSecretName := include "hivemq-platform.pulse-secret-name" . -}}
-  {{- if or $pulseSecretName .Values.monitoredResources }}
+  {{- $dataIntelligenceMonitoredResources := include "hivemq-platform.data-intelligence-monitored-resources" . -}}
+  {{- if or $dataIntelligenceMonitoredResources .Values.monitoredResources }}
   {{- include "hivemq-platform.validate-monitored-resources" . }}
   monitoredResources:
-    {{- if $pulseSecretName }}
-    - name: {{ $pulseSecretName | quote }}
-      type: "SECRET"
-      files:
-        - "config.xml"
+    {{- with $dataIntelligenceMonitoredResources }}
+    {{- . | trim | nindent 4 }}
     {{- end }}
     {{- range .Values.monitoredResources }}
     - name: {{ .name | quote }}
@@ -51,6 +50,12 @@ spec:
         {{- end }}
       {{- end }}
     {{- end }}
+  {{- end }}
+  {{- with .Values.rollingRestart }}
+  {{- if hasKey . "lastPodMinAgeSeconds" }}
+  rollingRestart:
+    lastPodMinAgeSeconds: {{ .lastPodMinAgeSeconds }}
+  {{- end }}
   {{- end }}
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
@@ -109,6 +114,13 @@ spec:
                 {{- include "hivemq-platform.validate-env-vars" . }}
                 - name: JAVA_OPTS
                   value: {{ .Values.nodes.javaOpts | quote }}
+                {{- if $hasDataIntelligenceConnectionString }}
+                - name: HIVEMQ_DATA_INTELLIGENCE_CONNECTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.dataIntelligence.server.connectionStringSecretName | quote }}
+                      key: {{ .Values.dataIntelligence.server.connectionStringSecretKey | default "connection-string" | quote }}
+                {{- end }}
                 {{- if $hasKeystore }}
                   {{- $envNamesKeyStorePasswordList := list }}
                   {{- $envNamesKeyStorePrivatePasswordList := list }}
@@ -186,7 +198,7 @@ spec:
                       key: {{ .passwordKey }}
                 {{- end }}
                 {{- end }}
-              image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+              image: "{{ include "hivemq-platform.image-reference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               ports:
                 {{- $containerPortNameList := list }}
@@ -206,11 +218,15 @@ spec:
                   containerPort: {{ printf "%d" (int64 $metricsPort) }}
                 {{- end }}
               resources:
-                {{- if hasKey .Values.nodes.resources "overrideLimits" }}
-                {{- with .Values.nodes.resources.overrideLimits }}
+                {{- if .Values.nodes.resources.overrideLimits }}
                 limits:
-                  {{- toYaml . | nindent 18 }}
-                {{- end }}
+                  cpu: {{ (.Values.nodes.resources.overrideLimits.cpu | default .Values.nodes.resources.cpu) | toString | trim | quote }}
+                  memory: {{ (.Values.nodes.resources.overrideLimits.memory | default .Values.nodes.resources.memory) | toString | trim | quote }}
+                  {{- $ephemeralStorageOverride := index .Values.nodes.resources.overrideLimits "ephemeral-storage" }}
+                  {{- $ephemeralStorage := .Values.nodes.resources.ephemeralStorage }}
+                  {{- with ($ephemeralStorageOverride | default $ephemeralStorage) }}
+                  ephemeral-storage: {{ . | toString | trim | quote }}
+                  {{- end }}
                 {{- else }}
                 limits:
                   cpu: {{ .Values.nodes.resources.cpu | toString | trim | quote }}
@@ -226,15 +242,11 @@ spec:
                   ephemeral-storage: {{ . | trim | quote }}
                   {{- end }}
               {{- include "hivemq-platform.validate-additional-volumes" . -}}
-              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore $hasPulseConfig }}
+              {{- if or $hasAdditionalVolumeMounts $hasLicense $hasKeystore }}
               volumeMounts:
                 {{- if $hasLicense }}
                 - name: licenses
                   mountPath: /opt/hivemq/license
-                {{- end }}
-                {{- if $hasPulseConfig }}
-                - name: pulse-config
-                  mountPath: /opt/hivemq/pulse/conf
                 {{- end }}
                 {{- if $hasKeystore }}
                 {{- include "hivemq-platform.get-tls-volume-mount" . | indent 16 }}
@@ -256,7 +268,7 @@ spec:
             {{- with .Values.additionalContainers }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore $hasPulseConfig }}
+          {{- if or $hasAdditionalVolumes $hasLicense $hasKeystore }}
           volumes:
             {{- if $hasLicense }}
             - name: licenses
@@ -266,11 +278,6 @@ spec:
                 {{- else }}
                 secretName: {{ include "hivemq-platform.default-license-name" . }}
                 {{- end }}
-            {{- end }}
-            {{- if $hasPulseConfig }}
-            - name: pulse-config
-              secret:
-                secretName: {{ include "hivemq-platform.pulse-secret-name" . }}
             {{- end }}
             {{- if $hasKeystore }}
               {{- (include "hivemq-platform.get-tls-secret-volumes" .) | indent 12 -}}
@@ -287,6 +294,17 @@ spec:
           tolerations:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with .Values.podScheduling.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.podScheduling.priorityClassName }}
+          priorityClassName: {{ . }}
+          {{- end }}
+      {{- with .Values.nodes.persistentVolumeClaimRetentionPolicy }}
+      persistentVolumeClaimRetentionPolicy:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.volumeClaimTemplates }}
       volumeClaimTemplates:
         {{- toYaml . | nindent 12 }}
@@ -342,18 +360,19 @@ spec:
             targetPort: {{ $metricsContainerPortName }}
             port: {{ printf "%d" (int64 $metricsPort) }}
     {{- end }}
-  {{- if hasKey .Values "extensions" }}
+  {{- $extensions := include "hivemq-platform.normalize-extensions" . | fromYamlArray }}
+  {{- if $extensions }}
   extensions:
-    {{- include "hivemq-platform.validate-extensions" . -}}
-    {{- range $extension := .Values.extensions }}
+    {{- include "hivemq-platform.validate-extensions" $extensions -}}
+    {{- range $extension := $extensions }}
     - id: {{ $extension.name }}
       {{- if hasKey $extension "enabled" }}
-      enabled: {{ printf "%t" $extension.enabled | default false }}
+      enabled: {{ printf "%t" $extension.enabled }}
       {{- else }}
       enabled: false
       {{- end }}
       {{- if hasKey $extension "supportsHotReload" }}
-      supportsHotReload: {{ printf "%t" $extension.supportsHotReload | default false }}
+      supportsHotReload: {{ printf "%t" $extension.supportsHotReload }}
       {{- else }}
       supportsHotReload: false
       {{- end }}
@@ -368,13 +387,13 @@ spec:
       customizationUri: {{ $extension.customizationUri | quote }}
       {{- end }}
       {{- if hasKey $extension "priority" }}
-      extensionPriority: {{ $extension.priority | default -1 }}
+      extensionPriority: {{ $extension.priority }}
       {{- end }}
       {{- if hasKey $extension "startPriority" }}
-      extensionStartPriority: {{ $extension.startPriority | default -1 }}
+      extensionStartPriority: {{ $extension.startPriority }}
       {{- end }}
       {{- if hasKey $extension "startMandatory" }}
-      extensionStartMandatory: {{ $extension.startMandatory | default false }}
+      extensionStartMandatory: {{ $extension.startMandatory }}
       {{- end }}
       {{- if hasKey $extension "secretName" }}
       secretName: {{ $extension.secretName | quote }}

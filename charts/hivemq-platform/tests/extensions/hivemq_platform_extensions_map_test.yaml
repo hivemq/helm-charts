@@ -1,0 +1,362 @@
+suite: HiveMQ Platform - Extension Map tests
+templates:
+  - hivemq-custom-resource.yml
+set:
+  extensions: []
+tests:
+
+  - it: with extensionMap containing all extensions, all fields rendered correctly
+    values:
+      - extension-map-values.yaml
+    asserts:
+      - exists:
+          path: spec.extensions
+      - lengthEqual:
+          path: spec.extensions
+          count: 4
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-custom-test-extension
+            enabled: true
+            supportsHotReload: false
+            configMapName: "custom-extension-configuration"
+            requestHeaderSecretName: custom-extension-auth-secret
+            extensionUri: http://nginx-service/hivemq-custom-test-extension-1.0.0.zip
+            customizationUri: http://nginx-service/hivemq-customization.zip
+            extensionPriority: 1500
+            extensionStartMandatory: true
+            extensionStartPriority: 2000
+            skipHttpsCertificateValidation: true
+            skipHttpsHostnameVerification: false
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+            enabled: true
+            supportsHotReload: true
+            configMapName: "hivemq-kafka-extension-test-configuration"
+            extensionUri: preinstalled
+            extensionStartMandatory: false
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-google-cloud-pubsub-extension
+            enabled: true
+            supportsHotReload: true
+            extensionUri: preinstalled
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-distributed-tracing-extension
+            enabled: false
+            supportsHotReload: true
+            secretName: "my-tracing-extension-secret-name"
+            extensionUri: preinstalled
+
+  - it: with extensionMap containing single extension
+    set:
+      extensionMap:
+        hivemq-allow-all-extension:
+          enabled: true
+    asserts:
+      - exists:
+          path: spec.extensions
+      - lengthEqual:
+          path: spec.extensions
+          count: 1
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-allow-all-extension
+            enabled: true
+            extensionUri: preinstalled
+            supportsHotReload: false
+
+  - it: with extensionMap having configMapName and secretName set, validation fails
+    set:
+      extensionMap:
+        hivemq-distributed-tracing-extension:
+          enabled: true
+          supportsHotReload: true
+          configMapName: "my-tracing-extension-configmap-name"
+          secretName: "my-tracing-extension-secret-name"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'Both `configMapName` and `secretName` values are set for extension `hivemq-distributed-tracing-extension`. Only one can be defined at a time'
+
+  - it: with extensionMap having configMapName and secretName empty, validation succeeds
+    set:
+      extensionMap:
+        hivemq-distributed-tracing-extension:
+          enabled: true
+          supportsHotReload: true
+          configMapName: ""
+          secretName: ""
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 1
+
+  - it: with empty extensionMap and empty extensions, no extensions rendered
+    set:
+      extensionMap: {}
+    asserts:
+      - notExists:
+          path: spec.extensions
+
+  - it: with null extensionMap and empty extensions, no extensions rendered
+    set:
+      extensionMap: ~
+    asserts:
+      - notFailedTemplate: {}
+      - notExists:
+          path: spec.extensions
+
+  - it: with extensionMap empty entry, extension rendered with defaults
+    set:
+      extensionMap:
+        empty-entry-extension: {}
+    asserts:
+      - lengthEqual:
+          path: spec.extensions
+          count: 1
+      - contains:
+          path: spec.extensions
+          content:
+            id: empty-entry-extension
+            enabled: false
+            supportsHotReload: false
+            extensionUri: preinstalled
+      - notExists:
+          path: spec.extensions[0].configMapName
+      - notExists:
+          path: spec.extensions[0].extensionPriority
+      - notExists:
+          path: spec.extensions[0].extensionStartPriority
+      - notExists:
+          path: spec.extensions[0].extensionStartMandatory
+      - notExists:
+          path: spec.extensions[0].secretName
+
+  - it: with extensionMap having single field, defaults fill remaining
+    set:
+      extensionMap:
+        minimal-map-extension:
+          enabled: true
+    asserts:
+      - lengthEqual:
+          path: spec.extensions
+          count: 1
+      - contains:
+          path: spec.extensions
+          content:
+            id: minimal-map-extension
+            enabled: true
+            supportsHotReload: false
+            extensionUri: preinstalled
+      - notExists:
+          path: spec.extensions[0].configMapName
+      - notExists:
+          path: spec.extensions[0].extensionPriority
+
+  - it: with extensionMap priority and startPriority set to zero, zero values are preserved
+    set:
+      extensionMap:
+        zero-priority-extension:
+          enabled: true
+          priority: 0
+          startPriority: 0
+    asserts:
+      - contains:
+          path: spec.extensions
+          content:
+            id: zero-priority-extension
+            enabled: true
+            supportsHotReload: false
+            extensionUri: preinstalled
+            extensionPriority: 0
+            extensionStartPriority: 0
+
+  - it: with extensionMap optional fields absent, conditional fields are not rendered
+    set:
+      extensionMap:
+        test-extension:
+          enabled: true
+          supportsHotReload: false
+    asserts:
+      - lengthEqual:
+          path: spec.extensions
+          count: 1
+      - contains:
+          path: spec.extensions
+          content:
+            id: test-extension
+            enabled: true
+            supportsHotReload: false
+            extensionUri: preinstalled
+      - notExists:
+          path: spec.extensions[0].configMapName
+      - notExists:
+          path: spec.extensions[0].requestHeaderSecretName
+      - notExists:
+          path: spec.extensions[0].customizationUri
+      - notExists:
+          path: spec.extensions[0].extensionPriority
+      - notExists:
+          path: spec.extensions[0].extensionStartPriority
+      - notExists:
+          path: spec.extensions[0].extensionStartMandatory
+      - notExists:
+          path: spec.extensions[0].secretName
+      - notExists:
+          path: spec.extensions[0].skipHttpsCertificateValidation
+      - notExists:
+          path: spec.extensions[0].skipHttpsHostnameVerification
+
+  - it: with extensionMap secretName only, configMapName is not rendered
+    set:
+      extensionMap:
+        secret-extension:
+          enabled: true
+          secretName: my-secret
+    asserts:
+      - contains:
+          path: spec.extensions
+          content:
+            id: secret-extension
+            enabled: true
+            supportsHotReload: false
+            secretName: my-secret
+            extensionUri: preinstalled
+      - notExists:
+          path: spec.extensions[0].configMapName
+
+  - it: with extensionMap null field in entry, null field is not rendered
+    set:
+      extensionMap:
+        new-extension:
+          enabled: true
+          configMapName: null
+    asserts:
+      - lengthEqual:
+          path: spec.extensions
+          count: 1
+      - contains:
+          path: spec.extensions
+          content:
+            id: new-extension
+            enabled: true
+            supportsHotReload: false
+            extensionUri: preinstalled
+      - notExists:
+          path: spec.extensions[0].configMapName
+
+  - it: with multiple extensionMap overrides, last file takes precedence
+    values:
+      - hierarchical-base-values.yaml
+      - region-override-values.yaml
+      - cluster-override-values.yaml
+    asserts:
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+            enabled: true
+            supportsHotReload: true
+            configMapName: cluster-kafka-config
+            extensionUri: preinstalled
+
+  - it: with null at start of override chain, later files restore the extension
+    values:
+      - null-override-values.yaml
+      - hierarchical-base-values.yaml
+      - region-override-values.yaml
+    asserts:
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+            enabled: false
+            supportsHotReload: true
+            configMapName: region-kafka-config
+            extensionUri: preinstalled
+
+  - it: with null in middle of override chain, later file recreates the extension without inheriting earlier fields
+    values:
+      - hierarchical-base-values.yaml
+      - null-override-values.yaml
+      - region-override-values.yaml
+    asserts:
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+            enabled: false
+            supportsHotReload: false
+            configMapName: region-kafka-config
+            extensionUri: preinstalled
+
+  # The test below verifies the documented contract: when `null` is the last value file in the chain,
+  # the extension is removed regardless of the values set in earlier files.
+  # It is skipped due to https://github.com/helm-unittest/helm-unittest/issues/845
+  # (helm-unittest does not strip null keys during deep merge of values files).
+  # Real Helm behavior can be verified manually with:
+  #   helm template t ./charts/hivemq-platform \
+  #     -f charts/hivemq-platform/tests/extensions/hierarchical-base-values.yaml \
+  #     -f charts/hivemq-platform/tests/extensions/region-override-values.yaml \
+  #     -f charts/hivemq-platform/tests/extensions/null-override-values.yaml
+  # The output omits `hivemq-kafka-extension` from `spec.extensions`.
+  #- it: with null at end of override chain, extension is removed regardless of earlier files
+  #  values:
+  #    - hierarchical-base-values.yaml
+  #    - region-override-values.yaml
+  #    - null-override-values.yaml
+  #  asserts:
+  #    - notContains:
+  #        path: spec.extensions
+  #        content:
+  #          id: hivemq-kafka-extension
+  #        any: true
+
+  - it: with extensionMap custom extensionUri containing special characters
+    set:
+      extensionMap:
+        custom-uri-extension:
+          enabled: true
+          extensionUri: "https://artifacts.example.com/my-extension-1.0.0.zip?token=abc&version=latest"
+    asserts:
+      - contains:
+          path: spec.extensions
+          content:
+            id: custom-uri-extension
+            enabled: true
+            supportsHotReload: false
+            extensionUri: "https://artifacts.example.com/my-extension-1.0.0.zip?token=abc&version=latest"
+
+  # The test below verifies the documented contract: when a values file contains duplicate keys in
+  # `extensionMap`, real Helm accepts the file and the last duplicate wins (overwrite semantics).
+  # It is skipped due to https://github.com/helm-unittest/helm-unittest/issues/848
+  # (helm-unittest's strict YAML parser rejects duplicate keys at parse time, before templates run).
+  # Real Helm behavior can be verified manually with:
+  #   helm template t ./charts/hivemq-platform \
+  #     -f charts/hivemq-platform/tests/extensions/extension-map-duplicated-values.yaml
+  # The output contains a single `hivemq-tracing-extension` entry with values from the last duplicate
+  # (`enabled: false`, `secretName: my-tracing-extension-secret-name`).
+  #- it: with duplicated extension keys in extensionMap, last duplicate takes precedence
+  #  values:
+  #    - extension-map-duplicated-values.yaml
+  #  asserts:
+  #    - lengthEqual:
+  #        path: spec.extensions
+  #        count: 1
+  #    - contains:
+  #        path: spec.extensions
+  #        content:
+  #          id: hivemq-tracing-extension
+  #          enabled: false
+  #          supportsHotReload: false
+  #          secretName: my-tracing-extension-secret-name
+  #          extensionUri: preinstalled
+  #    - notExists:
+  #        path: spec.extensions[0].configMapName

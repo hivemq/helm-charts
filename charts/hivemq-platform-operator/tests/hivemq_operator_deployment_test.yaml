@@ -62,7 +62,7 @@ tests:
             - name: HIVEMQ_PLATFORM_OPERATOR_CRD_WAIT_UNTIL_READY_TIMEOUT
               value: "PT10S"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
-              value: "docker.io/hivemq/hivemq-platform-operator-init:2.1.4"
+              value: "docker.io/hivemq/hivemq-platform-operator-init:2.2.2"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_PULL_POLICY
               value: "IfNotPresent"
             - name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_CPU
@@ -81,6 +81,8 @@ tests:
               value: "plain"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT
               value: "0"
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+              value: "10"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
@@ -177,6 +179,87 @@ tests:
       - exists:
           path: spec.template.spec.containers[0].resources
 
+  - it: with image digest overrides
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: test-tag
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.initImageName: test-init-image
+      image.initImageDigest: sha256:2222222222222222222222222222222222222222222222222222222222222222
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image:test-tag@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+            value: "test-repo/test-init-image:test-tag@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
+  - it: with image digest overrides and empty tag
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: ""
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.initImageName: test-init-image
+      image.initImageDigest: sha256:2222222222222222222222222222222222222222222222222222222222222222
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-repo/test-image@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE
+            value: "test-repo/test-init-image@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+
+  - it: with empty image repository, validation fails
+    set:
+      image.repository: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`repository` is required to build the HiveMQ Platform Operator container image reference'
+
+  - it: with empty image name, validation fails
+    set:
+      image.name: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`name` is required to build the HiveMQ Platform Operator container image reference'
+
+  - it: with empty image init image name, validation fails
+    set:
+      image.initImageName: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`name` is required to build the HiveMQ Platform Operator container image reference'
+
+  - it: with invalid image digest type, schema validation fails
+    set:
+      image.digest: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with image digest not matching OCI format, schema validation fails
+    set:
+      image.digest: not-a-valid-digest
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid image init digest type, schema validation fails
+    set:
+      image.initImageDigest: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with image init digest not matching OCI format, schema validation fails
+    set:
+      image.initImageDigest: not-a-valid-digest
+    asserts:
+      - failedTemplate: {}
+
   - it: with custom concurrentRollingRestartLimit, operator container EnvVar created
     set:
       concurrentRollingRestartLimit: 5
@@ -200,6 +283,32 @@ tests:
   - it: with invalid concurrentRollingRestartLimit, schema validation fails
     set:
       concurrentRollingRestartLimit: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom concurrentInitAppUpdateLimit, operator container EnvVar created
+    set:
+      concurrentInitAppUpdateLimit: 5
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+            value: "5"
+
+  - it: with empty concurrentInitAppUpdateLimit, operator container EnvVar created empty
+    set:
+      concurrentInitAppUpdateLimit:
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+            value: ""
+
+  - it: with invalid concurrentInitAppUpdateLimit, schema validation fails
+    set:
+      concurrentInitAppUpdateLimit: -1
     asserts:
       - failedTemplate: {}
 
@@ -383,6 +492,15 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_INIT_IMAGE_RESOURCES_EPHEMERAL_STORAGE` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with duplicated custom environment variables for the init-app update concurrency limit, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
+          value: "20"
+    asserts:
+      - failedTemplate:
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
 
   - it: with duplicated custom environment variables, validation fails
     set:
@@ -728,8 +846,7 @@ tests:
         runAsUser: 185
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499 
-            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)'
 
   - it: with pod security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
@@ -739,8 +856,7 @@ tests:
         runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)'
 
   - it: with defaults, no container security context set
     asserts:
@@ -975,8 +1091,7 @@ tests:
         runAsUser: 185
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `false` but `runAsUser` is not set to `0` \(root\)'
 
   - it: with container security context runAsNonRoot true, and runAsUser root, then validation fails
     set:
@@ -985,8 +1100,7 @@ tests:
         runAsUser: 0
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)
+          errorPattern: '`runAsNonRoot` is set to `true` but `runAsUser` is set to `0` \(root\)'
 
 
   - it: with pod scheduling values set
@@ -1479,3 +1593,85 @@ tests:
           content:
             name: HIVEMQ_PLATFORM_OPERATOR_SKIP_HTTPS_CERTIFICATE_VALIDATION
             value: "false"
+
+  - it: with default values, default livenessProbe values are set
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe
+          value:
+            failureThreshold: 3
+            httpGet:
+              path: /health/liveness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+
+  - it: with default values, default readinessProbe values are set
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe
+          value:
+            failureThreshold: 3
+            httpGet:
+              path: /health/readiness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+
+  - it: with custom livenessProbe values
+    set:
+      livenessProbe.initialDelaySeconds: 15
+      livenessProbe.periodSeconds: 30
+      livenessProbe.timeoutSeconds: 20
+      livenessProbe.failureThreshold: 5
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe
+          value:
+            failureThreshold: 5
+            httpGet:
+              path: /health/liveness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 20
+
+  - it: with custom readinessProbe values
+    set:
+      readinessProbe.initialDelaySeconds: 10
+      readinessProbe.periodSeconds: 20
+      readinessProbe.timeoutSeconds: 15
+      readinessProbe.successThreshold: 1
+      readinessProbe.failureThreshold: 6
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe
+          value:
+            failureThreshold: 6
+            httpGet:
+              path: /health/readiness
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 15
+
+  - it: with custom http port, probe port is updated
+    set:
+      http.port: 9090
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: 9090
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: 9090

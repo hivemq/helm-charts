@@ -52,6 +52,14 @@ additionalVolumes:
           audience: api
           expirationSeconds: 3600
           path: token
+  - type: csi
+    mountName: test-csi-volume
+    path: /additional-csi-volume
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: my-secret-provider
 volumeClaimTemplates:
   - kind: PersistentVolumeClaim
     apiVersion: v1

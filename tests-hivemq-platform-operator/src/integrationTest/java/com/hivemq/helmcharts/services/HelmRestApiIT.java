@@ -13,8 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelmRestApiIT extends AbstractHelmChartIT {
 
     private static final int REST_API_SERVICE_PORT_8890 = 8890;
-    private static final @NotNull String REST_API_SERVICE_NAME_8890 =
-            "hivemq-test-hivemq-platform-rest-" + REST_API_SERVICE_PORT_8890;
+
+    private final @NotNull String restApiServiceName8890 =
+            "hivemq-%s-rest-%s".formatted(platformReleaseName, REST_API_SERVICE_PORT_8890);
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -23,7 +24,7 @@ class HelmRestApiIT extends AbstractHelmChartIT {
 
         assertThat(RestAPIUtil.getAllMqttClients(client,
                 platformNamespace,
-                REST_API_SERVICE_NAME_8890,
+                restApiServiceName8890,
                 REST_API_SERVICE_PORT_8890,
                 false)).isEmpty();
     }

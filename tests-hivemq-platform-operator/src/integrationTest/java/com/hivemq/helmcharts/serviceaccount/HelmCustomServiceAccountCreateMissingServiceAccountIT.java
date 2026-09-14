@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.serviceaccount;
 
 import com.hivemq.helmcharts.util.K8sUtil;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -11,11 +12,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HelmCustomServiceAccountCreateMissingServiceAccountIT extends AbstractHelmCustomServiceAccountIT {
 
+    @Override
+    protected @NotNull String getReleaseBaseName() {
+        return "custom-sa-create-missing-sa";
+    }
+
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void platformCharts_withNonExistingCustomServiceAccountThenCreate_hivemqRunning() throws Exception {
-        helmChartContainer.installPlatformOperatorChart(OPERATOR_RELEASE_NAME, "--namespace", operatorNamespace);
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
+        helmChartContainer.installPlatformOperatorChart(operatorReleaseName, "--namespace", operatorNamespace);
+        helmChartContainer.installPlatformChart(platformReleaseName,
                 "--set",
                 "nodes.serviceAccountName=" + SERVICE_ACCOUNT_NAME,
                 "--set",
@@ -24,7 +30,7 @@ class HelmCustomServiceAccountCreateMissingServiceAccountIT extends AbstractHelm
                 platformNamespace);
 
         final var hivemqCustomResource =
-                K8sUtil.waitForHiveMQPlatformState(client, platformNamespace, PLATFORM_RELEASE_NAME, "ERROR");
+                K8sUtil.waitForHiveMQPlatformState(client, platformNamespace, platformReleaseName, "ERROR");
         //noinspection unchecked
         assertThat((Map<String, String>) hivemqCustomResource.getAdditionalProperties().get("status")).containsValues(
                 "The ServiceAccount and its permissions are invalid: The ServiceAccount '%s' does not exist".formatted(
@@ -34,7 +40,7 @@ class HelmCustomServiceAccountCreateMissingServiceAccountIT extends AbstractHelm
         // create missing ServiceAccount
         K8sUtil.createServiceAccount(client, platformNamespace, SERVICE_ACCOUNT_NAME);
 
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
 
         // assert that the ServiceAccount and permissions are working
         assertPlatformPodAnnotations();

@@ -61,6 +61,9 @@ tests:
   - it: Should define the correct probes
     asserts:
       - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /api/v1/health/readiness
+      - equal:
           path: spec.template.spec.containers[0].livenessProbe.httpGet.path
           value: /api/v1/health/liveness
       - equal:

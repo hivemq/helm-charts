@@ -12,13 +12,13 @@ jobs:
       should-run: ${{ steps.changes.outputs.modified }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         with:
           filters: |
             modified:
@@ -26,6 +26,7 @@ jobs:
               - '.github/workflows/edge-*.yml'
               - 'charts/hivemq-edge/**'
               - 'manifests/hivemq-edge/**'
+              - 'tests-hivemq-edge/**'
           list-files: csv
 
   swarm-changes:
@@ -35,13 +36,13 @@ jobs:
       should-run: ${{ steps.changes.outputs.modified }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         with:
           filters: |
             modified:
@@ -58,13 +59,13 @@ jobs:
       should-run: ${{ steps.changes.outputs.modified }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         with:
           filters: |
             modified:
@@ -82,13 +83,13 @@ jobs:
       should-run: ${{ steps.changes.outputs.modified }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Check for relevant changes
         id: changes
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         with:
           filters: |
             modified:
@@ -99,6 +100,36 @@ jobs:
               - 'tests-hivemq-platform-operator/**'
           list-files: csv
 
+  helm-image-changes:
+    name: Helm test image changes
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.changes.outputs.modified }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        id: changes
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
+        with:
+          filters: |
+            modified:
+              - '.github/workflows/dispatcher.yml'
+              - '.github/workflows/helm-image*.yml'
+              - 'helm-image/**'
+              - '.helm-version'
+          list-files: csv
+
+  edge-verify-tests:
+    name: Edge verify tests
+    needs: edge-changes
+    if: needs.edge-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/edge-verify.yml
+    secrets: inherit
+
   edge-smoke-test:
     name: Edge smoke tests
     needs: edge-changes
@@ -106,11 +137,12 @@ jobs:
     uses: ./.github/workflows/edge-smoke-test.yml
     secrets: inherit
 
-  edge-verify-tests:
-    name: Edge verify tests
-    needs: edge-changes
+  edge-integration-tests:
+    name: Edge integration tests
+    needs:
+      - edge-changes
     if: needs.edge-changes.outputs.should-run == 'true'
-    uses: ./.github/workflows/edge-verify.yml
+    uses: ./.github/workflows/edge-integration-tests.yml
     secrets: inherit
 
   swarm-verify-tests:
@@ -153,26 +185,157 @@ jobs:
     uses: ./.github/workflows/platform-integration-tests.yml
     secrets: inherit
 
+  helm-image-verify-tests:
+    name: Helm test image verify tests
+    needs: helm-image-changes
+    if: needs.helm-image-changes.outputs.should-run == 'true'
+    uses: ./.github/workflows/helm-image-verify.yml
+    secrets: inherit
+
   tests-summary-report:
     name: Tests Summary Report
     runs-on: ubuntu-latest
     if: always()
     needs:
-      - edge-smoke-test
       - edge-verify-tests
+      - edge-smoke-test
+      - edge-integration-tests
       - swarm-verify-tests
       - platform-verify-tests
       - platform-smoke-test
       - platform-integration-tests
+      - helm-image-verify-tests
     steps:
       - name: Tests results summary
         if: |
-          needs.edge-smoke-test.result == 'failure' ||
           needs.edge-verify-tests.result == 'failure' ||
+          needs.edge-smoke-test.result == 'failure' ||
+          needs.edge-integration-tests.result == 'failure' ||
           needs.swarm-verify-tests.result == 'failure' ||
           needs.platform-verify-tests.result == 'failure' ||
           needs.platform-smoke-test.result == 'failure' ||
-          needs.platform-integration-tests.result == 'failure'
+          needs.platform-integration-tests.result == 'failure' ||
+          needs.helm-image-verify-tests.result == 'failure'
         run: |
           echo "There are test failures."
           exit 1
+
+  jenkins-composite-dispatch:
+    name: Jenkins composite dispatch
+    runs-on: ubuntu-latest
+    needs:
+      - edge-changes
+      - swarm-changes
+      - platform-changes
+      - platform-operator-changes
+    if: >
+      needs.edge-changes.result == 'success' &&
+      needs.swarm-changes.result == 'success' &&
+      needs.platform-changes.result == 'success' &&
+      needs.platform-operator-changes.result == 'success'
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Check whether Jenkins build is needed
+        id: jenkins-build
+        env:
+          PLATFORM: ${{ needs.platform-changes.outputs.should-run }}
+          OPERATOR: ${{ needs.platform-operator-changes.outputs.should-run }}
+          SWARM: ${{ needs.swarm-changes.outputs.should-run }}
+        run: |
+          if [[ "$PLATFORM" == "true" || "$OPERATOR" == "true" || "$SWARM" == "true" ]]; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Jenkins webhook payload
+        id: payload
+        if: steps.jenkins-build.outputs.needed == 'true'
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BEFORE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '0000000000000000000000000000000000000000' }}
+          REPOSITORY_JSON: ${{ toJSON(github.event.repository) }}
+          ORGANIZATION_JSON: ${{ toJSON(github.event.organization) }}
+        run: |
+          set -euo pipefail
+          jq -nc \
+            --arg ref "refs/heads/$BRANCH" \
+            --arg before "$BEFORE_SHA" \
+            --arg after "$HEAD_SHA" \
+            --argjson repository "$REPOSITORY_JSON" \
+            --argjson organization "$ORGANIZATION_JSON" \
+            '{
+              ref: $ref,
+              before: $before,
+              after: $after,
+              repository: $repository,
+              pusher: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com" },
+              sender: { login: "github-actions[bot]", id: 41898282, type: "Bot" },
+              organization: $organization,
+              forced: false,
+              created: false,
+              deleted: false,
+              base_ref: null,
+              compare: ($repository.html_url + "/compare/" + ($before[0:7]) + "..." + ($after[0:7])),
+              commits: [],
+              head_commit: {
+                id: $after,
+                tree_id: $after,
+                distinct: true,
+                message: "GHA-dispatched build",
+                timestamp: (now | todateiso8601),
+                url: ($repository.html_url + "/commit/" + $after),
+                author: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com", username: "github-actions[bot]" },
+                committer: { name: "github-actions[bot]", email: "github-actions[bot]@users.noreply.github.com", username: "github-actions[bot]" },
+                added: [],
+                removed: [],
+                modified: []
+              }
+            }' > "$RUNNER_TEMP/jenkins-payload.json"
+
+      - name: Trigger Jenkins composite build
+        id: trigger
+        if: steps.jenkins-build.outputs.needed == 'true'
+        env:
+          JENKINS_WEBHOOK_PAYLOAD_URL: ${{ secrets.JENKINS_WEBHOOK_PAYLOAD_URL }}
+          JENKINS_WEBHOOK_SECRET: ${{ secrets.JENKINS_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          PAYLOAD_FILE="$RUNNER_TEMP/jenkins-payload.json"
+          # The signature covers the exact request body, so sign the file that is posted verbatim.
+          # Both signature headers are sent, matching a GitHub webhook delivery.
+          SIGNATURE_1="sha1=$(openssl dgst -sha1 -hmac "$JENKINS_WEBHOOK_SECRET" -hex < "$PAYLOAD_FILE" | awk '{print $NF}')"
+          SIGNATURE_256="sha256=$(openssl dgst -sha256 -hmac "$JENKINS_WEBHOOK_SECRET" -hex < "$PAYLOAD_FILE" | awk '{print $NF}')"
+          echo "::add-mask::$SIGNATURE_1"
+          echo "::add-mask::$SIGNATURE_256"
+          DELIVERY=$(cat /proc/sys/kernel/random/uuid)
+          echo "::add-mask::$DELIVERY"
+          RESPONSE_FILE="$RUNNER_TEMP/jenkins-response.txt"
+          HTTP_CODE=$(curl --silent --show-error --max-time 30 \
+            --output "$RESPONSE_FILE" --write-out '%{http_code}' \
+            --request POST "$JENKINS_WEBHOOK_PAYLOAD_URL" \
+            --header 'Content-Type: application/json' \
+            --header 'X-GitHub-Event: push' \
+            --header "X-Hub-Signature: $SIGNATURE_1" \
+            --header "X-Hub-Signature-256: $SIGNATURE_256" \
+            --header "X-GitHub-Delivery: $DELIVERY" \
+            --header 'User-Agent: GitHub-Hookshot/gha-dispatcher' \
+            --data-binary @"$PAYLOAD_FILE")
+          echo "Jenkins responded with HTTP $HTTP_CODE"
+          if [[ "$HTTP_CODE" != 2* ]]; then
+            cat "$RESPONSE_FILE"
+            exit 1
+          fi
+
+      - name: Skip Jenkins composite build
+        if: steps.jenkins-build.outputs.needed == 'false'
+        uses: guibranco/github-status-action-v2@77639353504055053524efa7a3719aaf0b731ce9 # v1
+        with:
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          context: "continuous-integration/jenkins/branch"
+          state: "success"
+          sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          target_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

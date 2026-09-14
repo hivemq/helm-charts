@@ -5,8 +5,18 @@
 image:
   repository: docker.io/hivemq
   name: hivemq-platform-operator
-  tag: 2.1.4
+  tag: 2.2.2
+  # Optional digest for the HiveMQ Platform Operator image.
+  # When set, the digest pins the image to an exact version.
+  # The rendered image reference is <repository>/<name>:<tag>@<digest>.
+  # If tag is empty, the reference is <repository>/<name>@<digest>.
+  digest: ""
   initImageName: hivemq-platform-operator-init
+  # Optional digest for the HiveMQ Platform Operator Init image.
+  # When set, the digest pins the image to an exact version.
+  # The rendered image reference is <repository>/<initImageName>:<tag>@<initImageDigest>.
+  # If tag is empty, the reference is <repository>/<initImageName>@<initImageDigest>.
+  initImageDigest: ""
   pullPolicy: IfNotPresent
   pullSecretName: ""
 
@@ -24,8 +34,12 @@ logLevel: INFO
 
 # One HiveMQ Platform Operator can manage many HiveMQ Platforms.
 # This value configures the maximum number of HiveMQ Platforms that can perform a rolling restart at the same time.
-# If set to `0`, no limit is applied.
+# The default setting is 0, which disables the limit.
 concurrentRollingRestartLimit: 0
+
+# This value configures the maximum number of HiveMQ Platforms that can perform an init app update at the same time.
+# The default setting is 10. To disable the limit, set the value to 0.
+concurrentInitAppUpdateLimit: 10
 
 # Configures the Operator ports for http/s. These ports provide access to metrics and other services.
 http:
@@ -36,6 +50,21 @@ https:
   # These settings are used for all Operator related HTTP clients, e.g. for downloading custom extensions and extension customizations.
   skipCertificateValidation: false
   skipHostnameVerification: false
+
+# Configures the liveness probe for the HiveMQ Platform Operator container.
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+# Configures the readiness probe for the HiveMQ Platform Operator container.
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
 
 # Configures the Java JVM runtime options for the process.
 javaOpts: "-XX:+UnlockExperimentalVMOptions -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75"

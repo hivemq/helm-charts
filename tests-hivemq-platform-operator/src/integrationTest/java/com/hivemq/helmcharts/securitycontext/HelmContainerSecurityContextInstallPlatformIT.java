@@ -26,7 +26,7 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
     void installPlatform_withRootAndNonRootUsers_hivemqRunning(final @NotNull ChartValues chartValues)
             throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
-        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
+        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(operatorReleaseName);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
                 "hivemq-platform-operator",
@@ -34,7 +34,7 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
                 chartValues.operator().gid());
 
         installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
-        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         assertUidAndGid(platformNamespace,
                 platformLabels,
                 "hivemq",
@@ -50,7 +50,7 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
                 operatorChartNonRootUserValuesFile(),
                 "--set",
                 "containerSecurityContext.runAsUser=" + operatorUid);
-        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
+        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(operatorReleaseName);
         assertUidAndGid(operatorNamespace, operatorLabels, "hivemq-platform-operator", operatorUid, 0);
 
         final var platformUid = ThreadLocalRandom.current().nextInt(MIN_UID, MAX_UID);
@@ -58,7 +58,7 @@ class HelmContainerSecurityContextInstallPlatformIT extends AbstractHelmContaine
                 platformChartNonRootUserValuesFile(),
                 "--set",
                 "nodes.containerSecurityContext.runAsUser=" + platformUid);
-        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         assertUidAndGid(platformNamespace, //
                 platformLabels, //
                 "hivemq", //

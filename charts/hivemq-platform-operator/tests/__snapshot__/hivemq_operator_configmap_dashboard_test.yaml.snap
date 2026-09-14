@@ -917,7 +917,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
             },
             "gridPos": {
               "h": 7,
-              "w": 24,
+              "w": 12,
               "x": 0,
               "y": 12
             },
@@ -956,12 +956,349 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
             "type": "timeseries"
           },
           {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
+                "unit": "short"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 12,
+              "x": 12,
+              "y": 12
+            },
+            "id": 148,
+            "options": {
+              "dataLinks": [],
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "hivemq_platform_operator_concurrency_limit_active_count{instance=\"$instance\"}",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "{{concurrency_limit}} active",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "hivemq_platform_operator_concurrency_limit_blocked_count{instance=\"$instance\"}",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "{{concurrency_limit}} blocked",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "Concurrency limit (active / blocked)",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    }
+                  ]
+                },
+                "unit": "short"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 12,
+              "x": 0,
+              "y": 19
+            },
+            "id": 149,
+            "options": {
+              "dataLinks": [],
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "hivemq_platform_operator_informer_count{instance=\"$instance\"}",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "total informers",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "hivemq_platform_operator_informer_event_source_count{instance=\"$instance\"}",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "event sources",
+                "range": true,
+                "refId": "B"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "hivemq_platform_operator_informer_unsynced_count{instance=\"$instance\"}",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "not synced",
+                "range": true,
+                "refId": "C"
+              }
+            ],
+            "title": "Informers",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "barWidthFactor": 0.6,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "insertNulls": false,
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "auto",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    }
+                  ]
+                },
+                "unit": "short"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 12,
+              "x": 12,
+              "y": 19
+            },
+            "id": 150,
+            "options": {
+              "dataLinks": [],
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "hivemq_platform_operator_informer_cached_resource_count{instance=\"$instance\"}",
+                "format": "time_series",
+                "interval": "",
+                "intervalFactor": 2,
+                "legendFormat": "{{event_source}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Informer cache size (per source)",
+            "type": "timeseries"
+          },
+          {
             "collapsed": false,
             "gridPos": {
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 19
+              "y": 26
             },
             "id": 138,
             "panels": [],
@@ -1033,7 +1370,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 20
+              "y": 27
             },
             "id": 142,
             "options": {
@@ -1057,7 +1394,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "prometheus"
                 },
                 "editorMode": "code",
-                "expr": "rate(operator_sdk_controllers_execution_reconcile_success_total{instance=\"$instance\"}[$__rate_interval])",
+                "expr": "rate(reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
                 "format": "time_series",
                 "interval": "",
                 "intervalFactor": 2,
@@ -1071,7 +1408,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "prometheus"
                 },
                 "editorMode": "code",
-                "expr": "rate(operator_sdk_controllers_execution_reconcile_failure_total{instance=\"$instance\"}[$__rate_interval])",
+                "expr": "rate(reconciliations_failure_total{instance=\"$instance\"}[$__rate_interval])",
                 "format": "time_series",
                 "hide": false,
                 "interval": "",
@@ -1149,7 +1486,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 0,
-              "y": 28
+              "y": 35
             },
             "id": 141,
             "options": {
@@ -1173,7 +1510,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "prometheus"
                 },
                 "editorMode": "code",
-                "expr": "rate(operator_sdk_reconciliations_started_total{instance=\"$instance\"}[$__rate_interval])",
+                "expr": "rate(reconciliations_started_total{instance=\"$instance\"}[$__rate_interval])",
                 "format": "time_series",
                 "interval": "",
                 "intervalFactor": 2,
@@ -1250,7 +1587,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 8,
-              "y": 28
+              "y": 35
             },
             "id": 144,
             "options": {
@@ -1274,7 +1611,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "prometheus"
                 },
                 "editorMode": "code",
-                "expr": "rate(operator_sdk_reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
+                "expr": "rate(reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
                 "format": "time_series",
                 "hide": false,
                 "interval": "",
@@ -1352,7 +1689,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 16,
-              "y": 28
+              "y": 35
             },
             "id": 143,
             "options": {
@@ -1376,7 +1713,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "prometheus"
                 },
                 "editorMode": "code",
-                "expr": "rate(operator_sdk_reconciliations_failed_total{instance=\"$instance\"}[$__rate_interval])",
+                "expr": "rate(reconciliations_failure_total{instance=\"$instance\"}[$__rate_interval])",
                 "format": "time_series",
                 "hide": false,
                 "interval": "",
@@ -1413,7 +1750,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 12,
               "x": 0,
-              "y": 27
+              "y": 34
             },
             "id": 146,
             "interval": "10s",
@@ -1460,7 +1797,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                 },
                 "editorMode": "code",
                 "exemplar": false,
-                "expr": "sum(rate(operator_sdk_controllers_execution_reconcile_seconds_bucket{instance=\"$instance\"}[1m])) by (le)",
+                "expr": "sum(rate(reconciliations_execution_duration_seconds_bucket{instance=\"$instance\"}[1m])) by (le)",
                 "format": "heatmap",
                 "hide": false,
                 "instant": false,
@@ -1539,7 +1876,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 12,
               "x": 12,
-              "y": 27
+              "y": 34
             },
             "id": 145,
             "options": {
@@ -1563,7 +1900,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
                   "uid": "prometheus"
                 },
                 "editorMode": "code",
-                "expr": "operator_sdk_controllers_execution_reconcile_seconds_max{instance=\"$instance\"}",
+                "expr": "reconciliations_execution_duration_seconds_max{instance=\"$instance\"}",
                 "format": "time_series",
                 "interval": "",
                 "intervalFactor": 2,
@@ -1640,7 +1977,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 0,
-              "y": 42
+              "y": 49
             },
             "id": 24,
             "options": {
@@ -1767,7 +2104,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 8,
-              "y": 42
+              "y": 49
             },
             "id": 25,
             "options": {
@@ -1836,7 +2173,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 49
+              "y": 56
             },
             "id": 128,
             "panels": [],
@@ -1910,7 +2247,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 11,
               "x": 0,
-              "y": 50
+              "y": 57
             },
             "id": 106,
             "options": {
@@ -2038,7 +2375,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 13,
               "x": 11,
-              "y": 50
+              "y": 57
             },
             "id": 93,
             "options": {
@@ -2151,7 +2488,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 0,
-              "y": 57
+              "y": 64
             },
             "id": 124,
             "options": {
@@ -2249,7 +2586,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 8,
-              "y": 57
+              "y": 64
             },
             "id": 32,
             "options": {
@@ -2386,7 +2723,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 16,
-              "y": 57
+              "y": 64
             },
             "id": 61,
             "options": {
@@ -2441,7 +2778,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 64
+              "y": 71
             },
             "id": 129,
             "panels": [],
@@ -2514,7 +2851,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 65
+              "y": 72
             },
             "id": 3,
             "maxPerRow": 3,
@@ -2589,7 +2926,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 73
+              "y": 80
             },
             "id": 130,
             "panels": [],
@@ -2661,7 +2998,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 74
+              "y": 81
             },
             "id": 78,
             "maxPerRow": 3,
@@ -2736,7 +3073,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 81
+              "y": 88
             },
             "id": 131,
             "panels": [],
@@ -2808,7 +3145,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 0,
-              "y": 82
+              "y": 89
             },
             "id": 98,
             "options": {
@@ -2907,7 +3244,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 8,
-              "y": 82
+              "y": 89
             },
             "id": 101,
             "options": {
@@ -3019,7 +3356,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 8,
               "x": 16,
-              "y": 82
+              "y": 89
             },
             "id": 99,
             "options": {
@@ -3070,7 +3407,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 88
+              "y": 95
             },
             "id": 132,
             "panels": [],
@@ -3143,7 +3480,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 12,
               "x": 0,
-              "y": 89
+              "y": 96
             },
             "id": 37,
             "options": {
@@ -3242,7 +3579,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 12,
               "x": 12,
-              "y": 89
+              "y": 96
             },
             "id": 38,
             "options": {
@@ -3284,7 +3621,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 96
+              "y": 103
             },
             "id": 133,
             "panels": [],
@@ -3356,7 +3693,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 6,
               "x": 0,
-              "y": 97
+              "y": 104
             },
             "id": 33,
             "options": {
@@ -3466,7 +3803,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 6,
               "x": 6,
-              "y": 97
+              "y": 104
             },
             "id": 83,
             "options": {
@@ -3564,7 +3901,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 6,
               "x": 12,
-              "y": 97
+              "y": 104
             },
             "id": 85,
             "options": {
@@ -3674,7 +4011,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "h": 7,
               "w": 6,
               "x": 18,
-              "y": 97
+              "y": 104
             },
             "id": 84,
             "options": {
@@ -3722,7 +4059,7 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
               "label": "Instance",
               "name": "instance",
               "options": [],
-              "query": "label_values(operator_sdk_reconciliations_executions_hivemq_controller, instance)",
+              "query": "label_values(reconciliations_started_total{controller_name=\"hivemq-controller\"}, instance)",
               "refresh": 2,
               "regex": "",
               "type": "query"
@@ -3762,6 +4099,6 @@ with monitoring enabled and default values, ConfigMap spec created with defaults
         "timepicker": {},
         "timezone": "",
         "title": "HiveMQ Platform Operator (Prometheus)",
-        "version": 4,
+        "version": 7,
         "weekStart": ""
       }

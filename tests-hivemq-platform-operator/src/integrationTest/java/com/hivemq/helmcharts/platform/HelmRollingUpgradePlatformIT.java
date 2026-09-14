@@ -33,7 +33,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
         LOG.info("Current platform chart: {}", helmChartContainer.getPlatformChart());
         LOG.info("Previous platform chart: {}", helmChartContainer.getPreviousPlatformChart());
 
-        helmChartContainer.installPlatformChart(PLATFORM_RELEASE_NAME,
+        helmChartContainer.installPlatformChart(platformReleaseName,
                 false,
                 "--set",
                 "nodes.replicaCount=1",
@@ -41,16 +41,16 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 previousPlatformChart.getVersion().toString(),
                 "--namespace",
                 platformNamespace);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
         final var currentPodRevisionHash = client.pods()
                 .inNamespace(platformNamespace)
-                .withName(PLATFORM_RELEASE_NAME + "-0")
+                .withName(platformReleaseName + "-0")
                 .get()
                 .getMetadata()
                 .getLabels()
                 .get(STS_REVISION_HASH);
 
-        helmChartContainer.upgradePlatformChart(PLATFORM_RELEASE_NAME,
+        helmChartContainer.upgradePlatformChart(platformReleaseName,
                 true,
                 "--set",
                 "nodes.replicaCount=1",
@@ -63,7 +63,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                 // needed to avoid SSA conflicts on label changes in the platform that are managed by the operator
                 "--force-conflicts");
 
-        final var platform = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var platform = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
         final var requiresRollingRestart =
                 !previousPlatformChart.getAppVersion().equals(currentPlatformChart.getAppVersion());
         if (requiresRollingRestart) {
@@ -75,7 +75,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
         platform.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RUNNING"), 3, TimeUnit.MINUTES);
         final var updatedPodRevisionHash = client.pods()
                 .inNamespace(platformNamespace)
-                .withName(PLATFORM_RELEASE_NAME + "-0")
+                .withName(platformReleaseName + "-0")
                 .get()
                 .getMetadata()
                 .getLabels()
@@ -88,7 +88,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     .isNotEqualTo(currentPodRevisionHash);
             assertThat(client.pods()
                     .inNamespace(platformNamespace)
-                    .withName(PLATFORM_RELEASE_NAME + "-0")
+                    .withName(platformReleaseName + "-0")
                     .get()
                     .getSpec()
                     .getContainers()
@@ -101,7 +101,7 @@ class HelmRollingUpgradePlatformIT extends AbstractHelmChartIT {
                     .isEqualTo(currentPodRevisionHash);
             assertThat(client.pods()
                     .inNamespace(platformNamespace)
-                    .withName(PLATFORM_RELEASE_NAME + "-0")
+                    .withName(platformReleaseName + "-0")
                     .get()
                     .getSpec()
                     .getContainers()

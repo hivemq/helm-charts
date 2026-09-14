@@ -40,7 +40,7 @@ class HelmSharedPvcVolumeIT extends AbstractHelmChartIT {
 
         // verify StatefulSet spec: volume, mount, env vars, and volumeClaimTemplates
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
         assertThat(statefulSet).isNotNull();
         final var template = statefulSet.getSpec().getTemplate();
 
@@ -74,7 +74,7 @@ class HelmSharedPvcVolumeIT extends AbstractHelmChartIT {
         assertThat(vct.getSpec().getResources().getRequests()).containsEntry("storage", new Quantity("1Gi"));
 
         // get the running pods
-        final var labels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var labels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         final var pods = client.pods().inNamespace(platformNamespace).withLabels(labels).list().getItems();
         assertThat(pods).hasSize(2);
 
@@ -108,8 +108,11 @@ class HelmSharedPvcVolumeIT extends AbstractHelmChartIT {
         }
 
         // trigger a rolling restart and verify files persist
-        K8sUtil.updateConfigMap(client, platformNamespace, "hivemq-config-map-update.yml");
-        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        K8sUtil.updateConfigMap(client,
+                platformNamespace,
+                "hivemq-config-map-update.yml",
+                "hivemq-configuration-" + platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, platformReleaseName);
 
         // after restart, verify files are still present and isolated in all pods
         final var restartedPods = client.pods()

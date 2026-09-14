@@ -17,8 +17,9 @@ import static org.awaitility.Durations.ONE_MINUTE;
 class HelmMqttNodePortIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT_1884 = 1884;
-    private static final @NotNull String MQTT_SERVICE_NAME =
-            "hivemq-test-hivemq-platform-mqtt-" + MQTT_SERVICE_PORT_1884;
+
+    private final @NotNull String mqttServiceName1884 =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT_1884);
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
@@ -27,11 +28,11 @@ class HelmMqttNodePortIT extends AbstractHelmChartIT {
         await().atMost(ONE_MINUTE).untilAsserted(() -> {
             final var services = client.services().inNamespace(platformNamespace).list().getItems();
             assertThat(services).isNotEmpty()
-                    .filteredOn(service -> MQTT_SERVICE_NAME.equals(service.getMetadata().getName()))
+                    .filteredOn(service -> mqttServiceName1884.equals(service.getMetadata().getName()))
                     .extracting(Service::getSpec)
                     .extracting(ServiceSpec::getType)
                     .contains("NodePort");
         });
-        MqttUtil.assertMessages(client, platformNamespace, MQTT_SERVICE_NAME, MQTT_SERVICE_PORT_1884);
+        MqttUtil.assertMessages(client, platformNamespace, mqttServiceName1884, MQTT_SERVICE_PORT_1884);
     }
 }

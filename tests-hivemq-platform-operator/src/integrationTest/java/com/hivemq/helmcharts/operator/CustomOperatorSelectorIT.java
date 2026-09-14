@@ -13,8 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomOperatorSelectorIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String PLATFORM_NAME_ALPHA = PLATFORM_RELEASE_NAME + "-alpha";
-    private static final @NotNull String PLATFORM_NAME_BETA = PLATFORM_RELEASE_NAME + "-beta";
+    private final @NotNull String platformNameAlpha = platformReleaseName + "-alpha";
+    private final @NotNull String platformNameBeta = platformReleaseName + "-beta";
 
     @Override
     protected boolean installPlatformOperatorChart() {
@@ -29,8 +29,8 @@ class CustomOperatorSelectorIT extends AbstractHelmChartIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA, platformNamespace);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_BETA, platformNamespace, true);
+        helmChartContainer.uninstallRelease(platformNameAlpha, platformNamespace);
+        helmChartContainer.uninstallRelease(platformNameBeta, platformNamespace, true);
     }
 
     @Test
@@ -39,15 +39,15 @@ class CustomOperatorSelectorIT extends AbstractHelmChartIT {
         // the operator should reconcile the alpha platform, but ignore the beta platform
         installPlatformOperatorChartAndWaitToBeRunning("--set", "selector=alpha");
 
-        installPlatformChart(PLATFORM_NAME_ALPHA, "--set", "nodes.replicaCount=1", "--set", "operator.selector=alpha");
-        installPlatformChart(PLATFORM_NAME_BETA, "--set", "nodes.replicaCount=1", "--set", "operator.selector=beta");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_NAME_ALPHA);
+        installPlatformChart(platformNameAlpha, "--set", "nodes.replicaCount=1", "--set", "operator.selector=alpha");
+        installPlatformChart(platformNameBeta, "--set", "nodes.replicaCount=1", "--set", "operator.selector=beta");
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformNameAlpha);
 
         // assert that all custom resources are present, but only one StatefulSet was created
-        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_NAME_ALPHA).get()).isNotNull();
-        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_NAME_BETA).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, platformNameAlpha).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, platformNameBeta).get()).isNotNull();
         assertThat(client.apps().statefulSets().inNamespace(platformNamespace).list().getItems()).singleElement()
                 .satisfies(statefulSet -> assertThat(statefulSet.getMetadata().getName()) //
-                        .isEqualTo(PLATFORM_NAME_ALPHA));
+                        .isEqualTo(platformNameAlpha));
     }
 }

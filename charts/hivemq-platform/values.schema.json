@@ -70,12 +70,44 @@
             "description" : "The optional name of the container to which the volume is mounted. The default container name is `hivemq`.",
             "type" : "string"
           },
+          "csi" : {
+            "description" : "Configures the Container Storage Interface (CSI) volume source. Required for type `csi`.",
+            "properties" : {
+              "driver" : {
+                "description" : "The name of the CSI driver to use (e.g. `secrets-store.csi.k8s.io`).",
+                "minLength" : 1,
+                "type" : "string"
+              },
+              "fsType" : {
+                "description" : "The filesystem type to mount (e.g. `ext4`, `xfs`, `ntfs`). The value is passed through to the CSI driver and the supported types depend on the driver and the host operating system.",
+                "minLength" : 1,
+                "type" : "string"
+              },
+              "nodePublishSecretRef" : {
+                "description" : "The name of the Kubernetes Secret to pass to the CSI driver for `NodePublishVolume`.",
+                "minLength" : 1,
+                "type" : "string"
+              },
+              "readOnly" : {
+                "description" : "Mounts the CSI volume as read-only.",
+                "type" : "boolean"
+              },
+              "volumeAttributes" : {
+                "additionalProperties" : {
+                  "type" : "string"
+                },
+                "description" : "Driver-specific key-value attributes passed through to the CSI driver.",
+                "type" : "object"
+              }
+            },
+            "type" : "object"
+          },
           "mountName" : {
             "description" : "Defines the name of the volume mount to be used for the StatefulSet spec. For type `sharedPersistentVolumeClaim`, the `mountName` (or `name`, if not set) must match a `volumeClaimTemplates` entry.",
             "type" : "string"
           },
           "name" : {
-            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this entry is used as the PersistentVolumeClaim name. The `name` field is ignored for types `emptyDir` and `projected`.",
+            "description" : "The name of the Kubernetes resource backing the volume. Required for types `configMap`, `secret`, `persistentVolumeClaim` and `sharedPersistentVolumeClaim`. For `persistentVolumeClaim` and `sharedPersistentVolumeClaim`, this entry is used as the PersistentVolumeClaim name. For types `csi`, `emptyDir` and `projected`, `name` is used as the volume identifier only when `mountName` is not set (prefer setting `mountName`).",
             "type" : "string"
           },
           "path" : {
@@ -138,6 +170,7 @@
             "description" : "Defines the type of volume to be mounted.",
             "enum" : [
               "configMap",
+              "csi",
               "emptyDir",
               "persistentVolumeClaim",
               "projected",
@@ -265,54 +298,120 @@
       },
       "type" : "object"
     },
+    "dataIntelligence" : {
+      "additionalProperties" : false,
+      "description" : "Defines the HiveMQ Data Intelligence configuration options.",
+      "properties" : {
+        "server" : {
+          "additionalProperties" : false,
+          "description" : "Configures the connection to the HiveMQ Data Intelligence server. Without a connection string configured here, the connection string of the HiveMQ Platform license is used.",
+          "properties" : {
+            "connectionStringSecretKey" : {
+              "description" : "The key within the Secret (`connection-string` by default).",
+              "maxLength" : 253,
+              "pattern" : "^[-._a-zA-Z0-9]+$",
+              "type" : "string"
+            },
+            "connectionStringSecretName" : {
+              "description" : "The name of an existing Kubernetes Secret containing the connection string. The connection string is never stored in the HiveMQ configuration, and content changes trigger a rolling restart of the HiveMQ Platform cluster.",
+              "maxLength" : 253,
+              "minLength" : 1,
+              "pattern" : "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        },
+        "clustering" : {
+          "additionalProperties" : false,
+          "description" : "Configures HiveMQ Data Intelligence log-based clustering.",
+          "properties" : {
+            "dataLayerEnabled" : {
+              "description" : "Enables the log-based clustering data layer (`true` by default). Set to `false` to disable it.",
+              "type" : "boolean"
+            },
+            "enabled" : {
+              "description" : "Enables log-based clustering.",
+              "type" : "boolean"
+            },
+            "initialMemberCount" : {
+              "description" : "The number of nodes that form the initial cluster. Required when clustering is enabled and must not exceed the `nodes.replicaCount` value. Cannot be changed on an existing installation. A value of `1` permanently limits the installation to a single replica.",
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "initialMembersConnectTimeoutSeconds" : {
+              "description" : "The time in seconds that a cluster formation attempt waits for the other initial members before it retries (`60` by default).",
+              "minimum" : 1,
+              "type" : "integer"
+            },
+            "port" : {
+              "description" : "The port for the log-based clustering communication between the cluster nodes (`7557` by default).",
+              "maximum" : 65535,
+              "minimum" : 1,
+              "type" : "integer"
+            }
+          },
+          "type" : "object"
+        }
+      },
+      "type" : "object"
+    },
     "extensions" : {
       "items" : {
         "properties" : {
           "configMapName" : {
+            "description" : "Configures the name of the Kubernetes ConfigMap that contains the extension configuration.",
             "maxLength" : 253,
             "type" : "string"
           },
           "customizationUri" : {
+            "description" : "The HTTP URL from which to load the extension customization.",
             "type" : "string"
           },
           "enabled" : {
+            "description" : "Boolean value that defines whether the extension is enabled.",
             "type" : "boolean"
           },
           "extensionUri" : {
+            "description" : "The location from which to load the extension. Possible values are: preinstalled or an HTTP URL.",
             "type" : "string"
           },
           "name" : {
+            "description" : "The defined name of the extension from the extensions.xml file.",
             "type" : "string"
           },
           "priority" : {
-            "description" : "Dynamically configures the extension priority value in the hivemq-extension.xml file.",
+            "description" : "The priority of the extension.",
             "type" : "integer"
           },
           "requestHeaderSecretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains headers for HTTP requests for custom extension and extension customization downloads.",
             "maxLength" : 253,
             "type" : "string"
           },
           "secretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains the extension configuration.",
             "maxLength" : 253,
             "type" : "string"
           },
           "skipHttpsCertificateValidation" : {
-            "description" : "Configures if certificate validation should be skipped for downloads of custom extensions or extension customizations.",
+            "description" : "Boolean value to skip certificate validation when downloading a custom extension and extension customizations via the HTTPS protocol.",
             "type" : "boolean"
           },
           "skipHttpsHostnameVerification" : {
-            "description" : "Configures if hostname verification should be skipped for downloads of custom extensions or extension customizations.",
+            "description" : "Boolean value to skip hostname verification when downloading a custom extension and extension customizations via the HTTPS protocol.",
             "type" : "boolean"
           },
           "startMandatory" : {
-            "description" : "Dynamically configures the extension start-mandatory value in the hivemq-extension.xml file.",
+            "description" : "Determines how the HiveMQ broker behaves if the startup of the extension fails.",
             "type" : "boolean"
           },
           "startPriority" : {
-            "description" : "Dynamically configures the extension start-priority value in the hivemq-extension.xml file.",
+            "description" : "The start priority of the extension.",
             "type" : "integer"
           },
           "supportsHotReload" : {
+            "description" : "Boolean value that specifies whether the extension configuration is hot-reloadable. The extension must explicitly support hot-reload.",
             "type" : "boolean"
           }
         },
@@ -322,6 +421,106 @@
         "type" : "object"
       },
       "type" : "array"
+    },
+    "extensionMap" : {
+      "description" : "Map-based extension configuration. Keys are extension names. Entries override matching extensions by name. Extensions defined only in extensionMap are added as new entries. Supports hierarchical value file overrides.",
+      "type" : "object",
+      "additionalProperties" : {
+        "type" : [
+          "object",
+          "null"
+        ],
+        "properties" : {
+          "configMapName" : {
+            "description" : "Configures the name of the Kubernetes ConfigMap that contains the extension configuration.",
+            "maxLength" : 253,
+            "type" : [
+              "string",
+              "null"
+            ]
+          },
+          "customizationUri" : {
+            "description" : "The HTTP URL from which to load the extension customization.",
+            "type" : [
+              "string",
+              "null"
+            ]
+          },
+          "enabled" : {
+            "description" : "Boolean value that defines whether the extension is enabled.",
+            "type" : [
+              "boolean",
+              "null"
+            ]
+          },
+          "extensionUri" : {
+            "description" : "The location from which to load the extension. Possible values are: preinstalled or an HTTP URL.",
+            "type" : [
+              "string",
+              "null"
+            ]
+          },
+          "priority" : {
+            "description" : "The priority of the extension.",
+            "type" : [
+              "integer",
+              "null"
+            ]
+          },
+          "requestHeaderSecretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains headers for HTTP requests for custom extension and extension customization downloads.",
+            "maxLength" : 253,
+            "type" : [
+              "string",
+              "null"
+            ]
+          },
+          "secretName" : {
+            "description" : "Configures the name of the Kubernetes Secret that contains the extension configuration.",
+            "maxLength" : 253,
+            "type" : [
+              "string",
+              "null"
+            ]
+          },
+          "skipHttpsCertificateValidation" : {
+            "description" : "Boolean value to skip certificate validation when downloading a custom extension and extension customizations via the HTTPS protocol.",
+            "type" : [
+              "boolean",
+              "null"
+            ]
+          },
+          "skipHttpsHostnameVerification" : {
+            "description" : "Boolean value to skip hostname verification when downloading a custom extension and extension customizations via the HTTPS protocol.",
+            "type" : [
+              "boolean",
+              "null"
+            ]
+          },
+          "startMandatory" : {
+            "description" : "Determines how the HiveMQ broker behaves if the startup of the extension fails.",
+            "type" : [
+              "boolean",
+              "null"
+            ]
+          },
+          "startPriority" : {
+            "description" : "The start priority of the extension.",
+            "type" : [
+              "integer",
+              "null"
+            ]
+          },
+          "supportsHotReload" : {
+            "description" : "Boolean value that specifies whether the extension configuration is hot-reloadable. The extension must explicitly support hot-reload.",
+            "type" : [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties" : false
+      }
     },
     "hivemqClientEventHistory" : {
       "description" : "Configures HiveMQ Client Event History options.",
@@ -616,11 +815,19 @@
       "type" : "object"
     },
     "image" : {
+      "description" : "Configures the container image details for the HiveMQ Platform.",
       "properties" : {
+        "digest" : {
+          "description" : "Optional image digest for the HiveMQ Platform image. When set, the rendered image reference is `<repository>/<name>:<tag>@<digest>`, or `<repository>/<name>@<digest>` when `tag` is empty. Must be in the form `<algorithm>:<hex>`, e.g. `sha256:<64 hex chars>`.",
+          "pattern" : "^$|^[a-z0-9]+(?:[+._-][a-z0-9]+)*:[0-9a-fA-F]{32,}$",
+          "type" : "string"
+        },
         "name" : {
+          "description" : "The name of the HiveMQ Platform container image to be used.",
           "type" : "string"
         },
         "pullPolicy" : {
+          "description" : "Defines the imagePullPolicy that Kubernetes uses to download the HiveMQ Platform container image. Possible values: `IfNotPresent`, `Never`, or `Always`. Default: `IfNotPresent`.",
           "type" : "string",
           "enum" : [
             "Always",
@@ -629,19 +836,18 @@
           ]
         },
         "pullSecretName" : {
+          "description" : "Configures the name of the ImagePullSecret Kubernetes uses to authenticate against the selected repository. Applies to all containers in HiveMQ Platform pods including init and sidecar containers.",
           "type" : "string"
         },
         "repository" : {
+          "description" : "Configures from which repository the HiveMQ Platform image is pulled.",
           "type" : "string"
         },
         "tag" : {
+          "description" : "The identifier of the HiveMQ Platform container image variant to be pulled.",
           "type" : "string"
         }
       },
-      "required" : [
-        "name",
-        "repository"
-      ],
       "type" : "object"
     },
     "license" : {
@@ -710,6 +916,17 @@
       "properties" : {
         "statefulSet" : {
           "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "rollingRestart" : {
+      "description" : "Configures the rolling restart behavior for this HiveMQ Platform.",
+      "properties" : {
+        "lastPodMinAgeSeconds" : {
+          "description" : "The minimum age in seconds that the last restarted Pod must have before the next Pod can be restarted during a rolling restart. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
+          "type" : "integer",
+          "minimum" : 0
         }
       },
       "type" : "object"
@@ -850,6 +1067,10 @@
             "WARN"
           ]
         },
+        "persistentVolumeClaimRetentionPolicy" : {
+          "description" : "Optional setting that defines the retention policy controlling the lifecycle of PersistentVolumeClaims created from `volumeClaimTemplates` for your HiveMQ Platform pods. Any valid `persistentVolumeClaimRetentionPolicy` Kubernetes configuration can be used.",
+          "type" : "object"
+        },
         "podSecurityContext" : {
           "description" : "Configures pod-level security for the HiveMQ Platform pod. Some fields are also present in container.securityContext. Field values of container.securityContext take precedence over field values of PodSecurityContext.",
           "properties" : {
@@ -875,7 +1096,8 @@
           "type" : "object"
         },
         "replicaCount" : {
-          "minimum" : 1,
+          "description" : "The number of HiveMQ Platform nodes to start.",
+          "minimum" : 0,
           "type" : "integer"
         },
         "resources" : {
@@ -922,51 +1144,86 @@
       },
       "type" : "object"
     },
-    "podScheduling" : {
+    "persistence" : {
+      "additionalProperties" : false,
+      "description" : "Stores the HiveMQ data, log and audit folders, and by default the backup folder, on a PersistentVolumeClaim per HiveMQ Platform pod, so their content survives pod restarts. The `storageClass` and `storageSize` values are required and cannot be changed on an existing installation.",
       "properties" : {
-        "affinity" : {
-          "type" : "object"
+        "backupFolder" : {
+          "description" : "Stores the HiveMQ backup folder on the PersistentVolumeClaim (`true` by default). Set to `false` to keep the backup folder on the ephemeral storage of the HiveMQ container; a previously stored backup folder remains on the PersistentVolumeClaim.",
+          "type" : "boolean"
         },
-        "tolerations" : {
-          "items" : {
-            "type" : "object"
-          },
-          "type" : "array"
+        "storageClass" : {
+          "description" : "The StorageClass of the PersistentVolumeClaim. Required when persistence is configured.",
+          "maxLength" : 253,
+          "pattern" : "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
+          "type" : "string"
+        },
+        "storageSize" : {
+          "description" : "The size of the PersistentVolumeClaim as a Kubernetes quantity (for example, `10Gi`). Required when persistence is configured.",
+          "pattern" : "^([0-9]*[1-9][0-9]*(\\.[0-9]+)?|[0-9]+\\.[0-9]*[1-9][0-9]*)(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E)?$",
+          "type" : "string"
         }
       },
       "type" : "object"
     },
-    "pulse" : {
-      "description" : "Defines the HiveMQ Pulse configuration options.",
+    "podDisruptionBudget" : {
+      "description" : "Configures a PodDisruptionBudget for the HiveMQ Platform pods to control voluntary disruptions such as node drains or cluster autoscaler scale-down events.",
       "properties" : {
-        "annotations" : {
-          "description" : "Defines custom annotations for the Kubernetes Secret that contains the HiveMQ Pulse configuration.",
-          "type" : "object"
-        },
-        "create" : {
-          "description" : "Creates a Kubernetes Secret for the HiveMQ Pulse configuration.",
+        "enabled" : {
+          "description" : "Defines whether the PodDisruptionBudget resource is created for the HiveMQ Platform pods. Requires either minAvailable or maxUnavailable (but not both) to also be set.",
           "type" : "boolean"
         },
-        "data" : {
-          "description" : "Inlines the HiveMQ Pulse configuration as a string. By default, this data is expected as Base64 encoded string. Set \"isPulseConfigBase64Encoded=false\" to provide a plain string.",
+        "maxUnavailable" : {
+          "description" : "Maximum number of HiveMQ Platform pods that can be unavailable during voluntary disruptions. Accepts an integer or a percentage string (for example, `1` or `\"25%\"`). Mutually exclusive with `minAvailable`.",
+          "minimum" : 0,
+          "pattern" : "^[0-9]+%$",
+          "type" : [
+            "integer",
+            "string"
+          ]
+        },
+        "minAvailable" : {
+          "description" : "Minimum number of HiveMQ Platform pods that must remain available during voluntary disruptions. Accepts an integer or a percentage string (for example, `2` or `\"50%\"`). Mutually exclusive with `maxUnavailable`.",
+          "minimum" : 1,
+          "pattern" : "^[0-9]+%$",
+          "type" : [
+            "integer",
+            "string"
+          ]
+        },
+        "unhealthyPodEvictionPolicy" : {
+          "description" : "Controls how the PodDisruptionBudget treats unhealthy HiveMQ Platform pods. Requires Kubernetes 1.26 or newer. Leave empty to use the cluster default. `IfHealthyBudget` only allows eviction of unhealthy pods if the budget is satisfied (can deadlock if pods crashloop). `AlwaysAllow` always allows eviction of unhealthy pods.",
+          "enum" : [
+            "",
+            "IfHealthyBudget",
+            "AlwaysAllow"
+          ],
           "type" : "string"
-        },
-        "isPulseConfigBase64Encoded" : {
-          "description" : "Indicates whether the HiveMQ Pulse configuration is provided as Base64 encoded string (data) or plain content (stringData) for the rendered Kubernetes Secret. This is useful for third party tools that handle content through placeholders, such as the ArgoCD Vault plugin.",
-          "type" : "boolean"
-        },
-        "labels" : {
-          "description" : "Defines custom labels for the Kubernetes Secret that contains the HiveMQ Pulse configuration.",
+        }
+      },
+      "type" : "object"
+    },
+    "podScheduling" : {
+      "description" : "Configures how the HiveMQ Platform pods are placed on your Kubernetes nodes.",
+      "properties" : {
+        "affinity" : {
+          "description" : "Optional setting that defines the affinity configuration for your HiveMQ Platform pods. Any valid `affinity` Kubernetes configuration can be used.",
           "type" : "object"
         },
-        "name" : {
-          "description" : "The name of the Kubernetes Secret containing the HiveMQ Pulse configuration. To create a new Kubernetes Secret, set create=true. Otherwise, false to reuse an existing Secret.",
-          "maxLength" : 253,
+        "nodeSelector" : {
+          "description" : "Optional setting that defines the node selector configuration for your HiveMQ Platform pods. Constrains the HiveMQ Platform pods to run on Kubernetes nodes with matching labels.",
+          "type" : "object"
+        },
+        "priorityClassName" : {
+          "description" : "Optional setting that defines the priority class name for your HiveMQ Platform pods. The referenced Kubernetes `PriorityClass` must already exist in the cluster. Protects HiveMQ Platform pods from being preempted during cluster events such as node upgrades or autoscaling.",
           "type" : "string"
         },
-        "overridePulseConfig" : {
-          "description" : "Overrides the HiveMQ Pulse configuration via file using --set-file pulse.overridePulseConfig=your-pulse-config.xml.",
-          "type" : "string"
+        "tolerations" : {
+          "description" : "Optional setting that defines the pod tolerations configuration for your HiveMQ Platform pods.",
+          "items" : {
+            "type" : "object"
+          },
+          "type" : "array"
         }
       },
       "type" : "object"

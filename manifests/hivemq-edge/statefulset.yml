@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-edge"
     app.kubernetes.io/instance: "my-edge"
-    app.kubernetes.io/version: "2026.7"
+    app.kubernetes.io/version: "2026.13"
 spec:
   selector:
     matchLabels:
@@ -23,13 +23,18 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: hivemq-edge
-          image: "hivemq/hivemq-edge:2026.7"
+          image: "hivemq/hivemq-edge:2026.13"
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /api/v1/health/liveness
               port: 8080
             initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 8080
             periodSeconds: 5
           ports:
             - containerPort: 8080
@@ -85,6 +90,8 @@ spec:
             mountPath: /fragment
           - name: topicfilters
             mountPath: /opt/hivemq/conf-secondary
+          - name: hivemq-edge-persistence-my-edge
+            mountPath: /persistence
       volumes:
         - name: fragment
           configMap:
@@ -92,3 +99,6 @@ spec:
         - name: topicfilters
           configMap:
             name: hivemq-edge-topicfilters-my-edge
+        - name: hivemq-edge-persistence-my-edge
+          emptyDir: {}
+

@@ -1,0 +1,41 @@
+suite: HiveMQ Platform - PVC Retention Policy tests
+templates:
+  - hivemq-custom-resource.yml
+tests:
+
+  - it: with defaults, persistentVolumeClaimRetentionPolicy is not rendered
+    asserts:
+      - notExists:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy
+
+  - it: with whenScaled set to Delete, only whenScaled is rendered
+    set:
+      nodes.persistentVolumeClaimRetentionPolicy.whenScaled: Delete
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Delete
+      - notExists:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+
+  - it: with whenDeleted set to Delete, only whenDeleted is rendered
+    set:
+      nodes.persistentVolumeClaimRetentionPolicy.whenDeleted: Delete
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Delete
+      - notExists:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenScaled
+
+  - it: with both whenDeleted and whenScaled set, both fields are rendered
+    set:
+      nodes.persistentVolumeClaimRetentionPolicy.whenDeleted: Retain
+      nodes.persistentVolumeClaimRetentionPolicy.whenScaled: Delete
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenDeleted
+          value: Retain
+      - equal:
+          path: spec.statefulSet.spec.persistentVolumeClaimRetentionPolicy.whenScaled
+          value: Delete

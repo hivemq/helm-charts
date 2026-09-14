@@ -35,7 +35,7 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
         // assert StatefulSet
         await().untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
 
             // assert StatefulSet volumes
@@ -52,7 +52,7 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
         });
 
         // create files for each pod in their corresponding PVCs
-        final var labels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var labels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         client.pods().inNamespace(platformNamespace).withLabels(labels).list().getItems().forEach(pod -> {
             final var mountPath = pod.getSpec()
                     .getContainers()
@@ -72,8 +72,11 @@ class HelmVolumeClaimTemplatesIT extends AbstractHelmChartIT {
         });
 
         // Update ConfigMap to trigger a rolling restart to make sure the files are persisted in their corresponding PVCs
-        K8sUtil.updateConfigMap(client, platformNamespace, "hivemq-config-map-update.yml");
-        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        K8sUtil.updateConfigMap(client,
+                platformNamespace,
+                "hivemq-config-map-update.yml",
+                "hivemq-configuration-" + platformReleaseName);
+        K8sUtil.waitForHiveMQPlatformStateRunningAfterRollingRestart(client, platformNamespace, platformReleaseName);
 
         // assert Platform pods
         await().untilAsserted(() -> client.pods()

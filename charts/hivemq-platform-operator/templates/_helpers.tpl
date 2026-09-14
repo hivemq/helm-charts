@@ -44,12 +44,33 @@ app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{/*
 Creates the name of the service account to use for the HiveMQ Platform Operator
 */}}
-{{- define "hivemq-platform-operator.serviceAccountName" -}}
+{{- define "hivemq-platform-operator.service-account-name" -}}
 {{- if .Values.serviceAccount.name }}
 {{- printf "%s" .Values.serviceAccount.name }}
 {{- else }}
 {{- include "hivemq-platform-operator.name" (dict "prefix" "hivemq-platform-operator" "releaseName" .Release.Name) }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Builds a container image reference.
+Params:
+- repository: The image repository path.
+- name:       The image name.
+- tag:        The image tag.
+- digest:     The optional image digest.
+Usage: {{ include "hivemq-platform-operator.image-reference" (dict "repository" .Values.image.repository "name" .Values.image.name "tag" .Values.image.tag "digest" .Values.image.digest) }}
+*/}}
+{{- define "hivemq-platform-operator.image-reference" -}}
+{{- if not .repository -}}
+{{- fail (printf "\n`repository` is required to build the HiveMQ Platform Operator container image reference.") -}}
+{{- end -}}
+{{- if not .name -}}
+{{- fail (printf "\n`name` is required to build the HiveMQ Platform Operator container image reference.") -}}
+{{- end -}}
+{{- printf "%s/%s" .repository .name -}}
+{{- with .tag }}:{{ . }}{{- end -}}
+{{- with .digest }}@{{ . }}{{- end -}}
 {{- end -}}
 
 {{/*
@@ -137,6 +158,7 @@ Usage: {{- include "hivemq-platform-operator.validate-default-operator-env-vars"
   "HIVEMQ_PLATFORM_OPERATOR_LOG_CONFIGURATION"
   "HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT"
   "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT"
+  "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT"
   "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE"
   "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE"
   "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME"

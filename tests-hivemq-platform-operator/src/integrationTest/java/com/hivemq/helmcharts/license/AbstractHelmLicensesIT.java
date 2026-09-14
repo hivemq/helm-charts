@@ -13,7 +13,7 @@ abstract class AbstractHelmLicensesIT extends AbstractHelmChartIT {
     protected void assertLicense(final @NotNull String licenseSecretName) {
         await().atMost(TWO_MINUTES).untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
             assertThat(K8sUtil.getHiveMQContainer(statefulSet.getSpec()).getVolumeMounts().stream()) //
                     .anyMatch(volumeMount -> volumeMount.getName().equals("licenses") &&

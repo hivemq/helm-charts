@@ -1,0 +1,23 @@
+{
+  "type" : "object",
+  "properties" : {
+    "topicFilter" : {
+      "type" : "string",
+      "default" : "#",
+      "title" : "Topic filter matching",
+      "description" : "The PUBLISH message topic filter to which the instance applies"
+    },
+    "dropFailedMessages" : {
+      "type" : "boolean",
+      "default" : true,
+      "title" : "Drop invalid JSON messages",
+      "description" : "Drop incoming PUBLISH messages that have an invalid JSON format"
+    },
+    "addsTimestampToPayload" : {
+      "type" : "boolean",
+      "default" : true,
+      "title" : "Add ISO timestamp to each incoming message",
+      "description" : "Add the ISO 8601 timestamp to the JSON message"
+    }
+  }
+}

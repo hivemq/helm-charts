@@ -103,6 +103,7 @@ public class HelmChartContainer extends K3sContainer {
         super.withCopyToContainer(Transferable.of(getRegistriesContent()), "/etc/rancher/k3s/registries.yaml");
         super.withExtraHost("host.docker.internal", "host-gateway");
 
+        super.withStartupAttempts(3);
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
@@ -161,9 +162,17 @@ public class HelmChartContainer extends K3sContainer {
             client.close();
             this.client = null;
         }
-        executorService.shutdownNow();
         super.stop();
         LOG.info("HelmChartContainer is stopped");
+    }
+
+    @Override
+    public void close() {
+        try {
+            super.close();
+        } finally {
+            executorService.shutdownNow();
+        }
     }
 
     @Override
@@ -205,9 +214,9 @@ public class HelmChartContainer extends K3sContainer {
         final var regex = "*.%s*".formatted(currentChart.getDescription());
         final var platformCharts = executeHelmSearchCommand("hivemq/hivemq-platform",
                 Stream.of("--versions", "--regexp", regex, "--output", "yaml"));
-        final var platformChartsList = objectMapper.readValue(platformCharts.replaceAll("app_version", "appVersion"),
+        final var platformChartsList = objectMapper.readValue(platformCharts.replace("app_version", "appVersion"),
                 new TypeReference<List<Chart>>() {
-                });//
+                });
         return platformChartsList.stream()
                 .filter(chart -> chart.getVersion() != null)
                 .filter(chart -> !Objects.equals(chart.getVersion(), currentChart.getVersion()))
@@ -374,16 +383,12 @@ public class HelmChartContainer extends K3sContainer {
             final @NotNull Stream<String> additionalCommands,
             final boolean debugOnFailure) throws Exception {
         // helm --kubeconfig /etc/rancher/k3s/k3s.yaml <install|upgrade> test-operator /chart/hivemq-platform-operator --debug --wait=legacy --timeout 3m0s
-        final var helmCommandList = new ArrayList<>(List.of("helm",
-                "--kubeconfig",
-                "/etc/rancher/k3s/k3s.yaml",
-                helmCommand,
-                releaseName,
-                chartName != null ? chartName : "",
-                "--debug",
-                "--wait=legacy",
-                "--timeout",
-                "3m0s"));
+        final var helmCommandList =
+                new ArrayList<>(List.of("helm", "--kubeconfig", "/etc/rancher/k3s/k3s.yaml", helmCommand, releaseName));
+        if (chartName != null) {
+            helmCommandList.add(chartName);
+        }
+        helmCommandList.addAll(List.of("--debug", "--wait=legacy", "--timeout", "3m0s"));
         final var additionalCommandsList = additionalCommands.toList();
         helmCommandList.addAll(additionalCommandsList);
         if (chartName != null && withLocalCharts) {
@@ -594,7 +599,7 @@ public class HelmChartContainer extends K3sContainer {
             LOG.info("Received {} event for container {} in pod {} [{}]", reason, containerName, podName, podUid);
             try {
                 if (reason.equals("Created")) {
-                    logWatches.computeIfAbsent(podUid + "-" + podName + "-" + containerName, key -> {
+                    logWatches.computeIfAbsent(podUid + "-" + podName + "-" + containerName, _ -> {
                         // create log watcher for container
                         final var logWatch = client.pods()
                                 .inNamespace(namespace)

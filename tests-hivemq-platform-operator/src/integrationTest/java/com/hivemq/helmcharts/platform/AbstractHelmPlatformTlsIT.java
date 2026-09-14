@@ -26,14 +26,19 @@ class AbstractHelmPlatformTlsIT extends AbstractHelmChartIT {
     private static final @NotNull WebDriverContainerExtension WEB_DRIVER_CONTAINER_EXTENSION =
             new WebDriverContainerExtension(network);
 
-    static final @NotNull String MQTT_SERVICE_NAME_1884 = "hivemq-test-hivemq-platform-mqtt-1884";
     static final int MQTT_SERVICE_PORT_1884 = 1884;
-    static final @NotNull String MQTT_SERVICE_NAME_1885 = "hivemq-test-hivemq-platform-mqtt-1885";
     static final int MQTT_SERVICE_PORT_1885 = 1885;
-    static final @NotNull String MQTT_SERVICE_NAME_1886 = "hivemq-test-hivemq-platform-mqtt-1886";
     static final int MQTT_SERVICE_PORT_1886 = 1886;
-    static final @NotNull String HIVEMQ_CC_SERVICE_NAME = "hivemq-test-hivemq-platform-cc-8080";
     static final int HIVEMQ_CC_SERVICE_PORT = 8080;
+
+    final @NotNull String mqttServiceName1884 =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT_1884);
+    final @NotNull String mqttServiceName1885 =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT_1885);
+    final @NotNull String mqttServiceName1886 =
+            "hivemq-%s-mqtt-%s".formatted(platformReleaseName, MQTT_SERVICE_PORT_1886);
+    final @NotNull String hivemqCcServiceName =
+            "hivemq-%s-cc-%s".formatted(platformReleaseName, HIVEMQ_CC_SERVICE_PORT);
 
     @TempDir
     @NotNull Path tmp;
@@ -64,7 +69,7 @@ class AbstractHelmPlatformTlsIT extends AbstractHelmChartIT {
 
     void assertSecretMounted(final @NotNull KubernetesClient client, final @NotNull String name) {
         final var statefulSet =
-                client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
         assertThat(statefulSet).isNotNull();
         final var volumes = statefulSet.getSpec().getTemplate().getSpec().getVolumes();
         assertThat(volumes).isNotEmpty();

@@ -101,8 +101,23 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
+            name: HIVEMQ_MQTTS_CLIENTAUTH_ENABLED
+            value: "true"
+      # HIVEMQ_MQTTS_ENABLED selects the TLS listener without a truststore and would
+      # bind port 8883 a second time, so it must not be set alongside the client-auth one.
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: HIVEMQ_MQTTS_ENABLED
             value: "true"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_MQTTS_KEYSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "hivemq-keystore-secret"
+                key: "keystore-password"
       - contains:
           path: spec.template.spec.containers[0].env
           content:
@@ -181,6 +196,8 @@ tests:
               mountPath: /fragment
             - mountPath: /opt/hivemq/conf-secondary
               name: topicfilters
+            - name: hivemq-edge-persistence-edge
+              mountPath: /persistence
             - name: mqtts-jks
               mountPath: /mqtts
             - name: mqtts-truststore-jks
@@ -209,3 +226,5 @@ tests:
                 items:
                   - key: truststore.jks
                     path: truststore.jks
+            - name: hivemq-edge-persistence-edge
+              emptyDir: {}

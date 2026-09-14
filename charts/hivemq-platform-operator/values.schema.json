@@ -38,6 +38,11 @@
       "minimum" : 0,
       "type" : "integer"
     },
+    "concurrentInitAppUpdateLimit" : {
+      "description" : "This value configures the maximum number of HiveMQ Platforms that can perform an init app update at the same time.",
+      "minimum" : 0,
+      "type" : "integer"
+    },
     "env" : {
       "description" : "Specifies environment variables to be added to the operator container.",
       "items" : {
@@ -130,14 +135,28 @@
       "type" : "object"
     },
     "image" : {
+      "description" : "Defines which container image is used for the operator. Images are available on DockerHub as multi-architecture images supporting ARM and AMD hardware.",
       "properties" : {
+        "digest" : {
+          "description" : "Optional image digest for the HiveMQ Platform Operator image. When set, the digest pins the image to an exact version. The rendered image reference is `<repository>/<name>:<tag>@<digest>`. If `tag` is empty, the reference is `<repository>/<name>@<digest>`. The digest must be specified in the format `<algorithm>:<hex>`. For example, `sha256:<64 hex chars>`.",
+          "pattern" : "^$|^[a-z0-9]+(?:[+._-][a-z0-9]+)*:[0-9a-fA-F]{32,}$",
+          "type" : "string"
+        },
+        "initImageDigest" : {
+          "description" : "Optional image digest for the HiveMQ Platform Operator init image. When set, the digest pins the image to an exact version. The rendered image reference is `<repository>/<initImageName>:<tag>@<initImageDigest>`. If `tag` is empty, the reference is `<repository>/<initImageName>@<initImageDigest>`. The digest must be specified in the format `<algorithm>:<hex>`. For example, `sha256:<64 hex chars>`.",
+          "pattern" : "^$|^[a-z0-9]+(?:[+._-][a-z0-9]+)*:[0-9a-fA-F]{32,}$",
+          "type" : "string"
+        },
         "initImageName" : {
+          "description" : "The name of the HiveMQ Platform Operator initContainer image to be pulled.",
           "type" : "string"
         },
         "name" : {
+          "description" : "The name of the HiveMQ Platform Operator container image to be pulled.",
           "type" : "string"
         },
         "pullPolicy" : {
+          "description" : "The Kubernetes imagePullPolicy setting that is used. The default setting is `IfNotPresent`.",
           "enum" : [
             "IfNotPresent",
             "Never",
@@ -146,18 +165,19 @@
           "type" : "string"
         },
         "pullSecretName" : {
+          "description" : "The name of the ImagePullSecret the operator uses to authenticate against the selected repository.",
           "type" : "string"
         },
         "repository" : {
+          "description" : "The repository from which the HiveMQ Platform Operator container image is pulled.",
           "type" : "string"
         },
         "tag" : {
+          "description" : "The identifier of the HiveMQ Platform Operator container image variant to be pulled.",
           "type" : "string"
         }
       },
       "required" : [
-        "repository",
-        "name",
         "tag",
         "initImageName"
       ],
@@ -165,6 +185,32 @@
     },
     "javaOpts" : {
       "type" : "string"
+    },
+    "livenessProbe" : {
+      "description" : "Configures the liveness probe for the HiveMQ Platform Operator container.",
+      "properties" : {
+        "failureThreshold" : {
+          "description" : "Number of consecutive failures before the container is considered unhealthy.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "initialDelaySeconds" : {
+          "description" : "Number of seconds after the container has started before the probe is initiated.",
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "periodSeconds" : {
+          "description" : "How often (in seconds) to perform the probe.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "timeoutSeconds" : {
+          "description" : "Number of seconds after which the probe times out.",
+          "minimum" : 1,
+          "type" : "integer"
+        }
+      },
+      "type" : "object"
     },
     "logConfiguration" : {
       "description" : "Logs the configuration values at operator startup. Sensitive values are redacted.",
@@ -287,6 +333,37 @@
       "properties" : {
         "create" : {
           "type" : "boolean"
+        }
+      },
+      "type" : "object"
+    },
+    "readinessProbe" : {
+      "description" : "Configures the readiness probe for the HiveMQ Platform Operator container.",
+      "properties" : {
+        "failureThreshold" : {
+          "description" : "Number of consecutive failures before the container is considered not ready.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "initialDelaySeconds" : {
+          "description" : "Number of seconds after the container has started before the probe is initiated.",
+          "minimum" : 0,
+          "type" : "integer"
+        },
+        "periodSeconds" : {
+          "description" : "How often (in seconds) to perform the probe.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "successThreshold" : {
+          "description" : "Minimum number of consecutive successes required for the probe to be considered successful after a failure.",
+          "minimum" : 1,
+          "type" : "integer"
+        },
+        "timeoutSeconds" : {
+          "description" : "Number of seconds after which the probe times out.",
+          "minimum" : 1,
+          "type" : "integer"
         }
       },
       "type" : "object"

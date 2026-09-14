@@ -24,7 +24,7 @@ class HelmInstallRemoteImagesIT extends AbstractHelmChartIT {
         await().atMost(TWO_MINUTES).untilAsserted(() -> {
             // check the StatefulSet spec contains the same default "ghcr" imagePullSecrets as per the default created for the operator
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull()
                     .extracting(StatefulSet::getSpec)
                     .satisfies(statefulSetSpec -> assertThat(statefulSetSpec.getTemplate().getSpec()) //

@@ -16,7 +16,7 @@ class HelmControlCenterCustomCredentialsIT extends AbstractHelmControlCenterIT {
         assertLogin(client,
                 platformNamespace,
                 webDriverContainer,
-                CC_SERVICE_NAME_8081,
+                ccServiceName8081,
                 CC_SERVICE_PORT_8081,
                 "test-username",
                 "test-password");

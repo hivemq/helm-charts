@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +37,19 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.ONE_MINUTE;
 
 public class K8sUtil {
+
+    /**
+     * Maximum length for the release base name (before the {@code -pf}, {@code -op}, or {@code -lg} suffix).
+     * The tightest K8s resource name constraint is {@code hivemq-platform-<release>-dynamic-state} (30 chars
+     * overhead), which leaves 33 characters for the full release name (base + 3-character suffix).
+     */
+    public static final int MAX_RELEASE_BASE_NAME_LENGTH = 30;
+
+    /**
+     * Maximum length for the full release name (base + suffix), to ensure all derived K8s resource names stay
+     * within the 63-character limit.
+     */
+    public static final int MAX_RELEASE_NAME_LENGTH = MAX_RELEASE_BASE_NAME_LENGTH + 3;
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(K8sUtil.class);
 
@@ -444,7 +458,7 @@ public class K8sUtil {
 
     private static @NotNull String getNamespaceName(final @NotNull Class<?> clazz, final @NotNull String suffix) {
         final var maxLength = 63 - suffix.length();
-        final var namespace = clazz.getSimpleName().toLowerCase();
+        final var namespace = clazz.getSimpleName().toLowerCase(Locale.ROOT);
         if (namespace.length() > maxLength) {
             return namespace.substring(0, maxLength) + suffix;
         }
@@ -457,6 +471,27 @@ public class K8sUtil {
      */
     public static @NotNull String getOperatorNamespaceName(final @NotNull Class<?> clazz) {
         return getNamespaceName(clazz, "-operator");
+    }
+
+    /**
+     * Returns the release base name derived from the test class name, up to
+     * {@value MAX_RELEASE_BASE_NAME_LENGTH} characters.
+     * <p>
+     * The leading "helm" prefix and trailing "it" suffix are stripped from the class name,
+     * and if the name is still too long, it is truncated from the end.
+     */
+    public static @NotNull String getReleaseBaseName(final @NotNull Class<?> clazz) {
+        var baseName = clazz.getSimpleName().toLowerCase(Locale.ROOT);
+        if (baseName.startsWith("helm")) {
+            baseName = baseName.substring(4);
+        }
+        if (baseName.endsWith("it")) {
+            baseName = baseName.substring(0, baseName.length() - 2);
+        }
+        if (baseName.length() > MAX_RELEASE_BASE_NAME_LENGTH) {
+            baseName = baseName.substring(0, MAX_RELEASE_BASE_NAME_LENGTH);
+        }
+        return baseName;
     }
 
     /**
@@ -538,6 +573,25 @@ public class K8sUtil {
             final @NotNull String namespace,
             final @NotNull String resourceName) {
         loadResource(client, namespace, resourceName, ConfigMap.class).update();
+    }
+
+    /**
+     * Updates a ConfigMap from the given resource file on the classpath, overriding the ConfigMap name.
+     *
+     * @param client        the Kubernetes client to use
+     * @param namespace     the namespace to update the custom resource in
+     * @param resourceName  the name of the resource file to use
+     * @param configMapName the name to set on the ConfigMap
+     */
+    public static void updateConfigMap(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String resourceName,
+            final @NotNull String configMapName) {
+        final var resource = loadResource(client, namespace, resourceName, ConfigMap.class);
+        final var item = resource.item();
+        item.getMetadata().setName(configMapName);
+        client.resource(item).inNamespace(namespace).update();
     }
 
     /**
@@ -635,18 +689,56 @@ public class K8sUtil {
         client.pods()
                 .inNamespace(namespace)
                 .withLabels(labels)
-                .waitUntilCondition(pod -> pod != null &&
-                        pod.getStatus().getContainerStatuses().stream().allMatch(containerStatus -> {
-                            final var ready = containerStatus.getReady() && containerStatus.getStarted();
-                            if (ready) {
-                                LOG.info("Pod '{}' is ready", pod.getMetadata().getName());
-                            } else {
-                                LOG.debug("Waiting for Pod '{}' to be ready: {}",
-                                        pod.getMetadata().getName(),
-                                        containerStatus);
-                            }
-                            return ready;
-                        }), 3, TimeUnit.MINUTES);
+                .waitUntilCondition(podRunningCondition(), 3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Waits for the pod with the given name to be in a running status, ignoring the pod with the given previous UID.
+     * <p>
+     * This waits for a pod with a different UID than the one given, so it can be used to wait for the recreated pod
+     * after a restart, rather than matching the terminating pod that still reports ready.
+     */
+    public static void waitForPodStateRunning(
+            final @NotNull KubernetesClient client,
+            final @NotNull String namespace,
+            final @NotNull String podName,
+            final @NotNull String previousUid) {
+        client.pods()
+                .inNamespace(namespace)
+                .withName(podName)
+                .waitUntilCondition(recreatedPodCondition(previousUid).and(podRunningCondition()), 3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Returns a condition that is met once a pod is ready.
+     */
+    private static @NotNull Predicate<Pod> podRunningCondition() {
+        return pod -> {
+            if (pod == null || pod.getStatus() == null) {
+                return false;
+            }
+            final var containerStatuses = pod.getStatus().getContainerStatuses();
+            if (containerStatuses.isEmpty()) {
+                return false;
+            }
+            return containerStatuses.stream().allMatch(containerStatus -> {
+                final var ready = Boolean.TRUE.equals(containerStatus.getReady()) &&
+                        Boolean.TRUE.equals(containerStatus.getStarted());
+                if (ready) {
+                    LOG.info("Pod '{}' is ready", pod.getMetadata().getName());
+                } else {
+                    LOG.debug("Waiting for Pod '{}' to be ready: {}", pod.getMetadata().getName(), containerStatus);
+                }
+                return ready;
+            });
+        };
+    }
+
+    /**
+     * Returns a condition that is met once the pod has a different UID than the given one, i.e. it has been recreated.
+     */
+    private static @NotNull Predicate<Pod> recreatedPodCondition(final @NotNull String previousUid) {
+        return pod -> pod != null && !previousUid.equals(pod.getMetadata().getUid());
     }
 
     private static <T extends HasMetadata> @NotNull Resource<T> loadResource(

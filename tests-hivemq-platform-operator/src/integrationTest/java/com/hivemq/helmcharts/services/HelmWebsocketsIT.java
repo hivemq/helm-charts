@@ -26,13 +26,17 @@ import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 
 class HelmWebsocketsIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String WEBSOCKET_SERVICE_NAME_PORT_8002 = "hivemq-test-hivemq-platform-ws-8002";
     private static final int WEBSOCKET_SERVICE_PORT_8002 = 8002;
-    private static final @NotNull String WEBSOCKET_SERVICE_NAME_PORT_8003 = "hivemq-test-hivemq-platform-ws-8003";
     private static final int WEBSOCKET_SERVICE_PORT_8003 = 8003;
-    private static final @NotNull String WEBSOCKET_SERVICE_NAME_PORT_8004 = "hivemq-test-hivemq-platform-ws-8004";
     private static final int WEBSOCKET_SERVICE_PORT_8004 = 8004;
     private static final @NotNull String WEBSOCKET_SERVICE_PATH = "/mqtt";
+
+    private final @NotNull String websocketServiceNamePort8002 =
+            "hivemq-%s-ws-%s".formatted(platformReleaseName, WEBSOCKET_SERVICE_PORT_8002);
+    private final @NotNull String websocketServiceNamePort8003 =
+            "hivemq-%s-ws-%s".formatted(platformReleaseName, WEBSOCKET_SERVICE_PORT_8003);
+    private final @NotNull String websocketServiceNamePort8004 =
+            "hivemq-%s-ws-%s".formatted(platformReleaseName, WEBSOCKET_SERVICE_PORT_8004);
 
     @TempDir
     private @NotNull Path tmp;
@@ -75,9 +79,9 @@ class HelmWebsocketsIT extends AbstractHelmChartIT {
                 .hostnameVerifier((hostname, session) -> true)
                 .build();
 
-        assertWebSocketListener(WEBSOCKET_SERVICE_NAME_PORT_8002, WEBSOCKET_SERVICE_PORT_8002, null);
-        assertWebSocketListener(WEBSOCKET_SERVICE_NAME_PORT_8003, WEBSOCKET_SERVICE_PORT_8003, sslConfig);
-        assertWebSocketListener(WEBSOCKET_SERVICE_NAME_PORT_8004, WEBSOCKET_SERVICE_PORT_8004, sslConfig);
+        assertWebSocketListener(websocketServiceNamePort8002, WEBSOCKET_SERVICE_PORT_8002, null);
+        assertWebSocketListener(websocketServiceNamePort8003, WEBSOCKET_SERVICE_PORT_8003, sslConfig);
+        assertWebSocketListener(websocketServiceNamePort8004, WEBSOCKET_SERVICE_PORT_8004, sslConfig);
     }
 
     private void assertWebSocketListener(

@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String PLATFORM_NAME_ALPHA = PLATFORM_RELEASE_NAME + "-alpha";
-    private static final @NotNull String PLATFORM_NAME_BETA = PLATFORM_RELEASE_NAME + "-beta";
-    private static final @NotNull String PLATFORM_NAME_GAMMA = PLATFORM_RELEASE_NAME + "-gamma";
+    private final @NotNull String platformNameAlpha = platformReleaseName + "-alpha";
+    private final @NotNull String platformNameBeta = platformReleaseName + "-beta";
+    private final @NotNull String platformNameGamma = platformReleaseName + "-gamma";
 
     private @NotNull String namespaceAlpha;
     private @NotNull String namespaceBeta;
@@ -51,9 +51,9 @@ class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA, namespaceAlpha, true);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_BETA, namespaceBeta, true);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_GAMMA, namespaceGamma, true);
+        helmChartContainer.uninstallRelease(platformNameAlpha, namespaceAlpha, true);
+        helmChartContainer.uninstallRelease(platformNameBeta, namespaceBeta, true);
+        helmChartContainer.uninstallRelease(platformNameGamma, namespaceGamma, true);
     }
 
     @Test
@@ -64,34 +64,34 @@ class CustomOperatorNamespacesIT extends AbstractHelmChartIT {
         installPlatformOperatorChartAndWaitToBeRunning("--set",
                 "namespaces=%s\\,%s".formatted(namespaceAlpha, namespaceBeta));
 
-        helmChartContainer.installPlatformChart(PLATFORM_NAME_ALPHA,
+        helmChartContainer.installPlatformChart(platformNameAlpha,
                 "--namespace",
                 namespaceAlpha,
                 "--set",
                 "nodes.replicaCount=1");
-        helmChartContainer.installPlatformChart(PLATFORM_NAME_BETA,
+        helmChartContainer.installPlatformChart(platformNameBeta,
                 "--namespace",
                 namespaceBeta,
                 "--set",
                 "nodes.replicaCount=1");
-        helmChartContainer.installPlatformChart(PLATFORM_NAME_GAMMA,
+        helmChartContainer.installPlatformChart(platformNameGamma,
                 "--namespace",
                 namespaceGamma,
                 "--set",
                 "nodes.replicaCount=1");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespaceAlpha, PLATFORM_NAME_ALPHA);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespaceBeta, PLATFORM_NAME_BETA);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespaceAlpha, platformNameAlpha);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, namespaceBeta, platformNameBeta);
 
         // assert that all custom resources are present, but only two StatefulSets were created
-        assertThat(K8sUtil.getHiveMQPlatform(client, namespaceAlpha, PLATFORM_NAME_ALPHA).get()).isNotNull();
-        assertThat(K8sUtil.getHiveMQPlatform(client, namespaceBeta, PLATFORM_NAME_BETA).get()).isNotNull();
-        assertThat(K8sUtil.getHiveMQPlatform(client, namespaceGamma, PLATFORM_NAME_GAMMA).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, namespaceAlpha, platformNameAlpha).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, namespaceBeta, platformNameBeta).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, namespaceGamma, platformNameGamma).get()).isNotNull();
         assertThat(client.apps().statefulSets().inNamespace(namespaceAlpha).list().getItems()).singleElement()
                 .satisfies(statefulSet -> assertThat(statefulSet.getMetadata().getName()) //
-                        .isEqualTo(PLATFORM_NAME_ALPHA));
+                        .isEqualTo(platformNameAlpha));
         assertThat(client.apps().statefulSets().inNamespace(namespaceBeta).list().getItems()).singleElement()
                 .satisfies(statefulSet -> assertThat(statefulSet.getMetadata().getName()) //
-                        .isEqualTo(PLATFORM_NAME_BETA));
+                        .isEqualTo(platformNameBeta));
         assertThat(client.apps().statefulSets().inNamespace(namespaceGamma).list().getItems()).isEmpty();
     }
 }

@@ -13,9 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomOperatorSelectorsIT extends AbstractHelmChartIT {
 
-    private static final @NotNull String PLATFORM_NAME_ALPHA_TIER_1 = PLATFORM_RELEASE_NAME + "-alpha-tier1";
-    private static final @NotNull String PLATFORM_NAME_ALPHA_TIER_2 = PLATFORM_RELEASE_NAME + "-alpha-tier2";
-    private static final @NotNull String PLATFORM_NAME_ALPHA_TIER_3 = PLATFORM_RELEASE_NAME + "-alpha-tier3";
+    private final @NotNull String platformNameAlphaTier1 = platformReleaseName + "-alpha-tier1";
+    private final @NotNull String platformNameAlphaTier2 = platformReleaseName + "-alpha-tier2";
+    private final @NotNull String platformNameAlphaTier3 = platformReleaseName + "-alpha-tier3";
 
     @Override
     protected boolean installPlatformOperatorChart() {
@@ -30,9 +30,9 @@ class CustomOperatorSelectorsIT extends AbstractHelmChartIT {
     @AfterEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void tearDown() throws Exception {
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA_TIER_1, platformNamespace);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA_TIER_2, platformNamespace);
-        helmChartContainer.uninstallRelease(PLATFORM_NAME_ALPHA_TIER_3, platformNamespace, true);
+        helmChartContainer.uninstallRelease(platformNameAlphaTier1, platformNamespace);
+        helmChartContainer.uninstallRelease(platformNameAlphaTier2, platformNamespace);
+        helmChartContainer.uninstallRelease(platformNameAlphaTier3, platformNamespace, true);
     }
 
     @Test
@@ -41,32 +41,32 @@ class CustomOperatorSelectorsIT extends AbstractHelmChartIT {
         // the operator should reconcile the tier two and three platforms, but ignore the tier one platform
         installPlatformOperatorChartAndWaitToBeRunning("--set", "selectors=group=alpha\\,tier!=one");
 
-        installPlatformChart(PLATFORM_NAME_ALPHA_TIER_1,
+        installPlatformChart(platformNameAlphaTier1,
                 "--set",
                 "nodes.replicaCount=1",
                 "--set",
                 "operator.labels.group=alpha,operator.labels.tier=one");
-        installPlatformChart(PLATFORM_NAME_ALPHA_TIER_2,
+        installPlatformChart(platformNameAlphaTier2,
                 "--set",
                 "nodes.replicaCount=1",
                 "--set",
                 "operator.labels.group=alpha,operator.labels.tier=two");
-        installPlatformChart(PLATFORM_NAME_ALPHA_TIER_3,
+        installPlatformChart(platformNameAlphaTier3,
                 "--set",
                 "nodes.replicaCount=1",
                 "--set",
                 "operator.labels.group=alpha,operator.labels.tier=three");
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_2);
-        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_3);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformNameAlphaTier2);
+        K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformNameAlphaTier3);
 
         // assert that all custom resources are present, but only two StatefulSets were created
-        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_1).get()).isNotNull();
-        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_2).get()).isNotNull();
-        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_NAME_ALPHA_TIER_3).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, platformNameAlphaTier1).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, platformNameAlphaTier2).get()).isNotNull();
+        assertThat(K8sUtil.getHiveMQPlatform(client, platformNamespace, platformNameAlphaTier3).get()).isNotNull();
         assertThat(client.apps().statefulSets().inNamespace(platformNamespace).list().getItems()).hasSize(2)
                 .satisfiesExactlyInAnyOrder(statefulSet -> assertThat(statefulSet.getMetadata().getName()) //
-                                .isEqualTo(PLATFORM_NAME_ALPHA_TIER_2),
+                                .isEqualTo(platformNameAlphaTier2),
                         statefulSet -> assertThat(statefulSet.getMetadata().getName()) //
-                                .isEqualTo(PLATFORM_NAME_ALPHA_TIER_3));
+                                .isEqualTo(platformNameAlphaTier3));
     }
 }

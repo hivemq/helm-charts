@@ -136,6 +136,8 @@ tests:
               mountPath: /fragment
             - mountPath: /opt/hivemq/conf-secondary
               name: topicfilters
+            - name: hivemq-edge-persistence-edge
+              mountPath: /persistence
             - mountPath: /mqtts
               name: mqtts-jks
 
@@ -157,4 +159,6 @@ tests:
                     - key: keystore.jks
                       path: keystore.jks
                 secretName: hivemq-keystore-secret
+            - name: hivemq-edge-persistence-edge
+              emptyDir: {}
 

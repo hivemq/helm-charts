@@ -14,12 +14,12 @@ jobs:
           - helm-label: 'minimum'
             helm-version: 'v3.10.0'
           - helm-label: 'latest-3'
-            helm-version: 'v3.20.0'
+            helm-version: 'v3.22.0'
           - helm-label: 'latest-4'
-            helm-version: 'v4.1.1'
+            helm-version: 'v4.3.0'
     steps:
       - name: Checkout HiveMQ Helm Charts
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Create K8s Kind Cluster
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1
@@ -27,7 +27,7 @@ jobs:
           cluster_name: "kind"
 
       - name: Set up Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5
         with:
           version: ${{ matrix.helm-version }}
 
@@ -51,7 +51,7 @@ jobs:
 
       - name: Upload HiveMQ Edge Pod logs
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: "HiveMQ Edge - Smoke test results on Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})"
           path: ${{ runner.temp }}/logs/edge-pod.log

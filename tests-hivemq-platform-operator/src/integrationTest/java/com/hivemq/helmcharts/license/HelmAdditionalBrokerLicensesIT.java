@@ -13,14 +13,14 @@ class HelmAdditionalBrokerLicensesIT extends AbstractHelmLicensesIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withAdditionalBrokerLicenseFileContent_statefulSetWithLicenseSecretMounted() throws Exception {
         final var brokerLicenseFuture =
-                logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file broker.lic is corrupt.");
+                logWaiter.waitFor(platformLogWaiterPrefix, ".*License file broker.lic is corrupt.");
         installPlatformChartAndWaitToBeRunning("--set",
                 "nodes.replicaCount=1",
                 "--set",
                 "license.create=true",
                 "--set-file",
                 "license.additionalLicenses.broker.overrideLicense=/files/mock-additional-license.lic");
-        assertLicense("hivemq-license-test-hivemq-platform");
+        assertLicense("hivemq-license-" + platformReleaseName);
         await().until(brokerLicenseFuture::isDone);
     }
 }

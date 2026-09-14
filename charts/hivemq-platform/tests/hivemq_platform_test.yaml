@@ -115,6 +115,54 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
+  - it: with image digest override, container image rendered with tag and digest
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: snapshot
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].image
+          value: "test-repo/test-image:snapshot@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+
+  - it: with image digest override and empty tag, container image rendered with digest only
+    set:
+      image.repository: test-repo
+      image.name: test-image
+      image.tag: ""
+      image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].image
+          value: "test-repo/test-image@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+
+  - it: with empty image repository, validation fails
+    set:
+      image.repository: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`repository` is required to build the HiveMQ Platform container image reference'
+
+  - it: with empty image name, validation fails
+    set:
+      image.name: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: '`name` is required to build the HiveMQ Platform container image reference'
+
+  - it: with invalid image digest type, schema validation fails
+    set:
+      image.digest: 123
+    asserts:
+      - failedTemplate: {}
+
+  - it: with image digest not matching OCI format, schema validation fails
+    set:
+      image.digest: not-a-valid-digest
+    asserts:
+      - failedTemplate: {}
+
   - it: with override init containers
     set:
       config.overrideInitContainers: |-
@@ -378,6 +426,15 @@ tests:
       - failedTemplate:
           errorMessage: "Default environment variable `JAVA_OPTS` for the HiveMQ Platform is not allowed to be set via `.nodes.env` value. Please use the corresponding values instead"
 
+  - it: with HIVEMQ_CLUSTERING_BOOTSTRAP defined in nodes.env, validation fails
+    set:
+      nodes.env:
+        - name: HIVEMQ_CLUSTERING_BOOTSTRAP
+          value: "true"
+    asserts:
+      - failedTemplate:
+          errorMessage: "HIVEMQ_CLUSTERING_BOOTSTRAP environment variable cannot be set"
+
   - it: with default resource requests
     asserts:
       - exists:
@@ -571,6 +628,23 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
           value: "3"
 
+  - it: with override custom numeric resource limits as integer
+    set:
+      nodes.resources.overrideLimits:
+        cpu: 1
+        memory: 2
+        ephemeral-storage: 3
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "2"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: "3"
+
   - it: with empty override resource limits
     set:
       nodes.resources.overrideLimits: {}
@@ -588,8 +662,14 @@ tests:
           value: 2048M
       - notExists:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1000m"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: 2048M
       - notExists:
-          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
 
   - it: with empty override resource limits and custom resource requests
     set:
@@ -612,8 +692,91 @@ tests:
       - equal:
           path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
           value: 1M
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1c"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "1m"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: "1M"
+
+  - it: with partial override resource limits with only cpu
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+      nodes.resources.ephemeralStorage: 1M
+      nodes.resources.overrideLimits:
+        cpu: 8c
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+          value: 1M
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "8c"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "1m"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: "1M"
+
+  - it: with partial override resource limits with only memory
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+      nodes.resources.overrideLimits:
+        memory: 8m
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
       - notExists:
-          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1c"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "8m"
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+
+  - it: with partial override resource limits with only ephemeral-storage
+    set:
+      nodes.resources.cpu: 1c
+      nodes.resources.memory: 1m
+      nodes.resources.overrideLimits:
+        ephemeral-storage: 8M
+    asserts:
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.cpu
+          value: 1c
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.memory
+          value: 1m
+      - notExists:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.requests.ephemeral-storage
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.cpu
+          value: "1c"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.memory
+          value: "1m"
+      - equal:
+          path: spec.statefulSet.spec.template.spec.containers[0].resources.limits.ephemeral-storage
+          value: "8M"
 
   - it: with default values, no volumes are defined
     asserts:
@@ -630,7 +793,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.volumes
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.volumes
-          count: 8
+          count: 9
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -695,7 +858,7 @@ tests:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
       - lengthEqual:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
-          count: 7
+          count: 8
       - contains:
           path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
           content:
@@ -734,6 +897,20 @@ tests:
           content:
             name: test-projected-volume
             mountPath: /additional-projected-volume
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+              volumeAttributes:
+                secretProviderClass: my-secret-provider
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-csi-volume
+            mountPath: /additional-csi-volume
       - contains:
           path: spec.statefulSet.spec.template.spec.volumes
           content:
@@ -784,8 +961,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            VolumeMount `foobar-mount-volume` (name: `test-configmap-volume-2` value, mountName: `foobar-mount-volume` value) is duplicated for container `hivemq`
+          errorPattern: 'VolumeMount `foobar-mount-volume` (name: `test-configmap-volume-2` value, mountName: `foobar-mount-volume` value) is duplicated for container `hivemq`'
 
   - it: with duplicated additionalVolumes `mountName` value in same `foobar` container, then fails
     set:
@@ -802,8 +978,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: |- 
-            VolumeMount `foobar-mount-volume` (name: `test-configmap-volume-2` value, mountName: `foobar-mount-volume` value) is duplicated for container `foobar`
+          errorPattern: 'VolumeMount `foobar-mount-volume` (name: `test-configmap-volume-2` value, mountName: `foobar-mount-volume` value) is duplicated for container `foobar`'
 
   - it: with duplicated additionalVolumes `mountName` value but different containers, then succeeds
     set:
@@ -852,8 +1027,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            VolumeMount `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is duplicated for container `hivemq`
+          errorPattern: 'VolumeMount `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is duplicated for container `hivemq`'
 
   - it: with duplicated additionalVolumes `name` value in same `foobar` container, then fails
     set:
@@ -868,8 +1042,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            VolumeMount `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is duplicated for container `foobar`
+          errorPattern: 'VolumeMount `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is duplicated for container `foobar`'
 
   - it: with duplicated additionalVolumes `path` for the default container, then fails
     set:
@@ -882,8 +1055,7 @@ tests:
           path: /additional-configmap-volume
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            VolumeMount path `/additional-configmap-volume` (path: `/additional-configmap-volume` value, subPath: `` value) is duplicated for container `hivemq`
+          errorPattern: 'VolumeMount path `/additional-configmap-volume` (path: `/additional-configmap-volume` value, subPath: `` value) is duplicated for container `hivemq`'
 
   - it: with duplicated additionalVolumes `subPath` for the default container, then fails
     set:
@@ -898,8 +1070,7 @@ tests:
           subPath: subpath
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            VolumeMount path `/additional-configmap-volume/subpath` (path: `/additional-configmap-volume` value, subPath: `subpath` value) is duplicated for container `hivemq`
+          errorPattern: 'VolumeMount path `/additional-configmap-volume/subpath` (path: `/additional-configmap-volume` value, subPath: `subpath` value) is duplicated for container `hivemq`'
 
   - it: with duplicated additionalVolumes `path` but different `subPath` for the default container, then succeeds
     set:
@@ -929,8 +1100,7 @@ tests:
           path: /additional-configmap-volume
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            VolumeMount path `/additional-configmap-volume` (path: `/additional-configmap-volume` value, subPath: `` value) is duplicated for container `foobar`
+          errorPattern: 'VolumeMount path `/additional-configmap-volume` (path: `/additional-configmap-volume` value, subPath: `` value) is duplicated for container `foobar`'
 
   - it: with duplicated additionalVolumes `subPath` for the same `foobar` container, then fails
     set:
@@ -947,8 +1117,7 @@ tests:
           subPath: subpath
     asserts:
       - failedTemplate:
-          errorPattern: |- 
-            VolumeMount path `/additional-configmap-volume/subpath` (path: `/additional-configmap-volume` value, subPath: `subpath` value) is duplicated for container `foobar`
+          errorPattern: 'VolumeMount path `/additional-configmap-volume/subpath` (path: `/additional-configmap-volume` value, subPath: `subpath` value) is duplicated for container `foobar`'
 
   - it: with duplicated additionalVolumes `path` but different `subPath` for the same `foobar` container, then succeeds
     set:
@@ -1048,8 +1217,7 @@ tests:
           path: /additional-configmap-volume-2
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            Volume `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is defined more than once but with different types
+          errorPattern: 'Volume `foobar-mount-volume` (name: `foobar-mount-volume` value, mountName: `` value) is defined more than once but with different types'
 
   - it: with invalid additional volume `type`, then schema validation fails
     set:
@@ -1082,8 +1250,7 @@ tests:
           path: /fake-volume-path
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `type` value is mandatory for all of the `additionalVolumes` defined
+          errorPattern: '`type` value is mandatory for all of the `additionalVolumes` defined'
 
   - it: with missing mandatory additional volume `type` for `foobar` container, then fails
     set:
@@ -1093,8 +1260,7 @@ tests:
           containerName: foobar
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `type` value is mandatory for all of the `additionalVolumes` defined
+          errorPattern: '`type` value is mandatory for all of the `additionalVolumes` defined'
 
   - it: with missing mandatory additional volume `path` for `hivemq` container, then fails
     set:
@@ -1103,8 +1269,7 @@ tests:
           type: configMap
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container
+          errorPattern: '`path` values is mandatory for all of the `additionalVolumes` defined for the `hivemq` container'
 
   - it: with missing mandatory additional volume `path` for `foobar` container, then succeeds
     set:
@@ -1140,8 +1305,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
+          errorPattern: '`name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"'
 
   - it: with additional volume type `secret` but missing `name`, then fails
     set:
@@ -1151,8 +1315,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
+          errorPattern: '`name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"'
 
   - it: with additional volume type `persistentVolumeClaim` but missing `name`, then fails
     set:
@@ -1162,8 +1325,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499
-            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
+          errorPattern: '`name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"'
 
   - it: with additional volume type `emptyDir` but missing `name`, then succeeds
     set:
@@ -1243,8 +1405,7 @@ tests:
           mountName: fake-volume-mount-name
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499  
-            `projectedSources` value is required for type "projected"
+          errorPattern: '`projectedSources` value is required for type "projected"'
 
   - it: with additional volume type different than `projected` but `projectedSources` is present, then fails
     set:
@@ -1260,8 +1421,281 @@ tests:
                     path: my-config
     asserts:
       - failedTemplate:
-          errorPattern: |- # FIXME: |- character can be removed once the Helm Unittest plugin issue is fixed https://github.com/helm-unittest/helm-unittest/issues/499  
-            `projectedSources` value is only available for type "projected"
+          errorPattern: '`projectedSources` value is only available for type "projected"'
+
+  - it: with additional volume type `csi` but missing `name`, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - exists:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+      - contains:
+          path: spec.statefulSet.spec.template.spec.containers[0].volumeMounts
+          content:
+            name: test-csi-mount-volume
+            mountPath: /additional-csi-volume
+      - exists:
+          path: spec.statefulSet.spec.template.spec.volumes
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+
+  - it: with additional volume type `csi` with volumeAttributes, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            volumeAttributes:
+              secretProviderClass: my-provider
+              key1: value1
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              volumeAttributes:
+                secretProviderClass: my-provider
+                key1: value1
+
+  - it: with additional volume type `csi` and string `volumeAttributes` values that look like YAML booleans or numbers, then they are preserved as strings
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            volumeAttributes:
+              boolean: "true"
+              number: "123"
+              string: "yes"
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              volumeAttributes:
+                boolean: "true"
+                number: "123"
+                string: "yes"
+
+  - it: with additional volume type `csi` and non-string `volumeAttributes` values, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            volumeAttributes:
+              boolean: true
+              number: 123
+    asserts:
+      - failedTemplate:
+          errorPattern: 'got boolean, want string'
+
+  - it: with additional volume type `csi` with readOnly true, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+
+  - it: with additional volume type `csi` with readOnly false, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: false
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: false
+
+  - it: with additional volume type `csi` with fsType, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: my-csi-driver
+            fsType: ext4
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: my-csi-driver
+              fsType: ext4
+
+  - it: with additional volume type `csi` with nodePublishSecretRef, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /additional-csi-volume
+          mountName: test-csi-mount-volume
+          csi:
+            driver: my-csi-driver
+            nodePublishSecretRef: my-secret
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: my-csi-driver
+              nodePublishSecretRef:
+                name: my-secret
+
+  - it: with additional volume type `csi` but missing `csi` field, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+    asserts:
+      - failedTemplate:
+          errorPattern: '`csi` value is required for type "csi"'
+
+  - it: with additional volume type `csi` but missing `csi.driver`, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+          csi:
+            readOnly: true
+    asserts:
+      - failedTemplate:
+          errorPattern: '`csi.driver` value is required for type "csi"'
+
+  - it: with additional volume type different than `csi` but `csi` is present, then fails
+    set:
+      additionalVolumes:
+        - type: emptyDir
+          path: /fake-volume-path
+          mountName: fake-volume-mount-name
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - failedTemplate:
+          errorPattern: '`csi` value is only available for type "csi"'
+
+  - it: with multiple additional volumes of type `csi` sharing the same `mountName` and identical `csi` config, then succeeds
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: shared-csi-volume
+          path: /mnt/primary
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: my-provider
+        - type: csi
+          mountName: shared-csi-volume
+          containerName: sidecar-container
+          path: /mnt/secondary
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: my-provider
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: shared-csi-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+              volumeAttributes:
+                secretProviderClass: my-provider
+          count: 1
+
+  - it: with multiple additional volumes of type `csi` sharing the same `mountName` but with different `csi` configurations, then fails
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: shared-csi-volume
+          path: /mnt/primary
+          csi:
+            driver: driver-a
+        - type: csi
+          mountName: shared-csi-volume
+          containerName: sidecar-container
+          path: /mnt/secondary
+          csi:
+            driver: driver-b
+    asserts:
+      - failedTemplate:
+          errorPattern: '`csi` configuration for volume "shared-csi-volume" must be identical across all `additionalVolumes` entries that share the same `mountName`'
+
+  - it: with additional volume type `csi` and HiveMQ Platform CRD present but CSI driver not installed, then fails
+    capabilities:
+      apiVersions:
+        - hivemq.com/v1
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: test-csi-mount-volume
+          path: /additional-csi-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - failedTemplate:
+          errorPattern: 'CSI driver "secrets-store.csi.k8s.io" is not installed in the cluster. Ensure the CSI driver is deployed before installing the HiveMQ Platform.'
+
+  - it: with additional volume type `csi` and HiveMQ Platform CRD not present, then CSI driver check is skipped
+    set:
+      additionalVolumes:
+        - type: csi
+          mountName: test-csi-mount-volume
+          path: /additional-csi-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+    asserts:
+      - contains:
+          path: spec.statefulSet.spec.template.spec.volumes
+          content:
+            name: test-csi-mount-volume
+            csi:
+              driver: secrets-store.csi.k8s.io
 
   - it: with default settings, no volume claim template is set
     asserts:
@@ -1394,33 +1828,6 @@ tests:
     asserts:
       - failedTemplate: {}
 
-  - it: with pod scheduling values set
-    values:
-      - pod-scheduling-values.yaml
-    asserts:
-      - exists:
-          path: spec.statefulSet.spec.template.spec.affinity
-      - isSubset:
-          path: spec.statefulSet.spec.template.spec.affinity
-          content:
-            podAffinity:
-              requiredDuringSchedulingIgnoredDuringExecution:
-                - labelSelector:
-                    matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                          - my-app
-                  topologyKey: "kubernetes.io/hostname"
-      - exists:
-          path: spec.statefulSet.spec.template.spec.tolerations
-      - contains:
-          path: spec.statefulSet.spec.template.spec.tolerations
-          content:
-            effect: NoSchedule
-            key: my-key
-            operator: Exists
-
   - it: with custom pod annotations
     set:
       nodes:
@@ -1482,8 +1889,7 @@ tests:
           path: " /opt/hivemq/config"
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes path not starting with slash, then fails schema validation
     set:
@@ -1493,8 +1899,7 @@ tests:
           path: opt/hivemq/config
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes path containing special characters, then fails schema validation
     set:
@@ -1504,8 +1909,7 @@ tests:
           path: /opt/hivemq/con@fig
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes path containing spaces, then fails schema validation
     set:
@@ -1515,8 +1919,7 @@ tests:
           path: /opt/hivemq/my config
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes path with valid characters, then succeeds
     set:
@@ -1540,8 +1943,7 @@ tests:
           subPath: /my-file.xml
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes subPath starting with dot, then fails schema validation
     set:
@@ -1552,8 +1954,7 @@ tests:
           subPath: .hidden
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes subPath containing special characters, then fails schema validation
     set:
@@ -1564,8 +1965,7 @@ tests:
           subPath: my@file
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes subPath containing spaces, then fails schema validation
     set:
@@ -1576,8 +1976,7 @@ tests:
           subPath: my file
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with additionalVolumes subPath with valid characters, then succeeds
     set:
@@ -1914,8 +2313,7 @@ tests:
           path: /opt/hivemq/pvc
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"
+          errorPattern: '`name` value is required for types "configMap", "secret", "persistentVolumeClaim" and "sharedPersistentVolumeClaim"'
 
   - it: with `hivemqFolders` on non-sharedPersistentVolumeClaim type, then fails
     set:
@@ -1927,8 +2325,7 @@ tests:
             data: data
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `hivemqFolders` value is only available for type "sharedPersistentVolumeClaim"
+          errorPattern: '`hivemqFolders` value is only available for type "sharedPersistentVolumeClaim"'
 
   - it: with `subPath` on sharedPersistentVolumeClaim, then fails
     set:
@@ -1939,8 +2336,7 @@ tests:
           subPath: data
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `subPath` value is not allowed for type "sharedPersistentVolumeClaim". Use `hivemqFolders` instead
+          errorPattern: '`subPath` value is not allowed for type "sharedPersistentVolumeClaim". Use `hivemqFolders` instead'
 
   - it: with sharedPersistentVolumeClaim and non-hivemq containerName, then fails
     set:
@@ -1951,8 +2347,7 @@ tests:
           path: /opt/hivemq/pvc
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `sharedPersistentVolumeClaim` volume type is only allowed for the `hivemq` container
+          errorPattern: '`sharedPersistentVolumeClaim` volume type is only allowed for the `hivemq` container'
 
   - it: with sharedPersistentVolumeClaim and mountName matching volumeClaimTemplates, then succeeds
     set:
@@ -2016,8 +2411,7 @@ tests:
             volumeMode: Filesystem
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `custom-mount`
+          errorPattern: '`sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `custom-mount`'
 
   - it: with sharedPersistentVolumeClaim without volumeClaimTemplates, then fails
     set:
@@ -2029,8 +2423,7 @@ tests:
             data: data
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `hivemqpvc`
+          errorPattern: '`sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `hivemqpvc`'
 
   - it: with sharedPersistentVolumeClaim without matching volumeClaimTemplates name, then fails
     set:
@@ -2054,8 +2447,7 @@ tests:
             volumeMode: Filesystem
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `hivemqpvc`
+          errorPattern: '`sharedPersistentVolumeClaim` volume type requires a matching `volumeClaimTemplates` entry with name `hivemqpvc`'
 
   - it: with sharedPersistentVolumeClaim path set to /opt/hivemq, then fails
     set:
@@ -2077,8 +2469,7 @@ tests:
             volumeMode: Filesystem
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `path` value `/opt/hivemq` is not allowed for `sharedPersistentVolumeClaim` volume type. Use a subdirectory instead
+          errorPattern: '`path` value `/opt/hivemq` is not allowed for `sharedPersistentVolumeClaim` volume type. Use a subdirectory instead'
 
   - it: with HIVEMQ_DATA_FOLDER in nodes.env and hivemqFolders.data, then fails
     set:
@@ -2105,8 +2496,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `HIVEMQ_DATA_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`HIVEMQ_DATA_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_LOG_FOLDER in nodes.env and hivemqFolders.log, then fails
     set:
@@ -2133,8 +2523,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `HIVEMQ_LOG_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`HIVEMQ_LOG_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_HEAPDUMP_FOLDER in nodes.env and hivemqFolders.heapDump, then fails
     set:
@@ -2161,8 +2550,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `HIVEMQ_HEAPDUMP_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`HIVEMQ_HEAPDUMP_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_BACKUP_FOLDER in nodes.env and hivemqFolders.backup, then fails
     set:
@@ -2189,8 +2577,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `HIVEMQ_BACKUP_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`HIVEMQ_BACKUP_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_AUDIT_FOLDER in nodes.env and hivemqFolders.audit, then fails
     set:
@@ -2217,8 +2604,7 @@ tests:
           value: /custom/path
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `HIVEMQ_AUDIT_FOLDER` environment variable cannot be set via `.nodes.env` when using the `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`HIVEMQ_AUDIT_FOLDER` environment variable cannot be set via `.nodes.env`, as the `sharedPersistentVolumeClaim` volume type already redirects this HiveMQ folder'
 
   - it: with HIVEMQ_DATA_FOLDER in nodes.env without sharedPersistentVolumeClaim, then succeeds
     set:
@@ -2300,8 +2686,7 @@ tests:
             volumeMode: Filesystem
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `hivemqFolders` is required for `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`hivemqFolders` is required for `sharedPersistentVolumeClaim` volume type'
 
   - it: with sharedPersistentVolumeClaim with empty hivemqFolders, then fails
     set:
@@ -2324,8 +2709,7 @@ tests:
             volumeMode: Filesystem
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            `hivemqFolders` must contain at least one key (data, log, heapDump, backup, audit) for `sharedPersistentVolumeClaim` volume type
+          errorPattern: '`hivemqFolders` must contain at least one key (data, log, heapDump, backup, audit) for `sharedPersistentVolumeClaim` volume type'
 
   - it: with sharedPersistentVolumeClaim with unknown hivemqFolders key, then fails schema validation
     set:
@@ -2337,8 +2721,7 @@ tests:
             foo: bar
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim with empty string hivemqFolders value, then fails schema validation
     set:
@@ -2350,8 +2733,7 @@ tests:
             data: ""
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with multiple sharedPersistentVolumeClaim entries, then fails
     set:
@@ -2364,8 +2746,7 @@ tests:
           path: /opt/hivemq/pvc2
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            Only one `sharedPersistentVolumeClaim` volume type is allowed but 2 were defined
+          errorPattern: 'Only one `sharedPersistentVolumeClaim` volume type is allowed but 2 were defined'
 
   - it: with duplicate hivemqFolders values in sharedPersistentVolumeClaim, then fails
     set:
@@ -2390,8 +2771,7 @@ tests:
             volumeMode: Filesystem
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            Duplicate subfolder name `shared` in `hivemqFolders` for `sharedPersistentVolumeClaim`
+          errorPattern: 'Duplicate subfolder name `shared` in `hivemqFolders` for `sharedPersistentVolumeClaim`'
 
   - it: with sharedPersistentVolumeClaim subPath starting with slash, then fails schema validation
     set:
@@ -2403,8 +2783,7 @@ tests:
             data: /my-data
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim subPath containing spaces, then fails schema validation
     set:
@@ -2416,8 +2795,7 @@ tests:
             log: my data
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim subPath starting with dot, then fails schema validation
     set:
@@ -2429,8 +2807,7 @@ tests:
             heapDump: .hidden
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim subPath starting with hyphen, then fails schema validation
     set:
@@ -2442,8 +2819,7 @@ tests:
             backup: -backup
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim subPath containing special characters, then fails schema validation
     set:
@@ -2455,8 +2831,7 @@ tests:
             audit: my@data
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim nested subPath containing special characters, then fails schema validation
     set:
@@ -2468,8 +2843,7 @@ tests:
             data: foo/@invalid
     asserts:
       - failedTemplate:
-          errorPattern: |-
-            values don't meet the specifications of the schema
+          errorPattern: 'values don''t meet the specifications of the schema'
 
   - it: with sharedPersistentVolumeClaim subPath with valid characters (dots, underscores, hyphens), then succeeds
     set:

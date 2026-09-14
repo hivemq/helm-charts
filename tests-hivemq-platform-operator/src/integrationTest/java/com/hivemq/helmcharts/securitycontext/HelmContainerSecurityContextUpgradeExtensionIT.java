@@ -14,6 +14,11 @@ import static org.awaitility.Durations.ONE_MINUTE;
 class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContainerSecurityContextIT {
 
     @Override
+    protected @NotNull String getReleaseBaseName() {
+        return "container-sc-upgrade-extension";
+    }
+
+    @Override
     protected boolean installPlatformOperatorChart() {
         return false;
     }
@@ -34,7 +39,7 @@ class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContain
     void updateExtensionConfigMap_withRootAndNonRootUsers_rollingRestart(final @NotNull ChartValues chartValues)
             throws Exception {
         installPlatformOperatorChartAndWaitToBeRunning(chartValues.operator().valuesFile());
-        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(OPERATOR_RELEASE_NAME);
+        final var operatorLabels = K8sUtil.getHiveMQPlatformOperatorLabels(operatorReleaseName);
         assertUidAndGid(operatorNamespace,
                 operatorLabels,
                 "hivemq-platform-operator",
@@ -46,7 +51,7 @@ class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContain
                 ".*Extension \"HiveMQ Enterprise Distributed Tracing Extension\" version .* started successfully.");
 
         installPlatformChartAndWaitToBeRunning(chartValues.platform().valuesFile());
-        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(PLATFORM_RELEASE_NAME);
+        final var platformLabels = K8sUtil.getHiveMQPlatformLabels(platformReleaseName);
         assertUidAndGid(platformNamespace,
                 platformLabels,
                 "hivemq",
@@ -58,7 +63,7 @@ class HelmContainerSecurityContextUpgradeExtensionIT extends AbstractHelmContain
         final var configurationUpdatedFuture = waitForPlatformLog(
                 ".*HiveMQ Enterprise Distributed Tracing Extension: Successfully updated configuration from '/opt/hivemq/extensions/hivemq-distributed-tracing-extension/conf/config.xml'.");
 
-        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, PLATFORM_RELEASE_NAME);
+        final var hivemqCustomResource = K8sUtil.getHiveMQPlatform(client, platformNamespace, platformReleaseName);
         hivemqCustomResource.waitUntilCondition(K8sUtil.getCustomResourceStateCondition("RESTART_EXTENSIONS"),
                 3,
                 TimeUnit.MINUTES);

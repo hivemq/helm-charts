@@ -1,0 +1,24 @@
+nodes:
+  replicaCount: 1
+  podSecurityContext:
+    enabled: true
+    fsGroup: 0
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+additionalVolumes:
+  - type: persistentVolumeClaim
+    name: hivemq-pvc-data
+    path: /opt/hivemq/data
+volumeClaimTemplates:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: hivemq-pvc-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      volumeMode: Filesystem

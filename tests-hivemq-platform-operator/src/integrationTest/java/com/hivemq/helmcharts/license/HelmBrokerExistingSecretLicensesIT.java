@@ -17,7 +17,7 @@ class HelmBrokerExistingSecretLicensesIT extends AbstractHelmLicensesIT {
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void withExistingBrokerLicenseSecret_statefulSetWithLicenseSecretMounted() throws Exception {
         final var brokerLicenseFuture =
-                logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX, ".*License file license.lic is corrupt.");
+                logWaiter.waitFor(platformLogWaiterPrefix, ".*License file license.lic is corrupt.");
         K8sUtil.createSecret(client,
                 platformNamespace,
                 "test-license",

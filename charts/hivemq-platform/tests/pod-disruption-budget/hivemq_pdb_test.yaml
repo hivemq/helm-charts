@@ -1,0 +1,281 @@
+suite: HiveMQ Platform - Pod Disruption Budget tests
+templates:
+  - hivemq-platform-pod-disruption-budget.yml
+release:
+  name: test-hivemq-platform
+  namespace: test-hivemq-platform-namespace
+chart:
+  version: 0.0.1
+  appVersion: 1.0.0
+tests:
+
+  - it: with podDisruptionBudget disabled by default, no PDB is rendered
+    asserts:
+      - notFailedTemplate: {}
+      - hasDocuments:
+          count: 0
+
+  - it: with podDisruptionBudget enabled, default PDB resource created
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - containsDocument:
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          name: hivemq-platform-pdb-test-hivemq-platform
+
+  - it: with podDisruptionBudget enabled, PDB metadata created with default values
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-0.0.1
+            app.kubernetes.io/name: "hivemq-platform"
+            app.kubernetes.io/instance: "test-hivemq-platform"
+            app.kubernetes.io/version: "1.0.0"
+            app.kubernetes.io/managed-by: Helm
+      - equal:
+          path: metadata.namespace
+          value: test-hivemq-platform-namespace
+      - isSubset:
+          path: spec.selector
+          content:
+            matchLabels:
+              app.kubernetes.io/name: "hivemq-platform"
+              app.kubernetes.io/instance: "test-hivemq-platform"
+
+  - it: with custom release name and namespace, PDB metadata created with custom values
+    release:
+      name: custom-release
+      namespace: custom-namespace
+    chart:
+      version: 0.1.0
+      appVersion: 2.0.0
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - containsDocument:
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          name: hivemq-platform-pdb-custom-release
+      - isSubset:
+          path: metadata.labels
+          content:
+            helm.sh/chart: hivemq-platform-0.1.0
+            app.kubernetes.io/name: "hivemq-platform"
+            app.kubernetes.io/instance: "custom-release"
+            app.kubernetes.io/version: "2.0.0"
+            app.kubernetes.io/managed-by: Helm
+      - equal:
+          path: metadata.namespace
+          value: custom-namespace
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: "custom-release"
+
+  - it: with long release name, PDB name is truncated
+    release:
+      name: a-very-long-hivemq-platform-release-name-for-testing
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - equal:
+          path: metadata.name
+          value: hivemq-platform-pdb-a-very-long-hivemq-platform-release-name-fo
+
+  - it: with podDisruptionBudget enabled but neither minAvailable nor maxUnavailable set, validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: '`podDisruptionBudget.enabled` is `true` but neither `minAvailable` nor `maxUnavailable` was set'
+
+  - it: with podDisruptionBudget enabled and both minAvailable and maxUnavailable set, validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+        maxUnavailable: 1
+    asserts:
+      - failedTemplate:
+          errorPattern: '`podDisruptionBudget.minAvailable` and `podDisruptionBudget.maxUnavailable` are mutually exclusive'
+
+  - it: with podDisruptionBudget enabled and minAvailable as integer, PDB is rendered
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.minAvailable
+          value: 2
+      - notExists:
+          path: spec.maxUnavailable
+      - notExists:
+          path: spec.unhealthyPodEvictionPolicy
+
+  - it: with podDisruptionBudget enabled and minAvailable as zero, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 0
+    asserts:
+      - failedTemplate:
+          errorPattern: 'minimum'
+
+  - it: with podDisruptionBudget enabled and minAvailable as percentage, PDB is rendered with minAvailable percentage
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: "50%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "50%"
+
+  - it: with podDisruptionBudget enabled and maxUnavailable as integer, PDB is rendered
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 1
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - notExists:
+          path: spec.minAvailable
+
+  - it: with podDisruptionBudget enabled and maxUnavailable as zero, PDB is rendered with maxUnavailable zero
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 0
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.maxUnavailable
+          value: 0
+
+  - it: with podDisruptionBudget enabled and maxUnavailable as percentage, PDB is rendered with maxUnavailable percentage
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: "25%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "25%"
+
+  - it: with podDisruptionBudget enabled and unhealthyPodEvictionPolicy AlwaysAllow, policy is rendered
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+        unhealthyPodEvictionPolicy: "AlwaysAllow"
+    asserts:
+      - equal:
+          path: spec.unhealthyPodEvictionPolicy
+          value: "AlwaysAllow"
+
+  - it: with podDisruptionBudget enabled and unhealthyPodEvictionPolicy IfHealthyBudget, policy is rendered
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: 1
+        unhealthyPodEvictionPolicy: "IfHealthyBudget"
+    asserts:
+      - equal:
+          path: spec.unhealthyPodEvictionPolicy
+          value: "IfHealthyBudget"
+
+  - it: with minAvailable as invalid string, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: "foo"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'does not match pattern'
+
+  - it: with minAvailable as numeric string without percent, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: "2"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'does not match pattern'
+
+  - it: with minAvailable as negative integer, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: -1
+    asserts:
+      - failedTemplate:
+          errorPattern: 'minimum'
+
+  - it: with minAvailable as one, PDB is rendered with minAvailable one
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: with maxUnavailable as invalid string, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: "invalid"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'does not match pattern'
+
+  - it: with maxUnavailable as numeric string without percent, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: "1"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'does not match pattern'
+
+  - it: with maxUnavailable as negative integer, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        maxUnavailable: -5
+    asserts:
+      - failedTemplate:
+          errorPattern: 'minimum'
+
+  - it: with unhealthyPodEvictionPolicy as invalid value, schema validation fails
+    set:
+      podDisruptionBudget:
+        enabled: true
+        minAvailable: 2
+        unhealthyPodEvictionPolicy: "Invalid"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'value must be one of'

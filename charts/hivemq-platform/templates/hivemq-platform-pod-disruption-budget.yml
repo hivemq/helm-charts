@@ -1,0 +1,23 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+{{- include "hivemq-platform.validate-pod-disruption-budget" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "hivemq-platform.name" (dict "name" "pdb" "releaseName" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hivemq-platform.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "hivemq-platform.selector-labels" . | nindent 6 }}
+  {{- if include "hivemq-platform.has-pdb-value" (dict "pdb" .Values.podDisruptionBudget "field" "minAvailable") }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if include "hivemq-platform.has-pdb-value" (dict "pdb" .Values.podDisruptionBudget "field" "maxUnavailable") }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  {{- with .Values.podDisruptionBudget.unhealthyPodEvictionPolicy }}
+  unhealthyPodEvictionPolicy: {{ . }}
+  {{- end }}
+{{- end }}

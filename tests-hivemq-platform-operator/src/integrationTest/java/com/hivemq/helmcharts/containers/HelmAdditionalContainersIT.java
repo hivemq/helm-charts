@@ -20,7 +20,7 @@ class HelmAdditionalContainersIT extends AbstractHelmChartIT {
 
         await().untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
             final var hivemqContainer = K8sUtil.getHiveMQContainer(statefulSet.getSpec());
             assertThat(hivemqContainer.getVolumeMounts().stream()) //

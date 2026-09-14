@@ -1,0 +1,7 @@
+#set( $script = "#include('script.js')")
+{
+  "id": "adds-timestamp-script-${instanceId}",
+  "functionType": "TRANSFORMATION",
+  "description": "Adds an ISO 8601 timestamp field to the incoming MESSAGE",
+  "source": "$base64.encode($script)"
+}

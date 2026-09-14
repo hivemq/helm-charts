@@ -32,7 +32,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
         await().untilAsserted(() -> {
             final var statefulSet =
-                    client.apps().statefulSets().inNamespace(platformNamespace).withName(PLATFORM_RELEASE_NAME).get();
+                    client.apps().statefulSets().inNamespace(platformNamespace).withName(platformReleaseName).get();
             assertThat(statefulSet).isNotNull();
             final var template = statefulSet.getSpec().getTemplate();
             assertThat(template.getSpec().getVolumes()).isNotEmpty().map(Volume::getName).contains(mountName);
@@ -41,7 +41,7 @@ class HelmInitContainerIT extends AbstractHelmChartIT {
 
             await().untilAsserted(() -> assertThat(client.pods()
                     .inNamespace(platformNamespace)
-                    .withName(PLATFORM_RELEASE_NAME + "-0")
+                    .withName(platformReleaseName + "-0")
                     .get()) //
                     .isNotNull() //
                     .satisfies(this::assertThatFileContains));

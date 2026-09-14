@@ -49,7 +49,7 @@ abstract class AbstractHelmBridgeExtensionIT extends AbstractHelmChartIT {
         // assert MQTT messages are bridged
         MqttUtil.execute(client,
                 platformNamespace,
-                DEFAULT_MQTT_SERVICE_NAME,
+                defaultMqttServiceName,
                 DEFAULT_MQTT_SERVICE_PORT,
                 portForward -> getBlockingClient(portForward, "PublishClient"),
                 portForward -> getBlockingClient(hivemqContainer.getHost(),
@@ -70,12 +70,12 @@ abstract class AbstractHelmBridgeExtensionIT extends AbstractHelmChartIT {
     }
 
     protected @NotNull CompletableFuture<String> brokerExtensionStartedFuture() {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX,
+        return logWaiter.waitFor(platformLogWaiterPrefix,
                 ".*Extension \"HiveMQ Enterprise Bridge Extension\" version .* started successfully.");
     }
 
     protected @NotNull CompletableFuture<String> brokerExtensionStoppedFuture() {
-        return logWaiter.waitFor(PLATFORM_LOG_WAITER_PREFIX,
+        return logWaiter.waitFor(platformLogWaiterPrefix,
                 ".*Extension \"HiveMQ Enterprise Bridge Extension\" version .* stopped successfully.");
     }
 
