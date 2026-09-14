@@ -17,7 +17,7 @@ Please make sure that you configure a valid custom ServiceAccount in the HiveMQ 
 
 *** Warning ***
 The Operator is not configured to create the RBAC permissions (Role and RoleBinding) for the ServiceAccount of the HiveMQ Platform Pods.
-Please make sure the HiveMQ Platform Helm charts values.yaml configures a ServiceAccount (see nodes.serviceAccountName) with sufficient RBAC permissions to list, get and watch Pods.
+Please make sure the HiveMQ Platform Helm charts values.yaml configures a ServiceAccount (see nodes.serviceAccountName) with sufficient RBAC permissions to get, patch and update Pods.
 {{- end }}
 {{- if hasKey .Values.resources "overrideLimits" }}
 
