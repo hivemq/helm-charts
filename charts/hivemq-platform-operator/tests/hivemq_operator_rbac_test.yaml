@@ -327,3 +327,37 @@ tests:
     asserts:
       - matchSnapshot:
           path: rules
+
+  - it: with default values, secrets permissions are read-only
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "secrets" ]
+            verbs: [ "get", "list", "watch" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "configmaps", "events", "pods", "services" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
+
+  - it: with namespaces, secrets permissions are read-only
+    set:
+      namespaces: platform-one
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "secrets" ]
+            verbs: [ "get", "list", "watch" ]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [ "" ]
+            resources: [ "configmaps", "events", "pods", "services" ]
+            verbs: [ "get", "list", "watch", "create", "patch", "update", "delete" ]
