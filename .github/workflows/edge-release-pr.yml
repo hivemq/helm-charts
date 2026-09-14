@@ -84,7 +84,7 @@ jobs:
           APP_VERSION: ${{ inputs.app_version }}
         run: |
           if [ "$DRY_RUN" = "true" ]; then
-            echo "⚠️  DRY RUN: would push next-edge-release and create PR"
+            echo "⚠️  DRY RUN: would push next-edge-release, create PR, and enable auto-merge"
             git diff HEAD~1 --stat
           else
             git push origin next-edge-release
