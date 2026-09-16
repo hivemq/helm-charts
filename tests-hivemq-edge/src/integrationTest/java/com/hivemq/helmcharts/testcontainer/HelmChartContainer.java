@@ -1,6 +1,7 @@
 package com.hivemq.helmcharts.testcontainer;
 
 import com.github.dockerjava.api.DockerClient;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
@@ -56,6 +57,7 @@ public class HelmChartContainer extends K3sContainer {
     private static final @NotNull String LOG_PREFIX_EVENT = "EVENT";
     private static final @NotNull String LOG_PREFIX_POD = "POD";
     private static final @NotNull String LOG_PREFIX_K3S = "K3S";
+    private static final @NotNull String LOG_PREFIX_NODE = "NODE";
     private static final @NotNull Set<String> LOG_WATCHER_CONTAINERS = Set.of("hivemq-edge");
     private static final @NotNull Pattern LOGBACK_DATE_PREFIX =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} (.*)");
@@ -383,6 +385,7 @@ public class HelmChartContainer extends K3sContainer {
     private class EventWatcher implements Watcher<Event> {
 
         private final @NotNull KubernetesClient client;
+        private final @NotNull Set<String> failedSchedulingPodUids = ConcurrentHashMap.newKeySet();
 
         EventWatcher(final @NotNull KubernetesClient client) {
             this.client = client;
@@ -410,6 +413,9 @@ public class HelmChartContainer extends K3sContainer {
             final var eventLog = "%s [%s] %s [%s:%s]".formatted(event.getType(), reason, note, namespace, podName);
             LOG.info("[{}] {}", LOG_PREFIX_EVENT, eventLog);
             logWaiter.accept(LOG_PREFIX_EVENT, eventLog);
+            if (reason.equals("FailedScheduling") && failedSchedulingPodUids.add(podUid)) {
+                logNodeResources();
+            }
 
             // extract and check container name
             if (!eventRegarding.getKind().equals("Pod")) {
@@ -477,6 +483,30 @@ public class HelmChartContainer extends K3sContainer {
             }
         }
 
+        private void logNodeResources() {
+            try {
+                for (final var node : client.nodes().list().getItems()) {
+                    LOG.info("[{}] Node {} capacity: {}, allocatable: {}",
+                            LOG_PREFIX_NODE,
+                            node.getMetadata().getName(),
+                            node.getStatus().getCapacity(),
+                            node.getStatus().getAllocatable());
+                }
+                for (final var pod : client.pods().inAnyNamespace().list().getItems()) {
+                    LOG.info("[{}] Pod {}/{} ({}) on node {} requests: containers {}, init containers {}",
+                            LOG_PREFIX_NODE,
+                            pod.getMetadata().getNamespace(),
+                            pod.getMetadata().getName(),
+                            pod.getStatus().getPhase(),
+                            pod.getSpec().getNodeName(),
+                            getResourceRequests(pod.getSpec().getContainers()),
+                            getResourceRequests(pod.getSpec().getInitContainers()));
+                }
+            } catch (final Exception e) {
+                LOG.warn("[{}] Could not log node resources", LOG_PREFIX_NODE, e);
+            }
+        }
+
         private @NotNull String getLogPodName(final @NotNull String podName) {
             final var maxLength = 20;
             if (podName.length() < maxLength) {
@@ -487,6 +517,14 @@ public class HelmChartContainer extends K3sContainer {
                 return podName.substring(0, maxLength);
             }
             return podName.substring(0, dashPos);
+        }
+
+        private static @NotNull List<String> getResourceRequests(final @NotNull List<Container> containers) {
+            return containers.stream()
+                    .map(container -> container.getName() +
+                            "=" +
+                            (container.getResources() != null ? container.getResources().getRequests() : Map.of()))
+                    .toList();
         }
 
         @Override
