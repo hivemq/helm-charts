@@ -663,20 +663,24 @@ public class HelmChartContainer extends K3sContainer {
                             node.getStatus().getAllocatable());
                 }
                 for (final var pod : client.pods().inAnyNamespace().list().getItems()) {
+                    final var podStatus = pod.getStatus();
+                    final var podResources = podStatus.getResources();
                     LOG.info("[{}] Pod {}/{} ({}) on node {} requests: containers {}, init containers {}",
                             LOG_PREFIX_NODE,
                             pod.getMetadata().getNamespace(),
                             pod.getMetadata().getName(),
-                            pod.getStatus().getPhase(),
+                            podStatus.getPhase(),
                             pod.getSpec().getNodeName(),
                             getResourceRequests(pod.getSpec().getContainers()),
                             getResourceRequests(pod.getSpec().getInitContainers()));
-                    LOG.info("[{}] Pod {}/{} status resources: containers {}, init containers {}",
+                    LOG.info("[{}] Pod {}/{} status resources: pod requests {}, allocated {}, containers {}, init containers {}",
                             LOG_PREFIX_NODE,
                             pod.getMetadata().getNamespace(),
                             pod.getMetadata().getName(),
-                            getStatusResources(pod.getStatus().getContainerStatuses()),
-                            getStatusResources(pod.getStatus().getInitContainerStatuses()));
+                            podResources != null ? podResources.getRequests() : Map.of(),
+                            podStatus.getAllocatedResources(),
+                            getStatusResources(podStatus.getContainerStatuses()),
+                            getStatusResources(podStatus.getInitContainerStatuses()));
                 }
             } catch (final Exception e) {
                 LOG.warn("[{}] Could not log node resources", LOG_PREFIX_NODE, e);
