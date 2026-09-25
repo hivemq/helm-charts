@@ -2,6 +2,7 @@ package com.hivemq.helmcharts.testcontainer;
 
 import com.github.dockerjava.api.DockerClient;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.events.v1.Event;
@@ -501,6 +502,12 @@ public class HelmChartContainer extends K3sContainer {
                             pod.getSpec().getNodeName(),
                             getResourceRequests(pod.getSpec().getContainers()),
                             getResourceRequests(pod.getSpec().getInitContainers()));
+                    LOG.info("[{}] Pod {}/{} status resources: containers {}, init containers {}",
+                            LOG_PREFIX_NODE,
+                            pod.getMetadata().getNamespace(),
+                            pod.getMetadata().getName(),
+                            getStatusResources(pod.getStatus().getContainerStatuses()),
+                            getStatusResources(pod.getStatus().getInitContainerStatuses()));
                 }
             } catch (final Exception e) {
                 LOG.warn("[{}] Could not log node resources", LOG_PREFIX_NODE, e);
@@ -520,11 +527,19 @@ public class HelmChartContainer extends K3sContainer {
         }
 
         private static @NotNull List<String> getResourceRequests(final @NotNull List<Container> containers) {
-            return containers.stream()
-                    .map(container -> container.getName() +
-                            "=" +
-                            (container.getResources() != null ? container.getResources().getRequests() : Map.of()))
-                    .toList();
+            return containers.stream().map(container -> {
+                final var resources = container.getResources();
+                return "%s=%s".formatted(container.getName(), resources != null ? resources.getRequests() : Map.of());
+            }).toList();
+        }
+
+        private static @NotNull List<String> getStatusResources(final @NotNull List<ContainerStatus> containerStatuses) {
+            return containerStatuses.stream().map(containerStatus -> {
+                final var resources = containerStatus.getResources();
+                return "%s requests=%s allocated=%s".formatted(containerStatus.getName(),
+                        resources != null ? resources.getRequests() : Map.of(),
+                        containerStatus.getAllocatedResources());
+            }).toList();
         }
 
         @Override
