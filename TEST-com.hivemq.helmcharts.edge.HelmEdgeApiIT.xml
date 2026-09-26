@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.edge.HelmEdgeApiIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-26T16:37:54.095Z" hostname="runnervmtr4k5" time="64.582">
+<testsuite name="com.hivemq.helmcharts.edge.HelmEdgeApiIT" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-09-26T22:30:34.405Z" hostname="runnervmtr4k5" time="480.142">
   <properties/>
-  <testcase name="getAdapterTypes_returnsExpectedNumberOfAdapters()" classname="com.hivemq.helmcharts.edge.HelmEdgeApiIT" time="42.045"/>
+  <testcase name="getAdapterTypes_returnsExpectedNumberOfAdapters()" classname="com.hivemq.helmcharts.edge.HelmEdgeApiIT" time="360.497">
+    <failure message="java.util.concurrent.TimeoutException" type="java.util.concurrent.TimeoutException">java.util.concurrent.TimeoutException
+	at java.base/java.util.concurrent.CompletableFuture.timedGet(CompletableFuture.java:1981)
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2116)
+	at com.hivemq.helmcharts.edge.HelmEdgeApiIT.getAdapterTypes_returnsExpectedNumberOfAdapters(HelmEdgeApiIT.java:51)
+</failure>
+  </testcase>
+  <testcase name="getAdapterTypes_returnsExpectedNumberOfAdapters()" classname="com.hivemq.helmcharts.edge.HelmEdgeApiIT" time="35.687"/>
 </testsuite>
