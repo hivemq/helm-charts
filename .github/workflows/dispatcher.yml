@@ -173,6 +173,9 @@ jobs:
       needs.platform-operator-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/platform-smoke-test.yml
     secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
 
   platform-integration-tests:
     name: Platform integration tests
@@ -184,6 +187,13 @@ jobs:
       needs.platform-operator-changes.outputs.should-run == 'true'
     uses: ./.github/workflows/platform-integration-tests.yml
     secrets: inherit
+    # explicit permissions replace the write-all default: contents for the JUnit report merge, checks for the
+    # test report, actions for the JUnit report artifacts, id-token for the ECR Public login
+    permissions:
+      contents: write
+      checks: write
+      actions: read
+      id-token: write
 
   helm-image-verify-tests:
     name: Helm test image verify tests
