@@ -54,6 +54,21 @@ jobs:
           registry_name: kind-registry
           registry_port: 5000
 
+      - name: Configure AWS credentials for ECR Public
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4
+        with:
+          role-to-assume: arn:aws:iam::691852750577:role/ecr-gha-public-pull
+          aws-region: us-east-1
+
+      # the included hivemq-platform-operator build pulls its base image from ECR Public; authenticated pulls lift
+      # the anonymous 1/s cap that parallel jobs hit
+      - name: Log in to ECR Public
+        run: |
+          password=$(aws ecr-public get-login-password --region us-east-1)
+          echo "::add-mask::$password"
+          echo "ORG_GRADLE_PROJECT_ecrPublicUsername=AWS" >> "$GITHUB_ENV"
+          echo "ORG_GRADLE_PROJECT_ecrPublicPassword=$password" >> "$GITHUB_ENV"
+
       - name: Push images to the Kind registry
         working-directory: helm-charts
         env:
