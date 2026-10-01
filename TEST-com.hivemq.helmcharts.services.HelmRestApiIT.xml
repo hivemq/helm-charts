@@ -1,22 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.services.HelmRestApiIT" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-09-30T15:55:44.862Z" hostname="runnervmtr4k5" time="234.293">
+<testsuite name="com.hivemq.helmcharts.services.HelmRestApiIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-01T19:05:50.489Z" hostname="runnervm8df0l" time="90.121">
   <properties/>
-  <testcase name="platformChart_whenRestApiEnabled_thenCallsEndpoint()" classname="com.hivemq.helmcharts.services.HelmRestApiIT" time="96.037">
-    <failure message="java.lang.AssertionError: 1 expectation failed.&#10;Expected status code &lt;200&gt; but was &lt;404&gt;.&#10;" type="java.lang.AssertionError">java.lang.AssertionError: 1 expectation failed.
-Expected status code &lt;200&gt; but was &lt;404&gt;.
-
-	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:344)
-	at io.restassured.internal.ResponseSpecificationImpl$HamcrestAssertionClosure.validate(ResponseSpecificationImpl.groovy:516)
-	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:344)
-	at io.restassured.internal.ResponseSpecificationImpl.validateResponseIfRequired(ResponseSpecificationImpl.groovy:714)
-	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:344)
-	at io.restassured.internal.ResponseSpecificationImpl.statusCode(ResponseSpecificationImpl.groovy:139)
-	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:344)
-	at io.restassured.internal.ResponseSpecificationImpl.statusCode(ResponseSpecificationImpl.groovy:147)
-	at io.restassured.internal.ValidatableResponseOptionsImpl.statusCode(ValidatableResponseOptionsImpl.java:89)
-	at com.hivemq.helmcharts.util.RestAPIUtil.getAllMqttClients(RestAPIUtil.java:138)
-	at com.hivemq.helmcharts.services.HelmRestApiIT.platformChart_whenRestApiEnabled_thenCallsEndpoint(HelmRestApiIT.java:25)
-</failure>
-  </testcase>
-  <testcase name="platformChart_whenRestApiEnabled_thenCallsEndpoint()" classname="com.hivemq.helmcharts.services.HelmRestApiIT" time="115.436"/>
+  <testcase name="platformChart_whenRestApiEnabled_thenCallsEndpoint()" classname="com.hivemq.helmcharts.services.HelmRestApiIT" time="90.12"/>
 </testsuite>
