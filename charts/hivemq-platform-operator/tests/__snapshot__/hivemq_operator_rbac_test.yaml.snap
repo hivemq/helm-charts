@@ -40,7 +40,6 @@ with default values:
         - configmaps
         - events
         - pods
-        - secrets
         - services
       verbs:
         - get
@@ -50,6 +49,14 @@ with default values:
         - patch
         - update
         - delete
+    - apiGroups:
+        - ""
+      resources:
+        - secrets
+      verbs:
+        - get
+        - list
+        - watch
     - apiGroups:
         - apps
       resources:
@@ -138,7 +145,6 @@ with namespaces:
         - configmaps
         - events
         - pods
-        - secrets
         - services
       verbs:
         - get
@@ -148,6 +154,14 @@ with namespaces:
         - patch
         - update
         - delete
+    - apiGroups:
+        - ""
+      resources:
+        - secrets
+      verbs:
+        - get
+        - list
+        - watch
     - apiGroups:
         - apps
       resources:
@@ -214,7 +228,6 @@ with namespaces:
         - configmaps
         - events
         - pods
-        - secrets
         - services
       verbs:
         - get
@@ -224,6 +237,14 @@ with namespaces:
         - patch
         - update
         - delete
+    - apiGroups:
+        - ""
+      resources:
+        - secrets
+      verbs:
+        - get
+        - list
+        - watch
     - apiGroups:
         - apps
       resources:
