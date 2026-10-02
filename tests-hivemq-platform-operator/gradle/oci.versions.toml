@@ -90,3 +90,9 @@ reference = "21-al2023-jdk@sha256:70c4c569bf3f794e4b9f22619efb64a072a5d97fd66867
 name = "jre-corretto25-al2023"
 image = "library/amazoncorretto"
 reference = "25-al2023-jdk@sha256:c03c31e0e277996ddc4c80f0d674b7da29db3ab488b8b58c5d8f58b2abbe5d59"
+
+# https://container-registry.oracle.com/ords/ocr/ba/java/jdk-no-fee-term
+[[oci]]
+name = "jre-oracle25-ol9"
+image = "container-registry.oracle.com/java/jdk-no-fee-term"
+reference = "25-oraclelinux9@sha256:947650420cbf1a8d0ade992ed0cdc2edab4f8d4da1b80f501a56d3392e09e921"
