@@ -55,6 +55,7 @@ val jreBaseImages = mapOf(
     "semeru25-noble" to ociImages.jre.semeru25.noble,
     "corretto21-al2023" to ociImages.jre.corretto21.al2023,
     "corretto25-al2023" to ociImages.jre.corretto25.al2023,
+    "oracle25-ol9" to ociImages.jre.oracle25.ol9,
 )
 
 /*
@@ -231,6 +232,10 @@ oci {
             url = uri("https://public.ecr.aws")
             optionalCredentials()
             exclusiveContent { includeGroup("hivemq.library") }
+        }
+        registry("oracle") {
+            url = uri("https://${ociImages.jre.oracle25.ol9.registry}")
+            exclusiveContent { includeModule(jreBaseImageGroup, "oracle25-ol9") }
         }
     }
     imageMapping {
