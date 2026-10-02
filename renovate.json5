@@ -69,7 +69,7 @@
             allowedVersions: '/^v1\\.35\\./',
         },
         {
-            description: 'Stay on Java 21 and 25 for the Java runtime base images of the custom HiveMQ Platform image variants. Digest, minor and patch updates still apply',
+            description: 'Keep the Java 21 and 25 variants of the custom HiveMQ Platform image on their major. The latest variants are not matched and follow the newest Java release. Digest updates still apply',
             matchFileNames: [
                 '**/gradle/oci.versions.toml',
             ],
@@ -79,10 +79,32 @@
                 'library/ibm-semeru-runtimes',
                 'container-registry.oracle.com/java/jdk-no-fee-term',
             ],
+            matchCurrentValue: '/^(open-)?(21|25)-/',
             matchUpdateTypes: [
                 'major',
             ],
             enabled: false,
+        },
+        {
+            description: 'Parse the Java version from the IBM Semeru Runtimes tags, the "open-" prefix is not supported by the Docker versioning',
+            matchFileNames: [
+                '**/gradle/oci.versions.toml',
+            ],
+            matchPackageNames: [
+                'library/ibm-semeru-runtimes',
+            ],
+            versioning: 'regex:^open-(?<major>\\d+)(?<compatibility>-.+)$',
+        },
+        {
+            description: 'Let the latest Eclipse Temurin variants of the custom HiveMQ Platform image follow the newest Java release, overriding the Java 25 limit of the shared config',
+            matchFileNames: [
+                '**/gradle/oci.versions.toml',
+            ],
+            matchPackageNames: [
+                'library/eclipse-temurin',
+            ],
+            matchCurrentValue: '!/^(21|25)-/',
+            allowedVersions: '/^\\d+-/',
         },
         {
             description: 'Stay on Cosign 2.x - Cosign 3.x signs exclusively via the OCI 1.1 referrers API, which our registry does not support',

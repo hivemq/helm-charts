@@ -96,3 +96,35 @@ reference = "25-al2023-jdk@sha256:c03c31e0e277996ddc4c80f0d674b7da29db3ab488b8b5
 name = "jre-oracle25-ol9"
 image = "container-registry.oracle.com/java/jdk-no-fee-term"
 reference = "25-oraclelinux9@sha256:947650420cbf1a8d0ade992ed0cdc2edab4f8d4da1b80f501a56d3392e09e921"
+
+# Java runtime base images of the newest Java release, Renovate updates them to the next major version.
+
+# https://hub.docker.com/_/eclipse-temurin/tags?name=-jre-resolute
+[[oci]]
+name = "jre-temurinlatest-resolute"
+image = "library/eclipse-temurin"
+reference = "26-jre-resolute@sha256:ceaf314a81cc2e24eed3076944002b9badb00209283d7afca273ad909c90e6b0"
+
+# https://hub.docker.com/_/eclipse-temurin/tags?name=-jre-ubi10-minimal
+[[oci]]
+name = "jre-temurinlatest-ubi10"
+image = "library/eclipse-temurin"
+reference = "26-jre-ubi10-minimal@sha256:8f87e8404d244810ed64ead791ebfb0be5668562881ee4360dda5436d37af705"
+
+# https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=-jre-noble
+[[oci]]
+name = "jre-semerulatest-noble"
+image = "library/ibm-semeru-runtimes"
+reference = "open-27-jre-noble@sha256:6059c4d2324d6cd3b77fb331e7d1dab2b7fa22560662d4d214a6e902a34873d7"
+
+# https://hub.docker.com/_/amazoncorretto/tags?name=-al2023-jdk
+[[oci]]
+name = "jre-correttolatest-al2023"
+image = "library/amazoncorretto"
+reference = "27-al2023-jdk@sha256:bda485d0d89dcbc58f60681ed07121e941e512f8713713776a1afeb2aa6159ce"
+
+# https://container-registry.oracle.com/ords/ocr/ba/java/jdk-no-fee-term
+[[oci]]
+name = "jre-oraclelatest-ol9"
+image = "container-registry.oracle.com/java/jdk-no-fee-term"
+reference = "27-oraclelinux9@sha256:01de4136f638dbfcb372e7df9c4bf63b117a326b63450c0446473dbf8566cf35"

@@ -48,14 +48,20 @@ val k3sTag = resolveK3sTag()
 val customPlatformImageVariant: String? = providers.gradleProperty("customPlatformImageVariant").orNull
 
 val jreBaseImages = mapOf(
-    "temurin21-resolute" to ociImages.jre.temurin21.resolute,
-    "temurin21-ubi9" to ociImages.jre.temurin21.ubi9,
-    "temurin25-ubi10" to ociImages.jre.temurin25.ubi10,
-    "semeru21-noble" to ociImages.jre.semeru21.noble,
-    "semeru25-noble" to ociImages.jre.semeru25.noble,
-    "corretto21-al2023" to ociImages.jre.corretto21.al2023,
-    "corretto25-al2023" to ociImages.jre.corretto25.al2023,
-    "oracle25-ol9" to ociImages.jre.oracle25.ol9,
+    "temurin-21-resolute" to ociImages.jre.temurin21.resolute,
+    "temurin-latest-resolute" to ociImages.jre.temurinlatest.resolute,
+    "temurin-21-ubi9" to ociImages.jre.temurin21.ubi9,
+    "temurin-25-ubi10" to ociImages.jre.temurin25.ubi10,
+    "temurin-latest-ubi10" to ociImages.jre.temurinlatest.ubi10,
+    "semeru-21-noble" to ociImages.jre.semeru21.noble,
+    "semeru-25-noble" to ociImages.jre.semeru25.noble,
+    "semeru-latest-noble" to ociImages.jre.semerulatest.noble,
+    "corretto-21-al2023" to ociImages.jre.corretto21.al2023,
+    "corretto-25-al2023" to ociImages.jre.corretto25.al2023,
+    "corretto-latest-al2023" to ociImages.jre.correttolatest.al2023,
+    // TODO: Enable once gradle-oci can pull from the Oracle registry (https://github.com/SgtSilvio/gradle-oci/pull/157)
+    // "oracle-25-ol9" to ociImages.jre.oracle25.ol9,
+    // "oracle-latest-ol9" to ociImages.jre.oraclelatest.ol9,
 )
 
 /*
@@ -235,7 +241,10 @@ oci {
         }
         registry("oracle") {
             url = uri("https://${ociImages.jre.oracle25.ol9.registry}")
-            exclusiveContent { includeModule(jreBaseImageGroup, "oracle25-ol9") }
+            exclusiveContent {
+                includeModule(jreBaseImageGroup, "oracle-25-ol9")
+                includeModule(jreBaseImageGroup, "oracle-latest-ol9")
+            }
         }
     }
     imageMapping {

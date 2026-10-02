@@ -50,27 +50,31 @@ The official HiveMQ Platform image is built on Ubuntu with an Eclipse Temurin JR
 Set the `customPlatformImageVariant` property to build such an image and run the tests against it:
 
 ```bash
-./gradlew integrationTest -PcustomPlatformImageVariant=temurin21-ubi9
+./gradlew integrationTest -PcustomPlatformImageVariant=temurin-21-ubi9
 ```
 
 The image is built from the platform distribution of the `hivemq-platform` version in `gradle/libs.versions.toml` on top of the Java runtime base image of the variant. It is only served to the K3s cluster of the test run and is never published to a registry.
 
 The following variants are available:
 
-| Variant              | Base image                              | JVM     | Java |
-|----------------------|-----------------------------------------|---------|------|
-| `temurin21-resolute` | `eclipse-temurin:21-jre-resolute`       | HotSpot | 21   |
-| `temurin21-ubi9`     | `eclipse-temurin:21-jre-ubi9-minimal`   | HotSpot | 21   |
-| `temurin25-ubi10`    | `eclipse-temurin:25-jre-ubi10-minimal`  | HotSpot | 25   |
-| `semeru21-noble`     | `ibm-semeru-runtimes:open-21-jre-noble` | OpenJ9  | 21   |
-| `semeru25-noble`     | `ibm-semeru-runtimes:open-25-jre-noble` | OpenJ9  | 25   |
-| `corretto21-al2023`  | `amazoncorretto:21-al2023-jdk`          | HotSpot | 21   |
-| `corretto25-al2023`  | `amazoncorretto:25-al2023-jdk`          | HotSpot | 25   |
+| Variant                   | Base image                                    | JVM     | Java   |
+|---------------------------|-----------------------------------------------|---------|--------|
+| `temurin-21-resolute`     | `eclipse-temurin:21-jre-resolute`             | HotSpot | 21     |
+| `temurin-latest-resolute` | `eclipse-temurin:<latest>-jre-resolute`       | HotSpot | latest |
+| `temurin-21-ubi9`         | `eclipse-temurin:21-jre-ubi9-minimal`         | HotSpot | 21     |
+| `temurin-25-ubi10`        | `eclipse-temurin:25-jre-ubi10-minimal`        | HotSpot | 25     |
+| `temurin-latest-ubi10`    | `eclipse-temurin:<latest>-jre-ubi10-minimal`  | HotSpot | latest |
+| `semeru-21-noble`         | `ibm-semeru-runtimes:open-21-jre-noble`       | OpenJ9  | 21     |
+| `semeru-25-noble`         | `ibm-semeru-runtimes:open-25-jre-noble`       | OpenJ9  | 25     |
+| `semeru-latest-noble`     | `ibm-semeru-runtimes:open-<latest>-jre-noble` | OpenJ9  | latest |
+| `corretto-21-al2023`      | `amazoncorretto:21-al2023-jdk`                | HotSpot | 21     |
+| `corretto-25-al2023`      | `amazoncorretto:25-al2023-jdk`                | HotSpot | 25     |
+| `corretto-latest-al2023`  | `amazoncorretto:<latest>-al2023-jdk`          | HotSpot | latest |
 
 Only the tests tagged with `custom-platform-image` run in this mode, and a `--tests` filter can narrow the selection further:
 
 ```bash
-./gradlew integrationTest -PcustomPlatformImageVariant=semeru25-noble --tests '*HelmMqttIT*'
+./gradlew integrationTest -PcustomPlatformImageVariant=semeru-25-noble --tests '*HelmMqttIT*'
 ```
 
 Without the property, the build resolves the official HiveMQ Platform image and runs the whole suite, as it does for every regular test run.
