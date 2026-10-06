@@ -26,7 +26,7 @@ reference = "latest@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae83
 [[oci]]
 name = "nginx"
 image = "library/nginx"
-reference = "latest@sha256:abe47724e466aeab9a345d8e46a221c2fa8953c7848bb4a3bd9976a7199f8cf2"
+reference = "latest@sha256:f9ea18bfa4fad859e1ed38259d711da7ccad2c3516e875cec3351a57c859f571"
 
 # https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
 [[oci]]
@@ -83,13 +83,13 @@ reference = "open-25-jre-noble@sha256:8278bc81988426202699630593d49aeb811c611e22
 [[oci]]
 name = "jre-corretto21-al2023"
 image = "library/amazoncorretto"
-reference = "21-al2023-jdk@sha256:70c4c569bf3f794e4b9f22619efb64a072a5d97fd66867fd134398c12d6f2905"
+reference = "21-al2023-jdk@sha256:d965a0725293a57ea781ba3712d4f024f338aefa249af83b5c1f3981d0e21556"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=25-al2023-jdk
 [[oci]]
 name = "jre-corretto25-al2023"
 image = "library/amazoncorretto"
-reference = "25-al2023-jdk@sha256:c03c31e0e277996ddc4c80f0d674b7da29db3ab488b8b58c5d8f58b2abbe5d59"
+reference = "25-al2023-jdk@sha256:06f99cdfd01c26ed2a5b03dc85385d36c17aa81ddfcaf8500f641ab556a985d6"
 
 # https://container-registry.oracle.com/ords/ocr/ba/java/jdk-no-fee-term
 [[oci]]
@@ -121,7 +121,7 @@ reference = "open-27-jre-noble@sha256:dc81b845d519ffb571e27d064c67bf8ed2ce319f0d
 [[oci]]
 name = "jre-correttolatest-al2023"
 image = "library/amazoncorretto"
-reference = "27-al2023-jdk@sha256:bda485d0d89dcbc58f60681ed07121e941e512f8713713776a1afeb2aa6159ce"
+reference = "27-al2023-jdk@sha256:3bca6d83fb33e63fe5386c7f8e290e4f70ecb2a406ae59eaf5cfd6fddca01563"
 
 # https://container-registry.oracle.com/ords/ocr/ba/java/jdk-no-fee-term
 [[oci]]
