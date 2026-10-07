@@ -23,7 +23,7 @@
           "uid": "prometheus"
         },
         "enable": true,
-        "expr": "resets(process_uptime_seconds{instance=\"$instance\"}[1m]) > 0",
+        "expr": "min(process_uptime_seconds{job=~\".*operator.*\", instance=~\"$instance\"}) < 60",
         "hide": false,
         "iconColor": "rgba(255, 96, 96, 1)",
         "name": "Restart Detection",
@@ -121,7 +121,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_uptime_seconds{instance=\"$instance\"}",
+          "expr": "process_uptime_seconds{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -198,7 +198,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_start_time_seconds{instance=\"$instance\"}*1000",
+          "expr": "process_start_time_seconds{instance=~\"$instance\"}*1000",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -282,7 +282,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=~\"$instance\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{instance=~\"$instance\", area=\"heap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -375,7 +375,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"nonheap\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=~\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{instance=~\"$instance\", area=\"nonheap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -488,7 +488,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_custom_resource_namespaces_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_custom_resource_namespaces_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -502,7 +502,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_custom_resource_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_custom_resource_count{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -755,7 +755,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_custom_resource_state_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_custom_resource_state_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -940,7 +940,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_health_system_current{instance=\"$instance\"}",
+          "expr": "hivemq_platform_health_system_current{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1041,7 +1041,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_concurrency_limit_active_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_concurrency_limit_active_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1055,7 +1055,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_concurrency_limit_blocked_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_concurrency_limit_blocked_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1152,7 +1152,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_informer_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_informer_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1166,7 +1166,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_informer_event_source_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_informer_event_source_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1180,7 +1180,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_informer_unsynced_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_informer_unsynced_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1277,17 +1277,32 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "hivemq_platform_operator_informer_cached_resource_count{instance=\"$instance\"}",
+          "expr": "hivemq_platform_operator_informer_cached_resource_count{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{event_source}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(hivemq_platform_operator_custom_resource_count{instance=~\"$instance\"})",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "HiveMQ Platforms (for comparison)",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Informer cache size (per source)",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Objects retained per informer cache. Compare the ConfigMap and Secret series against the platform count: they scale with referenced objects, not with the namespace inventory."
     },
     {
       "collapsed": false,
@@ -1391,7 +1406,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_success_total{instance=~\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1405,7 +1420,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(reconciliations_failure_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_failure_total{instance=~\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1507,7 +1522,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(reconciliations_started_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_started_total{instance=~\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1608,7 +1623,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(reconciliations_success_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_success_total{instance=~\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1710,7 +1725,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(reconciliations_failure_total{instance=\"$instance\"}[$__rate_interval])",
+          "expr": "rate(reconciliations_failure_total{instance=~\"$instance\"}[$__rate_interval])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1767,7 +1782,7 @@
           "color": "rgba(255,0,255,0.7)"
         },
         "filterValues": {
-          "le": 1e-9
+          "le": 1e-09
         },
         "legend": {
           "show": true
@@ -1794,7 +1809,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(rate(reconciliations_execution_duration_seconds_bucket{instance=\"$instance\"}[1m])) by (le)",
+          "expr": "sum(rate(reconciliations_execution_duration_seconds_bucket{instance=~\"$instance\"}[1m])) by (le)",
           "format": "heatmap",
           "hide": false,
           "instant": false,
@@ -1897,7 +1912,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "reconciliations_execution_duration_seconds_max{instance=\"$instance\"}",
+          "expr": "reconciliations_execution_duration_seconds_max{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -2000,7 +2015,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=~\"$instance\", area=\"heap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "used",
@@ -2013,7 +2028,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_committed_bytes{instance=\"$instance\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_committed_bytes{instance=~\"$instance\", area=\"heap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "committed",
@@ -2025,7 +2040,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_max_bytes{instance=~\"$instance\", area=\"heap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "max",
@@ -2127,7 +2142,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_used_bytes{instance=\"$instance\", area=\"nonheap\"})",
+          "expr": "sum(jvm_memory_used_bytes{instance=~\"$instance\", area=\"nonheap\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -2141,7 +2156,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_committed_bytes{instance=\"$instance\", area=\"nonheap\"})",
+          "expr": "sum(jvm_memory_committed_bytes{instance=~\"$instance\", area=\"nonheap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "committed",
@@ -2153,7 +2168,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(jvm_memory_max_bytes{instance=\"$instance\", area=\"nonheap\"})",
+          "expr": "sum(jvm_memory_max_bytes{instance=~\"$instance\", area=\"nonheap\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "max",
@@ -2162,6 +2177,117 @@
         }
       ],
       "title": "JVM Non-Heap",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 49
+      },
+      "id": 200,
+      "options": {
+        "dataLinks": [],
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(jvm_memory_used_bytes{instance=~\"$instance\", area=\"heap\"})",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "used",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "min_over_time(sum(jvm_memory_used_bytes{instance=~\"$instance\", area=\"heap\"})[10m:30s])",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "live estimate (10m GC floor)",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "JVM Heap (live estimate)",
       "type": "timeseries"
     },
     {
@@ -2269,7 +2395,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "system_cpu_usage{instance=\"$instance\"}",
+          "expr": "system_cpu_usage{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2283,7 +2409,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_cpu_usage{instance=\"$instance\"}",
+          "expr": "process_cpu_usage{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2295,7 +2421,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg_over_time(process_cpu_usage{instance=\"$instance\"}[1h])",
+          "expr": "avg_over_time(process_cpu_usage{instance=~\"$instance\"}[1h])",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2397,7 +2523,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "system_load_average_1m{instance=\"$instance\"}",
+          "expr": "system_load_average_1m{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "system-1m",
@@ -2410,7 +2536,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "system_cpu_count{instance=\"$instance\"}",
+          "expr": "system_cpu_count{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "cpus",
@@ -2507,7 +2633,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_threads_states_threads{instance=\"$instance\"}",
+          "expr": "jvm_threads_states_threads{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -2605,7 +2731,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_threads_live_threads{instance=\"$instance\"}",
+          "expr": "jvm_threads_live_threads{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "live",
@@ -2618,7 +2744,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_threads_daemon_threads{instance=\"$instance\"}",
+          "expr": "jvm_threads_daemon_threads{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "daemon",
@@ -2631,7 +2757,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_threads_peak_threads{instance=\"$instance\"}",
+          "expr": "jvm_threads_peak_threads{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "peak",
@@ -2643,7 +2769,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_threads{instance=\"$instance\"}",
+          "expr": "process_threads{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -2742,7 +2868,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_files_open_files{instance=\"$instance\"}",
+          "expr": "process_files_open_files{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -2756,7 +2882,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "process_files_max_files{instance=\"$instance\"}",
+          "expr": "process_files_max_files{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -2873,7 +2999,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_memory_used_bytes{instance=\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
+          "expr": "jvm_memory_used_bytes{instance=~\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2888,7 +3014,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_memory_committed_bytes{instance=\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
+          "expr": "jvm_memory_committed_bytes{instance=~\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2903,7 +3029,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_memory_max_bytes{instance=\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
+          "expr": "jvm_memory_max_bytes{instance=~\"$instance\", id=~\"$jvm_memory_pool_heap\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3020,7 +3146,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_memory_used_bytes{instance=\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
+          "expr": "jvm_memory_used_bytes{instance=~\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3035,7 +3161,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_memory_committed_bytes{instance=\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
+          "expr": "jvm_memory_committed_bytes{instance=~\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3050,7 +3176,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_memory_max_bytes{instance=\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
+          "expr": "jvm_memory_max_bytes{instance=~\"$instance\", id=~\"$jvm_memory_pool_nonheap\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3164,7 +3290,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(jvm_gc_pause_seconds_count{instance=\"$instance\"}[2m])",
+          "expr": "rate(jvm_gc_pause_seconds_count{instance=~\"$instance\"}[2m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3263,7 +3389,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(jvm_gc_pause_seconds_sum{instance=\"$instance\"}[1m])/rate(jvm_gc_pause_seconds_count{instance=\"$instance\"}[1m])",
+          "expr": "rate(jvm_gc_pause_seconds_sum{instance=~\"$instance\"}[1m])/rate(jvm_gc_pause_seconds_count{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -3276,7 +3402,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_gc_pause_seconds_max{instance=\"$instance\"}",
+          "expr": "jvm_gc_pause_seconds_max{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -3375,7 +3501,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(jvm_gc_memory_allocated_bytes_total{instance=\"$instance\"}[2m])",
+          "expr": "rate(jvm_gc_memory_allocated_bytes_total{instance=~\"$instance\"}[2m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3387,7 +3513,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(jvm_gc_memory_promoted_bytes_total{instance=\"$instance\"}[2m])",
+          "expr": "rate(jvm_gc_memory_promoted_bytes_total{instance=~\"$instance\"}[2m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3499,7 +3625,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_classes_loaded_classes{instance=\"$instance\"}",
+          "expr": "jvm_classes_loaded_classes{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "loaded",
@@ -3598,7 +3724,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "delta(jvm_classes_loaded_classes{instance=\"$instance\"}[2m])",
+          "expr": "delta(jvm_classes_loaded_classes{instance=~\"$instance\"}[2m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3712,7 +3838,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_buffer_memory_used_bytes{instance=\"$instance\", id=\"direct\"}",
+          "expr": "jvm_buffer_memory_used_bytes{instance=~\"$instance\", id=\"direct\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "used",
@@ -3725,7 +3851,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_buffer_total_capacity_bytes{instance=\"$instance\", id=\"direct\"}",
+          "expr": "jvm_buffer_total_capacity_bytes{instance=~\"$instance\", id=\"direct\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "capacity",
@@ -3822,7 +3948,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_buffer_count_buffers{instance=\"$instance\", id=\"direct\"}",
+          "expr": "jvm_buffer_count_buffers{instance=~\"$instance\", id=\"direct\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "count",
@@ -3920,7 +4046,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_buffer_memory_used_bytes{instance=\"$instance\", id=\"mapped\"}",
+          "expr": "jvm_buffer_memory_used_bytes{instance=~\"$instance\", id=\"mapped\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "used",
@@ -3933,7 +4059,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_buffer_total_capacity_bytes{instance=\"$instance\", id=\"mapped\"}",
+          "expr": "jvm_buffer_total_capacity_bytes{instance=~\"$instance\", id=\"mapped\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "capacity",
@@ -4030,7 +4156,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_buffer_count_buffers{instance=\"$instance\", id=\"mapped\"}",
+          "expr": "jvm_buffer_count_buffers{instance=~\"$instance\", id=\"mapped\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "count",
@@ -4040,6 +4166,509 @@
         }
       ],
       "title": "Mapped Buffers",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 111
+      },
+      "id": 201,
+      "panels": [],
+      "title": "API Server (ConfigMaps / Secrets)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 112
+      },
+      "id": 202,
+      "options": {
+        "dataLinks": [],
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (resource, scope) (rate(apiserver_request_total{verb=\"LIST\", resource=~\"configmaps|secrets\"}[2m]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{resource}} ({{scope}})",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Cluster-wide LIST rate for ConfigMaps and Secrets, summed over every API server client, not only this operator. Requires Prometheus to scrape the kube-apiserver, otherwise this panel stays empty.",
+      "title": "ConfigMap / Secret LIST rate (cluster-wide, all clients)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 112
+      },
+      "id": 203,
+      "options": {
+        "dataLinks": [],
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (resource, scope) (rate(apiserver_response_sizes_sum{verb=\"LIST\", resource=~\"configmaps|secrets\"}[2m]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{resource}} ({{scope}})",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Cluster-wide LIST response bytes for ConfigMaps and Secrets, summed over every API server client, not only this operator. Requires Prometheus to scrape the kube-apiserver, otherwise this panel stays empty.",
+      "title": "ConfigMap / Secret LIST response bytes (cluster-wide, all clients)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 119
+      },
+      "id": 204,
+      "options": {
+        "dataLinks": [],
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (resource, code) (rate(apiserver_request_total{verb=\"GET\", resource=~\"configmaps|secrets\"}[2m]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{resource}} {{code}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Direct GET rate for ConfigMaps and Secrets. The operator falls back to a direct GET when a referenced object is not in its cache, so a sustained rate here suggests lookups are missing the cache. Split by response code: 200 is a referenced object that was found, 404 is one that does not exist and gets remembered as an absence. Cluster-wide, summed over every API server client, not only this operator. Requires Prometheus to scrape the kube-apiserver, otherwise this panel stays empty.",
+      "title": "ConfigMap / Secret GET rate (cluster-wide, all clients)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 119
+      },
+      "id": 205,
+      "options": {
+        "dataLinks": [],
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (resource) (rate(apiserver_request_total{verb=\"WATCH\", resource=~\"configmaps|secrets\"}[2m]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{resource}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Rate at which WATCH requests are established for ConfigMaps and Secrets. This counts watches being opened, not events delivered, so it shows re-list and reconnect churn rather than event volume. Cluster-wide, summed over every API server client, not only this operator. Requires Prometheus to scrape the kube-apiserver, otherwise this panel stays empty.",
+      "title": "ConfigMap / Secret WATCH establishments (cluster-wide, all clients)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 126
+      },
+      "id": 206,
+      "options": {
+        "dataLinks": [],
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (event, action) (rate(events_received_total{instance=~\"$instance\"}[2m]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "{{event}} / {{action}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Rate of informer events reaching the controller. Secondary resource events are reported as event=Event with action=unknown, custom resource events as event=ResourceEvent. Reducing the cache does not reduce this: every watched object still costs an event to deserialize.",
+      "title": "Events received by the controller",
       "type": "timeseries"
     }
   ],
@@ -4052,14 +4681,15 @@
       {
         "datasource": "prometheus",
         "definition": "",
-        "includeAll": false,
+        "includeAll": true,
         "label": "Instance",
         "name": "instance",
         "options": [],
         "query": "label_values(reconciliations_started_total{controller_name=\"hivemq-controller\"}, instance)",
         "refresh": 2,
         "regex": "",
-        "type": "query"
+        "type": "query",
+        "multi": true
       },
       {
         "datasource": "prometheus",
@@ -4068,7 +4698,7 @@
         "label": "JVM Memory Pools Heap",
         "name": "jvm_memory_pool_heap",
         "options": [],
-        "query": "label_values(jvm_memory_used_bytes{instance=\"$instance\", area=\"heap\"},id)",
+        "query": "label_values(jvm_memory_used_bytes{instance=~\"$instance\", area=\"heap\"},id)",
         "refresh": 1,
         "regex": "",
         "sort": 1,
@@ -4081,7 +4711,7 @@
         "label": "JVM Memory Pools Non-Heap",
         "name": "jvm_memory_pool_nonheap",
         "options": [],
-        "query": "label_values(jvm_memory_used_bytes{instance=\"$instance\", area=\"nonheap\"},id)",
+        "query": "label_values(jvm_memory_used_bytes{instance=~\"$instance\", area=\"nonheap\"},id)",
         "refresh": 1,
         "regex": "",
         "sort": 2,
@@ -4096,6 +4726,6 @@
   "timepicker": {},
   "timezone": "",
   "title": "HiveMQ Platform Operator (Prometheus)",
-  "version": 7,
+  "version": 8,
   "weekStart": ""
 }

@@ -82,7 +82,6 @@ Usage: {{- include "hivemq-platform-operator.rbac.rules.namespace" (dict "platfo
       - configmaps
       - events
       - pods
-      - secrets
       - services
     verbs:
       - get
@@ -92,6 +91,14 @@ Usage: {{- include "hivemq-platform-operator.rbac.rules.namespace" (dict "platfo
       - patch
       - update
       - delete
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
   - apiGroups:
       - apps
     resources:
