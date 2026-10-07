@@ -654,6 +654,8 @@ Normalizes extension input into a list.
 - Starts with the `extensions` array as the base list.
 - For each `extensionMap` entry with a matching array extension, merges the map entry on top (map wins per-field).
 - For each `extensionMap` entry with no match in the array, appends it as a new extension (in alphabetical order of the map key).
+- `extensionMap` entries set to null are skipped, so a null in an override values file removes an extension defined
+  through `extensionMap`. A same-named entry in the `extensions` array is kept unchanged.
 - Null-valued fields in the merged result are removed to avoid rendering empty values.
 Usage: {{ include "hivemq-platform.normalize-extensions" . }}
 */}}
@@ -678,7 +680,7 @@ Usage: {{ include "hivemq-platform.normalize-extensions" . }}
     {{- $processedExtensions = append $processedExtensions $extension.name -}}
   {{- end -}}
   {{- range $name, $extension := $extensionMap -}}
-    {{- if not (has $name $processedExtensions) -}}
+    {{- if and (not (kindIs "invalid" $extension)) (not (has $name $processedExtensions)) -}}
       {{- $extensions = append $extensions (merge (dict "name" $name) $extension) -}}
     {{- end -}}
   {{- end -}}
