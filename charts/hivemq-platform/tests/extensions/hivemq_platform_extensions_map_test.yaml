@@ -297,27 +297,17 @@ tests:
             configMapName: region-kafka-config
             extensionUri: preinstalled
 
-  # The test below verifies the documented contract: when `null` is the last value file in the chain,
-  # the extension is removed regardless of the values set in earlier files.
-  # It is skipped due to https://github.com/helm-unittest/helm-unittest/issues/845
-  # (helm-unittest does not strip null keys during deep merge of values files).
-  # Real Helm behavior can be verified manually with:
-  #   helm template t ./charts/hivemq-platform \
-  #     -f charts/hivemq-platform/tests/extensions/hierarchical-base-values.yaml \
-  #     -f charts/hivemq-platform/tests/extensions/region-override-values.yaml \
-  #     -f charts/hivemq-platform/tests/extensions/null-override-values.yaml
-  # The output omits `hivemq-kafka-extension` from `spec.extensions`.
-  #- it: with null at end of override chain, extension is removed regardless of earlier files
-  #  values:
-  #    - hierarchical-base-values.yaml
-  #    - region-override-values.yaml
-  #    - null-override-values.yaml
-  #  asserts:
-  #    - notContains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-kafka-extension
-  #        any: true
+  - it: with null at end of override chain, extension is removed regardless of earlier files
+    values:
+      - hierarchical-base-values.yaml
+      - region-override-values.yaml
+      - null-override-values.yaml
+    asserts:
+      - notContains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+          any: true
 
   - it: with extensionMap custom extensionUri containing special characters
     set:

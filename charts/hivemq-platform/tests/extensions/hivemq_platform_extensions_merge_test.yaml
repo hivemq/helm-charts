@@ -263,79 +263,69 @@ tests:
             extensionUri: preinstalled
             supportsHotReload: false
 
-  # The two tests below verify the documented contract: setting an `extensionMap` entry to `null` (or
-  # leaving it implicit-null) in an override values file removes the extension from the merged result,
-  # because Helm deep-merge strips null map keys before templates run.
-  # They are skipped due to https://github.com/helm-unittest/helm-unittest/issues/845
-  # (helm-unittest does not strip null keys during deep merge of values files).
-  # Real Helm behavior can be verified manually with:
-  #   helm template t ./charts/hivemq-platform \
-  #     -f charts/hivemq-platform/tests/extensions/hierarchical-base-values.yaml \
-  #     -f charts/hivemq-platform/tests/extensions/null-override-values.yaml
-  # The output omits `hivemq-kafka-extension` from `spec.extensions`.
-  #- it: with base extension nullified in override, extension is removed
-  #  values:
-  #    - hierarchical-base-values.yaml
-  #    - null-override-values.yaml
-  #  asserts:
-  #    - exists:
-  #        path: spec.extensions
-  #    - lengthEqual:
-  #        path: spec.extensions
-  #        count: 3
-  #    - contains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-enterprise-security-extension
-  #          enabled: true
-  #          configMapName: ese-config
-  #          supportsHotReload: true
-  #          extensionUri: preinstalled
-  #    - contains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-distributed-tracing-extension
-  #          enabled: true
-  #          supportsHotReload: true
-  #          configMapName: tracing-config
-  #          extensionUri: preinstalled
-  #    - notContains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-kafka-extension
-  #        any: true
+  - it: with base extension nullified in override, extension is removed
+    values:
+      - hierarchical-base-values.yaml
+      - null-override-values.yaml
+    asserts:
+      - exists:
+          path: spec.extensions
+      - lengthEqual:
+          path: spec.extensions
+          count: 3
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-enterprise-security-extension
+            enabled: true
+            configMapName: ese-config
+            supportsHotReload: true
+            extensionUri: preinstalled
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-distributed-tracing-extension
+            enabled: true
+            supportsHotReload: true
+            configMapName: tracing-config
+            extensionUri: preinstalled
+      - notContains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+          any: true
 
-  #- it: with base extension implicit nullified in override, extension is removed
-  #  values:
-  #    - hierarchical-base-values.yaml
-  #    - hierarchical-implicit-null-override-values.yaml
-  #  asserts:
-  #    - exists:
-  #        path: spec.extensions
-  #    - lengthEqual:
-  #        path: spec.extensions
-  #        count: 3
-  #    - contains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-enterprise-security-extension
-  #          enabled: true
-  #          configMapName: ese-config
-  #          supportsHotReload: true
-  #          extensionUri: preinstalled
-  #    - contains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-distributed-tracing-extension
-  #          enabled: true
-  #          supportsHotReload: true
-  #          configMapName: tracing-config
-  #          extensionUri: preinstalled
-  #    - notContains:
-  #        path: spec.extensions
-  #        content:
-  #          id: hivemq-kafka-extension
-  #        any: true
+  - it: with base extension implicit nullified in override, extension is removed
+    values:
+      - hierarchical-base-values.yaml
+      - hierarchical-implicit-null-override-values.yaml
+    asserts:
+      - exists:
+          path: spec.extensions
+      - lengthEqual:
+          path: spec.extensions
+          count: 3
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-enterprise-security-extension
+            enabled: true
+            configMapName: ese-config
+            supportsHotReload: true
+            extensionUri: preinstalled
+      - contains:
+          path: spec.extensions
+          content:
+            id: hivemq-distributed-tracing-extension
+            enabled: true
+            supportsHotReload: true
+            configMapName: tracing-config
+            extensionUri: preinstalled
+      - notContains:
+          path: spec.extensions
+          content:
+            id: hivemq-kafka-extension
+          any: true
 
   - it: with duplicated extension names in array, validation fails
     set:
@@ -529,9 +519,6 @@ tests:
       - notExists:
           path: spec.extensions[?(@.id=="hivemq-kafka-extension")].configMapName
 
-  # `extensionMap` null entries can only remove extensions originally defined via `extensionMap`.
-  # When the extension is defined via the `extensions` array, a null `extensionMap` override has no
-  # effect on the array entry: Helm deep-merge strips the null map key, leaving the array untouched.
   - it: with extensions array in base and extensionMap null in override, array entry is preserved
     values:
       - cross-source-base-values.yaml
