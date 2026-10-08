@@ -57,19 +57,21 @@ The image is built from the platform distribution of the `hivemq-platform` versi
 
 The following variants are available:
 
-| Variant                   | Base image                                    | JVM     | Java   |
-|---------------------------|-----------------------------------------------|---------|--------|
-| `temurin-21-resolute`     | `eclipse-temurin:21-jre-resolute`             | HotSpot | 21     |
-| `temurin-latest-resolute` | `eclipse-temurin:<latest>-jre-resolute`       | HotSpot | latest |
-| `temurin-21-ubi9`         | `eclipse-temurin:21-jre-ubi9-minimal`         | HotSpot | 21     |
-| `temurin-25-ubi10`        | `eclipse-temurin:25-jre-ubi10-minimal`        | HotSpot | 25     |
-| `temurin-latest-ubi10`    | `eclipse-temurin:<latest>-jre-ubi10-minimal`  | HotSpot | latest |
-| `semeru-21-noble`         | `ibm-semeru-runtimes:open-21-jre-noble`       | OpenJ9  | 21     |
-| `semeru-25-noble`         | `ibm-semeru-runtimes:open-25-jre-noble`       | OpenJ9  | 25     |
-| `semeru-latest-noble`     | `ibm-semeru-runtimes:open-<latest>-jre-noble` | OpenJ9  | latest |
-| `corretto-21-al2023`      | `amazoncorretto:21-al2023-jdk`                | HotSpot | 21     |
-| `corretto-25-al2023`      | `amazoncorretto:25-al2023-jdk`                | HotSpot | 25     |
-| `corretto-latest-al2023`  | `amazoncorretto:<latest>-al2023-jdk`          | HotSpot | latest |
+| Variant                   | Base image                                                                 | JVM     | Java   |
+|---------------------------|----------------------------------------------------------------------------|---------|--------|
+| `temurin-21-resolute`     | `eclipse-temurin:21-jre-resolute`                                          | HotSpot | 21     |
+| `temurin-latest-resolute` | `eclipse-temurin:<latest>-jre-resolute`                                    | HotSpot | latest |
+| `temurin-21-ubi9`         | `eclipse-temurin:21-jre-ubi9-minimal`                                      | HotSpot | 21     |
+| `temurin-25-ubi10`        | `eclipse-temurin:25-jre-ubi10-minimal`                                     | HotSpot | 25     |
+| `temurin-latest-ubi10`    | `eclipse-temurin:<latest>-jre-ubi10-minimal`                               | HotSpot | latest |
+| `semeru-21-noble`         | `ibm-semeru-runtimes:open-21-jre-noble`                                    | OpenJ9  | 21     |
+| `semeru-25-noble`         | `ibm-semeru-runtimes:open-25-jre-noble`                                    | OpenJ9  | 25     |
+| `semeru-latest-noble`     | `ibm-semeru-runtimes:open-<latest>-jre-noble`                              | OpenJ9  | latest |
+| `corretto-21-al2023`      | `amazoncorretto:21-al2023-jdk`                                             | HotSpot | 21     |
+| `corretto-25-al2023`      | `amazoncorretto:25-al2023-jdk`                                             | HotSpot | 25     |
+| `corretto-latest-al2023`  | `amazoncorretto:<latest>-al2023-jdk`                                       | HotSpot | latest |
+| `oracle-25-ol9`           | `container-registry.oracle.com/java/jdk-no-fee-term:25-oraclelinux9`       | HotSpot | 25     |
+| `oracle-latest-ol9`       | `container-registry.oracle.com/java/jdk-no-fee-term:<latest>-oraclelinux9` | HotSpot | latest |
 
 Only the tests tagged with `custom-platform-image` run in this mode, and a `--tests` filter can narrow the selection further:
 
