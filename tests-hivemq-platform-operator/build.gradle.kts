@@ -61,6 +61,8 @@ val jreBaseImages = mapOf(
     "corretto-latest-al2023" to ociImages.jre.correttolatest.al2023,
     "oracle-25-ol9" to ociImages.jre.oracle25.ol9,
     "oracle-latest-ol9" to ociImages.jre.oraclelatest.ol9,
+    "redhat-21-ubi9" to ociImages.jre.redhat21.ubi9,
+    "redhat-25-ubi10" to ociImages.jre.redhat25.ubi10,
 )
 
 /*
@@ -243,6 +245,13 @@ oci {
             exclusiveContent {
                 includeModule(jreBaseImageGroup, "oracle-25-ol9")
                 includeModule(jreBaseImageGroup, "oracle-latest-ol9")
+            }
+        }
+        registry("redhat") {
+            url = uri("https://${ociImages.jre.redhat21.ubi9.registry}")
+            exclusiveContent {
+                includeModule(jreBaseImageGroup, "redhat-21-ubi9")
+                includeModule(jreBaseImageGroup, "redhat-25-ubi10")
             }
         }
     }

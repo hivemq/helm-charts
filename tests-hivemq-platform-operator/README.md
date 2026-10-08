@@ -72,6 +72,8 @@ The following variants are available:
 | `corretto-latest-al2023`  | `amazoncorretto:<latest>-al2023-jdk`                                       | HotSpot | latest |
 | `oracle-25-ol9`           | `container-registry.oracle.com/java/jdk-no-fee-term:25-oraclelinux9`       | HotSpot | 25     |
 | `oracle-latest-ol9`       | `container-registry.oracle.com/java/jdk-no-fee-term:<latest>-oraclelinux9` | HotSpot | latest |
+| `redhat-21-ubi9`          | `registry.access.redhat.com/ubi9/openjdk-21-runtime:1.24`                  | HotSpot | 21     |
+| `redhat-25-ubi10`         | `registry.access.redhat.com/ubi10/openjdk-25-runtime:1.24`                 | HotSpot | 25     |
 
 Only the tests tagged with `custom-platform-image` run in this mode, and a `--tests` filter can narrow the selection further:
 
