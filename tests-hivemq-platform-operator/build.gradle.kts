@@ -59,9 +59,8 @@ val jreBaseImages = mapOf(
     "corretto-21-al2023" to ociImages.jre.corretto21.al2023,
     "corretto-25-al2023" to ociImages.jre.corretto25.al2023,
     "corretto-latest-al2023" to ociImages.jre.correttolatest.al2023,
-    // TODO: Enable once gradle-oci can pull from the Oracle registry (https://github.com/SgtSilvio/gradle-oci/pull/157)
-    // "oracle-25-ol9" to ociImages.jre.oracle25.ol9,
-    // "oracle-latest-ol9" to ociImages.jre.oraclelatest.ol9,
+    "oracle-25-ol9" to ociImages.jre.oracle25.ol9,
+    "oracle-latest-ol9" to ociImages.jre.oraclelatest.ol9,
 )
 
 /*
