@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.api.model.apps.StatefulSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,6 +29,7 @@ import static com.hivemq.helmcharts.util.CertificatesUtil.DEFAULT_TRUSTSTORE_PAS
 import static com.hivemq.helmcharts.util.K8sUtil.createSecret;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("custom-platform-image")
 class HelmPlatformMutualTlsIT extends AbstractHelmChartIT {
 
     private static final int MQTT_SERVICE_PORT_1884 = 1884;
