@@ -159,16 +159,18 @@ spec:
                 scaling:
                   properties:
                     lastPodReadyMinAgeSeconds:
-                      description: "The minimum time in seconds that the last added\
-                      \ Pod must have been ready before the next Pod can be added\
-                      \ during a scale up. Overrides the global operator configuration.\
-                      \ If not set, the global operator configuration is used."
-                      type: "integer"
-                    lastPodRemovalMinAgeSeconds:
-                      description: "The minimum time in seconds since the last Pod removal\
-                      \ before the next Pod can be removed during a scale down. Overrides\
+                      description: "The minimum time in seconds that the last Pod to\
+                      \ become ready must have been ready before the next Pod can be\
+                      \ added during a scale up or removed during a scale down. Overrides\
                       \ the global operator configuration. If not set, the global\
                       \ operator configuration is used."
+                      type: "integer"
+                    lastPodRemovalMinAgeSeconds:
+                      description: "The minimum time in seconds since the HiveMQ Platform\
+                      \ settled after the last Pod removal before the next Pod can be\
+                      \ removed during a scale down. Overrides the global operator\
+                      \ configuration. If not set, the global operator configuration\
+                      \ is used."
                       type: "integer"
                   type: "object"
                 secretName:
@@ -3877,9 +3879,13 @@ spec:
                     - "UNKNOWN"
                     - "UP"
                   type: "string"
+                lastPodRemovalReplicas:
+                  description: "The HiveMQ Platform replica count the last Pod removal\
+                  \ time was recorded at"
+                  type: "integer"
                 lastPodRemovalTime:
-                  description: "The time the last Pod removal was initiated during a\
-                  \ scale down"
+                  description: "The time the HiveMQ Platform was observed settled at\
+                  \ the recorded replica count"
                   type: "string"
                 message:
                   description: "A human readable state message"
