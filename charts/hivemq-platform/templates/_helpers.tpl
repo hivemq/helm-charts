@@ -1763,6 +1763,30 @@ Returns:
 {{- end }}
 
 {{/*
+Validates the HiveMQ MQTT Add-on values:
+ - The `triggers` value of the Client Lifecycle Topic add-on enables at least one trigger, as an
+   empty `<triggers/>` element is a HiveMQ configuration error that prevents HiveMQ from starting.
+ - The `clientDisconnected` trigger given as a map enables at least one initiator, as an empty
+   `<client-disconnected/>` element would silently enable every initiator.
+Usage: {{ include "hivemq-platform.validate-mqtt-addons" . }}
+*/}}
+{{- define "hivemq-platform.validate-mqtt-addons" -}}
+{{- $clientLifecycleTopic := (.Values.hivemqMqttAddons).clientLifecycleTopic -}}
+{{- if and $clientLifecycleTopic (hasKey $clientLifecycleTopic "triggers") -}}
+    {{- $triggers := $clientLifecycleTopic.triggers -}}
+    {{- $clientDisconnected := $triggers.clientDisconnected -}}
+    {{- if kindIs "map" $clientDisconnected -}}
+        {{- if not (or $clientDisconnected.client $clientDisconnected.server $clientDisconnected.sessionTakenOver $clientDisconnected.unspecified) -}}
+            {{- fail (printf "\nThe `hivemqMqttAddons.clientLifecycleTopic.triggers.clientDisconnected` value enables no disconnect initiator. Enable at least one initiator, or set `clientDisconnected` to `true` (every initiator) or `false` (no disconnect events)") -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if not (or $triggers.clientConnected $clientDisconnected) -}}
+        {{- fail (printf "\nThe `hivemqMqttAddons.clientLifecycleTopic.triggers` value enables no trigger, which HiveMQ rejects at startup. Set `clientConnected` or `clientDisconnected` to `true`, or remove the `triggers` value to publish every client lifecycle event") -}}
+    {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Checks if there is any HiveMQ MQTT Add-on options set based on the `.Values.hivemqMqttAddons` values
 Params:
 - hivemqMqttAddons: The set of values from hivemqMqttAddons
@@ -1775,7 +1799,8 @@ Returns:
 {{- if or
     (hasKey $mqttAddonsConfig "expiredMessagesTopic")
     (hasKey $mqttAddonsConfig "droppedMessagesTopic")
-    (hasKey $mqttAddonsConfig "deadMessagesTopic") }}
+    (hasKey $mqttAddonsConfig "deadMessagesTopic")
+    (hasKey $mqttAddonsConfig "clientLifecycleTopic") }}
 {{- $contains = true }}
 {{- end }}
 {{- $contains }}

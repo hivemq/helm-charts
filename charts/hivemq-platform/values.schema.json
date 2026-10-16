@@ -727,6 +727,65 @@
       "additionalProperties" : false,
       "description" : "Configures HiveMQ MQTT Add-on options. See https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html.",
       "properties" : {
+        "clientLifecycleTopic" : {
+          "additionalProperties" : false,
+          "description" : "Publishes a client lifecycle event to the `$client-events` namespace each time a client connects or disconnects.",
+          "properties" : {
+            "enabled" : {
+              "description" : "Enables the Client Lifecycle Topic add-on.",
+              "type" : "boolean"
+            },
+            "identifier" : {
+              "description" : "The identifier used in the topic: `client-id` (HiveMQ default) or `username`. Clients that connect without an MQTT username fall back to `client-id`.",
+              "enum" : [
+                "client-id",
+                "username"
+              ],
+              "type" : "string"
+            },
+            "triggers" : {
+              "additionalProperties" : false,
+              "description" : "The lifecycle events HiveMQ publishes. Omit to publish every event. At least one trigger must be enabled.",
+              "properties" : {
+                "clientConnected" : {
+                  "description" : "Publishes an event when a client connects.",
+                  "type" : "boolean"
+                },
+                "clientDisconnected" : {
+                  "additionalProperties" : false,
+                  "description" : "Publishes an event when a client disconnects. `true` publishes the disconnects of every initiator. Alternatively, an object that enables the initiators to publish: `client`, `server`, `sessionTakenOver` and `unspecified`.",
+                  "properties" : {
+                    "client" : {
+                      "description" : "The client sent an MQTT DISCONNECT packet.",
+                      "type" : "boolean"
+                    },
+                    "server" : {
+                      "description" : "HiveMQ or a HiveMQ extension disconnected the client.",
+                      "type" : "boolean"
+                    },
+                    "sessionTakenOver" : {
+                      "description" : "Another connection took over the session of the client.",
+                      "type" : "boolean"
+                    },
+                    "unspecified" : {
+                      "description" : "The connection ended without a known initiator, for example the network connection closed without an MQTT DISCONNECT packet, or the cluster node the client was connected to left the cluster.",
+                      "type" : "boolean"
+                    }
+                  },
+                  "type" : [
+                    "boolean",
+                    "object"
+                  ]
+                }
+              },
+              "type" : "object"
+            }
+          },
+          "required" : [
+            "enabled"
+          ],
+          "type" : "object"
+        },
         "deadMessagesTopic" : {
           "description" : "Captures all dead messages on the HiveMQ system.",
           "type" : "boolean"
