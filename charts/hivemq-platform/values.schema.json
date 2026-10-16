@@ -724,6 +724,7 @@
       "type" : "object"
     },
     "hivemqMqttAddons" : {
+      "additionalProperties" : false,
       "description" : "Configures HiveMQ MQTT Add-on options. See https://docs.hivemq.com/hivemq/latest/user-guide/mqtt-add-ons.html.",
       "properties" : {
         "deadMessagesTopic" : {
