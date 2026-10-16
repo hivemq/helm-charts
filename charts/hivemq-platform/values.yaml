@@ -149,6 +149,16 @@ restApi:
 #  expiredMessagesTopic: false
 #  droppedMessagesTopic: false
 #  deadMessagesTopic: false
+#  clientLifecycleTopic:
+#    enabled: false
+#    identifier: client-id
+#    triggers:
+#      clientConnected: true
+#      clientDisconnected:
+#        client: true
+#        server: true
+#        sessionTakenOver: true
+#        unspecified: true
 
 # Configures HiveMQ MQTT security options.
 # See https://docs.hivemq.com/hivemq/latest/user-guide/configuration.html#security
