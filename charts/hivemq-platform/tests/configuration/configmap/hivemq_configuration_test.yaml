@@ -2964,6 +2964,16 @@ tests:
       - failedTemplate:
           errorPattern: "expiredMessagesTopic': got string, want boolean"
 
+  - it: with unknown hivemqMqttAddons key, schema validation fails
+    template: hivemq-configuration.yml
+    set:
+      hivemqMqttAddons:
+        clientLifeCycleTopic:
+          enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "hivemqMqttAddons': additional properties 'clientLifeCycleTopic' not allowed"
+
   - it: with default platform values and all default hivemqMqttSecurity config values
     template: hivemq-configuration.yml
     set:
