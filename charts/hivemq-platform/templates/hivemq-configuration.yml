@@ -1,4 +1,7 @@
 {{- if .Values.config.create }}
+{{- if not .Values.config.overrideHiveMQConfig }}
+{{- include "hivemq-platform.validate-mqtt-addons" . -}}
+{{- end -}}
 apiVersion: v1
 kind: {{ .Values.config.createAs }}
 metadata:
