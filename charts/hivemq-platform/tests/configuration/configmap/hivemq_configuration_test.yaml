@@ -2943,7 +2943,8 @@ tests:
       hivemqMqttAddons:
         deadMessagesTopic: foobar
     asserts:
-      - failedTemplate: {}
+      - failedTemplate:
+          errorPattern: "deadMessagesTopic': got string, want boolean"
 
   - it: with invalid droppedMessagesTopic value for hivemqMqttAddons config, schema validation fails
     template: hivemq-configuration.yml
@@ -2951,7 +2952,8 @@ tests:
       hivemqMqttAddons:
         droppedMessagesTopic: foobar
     asserts:
-      - failedTemplate: {}
+      - failedTemplate:
+          errorPattern: "droppedMessagesTopic': got string, want boolean"
 
   - it: with invalid expiredMessagesTopic value for hivemqMqttAddons config, schema validation fails
     template: hivemq-configuration.yml
@@ -2959,7 +2961,8 @@ tests:
       hivemqMqttAddons:
         expiredMessagesTopic: foobar
     asserts:
-      - failedTemplate: {}
+      - failedTemplate:
+          errorPattern: "expiredMessagesTopic': got string, want boolean"
 
   - it: with default platform values and all default hivemqMqttSecurity config values
     template: hivemq-configuration.yml
