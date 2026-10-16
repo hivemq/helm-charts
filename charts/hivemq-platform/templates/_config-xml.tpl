@@ -582,6 +582,44 @@ Usage: {{ include "hivemq-platform.default-hivemq-configuration" . }}
     <dead-messages-topic>
       <enabled>{{ printf "%t" $mqttAddonsConfig.deadMessagesTopic }}</enabled>
     </dead-messages-topic>
+    {{- end -}}
+    {{- if (hasKey $mqttAddonsConfig "clientLifecycleTopic") }}
+    {{- $clientLifecycleTopic := $mqttAddonsConfig.clientLifecycleTopic }}
+    <client-lifecycle-topic>
+      <enabled>{{ printf "%t" $clientLifecycleTopic.enabled }}</enabled>
+      {{- if (hasKey $clientLifecycleTopic "identifier") }}
+      <identifier>
+        <{{ $clientLifecycleTopic.identifier }}/>
+      </identifier>
+      {{- end }}
+      {{- if (hasKey $clientLifecycleTopic "triggers") }}
+      {{- $triggers := $clientLifecycleTopic.triggers }}
+      {{- $clientDisconnected := $triggers.clientDisconnected }}
+      <triggers>
+        {{- if $triggers.clientConnected }}
+        <client-connected/>
+        {{- end }}
+        {{- if (kindIs "map" $clientDisconnected) }}
+        <client-disconnected>
+          {{- if $clientDisconnected.client }}
+          <client/>
+          {{- end }}
+          {{- if $clientDisconnected.server }}
+          <server/>
+          {{- end }}
+          {{- if $clientDisconnected.sessionTakenOver }}
+          <session-taken-over/>
+          {{- end }}
+          {{- if $clientDisconnected.unspecified }}
+          <unspecified/>
+          {{- end }}
+        </client-disconnected>
+        {{- else if $clientDisconnected }}
+        <client-disconnected/>
+        {{- end }}
+      </triggers>
+      {{- end }}
+    </client-lifecycle-topic>
     {{- end }}
   </mqtt-addons>
   {{- end }}
