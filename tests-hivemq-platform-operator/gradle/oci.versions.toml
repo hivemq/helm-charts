@@ -53,7 +53,7 @@ pinnedReference = "1.0.1@sha256:96f972c3029a2bab716c43c5404280030ecd98d199bd9cbe
 [[oci]]
 name = "jre-temurin21-resolute"
 image = "library/eclipse-temurin"
-reference = "21-jre-resolute@sha256:e9a838377dc3719c0a0e7d1ac2e13d6f49c5cacd643f9a22024845736bb00ad9"
+reference = "21-jre-resolute@sha256:e7b42d0fad9b3dd6d61d6816ce3984df079a5da7d8e9af81c464243d15c04e3e"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=21-jre-ubi9-minimal
 [[oci]]
@@ -71,13 +71,13 @@ reference = "25-jre-ubi10-minimal@sha256:115488f21acc54e3987649f26c8b16f49b69fea
 [[oci]]
 name = "jre-semeru21-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-21-jre-noble@sha256:f15fceee04d866b50c2a366149a9656dac1d3fdf628d5f06bcf22824eb2b2c69"
+reference = "open-21-jre-noble@sha256:526d629da9792e0ee1e22c36d1075b15b37d53bc9a6978e29ab2c2e9abe62fe9"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-25-jre-noble
 [[oci]]
 name = "jre-semeru25-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-25-jre-noble@sha256:8278bc81988426202699630593d49aeb811c611e22dd205c3cb0ffb572bdef38"
+reference = "open-25-jre-noble@sha256:e1278cb26cc3c8a9d636eb8b9fdaaf477533b84c10c4dec3ba3ef90bf428eba6"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=21-al2023-jdk
 [[oci]]
@@ -115,7 +115,7 @@ reference = "1.24-16@sha256:5161ac11d66c3c998387192d7f6fc22ac7d25792a172eb0b93b7
 [[oci]]
 name = "jre-temurinlatest-resolute"
 image = "library/eclipse-temurin"
-reference = "27-jre-resolute@sha256:9274ccf4c2bb3dd950acee56da64c00a8333e847ebd6b7e031d1d15dec575020"
+reference = "27-jre-resolute@sha256:eb52ede2345b29b715dbcbbc0de6f0bda88419d35eaf96f96e18f710b109d7b6"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=-jre-ubi10-minimal
 [[oci]]
@@ -127,7 +127,7 @@ reference = "27-jre-ubi10-minimal@sha256:20af916f45c02b7243d1d2a5f5a1198ba019465
 [[oci]]
 name = "jre-semerulatest-noble"
 image = "library/ibm-semeru-runtimes"
-reference = "open-27-jre-noble@sha256:dc81b845d519ffb571e27d064c67bf8ed2ce319f0d86cd90ea5c5c34a657587e"
+reference = "open-27-jre-noble@sha256:9db95bbaf7361a6a6650fb101b7a4f6ca58d6d7f412cd39800cf9123fc7490af"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=-al2023-jdk
 [[oci]]
