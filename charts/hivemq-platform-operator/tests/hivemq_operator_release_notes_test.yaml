@@ -135,3 +135,23 @@ tests:
             *** Warning ***
             `hivemqPlatformStatefulSet.rollingRestartOnTemplateMetadataChange` and its counterpart environment variable `HIVEMQ_PLATFORM_OPERATOR_STATEFULSET_ROLLING_RESTART_ON_TEMPLATE_METADATA_CHANGE` are no longer supported by the Operator.
             -----
+
+  - it: with deprecated rolling restart last pod min age EnvVar, shows warning
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS
+          value: "60000"
+    asserts:
+      - equalRaw:
+          value: |
+            -----
+            HiveMQ Platform Operator release "hivemq-platform-operator-release" installed in namespace "hivemq-platform-operator-namespace"
+            
+            Documentation can be found here: https://docs.hivemq.com/hivemq-platform-operator/index.html
+            
+            *** Warning ***
+            The environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS` is deprecated and will be removed in future releases.
+            Please, consider removing it and using the `rollingRestartLastPodReadyMinAgeSeconds` value instead.
+            Since HiveMQ Platform Operator 2.3.0, the minimum age is measured from the time the last restarted pod became ready instead of from the time it started.
+            A pod becomes ready only after HiveMQ has joined the cluster, including the join data replication, so with the same value a rolling restart waits longer between pods, by up to the configured minimum age per pod.
+            -----
