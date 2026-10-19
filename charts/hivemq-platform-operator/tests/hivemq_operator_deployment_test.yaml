@@ -85,6 +85,12 @@ tests:
               value: "10"
             - name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
               value: "3"
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS
+              value: "30000"
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS
+              value: "30000"
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS
+              value: "30000"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
@@ -394,6 +400,33 @@ tests:
             name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS
             value: "0"
 
+  - it: with deprecated rolling restart min age EnvVar, rollingRestartLastPodReadyMinAgeSeconds EnvVar not created
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS
+          value: "60000"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS
+            value: "60000"
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS
+            value: "30000"
+
+  - it: with deprecated rolling restart min age EnvVar and custom rollingRestartLastPodReadyMinAgeSeconds, validation fails
+    set:
+      rollingRestartLastPodReadyMinAgeSeconds: 300
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS
+          value: "60000"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'The deprecated environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS` set via `.env` value cannot be combined with the `rollingRestartLastPodReadyMinAgeSeconds` value'
+
   - it: with invalid rollingRestartLastPodReadyMinAgeSeconds, schema validation fails
     set:
       rollingRestartLastPodReadyMinAgeSeconds: -1
@@ -601,6 +634,42 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with custom environment variable for the crash loop restart threshold, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+          value: "5"
+    asserts:
+      - failedTemplate:
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with custom environment variable for the rolling restart last pod ready min age, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS
+          value: "60000"
+    asserts:
+      - failedTemplate:
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with custom environment variable for the scaling last pod removal min age, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS
+          value: "60000"
+    asserts:
+      - failedTemplate:
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
+
+  - it: with custom environment variable for the scaling last pod ready min age, validation fails
+    set:
+      env:
+        - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS
+          value: "60000"
+    asserts:
+      - failedTemplate:
+          errorPattern: Default environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead.
 
   - it: with duplicated custom environment variables, validation fails
     set:
