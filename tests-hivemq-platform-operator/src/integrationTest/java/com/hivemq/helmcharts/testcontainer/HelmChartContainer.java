@@ -543,12 +543,9 @@ public class HelmChartContainer extends K3sContainer {
         return Stream.of("--set", "logLevel=DEBUG",
                 // need to limit cpu resource value for CI jobs
                 "--set", "resources.cpu=" + POD_CPU_LIMIT,
-                "--set", "env[0].name=HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS",
-                "--set-string", "env[0].value=1000",
-                "--set", "env[1].name=HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS",
-                "--set-string", "env[1].value=1000",
-                "--set", "env[2].name=HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS",
-                "--set-string", "env[2].value=1000");
+                "--set", "rollingRestartLastPodReadyMinAgeSeconds=1",
+                "--set", "scalingLastPodRemovalMinAgeSeconds=1",
+                "--set", "scalingLastPodReadyMinAgeSeconds=1");
     }
 
     private static @NotNull Stream<String> getPlatformFixedValues() {
