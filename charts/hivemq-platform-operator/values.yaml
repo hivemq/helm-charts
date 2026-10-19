@@ -46,6 +46,23 @@ concurrentInitAppUpdateLimit: 10
 # The default setting is 3. To disable the crash loop detection, set the value to 0.
 crashLoopRestartThreshold: 3
 
+# The minimum time in seconds that the last restarted pod must have been ready before the next pod can be
+# restarted or the surge pod can be removed during a rolling restart.
+# This is the default for all HiveMQ Platforms, which a HiveMQ Platform can override with its own configuration.
+# If not set, the operator default of 30 seconds is used.
+rollingRestartLastPodReadyMinAgeSeconds:
+
+# The minimum time in seconds after the last pod removal before the next pod can be removed during a scale down.
+# This is the default for all HiveMQ Platforms, which a HiveMQ Platform can override with its own configuration.
+# If not set, the operator default of 30 seconds is used.
+scalingLastPodRemovalMinAgeSeconds:
+
+# The minimum time in seconds that the last added pod must have been ready before the next pod can be added
+# during a scale up.
+# This is the default for all HiveMQ Platforms, which a HiveMQ Platform can override with its own configuration.
+# If not set, the operator default of 30 seconds is used.
+scalingLastPodReadyMinAgeSeconds:
+
 # Configures the Operator ports for http/s. These ports provide access to metrics and other services.
 http:
   port: 8080
