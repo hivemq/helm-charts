@@ -127,11 +127,13 @@ Usage: {{- include "hivemq-platform-operator.validate-run-as-user-security-conte
 Validates:
 - No duplicated EnvVars defined in the `.Values.env` value.
 - No default Operator EnvVar is set through `.Values.env`. Otherwise it clashes with the defaults already set.
+- The deprecated rolling restart min age EnvVar does not clash with a custom `rollingRestartLastPodReadyMinAgeSeconds` value.
 Usage: {{ include "hivemq-platform-operator.validate-env-vars" . }}
 */}}
 {{- define "hivemq-platform-operator.validate-env-vars" -}}
 {{- include "hivemq-platform-operator.validate-duplicated-env-vars" . -}}
 {{- include "hivemq-platform-operator.validate-default-operator-env-vars" . -}}
+{{- include "hivemq-platform-operator.validate-deprecated-rolling-restart-min-age-env-var" . -}}
 {{- end -}}
 
 {{/*
@@ -159,6 +161,10 @@ Usage: {{- include "hivemq-platform-operator.validate-default-operator-env-vars"
   "HIVEMQ_PLATFORM_OPERATOR_PLATFORM_HEALTH_DETAILS_FORMAT"
   "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_CONCURRENT"
   "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT"
+  "HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD"
+  "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS"
+  "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS"
+  "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS"
   "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE"
   "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE"
   "HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_NAME"
@@ -181,6 +187,34 @@ Usage: {{- include "hivemq-platform-operator.validate-default-operator-env-vars"
   {{- if has .name $defaultEnvs }}
     {{- fail (printf "\nDefault environment variable `%s` for the HiveMQ Platform Operator is not allowed to be set via `.env` value. Please use the corresponding values instead." .name) }}
   {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Returns "true" when the deprecated rolling restart min age EnvVar is set via the `.Values.env` value.
+The Operator only reads it while the `rollingRestartLastPodReadyMinAgeSeconds` EnvVar is not set.
+Usage: {{ include "hivemq-platform-operator.has-deprecated-rolling-restart-min-age-env-var" . }}
+*/}}
+{{- define "hivemq-platform-operator.has-deprecated-rolling-restart-min-age-env-var" -}}
+{{- range .Values.env }}
+  {{- if eq .name "HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS" }}
+    {{- "true" }}
+    {{- break }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Validates the deprecated rolling restart min age EnvVar is not set via the `.Values.env` value together with a custom
+`rollingRestartLastPodReadyMinAgeSeconds` value. The chart does not render the `rollingRestartLastPodReadyMinAgeSeconds`
+EnvVar while the deprecated EnvVar is set, so a custom value would be silently ignored.
+A value equal to the default of 30 seconds cannot be told apart from the default and is not validated.
+Usage: {{- include "hivemq-platform-operator.validate-deprecated-rolling-restart-min-age-env-var" . }}
+*/}}
+{{- define "hivemq-platform-operator.validate-deprecated-rolling-restart-min-age-env-var" -}}
+{{- $isDeprecatedEnvVarPresent := include "hivemq-platform-operator.has-deprecated-rolling-restart-min-age-env-var" . }}
+{{- if and $isDeprecatedEnvVarPresent (ne (.Values.rollingRestartLastPodReadyMinAgeSeconds | int64) 30) }}
+  {{- fail "\nThe deprecated environment variable `HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_MIN_AGE_MILLIS` set via `.env` value cannot be combined with the `rollingRestartLastPodReadyMinAgeSeconds` value. Please remove the deprecated environment variable." }}
 {{- end }}
 {{- end -}}
 
