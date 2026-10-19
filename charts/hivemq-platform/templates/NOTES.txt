@@ -18,5 +18,7 @@ Please, consider using `additionalInitContainers` value instead.
 *** Warning ***
 `rollingRestart.lastPodMinAgeSeconds` value is deprecated and will be removed in future releases.
 Please, consider using `rollingRestart.lastPodReadyMinAgeSeconds` value instead.
+Since HiveMQ Platform Operator 2.3.0, the minimum age is measured from the time the last restarted pod became ready instead of from the time it started.
+A pod becomes ready only after HiveMQ has joined the cluster, including the join data replication, so with the same value a rolling restart waits longer between pods, by up to the configured minimum age per pod.
 {{- end }}
 -----
