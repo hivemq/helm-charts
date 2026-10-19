@@ -62,6 +62,8 @@ spec:
               value: "0"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
               value: "10"
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+              value: "3"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE

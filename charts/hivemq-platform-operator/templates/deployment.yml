@@ -102,6 +102,8 @@ spec:
               value: "{{ .Values.concurrentRollingRestartLimit }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
               value: "{{ .Values.concurrentInitAppUpdateLimit }}"
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+              value: "{{ .Values.crashLoopRestartThreshold | int64 }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "{{ .Values.hivemqPlatformServiceAccount.create }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE

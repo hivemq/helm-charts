@@ -41,6 +41,11 @@ concurrentRollingRestartLimit: 0
 # The default setting is 10. To disable the limit, set the value to 0.
 concurrentInitAppUpdateLimit: 10
 
+# This value configures the number of container restarts after which a crash looping HiveMQ Platform pod
+# moves the HiveMQ Platform to the ERROR state.
+# The default setting is 3. To disable the crash loop detection, set the value to 0.
+crashLoopRestartThreshold: 3
+
 # Configures the Operator ports for http/s. These ports provide access to metrics and other services.
 http:
   port: 8080
