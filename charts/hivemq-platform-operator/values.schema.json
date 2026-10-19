@@ -48,6 +48,21 @@
       "minimum" : 0,
       "type" : "integer"
     },
+    "rollingRestartLastPodReadyMinAgeSeconds" : {
+      "description" : "The minimum time in seconds that the last restarted pod must have been ready before the next pod can be restarted or the surge pod can be removed during a rolling restart. This is the default for all HiveMQ Platforms. If not set, the operator default of 30 seconds is used.",
+      "minimum" : 0,
+      "type" : [ "integer", "null" ]
+    },
+    "scalingLastPodRemovalMinAgeSeconds" : {
+      "description" : "The minimum time in seconds after the last pod removal before the next pod can be removed during a scale down. This is the default for all HiveMQ Platforms. If not set, the operator default of 30 seconds is used.",
+      "minimum" : 0,
+      "type" : [ "integer", "null" ]
+    },
+    "scalingLastPodReadyMinAgeSeconds" : {
+      "description" : "The minimum time in seconds that the last added pod must have been ready before the next pod can be added during a scale up. This is the default for all HiveMQ Platforms. If not set, the operator default of 30 seconds is used.",
+      "minimum" : 0,
+      "type" : [ "integer", "null" ]
+    },
     "env" : {
       "description" : "Specifies environment variables to be added to the operator container.",
       "items" : {

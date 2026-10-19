@@ -104,6 +104,18 @@ spec:
               value: "{{ .Values.concurrentInitAppUpdateLimit }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
               value: "{{ .Values.crashLoopRestartThreshold | int64 }}"
+            {{- if not (kindIs "invalid" .Values.rollingRestartLastPodReadyMinAgeSeconds) }}
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS
+              value: "{{ mul .Values.rollingRestartLastPodReadyMinAgeSeconds 1000 }}"
+            {{- end }}
+            {{- if not (kindIs "invalid" .Values.scalingLastPodRemovalMinAgeSeconds) }}
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS
+              value: "{{ mul .Values.scalingLastPodRemovalMinAgeSeconds 1000 }}"
+            {{- end }}
+            {{- if not (kindIs "invalid" .Values.scalingLastPodReadyMinAgeSeconds) }}
+            - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS
+              value: "{{ mul .Values.scalingLastPodReadyMinAgeSeconds 1000 }}"
+            {{- end }}
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "{{ .Values.hivemqPlatformServiceAccount.create }}"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
