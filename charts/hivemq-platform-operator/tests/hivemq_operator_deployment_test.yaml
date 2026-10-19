@@ -83,6 +83,8 @@ tests:
               value: "0"
             - name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_INIT_APP_UPDATE_CONCURRENT
               value: "10"
+            - name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+              value: "3"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_CREATE
               value: "true"
             - name: HIVEMQ_PLATFORM_OPERATOR_SERVICEACCOUNT_VALIDATE
@@ -309,6 +311,42 @@ tests:
   - it: with invalid concurrentInitAppUpdateLimit, schema validation fails
     set:
       concurrentInitAppUpdateLimit: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with custom crashLoopRestartThreshold, operator container EnvVar created
+    set:
+      crashLoopRestartThreshold: 5
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+            value: "5"
+
+  - it: with large crashLoopRestartThreshold, operator container EnvVar created as integer
+    set:
+      crashLoopRestartThreshold: 1000000
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+            value: "1000000"
+
+  - it: with crashLoopRestartThreshold set to zero, operator container EnvVar created
+    set:
+      crashLoopRestartThreshold: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_CRASH_LOOP_RESTART_THRESHOLD
+            value: "0"
+
+  - it: with invalid crashLoopRestartThreshold, schema validation fails
+    set:
+      crashLoopRestartThreshold: -1
     asserts:
       - failedTemplate: {}
 
