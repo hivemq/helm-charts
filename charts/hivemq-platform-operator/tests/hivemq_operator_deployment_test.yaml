@@ -350,6 +350,68 @@ tests:
     asserts:
       - failedTemplate: {}
 
+  - it: with custom min age values, operator container EnvVars created in milliseconds
+    set:
+      rollingRestartLastPodReadyMinAgeSeconds: 300
+      scalingLastPodRemovalMinAgeSeconds: 600
+      scalingLastPodReadyMinAgeSeconds: 120
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS
+            value: "300000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS
+            value: "600000"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS
+            value: "120000"
+
+  - it: with min age values set to zero, operator container EnvVars created
+    set:
+      rollingRestartLastPodReadyMinAgeSeconds: 0
+      scalingLastPodRemovalMinAgeSeconds: 0
+      scalingLastPodReadyMinAgeSeconds: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_ROLLING_RESTART_LAST_POD_READY_MIN_AGE_MILLIS
+            value: "0"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_REMOVAL_MIN_AGE_MILLIS
+            value: "0"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: HIVEMQ_PLATFORM_OPERATOR_RECONCILIATION_SCALING_LAST_POD_READY_MIN_AGE_MILLIS
+            value: "0"
+
+  - it: with invalid rollingRestartLastPodReadyMinAgeSeconds, schema validation fails
+    set:
+      rollingRestartLastPodReadyMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid scalingLastPodRemovalMinAgeSeconds, schema validation fails
+    set:
+      scalingLastPodRemovalMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: with invalid scalingLastPodReadyMinAgeSeconds, schema validation fails
+    set:
+      scalingLastPodReadyMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}
+
   - it: with custom hivemqPlatformHealthDetailsFormat, operator container EnvVar created
     set:
       hivemqPlatformHealthDetailsFormat: json
