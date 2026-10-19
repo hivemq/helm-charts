@@ -1,0 +1,82 @@
+suite: HiveMQ Platform - Scaling Configuration tests
+templates:
+  - hivemq-custom-resource.yml
+release:
+  name: test-hivemq-platform
+chart:
+  version: 0.0.1
+tests:
+
+  - it: should not render scaling field when not defined
+    asserts:
+      - notExists:
+          path: spec.scaling
+
+  - it: should not render scaling field when empty object
+    set:
+      scaling: {}
+    asserts:
+      - notExists:
+          path: spec.scaling
+
+  - it: should render scaling with lastPodRemovalMinAgeSeconds
+    set:
+      scaling:
+        lastPodRemovalMinAgeSeconds: 300
+    asserts:
+      - equal:
+          path: spec.scaling.lastPodRemovalMinAgeSeconds
+          value: 300
+      - notExists:
+          path: spec.scaling.lastPodReadyMinAgeSeconds
+
+  - it: should render scaling with lastPodReadyMinAgeSeconds
+    set:
+      scaling:
+        lastPodReadyMinAgeSeconds: 120
+    asserts:
+      - equal:
+          path: spec.scaling.lastPodReadyMinAgeSeconds
+          value: 120
+      - notExists:
+          path: spec.scaling.lastPodRemovalMinAgeSeconds
+
+  - it: should render scaling with both fields
+    set:
+      scaling:
+        lastPodRemovalMinAgeSeconds: 300
+        lastPodReadyMinAgeSeconds: 120
+    asserts:
+      - equal:
+          path: spec.scaling.lastPodRemovalMinAgeSeconds
+          value: 300
+      - equal:
+          path: spec.scaling.lastPodReadyMinAgeSeconds
+          value: 120
+
+  - it: should render scaling fields set to zero
+    set:
+      scaling:
+        lastPodRemovalMinAgeSeconds: 0
+        lastPodReadyMinAgeSeconds: 0
+    asserts:
+      - equal:
+          path: spec.scaling.lastPodRemovalMinAgeSeconds
+          value: 0
+      - equal:
+          path: spec.scaling.lastPodReadyMinAgeSeconds
+          value: 0
+
+  - it: should fail when lastPodRemovalMinAgeSeconds is negative
+    set:
+      scaling:
+        lastPodRemovalMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}
+
+  - it: should fail when lastPodReadyMinAgeSeconds is negative
+    set:
+      scaling:
+        lastPodReadyMinAgeSeconds: -1
+    asserts:
+      - failedTemplate: {}

@@ -996,6 +996,22 @@
       },
       "type" : "object"
     },
+    "scaling" : {
+      "description" : "Configures the scaling behavior for this HiveMQ Platform.",
+      "properties" : {
+        "lastPodRemovalMinAgeSeconds" : {
+          "description" : "The minimum time in seconds after the last Pod removal before the next Pod can be removed during a scale down. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
+          "type" : "integer",
+          "minimum" : 0
+        },
+        "lastPodReadyMinAgeSeconds" : {
+          "description" : "The minimum time in seconds that the last added Pod must have been ready before the next Pod can be added during a scale up. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
+          "type" : "integer",
+          "minimum" : 0
+        }
+      },
+      "type" : "object"
+    },
     "monitoredResources" : {
       "description" : "Configures Kubernetes resources (ConfigMaps and Secrets) to monitor for changes. When one of the files in a monitored resource changes, the HiveMQ Platform pods will perform a rolling restart.",
       "items" : {

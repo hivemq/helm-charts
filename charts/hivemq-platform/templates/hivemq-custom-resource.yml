@@ -60,6 +60,17 @@ spec:
     lastPodReadyMinAgeSeconds: {{ .lastPodMinAgeSeconds }}
   {{- end }}
   {{- end }}
+  {{- with .Values.scaling }}
+  {{- if or (hasKey . "lastPodRemovalMinAgeSeconds") (hasKey . "lastPodReadyMinAgeSeconds") }}
+  scaling:
+    {{- if hasKey . "lastPodRemovalMinAgeSeconds" }}
+    lastPodRemovalMinAgeSeconds: {{ .lastPodRemovalMinAgeSeconds }}
+    {{- end }}
+    {{- if hasKey . "lastPodReadyMinAgeSeconds" }}
+    lastPodReadyMinAgeSeconds: {{ .lastPodReadyMinAgeSeconds }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
   statefulSet:
     {{- if not .Values.config.overrideStatefulSet }}
     spec:
