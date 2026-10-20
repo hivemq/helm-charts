@@ -54,12 +54,12 @@
       "type" : "integer"
     },
     "scalingLastPodRemovalMinAgeSeconds" : {
-      "description" : "The minimum time in seconds after the last pod removal before the next pod can be removed during a scale down. This is the default for all HiveMQ Platforms.",
+      "description" : "The minimum time in seconds since the HiveMQ Platform settled after the last pod removal before the next pod can be removed during a scale down. This is the default for all HiveMQ Platforms.",
       "minimum" : 0,
       "type" : "integer"
     },
     "scalingLastPodReadyMinAgeSeconds" : {
-      "description" : "The minimum time in seconds that the last added pod must have been ready before the next pod can be added during a scale up. This is the default for all HiveMQ Platforms.",
+      "description" : "The minimum time in seconds that the last pod to become ready must have been ready before the next pod can be added during a scale up or removed during a scale down. This is the default for all HiveMQ Platforms.",
       "minimum" : 0,
       "type" : "integer"
     },
