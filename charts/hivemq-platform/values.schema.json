@@ -1000,12 +1000,12 @@
       "description" : "Configures the scaling behavior for this HiveMQ Platform.",
       "properties" : {
         "lastPodRemovalMinAgeSeconds" : {
-          "description" : "The minimum time in seconds after the last Pod removal before the next Pod can be removed during a scale down. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
+          "description" : "The minimum time in seconds since the HiveMQ Platform settled after the last Pod removal before the next Pod can be removed during a scale down. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
           "type" : "integer",
           "minimum" : 0
         },
         "lastPodReadyMinAgeSeconds" : {
-          "description" : "The minimum time in seconds that the last added Pod must have been ready before the next Pod can be added during a scale up. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
+          "description" : "The minimum time in seconds that the last Pod to become ready must have been ready before the next Pod can be added during a scale up or removed during a scale down. When set, this overrides the global operator configuration. If not set, the global operator default of 30 seconds is used.",
           "type" : "integer",
           "minimum" : 0
         }
