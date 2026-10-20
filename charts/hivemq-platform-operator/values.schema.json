@@ -18,6 +18,11 @@
       },
       "type" : "object"
     },
+    "crashLoopRestartThreshold" : {
+      "description" : "This value configures the number of container restarts after which a crash looping HiveMQ Platform pod moves the HiveMQ Platform to the ERROR state. Set to 0 to disable the crash loop detection.",
+      "minimum" : 0,
+      "type" : "integer"
+    },
     "crd" : {
       "properties" : {
         "apply" : {
@@ -40,26 +45,6 @@
     },
     "concurrentInitAppUpdateLimit" : {
       "description" : "This value configures the maximum number of HiveMQ Platforms that can perform an init app update at the same time.",
-      "minimum" : 0,
-      "type" : "integer"
-    },
-    "crashLoopRestartThreshold" : {
-      "description" : "This value configures the number of container restarts after which a crash looping HiveMQ Platform pod moves the HiveMQ Platform to the ERROR state. Set to 0 to disable the crash loop detection.",
-      "minimum" : 0,
-      "type" : "integer"
-    },
-    "rollingRestartLastPodReadyMinAgeSeconds" : {
-      "description" : "The minimum time in seconds that the last restarted pod must have been ready before the next pod can be restarted or the surge pod can be removed during a rolling restart. This is the default for all HiveMQ Platforms.",
-      "minimum" : 0,
-      "type" : "integer"
-    },
-    "scalingLastPodRemovalMinAgeSeconds" : {
-      "description" : "The minimum time in seconds since the HiveMQ Platform settled after the last pod removal before the next pod can be removed during a scale down. This is the default for all HiveMQ Platforms.",
-      "minimum" : 0,
-      "type" : "integer"
-    },
-    "scalingLastPodReadyMinAgeSeconds" : {
-      "description" : "The minimum time in seconds that the last pod to become ready must have been ready before the next pod can be added during a scale up or removed during a scale down. This is the default for all HiveMQ Platforms.",
       "minimum" : 0,
       "type" : "integer"
     },
@@ -408,6 +393,21 @@
         }
       },
       "type" : "object"
+    },
+    "rollingRestartLastPodReadyMinAgeSeconds" : {
+      "description" : "The minimum time in seconds that the last restarted pod must have been ready before the next pod can be restarted or the surge pod can be removed during a rolling restart. This is the default for all HiveMQ Platforms.",
+      "minimum" : 0,
+      "type" : "integer"
+    },
+    "scalingLastPodReadyMinAgeSeconds" : {
+      "description" : "The minimum time in seconds that the last pod to become ready must have been ready before the next pod can be added during a scale up or removed during a scale down. This is the default for all HiveMQ Platforms.",
+      "minimum" : 0,
+      "type" : "integer"
+    },
+    "scalingLastPodRemovalMinAgeSeconds" : {
+      "description" : "The minimum time in seconds since the HiveMQ Platform settled after the last pod removal before the next pod can be removed during a scale down. This is the default for all HiveMQ Platforms.",
+      "minimum" : 0,
+      "type" : "integer"
     },
     "selector" : {
       "description" : "Selector name to configure which HiveMQ Platform instances are managed by this Operator.",
