@@ -935,12 +935,13 @@ rollingRestart: {}
 # Configures the scaling behavior for this HiveMQ Platform.
 # The HiveMQ Platform Operator changes the replica count one pod at a time and waits between the steps.
 scaling: {}
-  # The minimum time in seconds after the last pod removal before the next pod can be removed during a scale down.
-  # When set, this overrides the global operator configuration.
+  # The minimum time in seconds since the HiveMQ Platform settled after the last pod removal before the next pod
+  # can be removed during a scale down. When set, this overrides the global operator configuration.
   # If not set, the global operator default of 30 seconds is used.
   # lastPodRemovalMinAgeSeconds: 300
-  # The minimum time in seconds that the last added pod must have been ready before the next pod can be added
-  # during a scale up. When set, this overrides the global operator configuration.
+  # The minimum time in seconds that the last pod to become ready must have been ready before the next pod can be
+  # added during a scale up or removed during a scale down. When set, this overrides the global operator
+  # configuration.
   # If not set, the global operator default of 30 seconds is used.
   # lastPodReadyMinAgeSeconds: 300
 
