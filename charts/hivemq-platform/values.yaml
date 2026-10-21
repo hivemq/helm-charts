@@ -928,8 +928,8 @@ dataIntelligence:
 # Configures the rolling restart behavior for this HiveMQ Platform.
 rollingRestart: {}
   # The minimum time in seconds that the last restarted pod must have been ready before the next pod can be
-  # restarted during a rolling restart. When set, this overrides the global operator configuration
-  # (`rollingRestartLastPodReadyMinAgeSeconds` of the HiveMQ Platform Operator chart).
+  # restarted or the surge pod can be removed during a rolling restart.
+  # When set, this overrides the global operator configuration (`rollingRestartLastPodReadyMinAgeSeconds` of the HiveMQ Platform Operator chart).
   # If not set, the global operator configuration is used.
   # lastPodReadyMinAgeSeconds: 300
 
