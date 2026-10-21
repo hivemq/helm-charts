@@ -984,7 +984,7 @@
       "description" : "Configures the rolling restart behavior for this HiveMQ Platform.",
       "properties" : {
         "lastPodReadyMinAgeSeconds" : {
-          "description" : "The minimum time in seconds that the last restarted Pod must have been ready before the next Pod can be restarted during a rolling restart. When set, this overrides the global operator configuration (`rollingRestartLastPodReadyMinAgeSeconds` of the HiveMQ Platform Operator chart). If not set, the global operator configuration is used.",
+          "description" : "The minimum time in seconds that the last restarted Pod must have been ready before the next Pod can be restarted or the surge Pod can be removed during a rolling restart. When set, this overrides the global operator configuration (`rollingRestartLastPodReadyMinAgeSeconds` of the HiveMQ Platform Operator chart). If not set, the global operator configuration is used.",
           "type" : "integer",
           "minimum" : 0
         },
