@@ -26,7 +26,7 @@ reference = "latest@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae83
 [[oci]]
 name = "nginx"
 image = "library/nginx"
-reference = "latest@sha256:8632b3314d74c61f0e27f59055bab13f7793b988c94c090154d867bc29e0f39b"
+reference = "latest@sha256:4c41e2d0a3a55b325ed572cd0200bdb72af1433c3daa2bca6ef8eea68ce504a2"
 
 # https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
 [[oci]]
@@ -95,7 +95,7 @@ reference = "25-al2023-jdk@sha256:c4348c3d4e9c2219d6e09c2e9e473c9a5bafe0492c4a70
 [[oci]]
 name = "jre-oracle25-ol9"
 image = "container-registry.oracle.com/java/jdk-no-fee-term"
-reference = "25-oraclelinux9@sha256:283d01db5d749b005826ad311af50a78cc40969548abb63d4b57063a6d611960"
+reference = "25-oraclelinux9@sha256:28a875b8335dd63f8d6b4bc64e3dce4956598b91ac125f484071c4deecc2407c"
 
 # https://catalog.redhat.com/software/containers/ubi9/openjdk-21-runtime/6501ce769a0d86945c422d5f
 [[oci]]
@@ -139,4 +139,4 @@ reference = "27-al2023-jdk@sha256:39b41a896b3aebe8bc99272764cfe8739025064463c600
 [[oci]]
 name = "jre-oraclelatest-ol9"
 image = "container-registry.oracle.com/java/jdk-no-fee-term"
-reference = "27-oraclelinux9@sha256:bd61439e8520cb9971ff0e4e23ba7f4a1d7e96a17ca4797184a72636b271dfdf"
+reference = "27-oraclelinux9@sha256:c726ab6f76817cf076c92ff51c5179d9244907d0684302f348c8c7c750900929"
