@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.services.HelmRestApiIT" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-23T11:52:17.188Z" hostname="runnervm8k3b6" time="74.971">
+<testsuite name="com.hivemq.helmcharts.services.HelmRestApiIT" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-10-23T15:53:42.280Z" hostname="runnervm8k3b6" time="197.278">
   <properties/>
-  <testcase name="platformChart_whenRestApiEnabled_thenCallsEndpoint()" classname="com.hivemq.helmcharts.services.HelmRestApiIT" time="74.969"/>
+  <testcase name="platformChart_whenRestApiEnabled_thenCallsEndpoint()" classname="com.hivemq.helmcharts.services.HelmRestApiIT" time="86.228">
+    <failure message="java.lang.AssertionError: 1 expectation failed.&#10;Expected status code &lt;200&gt; but was &lt;404&gt;.&#10;" type="java.lang.AssertionError">java.lang.AssertionError: 1 expectation failed.
+Expected status code &lt;200&gt; but was &lt;404&gt;.
+
+	at io.restassured.internal.ResponseSpecificationImpl$HamcrestAssertionClosure.validate(ResponseSpecificationImpl.java:569)
+	at io.restassured.internal.ResponseSpecificationImpl.validateResponseIfRequired(ResponseSpecificationImpl.java:932)
+	at io.restassured.internal.ResponseSpecificationImpl.statusCode(ResponseSpecificationImpl.java:163)
+	at io.restassured.internal.ResponseSpecificationImpl.statusCode(ResponseSpecificationImpl.java:168)
+	at io.restassured.internal.ValidatableResponseOptionsImpl.statusCode(ValidatableResponseOptionsImpl.java:89)
+	at com.hivemq.helmcharts.util.RestAPIUtil.getAllMqttClients(RestAPIUtil.java:138)
+	at com.hivemq.helmcharts.services.HelmRestApiIT.platformChart_whenRestApiEnabled_thenCallsEndpoint(HelmRestApiIT.java:25)
+</failure>
+  </testcase>
+  <testcase name="platformChart_whenRestApiEnabled_thenCallsEndpoint()" classname="com.hivemq.helmcharts.services.HelmRestApiIT" time="92.984"/>
 </testsuite>
