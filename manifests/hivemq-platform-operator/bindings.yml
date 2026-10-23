@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-platform-operator"
     app.kubernetes.io/instance: "my-operator"
-    app.kubernetes.io/version: "2.3.0"
+    app.kubernetes.io/version: "2.3.1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -26,7 +26,7 @@ metadata:
   labels:
     app.kubernetes.io/name: "hivemq-platform-operator"
     app.kubernetes.io/instance: "my-operator"
-    app.kubernetes.io/version: "2.3.0"
+    app.kubernetes.io/version: "2.3.1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
