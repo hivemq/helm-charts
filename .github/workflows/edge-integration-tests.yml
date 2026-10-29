@@ -38,7 +38,7 @@ jobs:
           java-version: 25
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@99a8333667fff04fdd6cffb46dfd409f8329a7bf # v4
@@ -96,7 +96,7 @@ jobs:
           java-version: 25
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@99a8333667fff04fdd6cffb46dfd409f8329a7bf # v4
