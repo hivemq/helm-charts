@@ -20,7 +20,7 @@ reference = "v1.35.9-k3s1@sha256:ec9868c6a38d4e8c1869832fb5fd1eb8473c39794a0b44d
 [[oci]]
 name = "busybox"
 image = "library/busybox"
-reference = "latest@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e"
+reference = "latest@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4"
 
 # https://hub.docker.com/_/nginx/tags?name=latest
 [[oci]]
@@ -115,7 +115,7 @@ reference = "1.24-18@sha256:e898c4ad1c8cfb5afee86917906356226956813733ebc27bbf33
 [[oci]]
 name = "jre-temurinlatest-resolute"
 image = "library/eclipse-temurin"
-reference = "27-jre-resolute@sha256:492896faf0de16f8959951fcc97e84d6b1db7b1cbc327e732b4e740cd27409e9"
+reference = "27-jre-resolute@sha256:7520762e9fac9c34ae0ef3a898ff0e9fc652b019860ab859728b17df41f2b497"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=-jre-ubi10-minimal
 [[oci]]
