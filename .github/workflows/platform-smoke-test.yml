@@ -78,7 +78,7 @@ jobs:
           ./gradlew :tests-hivemq-platform-operator:pushAllImagesForTesting --url ${{ steps.kind.outputs.LOCAL_REGISTRY }}
 
       - name: Set up Helm ${{ matrix.helm-label }} (${{ matrix.helm-version }})
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5
+        uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5
         with:
           version: ${{ matrix.helm-version }}
 
