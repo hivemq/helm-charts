@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.volumes.HelmPvcRetentionPolicyIT" tests="2" skipped="1" failures="0" errors="0" timestamp="2026-11-16T13:00:54.163Z" hostname="runnervmccnms" time="240.493">
+<testsuite name="com.hivemq.helmcharts.volumes.HelmPvcRetentionPolicyIT" tests="2" skipped="1" failures="0" errors="0" timestamp="2026-11-16T13:31:28.490Z" hostname="runnervmccnms" time="228.887">
   <properties/>
-  <testcase name="platform_whenWhenScaledDelete_onAlphaK8s_thenSurgePvcRemains()" classname="com.hivemq.helmcharts.volumes.HelmPvcRetentionPolicyIT" time="0.001">
+  <testcase name="platform_whenWhenScaledDelete_onAlphaK8s_thenSurgePvcRemains()" classname="com.hivemq.helmcharts.volumes.HelmPvcRetentionPolicyIT" time="0.003">
     <skipped/>
   </testcase>
-  <testcase name="platform_whenPvcRetentionPolicyAllDelete_thenAllPvcsCleanedUp()" classname="com.hivemq.helmcharts.volumes.HelmPvcRetentionPolicyIT" time="240.482"/>
+  <testcase name="platform_whenPvcRetentionPolicyAllDelete_thenAllPvcsCleanedUp()" classname="com.hivemq.helmcharts.volumes.HelmPvcRetentionPolicyIT" time="228.87"/>
 </testsuite>
