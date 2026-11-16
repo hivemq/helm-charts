@@ -38,9 +38,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -51,6 +54,11 @@ import static org.awaitility.Durations.ONE_HUNDRED_MILLISECONDS;
 import static org.testcontainers.containers.output.OutputFrame.OutputType.STDERR;
 
 public class HelmChartContainer extends K3sContainer {
+
+    // hard bound on each startup attempt: a broken K3s bootstrap floods logs and hangs testcontainers' getLogs(), so
+    // start() force-kills the container of an attempt that overruns its startup check timeout
+    private static final @NotNull Duration STARTUP_ATTEMPT_TIMEOUT =
+            K3sReadyStartupCheckStrategy.TIMEOUT.plusMinutes(1);
 
     private static final @NotNull DockerImageName K3S_DOCKER_IMAGE =
             OciImages.getImageName("hivemq/helm-charts").asCompatibleSubstituteFor("rancher/k3s");
@@ -85,6 +93,7 @@ public class HelmChartContainer extends K3sContainer {
         super.withCopyToContainer(Transferable.of(getRegistriesContent()), "/etc/rancher/k3s/registries.yaml");
         super.withExtraHost("host.docker.internal", "host-gateway");
 
+        super.withStartupAttempts(3);
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
@@ -117,7 +126,7 @@ public class HelmChartContainer extends K3sContainer {
     @Override
     public final void start() {
         LOG.info("Starting HelmChartContainer...");
-        super.start();
+        awaitStartup(executorService.submit(super::start));
         addHelmRepo("hivemq", "https://hivemq.github.io/helm-charts");
         final var client = getKubernetesClient();
         watches.put("events", client.events().v1().events().inAnyNamespace().watch(new EventWatcher(client)));
@@ -144,18 +153,27 @@ public class HelmChartContainer extends K3sContainer {
             client.close();
             this.client = null;
         }
-        executorService.shutdownNow();
-        if (K3sRuntimeStallDetector.hasDetectedStall()) {
+        final var containerId = getContainerId();
+        if (containerId != null && K3sRuntimeStallDetector.hasDetectedStall()) {
             // a stalled containerd never shuts down gracefully, so the docker stop of super.stop() blocks on it forever,
             // and docker-java resolves the docker host on every new connection, a lookup the stall can wedge; SIGKILL the
             // container through the docker CLI instead (docker kill does not wait on the inner containerd) and leave its
             // removal to Ryuk
             LOG.warn("K3s runtime stalled; force-killing the container to avoid a blocked shutdown");
-            forceKill();
+            forceKill(containerId);
         } else {
             super.stop();
         }
         LOG.info("HelmChartContainer is stopped");
+    }
+
+    @Override
+    public void close() {
+        try {
+            super.close();
+        } finally {
+            executorService.shutdownNow();
+        }
     }
 
     @Override
@@ -274,15 +292,59 @@ public class HelmChartContainer extends K3sContainer {
         }
     }
 
+    private void awaitStartup(final @NotNull Future<?> startup) {
+        // an upstream K3s/flannel bug can leave the cluster unable to create any pod sandbox at bootstrap; the container
+        // then floods logs nonstop, testcontainers' getLogs() during startup never drains, and start() hangs until the
+        // CI step timeout. Bound each attempt on its own: force-kill the container of an attempt that runs past
+        // STARTUP_ATTEMPT_TIMEOUT, so getLogs() unblocks and withStartupAttempts retries a fresh container. A startup
+        // that is still blocked another STARTUP_ATTEMPT_TIMEOUT later (an uninterruptible getaddrinfo does not return on
+        // a kill) is abandoned, so the caller fails instead of hanging
+        String attemptContainerId = null;
+        String killedContainerId = null;
+        var attemptDeadline = System.nanoTime() + STARTUP_ATTEMPT_TIMEOUT.toNanos();
+        try {
+            while (!completesWithin(startup, Duration.ofSeconds(1))) {
+                final var containerId = getContainerId();
+                if (!Objects.equals(containerId, attemptContainerId)) {
+                    attemptContainerId = containerId;
+                    attemptDeadline = System.nanoTime() + STARTUP_ATTEMPT_TIMEOUT.toNanos();
+                }
+                final var overdue = System.nanoTime() - attemptDeadline;
+                if (overdue > STARTUP_ATTEMPT_TIMEOUT.toNanos()) {
+                    // a kill does not release a native call such as a getaddrinfo on the resolver a K3s stall wedged,
+                    // which can happen before the stall marker shows up in the log stream; record the stall, so the
+                    // following tests fail fast and the teardown skips docker-java
+                    K3sRuntimeStallDetector.recordStall();
+                    startup.cancel(true);
+                    throw new IllegalStateException(
+                            "K3s container startup was still blocked %s after the attempt timed out".formatted(
+                                    STARTUP_ATTEMPT_TIMEOUT));
+                }
+                if (overdue > 0 && attemptContainerId != null && !attemptContainerId.equals(killedContainerId)) {
+                    LOG.error("K3s container {} did not start within {}; force-killing it",
+                            attemptContainerId,
+                            STARTUP_ATTEMPT_TIMEOUT);
+                    forceKill(attemptContainerId);
+                    killedContainerId = attemptContainerId;
+                }
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            startup.cancel(true);
+            throw new IllegalStateException("Interrupted while waiting for the K3s container to start", e);
+        }
+        // an attempt can finish right before its container is killed, which leaves the started container dead
+        if (killedContainerId != null && killedContainerId.equals(getContainerId())) {
+            throw new IllegalStateException("K3s container was force-killed after not starting within %s".formatted(
+                    STARTUP_ATTEMPT_TIMEOUT));
+        }
+    }
+
     // SIGKILL via the docker CLI, not the docker-java client: docker-java resolves the docker host through the JVM's
     // getaddrinfo on every request, which is exactly the native call wedged during a stall (the startup-check thread
     // holds the per-host InetAddress lock in an uninterruptible lookup). A docker-java kill blocks on that same lock and
     // never fires. The docker CLI talks to the daemon socket directly and needs no name resolution.
-    private void forceKill() {
-        final var containerId = getContainerId();
-        if (containerId == null) {
-            return;
-        }
+    private void forceKill(final @NotNull String containerId) {
         try {
             final var process = new ProcessBuilder("docker", "kill", containerId).redirectErrorStream(true).start();
             if (!process.waitFor(30, TimeUnit.SECONDS)) {
@@ -360,6 +422,22 @@ public class HelmChartContainer extends K3sContainer {
                             "n/a");
         } catch (final Exception e) {
             return "Could not describe Helm command: " + e;
+        }
+    }
+
+    private static boolean completesWithin(final @NotNull Future<?> future, final @NotNull Duration timeout)
+            throws InterruptedException {
+        try {
+            future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            return true;
+        } catch (final TimeoutException e) {
+            return false;
+        } catch (final ExecutionException e) {
+            // rethrow the startup failure (such as a ContainerLaunchException) on the calling thread
+            if (e.getCause() instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new IllegalStateException(e.getCause());
         }
     }
 
@@ -617,11 +695,13 @@ public class HelmChartContainer extends K3sContainer {
 
     private static class K3sReadyStartupCheckStrategy extends StartupCheckStrategy {
 
+        private static final @NotNull Duration TIMEOUT = Duration.ofSeconds(240);
+
         private final @NotNull HelmChartContainer container;
 
         K3sReadyStartupCheckStrategy(final @NotNull HelmChartContainer container) {
             this.container = container;
-            withTimeout(Duration.ofSeconds(120));
+            withTimeout(TIMEOUT);
         }
 
         @Override
@@ -637,6 +717,42 @@ public class HelmChartContainer extends K3sContainer {
             } catch (final Exception e) {
                 LOG.warn("K3s image not ready yet '{}'", e.getMessage());
                 throw new RuntimeException(e);
+            }
+            // the API server can be up while flannel bootstrapped with a broken subnet.env, leaving every pod stuck
+            // without a sandbox ("failed to setup network ... flannel ... subnet.env"). coredns needs a working sandbox,
+            // so gate on it being Ready: a broken cluster never gets past here, the startup check timeout fails the
+            // attempt and withStartupAttempts retries a fresh container, instead of handing a dead cluster to the tests
+            // where they hang until the CI step timeout
+            try {
+                // kubectl wait exits at once while no pod matches its selector, so check again until coredns has a pod
+                final var coreDnsPods = container.execInContainer("kubectl",
+                        "get",
+                        "pod",
+                        "--namespace=kube-system",
+                        "--selector=k8s-app=kube-dns",
+                        "--output=name");
+                if (coreDnsPods.getStdout().isBlank()) {
+                    return StartupStatus.NOT_YET_KNOWN;
+                }
+                // a short wait per check: a coredns that is only slow (an image pull) keeps the attempt, while a broken
+                // CNI fails it once the startup check timeout runs out
+                final var coreDnsReady = container.execInContainer("kubectl",
+                        "wait",
+                        "--for=condition=Ready",
+                        "pod",
+                        "--namespace=kube-system",
+                        "--selector=k8s-app=kube-dns",
+                        "--timeout=10s");
+                if (coreDnsReady.getExitCode() != 0) {
+                    LOG.warn("K3s CNI not ready yet (coredns not Ready):\n{}\n{}",
+                            coreDnsReady.getStdout().trim(),
+                            coreDnsReady.getStderr().trim());
+                    return StartupStatus.NOT_YET_KNOWN;
+                }
+                LOG.info("K3s CNI is ready (coredns Ready)");
+            } catch (final Exception e) {
+                LOG.error("Could not verify K3s CNI readiness", e);
+                return StartupStatus.FAILED;
             }
             LOG.debug("Successful Helm chart Container startup");
             return StartupStatus.SUCCESSFUL;
