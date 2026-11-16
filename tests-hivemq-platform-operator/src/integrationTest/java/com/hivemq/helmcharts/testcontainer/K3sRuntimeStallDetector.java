@@ -69,6 +69,10 @@ class K3sRuntimeStallDetector implements Consumer<String> {
         return stallDetected.get();
     }
 
+    static void recordStall() {
+        stallDetected.set(true);
+    }
+
     @Override
     public void accept(final @NotNull String frame) {
         // testcontainers may split a log line across frames or batch several into one; join with the retained tail and
