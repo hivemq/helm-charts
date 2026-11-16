@@ -146,6 +146,9 @@ jobs:
           echo "ORG_GRADLE_PROJECT_ecrPublicUsername=AWS" >> "$GITHUB_ENV"
           echo "ORG_GRADLE_PROJECT_ecrPublicPassword=$password" >> "$GITHUB_ENV"
 
+      - name: Network state before tests
+        run: bash helm-charts/.github/scripts/network-state.sh before
+
       - name: Run integration tests
         working-directory: helm-charts
         env:
@@ -158,6 +161,14 @@ jobs:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         run: >
           ./gradlew :tests-hivemq-platform-operator:integrationTest -PcustomPlatformImageVariant=${{ matrix.variant }}
+
+      # only on a non-success run: a healthy run keeps the resolver working, so the built-in post-step
+      # logout is fine and keeps the tailnet clean. A runtime stall wedges the resolver and either
+      # fails the test step or trips timeout-minutes (a cancel, where failure() is false), so gate on
+      # both. cancelled()-gated steps still run during the cancellation window.
+      - name: Capture the network state and log out of Tailscale after failed tests
+        if: ${{ failure() || cancelled() }}
+        uses: ./helm-charts/.github/actions/after-failed-tests
 
       - name: Add the tested HiveMQ Platform version to the summary
         if: ${{ !cancelled() }}
