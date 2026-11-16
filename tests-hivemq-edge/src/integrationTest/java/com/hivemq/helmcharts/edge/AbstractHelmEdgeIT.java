@@ -2,6 +2,7 @@ package com.hivemq.helmcharts.edge;
 
 import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
 import com.hivemq.helmcharts.testcontainer.HelmChartContainerExtension;
+import com.hivemq.helmcharts.testcontainer.K3sStallFailureExtension;
 import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import static org.awaitility.Durations.TWO_SECONDS;
  * no CRD), so this base class only manages a namespace and the chart release lifecycle.
  */
 @SuppressWarnings("NotNullFieldNotInitialized")
+@ExtendWith(K3sStallFailureExtension.class)
 abstract class AbstractHelmEdgeIT {
 
     @RegisterExtension

@@ -70,6 +70,7 @@ public class HelmChartContainer extends K3sContainer {
     private final @NotNull Map<String, Watch> watches = new ConcurrentHashMap<>();
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
+    private final @NotNull K3sRuntimeStallDetector stallDetector = new K3sRuntimeStallDetector();
 
     private @Nullable KubernetesClient client;
 
@@ -87,6 +88,7 @@ public class HelmChartContainer extends K3sContainer {
         super.withStartupCheckStrategy(new K3sReadyStartupCheckStrategy(this));
         super.withLogConsumer(new K3sLogConsumer(LOG).withPrefix(LOG_PREFIX_K3S).withDebugging(withK3sDebugging));
         super.withLogConsumer(outputFrame -> logWaiter.accept(LOG_PREFIX_K3S, outputFrame.getUtf8String().trim()));
+        super.withLogConsumer(outputFrame -> stallDetector.accept(outputFrame.getUtf8String()));
         final var k3sCommands = new ArrayList<>(List.of("server",
                 "--etcd-arg=unsafe-no-fsync",
                 "--etcd-arg=snapshot-count=10000",
@@ -143,7 +145,16 @@ public class HelmChartContainer extends K3sContainer {
             this.client = null;
         }
         executorService.shutdownNow();
-        super.stop();
+        if (K3sRuntimeStallDetector.hasDetectedStall()) {
+            // a stalled containerd never shuts down gracefully, so the docker stop of super.stop() blocks on it forever,
+            // and docker-java resolves the docker host on every new connection, a lookup the stall can wedge; SIGKILL the
+            // container through the docker CLI instead (docker kill does not wait on the inner containerd) and leave its
+            // removal to Ryuk
+            LOG.warn("K3s runtime stalled; force-killing the container to avoid a blocked shutdown");
+            forceKill();
+        } else {
+            super.stop();
+        }
         LOG.info("HelmChartContainer is stopped");
     }
 
@@ -230,6 +241,15 @@ public class HelmChartContainer extends K3sContainer {
             final @NotNull String namespace,
             final boolean deleteNamespace,
             final @NotNull String... additionalCommands) throws Exception {
+        // a stalled K3s runtime cannot uninstall anything or delete a namespace, and the Helm call goes through
+        // docker-java, which blocks once the stall wedged the name resolution; the container is force-killed on
+        // teardown anyway
+        if (K3sRuntimeStallDetector.hasDetectedStall()) {
+            LOG.warn("K3s runtime stalled; skipping the uninstall of release '{}' in namespace '{}'",
+                    releaseName,
+                    namespace);
+            return;
+        }
         LOG.info("Uninstalling release '{}' in namespace '{}'...", releaseName, namespace);
         try {
             executeHelmCommand("uninstall",
@@ -251,6 +271,30 @@ public class HelmChartContainer extends K3sContainer {
                 deleteNamespace(namespace);
             }
             LOG.info("Release '{}' in namespace '{}' is uninstalled", releaseName, namespace);
+        }
+    }
+
+    // SIGKILL via the docker CLI, not the docker-java client: docker-java resolves the docker host through the JVM's
+    // getaddrinfo on every request, which is exactly the native call wedged during a stall (the startup-check thread
+    // holds the per-host InetAddress lock in an uninterruptible lookup). A docker-java kill blocks on that same lock and
+    // never fires. The docker CLI talks to the daemon socket directly and needs no name resolution.
+    private void forceKill() {
+        final var containerId = getContainerId();
+        if (containerId == null) {
+            return;
+        }
+        try {
+            final var process = new ProcessBuilder("docker", "kill", containerId).redirectErrorStream(true).start();
+            if (!process.waitFor(30, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                LOG.warn("Timed out force-killing the K3s container {}", containerId);
+            } else if (process.exitValue() != 0) {
+                LOG.warn("docker kill for the K3s container {} exited with {}", containerId, process.exitValue());
+            }
+        } catch (final IOException e) {
+            LOG.warn("Could not force-kill the K3s container {}", containerId, e);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
