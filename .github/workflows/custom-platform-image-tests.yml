@@ -93,7 +93,7 @@ jobs:
       contents: read
       checks: write
       id-token: write
-    timeout-minutes: 60
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
