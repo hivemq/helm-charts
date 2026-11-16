@@ -2,6 +2,7 @@ package com.hivemq.helmcharts;
 
 import com.hivemq.helmcharts.testcontainer.HelmChartContainer;
 import com.hivemq.helmcharts.testcontainer.HelmChartContainerExtension;
+import com.hivemq.helmcharts.testcontainer.K3sStallFailureExtension;
 import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.Network;
 
@@ -30,6 +32,7 @@ import static org.awaitility.Durations.FIVE_MINUTES;
 import static org.awaitility.Durations.TWO_SECONDS;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
+@ExtendWith(K3sStallFailureExtension.class)
 public abstract class AbstractHelmChartIT {
 
     @RegisterExtension
