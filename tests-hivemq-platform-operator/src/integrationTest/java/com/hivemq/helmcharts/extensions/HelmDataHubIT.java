@@ -30,7 +30,7 @@ class HelmDataHubIT extends AbstractHelmChartIT {
                 platformNamespace,
                 restApiServiceName,
                 REST_API_SERVICE_PORT)) {
-            final var baseRestApiEndpoint = "http://localhost:" + forwarded.getLocalPort();
+            final var baseRestApiEndpoint = "http://127.0.0.1:" + forwarded.getLocalPort();
 
             final var schemaPath = getClass().getResource("/coordinates-schema.json");
             assertThat(schemaPath).isNotNull();

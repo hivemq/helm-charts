@@ -26,7 +26,7 @@ public class PrometheusUtil {
                 .build()) {
 
             final var request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:" + portForward.getLocalPort() + path))
+                    .uri(URI.create("http://127.0.0.1:" + portForward.getLocalPort() + path))
                     .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();

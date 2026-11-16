@@ -28,7 +28,7 @@ abstract class AbstractHelmMonitoringIT extends AbstractHelmChartIT {
     @BeforeEach
     @Timeout(value = 5, unit = TimeUnit.MINUTES)
     final void setup() throws Exception {
-        RestAssured.baseURI = "http://localhost";
+        RestAssured.baseURI = "http://127.0.0.1";
         helmChartContainer.addHelmRepo("prometheus-community", "https://prometheus-community.github.io/helm-charts");
         helmChartContainer.installChart(MONITORING_RELEASE,
                 "prometheus-community/kube-prometheus-stack",

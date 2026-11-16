@@ -192,6 +192,10 @@ jobs:
           K8S_VERSION_TYPE: ${{ matrix.k8s-version-type }}
           DEVELOCITY_SERVER_URL: ${{ secrets.DEVELOCITY_SERVER_URL }}
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+          # make testcontainers getHost() return the 127.0.0.1 literal instead of the name "localhost", so the shared
+          # fabric8 client connects to the k3s API by IP and never does a getaddrinfo, which can stall under a runtime
+          # stall and freeze every HTTP thread on the JVM's per-host DNS lock
+          TESTCONTAINERS_HOST_OVERRIDE: 127.0.0.1
         run: ./gradlew :tests-hivemq-platform-operator:integrationTest ${{ steps.split-tests.outputs.test-suite }}
 
       # only on a non-success run: a healthy run keeps the resolver working, so the built-in post-step
