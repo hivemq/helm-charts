@@ -1,0 +1,41 @@
+name: 'Collect logs of canceled jobs'
+description: 'Fetch the logs of the canceled jobs of this run and upload them as an artifact'
+inputs:
+  artifact-name:
+    description: 'The name of the artifact with the logs'
+    required: true
+  token:
+    description: 'GitHub token to read the jobs and logs of this run'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Fetch the logs of the canceled jobs of this run
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        mkdir -p /tmp/cancelled-logs
+        gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs --paginate \
+          --jq '.jobs[] | select(.conclusion == "cancelled") | "\(.id) \(.name)"' \
+        | while read -r JOB_ID JOB_NAME; do
+            SAFE=$(echo "$JOB_NAME" | tr -c 'A-Za-z0-9' '-' | tr -s '-' | sed 's/^-//;s/-$//')
+            OUT=/tmp/cancelled-logs/$SAFE.log
+            for ATTEMPT in 1 2 3 4 5 6; do
+              if gh api --allow-escape-sequences "repos/${{ github.repository }}/actions/jobs/$JOB_ID/logs" > "$OUT" 2>&1 && ! grep -q "BlobNotFound" "$OUT"; then
+                break
+              fi
+              echo "log of job $JOB_ID not available yet (attempt $ATTEMPT/6), sleeping 15s"
+              sleep 15
+            done
+          done
+
+    - name: Upload the logs of the canceled jobs
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: /tmp/cancelled-logs/
+        retention-days: 5
+        if-no-files-found: ignore

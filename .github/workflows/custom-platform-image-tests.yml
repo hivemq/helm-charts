@@ -204,3 +204,23 @@ jobs:
               echo "::error title=${{ matrix.variant }}::$TEST_CLASS.$TEST_METHOD%0A$MESSAGE"
             done
           done
+
+  collect-cancelled-logs:
+    name: Collect logs from cancelled jobs
+    runs-on: ubuntu-latest
+    needs: run-integration-tests
+    if: always() && needs.run-integration-tests.result != 'success'
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: helm-charts
+          sparse-checkout: .github/actions
+
+      - name: Collect the logs of the canceled jobs
+        uses: ./helm-charts/.github/actions/collect-cancelled-logs
+        with:
+          artifact-name: "HiveMQ Platform custom image - Logs of cancelled jobs"
