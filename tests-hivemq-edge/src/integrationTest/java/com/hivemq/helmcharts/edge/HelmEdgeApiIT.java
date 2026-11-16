@@ -54,7 +54,7 @@ class HelmEdgeApiIT extends AbstractHelmEdgeIT {
                 .inNamespace(edgeNamespace)
                 .withName(EDGE_POD_NAME)
                 .portForward(EDGE_HTTP_PORT)) {
-            final var baseUri = "http://localhost:" + portForward.getLocalPort();
+            final var baseUri = "http://127.0.0.1:" + portForward.getLocalPort();
 
             final var bearerToken = getBearerToken(baseUri);
 

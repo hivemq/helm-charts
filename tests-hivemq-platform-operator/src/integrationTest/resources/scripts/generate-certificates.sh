@@ -25,8 +25,10 @@ function generate_certificates() {
     -config <(echo "[req]"; echo "distinguished_name=req"; echo "[SAN]"; echo "subjectAltName=DNS:localhost,DNS:host.docker.internal") \
     -out server.csr >/dev/null
 
+  # the tests reach HTTPS endpoints through a port forward on 127.0.0.1, and the SNI host check of Jetty rejects a
+  # request whose host matches no SAN of the server certificate
   openssl x509 -req \
-    -extfile <(printf "subjectAltName=DNS:%s.%s.svc,DNS:localhost,DNS:host.docker.internal" "${SERVICE_NAME}" "${NAMESPACE}") \
+    -extfile <(printf "subjectAltName=DNS:%s.%s.svc,DNS:localhost,DNS:host.docker.internal,IP:127.0.0.1" "${SERVICE_NAME}" "${NAMESPACE}") \
     -sha256 \
     -days 3650 \
     -in server.csr \

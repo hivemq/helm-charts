@@ -133,7 +133,7 @@ class HelmDataHubModuleIT extends AbstractHelmChartIT {
                     restApiServiceName,
                     REST_API_SERVICE_PORT)) {
                 final var statusCode = given().when()
-                        .post("http://localhost:%s/api/v1/data-hub/management/start-trial".formatted(forwarded.getLocalPort()))
+                        .post("http://127.0.0.1:%s/api/v1/data-hub/management/start-trial".formatted(forwarded.getLocalPort()))
                         .then()
                         .log()
                         .ifError()
@@ -152,7 +152,7 @@ class HelmDataHubModuleIT extends AbstractHelmChartIT {
             return given().contentType(ContentType.JSON)
                     .body(jsonPayload)
                     .when()
-                    .post("http://localhost:%s/api/v1/data-hub/modules/instances".formatted(forwarded.getLocalPort()))
+                    .post("http://127.0.0.1:%s/api/v1/data-hub/modules/instances".formatted(forwarded.getLocalPort()))
                     .then()
                     .log()
                     .ifError()

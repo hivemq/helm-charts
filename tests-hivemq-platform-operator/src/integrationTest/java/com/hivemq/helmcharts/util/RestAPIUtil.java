@@ -107,7 +107,7 @@ public class RestAPIUtil {
                 endpointPath);
         try (final var forwarded = K8sUtil.getPortForward(client, namespace, serviceName, port)) {
             final var baseRestApiEndpoint =
-                    "%s://localhost:%s".formatted(isSecure ? "https" : "http", forwarded.getLocalPort());
+                    "%s://127.0.0.1:%s".formatted(isSecure ? "https" : "http", forwarded.getLocalPort());
 
             given().header("Authorization", createBasicAuthHeader(username, password))
                     .when()
@@ -129,7 +129,7 @@ public class RestAPIUtil {
         final var clients = new ArrayList<>(0);
         try (final var forwarded = K8sUtil.getPortForward(client, namespace, serviceName, port)) {
             final var baseRestApiEndpoint =
-                    "%s://localhost:%s".formatted(isSecure ? "https" : "http", forwarded.getLocalPort());
+                    "%s://127.0.0.1:%s".formatted(isSecure ? "https" : "http", forwarded.getLocalPort());
 
             final var body = given().when()
                     .relaxedHTTPSValidation()
