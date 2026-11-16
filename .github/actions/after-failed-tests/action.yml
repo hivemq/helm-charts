@@ -1,0 +1,26 @@
+name: 'After failed tests'
+description: 'Capture the network state and log out of Tailscale after failed or canceled integration tests'
+
+runs:
+  using: 'composite'
+  steps:
+    # the caller runs this action only after failed or canceled tests, so its steps also run during a cancellation
+    - name: Network state after failed tests
+      if: ${{ always() }}
+      shell: bash
+      run: bash "$GITHUB_ACTION_PATH/../../scripts/network-state.sh" after
+
+    - name: Log out of Tailscale and neutralize the post-step logout
+      # also when the network state capture failed
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        # best-effort clean logout, bounded so a wedged resolver (same stall that freezes the k3s
+        # runtime) can't hang it
+        sudo -E timeout 20 tailscale logout || true
+        # the action's post-step (dist/logout/index.js) runs `tailscale --version` first and, if the
+        # binary is not found, logs "skipping logout" as info and returns cleanly. Move the binary
+        # aside so the post takes that quiet skip path instead of hanging ~5m on
+        # controlplane.tailscale.com. The runner is ephemeral, so removing the binary is harmless.
+        TS_BIN="$(command -v tailscale || true)"
+        [ -n "$TS_BIN" ] && sudo mv "$TS_BIN" "$TS_BIN.disabled" || true
