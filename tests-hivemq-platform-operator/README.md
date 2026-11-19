@@ -74,6 +74,8 @@ The following variants are available:
 | `oracle-latest-ol9`       | `container-registry.oracle.com/java/jdk-no-fee-term:<latest>-oraclelinux9` | HotSpot | latest |
 | `redhat-21-ubi9`          | `registry.access.redhat.com/ubi9/openjdk-21-runtime:1.24`                  | HotSpot | 21     |
 | `redhat-25-ubi10`         | `registry.access.redhat.com/ubi10/openjdk-25-runtime:1.24`                 | HotSpot | 25     |
+| `zulu-25-debian`          | `azul-zulu:25-jre-headless-debian`                                         | HotSpot | 25     |
+| `zulu-latest-debian`      | `azul-zulu:<latest>-jre-headless-debian`                                   | HotSpot | latest |
 
 Only the tests tagged with `custom-platform-image` run in this mode, and a `--tests` filter can narrow the selection further:
 

@@ -63,6 +63,8 @@ val jreBaseImages = mapOf(
     "oracle-latest-ol9" to ociImages.jre.oraclelatest.ol9,
     "redhat-21-ubi9" to ociImages.jre.redhat21.ubi9,
     "redhat-25-ubi10" to ociImages.jre.redhat25.ubi10,
+    "zulu-25-debian" to ociImages.jre.zulu25.debian,
+    "zulu-latest-debian" to ociImages.jre.zululatest.debian,
 )
 
 /*

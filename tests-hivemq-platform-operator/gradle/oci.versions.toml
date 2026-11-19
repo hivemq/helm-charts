@@ -109,6 +109,12 @@ name = "jre-redhat25-ubi10"
 image = "registry.access.redhat.com/ubi10/openjdk-25-runtime"
 reference = "1.24-20@sha256:dab1be80efb4b8b6e97a314715b367bc9c5ebea3f9c1233b9023910423c45f6c"
 
+# https://hub.docker.com/_/azul-zulu/tags?name=25-jre-headless-debian
+[[oci]]
+name = "jre-zulu25-debian"
+image = "library/azul-zulu"
+reference = "25-jre-headless-debian@sha256:2c111cd7a9c0608c694d7e6b8c992c8e38091b80aaecef61e9629e54619a56ff"
+
 # Java runtime base images of the newest Java release, Renovate updates them to the next major version.
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=-jre-resolute
@@ -140,3 +146,9 @@ reference = "27-al2023-jdk@sha256:95d651262e5a4dd7230cf2fbf3a18c39ebb7931593b459
 name = "jre-oraclelatest-ol9"
 image = "container-registry.oracle.com/java/jdk-no-fee-term"
 reference = "27-oraclelinux9@sha256:4f9dd819a56a1c9ed16051045757a98672e79ddd8c7683bb8a077e1ee239f33e"
+
+# https://hub.docker.com/_/azul-zulu/tags?name=-jre-headless-debian
+[[oci]]
+name = "jre-zululatest-debian"
+image = "library/azul-zulu"
+reference = "27-jre-headless-debian@sha256:7229a788b05946eb7baa548a30fda5d4a7ee82b68b1c6b5e445d29f720df0211"
