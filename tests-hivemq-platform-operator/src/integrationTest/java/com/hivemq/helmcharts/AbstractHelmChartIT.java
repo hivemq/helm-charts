@@ -5,6 +5,7 @@ import com.hivemq.helmcharts.testcontainer.HelmChartContainerExtension;
 import com.hivemq.helmcharts.testcontainer.K3sStallFailureExtension;
 import com.hivemq.helmcharts.testcontainer.LogWaiterUtil;
 import com.hivemq.helmcharts.util.K8sUtil;
+import com.hivemq.helmcharts.util.PodUtil;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.awaitility.Awaitility;
 import org.jetbrains.annotations.NotNull;
@@ -15,13 +16,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Network;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.hivemq.helmcharts.util.K8sUtil.MAX_RELEASE_NAME_LENGTH;
@@ -38,6 +44,8 @@ public abstract class AbstractHelmChartIT {
     @RegisterExtension
     private static final @NotNull HelmChartContainerExtension HELM_CHART_CONTAINER_EXTENSION =
             new HelmChartContainerExtension(false);
+
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(AbstractHelmChartIT.class);
 
     protected static final @NotNull String PLATFORM_CRD = "hivemq-platforms.hivemq.com";
     protected static final @NotNull String DEFAULT_OPERATOR_NAME_PREFIX = "hivemq";
@@ -146,6 +154,9 @@ public abstract class AbstractHelmChartIT {
     protected final void installPlatformChartAndWaitToBeRunning(final @NotNull String... commands) throws Exception {
         installPlatformChart(platformReleaseName, commands);
         K8sUtil.waitForHiveMQPlatformStateRunning(client, platformNamespace, platformReleaseName);
+        if (!CUSTOM_PLATFORM_IMAGE_VARIANT.isEmpty()) {
+            logCustomPlatformImageRuntime();
+        }
     }
 
     protected final void installPlatformChart(final @NotNull String releaseName, final @NotNull String... commands)
@@ -244,5 +255,46 @@ public abstract class AbstractHelmChartIT {
     private @NotNull String @NotNull [] addDefaultPlatformCommands(final @NotNull String... commands) {
         final var defaultCommands = Stream.of("--namespace", platformNamespace);
         return Stream.concat(Arrays.stream(commands), defaultCommands).toArray(String[]::new);
+    }
+
+    private void logCustomPlatformImageRuntime() {
+        final var podName = platformReleaseName + "-0";
+        final var osRelease = parseOsRelease(executeInPlatformPod(podName, "cat", "/etc/os-release"));
+        final var osDetails = Stream.of("ID", "ID_LIKE", "PLATFORM_ID", "VERSION_CODENAME")
+                .filter(osRelease::containsKey)
+                .map(key -> key + "=" + osRelease.get(key))
+                .toList();
+        final var operatingSystem = osRelease.getOrDefault("PRETTY_NAME", "an unknown operating system") +
+                (osDetails.isEmpty() ? "" : " (" + String.join(", ", osDetails) + ")");
+        final var javaVersion = executeInPlatformPod(podName, "java", "-version");
+        LOG.info("Custom platform image variant '{}' runs on {}:\n{}",
+                CUSTOM_PLATFORM_IMAGE_VARIANT,
+                operatingSystem,
+                javaVersion);
+    }
+
+    private @NotNull String executeInPlatformPod(final @NotNull String podName, final @NotNull String... command) {
+        final var execResult = PodUtil.execute(client, platformNamespace, podName, "hivemq", command);
+        try {
+            if (!execResult.await(15, TimeUnit.SECONDS)) {
+                LOG.warn("Could not execute '{}' in pod '{}'", String.join(" ", command), podName);
+                return "";
+            }
+            // java -version prints to stderr, so both streams are returned
+            return Stream.of(execResult.getOutput(), execResult.getError())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining("\n"));
+        } finally {
+            execResult.close();
+        }
+    }
+
+    private static @NotNull Map<String, String> parseOsRelease(final @NotNull String osRelease) {
+        return osRelease.lines()
+                .map(line -> line.split("=", 2))
+                .filter(keyValue -> keyValue.length == 2)
+                .collect(Collectors.toMap(keyValue -> keyValue[0],
+                        keyValue -> keyValue[1].replace("\"", ""),
+                        (first, _) -> first));
     }
 }
