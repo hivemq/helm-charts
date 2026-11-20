@@ -101,13 +101,13 @@ reference = "25-oraclelinux9@sha256:06faf4583782d5291b3e6ac47f68a8db155ef77486ed
 [[oci]]
 name = "jre-redhat21-ubi9"
 image = "registry.access.redhat.com/ubi9/openjdk-21-runtime"
-reference = "1.24-3.1794341129@sha256:9a074c2ff90be60b12521ffd5e531acafd25fe36f1c177180cbe1176dfb36c84"
+reference = "1.24-5@sha256:80663340693d8863d518116b9382f758364c5394a41cf549eef6240ebd9e67af"
 
 # https://catalog.redhat.com/software/containers/ubi10/openjdk-25-runtime/690ca3e4c827022925ed2db5
 [[oci]]
 name = "jre-redhat25-ubi10"
 image = "registry.access.redhat.com/ubi10/openjdk-25-runtime"
-reference = "1.24-20@sha256:dab1be80efb4b8b6e97a314715b367bc9c5ebea3f9c1233b9023910423c45f6c"
+reference = "1.24-21@sha256:6110c805def9e7fffdece743564942e528cb713696e40f5c77c36870d707a4fb"
 
 # https://hub.docker.com/_/azul-zulu/tags?name=25-jre-headless-debian
 [[oci]]
