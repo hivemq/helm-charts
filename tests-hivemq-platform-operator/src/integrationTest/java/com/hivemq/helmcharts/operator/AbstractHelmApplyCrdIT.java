@@ -1,6 +1,5 @@
 package com.hivemq.helmcharts.operator;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.hivemq.helmcharts.AbstractHelmChartIT;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +16,6 @@ class AbstractHelmApplyCrdIT extends AbstractHelmChartIT {
 
     static final @NotNull String CRD_NAME = "hivemq-platforms.hivemq.com";
     static final @NotNull String CRD_VERSION = "v1";
-
-    final @NotNull JsonNodeFactory jsonNodeFactory = new JsonNodeFactory(false);
 
     @Override
     protected boolean createPlatformNamespace() {

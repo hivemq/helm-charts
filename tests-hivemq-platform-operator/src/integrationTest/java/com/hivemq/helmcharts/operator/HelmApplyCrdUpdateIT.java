@@ -3,6 +3,7 @@ package com.hivemq.helmcharts.operator;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import tools.jackson.databind.node.JsonNodeFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +28,9 @@ class HelmApplyCrdUpdateIT extends AbstractHelmApplyCrdIT {
                         .get("status")
                         .getProperties()
                         .get("crdVersion")
-                        .setEnum(List.of(jsonNodeFactory.textNode("V1_0_0"), jsonNodeFactory.textNode("V1_0_1"))));
+                        .setEnum(List.of( //
+                                JsonNodeFactory.instance.stringNode("V1_0_0"),
+                                JsonNodeFactory.instance.stringNode("V1_0_1"))));
 
         final var customCrdResource = client.apiextensions().v1().customResourceDefinitions().resource(crd);
         customCrdResource.create();

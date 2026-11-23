@@ -1,12 +1,11 @@
 package com.hivemq.helmcharts;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public record Version(int major, int minor, int patch) implements Comparable<Version> {
@@ -52,11 +51,12 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
         return "%s.%s.%s".formatted(major, minor, patch);
     }
 
-    static class Deserializer extends JsonDeserializer<Version> {
+    static class Deserializer extends ValueDeserializer<Version> {
 
         @Override
-        public @NotNull Version deserialize(final @NotNull JsonParser parser, final @NotNull DeserializationContext ctx)
-                throws IOException {
+        public @NotNull Version deserialize(
+                final @NotNull JsonParser parser,
+                final @NotNull DeserializationContext ctx) {
             final var versionString = parser.getValueAsString();
             final var versionParts = versionString.split("\\.");
             if (versionParts.length != 3) {

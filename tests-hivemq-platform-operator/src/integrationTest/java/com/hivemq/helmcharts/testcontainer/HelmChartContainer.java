@@ -1,8 +1,5 @@
 package com.hivemq.helmcharts.testcontainer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.hivemq.helmcharts.Chart;
 import io.fabric8.kubernetes.api.model.Container;
@@ -29,6 +26,9 @@ import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.k3s.K3sContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,7 +90,7 @@ public class HelmChartContainer extends K3sContainer {
     private final @NotNull Map<String, LogWatch> logWatches = new ConcurrentHashMap<>();
     private final @NotNull LogWaiterUtil logWaiter = new LogWaiterUtil();
     private final @NotNull K3sRuntimeStallDetector stallDetector = new K3sRuntimeStallDetector();
-    private final @NotNull ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+    private final @NotNull ObjectMapper objectMapper = new YAMLMapper();
 
     private @Nullable KubernetesClient client;
     private @Nullable Chart legacyChart;
