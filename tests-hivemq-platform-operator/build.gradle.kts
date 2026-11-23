@@ -65,6 +65,9 @@ val jreBaseImages = mapOf(
     "redhat-25-ubi10" to ociImages.jre.redhat25.ubi10,
     "zulu-25-debian" to ociImages.jre.zulu25.debian,
     "zulu-latest-debian" to ociImages.jre.zululatest.debian,
+    "hivemq-coffee-21-noble" to ociImages.jre.hivemqcoffee21.noble,
+    "hivemq-coffee-25-noble" to ociImages.jre.hivemqcoffee25.noble,
+    "hivemq-coffee-25-resolute" to ociImages.jre.hivemqcoffee25.resolute,
 )
 
 /*
@@ -240,7 +243,13 @@ oci {
         registry("ecrPublic") {
             url = uri("https://public.ecr.aws")
             optionalCredentials()
-            exclusiveContent { includeGroup("hivemq.library") }
+            exclusiveContent {
+                includeGroup("hivemq.library")
+                includeModule("hivemq", "hivemq-coffee")
+                includeModule(jreBaseImageGroup, "hivemq-coffee-21-noble")
+                includeModule(jreBaseImageGroup, "hivemq-coffee-25-noble")
+                includeModule(jreBaseImageGroup, "hivemq-coffee-25-resolute")
+            }
         }
         registry("oracle") {
             url = uri("https://${ociImages.jre.oracle25.ol9.registry}")

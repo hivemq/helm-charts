@@ -115,6 +115,24 @@ name = "jre-zulu25-debian"
 image = "library/azul-zulu"
 reference = "25-jre-headless-debian@sha256:2c111cd7a9c0608c694d7e6b8c992c8e38091b80aaecef61e9629e54619a56ff"
 
+# https://gallery.ecr.aws/hivemq/hivemq-coffee
+[[oci]]
+name = "jre-hivemqcoffee21-noble"
+image = "public.ecr.aws/hivemq/hivemq-coffee"
+reference = "21-jre-noble@sha256:7db74c333a2f1282b10952c2742eba68c9ea64b6b70ecf4f21ccd6f2f5939083"
+
+# https://gallery.ecr.aws/hivemq/hivemq-coffee
+[[oci]]
+name = "jre-hivemqcoffee25-noble"
+image = "public.ecr.aws/hivemq/hivemq-coffee"
+reference = "25-jre-noble@sha256:75f0b5d3472b39bd22d907ab3592ad4c7241ccd99db52aac9978482b181284ce"
+
+# https://gallery.ecr.aws/hivemq/hivemq-coffee
+[[oci]]
+name = "jre-hivemqcoffee25-resolute"
+image = "public.ecr.aws/hivemq/hivemq-coffee"
+reference = "25-jre-resolute@sha256:780a2ca09b7c6314e7113e17cacec5fbd7532dbd1ff74bd9ad7178f5f47f8231"
+
 # Java runtime base images of the newest Java release, Renovate updates them to the next major version.
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=-jre-resolute
