@@ -29,7 +29,7 @@ repositories {
 }
 
 configurations.all {
-    exclude("io.fabric8", "kubernetes-httpclient-vertx")
+    exclude("io.fabric8", "kubernetes-httpclient-vertx-5")
 }
 
 val hivemqVersion = libs.versions.hivemq.platform.get()
