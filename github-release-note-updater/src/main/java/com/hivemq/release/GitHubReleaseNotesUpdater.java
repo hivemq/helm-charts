@@ -1,10 +1,9 @@
 package com.hivemq.release;
 
 import com.beust.jcommander.JCommander;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.zafarkhaja.semver.Version;
 import org.jetbrains.annotations.NotNull;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,7 +69,7 @@ public class GitHubReleaseNotesUpdater {
             System.exit(1);
         }
 
-        final var objectMapper = new ObjectMapper(new YAMLFactory());
+        final var objectMapper = new YAMLMapper();
         final var indexFile = objectMapper.readValue(Files.readString(chartsPath), IndexFile.class);
         final var releases =
                 Arrays.stream(objectMapper.readValue(Files.readString(releasesPath), Release[].class)).toList();
