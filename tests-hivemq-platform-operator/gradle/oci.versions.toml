@@ -119,19 +119,19 @@ reference = "25-jre-headless-debian@sha256:2c111cd7a9c0608c694d7e6b8c992c8e38091
 [[oci]]
 name = "jre-hivemqcoffee21-noble"
 image = "public.ecr.aws/hivemq/hivemq-coffee"
-reference = "21-jre-noble@sha256:7db74c333a2f1282b10952c2742eba68c9ea64b6b70ecf4f21ccd6f2f5939083"
+reference = "21-jre-noble@sha256:17fc88acec518cc3864318555bcce2de98130787d6cd1e52b1dfe14cc10b50e5"
 
 # https://gallery.ecr.aws/hivemq/hivemq-coffee
 [[oci]]
 name = "jre-hivemqcoffee25-noble"
 image = "public.ecr.aws/hivemq/hivemq-coffee"
-reference = "25-jre-noble@sha256:75f0b5d3472b39bd22d907ab3592ad4c7241ccd99db52aac9978482b181284ce"
+reference = "25-jre-noble@sha256:63e2d753b86d091239994ebdd26150212e77d2ab86f505371a4ba0e1b5d258c2"
 
 # https://gallery.ecr.aws/hivemq/hivemq-coffee
 [[oci]]
 name = "jre-hivemqcoffee25-resolute"
 image = "public.ecr.aws/hivemq/hivemq-coffee"
-reference = "25-jre-resolute@sha256:780a2ca09b7c6314e7113e17cacec5fbd7532dbd1ff74bd9ad7178f5f47f8231"
+reference = "25-jre-resolute@sha256:ca54092051fe981e6794c8dfd7bda6f586d0d3dde9a498ee33111405fbab9981"
 
 # Java runtime base images of the newest Java release, Renovate updates them to the next major version.
 
