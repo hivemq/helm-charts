@@ -26,7 +26,7 @@ reference = "latest@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d346
 [[oci]]
 name = "nginx"
 image = "library/nginx"
-reference = "latest@sha256:84f7876d21d154885f99554d7ae325d8c2213f9169726ea7ab60642f2573a787"
+reference = "latest@sha256:6a3df739b6312289e87d70947d900669c1b3087474ece5814b9c01bbf2e6dde3"
 
 # https://hub.docker.com/r/selenium/standalone-firefox/tags?name=148
 [[oci]]
@@ -59,7 +59,7 @@ reference = "21-jre-resolute@sha256:577acb7ab9893a6dfd6bcb138a25a4fb579ef1f3abcd
 [[oci]]
 name = "jre-temurin21-ubi9"
 image = "library/eclipse-temurin"
-reference = "21-jre-ubi9-minimal@sha256:473f06a821e185f5ab9047d4d70778c4eccaaeb303b3495001acbd93ff661b1f"
+reference = "21-jre-ubi9-minimal@sha256:4396a4492b33c138eec7348417ab7015c1ab21c0ffdead34107b2dc89468a329"
 
 # https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-resolute
 [[oci]]
@@ -71,7 +71,7 @@ reference = "25-jre-resolute@sha256:a0862ac8790c648f6b5db8a113b9990d24fbe8e65f3c
 [[oci]]
 name = "jre-temurin25-ubi10"
 image = "library/eclipse-temurin"
-reference = "25-jre-ubi10-minimal@sha256:98b00567cd604b1ef5446afe8aee92f1c653c8a04f44466300df96efbef10e43"
+reference = "25-jre-ubi10-minimal@sha256:25d8fbdec171e24e474065a7a42f3e0980559f0ac57f54f5c682d42f3cfa3450"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=open-21-jre-noble
 [[oci]]
@@ -89,13 +89,13 @@ reference = "open-25-jre-noble@sha256:2eb1982cf6da5b781dd6d5f6f2994f2028d574fa98
 [[oci]]
 name = "jre-corretto21-al2023"
 image = "library/amazoncorretto"
-reference = "21-al2023-jdk@sha256:a02f509af88bd1544d5bb42be83a20d9022dc15f388a0007e2c7d0d87170b9f4"
+reference = "21-al2023-jdk@sha256:fe9b50d12d33a499fb382d47370017a8dee73a2ab80ea6d5aa9a30ee72c82caa"
 
 # https://hub.docker.com/_/amazoncorretto/tags?name=25-al2023-jdk
 [[oci]]
 name = "jre-corretto25-al2023"
 image = "library/amazoncorretto"
-reference = "25-al2023-jdk@sha256:288b5647146a21027688b52cc23d802ee6badb6f28632111b606b79262d9fc5f"
+reference = "25-al2023-jdk@sha256:d4b9047349107b5c5a3c67f89853c48a83d4c769d4196a03f675a4c365737f7b"
 
 # https://container-registry.oracle.com/ords/ocr/ba/java/jdk-no-fee-term
 [[oci]]
@@ -151,7 +151,7 @@ reference = "27-jre-resolute@sha256:ad293220c45600f71afe656fa0fb14fa9ebba05afee2
 [[oci]]
 name = "jre-temurinlatest-ubi10"
 image = "library/eclipse-temurin"
-reference = "27-jre-ubi10-minimal@sha256:f76aca24b2b7da1b4d1bb172f15e5bb29c7c36d85e325a534e7a42b2ca87344d"
+reference = "27-jre-ubi10-minimal@sha256:0bacd16df2b3f11ca45a7af71b9abaaf9f19d95de2ebb63a566d477fa841da83"
 
 # https://hub.docker.com/_/ibm-semeru-runtimes/tags?name=-jre-noble
 [[oci]]
@@ -163,7 +163,7 @@ reference = "open-27-jre-noble@sha256:232846727f9c2acd4461506ba073b594baa847563e
 [[oci]]
 name = "jre-correttolatest-al2023"
 image = "library/amazoncorretto"
-reference = "27-al2023-jdk@sha256:aab3aaa907add0989f7e7b0d070fe2ebac58a68a7ca2217c61ded307c1d6ca5c"
+reference = "27-al2023-jdk@sha256:7ea74bb42ee0f34bfd69052476a3e7f27d152d1f5b3bff966cde2c890f6e994a"
 
 # https://container-registry.oracle.com/ords/ocr/ba/java/jdk-no-fee-term
 [[oci]]
