@@ -66,12 +66,14 @@ spec:
                         type: "boolean"
                       extensionPriority:
                         description: "Configures the priority value in the hivemq_extension.xml."
+                        format: "int32"
                         type: "integer"
                       extensionStartMandatory:
                         description: "Configures the start-mandatory value in the hivemq_extension.xml."
                         type: "boolean"
                       extensionStartPriority:
                         description: "Configures the start-priority value in the hivemq_extension.xml."
+                        format: "int32"
                         type: "integer"
                       extensionUri:
                         description: "HTTP URI to download the extension from (as .zip\
@@ -104,6 +106,7 @@ spec:
                     type: "object"
                   type: "array"
                 healthApiPort:
+                  format: "int32"
                   type: "integer"
                 logLevel:
                   enum:
@@ -116,6 +119,7 @@ spec:
                 metricsPath:
                   type: "string"
                 metricsPort:
+                  format: "int32"
                   type: "integer"
                 monitoredResources:
                   items:
@@ -140,6 +144,7 @@ spec:
                     type: "object"
                   type: "array"
                 operatorRestApiPort:
+                  format: "int32"
                   type: "integer"
                 rollingRestart:
                   properties:
@@ -147,6 +152,7 @@ spec:
                       description: "[DEPRECATED since HiveMQ Platform Operator 2.3.0]\
                       \ Use lastPodReadyMinAgeSeconds instead. It is only used when\
                       \ lastPodReadyMinAgeSeconds is not set."
+                      format: "int64"
                       type: "integer"
                     lastPodReadyMinAgeSeconds:
                       description: "The minimum time in seconds that the last restarted\
@@ -154,6 +160,7 @@ spec:
                       \ or the surge Pod can be removed during a rolling restart.\
                       \ Overrides the global operator configuration. If not set, the\
                       \ global operator configuration is used."
+                      format: "int64"
                       type: "integer"
                   type: "object"
                 scaling:
@@ -164,6 +171,7 @@ spec:
                       \ added during a scale up or removed during a scale down. Overrides\
                       \ the global operator configuration. If not set, the global\
                       \ operator configuration is used."
+                      format: "int64"
                       type: "integer"
                     lastPodRemovalMinAgeSeconds:
                       description: "The minimum time in seconds since the HiveMQ Platform\
@@ -171,6 +179,7 @@ spec:
                       \ removed during a scale down. Overrides the global operator\
                       \ configuration. If not set, the global operator configuration\
                       \ is used."
+                      format: "int64"
                       type: "integer"
                   type: "object"
                 secretName:
@@ -188,6 +197,7 @@ spec:
                           creationTimestamp:
                             type: "string"
                           deletionGracePeriodSeconds:
+                            format: "int64"
                             type: "integer"
                           deletionTimestamp:
                             type: "string"
@@ -198,6 +208,7 @@ spec:
                           generateName:
                             type: "string"
                           generation:
+                            format: "int64"
                             type: "integer"
                           labels:
                             additionalProperties:
@@ -270,6 +281,7 @@ spec:
                           externalTrafficPolicy:
                             type: "string"
                           healthCheckNodePort:
+                            format: "int32"
                             type: "integer"
                           internalTrafficPolicy:
                             type: "string"
@@ -295,8 +307,10 @@ spec:
                                 name:
                                   type: "string"
                                 nodePort:
+                                  format: "int32"
                                   type: "integer"
                                 port:
+                                  format: "int32"
                                   type: "integer"
                                 protocol:
                                   type: "string"
@@ -320,6 +334,7 @@ spec:
                               clientIP:
                                 properties:
                                   timeoutSeconds:
+                                    format: "int32"
                                     type: "integer"
                                 type: "object"
                             type: "object"
@@ -342,6 +357,7 @@ spec:
                         creationTimestamp:
                           type: "string"
                         deletionGracePeriodSeconds:
+                          format: "int64"
                           type: "integer"
                         deletionTimestamp:
                           type: "string"
@@ -352,6 +368,7 @@ spec:
                         generateName:
                           type: "string"
                         generation:
+                          format: "int64"
                           type: "integer"
                         labels:
                           additionalProperties:
@@ -408,10 +425,12 @@ spec:
                       description: "The spec of this StatefulSet"
                       properties:
                         minReadySeconds:
+                          format: "int32"
                           type: "integer"
                         ordinals:
                           properties:
                             start:
+                              format: "int32"
                               type: "integer"
                           type: "object"
                         persistentVolumeClaimRetentionPolicy:
@@ -424,8 +443,10 @@ spec:
                         podManagementPolicy:
                           type: "string"
                         replicas:
+                          format: "int32"
                           type: "integer"
                         revisionHistoryLimit:
+                          format: "int32"
                           type: "integer"
                         selector:
                           properties:
@@ -460,6 +481,7 @@ spec:
                                 creationTimestamp:
                                   type: "string"
                                 deletionGracePeriodSeconds:
+                                  format: "int64"
                                   type: "integer"
                                 deletionTimestamp:
                                   type: "string"
@@ -470,6 +492,7 @@ spec:
                                 generateName:
                                   type: "string"
                                 generation:
+                                  format: "int64"
                                   type: "integer"
                                 labels:
                                   additionalProperties:
@@ -525,6 +548,7 @@ spec:
                             spec:
                               properties:
                                 activeDeadlineSeconds:
+                                  format: "int64"
                                   type: "integer"
                                 affinity:
                                   properties:
@@ -563,6 +587,7 @@ spec:
                                                     type: "array"
                                                 type: "object"
                                               weight:
+                                                format: "int32"
                                                 type: "integer"
                                             type: "object"
                                           type: "array"
@@ -664,6 +689,7 @@ spec:
                                                     type: "string"
                                                 type: "object"
                                               weight:
+                                                format: "int32"
                                                 type: "integer"
                                             type: "object"
                                           type: "array"
@@ -790,6 +816,7 @@ spec:
                                                     type: "string"
                                                 type: "object"
                                               weight:
+                                                format: "int32"
                                                 type: "integer"
                                             type: "object"
                                           type: "array"
@@ -991,6 +1018,7 @@ spec:
                                               sleep:
                                                 properties:
                                                   seconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                 type: "object"
                                               tcpSocket:
@@ -1041,6 +1069,7 @@ spec:
                                               sleep:
                                                 properties:
                                                   seconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                 type: "object"
                                               tcpSocket:
@@ -1067,12 +1096,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -1103,10 +1134,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -1119,8 +1153,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       name:
@@ -1129,10 +1165,12 @@ spec:
                                         items:
                                           properties:
                                             containerPort:
+                                              format: "int32"
                                               type: "integer"
                                             hostIP:
                                               type: "string"
                                             hostPort:
+                                              format: "int32"
                                               type: "integer"
                                             name:
                                               type: "string"
@@ -1150,12 +1188,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -1186,10 +1226,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -1202,8 +1245,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       resizePolicy:
@@ -1254,6 +1299,7 @@ spec:
                                                   type: "string"
                                                 values:
                                                   items:
+                                                    format: "int32"
                                                     type: "integer"
                                                   type: "array"
                                               type: "object"
@@ -1288,10 +1334,12 @@ spec:
                                           readOnlyRootFilesystem:
                                             type: "boolean"
                                           runAsGroup:
+                                            format: "int64"
                                             type: "integer"
                                           runAsNonRoot:
                                             type: "boolean"
                                           runAsUser:
+                                            format: "int64"
                                             type: "integer"
                                           seLinuxOptions:
                                             properties:
@@ -1333,12 +1381,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -1369,10 +1419,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -1385,8 +1438,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       stdin:
@@ -1594,6 +1649,7 @@ spec:
                                               sleep:
                                                 properties:
                                                   seconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                 type: "object"
                                               tcpSocket:
@@ -1644,6 +1700,7 @@ spec:
                                               sleep:
                                                 properties:
                                                   seconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                 type: "object"
                                               tcpSocket:
@@ -1670,12 +1727,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -1706,10 +1765,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -1722,8 +1784,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       name:
@@ -1732,10 +1796,12 @@ spec:
                                         items:
                                           properties:
                                             containerPort:
+                                              format: "int32"
                                               type: "integer"
                                             hostIP:
                                               type: "string"
                                             hostPort:
+                                              format: "int32"
                                               type: "integer"
                                             name:
                                               type: "string"
@@ -1753,12 +1819,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -1789,10 +1857,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -1805,8 +1876,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       resizePolicy:
@@ -1857,6 +1930,7 @@ spec:
                                                   type: "string"
                                                 values:
                                                   items:
+                                                    format: "int32"
                                                     type: "integer"
                                                   type: "array"
                                               type: "object"
@@ -1891,10 +1965,12 @@ spec:
                                           readOnlyRootFilesystem:
                                             type: "boolean"
                                           runAsGroup:
+                                            format: "int64"
                                             type: "integer"
                                           runAsNonRoot:
                                             type: "boolean"
                                           runAsUser:
+                                            format: "int64"
                                             type: "integer"
                                           seLinuxOptions:
                                             properties:
@@ -1936,12 +2012,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -1972,10 +2050,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -1988,8 +2069,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       stdin:
@@ -2046,6 +2129,7 @@ spec:
                                       name:
                                         type: "string"
                                       priority:
+                                        format: "int32"
                                         type: "integer"
                                     type: "object"
                                   type: "array"
@@ -2214,6 +2298,7 @@ spec:
                                               sleep:
                                                 properties:
                                                   seconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                 type: "object"
                                               tcpSocket:
@@ -2264,6 +2349,7 @@ spec:
                                               sleep:
                                                 properties:
                                                   seconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                 type: "object"
                                               tcpSocket:
@@ -2290,12 +2376,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -2326,10 +2414,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -2342,8 +2433,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       name:
@@ -2352,10 +2445,12 @@ spec:
                                         items:
                                           properties:
                                             containerPort:
+                                              format: "int32"
                                               type: "integer"
                                             hostIP:
                                               type: "string"
                                             hostPort:
+                                              format: "int32"
                                               type: "integer"
                                             name:
                                               type: "string"
@@ -2373,12 +2468,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -2409,10 +2506,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -2425,8 +2525,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       resizePolicy:
@@ -2477,6 +2579,7 @@ spec:
                                                   type: "string"
                                                 values:
                                                   items:
+                                                    format: "int32"
                                                     type: "integer"
                                                   type: "array"
                                               type: "object"
@@ -2511,10 +2614,12 @@ spec:
                                           readOnlyRootFilesystem:
                                             type: "boolean"
                                           runAsGroup:
+                                            format: "int64"
                                             type: "integer"
                                           runAsNonRoot:
                                             type: "boolean"
                                           runAsUser:
+                                            format: "int64"
                                             type: "integer"
                                           seLinuxOptions:
                                             properties:
@@ -2556,12 +2661,14 @@ spec:
                                                 type: "array"
                                             type: "object"
                                           failureThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           grpc:
                                             properties:
                                               mode:
                                                 type: "string"
                                               port:
+                                                format: "int32"
                                                 type: "integer"
                                               service:
                                                 type: "string"
@@ -2592,10 +2699,13 @@ spec:
                                                 type: "string"
                                             type: "object"
                                           initialDelaySeconds:
+                                            format: "int32"
                                             type: "integer"
                                           periodSeconds:
+                                            format: "int32"
                                             type: "integer"
                                           successThreshold:
+                                            format: "int32"
                                             type: "integer"
                                           tcpSocket:
                                             properties:
@@ -2608,8 +2718,10 @@ spec:
                                                 x-kubernetes-int-or-string: true
                                             type: "object"
                                           terminationGracePeriodSeconds:
+                                            format: "int64"
                                             type: "integer"
                                           timeoutSeconds:
+                                            format: "int32"
                                             type: "integer"
                                         type: "object"
                                       stdin:
@@ -2679,6 +2791,7 @@ spec:
                                 preemptionPolicy:
                                   type: "string"
                                 priority:
+                                  format: "int32"
                                   type: "integer"
                                 priorityClassName:
                                   type: "string"
@@ -2754,14 +2867,17 @@ spec:
                                           type: "string"
                                       type: "object"
                                     fsGroup:
+                                      format: "int64"
                                       type: "integer"
                                     fsGroupChangePolicy:
                                       type: "string"
                                     runAsGroup:
+                                      format: "int64"
                                       type: "integer"
                                     runAsNonRoot:
                                       type: "boolean"
                                     runAsUser:
+                                      format: "int64"
                                       type: "integer"
                                     seLinuxChangePolicy:
                                       type: "string"
@@ -2785,6 +2901,7 @@ spec:
                                       type: "object"
                                     supplementalGroups:
                                       items:
+                                        format: "int64"
                                         type: "integer"
                                       type: "array"
                                     supplementalGroupsPolicy:
@@ -2821,6 +2938,7 @@ spec:
                                 subdomain:
                                   type: "string"
                                 terminationGracePeriodSeconds:
+                                  format: "int64"
                                   type: "integer"
                                 tolerations:
                                   items:
@@ -2832,6 +2950,7 @@ spec:
                                       operator:
                                         type: "string"
                                       tolerationSeconds:
+                                        format: "int64"
                                         type: "integer"
                                       value:
                                         type: "string"
@@ -2865,8 +2984,10 @@ spec:
                                           type: "string"
                                         type: "array"
                                       maxSkew:
+                                        format: "int32"
                                         type: "integer"
                                       minDomains:
+                                        format: "int32"
                                         type: "integer"
                                       nodeAffinityPolicy:
                                         type: "string"
@@ -2886,6 +3007,7 @@ spec:
                                           fsType:
                                             type: "string"
                                           partition:
+                                            format: "int32"
                                             type: "integer"
                                           readOnly:
                                             type: "boolean"
@@ -2953,8 +3075,10 @@ spec:
                                       configMap:
                                         properties:
                                           defaultMode:
+                                            format: "int32"
                                             type: "integer"
                                           defaultUser:
+                                            format: "int64"
                                             type: "integer"
                                           items:
                                             items:
@@ -2962,10 +3086,12 @@ spec:
                                                 key:
                                                   type: "string"
                                                 mode:
+                                                  format: "int32"
                                                   type: "integer"
                                                 path:
                                                   type: "string"
                                                 user:
+                                                  format: "int64"
                                                   type: "integer"
                                               type: "object"
                                             type: "array"
@@ -2995,8 +3121,10 @@ spec:
                                       downwardAPI:
                                         properties:
                                           defaultMode:
+                                            format: "int32"
                                             type: "integer"
                                           defaultUser:
+                                            format: "int64"
                                             type: "integer"
                                           items:
                                             items:
@@ -3009,6 +3137,7 @@ spec:
                                                       type: "string"
                                                   type: "object"
                                                 mode:
+                                                  format: "int32"
                                                   type: "integer"
                                                 path:
                                                   type: "string"
@@ -3025,6 +3154,7 @@ spec:
                                                       type: "string"
                                                   type: "object"
                                                 user:
+                                                  format: "int64"
                                                   type: "integer"
                                               type: "object"
                                             type: "array"
@@ -3034,6 +3164,7 @@ spec:
                                           medium:
                                             type: "string"
                                           mode:
+                                            format: "int32"
                                             type: "integer"
                                           sizeLimit:
                                             anyOf:
@@ -3054,6 +3185,7 @@ spec:
                                                   creationTimestamp:
                                                     type: "string"
                                                   deletionGracePeriodSeconds:
+                                                    format: "int64"
                                                     type: "integer"
                                                   deletionTimestamp:
                                                     type: "string"
@@ -3064,6 +3196,7 @@ spec:
                                                   generateName:
                                                     type: "string"
                                                   generation:
+                                                    format: "int64"
                                                     type: "integer"
                                                   labels:
                                                     additionalProperties:
@@ -3195,6 +3328,7 @@ spec:
                                           fsType:
                                             type: "string"
                                           lun:
+                                            format: "int32"
                                             type: "integer"
                                           readOnly:
                                             type: "boolean"
@@ -3237,6 +3371,7 @@ spec:
                                           fsType:
                                             type: "string"
                                           partition:
+                                            format: "int32"
                                             type: "integer"
                                           pdName:
                                             type: "string"
@@ -3290,6 +3425,7 @@ spec:
                                           iscsiInterface:
                                             type: "string"
                                           lun:
+                                            format: "int32"
                                             type: "integer"
                                           portals:
                                             items:
@@ -3342,8 +3478,10 @@ spec:
                                       projected:
                                         properties:
                                           defaultMode:
+                                            format: "int32"
                                             type: "integer"
                                           defaultUser:
+                                            format: "int64"
                                             type: "integer"
                                           sources:
                                             items:
@@ -3379,6 +3517,7 @@ spec:
                                                     signerName:
                                                       type: "string"
                                                     user:
+                                                      format: "int64"
                                                       type: "integer"
                                                   type: "object"
                                                 configMap:
@@ -3389,10 +3528,12 @@ spec:
                                                           key:
                                                             type: "string"
                                                           mode:
+                                                            format: "int32"
                                                             type: "integer"
                                                           path:
                                                             type: "string"
                                                           user:
+                                                            format: "int64"
                                                             type: "integer"
                                                         type: "object"
                                                       type: "array"
@@ -3414,6 +3555,7 @@ spec:
                                                                 type: "string"
                                                             type: "object"
                                                           mode:
+                                                            format: "int32"
                                                             type: "integer"
                                                           path:
                                                             type: "string"
@@ -3430,6 +3572,7 @@ spec:
                                                                 type: "string"
                                                             type: "object"
                                                           user:
+                                                            format: "int64"
                                                             type: "integer"
                                                         type: "object"
                                                       type: "array"
@@ -3445,10 +3588,12 @@ spec:
                                                     keyType:
                                                       type: "string"
                                                     maxExpirationSeconds:
+                                                      format: "int32"
                                                       type: "integer"
                                                     signerName:
                                                       type: "string"
                                                     user:
+                                                      format: "int64"
                                                       type: "integer"
                                                     userAnnotations:
                                                       additionalProperties:
@@ -3463,10 +3608,12 @@ spec:
                                                           key:
                                                             type: "string"
                                                           mode:
+                                                            format: "int32"
                                                             type: "integer"
                                                           path:
                                                             type: "string"
                                                           user:
+                                                            format: "int64"
                                                             type: "integer"
                                                         type: "object"
                                                       type: "array"
@@ -3480,10 +3627,12 @@ spec:
                                                     audience:
                                                       type: "string"
                                                     expirationSeconds:
+                                                      format: "int64"
                                                       type: "integer"
                                                     path:
                                                       type: "string"
                                                     user:
+                                                      format: "int64"
                                                       type: "integer"
                                                   type: "object"
                                               type: "object"
@@ -3557,8 +3706,10 @@ spec:
                                       secret:
                                         properties:
                                           defaultMode:
+                                            format: "int32"
                                             type: "integer"
                                           defaultUser:
+                                            format: "int64"
                                             type: "integer"
                                           items:
                                             items:
@@ -3566,10 +3717,12 @@ spec:
                                                 key:
                                                   type: "string"
                                                 mode:
+                                                  format: "int32"
                                                   type: "integer"
                                                 path:
                                                   type: "string"
                                                 user:
+                                                  format: "int64"
                                                   type: "integer"
                                               type: "object"
                                             type: "array"
@@ -3619,6 +3772,7 @@ spec:
                                     - type: "string"
                                   x-kubernetes-int-or-string: true
                                 partition:
+                                  format: "int32"
                                   type: "integer"
                               type: "object"
                             type:
@@ -3640,6 +3794,7 @@ spec:
                                   creationTimestamp:
                                     type: "string"
                                   deletionGracePeriodSeconds:
+                                    format: "int64"
                                     type: "integer"
                                   deletionTimestamp:
                                     type: "string"
@@ -3650,6 +3805,7 @@ spec:
                                   generateName:
                                     type: "string"
                                   generation:
+                                    format: "int64"
                                     type: "integer"
                                   labels:
                                     additionalProperties:
@@ -3865,6 +4021,7 @@ spec:
                     - "V2_1_0"
                     - "V2_2_0"
                     - "V2_3_0"
+                    - "V2_4_0"
                   type: "string"
                 healthDetails:
                   description: "Human readable details of the current health status"
@@ -3882,6 +4039,7 @@ spec:
                 lastPodRemovalReplicas:
                   description: "The HiveMQ Platform replica count the last Pod removal\
                   \ time was recorded at"
+                  format: "int32"
                   type: "integer"
                 lastPodRemovalTime:
                   description: "The time the HiveMQ Platform was observed settled at\
@@ -3892,9 +4050,11 @@ spec:
                   type: "string"
                 observedGeneration:
                   description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0]"
+                  format: "int64"
                   type: "integer"
                 platformReplicas:
                   description: "Current desired number of HiveMQ Platform replicas"
+                  format: "int32"
                   type: "integer"
                 reconciliationRequests:
                   description: "[DEPRECATED since HiveMQ Platform Operator 2.0.0] Requests\
