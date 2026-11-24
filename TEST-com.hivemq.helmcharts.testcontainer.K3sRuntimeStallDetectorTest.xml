@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-24T10:12:36.797Z" hostname="runnervm0hi8g" time="0.015">
+<testsuite name="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-24T16:16:50.982Z" hostname="runnervm0hi8g" time="0.011">
   <properties/>
   <testcase name="accept_atThreshold_printsThreadDump()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.005"/>
   <testcase name="accept_nonStallFrames_areIgnored()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.001"/>
-  <testcase name="accept_atThreshold_recordsStall()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.001"/>
+  <testcase name="accept_atThreshold_recordsStall()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.0"/>
   <testcase name="accept_multipleMarkersInOneFrame_areCounted()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.001"/>
   <testcase name="accept_hitsOlderThanWindow_arePruned()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.001"/>
-  <testcase name="accept_markerSplitAcrossFrames_isCounted()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.001"/>
+  <testcase name="accept_markerSplitAcrossFrames_isCounted()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.0"/>
   <testcase name="accept_belowThreshold_recordsNothing()" classname="com.hivemq.helmcharts.testcontainer.K3sRuntimeStallDetectorTest" time="0.001"/>
 </testsuite>
