@@ -60,6 +60,7 @@ The following variants are available:
 | Variant                     | Base image                                                                 | JVM     | Java   |
 |-----------------------------|----------------------------------------------------------------------------|---------|--------|
 | `temurin-21-resolute`       | `eclipse-temurin:21-jre-resolute`                                          | HotSpot | 21     |
+| `temurin-25-resolute`       | `eclipse-temurin:25-jre-resolute`                                          | HotSpot | 25     |
 | `temurin-latest-resolute`   | `eclipse-temurin:<latest>-jre-resolute`                                    | HotSpot | latest |
 | `temurin-21-ubi9`           | `eclipse-temurin:21-jre-ubi9-minimal`                                      | HotSpot | 21     |
 | `temurin-25-ubi10`          | `eclipse-temurin:25-jre-ubi10-minimal`                                     | HotSpot | 25     |

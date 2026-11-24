@@ -61,6 +61,12 @@ name = "jre-temurin21-ubi9"
 image = "library/eclipse-temurin"
 reference = "21-jre-ubi9-minimal@sha256:473f06a821e185f5ab9047d4d70778c4eccaaeb303b3495001acbd93ff661b1f"
 
+# https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-resolute
+[[oci]]
+name = "jre-temurin25-resolute"
+image = "library/eclipse-temurin"
+reference = "25-jre-resolute@sha256:a0862ac8790c648f6b5db8a113b9990d24fbe8e65f3c4ba8d68b0302d270c1e6"
+
 # https://hub.docker.com/_/eclipse-temurin/tags?name=25-jre-ubi10-minimal
 [[oci]]
 name = "jre-temurin25-ubi10"
