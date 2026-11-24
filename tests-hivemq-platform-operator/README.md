@@ -88,6 +88,6 @@ Only the tests tagged with `custom-platform-image` run in this mode, and a `--te
 
 Without the property, the build resolves the official HiveMQ Platform image and runs the whole suite, as it does for every regular test run.
 
-The [`HiveMQ Platform Custom Image Tests`](../.github/workflows/custom-platform-image-tests.yml) GitHub Actions Workflow runs every variant once a week, and can be started manually for a single variant.
+The [`HiveMQ Platform Custom Image Tests`](../.github/workflows/custom-platform-image-tests.yml) GitHub Actions Workflow runs every variant once a week on amd64 and on arm64 runners, and can be started manually for a single variant.
 
 To add a variant, add its Java runtime base image to [`gradle/oci.versions.toml`](gradle/oci.versions.toml) and the matching entry to the `jreBaseImages` map in [`build.gradle.kts`](build.gradle.kts). The workflow matrix is generated from that map. For a Java 21 or 25 variant of a new vendor, also add its image to the Renovate rule in [`renovate.json5`](../renovate.json5) that keeps these variants on their major, otherwise Renovate updates it to the newest Java release.
