@@ -49,6 +49,7 @@ val customPlatformImageVariant: String? = providers.gradleProperty("customPlatfo
 
 val jreBaseImages = mapOf(
     "temurin-21-resolute" to ociImages.jre.temurin21.resolute,
+    "temurin-25-resolute" to ociImages.jre.temurin25.resolute,
     "temurin-latest-resolute" to ociImages.jre.temurinlatest.resolute,
     "temurin-21-ubi9" to ociImages.jre.temurin21.ubi9,
     "temurin-25-ubi10" to ociImages.jre.temurin25.ubi10,
