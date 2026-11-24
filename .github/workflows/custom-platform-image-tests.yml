@@ -1,7 +1,8 @@
 #file: noinspection UndefinedAction,UndefinedParamsPresent,GithubFunctionSignatureValidation
 #
-# Smoke test of the HiveMQ Platform on different operating systems and Java runtimes. It runs a subset of the HiveMQ
-# Platform integration tests against HiveMQ Platform images that are built for the test run.
+# Smoke test of the HiveMQ Platform on different operating systems, Java runtimes and CPU architectures. It runs a
+# subset of the HiveMQ Platform integration tests against HiveMQ Platform images that are built for the test run, on
+# amd64 and on arm64 runners.
 #
 # It shows that HiveMQ runs on a combination, nothing more, and is not a certification of it.
 name: HiveMQ Platform Custom Image Tests
@@ -19,7 +20,7 @@ concurrency:
   group: custom-platform-image-tests
 env:
   CI_RUN: true
-  # the same set of files in every job, so the warmup job and the matrix jobs share one Gradle cache entry
+  # the same set of files in every job, so the warmup jobs and the matrix jobs share one Gradle cache entry per architecture
   cache-dependency-path: |
     helm-charts/**/*.gradle*
     helm-charts/**/gradle-wrapper.properties
@@ -85,10 +86,47 @@ jobs:
           echo "variants-json=$variants" >> "$GITHUB_OUTPUT"
           echo "Testing the variants $variants" >> "$GITHUB_STEP_SUMMARY"
 
+  # The setup-java cache key contains the architecture, so the arm64 jobs do not see the cache entry of the amd64 warmup.
+  warmup-arm64:
+    name: Warmup Gradle cache (arm64)
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout HiveMQ Helm Charts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: helm-charts
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          cache: gradle
+          cache-dependency-path: ${{ env.cache-dependency-path }}
+          distribution: temurin
+          java-version: 25
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+        with:
+          cache-disabled: true
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c # v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:cicd-harvester
+
+      - name: Warmup Gradle cache
+        working-directory: helm-charts
+        env:
+          DEVELOCITY_SERVER_URL: ${{ secrets.DEVELOCITY_SERVER_URL }}
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+        run: ./gradlew :tests-hivemq-platform-operator:resolvePlatformDistribution
+
   run-integration-tests:
-    name: "Test ${{ matrix.variant }}"
-    runs-on: ubuntu-latest
-    needs: generate-variants-json
+    name: "Test ${{ matrix.variant }} (${{ matrix.arch }})"
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    needs: [ generate-variants-json, warmup-arm64 ]
     permissions:
       contents: read
       checks: write
@@ -98,6 +136,7 @@ jobs:
       fail-fast: false
       matrix:
         variant: ${{ fromjson(needs.generate-variants-json.outputs.json) }}
+        arch: [ amd64, arm64 ]
     steps:
       - name: Checkout HiveMQ Helm Charts
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -180,13 +219,13 @@ jobs:
           VERSION_CATALOG: helm-charts/tests-hivemq-platform-operator/gradle/libs.versions.toml
         run: |
           version=$(sed -n 's/^hivemq-platform = "\(.*\)"$/\1/p' "$VERSION_CATALOG")
-          echo "${{ matrix.variant }}: HiveMQ Platform ${version:-unknown}" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ matrix.variant }} (${{ matrix.arch }}): HiveMQ Platform ${version:-unknown}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test results
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: "HiveMQ Platform custom image - Integration test results (${{ matrix.variant }})"
+          name: "HiveMQ Platform custom image - Integration test results (${{ matrix.variant }}, ${{ matrix.arch }})"
           path: |
             helm-charts/tests-hivemq-platform-operator/build/reports/tests/integrationTest/
             helm-charts/tests-hivemq-platform-operator/build/test-results/integrationTest/*.xml
@@ -196,7 +235,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a # v3
         with:
-          name: "Integration tests report (${{ matrix.variant }})"
+          name: "Integration tests report (${{ matrix.variant }}, ${{ matrix.arch }})"
           path: '**/build/test-results/integrationTest/TEST-*.xml'
           reporter: java-junit
           fail-on-error: false
@@ -216,7 +255,7 @@ jobs:
               TEST_METHOD=$(xmllint --xpath "string((//testcase[failure or error])[$INDEX]/@name)" "$FILE" 2>/dev/null)
               MESSAGE=$(xmllint --xpath "string((//testcase[failure or error])[$INDEX]/failure/@message | (//testcase[failure or error])[$INDEX]/error/@message)" "$FILE" 2>/dev/null)
               [ -z "$MESSAGE" ] && MESSAGE="Test failed"
-              echo "::error title=${{ matrix.variant }}::$TEST_CLASS.$TEST_METHOD%0A$MESSAGE"
+              echo "::error title=${{ matrix.variant }} (${{ matrix.arch }})::$TEST_CLASS.$TEST_METHOD%0A$MESSAGE"
             done
           done
 

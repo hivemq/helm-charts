@@ -193,11 +193,10 @@ testing {
                     runtime(ociImages.nginx.oci).name("nginx").tag("latest")
                     runtime(ociImages.selenium.standalone.firefox.oci).tag("latest")
                 }
-                val linuxAmd64 = platformSelector(platform("linux", "amd64"))
-                val linuxArm64v8 = platformSelector(platform("linux", "arm64", "v8"))
-                platformSelector = if (System.getenv("CI_RUN") != null //
-                    || System.getProperty("os.arch", "").equals("amd64")
-                ) linuxAmd64 else linuxAmd64.and(linuxArm64v8)
+                platformSelector = platformSelector(
+                    if (System.getProperty("os.arch") == "aarch64") platform("linux", "arm64", "v8")
+                    else platform("linux", "amd64")
+                )
             }
         }
     }
