@@ -119,25 +119,25 @@ reference = "1.24-22@sha256:727dae67a171bdcba9e7f79881994f8959e2b0f5eecfaeb18ce6
 [[oci]]
 name = "jre-zulu25-debian"
 image = "library/azul-zulu"
-reference = "25-jre-headless-debian@sha256:2c111cd7a9c0608c694d7e6b8c992c8e38091b80aaecef61e9629e54619a56ff"
+reference = "25-jre-headless-debian@sha256:935ae1f6b174ef46703e1fd82dd7ef695f261fbead1b6b3564ee755bca83c4e9"
 
 # https://gallery.ecr.aws/hivemq/hivemq-coffee
 [[oci]]
 name = "jre-hivemqcoffee21-noble"
 image = "public.ecr.aws/hivemq/hivemq-coffee"
-reference = "21-jre-noble@sha256:17fc88acec518cc3864318555bcce2de98130787d6cd1e52b1dfe14cc10b50e5"
+reference = "21-jre-noble@sha256:12adfee2d5419436310d6fd7e506713bc1cd4927ac408d467242db0e12f4667d"
 
 # https://gallery.ecr.aws/hivemq/hivemq-coffee
 [[oci]]
 name = "jre-hivemqcoffee25-noble"
 image = "public.ecr.aws/hivemq/hivemq-coffee"
-reference = "25-jre-noble@sha256:63e2d753b86d091239994ebdd26150212e77d2ab86f505371a4ba0e1b5d258c2"
+reference = "25-jre-noble@sha256:4479841ccc38521736c502b5911d9b82b71cc8752de8471dd0f84397875485f5"
 
 # https://gallery.ecr.aws/hivemq/hivemq-coffee
 [[oci]]
 name = "jre-hivemqcoffee25-resolute"
 image = "public.ecr.aws/hivemq/hivemq-coffee"
-reference = "25-jre-resolute@sha256:ca54092051fe981e6794c8dfd7bda6f586d0d3dde9a498ee33111405fbab9981"
+reference = "25-jre-resolute@sha256:be06a9131bf23375fcbde7f59a085b2cd78a54f03459bfa5a963b5a210eafd8d"
 
 # Java runtime base images of the newest Java release, Renovate updates them to the next major version.
 
@@ -175,4 +175,4 @@ reference = "27-oraclelinux9@sha256:4f9dd819a56a1c9ed16051045757a98672e79ddd8c76
 [[oci]]
 name = "jre-zululatest-debian"
 image = "library/azul-zulu"
-reference = "27-jre-headless-debian@sha256:7229a788b05946eb7baa548a30fda5d4a7ee82b68b1c6b5e445d29f720df0211"
+reference = "27-jre-headless-debian@sha256:b0c8e4aacd697289bf9b079e4ea789396715428024470bbb6f3b03bdad9bad95"
