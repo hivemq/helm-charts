@@ -244,7 +244,6 @@ oci {
             url = uri("https://public.ecr.aws")
             optionalCredentials()
             exclusiveContent {
-                includeGroup("hivemq.library")
                 includeModule("hivemq", "hivemq-coffee")
                 includeModule(jreBaseImageGroup, "hivemq-coffee-21-noble")
                 includeModule(jreBaseImageGroup, "hivemq-coffee-25-noble")
@@ -277,9 +276,6 @@ oci {
             mapModule(jreBaseImageGroup, variant) {
                 toImage(jreBaseImage.repository).withTag(version)
             }
-        }
-        mapGroup("hivemq.library") {
-            toImage(nameSpec("hivemq/library/") + name)
         }
     }
     imageDefinitions {
